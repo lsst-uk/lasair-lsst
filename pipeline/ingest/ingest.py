@@ -230,7 +230,7 @@ def run_ingest(args):
 
     # set up image store in shared file system
     if fitsdir and len(fitsdir) > 0:
-        image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir, double=True)
+        image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
     else:
         log.error('ERROR in ingest/ingestBatch: No image directory found for file storage')
         sys.stdout.flush()

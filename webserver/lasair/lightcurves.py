@@ -51,7 +51,7 @@ class lightcurve_fetcher():
                 candidates.append(cand)
             return candidates
         else:
-            store = objectStore(suffix='json', fileroot=self.fileroot, double=True)
+            store = objectStore(suffix='json', fileroot=self.fileroot)
             lc = store.getObject(objectId)
 
             if not lc:

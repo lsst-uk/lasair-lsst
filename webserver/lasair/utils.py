@@ -339,7 +339,7 @@ def string2bytes(str):
 
 def fits(request, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS, double=True)
+    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
     try:
         fitsdata = image_store.getFileObject(candid_cutoutType)
     except:
