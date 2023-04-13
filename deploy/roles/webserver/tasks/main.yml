@@ -1,0 +1,200 @@
+---
+
+- name: Install apt packages
+  become: true
+  apt: 
+    name: 
+      - python3-pip
+      - apache2
+      - apache2-dev
+      - apache2-utils
+      - libexpat1
+      - ssl-cert
+      - libmysqlclient-dev
+      - swig
+      - postfix
+    state: present
+    update_cache: true
+
+- name: Install python packages
+  become: true
+  pip: 
+    executable: pip3 
+    name: 
+      - mysql-connector-python
+      - mysqlclient
+      - django
+      - djangorestframework
+      - pyephem
+      - requests
+      - MOCpy
+      - astropy
+      - cassandra-driver
+      - gkhtm
+      - gkutils
+      - gkdbutils
+      - mod_wsgi-httpd
+      - mod_wsgi
+      - confluent-kafka
+      - fastavro
+      - crispy_bootstrap5
+      - django-debug-toolbar
+      - django-widget-tweaks
+      - django-browser-reload
+      - django-crispy-forms
+      - django-recaptcha
+      - astrocalc
+      - pandas
+      - plotly
+      
+
+- name: Disable Apache
+  become: true
+  service:
+    name: apache2
+    state: stopped
+    enabled: false
+
+#- name: "Install Certbot"
+#  become: true
+#  community.general.snap:
+#    name:
+#      - certbot
+#    classic: yes
+#  when: enable_letsencrypt
+
+#- name: "Get certificate"
+#  become: true
+#  command: "certbot certonly --non-interactive --apache -m {{ admin_email }} -d {{ lasair_name }}.{{ domain }} --agree-tos"
+#  register: certoutput
+#  args:
+#    creates: "/etc/letsencrypt/live/{{ lasair_name }}.{{ domain }}"
+#  when: enable_letsencrypt
+
+#- debug: var=certoutput.stdout_lines
+#  when: enable_letsencrypt
+
+#- name: Enable the Apache2 module ssl
+#  become: true
+#  community.general.apache2_module:
+#    state: present
+#    name: ssl
+#  when: enable_letsencrypt
+#  notify: restart_apache2
+
+#- name: Disable the Apache2 module ssl
+#  become: true
+#  community.general.apache2_module:
+#    state: absent
+#    name: ssl
+#  when: not enable_letsencrypt
+#  notify: restart_apache2
+
+- name: Create WSGI directory
+  file:
+      path: "{{ ansible_env.HOME }}/mod_wsgi_space"
+      state: directory
+
+- name: Make sure the repo is up to date
+  git:
+      repo: https://github.com/lsst-uk/lasair4.git
+      dest: "{{ ansible_env.HOME }}/lasair4"
+      version: "{{ lasair_version }}"
+
+      
+# lasair4/common/settings.py
+- import_tasks: settings.yml
+
+- name: Settings.py for django
+  template:
+    src:  settings.py.j2
+    dest: "{{ ansible_env.HOME }}/lasair4/webserver/lasair/settings.py"
+
+- name: Create restart script
+  template:
+    src: restart_webserver.sh.j2
+    dest: restart_webserver.sh
+    mode: 0755
+
+- name: Restart web server
+  command:
+    cmd: "{{ ansible_env.HOME }}/restart_webserver.sh"
+
+#- name: Enable Apache modules
+#  become: true
+#  apache2_module:
+#    name: "{{ item }}"
+#    state: present
+#  with_items:
+#    - rewrite
+#    - proxy
+#    - proxy_http
+#    - proxy_balancer
+#    - lbmethod_byrequests
+#  notify:
+#    - restart_apache2
+  
+#- name: Set Apache site config
+#  become: true
+#  template:
+#    src: 000-default-ssl.conf
+#    dest: /etc/apache2/sites-available/000-default.conf
+#  when: not enable_letsencrypt
+#  notify:
+#    - reload_apache2
+
+#- name: Set Apache site config
+#  become: true
+#  template:
+#    src: 000-default.conf
+#    dest: /etc/apache2/sites-available/000-default.conf
+#  when: enable_letsencrypt
+#  notify:
+#    - reload_apache2
+
+- name: Django bootstrap
+  shell:
+    chdir: "{{ ansible_env.HOME }}/lasair4/webserver"
+    cmd: "python3 manage.py {{ item }} --settings lasair.settings"
+  environment:
+          PYTHONPATH: "{{ ansible_env.HOME }}/lasair4/common/"
+  with_items:
+    - migrate --fake
+    - makemigrations
+    - migrate
+    - collectstatic --noinput
+
+- name: Create symlink for services log
+  file:
+    src: /mnt/cephfs/lasair/services_log
+    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/services_log"
+    state: link
+
+- name: Create symlink for streams
+  file:
+    src: /mnt/cephfs/lasair/streams
+    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/streams"
+    state: link
+
+- name: Create symlink for fits images
+  file:
+    src: /mnt/cephfs/lasair/fits
+    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/fits"
+    state: link
+
+- name: Create Django superuser
+  shell:
+    chdir: "{{ ansible_env.HOME }}/lasair4/webserver"
+    cmd: "python3 manage.py createsuperuser --settings lasair.settings --noinput --username su --email {{ admin_email }}"
+  environment:
+    PYTHONPATH: "{{ ansible_env.HOME }}/lasair4/common"
+    DJANGO_SUPERUSER_PASSWORD: "{{ django_password }}"
+  ignore_errors: true
+
+- name: Add default profile pic
+  copy:
+    src: default.jpg
+    dest: "{{ item }}"
+  loop:
+    - media/default.jpg
+    - media/profile_pics/default.jpg

@@ -1,0 +1,212 @@
+
+
+// Shades of grey
+$white   : #ffffff !default;
+$gray-50:  #F9FAFB !default;
+$gray-100: #F2F4F6 !default;
+$gray-200: #E5E7EB !default;
+$gray-300: #D1D5DB !default;
+$gray-400: #9CA3AF !default;
+$gray-500: #6B7280 !default;
+$gray-600: #4B5563 !default;
+$gray-700: #374151 !default;
+$gray-800: #1F2937 !default;
+$gray-900: #111827 !default;
+$dark    : $gray-800 !default;
+$black   : $gray-900 !default;
+
+// fusv-disable
+$grays: ("100": $gray-100,
+    "200": $gray-200,
+    "300": $gray-300,
+    "400": $gray-400,
+    "500": $gray-500,
+    "600": $gray-600,
+    "700": $gray-700,
+    "800": $gray-800,
+    "900": $gray-900) !default;
+// fusv-enable
+
+// Generic colors
+$blue       : #2361ce !default;
+$indigo     : #4F46E5 !default;
+$purple     : #7C3AED !default;
+$pink       : #EF4683 !default;
+$red        : #E11D48 !default;
+$orange     : #FBA918 !default;
+$brown      : #b9a084 !default;
+$yellow     : #f3c78e !default;
+$yellow-100 : #ffeed6 !default;
+$yellow-200 : #f5dbb8 !default;
+$green      : #10B981 !default;
+$teal       : #1E90FF !default;
+$cyan       : #63b1bd !default;
+$soft-indigo: #f5e8ff !default;
+$soft-green : #2CA58D !default;
+
+// scss-docs-start colors-map
+$colors: ("blue": $blue,
+    "indigo": $indigo,
+    "purple": $purple,
+    "pink": $pink,
+    "red": $red,
+    "orange": $orange,
+    "yellow": $yellow,
+    "green": $green,
+    "teal": $teal,
+    "cyan": $cyan,
+    "white": $white,
+    "gray": $gray-600,
+    "gray-dark": $gray-800) !default;
+// scss-docs-end colors-map
+
+// Color scheme
+$primary  : #1F2937 !default;
+$secondary: #f0bc74 !default;
+$tertiary : #31316A !default;
+
+// Series names and colors. This can be extended or customized as desired. Just add more series and colors.
+$ct-series-names: (a, b, c, d, e, f, g) !default !default;
+$ct-series-colors: (#262B40,
+    #F8BD7A,
+    #2CA58D,
+    #31316A,
+    #C96480,
+    #ffffff,
+    #F8BD7A,
+
+) !default;
+
+// LASAIR COLOURS
+$lasair-blue: #00BABB;
+$lasair-red: #CE4257;
+$lasair-yellow: #F0A202;
+$lasair-black: #262626;
+$lasair-white: #FFFFF0;
+$lasair-grey: #878E88;
+
+$success: $green !default;
+$info   : $lasair-blue !default;
+$warning: $lasair-yellow !default;
+$danger : $red !default;
+$gray   : $gray-900 !default;
+$light  : $gray-400 !default;
+$lighten: $gray-300 !default;
+$soft   : $gray-200 !default;
+$dark   : $dark !default;
+
+
+
+
+// Color scheme
+$primary: $lasair-blue;
+$secondary: $lasair-yellow;
+$tertiary: $lasair-red;
+$link-color: $lasair-red;
+
+$gray-800: $lasair-black;
+
+$dark: $lasair-black;
+
+
+// Theme colors
+$theme-colors: (
+    "primary": $primary,
+    "secondary": $secondary,
+    "tertiary": $tertiary,
+    "success": $success,
+    "info": $info,
+    "warning": $warning,
+    "danger": $danger,
+    "dark": $dark,
+    "white": $white,
+    "indigo": $indigo,
+    "purple": $purple,
+    "yellow-100": $yellow-100,
+    "yellow-200": $yellow-200,
+    "gray-50": $gray-50,
+    "gray-100": $gray-100,
+    "gray-200": $gray-200,
+    "gray-300": $gray-300,
+    "gray-400": $gray-400,
+    "gray-500": $gray-500,
+    "gray-600": $gray-600,
+    "gray-700": $gray-700,
+    "gray-800": $gray-800,
+    "gray-900": $gray-900
+    ) !default;
+
+$component-active-bg: $tertiary;
+$component-active-color       : $white !default;
+$component-active-bg          : $tertiary !default;
+$component-active-border-color: $primary !default;
+
+$component-hover-color       : $gray-300 !default;
+$component-hover-bg          : $gray-300 !default;
+$component-hover-border-color: $gray-300 !default;
+
+
+
+$pagination-bg: $gray-200;
+$pagination-border-color :  $white;
+$pagination-hover-bg          : $component-active-bg !default;
+$pagination-hover-border-color: $pagination-border-color;
+$pagination-hover-color: $component-active-color !default;
+$pagination-active-color       : $component-active-color !default;
+$pagination-active-bg          : $component-active-bg !default;
+$pagination-active-border-color: $pagination-border-color;
+$pagination-disabled-color       : $gray-600 !default;
+$pagination-disabled-bg          : $white !default;
+$pagination-disabled-border-color: $gray-300 !default;
+
+
+// $primary: blue;
+$icon-size-xxs:         0.85rem; 
+$icon-size-xs:          1.25rem !default; 
+$icon-size-sm:          1.5rem !default; 
+$icon-size:             2rem !default;  
+$icon-size-lg:          3.5rem !default;
+$icon-size-xl:          4.5rem !default;
+$icon-size-xxl:         6rem !default;
+
+$tooltip-color        : $white !default;
+$tooltip-bg           : $dark !default;
+$zindex-tooltip       : 9999999 !default;
+
+$form-select-indicator-padding:  2.5rem !default;
+
+$navbar-colors: ("primary": $dark) !default;
+
+
+// scss-docs-start grid-breakpoints
+$grid-breakpoints: (xs: 0,
+    sm: 576px,
+    md: 768px,
+    lg: 992px,
+    xl: 1200px,
+    xxl: 1400px) !default;
+// scss-docs-end grid-breakpoints
+
+// Grid containers
+//
+// Define the maximum width of `.container` for different screen sizes.
+
+// scss-docs-start container-max-widths
+$container-max-widths: (sm: 748px,
+    md: 900px,
+    lg: 960px,
+    xl: 1140px) !default;
+
+$font-size-base: 1.05rem !default; // Assumes the browser default, typically `16px`
+$small-font-size: .95em !default;
+
+
+$border-width      : .0625rem !default;
+$border-width-md   : 0.125rem !default;
+$border-width-lg   : 0.25rem !default;
+$border-width-xl   : 0.375rem !default;
+$border-color-white: $white !default;
+$border-color      : $gray-200 !default;
+$popover-border-width       : $border-width !default;
+$popover-border-color       : $gray-400 !default;
+$popover-max-width: 500px;

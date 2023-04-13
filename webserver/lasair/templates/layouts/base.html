@@ -1,0 +1,67 @@
+<!--
+
+=========================================================
+* Volt Free - Bootstrap 5 Dashboard
+=========================================================
+
+* Product Page: https://themesberg.com/product/admin-dashboard/volt-bootstrap-5-dashboard
+* Copyright 2021 Themesberg (https://www.themesberg.com)
+* License (https://themesberg.com/licensing)
+
+* Designed and coded by https://themesberg.com
+
+=========================================================
+
+* The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software. Please contact us to request a removal.
+
+-->
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+        <title>
+            {% block title %}
+                Lasair
+            {% endblock title %}
+        </title>
+
+        {% include 'includes/metatags.html' %}
+        {% include 'includes/analytics.html' %}
+        {% include 'includes/favicons.html' %}
+
+        {% include 'includes/stylesheets.html' %}
+
+        <!-- Specific Page CSS goes HERE  -->
+        {% block stylesheets %}{% endblock stylesheets %}
+
+    </head>
+    <body>
+
+
+
+        {% include 'includes/sidebar.html' %}
+
+        <main class="content">
+
+            {% include 'includes/navigation.html' %}
+
+
+            {% include 'includes/messages.html' %}
+
+            {% block content %}{% endblock content %}
+
+            {% include 'includes/help-box.html' %}
+
+            {% include 'includes/footer.html' %}
+
+        </main>
+
+        {% include 'includes/scripts.html' %}
+
+        <!-- Specific Page JS goes HERE  -->
+        {% block javascripts %}{% endblock javascripts %}
+
+    </body>
+</html>

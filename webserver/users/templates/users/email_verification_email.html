@@ -1,0 +1,9 @@
+{% load i18n %}{% autoescape off %}
+{% blocktranslate %}Hi {{ user }},
+
+Please click on the link below to verify your email address and active your Lasair account:{% endblocktranslate %}
+
+https://{{ domain }}{% url 'activate' uidb64=uid token=token %}
+
+{% blocktranslate %}The Lasair team{% endblocktranslate %}
+{% endautoescape %}

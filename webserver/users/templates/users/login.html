@@ -1,0 +1,90 @@
+
+
+{% extends "layouts/base-fullscreen.html" %}
+{% load widget_tweaks %}
+{% block title %} Sign IN {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 d-flex align-items-center justify-content-center">
+
+                <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500 mt-9">
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        {% include "includes/icons/icon.html" %}
+                        <h1 class="mb-0 h3">
+                            Lasair Sign In
+                        </h1>
+                        <br />
+                        <p>
+                            {% if msg %}
+                                <span class="text-danger">{{ msg | safe }}</span>
+                            {% endif %}
+
+                        </p>
+                    </div>
+                    <form method="post" action="" class="mt-4">
+
+                        {% csrf_token %}
+
+                        <!-- Form -->
+                        <div class="form-group mb-4">
+                            <label for="email">Username</label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="basic-addon1">
+                                    <span class="fas fa-user-circle"></span>
+                                </span>
+                                {{ form.username|add_class:"form-control" }}
+                            </div>
+                            <span class="text-error">{{ form.username.errors }}</span>
+                        </div>
+                        <!-- End of Form -->
+                        <div class="form-group">
+                            <!-- Form -->
+                            <div class="form-group mb-4">
+                                <label for="password">Your Password</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon2">
+                                        <span class="fas fa-unlock-alt"></span>
+                                    </span>
+                                    {{ form.password|add_class:"form-control" }}
+                                </div>
+                                <div class="text-error mt-3"> {{ form.non_field_errors }}</div>
+                            </div>
+                            <!-- End of Form -->
+                            <div class="d-flex justify-content-between align-items-top mb-4">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" value="" id="remember">
+                                    <label class="form-check-label mb-0" for="remember">
+                                        Remember me
+                                    </label>
+                                </div>
+                                <div><a href="{% url 'password_reset' %}" class="small text-right">Lost password?</a></div>
+                            </div>
+                        </div>
+                        <div class="d-grid">
+                            <button type="submit" name="login" class="btn btn-gray-800">Sign In</button>
+                        </div>
+                    </form>
+                    <br />
+
+                    <div class="d-flex justify-content-center align-items-center mt-4">
+                        <span class="fw-normal">
+                            Not registered?
+                            <a href="{% url 'register' %}" class="fw-bold">Create account</a>
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

@@ -1,0 +1,115 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100">
+
+
+
+    <div class="card-body">
+
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in watchlist">{{count}}</span>
+
+        <div class="row d-flex">
+
+            <div class="col-12 mb-3 d-flex align-items-center">
+                <div class="icon-shape icon-shape-tertiary rounded me-2">
+                    {% include "includes/icons/icon_watchlist.html" %}
+                </div>
+
+
+
+                <div class="h2 fw-extrabold  mb-0 ms-2 d-none d-sm-inline">'{{ watchlist.name }}' Watchlist Associations{% if watchlist.public %}
+                    <span class="icon icon-md text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+
+                <div class="h5 fw-extrabold mb-0 ms-2 d-sm-none">'{{ watchlist.name }}' Watchlist Associations{% if watchlist.public %}
+                    <span class="icon icon-md text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+
+
+
+
+
+            </div>
+
+            <div class="col-12 px-4">
+                <small class="text-gray-500">
+                    {{watchlist.description}}
+                </small>
+                <small class="text-gray-500">
+                    The watchlist contains {{number_cones}} sources with a default association radius of <b>{{watchlist.radius}} arcsec</b>. The watchlist is <b>{% if not watchlist.active %}not {% endif %} active</b> {% include "includes/info_tooltip.html" with info="When active, a watchlist will be dynamically matched against new transient alerts. See the watchlist settings to make changes" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}.
+                </small>
+            </div>
+
+        </div>
+
+
+        <div class="d-flex justify-content-end mt-3">
+
+            <div class="btn-group" >
+
+
+                {% if user.is_authenticated %}
+                    <a class="btn btn-sm btn-tertiary border-white" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="copy this watchlist into My Watchlists list">
+                        <span class="align-middle"  data-bs-toggle="modal" data-bs-target="#duplicateWatchlistForm">
+
+                {% else %}
+                    <a class="btn btn-sm btn-tertiary border-white "  href="{% url 'login' %}?next={{request.path}}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="copy this watchlist into My Watchlists list">
+                        <span class="align-middle"  >
+                {% endif %}
+
+                {% include "includes/icons/icon_copy.html" %}
+                <span class="align-middle  d-none d-md-inline"  >Duplicate</span></span></a>
+
+        {% if user.is_authenticated and watchlist.user.id == user.id %}
+
+
+
+            <a class="btn btn-sm btn-gray-600 border-white align-middle" href='#' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="edit the watchlist settings" >
+                <span class="align-middle" data-bs-toggle="modal" data-bs-target="#editWatchlistForm">
+                    {% include "includes/icons/icon_edit.html" %}
+                    <span class="align-middle  d-none d-md-inline">Settings</span></span></a>
+
+        {% endif %}
+
+
+        <button class="btn btn-sm btn-dark dropdown-toggle border-white " type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            {% include "includes/icons/icon_export.html" %}
+            <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+            <li><a class="dropdown-item export" href="{% url 'watchlist_download' watchlist.wl_id %}">Original Watchlist File</a></li>
+        </ul>
+    </div>
+</div>
+
+</nobr>
+
+</div>
+
+
+</div>
+
+{% if user.is_authenticated %}
+    {% include "includes/widgets/widget_watchlist_duplicate_form.html" %}
+    {% include "includes/widgets/widget_watchlist_update_form.html" %}
+{% endif %}
+
+
+

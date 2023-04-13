@@ -1,0 +1,533 @@
+{% extends "base.html"%}
+{% load static %}
+{% block content %}
+<style>
+dl dt {
+    color: #7b8994;
+    float: left;
+    width: 100px;
+    text-align: right;
+    padding-top: 3px;
+    font-size: 11px;
+    font-weight: 400;
+    text-transform: uppercase;
+}
+
+dd {
+    margin: 0 0 20px 120px;
+}
+</style>
+
+<div class="container">
+<h1>Lasair and Sherlock API</h1>
+The Lasair-Sherlock API allows developers to run queries and cone-searches, 
+to see outputs from streaming queries, and to query the Sherlock sky-context system.
+<h4>Ways to use the API</h4>
+The Lasair API uses either HTTP GET or POST. Arguments can be passed in the query string, as JSON or form encoded. Responses are JSON. 
+There is a throttling system in the backend: if you use the authprisation token shown below, it will only accept 10 requests in an hour.
+<p>
+The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package.
+The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code
+copied into a file and executed as a python program.
+
+<h4>Throttling of API Usage</h4>
+The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. The token shown below is just to show you how the API services work, it is not intended for real work. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please 
+<a href="mailto:lasair-help@lists.roe.ac.uk?subject=throttling problem">Email Lasair-help</a>, explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
+<ul>
+<li>Anonymous token (shown below): 10 API calls per hour, maximum 1000 rows from query.</li>
+<li>User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.</li>
+<li>Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.</li>
+</ul>
+
+<b>Note: WE ASK YOU TO PLEASE NOT SHARE THESE TOKENS. </b>
+If you share code that uses the Lasair API, please put the token in a separate, imported file or environment variable, that you do not share, and is not put in github.
+<p>
+
+
+<a name=auth_token><h5>Authorisation Token</h5></a>
+Request authentication is via authentication tokens. For GET queries, the token can go in 
+the parameter string, and for POST queries, the token goes in the headers.
+In the following, the string of xxxxxxxxxxxxxx characters should be replaced by your own token.
+
+<a name=auth_token><h5>Get Your Token</h5></a>
+We recommend that users request their own key by running the following script:
+<pre class="literal-block">
+curl --data "username=u&password=p" https://lasair-ztf.lsst.ac.uk/api/auth-token/
+</pre>
+where <code>u</code> and <code>p</code> are replaced with username and password for your Lasair account,
+which you can obtain <a href=/signup>here</a>. Each key can only do a certain number of requests 
+before the server responds with status code 429 and will not do more until an hour has passed.
+
+<h4>Methods</h4>
+Click on the method name to jump to documentation in the reference below.
+<ul>
+<li> <a href=#cone>/api/cone/</a>: runs a cone search on all the objects in the Lasair database.</li>
+<li> <a href=#query>/api/query/</a>: runs a SQL SELECT query on the Lasair database. </li>
+<li> <a href=#streams>/api/streams/</a>: returns a record of the output from a Lasair streaming query.</li>
+<li> <a href=#objects>/api/objects/</a>: returns a machine-readable version of the object web page.</li>
+<li> <a href=#lightcurves>/api/lightcurves/</a>: returns simple lightcurves for a number of objects.</li>
+<li> <a href=#sherlockobjects>/api/sherlock/objects/</a>: returns Sherlock information about a list of named objects.</li>
+<li> <a href=#sherlockposition>/api/sherlock/position/</a>: returns Sherlock information about a sky position.</li>
+</ul>
+
+<h2>Reference</h2>
+<a name=cone><h3>/api/cone/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method runs a cone search on all the objects in the Lasair database.
+The arguments are:<ul>
+<li><code>ra</code>: (float) the right ascension in decimal degrees, </li>
+<li><code>dec</code>: (float) the declination in decimal degrees,</li>
+<li><code>radius</code>: (float) the angular radius of the cone in arcseconds, the maximum being 1000 arcseconds.</li>
+<li><code>requestType</code>: (string) the type of request, which can be:
+<ul>
+  <li><code>nearest</code>: returns only the nearest objects within the cone
+  <li><code>all</code>: returns all the objects within the cone
+  <li><code>count</code>: returns the number of objects within the cone
+</ul></li>
+</ul>
+</p>
+</dd>
+<dt class="url-label">GET URL Example</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/cone/?&ra=194.494&dec=48.851&radius=240.0&requestType=all&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  </p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "ra=194.494&dec=48.851&radius=240.0&requestType=all" \
+https://lasair-ztf.lsst.ac.uk/api/cone/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+c = L.cone(ra, dec, radius=240.0, requestType='all')
+print(c)
+</pre>
+<p>and the return has object identifiers, and their separations in arcseconds, something like: </p>
+<pre class="literal-block">
+[
+    {
+        "object": "ZTF17aaajmtw",
+        "separation": 2.393511865261539
+    }
+]
+</pre>
+</dd>
+</dl>
+</dt>
+
+<a name=query><h3>/api/query/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method runs a query on the Lasair database.  There is an 
+<a href=/query>interactive query builder</a>, and a 
+<a href=/schema>schema description</a>.
+The arguments are:<ul>
+<li><code>selected</code>: (string) the list of attributes to be returned, </li>
+<li><code>tables</code>: (string) the list of tables to be joined,</li>
+<li><code>conditions</code>: (string) the "WHERE" criteria to restrict what is returned</li>
+<li><code>limit</code>: (int) (not required) the maximum number of records to return (default is 1000)</li>
+<li><code>offset</code>: (int) (not required) offset of record number (default is 0)</li>
+</ul>
+</p>
+</dd>
+
+<dt class="url-label">GET URL Example</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/query/?selected=objectId%2Cgmag&tables=objects&conditions=gmag%3C12.0&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  </p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "selected=objectId,gmag&tables=objects&conditions=gmag&lt;12.0&limit=3" \
+https://lasair-ztf.lsst.ac.uk/api/query/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+selected    = 'objectId, gmag'
+tables      = 'objects'
+conditions  = 'gmag &lt; 12.0'
+c = L.query(selected, tables, conditions, limit=10)
+print(c)
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+status= 200
+[
+  {
+    "objectId": "ZTF17aaagaie",
+    "gmag": 11.4319
+  },
+  {
+    "objectId": "ZTF18aaadvxy",
+    "gmag": 11.8582
+  },
+.... ]
+</pre>
+</dd>
+</dl>
+</dt>
+
+
+<a name=streams><h3>/api/streams/&lt;topic&gt;/ and /api/streams/</h3></a>
+<dl>
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method returns a record of the output from a Lasair streaming query. It represents an alternative
+to using a Kafka client to fetch from the Kafka server.
+</p> <p>
+If the <code>topic</code> URL is provided (with optional <code>limit</code>), the contents 
+of the stream are returned.  Alternatively, if the topic is not provided, a 
+<code>regex</code> argument may be provided, and a list of matching topic names will be returned. 
+A list of all topics can be obtained with the regex <code>.*</code> or by omitting the <code>regex</code>.
+</p>
+The arguments are:<ul>
+<li><code>limit</code>: (int) (not required) the maximum number of records to return (default 1000)</li>
+<li><code>regex</code>: (str) (not required) an expression used to select from the set of topics (regular expression)</li>
+</ul>
+</dd>
+
+<dt class="url-label">GET URL Example with Regex</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/streams/?regex=.%2ASN.%2A&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example with Regex</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  
+</p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "regex=.*SN.*" \
+https://lasair-ztf.lsst.ac.uk/api/streams/
+</pre>
+<p>and the return is a list of topic names, and a URL to get more information: </p>
+<pre class="literal-block">
+status= 200
+[
+  {
+    "topic": "2SN-likecandidates",
+    "more_info": "https://lasair-ztf.lsst.ac.uk/query/2/"
+  },
+... ]
+</pre>
+</dd>
+
+<dt class="url-label">GET URL Example with Topic</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/streams/2SN-likecandidates/?limit=1&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example with Topic</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  
+For more information about this stream, see <a href=https://lasair-ztf.lsst.ac.uk/query/2/>here</a>.
+</p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "2SN-likecandidates&limit=1" \
+https://lasair-ztf.lsst.ac.uk/api/streams/
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+status= 200
+[
+  {
+    "objectId": "ZTF19abrokxg",
+    "ramean": 35.82811567,
+    "decmean": -27.79242059,
+    "mjdmin": 59134.39827550016,
+    "mjdmax": 59164.37175930012,
+    "magrmin": 18.33,
+    "rmag": 19.4124,
+    "classification": "NT",
+    "score": "Not Near PS1 star",
+    "UTC": "2020-11-11 09:08:49"
+  }
+]
+</pre>
+</dd>
+
+<dt class="url-label">Python Example with Topic</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+print(L.streams_topics())
+c = L.streams('2SN-likecandidates', limit=10)
+</pre>
+<p>and the return is as above with the curl example </p>
+</dd>
+
+<a name=objects><h3>/api/objects/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method returns a machine-readable version of the information on a list of objects,
+which replicates the information on the object page of the web server. 
+The arguments are:<ul>
+<li><code>objectIds</code>: a list of objectIds for which data is wanted </li>
+</ul>
+</p>
+</dd>
+
+<dt class="url-label">GET URL Example</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/objects/?objectIds=ZTF18abdphvf,ZTF21aapzzgf&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  </p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "objectIds=ZTF18abdphvf,ZTF21aapzzgf" \
+https://lasair-ztf.lsst.ac.uk/api/objects/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+c = L.objects(objectIds)
+print(c)
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+status= 200
+[
+{"objectId":"ZTF18abdphvf",
+"objectData":{
+    "ncand":8,
+    "ramean":293.54591006249996,
+    "decmean":49.429229975,
+    "glonmean":81.77021010499132,
+    "glatmean":13.829346704017533,
+.... }
+]
+</pre>
+</dd>
+</dl>
+</dt>
+
+<a name=lightcurves><h3>/api/lightcurves/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method returns simple lightcurves for a number of objects. 
+<b>NOTE:</b> these are difference magnitudes from a reference source, not apparent magnitudes.
+See <a href=/lasair/static/mag.py>this python code</a> to convert the quantities below to apparent magnitude.
+
+Each lightcurve is a sequence of detections, or <i>candidates</i>, each of which has the quantities:
+<ul>
+  <li><code>candid</code>: the candidate ID for the detection</li>
+  <li><code>fid</code>: The filter ID for the detection (1 = g and 2 = r)</li>
+  <li><code>jd</code>: Julian Day for the detection </li>
+  <li><code>magpsf</code>: The difference magnitude</li>
+  <li><code>sigmapsf</code>: the error in the difference magnitude.</li>
+  <li><code>magnr</code>: Magnitude of the reference source</li>
+  <li><code>sigmagnr</code>: the error in the reference magnitude</li>
+  <li><code>magzpsci</code>: Zero-point magnitude of the science image</li>
+  <li><code>isdiffpos</code>:set to 't' if positive difference magnitude, 'f' for negative</li>
+</ul>
+The arguments are:<ul>
+<li><code>objectIds</code>: (string) comma-separated string of objectIds to be fetched</li>
+<li> There is a upper limit on the number of lightcurves that can be fetched, currently 50. 
+  If you need to do serious data mining on Lasair light curves, please write to 
+  <a href="mailto:lasair-help@lists.roe.ac.uk?subject=Notebooks">contact the Lasair team</a>.
+</lihere>
+</ul>
+</p>
+</dd>
+
+<dt class="url-label">GET URL Example</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/lightcurves/?objectIds=ZTF20acgrvqo%2CZTF19acylwtd%2CZTF18acmziob&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  
+</p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "objectIds=ZTF20acgrvqo,ZTF19acylwtd,ZTF18acmziob" \
+https://lasair-ztf.lsst.ac.uk/api/lightcurves/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+c = L.lightcurves(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
+print(c)
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+{
+  "objectId": "ZTF20acpwljl",
+  "candidates":[
+    {
+      "candid":1961223331015015002,
+      "fid":1,
+      "magpsf":19.46470069885254,
+      "sigmapsf":0.12973499298095703,
+      "magnr":21.349000930786133,
+      "sigmagnr":0.0989999994635582,
+      "magzpsci":26.41069984436035,
+      "isdiffpos":"t",
+      "jd":2459715.7233333,
+    },
+    ]
+... snip ...
+</pre>
+</dd>
+
+<a name=sherlockobjects><h3>/api/sherlock/objects/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method returns Sherlock information for a collection of named objects, either the "lite" record that
+is also in the Lasair database, or the full record including many possible crossmatches.
+The arguments are:
+<ul>
+<li><code>objectIds</code>: a comma-separated list of objectIds, maximum number is 10</li>
+<li><code>lite</code>: Set to 'true' to get the lite information only</li>
+</ul>
+</dd>
+
+<dt class="url-label">GET URL Example with objects</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/?objectIds=ZTF20acpwljl%2CZTF20acqqbkl%2CZTF20acplggt&token=xxxxxxxxxxxxxxxxxxxxxxxx&lite=true&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example with list of objects</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  
+</p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "objectIds=ZTF20acpwljl,ZTF20acqqbkl,ZTF20acplggt&lite=True" \
+https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example with list of objects</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+c = L.sherlock_objects(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
+print(c)
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+{
+    "ZTF20acpwljl": {
+        "classifications": {
+            "ZTF20acpwljl": [
+                "SN",
+                "The transient is possibly associated with &lt;em&gt;&lt;a href=\"http://skyserver.sdss.org/dr12/en/tools/explore/Summary.aspx?id=1237673709862061782\"&gt;SDSS J081931-060114.9&lt;/a&gt;&lt;/em&gt;; a J=17.01 mag galaxy found in the SDSS/2MASS/PS1 catalogues. It's located 1.09\" N, 1.11\" W from the galaxy centre."
+            ]
+        },
+        "crossmatches": [
+            {
+                "catalogue_object_id": "1237673709862061782",
+                "J": 17.007,
+                "JErr": 0.215,
+                "H": 15.974,
+                "HErr": 0.179,
+                "K": 15.389,
+...snip...
+</pre>
+</dd>
+
+<a name=sherlockposition><h3>/api/sherlock/position/</h3></a>
+<dl>
+
+<dt class="url-label">Description</dt> <dd>
+<p>
+This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that
+is also in the Lasair database, or the full record including many possible crossmatches.
+It is meant as an illustration of what Sherlock can do. If you would like to use Sherlock for high volume work,
+please
+<a href="mailto:lasair-help@lists.roe.ac.uk?subject=sherlock">Email Lasair-help</a>.
+
+
+The arguments are:
+<ul>
+<li><code>ra</code>: Right ascension of a point in the sky in degrees</li>
+<li><code>dec</code>: Declination of a point in the sky in degrees</li>
+<li><code>lite</code>: Set to 'true' to get the lite information only</li>
+</ul>
+</dd>
+
+<dt class="url-label">GET URL Example</dt> <dd>
+<pre class="literal-block">
+https://lasair-ztf.lsst.ac.uk/api/sherlock/position/?ra=16.851866&dec=34.53307&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+</pre>
+</dd>
+
+<dt class="url-label">Curl Example</dt> <dd>
+<p> The authorization token goes in the header of the request, and the data in the data section.  
+</p>
+<pre class="literal-block">
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+--data "ra=16.851866&dec=34.53307" \
+https://lasair-ztf.lsst.ac.uk/api/sherlock/position/
+</pre>
+</dd>
+
+<dt class="url-label">Python Example</dt> <dd>
+<p> This code requires the <code>lasair</code> library.
+<pre class="literal-block">
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+c = L.sherlock_position(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
+print(c)
+</pre>
+<p>and the return is something like: </p>
+<pre class="literal-block">
+status= 200
+{
+  "classifications": {
+    "query": [
+      "VS",
+      "The transient is synonymous with
+</pre>
+</div>
+{% endblock %}

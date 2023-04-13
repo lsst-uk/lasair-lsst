@@ -1,0 +1,187 @@
+---
+- hosts: all
+  gather_facts: true
+
+- hosts: all:!localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  roles:
+    - lasair_instance
+  tags: lasair_instance
+
+- hosts: svc
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    enable_letsencrypt: true
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    replication_count: "{{ 1 if (groups['kafka']|length)<2 else 2 }}"
+  roles:
+    - lasair_cephfs
+    - lasair_service
+    - prometheus
+    - grafana
+  tags: svc
+
+- hosts: kafka
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    internal_only: true
+    source: public.alerts.ztf.uw.edu:9092
+    start_mirrormaker: true # don't start mirrormaker automatically by default
+  roles:
+    - kafka
+    - mirrormaker # we currently run mirrormaker on the same hosts as kafka 
+  tags: kafka
+
+- hosts: kafka_pub
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    internal_only: false
+    dns_lookup: false # disable dns checks for testing
+  roles:
+    - kafka
+  tags: kafka_pub
+
+- hosts: ingest
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+  roles:
+    - lasair_cephfs
+    - ingest
+  tags: ingest
+  
+- hosts: sherlock
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+    mysql_root_password: "{{ settings.local_db_root_password }}"
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    datadir: /var/lib/mysql
+    sherlock_catalogue_data_dir_lite: "/mnt/sherlock/data_lite"
+    sherlock_catalogue_data_dir: "/mnt/sherlock/data"
+    sherlock_sql_dir: "/mnt/sherlock/sql"
+  roles:
+    - lasair_cephfs
+    - lasair_cephfs_sherlock
+    - sherlock
+  tags: sherlock
+  
+- hosts: filter
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+    mysql_root_password: "{{ settings.local_db_root_password }}"
+    datadir: /var/lib/mysql
+  roles:
+    - lasair_cephfs
+    - gkansible.gkservercollection.mariadb
+    - filter
+  tags: filter
+
+- hosts: web
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
+    cassandra_head: "{{ groups['cassandranodes'] }}"
+  roles:
+    - lasair_cephfs
+    - webserver
+  tags: web
+
+- hosts: proxy
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    enable_letsencrypt: true
+  roles:
+    - proxy
+  tags: proxy
+
+- hosts: cassandranodes
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: create filesystem for data
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/sdb
+    - name: ensure data filesystem is mounted
+      ansible.posix.mount:
+        path: /var/lib/cassandra
+        src: /dev/sdb
+        fstype: ext4
+        opts: nofail
+        state: mounted
+  tags: filesystem
+
+- hosts: cassandranodes
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cassandra
+
+- hosts: cassandranodes
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - gkansible.gkservercollection.cassandra_start_service
+  serial: 1
+  tags: cassandra
+
+- hosts: cassandranodes[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - gkansible.gkservercollection.cassandra_schema_lasair
+  tags: cassandra
+
+- hosts: parallel_ssh
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+  roles:
+    - role: lasair_cephfs
+      when: instances.parallel_ssh.started
+    - role: parallel_ssh
+      when: instances.parallel_ssh.started
+  tags: parallel_ssh
+

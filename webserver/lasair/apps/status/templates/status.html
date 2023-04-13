@@ -1,0 +1,28 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}
+    Status
+{% endblock title %}
+
+{% block content %}
+
+    <div class="container">
+        {% include "includes/widgets/widget_status_header.html" %}
+
+        {% include "includes/widgets/widget_status_table.html" %}
+
+
+        <div class="d-flex mt-3 justify-content-between">
+
+            <a class="btn btn-sm btn-gray-800 me-1 align-middle " href='{% url "status" nid|add:-1 %}'>
+                <span class="align-middle">&lt Previous Day</span></a>
+            {% if daysAgo > 0%}
+
+                <a class="btn btn-sm btn-gray-800 me-1 align-middle " href='{% url "status" nid|add:1 %}'>
+                    <span class="align-middle">Next Day &gt</span></a>
+            {%endif%}
+        </div>
+
+    </div>
+{% endblock %}

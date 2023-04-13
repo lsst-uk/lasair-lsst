@@ -1,0 +1,32 @@
+<div class="card border-0 shadow h-100">
+    <div class="card-body">
+        <div class="row d-flex align-items-start">
+            <div class="col-2 col-md-1 text-xl-center mb-3  justify-content-xl-start">
+                <div class="icon-shape icon-shape-tertiary rounded me-sm-0 ">
+
+                    <svg fill="currentColor" stroke="currentColor"  stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+                        <g>
+                            <path d="m33.16 60.988c0.12891 2.0938 1.9297 3.6875 4.0234 3.5664 1.2461-0.082032 2.3594-0.75391 3.0117-1.8086 6.8438-11.16 15.066-21.391 24.496-30.465 8.457-8.1445 20.27-11.816 31.855-9.9023v4.4297c-11.422-0.28516-22.336 4.6914-29.605 13.516-6.6055 8.0078-12.379 16.664-17.246 25.832-3.3242 6.2734-7.4102 12.109-12.164 17.395-4.293 4.7695-10.75 6.9531-17.047 5.7617-9.9609-1.8828-16.512-11.477-14.629-21.441 0.78516-4.1953 1.9727-8.3008 3.5312-12.27h23.656c-0.03125 1.793 0.007812 3.5938 0.11719 5.3867zm39.387-33.426l1.9727 4.6797c6.2539-4.1602 13.59-6.3789 21.098-6.3789v-2.6836c-7.9688-1.1328-16.082 0.39844-23.07 4.3828z"/>
+                            <path d="m23.129 47.035c-1.5742-5.2031-1-10.812 1.6094-15.582 3.5273-6.4805 3.2617-14.363-0.69141-20.598 1.5742 5.2031 0.99219 10.82-1.6094 15.582-3.5312 6.4883-3.2734 14.371 0.69141 20.598z"/>
+                        </g>
+                    </svg>
+
+
+                </div>
+            </div>
+            <div class="col-10 col-xl-11 pe-xl-2 ps-xl-5">
+                <div >
+                    <h2 class="h6 text-gray-400 mb-0 ps-3">Sherlock Contextual Classification{% include "includes/info_tooltip.html" with info="Predicted nature of the transient based on smart crossmatching of known objects" position="auto" link=docroot|add:"/core_functions/sherlock.html" %}</h2>
+                    <h4 class="fw-extrabold mb-2 ps-3"> <span class="fw-normal text-gray-400">Prediction: </span> {{ data.sherlock.classification_expanded }}</h3>
+                </div>
+            </div>
+            <div class="col-12 col-xl-10 pe-xl-5 ps-sm-4">
+                <small class="text-gray-500">
+                    {{ data.sherlock.description|safe }}
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+

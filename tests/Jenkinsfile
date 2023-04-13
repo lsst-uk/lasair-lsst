@@ -1,0 +1,50 @@
+pipeline {
+    agent { 
+        dockerfile {
+            dir 'tests'
+            filename 'Dockerfile'
+            args '--network host'
+        }
+    }
+    stages {
+        stage('Unit Tests') {
+            steps {
+                dir('tests/unit/common/src') {
+                    sh 'python3 test_manage_status.py'
+                    sh 'python3 test_logging.py'
+                }
+                dir('tests/unit/pipeline/sherlock') {
+                    sh 'python3 test_sherlock_wrapper.py'
+                }
+                dir('tests/unit/pipeline/filter') {
+                    sh 'python3 test_watchlist.py'
+                    sh 'python3 make_features_test.py'
+                }
+                dir('tests/unit/services/annotations/') {
+                    sh 'python3 kafka_test.py'
+                }
+            }
+            post {
+                always {
+                    junit 'tests/unit/common/src/test-reports/*.xml'
+                    junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
+                    junit 'tests/unit/pipeline/filter/test-reports/*.xml'
+                    junit 'tests/unit/services/annotations/test-reports/*.xml'
+                }
+            }
+        }
+        stage('Integration Tests') {
+            steps {
+                dir('tests/integration/pipeline/sherlock') {
+                    sh 'python3 test_sherlock_wrapper.py'
+                }
+            }
+            post {
+                always {
+                    junit 'tests/integration/pipeline/sherlock/test-reports/*.xml'
+                }
+            }
+        }
+    }
+}
+

@@ -1,0 +1,338 @@
+{% extends "layouts/base.html" %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+
+
+{% block title %}
+    {{data.objectId}}
+{% endblock title %}
+
+
+{% block content %}
+
+
+
+    <div class="container">
+
+        <div class="row mt-4">
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_filter_query_create_header.html"  %}
+            </div>
+
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_filter_creation_form.html" %}
+            </div>
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" real_sql=real_sql  %}
+            </div>
+
+
+
+
+
+
+
+
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script>
+
+        function updateAutocomplete(){
+
+            // NEED TO REMOVE PRISM LIVE AND REINSTATE AT THE END OF THIS FUNCTION FOR TAB COMPLETE TO WORK
+            document.querySelectorAll("div.prism-live").forEach(el=>el.replaceWith(el.querySelector("textarea.prism-live")));
+
+            // QUICKEST CLEANEST WAY TO REGENERATE AUTOCOMPLETES
+            var old_element = document.querySelector("textarea#id_conditions");
+            var new_element = old_element.cloneNode(true);
+            old_element.parentNode.replaceChild(new_element, old_element);
+
+            var old_element = document.querySelector("textarea#id_selected");
+            var new_element = old_element.cloneNode(true);
+            old_element.parentNode.replaceChild(new_element, old_element);
+
+            // DEFAULT, ALWAYS PRESENT AUTOCOMPLETE
+            var justTypeCollectionValues = [
+                { key : "MYSQL > jdnow", value: "jdnow()", info: "The current time in Julian Days"},
+                { key : "MYSQL > as", value: "as", info: false},
+                { key : "MYSQL > BETWEEN", value: "BETWEEN xx AND xx", info: ""},
+                { key : "MYSQL > LIKE", value: "LIKE `%xx%`", info: ""}
+            ];
+            var tableColumns = [];
+            {% for schema_name, schema_content in schemas_core.items %}
+                justTypeCollectionValues.push({ key : "TABLE > {{schema_name}}", value: "{{schema_name}}", info: ""})
+                var theseColumns = {
+                    trigger: "{{schema_name}}".concat("."),
+                    values: [],
+                    noMatchTemplate: "",
+                    spaceSelectsMatch: false,
+                    selectTemplate: function(item) {
+                        return item.original.value;
+                    },
+                    menuItemTemplate: function(item) {
+                        if (item.original.info.length > 0) {
+                            return item.string + `{% include "includes/info_tooltip.html" with info="`+item.original.info+`" position="top" %}`;
+                        } else {
+                            return item.string
+                        }
+
+                    }
+                }
+
+                {% for row in schema_content %}
+                    theseColumns.values.push({ key : "COLUMN > {{schema_name}}.{{row.name}}", value: "{{schema_name}}.{{row.name}}", info: "{{row.doc}}"})
+                {% endfor %}
+                tableColumns.push(theseColumns)
+            {% endfor %}
+
+            var e = document.getElementById("id_watchlists");
+            if (e.value) {
+                justTypeCollectionValues.push({ key : "TABLE > watchlist_hits", value: "watchlist_hits", info: ""})
+                var theseColumns = {
+                    trigger: "watchlist_hits.",
+                    values: [],
+                    noMatchTemplate: "",
+                    spaceSelectsMatch: false,
+                    selectTemplate: function(item) {
+                        return item.original.value;
+                    },
+                    menuItemTemplate: function(item) {
+                        if (item.original.info.length > 0) {
+                            return item.string + `{% include "includes/info_tooltip.html" with info="`+item.original.info+`" position="top" %}`;
+                        } else {
+                            return item.string
+                        }
+
+                    }
+                }
+                {% for row in schemas_additional.watchlist_hits %}
+                    theseColumns.values.push({ key : "COLUMN > watchlist_hits.{{row.name}}", value: "watchlist_hits.{{row.name}}", info: "{{row.doc}}"})
+                {% endfor %}
+                tableColumns.push(theseColumns)
+            }
+
+            // ANNOTATORS
+            var avalues = document.getElementById("id_annotators").selectedOptions;
+            for (i = 0; i < avalues.length; i++) {
+                justTypeCollectionValues.push({ key : "TABLE > ".concat(avalues[i].value), value: avalues[i].value, info: "{{row.doc}}"})
+                var theseColumns = {
+                    trigger:  avalues[i].value.concat("."),
+                    values: [],
+                    noMatchTemplate: "",
+                    spaceSelectsMatch: false,
+                    selectTemplate: function(item) {
+                        return item.original.value;
+                    },
+                    menuItemTemplate: function(item) {
+                        if (item.original.info.length > 0) {
+                            return item.string + `{% include "includes/info_tooltip.html" with info="`+item.original.info+`" position="top" %}`;
+                        } else {
+                            return item.string
+                        }
+
+                    }
+                }
+                {% for row in schemas_additional.annotations %}
+                    theseColumns.values.push({ key : "COLUMN > ".concat(avalues[i].value,".{{row.name}}"), value: avalues[i].value.concat(".{{row.name}}"), info: "{{row.doc}}"})
+                {% endfor %}
+                tableColumns.push(theseColumns)
+            }
+
+            var justTypeCollection = {
+                values: justTypeCollectionValues,
+                selectTemplate: function(item) {
+                    if (item.original.key.includes("MYSQL >")) {
+                        return item.original.value+" ";
+
+                    } else {
+                        return item.original.value+".";
+                    }
+
+                },
+                menuItemTemplate: function(item) {
+                    if (item.original.info.length > 0) {
+                        return item.string + `{% include "includes/info_tooltip.html" with info="`+item.original.info+`" position="top" %}`;
+                    } else {
+                        return item.string
+                    }
+
+                }
+            };
+
+            var tributeAutocompleteSelectArea = new Tribute({
+                autocompleteMode: true,
+                noMatchTemplate: "",
+                spaceSelectsMatch: false,
+                replaceTextSuffix: '',
+                collection: [justTypeCollection]
+            });
+
+            tributeAutocompleteSelectArea.attach(
+                document.querySelector("textarea#id_selected")
+            );
+            tributeAutocompleteSelectArea.attach(
+                document.querySelector("textarea#id_conditions")
+            );
+
+            var tributeAutocompleteTestAreaColumns = new Tribute({
+                noMatchTemplate: "",
+                collection: tableColumns
+            });
+            tributeAutocompleteTestAreaColumns.attach(
+                document.querySelector("textarea#id_selected")
+            );
+            tributeAutocompleteTestAreaColumns.attach(
+                document.querySelector("textarea#id_conditions")
+            );
+
+
+            document.querySelector("textarea#id_selected").addEventListener('keydown', function(e) {
+                updateFrom()
+                if (e.key == 'Tab') {
+                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteTestAreaColumns.isActive) {
+                        e.stopImmediatePropagation()
+                    }
+                }
+
+            });
+            document.querySelector("textarea#id_conditions").addEventListener('keydown', function(e) {
+                if (e.key == 'Tab') {
+                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteTestAreaColumns.isActive) {
+                        e.stopImmediatePropagation()
+                    }
+                }
+            });
+
+            let prismEditor = new Prism.Live(document.getElementById("id_selected"));
+            let prismEditor2 = new Prism.Live(document.getElementById("id_conditions"));
+            updateFrom();
+        };
+
+
+
+
+
+
+        function updateFrom(){
+            var selectText = document.getElementById('id_selected').value;
+            var tableList = [ '{{ schemas_core.keys|join:"', '" }}' ];
+            var fromContent = new Array();
+            for (i = 0; i < tableList.length; i++) {
+                var table = tableList[i];
+                if (selectText.indexOf(table+".") >= 0) {
+                    fromContent.push(table);
+                }
+            }
+
+            var e = document.getElementById("id_watchlists");
+            if (e.value) {
+                fromContent.push("'".concat(e.options[e.selectedIndex].text.replace(/ *\([^)]*\) */g, ""),"' as watchlist_hits"));
+        }
+
+        var values = document.getElementById("id_watchmaps").selectedOptions;
+        for (i = 0; i < values.length; i++) {
+            fromContent.push(values[i].text.replace(/ *\([^)]*\) */g, "").concat(" (watchmap)"));
+        }
+
+        var values = document.getElementById("id_annotators").selectedOptions;
+        for (i = 0; i < values.length; i++) {
+            fromContent.push(values[i].text.replace(/ *\([^)]*\) */g, "").concat(" (annotator)"));
+        }
+
+
+        // ARRAY TO COMMA SEPARATED LIST
+        fromContent = fromContent.toString().replaceAll(",",", ");
+        document.getElementById("from_box").innerHTML = fromContent;
+
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAutocomplete();
+
+        }, false);
+
+
+        $(document).ready(function () {
+            $('#id_watchlists').multiselect({
+                buttonClass: 'form-select',
+                nonSelectedText: 'None selected',
+                maxHeight: 500,
+                numberDisplayed: 2,
+                enableCaseInsensitiveFiltering: true,
+                templates: {
+                    button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                },
+                onChange: function() {
+                    updateAutocomplete();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#id_watchmaps').multiselect({
+                buttonClass: 'form-select',
+
+                maxHeight: 500,
+                numberDisplayed: 2,
+                enableCaseInsensitiveFiltering: true,
+                templates: {
+                    button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                },
+                nonSelectedText: 'No Watchmap Selected',
+                onChange: function() {
+                    updateAutocomplete();
+                }
+            });
+        });
+
+        $(document).ready(function () {
+            $('#id_annotators').multiselect({
+                buttonClass: 'form-select',
+                buttonWidth: '300px',
+                maxHeight: 500,
+                numberDisplayed: 2,
+                enableCaseInsensitiveFiltering: true,
+                templates: {
+                    button: '<button type="button" class="multiselect dropdown-toggle" data-bs-toggle="dropdown"><span class="multiselect-selected-text"></span></button>',
+                },
+                nonSelectedText: 'No Annotator Selected',
+                onChange: function() {
+                    updateAutocomplete();
+                }
+            });
+        });
+
+        {% if form.errors and not form.selected.errors %}
+            $(document).ready(function(){
+                $("#editFilterForm").modal('show');
+            });
+        {% endif %}
+
+
+        var body = $('body');
+        body.on('mouseover', '[data-bs-toggle="tooltip"]', function (e) {
+            e.stopPropagation();
+            return new bootstrap.Tooltip(this).show();
+        });
+
+        body.on('mouseleave', '[data-bs-toggle="tooltip"]', function (e) {
+            $('[role="tooltip"]').fadeOut(function () {
+                e.stopPropagation();
+                $(this).remove();
+            });
+        });
+
+
+    </script>
+{% endblock javascripts %}
+

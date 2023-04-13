@@ -1,0 +1,131 @@
+{% load customtags %}
+{% load widget_tweaks %}
+
+<div class="card border-0 shadow h-100">
+    <div class="card-body">
+
+        <div class="d-flex flex-row-reverse">
+            <a class="btn btn-sm btn-tertiary me-1 icon-sm" href="{% url 'schema_index' %}" target="_blank" role="button" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="open the Lasair Schema Browser in a new tab">{% include "includes/icons/icon_schema.html" %}Schema Browser</a>
+        </div>
+
+
+
+        <div class="row justify-content-center">
+
+
+
+            <div class="col-12 d-flex align-items-center justify-content-center">
+
+                <div class="bg-white border-0 rounded border-light p-4  pt-0 w-100">
+
+
+                    <form enctype="multipart/form-data" method="post" class="mt-0 row gy-2 gx-3 align-items-center">
+
+
+                        {% csrf_token %}
+
+
+
+                        <div class="d-flex my-4 justify-content-around">
+
+                            <div class=" form-group  mx-5 w-100">
+                                <label for="watchlists">Watchlist Matching {% include "includes/info_tooltip.html" with info="By selecting a watchlist, the results of the query are constrained to only objects associated with the watchlist" position="auto" %}</label>
+                                <div class="input-group">
+                                    {{ form.watchlists|add_class:"form-select single-select" }}
+                                </div>
+                                <span class="text-error">{{ form.watchlists.errors }}</span>
+                            </div>
+
+                            <div class="form-group   mx-5 w-100">
+                                <label for="watchmaps">Watchmaps Matching {% include "includes/info_tooltip.html" with info="By selecting a watchmap, the results of the query are constrained to only objects associated with the watchmap. If you select multiple watchmaps only objects found in the overlapping areas are returned." position="auto" %}</label>
+                                <div class="input-group">
+                                    {{ form.watchmaps|add_class:"form-select multi-select" }}
+                                </div>
+                                <span class="text-error">{{ form.watchmaps.errors }}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group mb-4">
+
+                            <div class="d-flex justify-content-around">
+                                {% if form.selected.errors %}
+
+
+                                    <span class="text-error mb-3 ">{% include "includes/icons/icon_warning.html" %}Your query has a syntax error near: <mark>{{ form.selected.errors.0 }}</mark></span>
+                                {%endif%}
+                            </div>
+
+
+                            <label for="name"><h4>SELECT COLUMNS</h4></label>
+
+                            {% include "includes/help_popover.html" with title="SELECT Help" position="right" content="In the SELECT box type a comma-separated list of column names you wish to appear in the filter results. To find the columns you need, search the <a target='_blank' href='/schema/'>Lasair Schema Browser</a> or just start typing and use the auto-complete function to find and input the column names.</br></br>If your query overflows the textbox, consider adding newlines to make the query more readable." %}
+
+                            <div id="select_div" class="input-group">
+                                <textarea name="selected" class="prism-live language-sql fill prism-live-source" required="" id="id_selected" spellcheck="false">{{ form.selected.value|default_if_none:"objects.objectId, objects.gmag, objects.jdmax as 'latest detection',  sherlock_classifications.classification as 'predicted classification' " }}</textarea>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+
+
+                            <label for="conditions"><h4>FROM</h4></label>
+
+                            {% include "includes/help_popover.html" with title="FROM Help" position="right" content="Content in the FROM box <b>cannot be manually edited</b>, instead, tables are dynamically added or removed depending on the content of the SELECT box above and additional asset selections to the right." %}
+                            <pre class="prism language-sql"><code id="from_box"></code></pre>
+                        </div>
+
+                        <div class="d-flex justify-content-around">
+
+                            <div class="form-group mb-4">
+                                <label for="annotators">Object Annotators {% include "includes/info_tooltip.html" with info="Include value-added annotations within your filter results. By selecting an annotator, objects returned are constrained to those tagged by the annotator. Not all annotators tag every object." position="auto" %}</label>
+                                <div class="input-group">
+                                    {{ form.annotators|add_class:"form-select multi-select" }}
+                                </div>
+                                <span class="text-error">{{ form.annotators.errors }}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="form-group mb-4">
+                            <label for="conditions"><h4>WHERE</h4></label>
+
+                            {% include "includes/help_popover.html" with title="WHERE Help" position="right" content="In the WHERE box, you can further filter results to return only sources you are interested in. Use the standard MySQL operators to write the criteria for your filter." %}
+                            <div id="where_div" class="input-group">
+                                <textarea name="conditions" class="prism-live language-sql fill prism-live-source"  id="id_conditions" spellcheck="false">{{ form.conditions.value|default_if_none:"objects.jdmax > jdnow()-365" }}</textarea>
+
+                            </div>
+                        </div>
+
+
+
+
+                        <small class="text-danger">{{ form.non_field_errors }}</small>
+                        <div class="d-flex flex-row-reverse">
+
+                            {% if user.is_authenticated %}
+                                <a class="btn btn-dark me-1 align-middle " href='#' data-bs-toggle="modal" data-bs-target="#editFilterForm">
+                            {% else %}
+                                <a class="btn btn-dark me-1 align-middle"  href="{% url 'login' %}?next={{request.path}}">
+                            {% endif %}
+
+                            {% include "includes/icons/icon_save.html" %}
+                            <span class="align-middle ms-2">Save</span></a>
+                        <button type="submit" name="action" class="btn btn-tertiary me-1" value="run">{% include "includes/icons/icon_run.html" %}<span class="align-middle">Run Filter</span></button>
+                    </div>
+                    {% include "includes/widgets/widget_filter_update_form.html" %}
+
+                </form>
+
+
+                <br />
+            </div>
+        </div>
+    </div>
+
+</div>
+</div>
+
+
+
+

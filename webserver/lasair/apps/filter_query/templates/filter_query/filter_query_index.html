@@ -1,0 +1,73 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% block title %}
+    Filters
+{% endblock title %}
+{% block content %}
+
+
+
+    <div class="container">
+
+        <div class="row mt-4">
+            <div class="col-12  mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <div class="row d-flex">
+
+
+                            <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                                <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                                    {% include "includes/icons/icon_filter_query.html" %}
+                                </div>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Filters</h2>
+
+                            </div>
+
+                            <div class="col-1 float-end d-none d-sm-inline">
+                                <span class="float-end">
+                                    <nobr><a class="btn btn-sm btn-tertiary me-1 ms-auto" href=' {% url "filter_query_create" %} ' data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="create your own filter">
+                                        <svg class="w-1 h-1 pe-1" style="height: 1.1rem;" fill="currentColor" stroke="currentColor" stroke-width="1"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                            <g>
+                                                <path d="m69.699 43h-12.699v-12.699c0-3.8008-3.1016-7-7-7-3.8008 0-7 3.1016-7 7v12.699h-12.699c-3.8008 0-7 3.1016-7 7 0 1.8984 0.80078 3.6992 2 4.8984 1.3008 1.3008 3 2 4.8984 2h12.801v12.699c0 1.8984 0.80078 3.6992 2 4.8984 1.3008 1.3008 3 2 4.8984 2 3.8008 0 7-3.1016 7-7v-12.496h12.699c3.8008 0 7-3.1016 7-7 0.003906-3.8008-3.0977-7-6.8984-7z"/>
+                                                <path d="m50 2.5c-26.199 0-47.5 21.301-47.5 47.5s21.301 47.5 47.5 47.5 47.5-21.301 47.5-47.5-21.301-47.5-47.5-47.5zm0 88c-22.398 0-40.5-18.102-40.5-40.5s18.102-40.5 40.5-40.5 40.5 18.102 40.5 40.5-18.102 40.5-40.5 40.5z"/>
+                                            </g>
+                                        </svg>
+                                        <span class="align-middle">Create New</span></a></nobr>
+                                </span>
+                            </div>
+
+                            <div class="col-12 px-4">
+                                <small class="text-gray-500">
+                                    Filters are used to select out subsets of transients of interest to Lasair users. Filters are written as SQL queries, created by users, to  match against past transient events found in the Lasair database and saved filters will dyamically match against future events.
+                                </small>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {% if user.is_authenticated %}
+                <div class="col-12 mb-4">
+                    {% include "includes/widgets/widget_filter_query_table.html" with type="my" position="auto" %}
+                </div>
+            {% endif %}
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_filter_query_table.html" with type="public" position="auto" %}
+            </div>
+
+
+
+        </div>
+    </div>
+
+
+
+{% endblock %}

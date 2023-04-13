@@ -1,0 +1,274 @@
+<nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
+    <a class="navbar-brand me-lg-5" href="/">
+        <img class="navbar-brand-dark" src="{{ ASSETS_ROOT }}/img/brand/icon.svg" alt="Volt logo" /> <img class="navbar-brand-light" src="{{ ASSETS_ROOT }}/img/brand/dark.svg" alt="Volt logo" />
+    </a>
+    <div class="d-flex align-items-center">
+        <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</nav>
+
+<nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
+    <div class="sidebar-inner px-2 pt-3">
+        <div class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
+            <div class="d-flex align-items-center">
+                {% if user.is_authenticated %}
+
+                    <a href="{% url 'profile' %}">
+                        <div class="avatar-lg me-4">
+                            <img src="data:image/png;base64,{{ request.user.profile.image_b64 }}" class="card-img-top rounded-circle border-white"
+                                alt="user profile image">
+                        </div>
+                    </a>
+                    <div class="d-block">
+                        <a href="{% url 'profile' %}">
+                            <h2 class="h5 mb-3">{{ request.user.username }}</h2>
+                        </a>
+                        <a href="{% url 'logout' %}" class="btn btn-secondary btn-sm d-inline-flex align-items-center">
+                            <svg class="icon icon-xxs me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                            Sign Out
+                        </a>
+                    </div>
+
+                {% else %}
+
+                    <a href="{% url 'login' %}" class="btn btn-info">Sign In</a>
+
+                {% endif %}
+
+            </div>
+            <div class="collapse-close d-md-none">
+                <a href="#sidebarMenu" data-bs-toggle="collapse"
+                    data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="true"
+                    aria-label="Toggle navigation">
+                    <svg class="icon icon-xs mb-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </a>
+            </div>
+        </div>
+        <ul class="nav flex-column pt-3 pt-md-0">
+
+
+
+            <li class="nav-item">
+                <a href="/" class="nav-link align-items-center">
+                    <img src="{{ ASSETS_ROOT }}/img/brand/logo_light.svg" alt="brand logo">
+                </a>
+            </li>
+
+            <li class="nav-item pt-3">
+
+
+
+
+                <li class="nav-item {% if 'filters' in request.path %} active {% endif %}">
+                    <a class="nav-link" href="{% url 'filter_query_index' %}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <path d="m56.25 75c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-12.5c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25zm18.75-31.25c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-50c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25zm18.75-31.25c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-87.5c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25z"/>
+                            </svg>
+
+                        </span>
+                        <span class="sidebar-text">Filters</span>
+                        {% include "includes/info_tooltip.html" with info="Transients dynamically matched against a pre-defined set of filtering criteria" position="auto" link=docroot|add:"/concepts/querying.html" %}
+                    </a>
+                </li>
+
+
+                <li class="nav-item {% if 'watchlists' in request.path %} active {% endif %}">
+                    <a class="nav-link" href="{% url 'watchlist_index' %}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
+                        </span>
+                        <span class="sidebar-text">Watchlists</span>
+                        {% include "includes/info_tooltip.html" with info="Transients matched within a given radius of a pre-defined catalogue of sky-positions" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}
+                    </a>
+                </li>
+
+
+
+
+
+
+                <li class="nav-item {% if 'watchmap' in request.path %} active {% endif %}">
+
+                    <a class="nav-link" href="{% url 'watchmap_index' %}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
+
+                        </span>
+                        <span class="sidebar-text">Watchmaps</span>
+                        {% include "includes/info_tooltip.html" with info="Transients found within a defined sky-region" position="auto" link=docroot|add:"/core_functions/watchmaps.html" %}
+                    </a>
+                </li>
+
+
+                <li class="nav-item {% if 'annotator' in request.path %} active {% endif %}">
+
+                    <a class="nav-link" href="{% url 'annotator_index' %}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                <path d="m90.668 47.168l-34.836-34.836c-4.832-4.832-11.5-7.332-18.332-7l-19.168 1c-6.5 0.33594-11.664 5.5-12 12l-1 19.168c-0.33203 6.832 2.168 13.5 7 18.332l34.832 34.832c2.668 2.668 6.168 4.168 10 4.168 3.832 0 7.332-1.5 10-4.168l23.5-23.5c2.668-2.668 4.168-6.168 4.168-10 0-3.832-1.5-7.332-4.1641-9.9961zm-56.836-13.336c-2.668 2.668-6.832 2.668-9.5 0s-2.668-6.832 0-9.5c1.332-1.332 3-2 4.668-2s3.332 0.66797 4.668 2c2.832 2.668 2.832 7 0.16406 9.5z"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-text">Annotators</span>
+                        {% include "includes/info_tooltip.html" with info="Value added metadata from third party and user supplied codes" position="auto" link=docroot|add:"/concepts/annotations.html" %}
+                    </a>
+                </li>
+
+
+                <li class="nav-item">
+                    <span
+                        class="nav-link collapsed d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages">
+                        <span>
+                            <span class="sidebar-icon">
+                                <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+
+
+                                    <path d="m55 7.5c-22 0-40.199 16.801-42.301 38.301h-6c-2.3008 0-4.1992 1.8984-4.1992 4.1992s1.8984 4.1992 4.1992 4.1992h32.398c1.6016 0 3-0.89844 3.6992-2.3008l3.5-6.8008 10.703 20.703c0.69922 1.3984 2.1016 2.3008 3.6992 2.3008 1.6016 0 3-0.89844 3.6992-2.3008l6-11.699h6c2.3008 0 4.1992-1.8984 4.1992-4.1992 0-2.3008-1.8984-4.1992-4.1992-4.1992h-8.5c-1.6016 0-3 0.89844-3.6992 2.3008l-3.5 6.8008-10.699-20.605c-1.3984-2.8008-6-2.8008-7.3984 0l-6 11.699h-15.5c2.1016-16.898 16.5-30 33.898-30 18.801 0 34.199 15.301 34.199 34.199 0 18.902-15.398 34.102-34.199 34.102-14.199 0-26.5-8.8008-31.602-21.199h-8.8984c5.5 17.102 21.602 29.5 40.5 29.5 23.398 0 42.5-19.102 42.5-42.5s-19.102-42.5-42.5-42.5z"/>
+                                </svg>
+
+                            </span>
+                            <span class="sidebar-text">Status</span>
+                        </span>
+                        <span class="link-arrow">
+                            <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
+                        </span>
+                    </span>
+
+
+
+                    <div class="multi-level {% if 'status' not in request.path %} collapse {% endif %}" role="list"
+                        id="submenu-pages" aria-expanded="false">
+                        <ul class="flex-column nav">
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'status_today' %}">
+                                    <span class="sidebar-text">Today</span>
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link" href="{{ lasair_grafana_url }}?orgId=1&refresh=5m&from=now-24h&to=now&viewPanel=8'">
+                                    <span class="sidebar-text">Grafana</span>
+
+                                </a>
+                            </li>
+
+                        </ul>
+                    </div>
+                </li>
+
+
+
+
+
+
+                <li role="separator" class="dropdown-divider mt-4 mb-5 border-gray-700"><hr></li>
+
+
+                <li class="nav-item">
+
+                    <a class="nav-link" href="{{docroot}}/quickstart.html">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="currentColor" viewBox="0 0 95 95" xmlns="http://www.w3.org/2000/svg">
+
+                                <path d="m25 7.8125c-5.168 0-9.375 4.207-9.375 9.375v65.617c0 0.058593 0.003906 0.11719 0.011719 0.17578 0.09375 5.0859 4.2617 9.207 9.3672 9.207h57.801c0.86328 0 1.5664-0.69531 1.5703-1.5586v-81.262c-0.003906-0.86328-0.70703-1.5586-1.5703-1.5547zm24.953 9.3789c0.42188-0.015625 0.83203 0.14062 1.1367 0.43359 0.30469 0.29688 0.47656 0.69922 0.48047 1.1211v17.195h14.672c0.55469 0 1.0703 0.30078 1.3477 0.78125 0.27734 0.48047 0.27734 1.0742 0 1.5586l-16.238 28.145c-0.35547 0.60547-1.0742 0.89453-1.7539 0.71094-0.67969-0.18359-1.1523-0.79688-1.1523-1.5v-17.191h-14.684c-0.55469 0-1.0703-0.30078-1.3477-0.78125-0.27734-0.48047-0.27734-1.0742 0-1.5586l16.238-28.145c0.26953-0.46484 0.76172-0.75391 1.3008-0.76953zm-24.953 59.371h56.242v2.8906h0.003906v9.6055h-56.242c-3.4883 0-6.2539-2.7617-6.2539-6.2539 0-3.4922 2.7656-6.2422 6.2539-6.2422z"/>
+                            </svg>
+
+
+                        </span>
+                        <span class="sidebar-text">Quick Start</span>
+                    </a>
+                </li>
+
+
+
+                <li class="nav-item {% if 'about' in request.path %} active {% endif %}">
+
+                    <a class="nav-link" href="{{docroot}}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 95 95" xmlns="http://www.w3.org/2000/svg">
+
+                                <path d="m50 5c-11.934 0-23.379 4.7422-31.82 13.18-8.4375 8.4414-13.18 19.887-13.18 31.82s4.7422 23.379 13.18 31.82c8.4414 8.4375 19.887 13.18 31.82 13.18s23.379-4.7422 31.82-13.18c8.4375-8.4414 13.18-19.887 13.18-31.82s-4.7422-23.379-13.18-31.82c-8.4414-8.4375-19.887-13.18-31.82-13.18zm5 65c0 2.7617-2.2383 5-5 5s-5-2.2383-5-5v-20c-2.7617 0-5-2.2383-5-5s2.2383-5 5-5h5c1.3242 0 2.5977 0.52734 3.5352 1.4648s1.4648 2.2109 1.4648 3.5352zm-5-35c-2.0234 0-3.8438-1.2188-4.6211-3.0859-0.77344-1.8672-0.34375-4.0195 1.0859-5.4492 1.4297-1.4297 3.582-1.8594 5.4492-1.0859 1.8672 0.77734 3.0859 2.5977 3.0859 4.6211 0 1.3242-0.52734 2.5977-1.4648 3.5352s-2.2109 1.4648-3.5352 1.4648z"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-text">About</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if 'about' in request.path %} active {% endif %}">
+
+                    <a class="nav-link" href="{{docroot}}/more_info/faqs.html">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+
+                                <path d="m50 0c-27.668 0-50 22.332-50 50s22.332 50 50 50 50-22.332 50-50-22.332-50-50-50zm4.8906 80.445h-10.555v-11h10.555zm13.219-39.113c-2.2227 3-4.8906 5.7773-7.668 8.332-2.1094 1.7773-3.7773 3.8906-5.1094 6.332-0.89062 2.4453-1.2227 5-1.1094 7.5547v1.1094l-9.7773 0.007813v-1.1094c-0.10937-3.4453 0.44531-6.8906 1.5547-10.109 1-2.668 3.2227-5.5547 6.668-8.8906l3.4453-3.332c0.89062-0.77734 1.668-1.7773 2.332-2.7773 1-1.4453 1.5547-3.2227 1.668-5 0.10938-2.332-0.77734-4.668-2.2227-6.4453s-4-2.668-7.4453-2.668c-4.332 0-7.332 1.5547-8.8906 4.668-1.1094 2.4453-1.668 5.2227-1.668 7.8906v1.1094l-9.8867-0.003906v-1.1094c0-6.332 1.8906-11.555 5.5547-15.445 3.668-3.8906 8.668-5.8906 15-5.8906 5.8906 0 10.668 1.668 14.223 5 3.5547 3.332 5.5547 8 5.4453 12.891 0 2.7773-0.66797 5.5547-2.1133 7.8867z"/>
+                            </svg>
+
+
+                        </svg>
+                    </span>
+                    <span class="sidebar-text">FAQ</span>
+                </a>
+            </li>
+
+
+            <li class="nav-item {% if 'schema' in request.path %} active {% endif %}">
+
+                <a class="nav-link" href="{% url 'schema_index' %}">
+                    <span class="sidebar-icon">
+                        <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
+
+
+
+                            <path d="m71 20h-42c-4.9688 0-9 4.0312-9 9v42c0 4.9688 4.0312 9 9 9h42c4.9688 0 9-4.0312 9-9v-42c0-4.9688-4.0312-9-9-9zm-42 6h42c1.6562 0 3 1.3438 3 3v9h-48v-9c0-1.6562 1.3438-3 3-3zm15 30v-12h12v12zm12 6v12h-12v-12zm-18-6h-12v-12h12zm24-12h12v12h-12zm-36 27v-9h12v12h-9c-1.6562 0-3-1.3438-3-3zm45 3h-9v-12h12v9c0 1.6562-1.3438 3-3 3z"/>
+                        </svg>
+
+
+                    </span>
+                    <span class="sidebar-text">Schema Browser</span>
+                    {% include "includes/info_tooltip.html" with info="Search the Lasair Database Schema" position="auto" %}
+                </a>
+            </li>
+
+            <li class="nav-item {% if 'about' in request.path %} active {% endif %}">
+
+                <a class="nav-link" href="{{docroot}}/more_info/contact.html">
+                    <span class="sidebar-icon">
+                        <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+                            <g>
+                                <path d="m12.848 18.707c-3.6133 0-6.6016 2.9688-6.6016 6.582v44.797c0 3.6133 2.9844 6.582 6.6016 6.582h4.6758v13.949h-0.003907c0.007813 0.82031 0.49219 1.5625 1.2422 1.8945s1.625 0.19141 2.2344-0.35547l17.195-15.488h37.707c3.6133 0 6.5977-2.9688 6.5977-6.582v-44.793c0-3.6133-2.9805-6.582-6.5977-6.582zm13.5 22.516c3.6133 0 6.6016 2.9844 6.6016 6.6016 0 3.6133-2.9844 6.5781-6.6016 6.5781-3.6133 0-6.5781-2.9648-6.5781-6.5781s2.9648-6.6016 6.5781-6.6016zm18.027 0c3.6133 0 6.582 2.9844 6.582 6.6016 0 3.6133-2.9688 6.5781-6.582 6.5781s-6.582-2.9648-6.582-6.5781 2.9688-6.6016 6.582-6.6016zm18.027 0c3.6133 0 6.5781 2.9844 6.5781 6.6016 0 3.6133-2.9648 6.5781-6.5781 6.5781-3.6133 0-6.6016-2.9648-6.6016-6.5781s2.9844-6.6016 6.6016-6.6016z"/>
+                                <path d="m62.398 45.387c-1.3633 0-2.4336 1.0703-2.4336 2.4336 0 1.3633 1.0703 2.4141 2.4336 2.4141 1.3633 0 2.4141-1.0508 2.4141-2.4141 0-1.3633-1.0508-2.4336-2.4141-2.4336z"/>
+                                <path d="m44.371 45.387c-1.3633 0-2.4141 1.0703-2.4141 2.4336 0 1.3633 1.0508 2.4141 2.4141 2.4141 1.3633 0 2.4297-1.0508 2.4297-2.4141 0-1.3633-1.0664-2.4336-2.4297-2.4336z"/>
+                                <path d="m26.348 45.387c-1.3633 0-2.4141 1.0703-2.4141 2.4336 0 1.3633 1.0508 2.4141 2.4141 2.4141 1.3633 0 2.4297-1.0508 2.4297-2.4141 0-1.3633-1.0664-2.4336-2.4297-2.4336z"/>
+                                <path d="m24.105 7.3086c-3.6133 0-6.582 2.9844-6.582 6.6016v0.62891h58.379c5.8984 0 10.762 4.8438 10.762 10.75v40h0.50781c3.6172 0 6.582-2.9805 6.582-6.5977v-44.781c0-3.6133-2.9688-6.6016-6.582-6.6016z"/>
+                            </g>
+                        </svg>
+
+                    </svg>
+                </span>
+                <span class="sidebar-text">Contact</span>
+            </a>
+        </li>
+
+
+
+
+
+
+
+
+
+
+
+    </ul>
+
+
+</ul>
+</div>
+</nav>

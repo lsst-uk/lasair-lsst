@@ -1,0 +1,99 @@
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+
+
+<div class="modal fade " id="editFilterForm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-md-5 mb-3">
+                <h2 class="h4 text-center">Filter Settings</h2>
+                <p class="text-center mb-4">Update your filter settings</p>
+                {% if filterQ %}
+                    <form enctype="multipart/form-data" action="{% url 'filter_query_detail' filterQ.mq_id %}" method="post" class="mt-0 mb-3">
+                {% else %}
+                    <form enctype="multipart/form-data" method="post" class="mt-0 mb-3">
+                {% endif %}
+                {% csrf_token %}
+
+                <div class="form-group mb-4">
+                    <label for="name">Name</label>
+                    <div class="input-group">
+                        {{ form.name|add_class:"form-control" }}
+                    </div>
+                    <span class="text-error">{{ form.name.errors }}</span>
+
+                </div>
+
+                <div class="form-group mb-4">
+                    <label for="description">Description</label>
+                    <div class="input-group">
+                        <textarea name="description" cols="40" rows="3" required="true" maxlength="4096" class="form-control" id="id_description">{{ form.description.value|default_if_none:"A detailed description of your filter." }}</textarea>
+                    </div>
+                    <span class="text-error">{{ form.description.errors }}</span>
+                </div>
+
+                <div class="form-group mb-4">
+
+                    <label for="active">Streaming</label>
+                    <small class="d-flex align-items-center text-gray-500 mb-2">How would you like to be notified of new alerts matching your filter?</small>
+                    {{ form.active|add_class:"form-select" }}
+
+                    <span class="text-error">{{ form.active.errors }}</span>
+                </div>
+
+                <div class="form-group mb-4">
+                    <div class="form-check form-switch">
+                        <label for="public">public</label>
+                        {{ form.public|add_class:"form-check-input" }}
+                        <small class="d-flex align-items-center text-gray-500">Submit filter to the public gallery</small>
+                    </div>
+
+
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" name="action" class="btn btn-dark" value="save"><span class="icon icon-xs">{% include "includes/icons/icon_save.html" %}</span><span class="align-middle ms-2 icon-xs">Save</span></button>
+                </div>
+            </form>
+
+            {% if filterQ %}
+                <div class="text-center mt-3">
+                    <a data-bs-toggle="modal" data-bs-dismiss="modal" href="#areYouSureModal"><small>delete filter</small></a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+
+{% if filterQ %}
+    <!-- DELETE MODAL -->
+    <div class="modal fade " id="areYouSureModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="areYouSureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="areYouSureModalLabel">Delete the {{filter.name}} filter?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to do this? There's no going back!
+                </div>
+                <div class="modal-footer">
+                    <form enctype="multipart/form-data" method="post" action='{% url "filter_query_delete" filterQ.mq_id %}' class="mt-0 mb-3">
+
+                        {% csrf_token %}
+
+                        <button  data-bs-target="#editWatchlistForm" data-bs-toggle="modal" data-bs-dismiss="modal" type="button" class="btn btn-dark" data-bs-dismiss="modal">Keep</button>
+                        <button type="submit" name="action" value="delete" type="button" class="btn btn-tertiary">Delete</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endif %}

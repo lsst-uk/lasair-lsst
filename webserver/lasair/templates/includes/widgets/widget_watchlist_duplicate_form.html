@@ -1,0 +1,64 @@
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+
+<div class="modal fade" id="duplicateWatchlistForm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-md-5 mb-3">
+                <h2 class="h4 text-center">Duplicate Watchlist</h2>
+                <p class="text-center mb-4">Copy the '{{watchlist.name}}' watchlist to My Watchlists</p>
+                <form enctype="multipart/form-data" method="post" class="mt-0 mb-3">
+
+                    {% csrf_token %}
+
+                    <div class="form-group mb-4">
+                        <label for="name">Watchlist Name</label>
+                        <div class="input-group">
+                            {{ duplicateForm.name|add_class:"form-control" }}
+                        </div>
+                        <span class="text-error">{{ duplicateForm.name.errors }}</span>
+
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="description">Description</label>
+                        <div class="input-group">
+                            {{ duplicateForm.description|add_class:"form-control" }}
+
+                        </div>
+                        <span class="text-error">{{ duplicateForm.description.errors }}</span>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <div class="form-check form-switch">
+                            <label for="active">active</label>
+                            {{ duplicateForm.active|add_class:"form-check-input" }}
+                            <small class="d-flex align-items-center text-gray-500">Dynamically match incoming alerts against watchlist</small>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <div class="form-check form-switch">
+                            <label for="public">public</label>
+                            {{ duplicateForm.public|add_class:"form-check-input" }}
+                            <small class="d-flex align-items-center text-gray-500">Submit watchlist to the public gallery</small>
+                        </div>
+
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" name="action" value="copy" class="btn btn-dark"><span class="align-middle ms-2 icon-xs">Duplicate</span></button>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+

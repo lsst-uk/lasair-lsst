@@ -1,0 +1,92 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+{% block title %}
+    Watchlists
+{% endblock title %}
+
+{% block content %}
+
+
+
+    <div class="container">
+
+        <div class="row mt-4">
+            <div class="col-12  mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <div class="row d-flex">
+
+                            <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                                <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                                    {% include "includes/icons/icon_watchlist.html" %}
+                                </div>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Watchlists</h2>
+                            </div>
+
+                            <div class="col-1 float-end d-none d-sm-inline">
+                                <span class="float-end">
+                                    <nobr>
+                                        {% if user.is_authenticated %}
+                                            <a class="btn btn-sm btn-tertiary me-1 ms-auto"  data-bs-toggle="modal" data-bs-target="#createWatchlistForm">
+                                        {% else %}
+                                            <a class="btn btn-sm btn-tertiary me-1 ms-auto"  href="{% url 'login' %}?next={{request.path}}">
+                                        {% endif %}
+
+                                        <svg class="w-1 h-1 pe-1" style="height: 1.1rem;" fill="currentColor" stroke="currentColor" stroke-width="1"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                                            <g>
+                                                <path d="m69.699 43h-12.699v-12.699c0-3.8008-3.1016-7-7-7-3.8008 0-7 3.1016-7 7v12.699h-12.699c-3.8008 0-7 3.1016-7 7 0 1.8984 0.80078 3.6992 2 4.8984 1.3008 1.3008 3 2 4.8984 2h12.801v12.699c0 1.8984 0.80078 3.6992 2 4.8984 1.3008 1.3008 3 2 4.8984 2 3.8008 0 7-3.1016 7-7v-12.496h12.699c3.8008 0 7-3.1016 7-7 0.003906-3.8008-3.0977-7-6.8984-7z"/>
+                                                <path d="m50 2.5c-26.199 0-47.5 21.301-47.5 47.5s21.301 47.5 47.5 47.5 47.5-21.301 47.5-47.5-21.301-47.5-47.5-47.5zm0 88c-22.398 0-40.5-18.102-40.5-40.5s18.102-40.5 40.5-40.5 40.5 18.102 40.5 40.5-18.102 40.5-40.5 40.5z"/>
+                                            </g>
+                                        </svg>
+                                        <span class="align-middle">Create New</span></a></nobr>
+                                {% include "includes/widgets/widget_watchlist_create_form.html" %}
+                            </span>
+                        </div>
+
+                        <div class="col-12 px-4">
+                            <small class="text-gray-500">
+                                A watchlist is generated from a set of points in the sky, together with an association radius. Each transient falling within an association radius of a watchlist source is flagged as <em>matched</em> against that watchlist.
+                            </small>
+                        </div>
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+    </div>
+
+    {% if user.is_authenticated %}
+        <div class="col-12 mb-4">
+            {% include "includes/widgets/widget_watchlist_table.html" with type="my" position="auto" %}
+        </div>
+    {% endif %}
+
+    <div class="col-12 mb-4">
+        {% include "includes/widgets/widget_watchlist_table.html" with type="public" position="auto" %}
+    </div>
+
+
+
+    </div>
+
+    </div>
+
+
+{% endblock %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script>
+        {% if form.errors %}
+            $(document).ready(function(){
+                $("#createWatchlistForm").modal('show');
+            });
+        {% endif %}
+    </script>
+{% endblock javascripts %}
+

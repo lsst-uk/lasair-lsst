@@ -1,0 +1,168 @@
+{% load static %}
+
+
+
+
+<div class="card border-0 shadow h-100">
+
+
+    <div class="card-body">
+
+        {%if count %}
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="number of objects detected in filter">
+                {% if count >= 10000 %}
+                    {{ count }}+
+                {% else %}
+                    {{ count }}
+                {% endif %}</span>
+        {% endif %}
+
+        <div class="row d-flex">
+
+
+            <div class="col-12 mb-3 d-flex align-items-center">
+                <div class="icon-shape icon-shape-tertiary rounded me-2">
+                    {% include "includes/icons/icon_filter_query.html" %}
+                </div>
+
+
+                <div class="h2 fw-extrabold  mb-0 ms-2 d-none d-sm-inline">'{{ filterQ.name }}' filter {% if "/filter/log/" not in request.path %}results{% else %}history{% endif %} {% if filterQ.public %}
+                    <span class="icon icon-md text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+
+                <div class="h5 fw-extrabold mb-0 ms-2 d-sm-none">'{{ filterQ.name }}' filter {% if "/filter/log/" not in request.path %}results{% else %}history{% endif %}{% if filterQ.public %}
+                    <span class="icon icon-md text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+
+
+
+
+
+            </div>
+
+
+
+
+
+
+            <div class="col-12 px-4">
+                <small class="text-gray-500">
+                    {{filterQ.description}}
+                </small>
+                <small class="text-gray-500">
+                    The filter is <b>{% if not filterQ.active %}not active{% elif filterQ.active == 1%} streamed via email{% elif filterQ.active == 2%} streamed via kafka</b> with the topic name <code>{{filterQ.topic_name}}</code><b>{% endif %}.</b> {% include "includes/info_tooltip.html" with info="when active, a filter will be dynamically matched against new transient alerts and the results streamed via email or kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
+                </small>
+            </div>
+
+
+
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+
+            <nobr>
+
+
+                <div class="btn-group" >
+                    <a class="btn btn-sm btn-tertiary border-white" href='{% url "filter_query_detail_run" filterQ.mq_id "run" %}' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="run the filter to give live results">
+                        {% include "includes/icons/icon_run.html" %}<span class="align-middle d-none d-md-inline">Run Filter</span></a>
+
+                    {% if user.is_authenticated and user.id == filterQ.user.id %}
+                        <a class="btn btn-sm btn-tertiary border-white" href='{% url "filter_query_update" filterQ.mq_id %}' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="edit this filter">
+                            {% include "includes/icons/icon_edit2.html" %}<span class="align-middle d-none d-md-inline">Edit Filter</span></a>
+                    {% endif %}
+
+                    {% if user.is_authenticated %}
+
+                        <a class="btn btn-sm btn-tertiary border-white" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="copy this filter into My Filters list">
+                            <span class="align-middle"  data-bs-toggle="modal" data-bs-target="#duplicateFilterForm">
+                    {% else %}
+                        <a class="btn btn-sm btn-tertiary border-white"  href="{% url 'login' %}?next={{request.path}}" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="copy this filter into My Filters list">
+
+                    {% endif %}
+
+                    {% include "includes/icons/icon_copy.html" %}
+                    <span class="align-middle  d-none d-md-inline"  >Duplicate</span></a>
+
+
+                {% if "filter/log/" not in request.path %}
+                    <a class="btn btn-sm btn-gray-600 border-white align-middle" href='{% url "filter_query_log" filterQ.topic_name %}' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="listing all transients passing filter since its creation">
+
+                        {% include "includes/icons/icon_history.html" %}
+                        <span class="align-middle  d-none d-md-inline"  >History</span></a>
+
+                    {% if user.is_authenticated and user.id == filterQ.user.id %}
+
+                        <a class="btn btn-sm btn-gray-600 border-white align-middle" href='#' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="edit the filter settings">
+                            <span class="align-middle" data-bs-toggle="modal" data-bs-target="#editFilterForm" >
+                                {% include "includes/icons/icon_edit.html" %}
+                                <span class="align-middle  d-none d-md-inline" >Settings</span></span></a>
+
+                        {% include "includes/widgets/widget_filter_update_form.html" %}
+                    {% endif %}
+                {% else %}
+
+
+                {% endif %}
+
+                <a class="btn btn-sm btn-gray-600 border-white align-middle" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="show the SQL query used to generate this filter"><?xml version="1.0" encoding="UTF-8"?>
+                    <span class="align-middle" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
+                        {% include "includes/icons/icon_sql.html" %}
+                        <span class="align-middle  d-none d-md-inline" >Show Query</span></span></a>
+
+
+                {# </div> #}
+
+
+            </div>
+        </nobr>
+
+
+
+    </div>
+
+
+    <div class="row d-block d-xl-flex">
+        {% if real_sql %}
+            <div class="accordion accordion-flush" id="accordionExample">
+                <div class="accordion-item">
+
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headinOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body p-0 ">
+                            <p><pre><code class="language-sql">{{real_sql}}</code></pre></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        {% endif %}
+    </div>
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+{% include "includes/widgets/widget_filter_duplicate_form.html" %}

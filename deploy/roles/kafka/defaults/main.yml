@@ -1,0 +1,10 @@
+---
+# defaults file for roles/kafka
+#
+dns_lookup: true
+internal_only: true
+data_fs:
+  dev: "/dev/sdb"
+  path: "/kafka"
+  type: "ext4"
+

@@ -1,0 +1,70 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100">
+
+
+
+    <div class="card-body">
+
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in search">{{count}}</span>
+
+        <div class="row d-block d-xl-flex">
+
+            <div class="col-1 text-xl-center mb-3 mb-xl-0 d-flex justify-content-xl-start">
+                <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_search.html" %}
+                </div>
+            </div>
+
+            <div class="col-7  px-xl-1">
+
+                <div class="d-flex ms-2">
+                    <div class="flex-grow-1">
+
+
+
+                        <div class="d-flex align-items-start">
+
+                            <div class="h3 fw-extrabold mb-0 ms-2"><em>"{{ query }}"</em> Search Results</div>
+                        </div>
+                        <small class="text-gray-500">
+                            Your search returned <b>{{results|length}} {% if results|length == 1 %}match{% else %}matches{% endif %}</b>
+                        </small>
+
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4  px-xl-1">
+
+                <div class="d-flex ms-2">
+
+                    <div class=" ms-auto ps-1">
+
+                    </div>
+
+                    {%if results|length > 0%}
+                        <div class="dropdown ps-1">
+                            <button class="btn btn-sm btn-dark dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% include "includes/icons/icon_export.html" %}
+                                <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                <li><a class="dropdown-item export" data-table="filter-results" href="#" data-type="csv" data-filename="lasair_search_results">CSV</a></li>
+                                <li><a class="dropdown-item export" data-table="filter-results" href="#" data-type="json" data-filename="lasair_search_results">JSON</a></li>
+                            </ul>
+                        </div>
+                    {%endif%}
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>
+</div>
+
+

@@ -1,0 +1,152 @@
+{% extends "layouts/base-fullscreen.html" %}
+{% load widget_tweaks %}
+{% block title %} Sign UP {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-12 d-flex align-items-center justify-content-center">
+
+                <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500 mt-9">
+                    {% include "includes/icons/icon.html" %}
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h3">
+                            Lasair Sign Up
+                        </h1>
+                        <br />
+                        <p>
+                            {% if msg %}
+                                {% if success %}
+                                    <span class="text-success">{{ msg | safe }}</span>
+                                {% else %}
+                                    <span class="text-danger">{{ msg | safe }}</span>
+                                {% endif %}
+                            {% else %}
+                                Add your credentials
+                            {% endif %}
+                        </p>
+                    </div>
+
+                    {% if success %}
+
+                        <div class="d-flex justify-content-center align-items-center mt-4">
+                            <a type="button" href="{% url 'login' %}" class="btn btn-gray-800">Sign UP</a>
+                        </div>
+
+                    {% else %}
+
+                        <form method="post" action="" class="mt-4">
+
+                            {% csrf_token %}
+
+
+                            <div class="form-group mb-4">
+                                <label for="first_name">First Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <span class="fas fa-user-circle"></span>
+                                    </span>
+                                    {{ form.first_name|add_class:"form-control" }}
+                                </div>
+                                <span class="text-error">{{ form.first_name.errors }}</span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label for="last_name">Last Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <span class="fas fa-user-circle"></span>
+                                    </span>
+                                    {{ form.last_name|add_class:"form-control" }}
+                                </div>
+                                <span class="text-error">{{ form.last_name.errors }}</span>
+                            </div>
+
+                            <div class="form-group mb-4">
+                                <label for="username">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <span class="fas fa-user-circle"></span>
+                                    </span>
+                                    {{ form.username|add_class:"form-control" }}
+                                </div>
+                                <span class="text-error">{{ form.username.errors }}</span>
+                            </div>
+
+                            <!-- Form -->
+                            <div class="form-group mb-4">
+                                <label for="email">Your Email</label>
+                                <div class="input-group">
+                                    <span class="input-group-text" id="basic-addon1">
+                                        <span class="fas fa-envelope"></span>
+                                    </span>
+                                    {{ form.email|add_class:"form-control" }}
+                                </div>
+                                <span class="text-error">{{ form.email.errors }}</span>
+                            </div>
+                            <!-- End of Form -->
+                            <div class="form-group">
+
+                                <!-- Form -->
+                                <div class="form-group mb-4">
+                                    <label for="password1">Your Password</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <span class="fas fa-unlock-alt"></span>
+                                        </span>
+                                        {{ form.password1|add_class:"form-control" }}
+                                    </div>
+                                    <span class="text-error">{{ form.password1.errors }}</span>
+                                </div>
+                                <div class="form-group mb-4">
+                                    <label for="password2">Password Confirmation</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text" id="basic-addon2">
+                                            <span class="fas fa-unlock-alt"></span>
+                                        </span>
+                                        {{ form.password2|add_class:"form-control" }}
+                                    </div>
+                                    <span class="text-error">{{ form.password2.errors }}</span>
+                                </div>
+
+                                <div class="form-group">
+                                    {{ form.captcha }}
+                                    <span class="text-error">{{ form.captcha.errors }}</span>
+                                </div>
+
+                                <div class="text-center mt-3 form-group">
+                                    {{ form.privacy }}
+                                    I have read and agree with <a target="_blank" href="{% url 'privacy' %}">Lasair's Privacy Statement</a>
+                                    <span class="text-error">{{ form.privacy.errors }}</span>
+                                </div>
+
+                            </div>
+                            <div class="d-grid mt-3">
+                                <button type="submit" name="register" class="btn btn-gray-800">Sign Up</button>
+                            </div>
+                        </form>
+                        <br />
+                        <div class="d-flex justify-content-center align-items-center mt-4">
+                            <span class="fw-normal">
+                                Already have an account?
+                                <a href="{% url 'login' %}" class="fw-bold">Sign In</a>
+                            </span>
+                        </div>
+
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}

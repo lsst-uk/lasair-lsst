@@ -1,0 +1,70 @@
+{% extends "layouts/base.html" %}
+{% block title %} Lasair's Privacy Statement {% endblock %}
+{% load static %}
+{% block content %}
+
+    <div class="container">
+
+        <div class="row mt-4">
+
+            <div class="col-12  mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <div class="row d-block d-xl-flex">
+
+                            <div class="col-1 text-xl-center mb-3 mb-xl-0 d-flex justify-content-xl-start">
+                                <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+
+                                    {% include "includes/icons/icon_privacy.html" %}
+                                </div>
+                            </div>
+                            <div class="col-11  px-xl-1">
+
+                                <div class="d-flex flex-row ms-2">
+                                    <div class="flex-shrink-1">
+
+                                        <h2 class="fw-extrabold mb-2">Lasair's Privacy Statement</h3>
+
+                                        <p>
+                                            The Lasair project may record and process your personal details if you supply them.
+                                            We will only record your personal details in the manner and for the purposes set out in this
+                                            privacy statement. Data will be kept secure from unauthorised access, use or disclosure.
+                                            We will not sell, rent, trade or otherwise knowingly share or provide your personal
+                                            information to any third party, except insofar as legally obliged to do so or as specified below.
+                                            Information we collect may include:
+                                            <ul>
+                                                <li>Your contact information, such as your name and email address</li>
+                                                <li>Any other information you post, email or otherwise send to us.</li>
+                                            </ul>
+                                            We are using information about you because it is needed for the scientific activities
+                                            of the Lasair project.
+                                            We do not use profiling or automated decision-making processes.
+                                            We use Google Analytics to measure the usage of the website, but individual information is not seen by Google.
+                                            A human decision maker will always be involved before any decision is reached in relation to you.
+                                            We may retain your personal data for the lifetime of the Lasair project.
+
+                                            If you have any questions about this privacy statement or the information about you held by Lasair, please contact:<br/>
+
+                                            <div class="ms-3" style="white-space: pre-line">
+                                                Dr George Beckett (LSST:UK Project Manager)
+                                                Institute for Astronomy, University of Edinburgh
+                                                Royal Observatory,
+                                                Blackford Hill,
+                                                Edinburgh
+                                                EH9 3HJ
+                                                <a href="mailto:george.beckett@ed.ac.uk?subject=Lasair Privacy Statetment Query">george.beckett@ed.ac.uk</a>
+                                            </div>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+{% endblock %}

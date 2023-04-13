@@ -1,0 +1,69 @@
+
+{% load humanize %}
+
+
+<div class="card border-0 shadow h-100">
+
+
+
+    <div class="card-header d-sm-flex flex-row align-items-start flex-0 mb-0 pb-0 border-0">
+        <div class="d-block mb-sm-0">
+            {% if type == "my" and user.is_authenticated %}
+                <img class="avatar rounded" style="width:3.8rem;height:3.8rem; "  alt="Image placeholder" src="data:image/png;base64,{{ request.user.profile.image_b64 }}">
+
+            {% else %}
+
+                <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_schema.html" %}
+
+                </div>
+            {% endif %}
+
+        </div>
+        <div class="d-flex ms-4">
+            <div class="row d-block d-xl-flex align-items-start">
+                {% if tablename %}
+                    <h3 class="fw-extrabold mb-2"><a id="{{tablename}}-schema"><code>{{tablename}}</code></a> Table Browser</h3>
+                {% else %}
+                    <h3 class="fw-extrabold mb-2">Lasair Schema</h3>
+                {% endif %}
+
+                <small class="text-gray-500">
+                    Use the search bar below to find the columns required. Click on  {% include "includes/icons/icon_copy.html" %} to copy the <code>table.column</code> name to your clipboard.
+                </small>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="card-body p-2 pt-4">
+        <div class="table-responsive p-4 pt-0">
+            <table  class="table table-flush datatable" id="{{type}}_datatable">
+                <thead class="thead-light">
+                    <tr>
+                        <th><code class="fw-extrabold text-gray-700">table.column</code></th>
+                        <th>Description</th>
+                    </tr></thead>
+                <tbody>
+
+                    {% for schema_name, schema_content in schemas.items %}
+
+                        {% if tablename is None or schema_name == tablename %}
+                            {% for row in schema_content %}
+                                <tr>
+                                    <td ><button data-bs-toggle="tooltip" data-bs-trigger="click" data-bs-animation="true" data-bs-placement="top" data-bs-title="copied" onclick="copy('{{schema_name}}.{{row.name}}','#copy_button_{{schema_name}}_{{row.name}}')" id="copy_button_{{schema_name}}_{{row.name}}" class="btn btn-xs copy-button me-1">  {% include "includes/icons/icon_copy.html" %} </button> <code class="fw-extrabold text-gray-400">{{schema_name}}.</code><code class="fw-extrabold text-gray-700">{{row.name}}</code></td>
+                                    <td> {{row.doc}}</td>
+
+                                </tr>
+                            {% endfor %}
+                        {% endif %}
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

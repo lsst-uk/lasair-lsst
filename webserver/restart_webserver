@@ -1,0 +1,23 @@
+export APACHEPATH=/home/ubuntu/mod_wsgi
+export PORT=8080
+export PYTHONPATH="$PYTHONPATH:/home/ubuntu/lasair4/common/"
+
+$APACHEPATH/apachectl stop
+sleep 5
+
+python3 manage.py collectstatic --settings lasair.settings
+
+mod_wsgi-express setup-server \
+--user ubuntu \
+--group ubuntu \
+--working-directory /home/ubuntu/lasair4/webserver/ \
+--python-path       /home/ubuntu/lasair4/webserver/ \
+--limit-request-body 70000000 \
+--url-alias /lasair/static static \
+--url-alias /media /home/ubuntu/media/ \
+--application-type module lasair.wsgi \
+--server-root $APACHEPATH \
+--port $PORT \
+--mount-point /
+
+$APACHEPATH/apachectl start

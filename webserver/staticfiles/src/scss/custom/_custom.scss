@@ -1,0 +1,294 @@
+@import "_variables";
+
+div.JS9Magnifier, div.ImExamPlugin {
+    width: 100% !important;
+    padding-bottom: 100%;
+    height: 0px;
+}
+
+div.ImExamRadialProj {
+    width: 100% !important;
+
+    table {
+        margin-right:20px;
+    }
+}
+
+div.JS9PluginContainer > .drag-handle {
+    display: none;
+}
+
+.drag-handle {
+   height:35px;
+}
+
+div.JS9Plugin {
+    background: #E9E9E9;
+    color: #657b83;
+}
+
+div.dhtmlwindow {
+    width: 530px !important;
+}
+
+div.JS9,
+div.JS9 *,
+div.JS9 *:before,
+div.JS9 *:after,
+div.dhtmlwindow,
+div.dhtmlwindow *,
+div.dhtmlwindow *:before, 
+div.dhtmlwindow *:after   {
+    -webkit-box-sizing: content-box !important;
+    -moz-box-sizing: content-box !important;
+    box-sizing: content-box !important;
+}
+
+div.JS9,  {
+    resize: none !important;
+}
+
+div.drag-resizearea{
+    visibility: hidden;
+}
+
+// YELLOW SUB- GO DEEPER
+btn:not(.collapsed), a.btn:not(.collapsed) {  
+    .godeeper {
+        transform: rotate(180deg);
+    }
+}
+
+
+.icon-shape svg {
+    height: 2.7rem !important;
+}
+
+
+
+.icon-shape  {
+    .image-xs {
+        height: 2.0rem;
+    }
+}
+
+
+td .icon-shape  {
+    height: 1.3rem !important;
+    width: 1.3rem !important;
+
+    svg {
+        height: 1.3rem !important;
+        width: 1.3rem !important;
+    }
+}
+
+a > svg {
+    height: 1.1rem;
+}
+
+.icon, .icon > svg {
+    height: $icon-size !important;
+
+    &.icon-xxs, &.icon-xxs > svg {
+        height: $icon-size-xxs  !important;
+    }
+
+    &.icon-xs,&.icon-xs > svg {
+        height: $icon-size-xs  !important;
+    }
+    &.icon-sm,&.icon-sm > svg {
+        height: $icon-size-sm  !important;
+    }
+    &.icon-lg,&.icon-lg > svg {
+        height: $icon-size-lg  !important;
+    }
+    &.icon-xl,&.icon-xl > svg {
+        height: $icon-size-xl  !important;
+    }
+    &.icon-xxl,&.icon-xxl > svg {
+        height: $icon-size-xxl  !important;
+    }
+
+    &.active-dot {
+        svg {
+            height: 0.7rem;
+        }
+    }
+}
+
+
+@media (min-width: 1600px) {
+    .container, .container-lg, .container-md, .container-sm, .container-xl {
+        max-width: 1400px !important;
+    }
+}
+
+
+
+.datatable thead th {
+    text-transform: none !important;
+}
+
+
+ul.errorlist li {
+    font-size: inherit;
+}
+
+
+div.prism-live {
+    position: relative;
+    box-sizing: border-box;
+    display: flex;
+    flex-flow: column;
+    width: 100%;
+}
+
+textarea.prism-live,
+pre.prism-live {
+    padding: 1rem 1rem;
+    box-sizing: border-box;
+    margin: 0;
+}
+
+textarea.prism-live {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    color: transparent;
+    // color: hsla(0,0%,50%,.4);
+    cursor: text;
+    // white-space: pre;
+    border: 0;
+    outline: none;
+    background: transparent;
+    resize: none;
+    --selection-background: hsl(320, 80%, 25%);
+    --selection-color: hsla(0, 0%, 100%, .8);
+}
+
+code[class*=language-], pre[class*=language-] {
+    white-space: pre-wrap !important;
+}
+
+@supports (not (caret-color: black)) and (-webkit-text-fill-color: black) {
+    textarea.prism-live {
+        color: inherit;
+        -webkit-text-fill-color: transparent;
+    }
+}
+
+    /* Setting specific colors is needed
+     * because otherwise Firefox shows blank text */
+    textarea.prism-live::-moz-selection {
+        background: var(--selection-background);
+        color: var(--selection-color);
+    }
+
+    textarea.prism-live::selection {
+        background: var(--selection-background);
+        color: var(--selection-color);
+    }
+
+pre.prism-live {
+    flex: 1;
+    position: relative;
+    pointer-events: none;
+    overflow: hidden;
+    min-height: 200px;
+    max-height: 100%;   
+    --scrollbar-width: 17px;
+    padding-bottom: var(--scrollbar-width);
+    padding-right: var(--scrollbar-width);
+}
+
+    pre.prism-live > code:empty::before {
+        content: " "
+    }
+
+.tooltip-inner {
+    a {
+        color: $secondary;
+        &:hover {
+            color: $secondary;
+            text-decoration: underline;
+        }
+    }
+}
+
+
+$border-radius     : .5rem !default;
+div.search-bar input {
+    border-top-right-radius: $border-radius !important;
+    border-bottom-right-radius: $border-radius !important;
+}
+
+.sidebar .nav-link {
+        font-size: $font-size-base*1.2 !important;
+}
+
+.popover {
+    border-width: $popover-border-width !important;
+    border-style: solid  !important;
+    border-color: $popover-border-color !important;
+}
+
+.popover-header {
+    border-width: $popover-border-width !important;
+    border-color: $popover-border-color !important;
+}
+
+.multiselect-container {
+  width: 100%;
+    &.dropdown-menu span {
+    width: 100%;
+}
+}
+
+.multiselect-container svg {
+  display: none;
+}
+
+
+.multiselect-container .multiselect-filter > input.multiselect-search {
+
+  margin-left: 0 !important;
+
+
+
+}
+
+.sidebar .nav {
+    white-space: normal !important;
+}
+
+.form-control {
+    padding: .5rem 1rem !important;
+}
+
+.text-error {
+    color: $lasair-red;
+}
+
+
+.dataTable-top {
+    justify-content: flex-end !important;
+}
+
+select, input[type=number], input[type=text] {
+    padding: .5rem 1rem !important;
+}
+
+.icon-shape {
+    min-width: 4rem;
+}
+
+
+.popover-body {
+    max-height: 500px;
+    overflow-y: auto;
+    white-space:pre-wrap;
+}

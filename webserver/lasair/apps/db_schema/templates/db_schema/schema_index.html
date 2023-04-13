@@ -1,0 +1,34 @@
+{% extends "layouts/base.html" %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+
+
+{% block title %}
+    Schema Browser
+{% endblock title %}
+
+
+{% block content %}
+
+    <div class="container">
+
+        <div class="row mt-4">
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_schema_browser_header.html" %}
+            </div>
+
+            {% for schema_name, schema_content in schemas.items %}
+
+                <div class="col-12 mb-4">
+                    {% include "includes/widgets/widget_schema_table.html" with tablename=schema_name  %}
+                </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+
+{% endblock %}

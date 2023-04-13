@@ -1,0 +1,135 @@
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+<div class="modal fade" id="createWatchlistForm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-md-5">
+                <h2 class="h4 text-center">Create New Watchlist</h2>
+                <p class="text-center"><small class="text-gray-500">
+                    A Watchlist is composed of a set of locations in the sky, together with an association radius in arcseconds. These locations are presumably coordinates of sources of specific interest to you. Use a Watchlist to be alerted of transient events found in association with any of these sources. Your Watchlists will appear in the </em>My Watchlists</em> of the Watchlists index.
+            </small>
+        </p>
+
+        <div class="d-flex justify-content-center">
+            <a href="{{docroot}}/core_functions/watchlists.html" target="_blank" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2">
+                <img src="{{ ASSETS_ROOT }}/img/icons/Read-the-docs.png" class="image-fluid image-xs me-1">
+                Watchlist Docs
+            </a>
+        </div>
+
+
+
+        <form enctype="multipart/form-data" method="post" class="mt-0 mb-3">
+
+            {% csrf_token %}
+
+            <div class="form-group mb-4">
+                <label for="name">Watchlist Name</label>
+                <div class="input-group">
+                    {{ form.name|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.name.errors }}</span>
+
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="description">Description</label>
+                <div class="input-group">
+                    {{ form.description|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.description.errors }}</span>
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="radius">Association radius (arcsec){% include "includes/info_tooltip.html" with info="The is the default search radius for your catalogue. If individual sources in your catalogue include their own association radii these will be used instead" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}</label>
+                <div class="input-group">
+                    {{ form.radius|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.usernradiusame.errors }}</span>
+            </div>
+
+            <label for="cones">Paste or Upload Catalogue List</label>
+            <span class="text-error">{{ form.cones_textarea.errors }}</span>
+            <span class="text-error">{{ form.cones_file.errors }}</span>
+            <div class="accordion  mb-4" id="cones">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingOne">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">Paste
+                        </button>
+                    </h2>
+                    <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headingOne" data-bs-parent="#cones">
+
+                        <div class="form-group">
+
+                            <div class="input-group  accordion-body">
+                                {{ form.cones_textarea|add_class:"form-control" }}
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingTwo">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                            Upload
+                        </button>
+                    </h2>
+                    <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo" data-bs-parent="#cones">
+                        <div class="accordion-body">
+                            <div class="form-group">
+                                <small class="text-gray-500">Each row in the file should include RA and Dec in decimal degrees, a unique source ID and an optional source-specific association radius in arcsec.</small>
+                                <small ><pre class="mt-3"><code class="language-text">RA, Dec, ID &lt;,radius&gt;
+RA, Dec, ID &lt;,radius&gt;
+...</code></pre></small>
+                                <div class="input-group mt-3">
+                                    {{ form.cones_file|add_class:"form-control" }}
+                                </div>
+
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group mb-4">
+                <div class="form-check form-switch">
+                    <label for="active">active</label>
+                    {{ form.active|add_class:"form-check-input" }}
+                    <small class="d-flex align-items-center text-gray-500">Dynamically match incoming alerts against watchlist</small>
+                </div>
+                <span class="text-error">{{ form.active.errors }}</span>
+            </div>
+
+            <div class="form-group mb-4">
+                <div class="form-check form-switch">
+                    <label for="public">public</label>
+                    {{ form.public|add_class:"form-check-input" }}
+                    <small class="d-flex align-items-center text-gray-500">Submit watchlist to the public gallery</small>
+                </div>
+
+                <span class="text-error">{{ form.public.errors }}</span>
+            </div>
+
+            <small class="text-danger">{{ form.non_field_errors }}</small>
+            <div class="d-grid">
+
+                <button type="submit" class="btn btn-gray-800" name="action" value="save">Create</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+</div>
+</div>
+
+
+
+
+

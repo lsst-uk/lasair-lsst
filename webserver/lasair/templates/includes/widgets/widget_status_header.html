@@ -1,0 +1,76 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100 mt-3">
+
+
+
+    <div class="card-body">
+
+        <div class="row d-block d-xl-flex">
+
+            <div class="col-1 text-xl-center mb-3 mb-xl-0 d-flex justify-content-xl-start">
+                <div class="icon-shape icon-shape-secondary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_status.html" %}
+                </div>
+            </div>
+
+            <div class="col-7  px-xl-1">
+
+                <div class="d-flex ms-2">
+                    <div class="flex-grow-1">
+
+
+
+                        <div class="d-flex align-items-start">
+                            <div class="h4 fw-extrabold mb-0 ms-2">Lasair Processing Status for {{prettyDate}} (MJD {{mjd}})</div>
+                        </div>
+                        <div>
+                            <small class="text-gray-500">
+                                {{watchmap.description}}
+                            </small>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-4  px-xl-1">
+
+                <div class="d-flex ms-2">
+
+                    <div class=" ms-auto ps-1">
+                        <span data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="view Lasair processing plots for this day">
+                            {% if daysAgo > 0%}
+                                <a class="btn btn-sm btn-secondary me-1 align-middle " href='{{ lasair_grafana_url }}?orgId=1&refresh=5m&from=now-{{daysAgo}}d%2Fd&to=now-{{daysAgo}}d%2Fd'>
+
+                            {% else %}
+                                <a class="btn btn-sm btn-secondary me-1 align-middle " href='{{ lasair_grafana_url }}?orgId=1&refresh=5m&from=now-24h&to=now'>
+                            {%endif%}
+                            {% include "includes/icons/icon_status.html" %}
+                            <span class="align-middle">Graph</span></a>
+
+                    </span>
+
+                    <span>
+                        <a class="btn btn-sm btn-secondary me-1 align-middle " href='/lasair/static/services_log/{{ date }}.log'>
+                            <span class="align-middle">Service Log</span></a>
+
+                    </span>
+                </div>
+
+
+            </div>
+
+
+        </div>
+    </div>
+
+</div>
+
+
+
+</div>
+
+
+

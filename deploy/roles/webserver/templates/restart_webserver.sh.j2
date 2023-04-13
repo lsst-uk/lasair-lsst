@@ -1,0 +1,23 @@
+#!/bin/bash
+export APACHEPATH={{ ansible_env.HOME }}/mod_wsgi
+export PORT=8080
+
+export PATH="$PATH:$HOME/.local/bin"
+
+#$APACHEPATH/apachectl stop
+sleep 1
+
+cd {{ ansible_env.HOME }}/lasair4/webserver
+
+mod_wsgi-express setup-server \
+--user {{ ansible_user_id }} \
+--group {{ lookup('pipe', 'id -gn') }} \
+--working-directory {{ ansible_env.HOME }}/lasair4/webserver \
+--python-path       {{ ansible_env.HOME }}/lasair4/webserver \
+--url-alias /lasair/static static \
+--application-type module lasair.wsgi \
+--server-root $APACHEPATH \
+--port $PORT \
+--mount-point /
+
+$APACHEPATH/apachectl start

@@ -1,0 +1,274 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block content %}
+
+
+    <div class="container container-lg">
+
+        <h2>Simple Search</h2>
+
+        <h5>Select object characteristics</h5>
+        <table border=1>
+            <thead> <tr>
+                <th>Show</th>
+                <th>Column</th>
+                <th>Constraint</th>
+                <th>Description</th>
+            </tr> </thead>
+
+            <tbody>
+                <tr> <td><input type="checkbox" id="show_ramean"></td> <td align=right>RA</td>
+                    <td><input type="text" id="ramean"></td>
+                    <td>Right Ascension (decimal degrees)</td></tr>
+                <tr> <td><input type="checkbox" id="show_decmean"></td> <td align=right>Dec</td>
+                    <td><input type="text" id="decmean"></td>
+                    <td>Declination (decimal degrees)</td></tr>
+
+                <tr> <td><input type="checkbox" id="show_gmag"></td> <td align=right>g mag</td>
+                    <td><input type="text" id="gmag"></td>
+                    <td>Latest g magnitude
+                    </td></tr>
+                <tr> <td><input type="checkbox" id="show_rmag"></td> <td align=right>r mag</td>
+                    <td><input type="text" id="rmag"></td>
+                    <td>Latest r magnitude
+                    </td></tr>
+                <tr> <td><input type="checkbox" id="show_ncand"></td> <td align=right>number</td>
+                    <td><input type="text" id="ncand"></td>
+                    <td>Number of points in the light curve
+                    </td></tr>
+
+                <tr> <td><input type="checkbox" id="show_jdnow-jdmax"></td> <td align=right>since</a></td>
+                <td><input type="text" id="jdnow-jdmax"></td>
+                <td>Days since most recent observation
+                </td></tr>
+
+            <tr> <td><input type="checkbox" id="dmdt_g"></td> <td align=right>dmdt_g</td>
+                <td><input type="text" id="dmdt_g"></td>
+                <td> Rate of increase of brightness (dm/dt in g)</td>
+            </td></tr>
+        <tr> <td><input type="checkbox" id="dmdt_r"></td> <td align=right>dmdt_r</td>
+            <td><input type="text" id="dmdt_r"></td>
+            <td> Rate of increase of brightness (dm/dt in r)</td>
+        </td></tr>
+    </td></tr>
+
+    </tbody>
+    </table>
+
+    <h5>Select sky context (optional)</h5>
+    <input type="radio" name="cat" value="AGN"> and in AGN catalogue<br/>
+    <input type="radio" name="cat" value="CV">  and in CV catalogue<br/>
+    <input type="radio" name="cat" value="SN">  and has host galaxy<br/>
+    <input type="radio" name="cat" value="VS">  and in variable star catalog<br/>
+
+    <h5>Select known transients from IAU naming service (TNS) (optional)</h5>
+    <input type="radio" name="cat" value="SN Ia"> and supernova type Ia<br/>
+    <input type="radio" name="cat" value="SN II"> and supernova type II<br/>
+    <input type="radio" name="cat" value="SLSN"> and superluminous supernova<br/>
+    <input type="radio" name="cat" value="CV burst"> and CV burst<br/>
+
+    <h5>Use my watchlist of sources (<a href="#">... more info</a>)</h5>
+    <input type="radio" name="cat" value="watchlist:35"> BL Lac for TeV<br/>
+    <input type="radio" name="cat" value="watchlist:58"> AM CVn<br/>
+    <input type="radio" name="cat" value="watchlist:147"> Gaia DR2 white dwarfs<br/>
+    <input type="radio" name="cat" value="watchlist:565"> Strong Lensing<br/>
+    <p>
+
+        <script>
+            function showdiv(divid){
+                if(document.getElementById(divid).style.display == 'block') {
+                    document.getElementById(divid).style.display = 'none'
+                } else {
+                    document.getElementById(divid).style.display = 'block'
+                }
+            }
+        </script>
+
+
+        <h2><a href="#" onclick="showdiv('syntax');">How to use this form</a></h2>
+        <div id="syntax" style="display:none">
+
+            The following details the syntax for <em>constraint</em> qualification,
+            already used by major astronomical querying engines, including
+            <a href=http://vizier.u-strasbg.fr/>Vizier</a>.
+
+
+        The qualification is made of
+        <em>comparison operators</em>, <em>logical operators</em>,
+        and <em>values</em>. The ways of specifying these different
+        components differ slightly for numeric, character, or other
+        types of data. Don'tforget that the special symbols have to be
+        converted when embedded in URL syntax (e.g. %25 for the <B>%</B> sign,
+        %3C for <B>&lt;</B>, etc.)
+
+        <H3> Numeric fields <EM>(INT, FLOAT, RA, Dec, DATE, TIME)</EM></H3>
+
+        <TABLE BORDER=1 WIDTH="50%">
+            <TR ALIGN=center>
+                <TH>Operator</TH><TH>Meaning</TH><TH>Example</TH>
+            </TR>
+            <TR ALIGN=center>
+                <TD>=</TD><TD>Strict equality <EM>(default)</em></TD><TD>=10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>!=</TD><TD>Inequality</TD><TD>!=10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>>=</TD><TD>Greater or equal</TD><TD>>=10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>></TD><TD>Strictly greater</TD><TD>>10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>&lt;=</TD><TD>Smaller or equal</TD><TD>&lt;=10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>&lt;</TD><TD>Strictly smaller</TD><TD>&lt;10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>..</TD><TD>Range of numbers</TD><TD>5..10</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>&</TD><TD>AND (logical operator)</TD><TD>1..5 & 7..9</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>|</TD><TD>OR (logical operator)</TD><TD>1..5 | 7..9</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>,</TD><TD>List of values</TD><TD>0,1,2</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>!</TD><TD>NOT (logical operator)</TD><TD>! 1..5</TD>
+            </TR>
+        </TABLE>
+
+        <H3>Writing Values <EM>(INT, FLOAT, RA, Dec, DATE, TIME)</EM></H3>
+
+        <TABLE BORDER=1 WIDTH="50%">
+            <TR ALIGN=center>
+                <TH>Type</TH><TH>Meaning</TH><TH>Example</TH>
+            </TR>
+            <TR ALIGN=center>
+                <TD>null</TD><TD>Unspecified <EM>(blank)</EM>value</TD>
+                <TD>(&lt;0)|null</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>now</TD>
+                <TD>Current date and time <B>(<EM>DATE</EM> only)</B></TD>
+                <TD>&lt; now</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TH ROWSPAN=2><EM>RA</EM></TH>
+                <TD>Sexagesimal hours, minutes, seconds of time</TD>
+                <TD>23 56 .. 00 04</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>Right ascension in decimal degrees</TD>
+                <TD>359 .. 001</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TH ROWSPAN=2><EM>Dec</EM></TH>
+                <TD>Sexagesimal degrees, minutes, seconds of arc</TD>
+                <TD>+41 45 .. +42 30</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>Declination in decimal degrees</TD>
+                <TD>+41.75 .. +42.50</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TH ROWSPAN=3><EM>DATE/TIME</EM></TH>
+                <TD>UT Date and time, alphabetic month </TD>
+                <TD>>= 1-Jan-1996</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>UT Date and Time, numeric month</TD>
+                <TD>>= 1996.01.01 00:00:00</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>Julian Date</TD>
+                <TD>>=JD2450083.5</TD>
+            </TR>
+        </TABLE>
+
+        <PRE>
+
+        </PRE>
+
+        <H3> Character fields <EM>(CHAR, TEXT)</EM></H3>
+        <TABLE BORDER=1 WIDTH="50%">
+            <TR ALIGN=center>
+                <TH>Operator</TH><TH>Meaning</TH><TH>Example</TH>
+            </TR>
+            <TR ALIGN=center>
+                <TD>~</TD><TD>Caseless pattern matching <EM>(default)</em></TD>
+                <TD>~ngc*3532*</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>=</TD><TD>Pattern matching</TD><TD>=NGC*3532*</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>=~</TD><TD>Caseless equality</TD><TD>=~eso</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>==</TD><TD>Strict equality</TD><TD>==ESO</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>!~</TD><TD>NOT caseless pattern matching</TD>
+                <TD>!~[obafgkm]*</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>!</TD><TD>NOT pattern matching</TD>
+                <TD>![OBAFGKM]*</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>!=</TD><TD>Strict inequality</TD><TD>!=ESO</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>>=</TD><TD>Alphabetically greater or equal</TD><TD>>=A</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD>></TD><TD>Alphabetically strictly greater</TD><TD>>M 51</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD><=</TD><TD>Alphabetically smaller or equal</TD><TD>&lt;=B*</TD>
+            </TR>
+            <TR ALIGN=center>
+                <TD><</TD><TD>Alphabetically strictly smaller</TD><TD>&lt; NGC</TD>
+            </TR>
+        </TABLE>
+
+        <H3>Pattern matching symbols</H3>
+
+        <TABLE BORDER=1 WIDTH="50%">
+            <TR ALIGN=center>
+                <TH>Symbol</TH><TH>Meaning</TH><TH>Example</TH>
+            </TR>
+            <TR ALIGN=center>
+                <TD ROWSPAN=2>[...]</EM></TD>
+            <TD>One of the characters defined within the brackets</TD>
+            <TD>=[OBA]*</TD>
+        </TR>
+        <TR ALIGN=center>
+            <TD>The - (<EM>dash</EM> or <EM>minus</EM>) indicates a range of
+                characters</TD>
+            <TD>=[A-Za-z]*</TD>
+        </TR>
+        <TR ALIGN=center>
+            <TD>[^...]</TD>
+            <TD>Any single character NOT contained within the brackets</TD>
+            <TD>=[^OBAFGMN]*</TD>
+        </TR>
+        <TR ALIGN=center>
+            <TD>*</TD><TD>Replaces 0 to n characters</TD><TD>[OB]*</TD>
+        </TR>
+        <TR ALIGN=center>
+            <TD>?</TD><TD>Replaces 1 character</TD><TD>A?C*</TD>
+        </TR>
+    </TABLE>
+    </div>
+
+
+    </div>
+
+
+{% endblock %}

@@ -1,0 +1,125 @@
+<div class="card border-0 shadow h-100">
+
+
+    <div class="card-body">
+        <div class="row d-flex">
+
+            <div class="col-2 col-md-1 text-xl-center mb-3 justify-content-xl-start">
+                <div class="icon-shape icon-shape-primary rounded me-sm-0">
+
+                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-width="4"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <path d="m61.434 50c0 6.3125-5.1211 11.434-11.434 11.434s-11.434-5.1211-11.434-11.434 5.1211-11.434 11.434-11.434 11.434 5.1211 11.434 11.434"/>
+                            <path d="m90.797 48.438h-5.5078c-0.80078-18.238-15.488-32.926-33.727-33.727v-5.5078c0-0.86328-0.69922-1.5625-1.5625-1.5625s-1.5625 0.69922-1.5625 1.5625v5.5078c-18.238 0.80078-32.926 15.488-33.727 33.727h-5.5078c-0.86328 0-1.5625 0.69922-1.5625 1.5625s0.69922 1.5625 1.5625 1.5625h5.5078c0.80078 18.238 15.488 32.926 33.727 33.727v5.5078c0 0.86328 0.69922 1.5625 1.5625 1.5625s1.5625-0.69922 1.5625-1.5625v-5.5078c18.238-0.80078 32.926-15.488 33.727-33.727h5.5078c0.86328 0 1.5625-0.69922 1.5625-1.5625s-0.69922-1.5625-1.5625-1.5625zm-39.234 33.688v-5.8281c0-0.86328-0.69922-1.5625-1.5625-1.5625s-1.5625 0.69922-1.5625 1.5625v5.8281c-16.508-0.80078-29.762-14.055-30.562-30.562h5.8281c0.86328 0 1.5625-0.69922 1.5625-1.5625s-0.69922-1.5625-1.5625-1.5625h-5.8281c0.80078-16.508 14.055-29.762 30.562-30.562v5.8281c0 0.86328 0.69922 1.5625 1.5625 1.5625s1.5625-0.69922 1.5625-1.5625v-5.8281c16.508 0.80078 29.762 14.055 30.562 30.562h-5.8281c-0.86328 0-1.5625 0.69922-1.5625 1.5625s0.69922 1.5625 1.5625 1.5625h5.8281c-0.80078 16.508-14.055 29.762-30.562 30.562z"/>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="col-7 col-md-8">
+                <div class="d-block ps-3 pe-lg-2 ps-lg-5">
+                    <h2 class="h4 fw-extrabold mb-0">{{data.objectId}}</h2>
+
+                    <h2 class="accordion-header " id="headinOne">
+                        <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ramean|floatformat:6 }}, {{ data.objectData.decmean|floatformat:6 }}</div>
+                    </h2>
+                </div>
+            </div>
+            <div class="col-3  px-xl-1 float-end">
+                <span class="float-end me-2">
+                    {% include "includes/go_deeper_button.html" with collapseId="collapseObject" %}
+                </span>
+            </div>
+        </div>
+        <div class="row  d-xl-flex mb-3 ms-sm-2">
+            <div class="col-6">
+                <small class="text-gray-500">
+                    <div><b>Discovery Date:</b> {{ data.objectData.discUtc }} UTC</div>
+                    <div><b>Discovery MJD:</b> {{  data.objectData.discMjd|floatformat:2 }}</div>
+                    <div><b>Disc {{ data.objectData.discFilter }}-Mag:</b> {{  data.objectData.discMag }}</div>
+                </small>
+
+            </div>
+            <div class="col-6">
+                <small class="text-gray-500">
+                    <div><b>Latest Date:</b> {{ data.objectData.latestUtc }} UTC</div>
+                    <div><b>Latest MJD:</b> {{  data.objectData.latestMjd|floatformat:2 }}</div>
+                    <div><b>Latest {{ data.objectData.latestFilter }}-Mag:</b> {{  data.objectData.latestMag }}</div>
+                </small>
+            </div>
+        </div>
+        <div class="row  d-xl-flex  ms-sm-2">
+
+            <div class="accordion accordion-flush" id="accordionExample">
+                <div class="accordion-item">
+
+                    <div id="collapseObject" class="accordion-collapse collapse" aria-labelledby="headinOne" data-bs-parent="#accordionExample">
+                        <div class="accordion-body p-2 pe-4 ">
+
+                            <table class="table mb-3">
+
+                                <tbody>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Peak Mag</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Peak Date</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakUtc }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Peak MJD</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakMjd|floatformat:2 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Detection Count</td>
+                                        <td class="fw-bold text-gray-400">{{ data.count_isdiffpos }} (excluding {{ data.count_isdiffneg }} neg flux detections)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Equatorial Coords</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Galactic Coords</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.glonmean|floatformat:6 }}, {{ data.objectData.glatmean|floatformat:6 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Ecliptic Coords</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+
+                            <div class="d-flex justify-content-center">
+
+                                <!-- BROKER LINKS -->
+                                <a href="https://alerce.online/object/{{data.objectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
+                                    alerce
+                                </a>
+                                <a href="https://antares.noirlab.edu/loci?query=%7B%22currentPage%22%3A1,%22filters%22%3A%5B%7B%22type%22%3A%22query_string%22,%22field%22%3A%7B%22query%22%3A%22%2a{{data.objectId}}%2a%22,%22fields%22%3A%5B%22properties.ztf_object_id%22,%22locus_id%22%5D%7D,%22value%22%3Anull,%22text%22%3A%22ID%20Lookup%3A%20{{data.objectId}}%22%7D%5D,%22sortBy%22%3A%22properties.newest_alert_observation_time%22,%22sortDesc%22%3Atrue,%22perPage%22%3A25%7D" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
+                                    antares
+                                </a>
+                                <a href="https://fink-portal.org/{{data.objectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
+                                    fink
+                                </a>
+                                <a href="https://mars.lco.global/?sort_value=jd&sort_order=desc&objectId={{data.objectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
+                                    mars
+                                </a>
+
+                            </div>
+                        </div>
+
+
+
+
+                    </div>
+
+
+
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+</div>

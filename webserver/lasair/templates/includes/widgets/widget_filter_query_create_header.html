@@ -1,0 +1,54 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100">
+
+
+
+    <div class="card-body">
+
+        <div class="row d-block d-xl-flex">
+
+            <div class="col-1 text-xl-center mb-3 mb-xl-0 d-flex justify-content-xl-start">
+                <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+
+                    {% if filterQ %}
+                        {% include "includes/icons/icon_edit2.html" %}
+                    {%else%}
+                        {% include "includes/icons/icon_filter_query.html" %}
+                    {%endif%}
+
+                </div>
+            </div>
+
+            <div class="col-11  px-xl-1">
+
+                <div class="d-flex ms-2">
+                    <div class="flex-grow-1">
+                        <h2 class="h3 fw-extrabold mb-0">
+                            {% if filterQ %}
+                                Editing the '{{filterQ.name}}' Filter
+                            {%else%}
+                                Filter Builder
+                            {%endif%}
+
+
+
+                        </h2>
+
+                        <small class="text-gray-500">
+                            Use the <a href="{% url 'schema_index' %}" target="_blank">Lasair Schema Browser</a> to find the attributes you would like to use to build your filter.
+                        </small>
+                    </div>
+
+                </div>
+
+
+
+
+
+
+            </div>
+        </div>
+    </div>
+</div>

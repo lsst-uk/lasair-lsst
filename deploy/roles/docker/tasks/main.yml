@@ -1,0 +1,26 @@
+---
+# tasks file for roles/docker
+
+- name: "Install Docker"
+  become: true
+  apt:
+    pkg:
+      - docker.io 
+      - docker-compose
+    state: present
+    update-cache: yes
+
+- name: "Install pip"
+  become: true
+  apt:
+    pkg:
+      - python3-pip
+    state: present
+    update-cache: yes
+
+- name: "Install docker python modules"
+  become: true
+  pip:
+    name:
+      - docker
+      - docker-compose

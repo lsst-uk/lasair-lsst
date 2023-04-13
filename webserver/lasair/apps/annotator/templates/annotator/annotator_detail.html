@@ -1,0 +1,20 @@
+{% extends "layouts/base.html" %}
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+{% block title %}
+    Annotator: {{annotator.topic}}
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-4">
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_annotator_header.html" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been annotated by this annotator so far." table=table header="Annotator Results"  desc="A set of transient objects processed and tagged by the '"|add:annotator.topic|add:"' annotator." %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,50 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100">
+
+    <div class="card-header d-sm-flex flex-row align-items-start flex-0 mb-0 pb-0 border-0">
+        <div class="d-block mb-sm-0">
+            {% if type == "my" and user.is_authenticated %}
+                <img class="avatar rounded" style="width:3.8rem;height:3.8rem; "  alt="Image placeholder" src="data:image/png;base64,{{ request.user.profile.image_b64 }}">
+
+            {% else %}
+
+                <div class="icon-shape icon-shape-tertiary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_schema.html" %}
+
+                </div>
+            {% endif %}
+
+
+        </div>
+        <div class="d-flex ms-4">
+            <div class="row d-block d-xl-flex align-items-start">
+                <h3 class="fw-extrabold mb-2">Lasair Schema Browser</h3>
+
+                <small class="text-gray-500">
+                    Click to jump to the schema for the
+                    {% for schema_name, schema_content in schemas.items %}
+                        {% if forloop.counter < schemas.items|length|add:-1  %}
+                            <a href="#{{schema_name}}-schema"><code>{{schema_name}}</code></a>,
+                        {% elif forloop.counter == schemas.items|length|add:-1 %}
+                            <a href="#{{schema_name}}-schema">{{schema_name}}</a>
+                        {% else %}
+                            or the <a href="#{{schema_name}}-schema">{{schema_name}}</a> table.
+                        {%endif%}
+                    {% endfor %}
+
+                </small>
+            </div>
+        </div>
+
+    </div>
+
+
+
+
+    <div class="card-body">
+
+    </div>
+</div>
+</div>

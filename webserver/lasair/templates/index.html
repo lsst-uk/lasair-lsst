@@ -1,0 +1,195 @@
+{% extends "layouts/base.html" %}
+{% block title %} Home {% endblock %}
+{% load static %}
+{% block content %}
+
+
+    <div class="container">
+        {% if news %}
+            <div class="d-flex mt-3 justify-content-center">
+                <div class="alert alert-info alert-dismissible fade show" role="alert">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0" viewBox="0 0 100 100" role="img">
+                        <path d="m38.551 79.289c10.559 6.0898 22.109 10.711 29.008 10.711 2.5195 0 4.4414-0.62891 5.4297-2.0391 0.089844-0.089844 0.17969-0.21094 0.23828-0.32813l0.23828-0.44922 3.5703-6.1211c0.62891-1.1094 0.83984-2.4609 0.57031-3.7812l-0.53906-2.8203c-1.3203-6.6289-0.32812-13.02 2.7891-18.449l4.3516-7.5312c2.7617-4.7383 3.1211-10.469 1.0195-16.109-1.5-4.0781-4.1719-7.8008-7.6797-10.738 1.1719-0.51172 2.1289-1.3516 2.7617-2.4609 0.80859-1.4102 1.0195-3.0586 0.60156-4.6484-0.42188-1.5586-1.4414-2.8789-2.8516-3.6914-1.4102-0.83984-3.0312-1.0508-4.6211-0.62891-1.5586 0.42188-2.8789 1.4414-3.7188 2.8516-0.66016 1.1406-0.89844 2.4297-0.75 3.6602-4.2891-1.5898-8.8516-2.0391-13.141-1.3203-5.9414 1.0195-10.711 4.1992-13.441 8.9414l-4.3516 7.5312c-3.1484 5.4297-8.1914 9.4492-14.578 11.641l-2.7305 0.92969c-1.2617 0.44922-2.3086 1.2891-2.9688 2.3984l-3.8086 6.6016c-1.5586 2.6992 0.30078 6.6914 5.5195 11.879 4.6328 4.5547 11.402 9.5352 19.082 13.973zm33.777-64.73c0.42188-0.71875 1.0781-1.2305 1.8906-1.4414 0.26953-0.089844 0.53906-0.12109 0.80859-0.12109 0.53906 0 1.0508 0.14844 1.5312 0.42188 1.5 0.87109 2.0117 2.7617 1.1406 4.2617-0.42188 0.69141-1.0781 1.2305-1.8906 1.4414-0.78125 0.21094-1.6211 0.089844-2.3398-0.30078-1.5-0.87109-2.0078-2.7891-1.1406-4.2617zm-55.758 40.371 0.12109-0.17969c0.35938-0.35938 1.2617-0.69141 2.9102-0.69141 1.5 0 3.6602 0.26953 6.6289 1.0781 6.0312 1.6484 13.469 4.9219 20.941 9.2383 15.258 8.8242 23.598 17.824 23.598 21.066 0 0.26953-0.03125 0.51172-0.14844 0.69141-1.4414 2.5195-14.07 0.089844-30.57-9.4492-7.4688-4.2891-14.012-9.0898-18.48-13.5-4.8789-4.8633-5.4492-7.4727-5-8.2539z"/>
+                    </svg>
+
+                    {{ news|safe }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        {% endif %}
+
+        <div class="row mt-4">
+            <div class="col-12 mb-4">
+
+                <div class="card border-0 shadow h-100 p-2">
+
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Total number of recent ZTF alerts">{{table|length}}</span>
+
+                    <div class="card-header border-0">
+
+
+                        <div class="row d-flex px-4">
+                            <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                                <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                                    {% include "includes/icons/icon_telescope.html" %}
+                                </div>
+                                <h2 class="h2 fw-extrabold mb-0 ps-2">Latest ZTF Transient Alerts Map</h2>
+
+                            </div>
+
+                            {%if table|length > 0 and export_name %}
+                                <div class="col-1 float-end d-none d-sm-inline">
+                                    <span class="float-end">
+
+                                        <button class="btn btn-sm btn-dark dropdown-toggle border-white " type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                            {% include "includes/icons/icon_export.html" %}
+                                            <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                                        </button>
+
+                                    </span>
+                                </div>
+                            {% endif %}
+
+                            <div class="col-12 px-4">
+
+                                <small class="text-gray-500">
+                                    This skymap shows the most recent, bright (&lt17 Mag) ZTF transient detections, coloured by their predicted type.
+                                    The longer ago the transient was last detected, the smaller and fainter its marker.
+                                    Click on a markers for information about an object, and then on the 'ZTF' transient ID for full information.
+                                </small>
+
+                            </div>
+
+                        </div>
+
+
+                    </div>
+
+                    <div class="card-body pt-0">
+
+                        <div class="row mx-4">
+                            <div class="col-12  mb-4">
+                                <div id="aladin-lite-div" style="aspect-ratio: 3 / 2;">
+                                </div>
+
+                            </div>
+                        </div>
+
+
+
+                        <div class="d-flex justify-content-center">
+
+
+
+
+                            <div class="p-1 mb-2 me-2"><span class="sidebar-icon" id="class0">
+                                {% include "includes/icons/icon_circle.html" %}
+                            </span>Possible Supernova</div>
+                            <div class="p-1 mb-2 me-2"><span class="sidebar-icon" id="class1">
+                                {% include "includes/icons/icon_circle.html" %}
+                            </span>Nuclear Transient</div>
+                            <div class="p-1 mb-2 me-2"><span class="sidebar-icon" id="class2">
+                                {% include "includes/icons/icon_circle.html" %}
+                            </span>Cataclysmic Variable</div>
+                            <div class="p-1 mb-2 me-2"><span class="sidebar-icon" id="class3">
+                                {% include "includes/icons/icon_circle.html" %}
+                            </span>Active Galaxy</div>
+
+
+                        </div>
+
+                        <div class="d-flex justify-content-center">
+                            <small class="text-gray-500" style="font-size:0.7em;">Mellinger color optical survey - Copyright 2000-2017 Axel Mellinger. All rights reserved.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this front-page filter. Check back later to see if any new objects have been matched." table=table header="Latest ZTF Transient Alerts Table"  desc="A list of transients found in the map above" export_name="lasair_front_pages_results"%}
+            </div>
+
+        </div>
+
+
+
+    </div>
+
+
+
+
+{% endblock %}
+
+
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script>
+
+        var colors = {{ colors|safe }};
+        var alerts = {{ alerts|safe }};
+
+        // These much match the code in ../views.py
+        var nclass = 4;   // Number of classe
+        var nage = 5;     // Number of age brackets
+
+        document.addEventListener('DOMContentLoaded', function() {
+
+
+
+            var imageSurvey = 'P/Mellinger/color'
+
+            var aladin;
+            A.init.then(() => {
+                aladin = A.aladin('#aladin-lite-div', {
+                    fov:360,
+                    cooFrame: 'ICRSd',
+                    projection: 'AIT',
+                    target: 'Arp 240',
+                    showReticle: false,
+                    showCooGrid: false,
+                    showCooGridControl: true,
+                    showFullscreenControl: false,
+                    showProjectionControl: false,
+                    showLayersControl: false,
+                    showFrame: false,
+                    showGotoControl: false
+                });
+
+                aladin.setBaseImageLayer(aladin.newImageSurvey(imageSurvey ));
+
+                for (iclass = 0; iclass < nclass; iclass++) {
+                    for (iage = 0; iage < nage; iage++) {
+                        // For each class and age bracket, make a catalog and insert the markers
+                        var size = 28 - 5*iage;
+                        var color = colors[iclass][iage];
+                        var markers = A.catalog({name: 'markers'+iclass+iage, sourceSize: size, color:color});
+                        aladin.addCatalog(markers);
+                        console.log(iclass, iage, alerts[iclass][iage].length);
+                        L = new Array;
+                        for(k=0; k<alerts[iclass][iage].length; k++){
+                            a = alerts[iclass][iage][k];
+                            var title = '<a href="/objects/' + a.objectId + '/" target="_blank">' + a.objectId + '</a>';
+                            var desc = 'Class:' + a.class + ' Mag:' + a.mag.toFixed(1) + ' Age:' + a.age.toFixed(1) +' days';
+                            L.push(A.marker(a.coordinates[0], a.coordinates[1], {popupTitle: title, popupDesc: desc}));
+                        }
+                        markers.addSources(L);
+                    }
+                }
+            });
+        });
+
+    </script>
+
+
+    <script>
+        for (var iclass = 0; iclass < nclass; iclass++){
+            console.log(colors[iclass][0]);
+            document.getElementById("class"+iclass).style.color = colors[iclass][0];
+        }
+    </script>
+
+{% endblock javascripts %}

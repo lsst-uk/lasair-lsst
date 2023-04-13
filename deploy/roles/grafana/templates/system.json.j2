@@ -1,0 +1,212 @@
+{% set y = 0 %}
+{
+"overwrite": true,
+"dashboard": {
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": null,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "gridPos": {
+        "x": 0,
+        "y": {{ y }},
+        "w": 18,
+        "h": 1
+      },
+      "type": "text",
+      "title": "Public Interfaces",
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+    },
+{% set y = y + 1 %}
+{% set title = "LSST:UK Web Site" %}
+{% set description = "Probe LSST:UK web interface" %}
+{% set h, w, x = (4, 3, 0) %}
+{% set expr = "probe_success{instance='https://www." ~ domain ~ "/'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% set title = "Web Interface" %}
+{% set description = "Probe web interface" %}
+{% set h, w, x = (4, 3, 3) %}
+{% set expr = "probe_success{instance='https://" ~ lasair_name ~ "." ~ domain ~ "/'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% set title = "Public Kafka Interface" %}
+{% set description = "Probe public kafka interface" %}
+{% set h, w, x = (4, 3, 6) %}
+{% set expr = "probe_success{instance='kafka." ~ domain ~ ":9092'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% set y = y + 4 %}
+    {
+      "gridPos": {
+        "x": 0,
+        "y": {{ y }},
+        "w": 18,
+        "h": 1
+      },
+      "type": "text",
+      "title": "Kafka",
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+    },
+{% set y = y + 1 %}
+{% include 'kafka.j2' %}
+{% set y = y + 7 + 4 * (groups['kafka'] | length) %}
+    {
+      "gridPos": {
+        "x": 0,
+        "y": {{ y }},
+        "w": 18,
+        "h": 1
+      },
+      "type": "text",
+      "title": "Hosts",
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+    },
+{% set y = y + 1 %}
+{% for host in groups['db'] %}
+  {% set host_type = "DB" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['cluster_control'] %}
+  {% set host_type = "Cluster Control" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['frontend_db'] %}
+  {% set host_type = "Frontend DB" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['backend_db'] %}
+  {% set host_type = "Backend DB" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['svc'] %}
+  {% set host_type = "Service" %}
+  {% set index = loop.index %}
+  {% set cephfs = true  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['web'] %}
+  {% set host_type = "Web" %}
+  {% set index = loop.index %}
+  {% set cephfs = true  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['ingest'] %}
+  {% set host_type = "Ingest" %}
+  {% set index = loop.index %}
+  {% set cephfs = true  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['sherlock'] %}
+  {% set host_type = "Sherlock" %}
+  {% set index = loop.index %}
+  {% set cephfs = true  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['filter'] %}
+  {% set host_type = "Filter" %}
+  {% set index = loop.index %}
+  {% set cephfs = true  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['cassandranodes'] %}
+  {% set host_type = "Cassandra" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['kafka'] %}
+  {% set host_type = "Kafka" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+{% for host in groups['kafka_pub'] %}
+  {% set host_type = "Public Kafka" %}
+  {% set index = loop.index %}
+  {% set cephfs = false  %}
+  {% include 'host.j2' %}
+{% endfor %}
+    {
+      "gridPos": {
+        "x": 0,
+        "y": {{ y + 4 }},
+        "w": 18,
+        "h": 1
+      },
+      "type": "text",
+      "title": " ",
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+    }
+  ],
+  "refresh": "5m",
+  "schemaVersion": 33,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {
+    "refresh_intervals": [
+      "5s",
+      "10s",
+      "30s",
+      "1m",
+      "5m",
+      "15m",
+      "30m",
+      "1h",
+      "2h",
+      "1d"
+    ]
+  },
+  "timezone": "",
+  "title": "System Health",
+  "uid": "IOlNNU-Zk",
+  "version": 0,
+  "weekStart": ""
+}
+}

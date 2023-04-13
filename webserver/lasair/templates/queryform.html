@@ -1,0 +1,288 @@
+{% extends "layouts/base.html" %}
+{% block content %}
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+    <script src="//code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+    <script src="/lasair/static/js/query.js"></script>
+
+    <div class="row"> <font color='green'>{{ message | safe}}</font> </div>
+    <div class="row">
+        <h3>Query Builder</h3>
+        The form below is a builder for SQL SELECT queries on the ZTF database of objects.
+        If you are logged in to Lasair, you can name and save your query,
+        share it with others, run it in real-time as alerts come in, and have results kept for you or pushed to you.
+        First you pick the tables to be joined for your query. The "objects" table is mandatory.
+        <ul>
+            <li> <b>objects</b>: Each astrophysical object consists of a series
+                of candidates (aka detections) forming a light curve. The light-curve is characterised by computed
+                features that you can use in your selection.</li>
+            <li> <b>sherlock_classifications</b>: Sky context information about each object derived from
+                the results of the <a href=/sherlock>Sherlock</a> spatial cross-match service.
+                <li> <b>crossmatch_tns</b>: For those objects also in the
+                    <a href=https://www.wis-tns.org/>Transient Name Server</a>,
+                these attributes can be searched. For example 'WHERE crossmatch_tns.type = "SN Ia"'.
+                <li> <b>watchlists</b>: Select one of the watchlists available to you to restrict searching to
+                    ZTF objects cross-matched with the watchlist.
+                    <li> <b>regions</b>: Select one of the regions available to you to restrict searching to
+                        ZTF objects within the region.
+                        <li> <b>annotators</b>: Select one of the external annotators available to you to restrict searching to
+                            ZTF objects annotated by that.
+                        </ul>
+                        <p>
+
+                            <!-- The logic in this template depends on several things:
+1 new: is it a new query with a blank form, or is is an existing query 
+  1.1 if logged in , we can save or run the query
+  1.2 if not logged in, we can type and then run the query
+2 we are editing or viewing an existing query
+  2.1 if owner of the query, we can edit, copy, run, or delete
+  2.2 if logged in and its public, we can copy or run the query
+  2.3 if not logged in and its public, we can view run the query
+  2.4 if not owner and its not public, we see nothing
+
+So new means section 1 above
+logged_in means 1.1, 2.2, or 2.3
+is_owner means 2.1
+                            -->
+
+                            <!-- new query, blank form -->
+                            {% if new  %}
+                                <form method="POST"  action="/query/">
+                            {% endif %} <!-- new -->
+
+                            <!-- editing an existing query -->
+                            {% if not new %}
+                                <form method="POST"  action="/query/{{ myquery.mq_id }}/">
+                            {% endif %} <!-- is_owner and not new -->
+
+                            {% csrf_token %}
+
+                            <!-- if you can save or edit this query -->
+                            {% if newandloggedin or is_owner %}
+                                Query Name {% if new %}(replace this name please){% endif %}<br/>
+                                <h3><input name="name" value="{% if new %}Query-{{ random }}{% else %}{{ myquery.name }}{% endif %}" size=50></h3>
+                                Description<br/>
+                                <textarea name="description" rows=4 cols=80>{{ myquery.description }}</textarea><br/>
+
+                                Public: <input type="checkbox" name="public" {% if myquery.public > 0 %}checked{% endif %}><br/>
+                                This query is:<br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="0" {% if myquery.active == 0 or new %}checked{% endif %}> Not a streaming filter<br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="1" {% if myquery.active == 1 %}checked{% endif %}> Convert to filter and Email to {{ email }} (max once a day) and log <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="2" {% if myquery.active == 2 %}checked{% endif %}> Convert to Filter and produce Kafka and log <br/>
+
+                                A 'Filter' will run real time as alerts come in.
+                                Results can be sent, also in real time, via email or Kafka.
+                                {% if is_owner %}
+                                    Note that the button "Save this Query" below will erase the exiting stream log.
+                                {% endif %}
+
+                            {% endif %} <!-- newandloggedin or is_owner -->
+                            {% if topic and myquery.active %}
+                                Click here for <a href=/streams/{{ topic }}>existing stream log</a>.
+                            {% endif %}
+                            <hr/>
+                            <input name='query_name' type='hidden' value='{{ myquery.name }}'/>
+                            <input name='mq_id' type='hidden' value='{{ myquery.mq_id }}'/>
+
+                            <!-- run, save or edit this query -->
+                            {% if new or is_owner %}
+                                <table><tr><td>
+                                    <div class ="form-group">
+                                        {% csrf_token %}
+
+                                        <b><font color="red">First pick your tables:</font></b> ("objects" is mandatory)
+                                        <div style="display:none">
+                                            <tt><textarea class="form-control" rows="1" cols="40" name="tables" id="tables">{{ myquery.tables }}</textarea></tt>
+                                        </div>
+                                        <table class="table table-bordered">
+                                            <tr>
+
+                                                <td> <font size=+1>
+                                                    <input type="checkbox" name="put" id="objects"   CHECKED          onclick="return false;"> objects
+                                                </font></td>
+
+                                                <td>
+                                                    <input type="checkbox" name="put" id="sherlock_classifications"    onclick="puttext();"> sherlock_classifications
+                                                </td>
+
+                                                <td>
+                                                    <input type="checkbox" name="put" id="crossmatch_tns"    onclick="puttext();"> crossmatch_tns
+                                                </td>
+                                            </tr>
+
+                                            <tr>
+                                                <td><input type="checkbox" name="put" id="watchlist"    onclick="showwatchlistradiolist();puttext();"> Watchlist
+                                                    <div id="watchlistradios">
+                                                        {% for wl in watchlists %}
+                                                            &nbsp;&nbsp;&nbsp;<input type="radio" name="wl" value="{{ wl.wl_id }}" onclick="puttext();"> {{ wl.name }}, ID={{ wl.wl_id }}
+                                                            {% if not wl.active %}<i>(inactive)</i>{% endif %}
+                                                            <br/>
+                                                        {% endfor %}
+                                                    </div>
+                                                </td>
+
+                                                <td><input type="checkbox" name="put" id="area"    onclick="showarearadiolist();puttext();"> Region
+                                                    <div id="arearadios">
+                                                        {% for ar in areas %}
+                                                            &nbsp;&nbsp;&nbsp;<input type="radio" name="ar" value="{{ ar.ar_id }}" onclick="puttext();"> {{ ar.name }}, ID={{ ar.ar_id }}
+                                                            {% if not ar.active %}<i>(inactive)</i>{% endif %}
+                                                            <br/>
+                                                        {% endfor %}
+                                                    </div>
+                                                </td>
+
+                                                <td><input type="checkbox" name="put" id="annotator"    onclick="showannotatorradiolist();puttext();"> Annotator
+                                                    <div id="annotatorradios">
+                                                        {% for an in annotators %}
+                                                            &nbsp;&nbsp;&nbsp;<input type="checkbox" name="an" value="{{ an.topic }}" onclick="puttext();"> {{ an.topic }}
+                                                            {% if not an.active %}<i>(inactive)</i>{% endif %}
+                                                            <br/>
+                                                        {% endfor %}
+                                                    </div>
+                                                </td>
+
+                                            </tr>
+
+                                        </table>
+
+                                        <b><font color="red">SELECT</font></b> clause here. Which attributes to return? See list at right.
+                                        <tt><textarea class="form-control" rows="4" cols="40" name="selected" id="selected">{% if new %}objects.objectId{% else %}{{ myquery.selected }}{% endif %}</textarea></tt>
+
+
+                                        The SQL <b><font color="red">WHERE</font></b>. Which objects to return. See list at right.
+                                        <tt><textarea class="form-control" rows="4" cols="40" name="conditions" id="conditions">{{ myquery.conditions }}</textarea></tt>
+                                        <br/>
+
+                                        <table><tr>
+                                            <td><b><font color="red">LIMIT</font></b></td><td><input name="limit" value=1000></td></tr>
+                                            <td><b><font color="red">OFFSET</font></b></td><td><input name="offset" value=0></td></tr>
+                                    </table>
+                                </div>
+
+                                </td><td style="background-color:#AAAAAA">&nbsp;</td><td width=400>
+                                    <div class="overflow-auto" style="height:600px;">
+                                        Click on the table name to see the schema:
+                                        <div id="schema_objects">
+                                            <h4><a href='#' onclick="showdiv('table_objects');">objects</a></h4>
+                                            <div id="table_objects" style="display:none">
+                                                <table class="table w-auto small">
+                                                    {% for row in schemas.objects %}
+                                                        <tr><td>{{ row.name }}</td><td>{{ row.doc }}</td></tr>
+                                                    {% endfor %}
+                                                </table>
+                                            </div>
+                                        </div>
+                                        <div id="schema_sherlock_classifications">
+                                            <h4><a href='#' onclick="showdiv('table_sherlock_classifications');">sherlock_classifications</a></h4>
+                                            <div id="table_sherlock_classifications" style="display:none">
+                                                <table class="table w-auto small">
+                                                    {% for row in schemas.sherlock_classifications %}
+                                                        <tr><td>{{ row.name }}</td><td>{{ row.doc }}</td></tr>
+                                                    {% endfor %}
+                                                </table>
+                                            </div>
+                                            <div id="schema_crossmatch_tns">
+                                                <h4><a href='#' onclick="showdiv('table_crossmatch_tns');">crossmatch_tns</a></h4>
+                                                <div id="table_crossmatch_tns" style="display:none">
+                                                    <table class="table w-auto small">
+                                                        {% for row in schemas.crossmatch_tns %}
+                                                            <tr><td>{{ row.name }}</td><td>{{ row.doc }}</td></tr>
+                                                        {% endfor %}
+                                                    </table>
+                                                </div>
+                                                <div id="schema_annotations">
+                                                    <h4><a href='#' onclick="showdiv('table_annotations');">annotations</a></h4>
+                                                    <div id="table_annotations" style="display:none">
+                                                        <table class="table w-auto small">
+                                                            {% for row in schemas.annotations %}
+                                                                <tr><td>{{ row.name }}</td><td>{{ row.doc }}</td></tr>
+                                                            {% endfor %}
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </td></tr></table>
+
+                                    <input class="form-control" type="hidden" name="page" value="{{ page }}"/><br/>
+                            {% endif %} <!-- new or is_owner -->
+
+                            <!-- viewing a public query not yours -->
+                            {% if not new and not is_owner %}
+                                <table border=1>
+                                    <tr><td>Name</td><td><h2>{{ myquery.name }}</h2></td></tr>
+                                    <tr><td>Description</td><td>{{ myquery.description }}</td></tr>
+                                    <tr><td>Selected</td><td><tt>{{ myquery.selected }}</tt></td></tr>
+                                    <tr><td>Tables</td><td><tt>{{ myquery.tables }}</tt></td></tr>
+                                    <tr><td>Conditions</td><td><tt>{{ myquery.conditions }}</tt></td></tr>
+                                    <tr><td>Active</td><td>{% if myquery.active == 1 %}yes{% else %}no{% endif %}
+                                        <tr><td>Public</td><td>{% if myquery.public == 1 %}yes{% else %}no{% endif %}</td></tr>
+                                    </table>
+                                        <input name='selected'   type='hidden' value='{{ myquery.selected }}'/>
+                                        <input name='tables'     type='hidden' value='{{ myquery.tables }}'/>
+                                        <input name='conditions' type='hidden' value='{{ myquery.conditions }}'/>
+                                        <input name='page'       type='hidden' value=0>
+                            {% endif %} <!-- not new and not is_owner -->
+
+                            <script>
+                                function ConfirmDelete()
+                                {
+                                    confirm("Are you sure you want to delete?");
+                                }
+                                function ConfirmSave()
+                                {
+                                    confirm("This will empty the stream log and replace the kafka topic with 10 alerts from the past. Continue?");
+                                }
+                            </script>
+
+                            <table border=1 cellpadding=30><tr>
+                                <!-- SAVE QUERY -->
+                                {% if newandloggedin or is_owner %}
+                                    <td>
+                                        <input type="submit" class="button" style="color: blue; background-color: #EEEEFF;"
+                                            value=" Save query" value=" Save this Query"
+                                            {% if myquery.active == 2 %}Onclick="ConfirmSave(){% endif %}">
+                                    </td>
+                                {% endif %} <!-- newandloggedin or is_owner -->
+
+                                <!-- RUN QUERY -->
+                                <td>
+                                    <font size=-2><input type="checkbox" name="json"/> Check this box for JSON output</font><br/>
+                                    <button style="color: blue; background-color: #EEEEFF;" type="submit" formaction=/runquery/>Run this Query</button>
+                            </td></tr>
+
+                            {% if is_owner %}
+                                </form>   <!-- END OF FORM -->
+
+                                <tr>
+                                    <!-- DELETE QUERY -->
+                                    {% if not new %}
+                                        <td>
+                                            <form method="POST"  action="/query/{{ myquery.mq_id }}/">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="delete" value="delete">
+                                                <input type="submit" class="button" style="color: blue; background-color: #EEEEFF;" value=" Delete this Query" Onclick="ConfirmDelete()"></td>
+                                        </form>
+                                        </td>
+                                    {% endif %} <!-- not new  -->
+                            {% endif %} <!-- is_owner -->
+
+                            <!-- COPY QUERY -->
+                            {% if logged_in and not new %}
+                                <td>
+                                    <form method="POST"  action="/query/{{ myquery.mq_id }}/">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="copy" value="copy">
+                                        <input type="submit" class="button" style="color: blue; background-color: #EEEEFF;" value=" Copy this Query"></td>
+                                </form>
+                                </td>
+                            {% endif %} <!-- logged_in and not new -->
+                        </tr></table>
+
+                </div>
+
+                <script type="text/javascript">
+                    $(document).ready(function(){
+                        check_boxes();
+                    });
+                </script>
+
+{% endblock %}

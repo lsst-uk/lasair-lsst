@@ -1,0 +1,23 @@
+---
+# tasks file for roles/zookeeper
+#- debug: msg="play_hosts={{play_hosts}}"
+
+- import_tasks: prometheus_exporter.yml
+
+- name: "Deploy Zookeeper compose file"
+  template:
+    src:  zookeeper-compose.yml.j2
+    dest: zookeeper-compose.yml
+
+- name: "Start Zookeeper services"
+  become: true
+  docker_compose:
+    project_name: zookeeper
+    project_src:
+        '.'
+    files:
+      - zookeeper-compose.yml
+    services:
+      - zookeep
+    state:
+      present

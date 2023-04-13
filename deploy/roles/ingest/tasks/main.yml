@@ -1,0 +1,6 @@
+---
+# tasks file for ingest
+- import_tasks: ingest.yml
+- import_tasks: service.yml
+- import_tasks: settings.yml
+

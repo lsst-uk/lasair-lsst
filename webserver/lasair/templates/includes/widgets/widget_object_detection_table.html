@@ -1,0 +1,116 @@
+{% load customtags %}
+
+<div class="card border-0 shadow h-100">
+
+    <div class="card-header border-0 ">
+        <div class="row d-flex align-items-start">
+            <div class="col-2 col-md-1 text-xl-center mb-3 mb-xl-0  justify-content-xl-start">
+                <div class="icon-shape icon-shape-primary rounded me-sm-0">
+
+                    <svg class="w-6 h-6" style="height: 3rem;" fill="currentColor" stroke="currentColor" stroke-width="1"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+                        <path d="m72.801 13.801h-45.602c-3.6016 0-6.5 2.8984-6.5 6.5v59.301c0 3.6016 2.8984 6.5 6.5 6.5h45.699c3.6016 0 6.5-2.8984 6.5-6.5v-59.301c-0.097657-3.5-3-6.5-6.5977-6.5zm3.5 65.898c0 1.8984-1.6016 3.5-3.5 3.5h-45.602c-1.8984 0-3.5-1.6016-3.5-3.5v-59.398c0-1.8984 1.6016-3.5 3.5-3.5h45.699c1.8984 0 3.5 1.6016 3.5 3.5v59.398zm-42.5-48.199h33.301v-3h-33.301zm0 10h33.301v-3h-33.301zm0 10h33.301v-3h-33.301zm0 20h21.301v-3h-21.301zm0-10h33.301v-3h-33.301z"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="col-7 col-md-8 px-xl-0">
+                <div>
+                    <h2 class="h5 text-gray-400 mb-0 ps-2">ZTF Alert Packet Data{% include "includes/info_tooltip.html" with info="Each row contains data measured at the location of transient on a single ZTF exposure" position="auto" %}</h2>
+                </div>
+            </div>
+            <div class="col-3  px-xl-1">
+                <div class="dropdown ms-auto ps-1 float-end">
+                    <button class="btn btn-sm btn-dark dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                        {% include "includes/icons/icon_export.html" %}
+                        <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                    </button>
+                    <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                        <li><a class="dropdown-item export" data-table="exportLightcurve" href="#" data-type="csv" data-filename="{{data.objectId}}_difference_photometry">CSV</a></li>
+                        <li><a class="dropdown-item export" data-table="exportLightcurve" href="#" data-type="json" data-filename="{{data.objectId}}_difference_photometry">JSON</a></li>
+                    </ul>
+                </div>
+            </div>
+
+
+
+
+
+        </div>
+    </div>
+
+    <div class="card-body p-2 ">
+        <div class="table-responsive p-4 pt-0">
+            <table class="table table-flush datatable">
+                <thead class="thead-light">
+                    <tr>
+                        <th>MJD</th>
+                        <th>UTC</th>
+                        <th>Filter</th>
+                        <th>magpsf</th>
+                        <th>difference flux status</th>
+                        <th>images</th>
+                        <th>alert packet</th>
+                    </tr></thead>
+                <tbody>
+                    {% for cand in data.candidates %}
+
+                        <tr>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.mjd|floatformat:6 }}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.utc }}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{% if cand.fid == 1 %}g{% else %}r{% endif %}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.magpsf|floatformat:3 }} {% if cand.candid %}&plusmn; {{ cand.sigmapsf|floatformat:3 }}{% endif %}{% if not cand.candid %}</font>{% endif %}</td>
+
+
+                            <td> {% if cand.candid %}{{ cand.isdiffpos|replace:"t|+ve"|replace:"f|-ve" }}
+                            {% else %}<font color="gray" size=-2>limit</font>
+                            {% endif %}</td>
+
+
+
+                            <td>{% if cand.candid > 0 %}
+                                {% if cand.image_urls.Science %}<a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutScience");'><small>target</small></a> {% endif %}
+                                {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
+                                {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutDifference");'><small>diff</small></a> {% endif %}
+                            {% endif %}</td>
+
+                            <td> {% if cand.candid %}<a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a>{% endif %}</td>
+
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <div class="table-responsive p-4 pt-0 d-none">
+            <table class="table table-flush datatable" id="exportLightcurve">
+                <thead class="thead-light">
+                    <tr>
+                        <th>MJD</th>
+                        <th>filter</th>
+                        <th>magpsf</th>
+                        <th>magpsf_error</th>
+                        <th>flux_status</th>
+                    </tr></thead>
+                <tbody>
+                    {% for cand in data.candidates %}
+
+                        <tr>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.mjd|floatformat:6 }}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{% if cand.fid == 1 %}g{% else %}r{% endif %}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{{ cand.magpsf|floatformat:3 }}</td>
+                            <td>{% if cand.candid %}{{ cand.sigmapsf|floatformat:3 }}{% endif %}</td>
+
+                            <td>{% if cand.candid %}{{ cand.isdiffpos|replace:"t|positive"|replace:"f|negative" }}{% else %}<font color="gray" size=-2>limit</font>{% endif %}</td>
+
+
+
+                        </tr>
+
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

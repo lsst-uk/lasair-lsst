@@ -1,0 +1,6 @@
+---
+# defaults file for grafana
+
+enable_letsencrypt:  true
+replication_count: 1
+

@@ -1,0 +1,33 @@
+
+{% load humanize %}
+
+
+<div class="card border-0 mt-3 shadow h-100">
+
+    <div class="card-body p-2 pt-4">
+        <div class="table-responsive p-4 pt-0">
+            <table  class="table table-flush datatable" id="{{type}}_datatable">
+                <thead class="thead-light">
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                    </tr></thead>
+                <tbody>
+
+                    {% for metric, value, comment in status %}
+
+                        <tr>
+                            <td >{{metric}}{% include "includes/info_tooltip.html" with info=comment position="auto" %}</td>
+                            <td>{{value}}</td>
+
+
+
+                        </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+

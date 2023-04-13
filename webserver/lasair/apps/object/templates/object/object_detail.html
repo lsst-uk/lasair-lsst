@@ -1,0 +1,82 @@
+{% extends "layouts/base.html" %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+
+
+{% block title %}
+    {{data.objectId}}
+{% endblock title %}
+
+
+{% block content %}
+
+
+
+    <div class="container">
+
+
+        <!--
+.col-   .col-sm-    .col-md-    .col-lg-    .col-xl-    .col-xxl-
+        -->
+
+
+        <div class="row mt-4">
+
+            <div class="col-12 col-lg-6 mb-4">
+                {% include "includes/widgets/widget_object_id.html" %}
+            </div>
+
+            <div class="col-12 col-lg-6 mb-4">
+                {% include "includes/widgets/widget_object_tns.html" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_sherlock.html" %}
+            </div>
+
+
+
+
+
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_lightcurve.html" %}
+            </div>
+
+
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_aladin.html" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_stamps.html" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_external_links.html" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_detection_table.html" %}
+            </div>
+
+
+        </div>
+    </div>
+
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+    <script type="text/javascript">
+        {% include "includes/widgets/widget_object_aladin.script" %}
+    </script>
+
+{% endblock javascripts %}
+
+

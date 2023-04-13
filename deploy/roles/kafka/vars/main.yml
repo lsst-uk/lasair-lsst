@@ -1,0 +1,10 @@
+---
+# vars file for roles/kafka
+
+kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
+
+num_partitions: "{{ (play_hosts|length) * 8 }}"
+retention_ms: "{{ 7 * 24 * 60 * 60 * 1000 }}"
+retention_bytes: "-1"
+replication_factor: "{{ 1 if (play_hosts|length)==1 else 2 }}"
+

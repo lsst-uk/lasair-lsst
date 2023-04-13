@@ -1,0 +1,73 @@
+<div class="card border-0 shadow  h-100">
+    <div class="card-body">
+        <div class="row d-flex">
+            <div class="col-2 col-md-1 text-xl-center mb-3 mb-xl-0  justify-content-xl-start">
+                <div class="icon-shape icon-shape-secondary rounded me-sm-0">
+
+                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-width="2"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+                        <g>
+                            <path d="m41.367 86 16.582-16.582c3.6484-3.668 5.668-8.5156 5.668-13.684s-2.0156-10.016-5.668-13.684c-1.8516-1.8516-4.0156-3.25-6.418-4.2148l-1.1172 1.1172c-1.418 1.418-2.1836 3.3008-2.1836 5.3164 0 0.48438 0.050781 0.96484 0.13281 1.4336 1.332 0.55078 2.5664 1.332 3.582 2.3672 4.2344 4.2148 4.2344 11.117 0 15.332l-16.594 16.598c-2.0352 2.0508-4.7656 3.1836-7.668 3.1836-2.8984 0-5.6328-1.1328-7.668-3.1836-2.0508-2.0508-3.1836-4.7656-3.1836-7.6836 0-2.8984 1.1328-5.6172 3.1836-7.668l8.5508-8.5508-2.0156-9.9844-12.551 12.535c-7.5352 7.5352-7.5352 19.816 0 27.352 7.5352 7.5508 19.816 7.5508 27.367 0z"/>
+                            <path d="m71.465 43.898 2 10 12.551-12.551c7.5352-7.5352 7.5352-19.816 0-27.352-7.5508-7.5508-19.816-7.5352-27.367 0l-16.582 16.582c-3.6484 3.668-5.668 8.5156-5.668 13.684s2.0156 10.035 5.668 13.684c1.8516 1.8516 4.0156 3.25 6.418 4.2148l1.1172-1.1172c1.8164-1.832 2.5156-4.3828 2.0508-6.75-1.332-0.53516-2.5664-1.332-3.582-2.3516-2.0508-2.0508-3.168-4.7852-3.168-7.6836 0-2.8984 1.1172-5.6328 3.168-7.668l16.578-16.59c2.0352-2.0508 4.7656-3.168 7.668-3.168 2.8984 0 5.6328 1.1172 7.668 3.168 2.0508 2.0508 3.1836 4.7852 3.1836 7.6836 0 2.8984-1.1328 5.6172-3.1836 7.668z"/>
+                        </g>
+                    </svg>
+
+
+                </div>
+            </div>
+
+            <div class="col-10 col-md-11  pe-lg-2 ps-lg-5">
+                <div class="d-block">
+                    <h2 class="h6 text-gray-400 mb-1 ps-2 ps-lg-0">External Resources{% include "includes/info_tooltip.html" with info="Links to external services providing further context information at the location of the transient" position="auto" %}</h2>
+                </div>
+                <a href="http://simbad.u-strasbg.fr/simbad/sim-coo?Coord={{ data.objectData.ramean }}%20{{ data.objectData.decmean }}&Radius=0.08" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-xxl-0">
+                    <img src="{{ ASSETS_ROOT }}/img/icons/simbad.png" class="image-fluid image-xs">
+                </a>
+                <a href="http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?lon={{ data.objectData.ramean|floatformat:6 }}d&lat={{ data.objectData.decmean|floatformat:6 }}d&radius=2&search_type=Near+Position+Search" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
+                    <img src="{{ ASSETS_ROOT }}/img/icons/ned.png" class="image-fluid image-xs">
+                </a>
+
+                <a href="https://www.legacysurvey.org/viewer?ra={{ data.objectData.ramean }}&dec={{ data.objectData.decmean }}&zoom=16&mark={{ data.objectData.ramean }},{{ data.objectData.decmean }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
+                    <img src="{{ ASSETS_ROOT }}/img/icons/decals.png" class="image-fluid image-xs me-1">
+                    DECaLS Sky Browser
+                </a>
+
+                <a href="http://nedwww.ipac.caltech.edu/cgi-bin/nph-calc?in_csys=Equatorial&in_equinox=J2000.0&obs_epoch=2000.0&lon={{ data.objectData.ramean }}d&lat={{ data.objectData.decmean }}&pa=0.0&out_csys=Equatorial&out_equinox=J2000.0" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
+
+                    <svg class="icon icon-sm me-2" fill="currentColor" stroke="currentColor" stroke-width="2" viewBox="0 0 100 100"  xmlns="http://www.w3.org/2000/svg">
+                        <g>
+                            <path  d="m57 70c-0.19141 0-0.37891-0.011719-0.57031-0.019531-0.55078-0.039063-0.96875-0.51953-0.92969-1.0703 0.039062-0.55078 0.51953-0.94922 1.0703-0.92969 1.7383 0.12109 3.4414-0.51172 4.6719-1.7383 1.1367-1.1328 1.7578-2.6406 1.7578-4.2422s-0.62109-3.1094-1.7617-4.2383c-1.1367-1.1328-2.6367-1.7617-4.2383-1.7617h-30c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1h30c2.1406 0 4.1484 0.82812 5.6602 2.3398 1.5117 1.5117 2.3398 3.5195 2.3398 5.6602s-0.82812 4.1484-2.3398 5.6602c-1.5117 1.5-3.5508 2.3398-5.6602 2.3398z"/>
+                            <path  d="m64 51h-42c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1h42c4.4102 0 8-3.5898 8-8s-3.5898-8-8-8c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1c5.5117 0 10 4.4883 10 10s-4.4883 10-10 10z"/>
+                            <path  d="m39.5 44c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m45.5 45c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m54.5 46c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m62.5 43c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m31.5 45c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m41.5 60c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m48.5 61c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m56.5 62c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m71.5 62c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m31.5 60c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m44.5 66c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m51.5 68c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m47.5 73c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m39.5 70c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m69.5 55c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m76.5 54c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m57.5 38c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m51.5 41c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m44.5 39c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m35.5 38c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m53.5 31c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m49.5 36c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m43.5 33c0 2-3 2-3 0s3-2 3 0"/>
+                            <path   d="m36.5 64c0 2-3 2-3 0s3-2 3 0"/>
+                        </g>
+                    </svg>
+
+                    <nobr>Galactic Extinction</nobr>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

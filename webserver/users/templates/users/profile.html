@@ -1,0 +1,106 @@
+{% extends "layouts/base.html" %}
+{% load crispy_forms_tags %}
+{% load widget_tweaks %}
+{% block title %} Profile {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+    <div class="row mt-4 justify-content-center">
+        <div class="col-12 col-xl-8 justify-content-center">
+            <div class="col-12 col-md-6 col-xxl-5 mb-4 mx-auto">
+                <div class="card shadow border-0 text-center p-0 ">
+                    <div class="profile-cover rounded-top" data-background="{{ ASSETS_ROOT }}/img/space_images/space_image_002.jpg"></div>
+                    <div class="card-body pb-5">
+                        <img src="data:image/png;base64,{{ request.user.profile.image_b64 }}" class="avatar-xl rounded-circle mx-auto mt-n7 mb-4" alt="Profile Pic">
+                        <h4 class="h3">
+                            {{ request.user.first_name }}  {{ request.user.last_name }}
+                        </h4>
+                        <h5 class="fw-normal">
+                            {{ request.user.username }}
+                        </h5>
+                        <p class="text-gray mb-4">
+                            {{ request.user.email }}
+                        </p>
+                        <p class="fw-bold text-gray  mb-0">API Token</p>
+                        <code class="mt-0">{{ token }}</code>
+
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-md-10 col-xxl-8 mb-4 mx-auto">
+                <div class="card card-body border-0 shadow mb-4">
+                    <h2 class="h5 mb-4">Update Your Profile Information</h2>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div>
+                                    {{ u_form.first_name|as_crispy_field}}
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <div>
+                                    {{ u_form.last_name|as_crispy_field}}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="form-group">
+                                    <label for="id_email">Email</label>
+                                    <input class="form-control" id="id_email" type="email" name="email"  placeholder="name@company.com" value="{{ request.user.email }}" required readonly>
+                                </div>
+                                <span class="text-error">{{ u_form.email.errors }}</span>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="form-group">
+                                    <label for="id_username">Username</label>
+                                    <input class="form-control" id="id_username" type="text" name="username"   placeholder="Enter a username" value="{{ request.user.username }}" required>
+                                </div>
+                                <span class="text-error">{{ u_form.username.errors }}</span>
+                            </div>
+                        </div>
+
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="form-group">
+                                    <label for="id_image">Profile Image</label>
+                                    <input type="file" name="image" id="id_image" class="form-control">
+                                </div>
+                                <span class="text-error">{{ p_form.image.errors }}</span>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <svg class="icon text-gray-500 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"></path></svg>
+                                <div class="text-gray small">Upload a square JPG, GIF or PNG. If the image is not square it is going to get squished!</div>
+
+                            </div>
+
+
+                        </div>
+
+
+
+
+                    </div>
+
+                    <div class="mt-3 d-flex flex-row-reverse">
+                        <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
