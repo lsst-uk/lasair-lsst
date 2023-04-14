@@ -100,7 +100,7 @@ def alert_filter(alert, msl):
 #                f.write(query)
 #                f.close()
                 execute_query(query, msl)
-    return {'ss':iq_dict['ss'], 'nalert':1}
+    return 1
 
 def kafka_consume(consumer, maxalert):
     """ kafka_consume: consume maxalert alerts from the consumer
@@ -118,7 +118,7 @@ def kafka_consume(consumer, maxalert):
         log.error('ERROR cannot connect to local database', e)
         return -1    # error return
 
-    nalert_in = nalert_out = nalert_ss = 0
+    nalert_in = nalert_out = 0
     startt = time.time()
 
     while nalert_in < maxalert:
@@ -138,13 +138,12 @@ def kafka_consume(consumer, maxalert):
         # Apply filter to each alert
         alert = json.loads(msg.value())
         nalert_in += 1
-        print(alert['diaSource']['diaObjectId'])
-        try:
+#        print(alert['diaSource']['diaObjectId'])
+        if 1:
             d = alert_filter(alert, msl)
-            nalert_out += d['nalert']
-            nalert_ss  += d['ss']
-        except:
-            break
+            nalert_out += d
+#        except:
+#            break
 
         if nalert_in%1000 == 0:
             log.info('%d nalert_in %d nalert_out  %d time %.1f' % 
@@ -155,14 +154,13 @@ def kafka_consume(consumer, maxalert):
             msl.close()
             msl = db_connect.local()
 
-    log.info('inished %d in, %d out, %d solar system' % (nalert_in, nalert_out, nalert_ss))
+    log.info('finished %d in, %d out % (nalert_in, nalert_out))
 
     ms = manage_status(settings.SYSTEM_STATUS)
     nid  = date_nid.nid_now()
     ms.add({
         'today_filter':nalert_in, 
         'today_filter_out':nalert_out,
-        'today_filter_ss':nalert_ss
         }, nid)
 
     if nalert_in > 0: return 1   # got some alerts
