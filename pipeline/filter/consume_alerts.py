@@ -9,7 +9,7 @@ sys.path.append('../../common')
 import settings
 
 sys.path.append('../../common/src')
-import lasairLogging
+import lasairLogging, db_connect, date_nid
 from manage_status import manage_status
 
 # If we catch a SIGTERM, set a flag

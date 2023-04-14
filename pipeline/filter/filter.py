@@ -18,22 +18,21 @@ Options:
     --topic_in=TIN     Kafka topic to use, default is from settings
 """
 import os,sys
-sys.path.append('../../common')
-import settings
 import time, tempfile
 import confluent_kafka
 from docopt import docopt
 from socket import gethostname
 from datetime import datetime
-from src.manage_status import manage_status
-from src import slack_webhook, date_nid, db_connect
 import run_active_queries
 from check_alerts_watchlists import get_watchlist_hits, insert_watchlist_hits
 from check_alerts_areas import get_area_hits, insert_area_hits
 from counts import batch_statistics, grafana_today
 from consume_alerts import kafka_consume
 import signal
+
 sys.path.append('../../common')
+import settings
+sys.path.append('../../common/src')
 import date_nid, db_connect, manage_status, lasairLogging
 
 def sigterm_handler(signum, frame):
@@ -213,7 +212,7 @@ def run_filter(args):
             log.error('ERROR in filter/filter: cannot push %s local to main database' % table)
             commit = False
         else:
-            log.info(table, 'ingested to main db')
+            log.info('%s ingested to main db' % table)
 
     log.info('Transfer to main database %.1f seconds' % (time.time() - t))
     if commit:
@@ -228,16 +227,17 @@ def run_filter(args):
 
     sys.stdout.flush()
     
-    ms = manage_status(settings.SYSTEM_STATUS)
+    ms = manage_status.manage_status(settings.SYSTEM_STATUS)
     nid = date_nid.nid_now()
     d = batch_statistics()
     ms.set({
         'today_ztf':grafana_today(), 
         'today_database':d['count'], 
-        'min_delay':d['delay'], 
         'total_count': d['total_count'],
-        'nid': nid}, 
+        'min_delay': '%.1f' % d['since'],  # hours since most recent alert
+        'nid': nid},
         nid)
+
     if rc > 0:  # minutes since telescope got it
 
         min_str = "{:d}".format(int(d['min_delay']*60))
@@ -253,9 +253,13 @@ def run_filter(args):
     s += 'lasair_alert_batch_lag{type="min"} %s\n' % min_str
     s += 'lasair_alert_batch_lag{type="avg"} %s\n' % avg_str
     s += 'lasair_alert_batch_lag{type="max"} %s\n' % max_str
-    f = open('/var/lib/prometheus/node-exporter/lasair.prom', 'w')
-    f.write(s)
-    f.close()
+    try:
+        filename = '/var/lib/prometheus/node-exporter/lasair.prom'
+        f = open(filename, 'w')
+        f.write(s)
+        f.close()
+    except:
+        log.error("ERROR in filter/filter: Cannot open %s" % filename)
     log.info('\n' + s)
     time.sleep(30)
 

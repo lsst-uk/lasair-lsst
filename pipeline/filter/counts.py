@@ -5,12 +5,11 @@ import json
 import urllib.parse
 import urllib
 import requests
-import lasairLogging
-import db_connect
-import settings
 import sys
 sys.path.append('../../common')
+import settings
 sys.path.append('../../common/src')
+import lasairLogging, db_connect
 
 
 def batch_statistics():
@@ -45,6 +44,7 @@ def batch_statistics():
             break
     except:
         total_count = -1
+        since = -1
 
     # statistics for most recent batch
     min_delay = -1
