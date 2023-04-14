@@ -66,6 +66,7 @@ def store_images(message, store, diaSourceId):
             content = message[cutoutType]
             filename = '%d_%s' % (diaSourceId, cutoutType)
             store.putObject(filename, content)
+        return True
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)
         return None # failure of batch
@@ -179,7 +180,7 @@ def handle_alert(alert, image_store, producer, topic_out, cassandra_session):
             sys.stdout.flush()
             return None   # ingest failed
 
-    return nDiaSource
+    return 1
 
 def run_ingest(args):
     """run.
@@ -246,6 +247,10 @@ def run_ingest(args):
         sys.stdout.flush()
         cassandra_session = None
 
+    f = open(settings.SCHEMA)
+    schema = json.loads(f.read())
+    pschema = fastavro.parse_schema(schema)
+
     # set up kafka consumer
     log.info('Consuming from %s' % settings.KAFKA_SERVER)
     log.info('Topic_in       %s' % topic_in)
@@ -301,42 +306,38 @@ def run_ingest(args):
             continue
 
         # read the avro contents
-        try:
-            bytes_io = io.BytesIO(msg.value())
-            msg = fastavro.reader(bytes_io)
-        except:
-            log.error('ERROR in ingest/ingest: ', msg.value())
+#        try:
+        bytes_io = io.BytesIO(msg.value())
+        alert = fastavro.schemaless_reader(bytes_io, pschema)
+#        except:
+#            log.error('ERROR in ingest/ingest: ', msg.value())
+#            break
+
+        if stop:
+            # clean shutdown - this should stop the consumer and commit offsets
+            log.info("Stopping ingest")
+            sys.stdout.flush()
             break
 
-        for alert in msg:
-            if stop:
-                # clean shutdown - this should stop the consumer and commit offsets
-                log.info("Stopping ingest")
-                sys.stdout.flush()
-                break
+        # Apply filter to each alert
+        idiaSource = handle_alert(alert, image_store, producer, topic_out, cassandra_session)
 
-            # Apply filter to each alert
-            idiaSource = handle_alert(alert, image_store, producer, topic_out, cassandra_session)
+        if idiaSource == None:
+            log.info('Ingestion failed ')
+            return 0
 
-            if idiaSource == None:
-                log.info('Ingestion failed ')
-                return 0
+        nalert += 1
+        ntotalalert += 1
+        ndiaSource += idiaSource
 
-            nalert += 1
-            ntotalalert += 1
-            ndiaSource += idiaSource
-
-            # every so often commit, flush, and update status
-            if nalert >= 250:
-                end_batch(consumer, producer, ms, nalert, ndiaSource)
-                nalert = ndiaSource = 0
-                # check for lockfile
-                if not os.path.isfile(settings.LOCKFILE):
-                    log.info('Lockfile not present')
-                    stop = True
-
-        if stop:  # need to break out of two loops if sigterm
-            break
+        # every so often commit, flush, and update status
+        if nalert >= 250:
+            end_batch(consumer, producer, ms, nalert, ndiaSource)
+            nalert = ndiaSource = 0
+            # check for lockfile
+            if not os.path.isfile(settings.LOCKFILE):
+                log.info('Lockfile not present')
+                stop = True
 
     # if we exit this loop, clean up
     log.info('Shutting down')

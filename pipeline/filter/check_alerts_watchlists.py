@@ -253,7 +253,7 @@ def insert_watchlist_hits(msl, hits):
     msl.commit()
 
 if __name__ == "__main__":
-        sys.path.append('../../common/src')
+    sys.path.append('../../common/src')
     import db_connect, lasairLogging
 
     lasairLogging.basicConfig(stream=sys.stdout)

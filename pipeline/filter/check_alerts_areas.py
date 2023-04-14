@@ -5,7 +5,7 @@ in a file named ar_<nn>.fits where nn is the area id from the database.
 The "moc<nnn>.fits" files are
 "Multi-Order Coverage maps", https://cds-astro.github.io/mocpy/. 
 """
-import os
+import os, sys
 import math
 from mocpy import MOC
 import astropy.units as u
