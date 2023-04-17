@@ -162,14 +162,14 @@ def build_query(select_expression, from_expression, where_condition):
         if table == 'sherlock_classifications':
             sherlock_classifications = True
 
-        if table.startswith('watchlist'):
+        if table.startswith('watchlist:'):
             w = table.split(':')
             try:
                 watchlist_id = int(w[1])
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form watchlist:nnn' % table)
 
-        if table.startswith('area'):
+        if table.startswith('area:'):
             w = table.split(':')
             try:
                 area_ids = w[1].split('&')
