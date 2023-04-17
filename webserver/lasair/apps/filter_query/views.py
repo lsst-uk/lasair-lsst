@@ -162,6 +162,7 @@ def filter_query_detail(request, mq_id, action=False):
         duplicateForm = DuplicateFilterQueryForm(instance=filterQuery, request=request)
 
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
+
     filterQuery.real_sql = build_query(filterQuery.selected, filterQuery.tables, filterQuery.conditions)
 
     cursor.execute(f'SELECT name, selected, tables, conditions, real_sql FROM myqueries WHERE mq_id={mq_id}')
@@ -306,6 +307,8 @@ def filter_query_create(request, mq_id=False):
         if watchmaps:
             watchmaps[:] = [str(w) for w in watchmaps]
             tables += f", area:{('&').join(watchmaps)}"
+        for a in annotators:
+            tables = tables.replace(a + ",", "").replace(a, "")
         if annotators:
             tables += f", annotator:{('&').join(annotators)}"
 
@@ -372,7 +375,7 @@ def filter_query_create(request, mq_id=False):
 
             filtername = form.cleaned_data.get('name')
 #            messages.success(request, f'The "{filtername}" filter has been successfully {verb}')
-            messages.success(request, message)     ####  hack hack
+            messages.success(request, message)  # hack hack
             return redirect(f'filter_query_detail', filterQuery.pk)
 
     else:

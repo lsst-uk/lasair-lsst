@@ -138,10 +138,24 @@ class filterQueryForm(forms.ModelForm):
         if action in ["run", "save"]:
             selected = self.cleaned_data.get('selected')
             conditions = self.cleaned_data.get('conditions')
+            annotators = self.cleaned_data.get('annotators')
+            watchlists = self.cleaned_data.get('watchlists')
+            watchmaps = self.cleaned_data.get('watchmaps')
             # FIND THE TABLES THAT NEED TO BE QUIERIED FROM THE SELECT STATEMENT
             matchObjectList = re.findall(r'([a-zA-Z0-9_\-]*)\.([a-zA-Z0-9_\-]*)', selected)
             tables = [m[0] for m in matchObjectList]
             tables = (",").join(set(tables))
+
+            if watchlists:
+                tables += f", watchlist:{watchlists}"
+            if watchmaps:
+                watchmaps[:] = [str(w) for w in watchmaps]
+                tables += f", area:{('&').join(watchmaps)}"
+
+            for a in annotators:
+                tables = tables.replace(a + ",", "").replace(a, "")
+            if annotators:
+                tables += f", annotator:{('&').join(annotators)}"
 
             e = check_query(selected, tables, conditions)
             if e:
@@ -156,6 +170,7 @@ class filterQueryForm(forms.ModelForm):
                 self.add_error('selected', msg)
 
             sqlquery_real = build_query(selected, tables, conditions)
+
             e = check_query_zero_limit(sqlquery_real)
             if e:
                 try:
