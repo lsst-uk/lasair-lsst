@@ -152,9 +152,9 @@ class filterQueryForm(forms.ModelForm):
                 watchmaps[:] = [str(w) for w in watchmaps]
                 tables += f", area:{('&').join(watchmaps)}"
 
-            for a in annotators:
-                tables = tables.replace(a + ",", "").replace(a, "")
             if annotators:
+                for a in annotators:
+                    tables = tables.replace(a + ",", "").replace(a, "")
                 tables += f", annotator:{('&').join(annotators)}"
 
             e = check_query(selected, tables, conditions)
