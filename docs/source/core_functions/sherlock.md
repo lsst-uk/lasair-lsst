@@ -23,7 +23,7 @@ Not shown in the panel is the `catalogue_table_name`, which is the catalogue (na
 that name. In this case the name is in the  
 [NED](https://ned.ipac.caltech.edu/) data system.
 
- -|`northSeparationArcsec` and `eastSeparationArcsec` for the angualr separation between the
+ -|`northSeparationArcsec` and `eastSeparationArcsec` for the angular separation between the
 transient and the centre of the associated galaxy. This is translated to `physical_separation_kpc`
 (separation in kilo-parsecs), using `direct_distance` which is mega-parsecs -- if available.
 
@@ -46,8 +46,7 @@ marshall system that allows prioritising of targets. It is thus a boosted
 decision tree algorithm. A full paper describing the code, catalogues and 
 algorithms is in preparation (Young et al. in prep). A summary is included in Section 4.2 of 
 "Design and Operation of the ATLAS Transient Science Server" 
-(Smith, Smartt, Young et al. 2020, submitted to PASP: 
-[https://arxiv.org/abs/2003.09052](https://arxiv.org/abs/2003.09052)). 
+[Smith, Smartt, Young et al. 2020](https://iopscience.iop.org/article/10.1088/1538-3873/ab936e).
 We label the current version as the official release of Sherlock 2.0. 
 The major upgrade from previous versions are that it includes Pan-STARRS DR1 
 (including the Tachibana & Miller 2018 star-galaxy separation index) and 
@@ -107,7 +106,7 @@ Once each transient has a set of independently crossmatched synonyms and associa
 
 We have constructed a multi-billion row database which contains all these catalogues. It currently consumes about 4.5TB and sits on a separate, similarly specified machine to that of the Lasair database. It will grow significantly as new catalogues are added (e.g. Pan-STARRS 3_π_ DR2, VST and VISTA surveys, future Gaia releases etc).
 
-The _Sherlock_ code is open source and can be found at: [https://github.com/thespacedoctor/sherlock](https://github.com/thespacedoctor/sherlock). Documentation is also available online here: [https://qub-sherlock.readthedocs.io/en/stable/](https://qub-sherlock.readthedocs.io/en/stable/).
+The _Sherlock_ code is open source and can be found at: [https://github.com/thespacedoctor/sherlock](https://github.com/thespacedoctor/sherlock). Documentation is also available online here: [https://qub-sherlock.readthedocs.io/en/master/](https://qub-sherlock.readthedocs.io/en/master/).
 
 Although the code for _Sherlock_ is public, it requires access to a number of large databases which are custom built from their original, public, releases. The latter is proprietary and therefore would require some effort from users to reproduce. As part of the Lasair project we are exploring public access to the integrated _Sherlock_ code and database information through an API.
 

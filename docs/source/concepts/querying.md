@@ -19,7 +19,7 @@ glatmean > 20
 ORDER BY glatmean
 ```
 and I click 'Run this Query', then I get a list of objects that are coincident with
-the given watchlist, together with the watchlist's name, and the galactiv latitude.
+the given watchlist, together with the watchlist's name, and the galactic latitude.
 The `WHERE` clause has restricted the results by galactic latitude, and the results
 come in order of galactic latitude.
 
@@ -28,7 +28,7 @@ come in order of galactic latitude.
 Lasair supports queries that join multiple tables, for example a watchlist of 
 your favourite sources, or the [TNS](https://www.wis-tns.org/) list of known 
 supernovae and other transients. In this case, you are selecting **ONLY** those
-objects that are **ALSO* in the chosen table. If you make a filter that selects 
+objects that are **ALSO** in the chosen table. If you make a filter that selects 
 ```objectId``` and you also choose a watchlist, then your filter returns only alerts
 coincident with the sources in the watchlist. 
 
@@ -39,13 +39,13 @@ whenever an incoming alert satisfies the criteria, a message is sent to the user
 query. The message can be via email (with messages bundled into a 24-hour digest), or it 
 can be machine-readable by a Kafka stream. In this way, a user -- or their machine -- can be
 alerted in near-real-time, withing minutes of the telescope taking the data. This message is
-repeated whenever new data comes in; in the example above, a message wouyld be generated every
+repeated whenever new data comes in; in the example above, a message would be generated every
 time an alert coincides with the watchlist and has `glatmean > 20`.
 
 However, the results of a streaming filter are not identical to running the same stored 
 query from web or API. As noted above, a given object can be reported multiple times when
 the streaming filter is operating, but only once in the select query. The other difference
-is that the ordering of results from a streaming filter will *always* by time order, so the 
+is that the ordering of results from a streaming filter will *always* be by time order, so the 
 `ORDER BY` part of the `WHERE` clause is ignored.
 
 ## Cookbook
