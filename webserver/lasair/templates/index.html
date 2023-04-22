@@ -23,7 +23,7 @@
 
                 <div class="card border-0 shadow h-100 p-2">
 
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Total number of recent ZTF alerts">{{table|length}}</span>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Total number of recent LSST alerts">{{table|length}}</span>
 
                     <div class="card-header border-0">
 
@@ -33,7 +33,7 @@
                                 <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
                                     {% include "includes/icons/icon_telescope.html" %}
                                 </div>
-                                <h2 class="h2 fw-extrabold mb-0 ps-2">Latest ZTF Transient Alerts Map</h2>
+                                <h2 class="h2 fw-extrabold mb-0 ps-2">Latest LSST Transient Alerts Map</h2>
 
                             </div>
 
@@ -53,9 +53,9 @@
                             <div class="col-12 px-4">
 
                                 <small class="text-gray-500">
-                                    This skymap shows the most recent, bright (&lt17 Mag) ZTF transient detections, coloured by their predicted type.
+                                    This skymap shows the most recent, bright (&lt17 Mag) LSST transient detections, coloured by their predicted type.
                                     The longer ago the transient was last detected, the smaller and fainter its marker.
-                                    Click on a markers for information about an object, and then on the 'ZTF' transient ID for full information.
+                                    Click on a markers for information about an object, and then on the 'LSST' transient ID for full information.
                                 </small>
 
                             </div>
@@ -107,7 +107,7 @@
 
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this front-page filter. Check back later to see if any new objects have been matched." table=table header="Latest ZTF Transient Alerts Table"  desc="A list of transients found in the map above" export_name="lasair_front_pages_results"%}
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this front-page filter. Check back later to see if any new objects have been matched." table=table header="Latest LSST Transient Alerts Table"  desc="A list of transients found in the map above" export_name="lasair_front_pages_results"%}
             </div>
 
         </div>

@@ -16,10 +16,10 @@ import pandas as pd
 import base64
 from src import db_connect
 from datetime import date
-import settings
 from lasair.lightcurves import lightcurve_fetcher
 from astropy.time import Time
 sys.path.append('../../common')
+import settings
 
 
 def datetime_converter(o):
@@ -116,8 +116,8 @@ def decsex(de):
         return '-%02d:%02d:%.3f' % (d, m, s)
 
 
-def objjson(objectId, full=False):
-    """return all data for an object as a json object (`objectId`,`objectData`,`candidates`,`count_isdiffpos`,`count_all_candidates`,`count_noncandidate`,`sherlock`,`TNS`)
+def objjson(diaObjectId, full=False):
+    """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`)
 
     **Usage:**
 
@@ -130,8 +130,8 @@ def objjson(objectId, full=False):
     message = ''
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'SELECT ncand, ramean, decmean, glonmean, glatmean, jdmin, jdmax '
-    query += 'FROM objects WHERE objectId = "%s"' % objectId
+    query = 'SELECT ncand, ra, decl, taimin as mjdmin, taimax as mjdmax '
+    query += 'FROM diaObjects WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:
         objectData = row
@@ -144,19 +144,19 @@ def objjson(objectId, full=False):
         if objectData and 'annotation' in objectData and objectData['annotation']:
             objectData['annotation'] = objectData['annotation'].replace('"', '').strip()
 
-        objectData['rasex'] = rasex(objectData['ramean'])
-        objectData['decsex'] = decsex(objectData['decmean'])
+        objectData['rasex'] = rasex(objectData['ra'])
+        objectData['decsex'] = decsex(objectData['decl'])
 
-        (ec_lon, ec_lat) = ecliptic(objectData['ramean'], objectData['decmean'])
+        (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon
         objectData['ec_lat'] = ec_lat
 
         objectData['now_mjd'] = '%.2f' % now
-        objectData['mjdmin_ago'] = now - (objectData['jdmin'] - 2400000.5)
-        objectData['mjdmax_ago'] = now - (objectData['jdmax'] - 2400000.5)
+        objectData['mjdmin_ago'] = now - objectData['mjdmin']
+        objectData['mjdmax_ago'] = now - objectData['mjdmax']
 
     sherlock = {}
-    query = 'SELECT * from sherlock_classifications WHERE objectId = "%s"' % objectId
+    query = 'SELECT * from sherlock_classifications WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:
         sherlock = row
@@ -164,7 +164,7 @@ def objjson(objectId, full=False):
     TNS = {}
     query = 'SELECT * '
     query += 'FROM crossmatch_tns JOIN watchlist_hits ON crossmatch_tns.tns_name = watchlist_hits.name '
-    query += 'WHERE watchlist_hits.wl_id=%d AND watchlist_hits.objectId="%s"' % (settings.TNS_WATCHLIST_ID, objectId)
+    query += 'WHERE watchlist_hits.wl_id=%d AND watchlist_hits.diaObjectId=%s' % (settings.TNS_WATCHLIST_ID, diaObjectId)
 
     def ordinal_suffix(day):
         if 3 < day < 21 or 23 < day < 31:
@@ -187,109 +187,85 @@ def objjson(objectId, full=False):
                 TNS[k] = v
 
     LF = lightcurve_fetcher(cassandra_hosts=settings.CASSANDRA_HEAD)
-    candidates = LF.fetch(objectId, full=full)
+    (diaSources, diaForcedSources, diaNondetectionLimits) = LF.fetch(diaObjectId, full=full)
     LF.close()
 
-    count_isdiffpos = count_all_candidates = count_noncandidate = 0
-    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+    count_all_diaSources = len(diaSources)
+    count_all_diaForcedSources = len(diaForcedSources)
+    count_diaNonDetectionLimits = len(diaNondetectionLimits)
+#    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+    image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits')  ## HACK
     image_urls = {}
-    for cand in candidates:
-        json_formatted_str = json.dumps(cand, indent=2)
-        cand['json'] = json_formatted_str[1:-1]
-        cand['mjd'] = mjd = float(cand['jd']) - 2400000.5
-        cand['since_now'] = mjd - now
-        if 'candid' in cand:
-            count_all_candidates += 1
-            candid = cand['candid']
-            date = datetime.strptime("1858/11/17", "%Y/%m/%d")
-            date += timedelta(mjd)
-            cand['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
+    for diaSource in diaSources:
+        json_formatted_str = json.dumps(diaSource, indent=2)
+        diaSource['json'] = json_formatted_str[1:-1]
+        diaSource['mjd'] = mjd = float(diaSource['midpointtai'])
+        diaSource['since_now'] = mjd - now
+        count_all_diaSources += 1
+        diaSourceId = diaSource['diasourceid']
+        date = datetime.strptime("1858/11/17", "%Y/%m/%d")
+        date += timedelta(mjd)
+        diaSource['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
 
-            # ADD IMAGE URLS
-            cand['image_urls'] = {}
-            for cutoutType in ['Science', 'Template', 'Difference']:
-                candid_cutoutType = '%s_cutout%s' % (candid, cutoutType)
-                filename = image_store.getFileName(candid_cutoutType)
-                if 1 == 1 or os.path.exists(filename):
-                    url = filename.replace(
-                        '/mnt/cephfs/lasair',
-                        f'https://{settings.LASAIR_URL}/lasair/static')
-                    cand['image_urls'][cutoutType] = url
+        # ADD IMAGE URLS
+        diaSource['image_urls'] = {}
+        for cutoutType in ['Science', 'Template', 'Difference']:
+            diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
+            filename = image_store.getFileName(diaSourceId_cutoutType)
+            if 1 == 1 or os.path.exists(filename):
+                url = filename.replace(
+                    '/mnt/cephfs/lasair',
+#                    f'https://{settings.LASAIR_URL}/lasair/static')
+                    f'https://lasair-lsst-dev-web/lasair/static')  ### HACK
+                diaSource['image_urls'][cutoutType] = url
 
-            if 'ssnamenr' in cand:
-                ssnamenr = cand['ssnamenr']
-                if ssnamenr == 'null':
-                    ssnamenr = None
-            if cand['isdiffpos'] == 't' or cand['isdiffpos'] == '1':
-                count_isdiffpos += 1
-        else:
-            count_noncandidate += 1
-            cand['magpsf'] = cand['diffmaglim']
-
-    if count_all_candidates == 0:
+    if count_all_diaSources == 0:
         return None
 
     if not objectData:
-        ra = float(cand['ra'])
-        dec = float(cand['dec'])
+        ra = float(diaSource['ra'])
+        dec = float(diaSource['decl'])
         objectData = {'ramean': ra, 'decmean': dec,
                       'rasex': rasex(ra), 'decsex': decsex(dec),
-                      'ncand': len(candidates), 'MPCname': ssnamenr}
+                      'ncand': len(diaSources), 'MPCname': ssnamenr}
         objectData['annotation'] = 'Unknown object'
-        if row['ssdistnr'] > 0 and row['ssdistnr'] < 10:
-            objectData['MPCname'] = ssnamenr
 
-    message += 'Got %d candidates and %d noncandidates' % (count_all_candidates, count_noncandidate)
+    message += 'Got %d diaSources and %d diaNonDetectionLimits' % (count_all_diaSources, count_diaNonDetectionLimits)
 
-    candidates.sort(key=lambda c: c['mjd'], reverse=True)
+    diaSources.sort(key=lambda c: c['mjd'], reverse=True)
 
-    df = pd.DataFrame(candidates)
+    detections = pd.DataFrame(diaSources)
     # SORT BY COLUMN NAME
-    df.sort_values(['mjd'],
-                   ascending=[True], inplace=True)
-
-    detections = df.loc[(df['candid'] > 0)]
+    detections.sort_values(['mjd'], ascending=[True], inplace=True)
 
     # DISC MAGS
     objectData["discMjd"] = detections["mjd"].values[0]
     objectData["discUtc"] = detections["utc"].values[0]
-    objectData["discMag"] = f"{detections['magpsf'].values[0]:.2f}±{detections['sigmapsf'].values[0]:.2f}"
-    if detections['fid'].values[0] == 1:
-        objectData["discFilter"] = "g"
-    else:
-        objectData["discFilter"] = "r"
+    objectData["discMag"] = f"{detections['apflux'].values[0]:.2f}±{detections['apfluxerr'].values[0]:.2f}"
+    objectData["discFilter"] = detections['filtername'].values[0]
 
     # LATEST MAGS
     objectData["latestMjd"] = detections["mjd"].values[-1]
     objectData["latestUtc"] = detections["utc"].values[-1]
-    objectData["latestMag"] = f"{detections['magpsf'].values[-1]:.2f}±{detections['sigmapsf'].values[-1]:.2f}"
-    if detections['fid'].values[-1] == 1:
-        objectData["latestFilter"] = "g"
-    else:
-        objectData["latestFilter"] = "r"
+    objectData["latestMag"] = f"{detections['apflux'].values[-1]:.2f}±{detections['apfluxerr'].values[-1]:.2f}"
+    objectData["latestFilter"] = detections['filtername'].values[0]
 
     # PEAK MAG
-    peakMag = detections[detections['magpsf'] == detections['magpsf'].min()]
+    peakMag = detections[detections['apflux'] == detections['apflux'].min()]
     objectData["peakMjd"] = peakMag["mjd"].values[0]
     objectData["peakUtc"] = peakMag["utc"].values[0]
-    objectData["peakMag"] = f"{peakMag['magpsf'].values[0]:.2f}±{peakMag['sigmapsf'].values[0]:.2f}"
-    if peakMag['fid'].values[0] == 1:
-        objectData["peakFilter"] = "g"
-    else:
-        objectData["peakFilter"] = "r"
+    objectData["peakMag"] = f"{peakMag['apflux'].values[0]:.2f}±{peakMag['apfluxerr'].values[0]:.2f}"
+    objectData["peakFilter"] = peakMag['filtername'].values[0]
 
-    data = {'objectId': objectId,
+    data = {'diaObjectId': diaObjectId,
             'objectData': objectData,
-            'candidates': candidates,
-            'count_isdiffpos': count_isdiffpos,
-            'count_isdiffneg': count_all_candidates - count_isdiffpos,
-            'count_all_candidates': count_all_candidates,
-            'count_noncandidate': count_noncandidate,
+            'diaSources': diaSources,
+            'diaForcedSources': diaForcedSources,
+            'diaNondetectionLimits': diaNondetectionLimits,
             'sherlock': sherlock,
             'image_urls': image_urls,
             'TNS': TNS, 'message': message}
     return data
-
 
 def distance(ra1, de1, ra2, de2):
     """*calculate the distance in degrees between 2 points*

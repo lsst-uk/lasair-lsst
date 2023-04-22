@@ -3,15 +3,30 @@ import plotly.graph_objects as go
 import math
 import numpy as np
 
+mcolor = {
+        'u': '#ff0000',
+        'g': '#f00f00',
+        'r': '#0f0f00',
+        'i': '#00ff00',
+        'z': '#00f0f0',
+        'y': '#0000ff',
+}
 
-def object_difference_lightcurve(
-    objectData
-):
+bcolor = {
+        'u': '#aa0000',
+        'g': '#a00a00',
+        'r': '#0a0a00',
+        'i': '#00aa00',
+        'z': '#00a0a0',
+        'y': '#0000aa',
+}
+
+def object_difference_lightcurve( data):
     """*Generate the Plotly HTML lightcurve for the object*
 
     **Key Arguments:**
 
-    - ``objectData`` -- a json object containing lightcurve data (and more)
+    - ``data`` -- a json object containing lightcurve data (and more)
 
     **Usage:**
 
@@ -20,87 +35,133 @@ def object_difference_lightcurve(
     htmlLightcurve = object_difference_lightcurve(data)
     ```
     """
-    # CREATE DATA FRAME FOR LC
-    df = pd.DataFrame(objectData["candidates"])
     from astropy.time import Time
+    allDataSets = []
+
+    # CREATE DATA FRAME FOR diaSources ###########################
+    df = pd.DataFrame(data["diaSources"])
+    df['mjd'] = df['midpointtai']
     mjds = Time(df['mjd'], format='mjd')
     df['utc'] = mjds.iso
     df['utc'] = pd.to_datetime(df['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
 
-    # FILTER DATA FRAME
-    df["marker_color"] = "#268bd2"
-    df["marker_symbol"] = "arrow-bar-down-open"
-    df["marker_size"] = 8
+    df["marker_symbol"] = "circle"
+    df["marker_size"] = 12
     df["marker_opacity"] = 0.6
     df["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
-    df.loc[(df['fid'] == 1), "marker_color"] = "#859900"
-    df.loc[(df['fid'] == 1), "bcolor"] = "#606e03"
-    df.loc[(df['fid'] == 2), "marker_color"] = "#dc322f"
-    df.loc[(df['fid'] == 2), "bcolor"] = "#b01f1c"
-    df.loc[(df['candid'] > 0), "marker_symbol"] = "circle-open"
-    df.loc[((df['candid'] > 0) & (df['isdiffpos'].isin([1, 't']))), "marker_symbol"] = "circle"
-    df.loc[(df['candid'] > 0), "marker_size"] = 10
 
-    # ADD FLUX
-    df["flux"] = 10**((23.9 - df["magpsf"]) / 2.5)
-    df["fluxerr"] = (10**((23.9 - (df["magpsf"] - df["sigmapsf"])) / 2.5) - 10**((23.9 - (df["magpsf"] + df["sigmapsf"])) / 2.5)) / 2
+    df["marker_color"] = df["filtername"]
+    df["marker_color"].replace(mcolor, inplace=True)
 
-    # SORT BY COLUMN NAME
-    df.sort_values(['mjd'],
-                   ascending=[True], inplace=True)
-    discovery = df.loc[(df['candid'] > 0)].head(1)
+    df["bcolor"] = df["filtername"]
+    df["bcolor"].replace(bcolor, inplace=True)
 
-    # GENERATE THE DATASETS
-    gBandData = df.loc[(df['fid'] == 1)]
-    rBandData = df.loc[(df['fid'] == 2)]
-    rBandDetections = rBandData.loc[(rBandData['candid'] > 0)]
-    rBandNonDetections = rBandData.loc[~(rBandData['candid'] > 0)]
-    rBandNonDetections["name"] = "r-band limiting mag"
-    gBandDetections = gBandData.loc[(gBandData['candid'] > 0)]
-    gBandNonDetections = gBandData.loc[~(gBandData['candid'] > 0)]
-    gBandNonDetections["name"] = "g-band limiting mag"
-    rBandDetectionsPos = rBandDetections.loc[(rBandDetections['isdiffpos'].isin([1, 't']))]
-    rBandDetectionsNeg = rBandDetections.loc[~(rBandDetections['isdiffpos'].isin([1, 't']))]
-    gBandDetectionsPos = gBandDetections.loc[(gBandDetections['isdiffpos'].isin([1, 't']))]
-    gBandDetectionsNeg = gBandDetections.loc[~(gBandDetections['isdiffpos'].isin([1, 't']))]
-    rBandDetectionsPos["name"] = "r-band detection"
-    rBandDetectionsNeg["name"] = "r-band neg. flux detection"
-    gBandDetectionsPos["name"] = "g-band detection"
-    gBandDetectionsNeg["name"] = "g-band neg. flux detection"
-    allDataSets = [rBandNonDetections, rBandDetectionsPos, rBandDetectionsNeg, gBandNonDetections, gBandDetectionsPos, gBandDetectionsNeg]
+    df["flux"] = df["psflux"]
+    df["fluxerr"] = df["psfluxerr"]
+    try:
+        df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+        df["sigmagpsf"] = 1.0857 * df["fluxerr"] / df["flux"]
+    except:
+        pass
+    
+    df.sort_values(['mjd'], ascending=[True], inplace=True)
+    discovery = df.head(1) 
+
+    for filt in mcolor.keys():
+        bandDetections = df.loc[(df['filtername'] == filt)]
+        bandDetections["name"] = '%s-band detection'%filt
+        allDataSets.append(bandDetections)
+
+    # CREATE DATA FRAME FOR diaForcedSources ###########################
+    if len(data['diaForcedSources']) > 0:
+        df = pd.DataFrame(data["diaForcedSources"])
+        df['mjd'] = df['midpointtai']
+        mjds = Time(df['mjd'], format='mjd')
+        df['utc'] = mjds.iso
+        df['utc'] = pd.to_datetime(df['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        df["marker_symbol"] = "arrow-bar-down-open"
+        df["marker_size"] = 8
+        df["marker_opacity"] = 0.6
+        df["name"] = "anon"
+        symbol_sequence = ["arrow-bar-down-open", "circle"]
+
+        df["marker_color"] = df["filtername"]
+        df["marker_color"].replace(mcolor, inplace=True)
+    
+        df["bcolor"] = df["filtername"]
+        df["bcolor"].replace(bcolor, inplace=True)
+
+        df["flux"] = df["psflux"]
+        df["fluxerr"] = 0.0
+        try:
+            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+        except:
+            pass
+
+        for filt in mcolor.keys():
+            bandDetections = df.loc[(df['filtername'] == filt)]
+            bandDetections["name"] = '%s-band forced detection'%filt
+            allDataSets.append(bandDetections)
+
+    # CREATE DATA FRAME FOR diaNondetectionLimits ###########################
+    if len(data['diaNondetectionLimits']) > 0:
+        df = pd.DataFrame(data["diaNondetectionLimits"])
+        df['mjd'] = df['midpointtai']
+        mjds = Time(df['mjd'], format='mjd')
+        df['utc'] = mjds.iso
+        df['utc'] = pd.to_datetime(df['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        df["marker_symbol"] = "arrow-bar-down-open"
+        df["marker_size"] = 5
+        df["marker_opacity"] = 0.6
+        df["name"] = "anon"
+        symbol_sequence = ["arrow-bar-down-open", "circle"]
+
+        df["marker_color"] = df["filtername"]
+        df["marker_color"].replace(mcolor, inplace=True)
+
+        df["bcolor"] = df["filtername"]
+        df["bcolor"].replace(bcolor, inplace=True)
+    
+        df["flux"] = df["diaNoise"]
+        df["fluxerr"] = 0.0
+        try:
+            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+        except:
+            pass
+
+        for filt in mcolor.keys():
+            bandDetections = df.loc[(df['filtername'] == filt)]
+            bandDetections["name"] = '%s-band nondetection limit'%filt
+            allDataSets.append(bandDetections)
 
     # START TO PLOT
     from plotly.subplots import make_subplots
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     # fig = go.Figure()
 
-    for data in allDataSets:
-        if len(data.index):
-            if data['candid'].values[0] > 0:
-                dataType = "Diff Mag"
-                error_y = {'type': 'data', 'array': data["fluxerr"]}
-            else:
-                error_y = None
-                dataType = "Limiting Mag"
+    for curve in allDataSets:
+        if len(curve.index):
+            dataType = "Diff Mag"
+            error_y = {'type': 'data', 'array': curve["fluxerr"]}
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["mjd"],
-                    y=data["flux"],
-                    customdata=np.stack((data['utc'], data['magpsf'], data['sigmapsf']), axis=-1),
+                    x=curve["mjd"],
+                    y=curve["flux"],
+                    customdata=np.stack((curve['utc'], curve['flux'], curve['fluxerr']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
-                    error_y_color=data["bcolor"].values[0],
+                    error_y_color=curve["bcolor"].values[0],
                     mode='markers',
-                    marker_size=data["marker_size"].values[0],
-                    marker_color=data["marker_color"].values[0],
-                    marker_symbol=data["marker_symbol"].values[0],
-                    marker_line_color=data["bcolor"].values[0],
+                    marker_size=curve["marker_size"].values[0],
+                    marker_color=curve["marker_color"].values[0],
+                    marker_symbol=curve["marker_symbol"].values[0],
+                    marker_line_color=curve["bcolor"].values[0],
                     marker_line_width=1.5,
-                    marker_opacity=data["marker_opacity"].values[0],
-                    name=data["name"].values[0],
-                    hovertemplate="<b>" + data["name"] + "</b><br>" +
+                    marker_opacity=curve["marker_opacity"].values[0],
+                    name=curve["name"].values[0],
+                    hovertemplate="<b>" + curve["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
                     "Flux: %{y} μJy<br>" +
@@ -112,8 +173,8 @@ def object_difference_lightcurve(
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["mjd"],
-                    y=data["flux"],
+                    x=curve["mjd"],
+                    y=curve["flux"],
                     showlegend=False,
                     opacity=0,
                     hoverinfo='skip',
@@ -121,16 +182,16 @@ def object_difference_lightcurve(
                 secondary_y=True
             )
             fig.add_traces(
-                go.Scatter(x=data["utc"],
-                           y=data["magpsf"],
+                go.Scatter(x=curve["utc"],
+                           y=curve["flux"],
                            showlegend=False,
                            opacity=0,
                            hoverinfo='skip',
                            xaxis="x2"))
 
     # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin = df.loc[(df['candid'] > 0), "mjd"].min()
-    mjdMax = df.loc[(df['candid'] > 0), "mjd"].max()
+    mjdMin = df["mjd"].min()
+    mjdMax = df["mjd"].max()
     mjdRange = mjdMax - mjdMin
     if mjdRange < 5:
         mjdRange = 5
@@ -155,7 +216,7 @@ def object_difference_lightcurve(
                               'linecolor': '#1F2937'})
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
-    ymax = df.loc[(df['candid'] > 0), "flux"].max()
+    ymax = df["flux"].max()
     ymin = 1e-10
     yrange = ymax - ymin
     if yrange < 50:
@@ -264,7 +325,7 @@ def object_difference_lightcurve(
             'displayModeBar': True,
             'displaylogo': False,
             'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
-            'toImageButtonOptions': {'filename': objectData["objectId"] + "_lasair_lc"},
+            'toImageButtonOptions': {'filename': data["diaObjectId"] + "_lasair_lc"},
             'responsive': True
         })
 
