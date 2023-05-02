@@ -196,6 +196,8 @@ def objjson(diaObjectId, full=False):
 #    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
     image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits')  ## HACK
     image_urls = {}
+#    fff = open('/home/ubuntu/message.txt', 'w')   # HACK
+#    fff.write('%d %d %d\n' % (count_all_diaSources, count_all_diaForcedSources, count_diaNonDetectionLimits))  # HACK
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
@@ -209,16 +211,18 @@ def objjson(diaObjectId, full=False):
 
         # ADD IMAGE URLS
         diaSource['image_urls'] = {}
-        for cutoutType in ['Science', 'Template', 'Difference']:
+        for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
             filename = image_store.getFileName(diaSourceId_cutoutType)
             if 1 == 1 or os.path.exists(filename):
                 url = filename.replace(
                     '/mnt/cephfs/lasair',
 #                    f'https://{settings.LASAIR_URL}/lasair/static')
-                    f'https://lasair-lsst-dev-web/lasair/static')  ### HACK
+                    f'localhost:8080/lasair/static')  ### HACK
                 diaSource['image_urls'][cutoutType] = url
 
+#        fff.write(str(diaSource) + '\n\n')    # HACK
+#    fff.close()    # HACK
     if count_all_diaSources == 0:
         return None
 

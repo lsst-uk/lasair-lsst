@@ -37,7 +37,7 @@ def object_difference_lightcurve( data):
     """
     from astropy.time import Time
     allDataSets = []
-    fff = open('/home/ubuntu/message.txt', 'w')   # HACK
+#    fff = open('/home/ubuntu/message.txt', 'w')   # HACK
 
     # CREATE DATA FRAME FOR diaSources ###########################
     df = pd.DataFrame(data["diaSources"])
@@ -60,8 +60,8 @@ def object_difference_lightcurve( data):
 
     df["flux"] = df["psflux"]
     df["fluxerr"] = df["psfluxerr"]
-    s = str(df[["mjd", "filtername", "flux"]])  # HACK
-    fff.write('diaSources\n' + s + '\n\n')         # HACK
+#    s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#    fff.write('diaSources\n' + s + '\n\n')         # HACK
 #    try:
 #        df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
 #        df["sigmagpsf"] = 1.0857 * df["fluxerr"] / df["flux"]
@@ -74,8 +74,8 @@ def object_difference_lightcurve( data):
     mjdMax = df["mjd"].max()
     fluxMin = (df["flux"]-df["fluxerr"]).min()
     fluxMax = (df["flux"]+df["fluxerr"]).max()
-    fff.write(str(fluxMin) + '\n')  # HACK
-    fff.write(str(fluxMax) + '\n')  # HACK
+#    fff.write(str(fluxMin) + '\n')  # HACK
+#    fff.write(str(fluxMax) + '\n')  # HACK
 
     for filt in mcolor.keys():
         bandDetections = df.loc[(df['filtername'] == filt)]
@@ -107,8 +107,8 @@ def object_difference_lightcurve( data):
         if df["mjd"].max() > mjdMax: mjdMax = df["mjd"].max()
         if df["flux"].min() < fluxMin: fluxMin = df["flux"].min()
         if df["flux"].max() > fluxMax: fluxMax = df["flux"].max()
-        s = str(df[["mjd", "filtername", "flux"]])  # HACK
-        fff.write('diaForcedSources\n' + s + '\n\n')         # HACK
+#        s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#        fff.write('diaForcedSources\n' + s + '\n\n')         # HACK
 #        try:
 #            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
 #        except:
@@ -144,8 +144,8 @@ def object_difference_lightcurve( data):
         if df["flux"].min() < fluxMin: fluxMin = df["flux"].min()
         if df["flux"].max() > fluxMax: fluxMax = df["flux"].max()
         df["fluxerr"] = 0.0
-        s = str(df[["mjd", "filtername", "flux"]])  # HACK
-        fff.write('diaNondetectionLimits\n' + s + '\n\n')         # HACK
+#        s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#        fff.write('diaNondetectionLimits\n' + s + '\n\n')         # HACK
 #        try:
 #            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
 #        except:
@@ -156,7 +156,7 @@ def object_difference_lightcurve( data):
             bandDetections["name"] = '%s-band nondetection limit'%filt
             allDataSets.append(bandDetections)
 
-    fff.close()   # HACK
+#    fff.close()   # HACK
     # START TO PLOT
     from plotly.subplots import make_subplots
     fig = make_subplots(specs=[[{"secondary_y": True}]])

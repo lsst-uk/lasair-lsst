@@ -18,10 +18,10 @@
 
             <div class="col-7 col-md-8">
                 <div class="d-block ps-3 pe-lg-2 ps-lg-5">
-                    <h2 class="h4 fw-extrabold mb-0">{{data.objectId}}</h2>
+			<h4 class="h5 fw-bold mb-0">diaObjectId<br/>{{data.diaObjectId}}</h4>
 
                     <h2 class="accordion-header " id="headinOne">
-                        <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ramean|floatformat:6 }}, {{ data.objectData.decmean|floatformat:6 }}</div>
+                        <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
                     </h2>
                 </div>
             </div>
