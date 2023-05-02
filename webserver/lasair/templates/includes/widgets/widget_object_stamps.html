@@ -1,5 +1,4 @@
 
-
 <div class="card border-0 shadow  h-100">
     <div class="card-header border-0 ">
         <div class="row d-flex align-items-start">
@@ -63,16 +62,12 @@
 
         <div class="row d-xl-flex align-items-centre">
             <div class="col-4">
-                <h2 class="h6 text-gray-400 mb-0">target</h2>
-                <div class="fitsStamp fits-lite" src="/fits/{{ data.candidates.0.candid }}_cutoutScience"></div>
-            </div>
-            <div class="col-4">
                 <h2 class="h6 text-gray-400 mb-0">reference</h2>
-                <div class="fitsStamp fits-lite" src="/fits/{{ data.candidates.0.candid }}_cutoutTemplate"></div>
+                <div class="fitsStamp fits-lite" src="/fits/{{ data.diaSources.0.diasourceid }}_cutoutTemplate"></div>
             </div>
             <div class="col-4">
                 <h2 class="h6 text-gray-400 mb-0">difference</h2>
-                <div class="fitsStamp fits-lite" src="/fits/{{ data.candidates.0.candid }}_cutoutDifference"></div>
+                <div class="fitsStamp fits-lite" src="/fits/{{ data.diaSources.0.diasourceid }}_cutoutDifference"></div>
             </div>
         </div>
     </div>
