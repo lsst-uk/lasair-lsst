@@ -4,21 +4,21 @@ import math
 import numpy as np
 
 mcolor = {
-        'u': '#ff0000',
-        'g': '#f00f00',
-        'r': '#0f0f00',
-        'i': '#00ff00',
-        'z': '#00f0f0',
-        'y': '#0000ff',
+   "u": "#9900cc",
+   "g": "#3366ff",
+   "r": "#33cc33",
+   "i": "#ffcc00",
+   "z": "#ff0000",
+   "y": "#cc6600",
 }
 
 bcolor = {
-        'u': '#aa0000',
-        'g': '#a00a00',
-        'r': '#0a0a00',
-        'i': '#00aa00',
-        'z': '#00a0a0',
-        'y': '#0000aa',
+   "u": "#d966ff",
+   "g": "#99b3ff",
+   "r": "#85e085",
+   "i": "#ffe066",
+   "z": "#ff8080",
+   "y": "#ffbf80",
 }
 
 def object_difference_lightcurve( data):
@@ -37,6 +37,7 @@ def object_difference_lightcurve( data):
     """
     from astropy.time import Time
     allDataSets = []
+#    fff = open('/home/ubuntu/message.txt', 'w')   # HACK
 
     # CREATE DATA FRAME FOR diaSources ###########################
     df = pd.DataFrame(data["diaSources"])
@@ -59,14 +60,22 @@ def object_difference_lightcurve( data):
 
     df["flux"] = df["psflux"]
     df["fluxerr"] = df["psfluxerr"]
-    try:
-        df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
-        df["sigmagpsf"] = 1.0857 * df["fluxerr"] / df["flux"]
-    except:
-        pass
+#    s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#    fff.write('diaSources\n' + s + '\n\n')         # HACK
+#    try:
+#        df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+#        df["sigmagpsf"] = 1.0857 * df["fluxerr"] / df["flux"]
+#    except:
+#        pass
     
     df.sort_values(['mjd'], ascending=[True], inplace=True)
     discovery = df.head(1) 
+    mjdMin = df["mjd"].min()
+    mjdMax = df["mjd"].max()
+    fluxMin = (df["flux"]-df["fluxerr"]).min()
+    fluxMax = (df["flux"]+df["fluxerr"]).max()
+#    fff.write(str(fluxMin) + '\n')  # HACK
+#    fff.write(str(fluxMax) + '\n')  # HACK
 
     for filt in mcolor.keys():
         bandDetections = df.loc[(df['filtername'] == filt)]
@@ -94,10 +103,16 @@ def object_difference_lightcurve( data):
 
         df["flux"] = df["psflux"]
         df["fluxerr"] = 0.0
-        try:
-            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
-        except:
-            pass
+        if df["mjd"].min() < mjdMin: mjdMin = df["mjd"].min()
+        if df["mjd"].max() > mjdMax: mjdMax = df["mjd"].max()
+        if df["flux"].min() < fluxMin: fluxMin = df["flux"].min()
+        if df["flux"].max() > fluxMax: fluxMax = df["flux"].max()
+#        s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#        fff.write('diaForcedSources\n' + s + '\n\n')         # HACK
+#        try:
+#            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+#        except:
+#            pass
 
         for filt in mcolor.keys():
             bandDetections = df.loc[(df['filtername'] == filt)]
@@ -124,17 +139,24 @@ def object_difference_lightcurve( data):
         df["bcolor"].replace(bcolor, inplace=True)
     
         df["flux"] = df["diaNoise"]
+        if df["mjd"].min() < mjdMin: mjdMin = df["mjd"].min()
+        if df["mjd"].max() > mjdMax: mjdMax = df["mjd"].max()
+        if df["flux"].min() < fluxMin: fluxMin = df["flux"].min()
+        if df["flux"].max() > fluxMax: fluxMax = df["flux"].max()
         df["fluxerr"] = 0.0
-        try:
-            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
-        except:
-            pass
+#        s = str(df[["mjd", "filtername", "flux"]])  # HACK
+#        fff.write('diaNondetectionLimits\n' + s + '\n\n')         # HACK
+#        try:
+#            df["magpsf"] = 23.9 - math.log10(df["flux"])*2.5
+#        except:
+#            pass
 
         for filt in mcolor.keys():
             bandDetections = df.loc[(df['filtername'] == filt)]
             bandDetections["name"] = '%s-band nondetection limit'%filt
             allDataSets.append(bandDetections)
 
+#    fff.close()   # HACK
     # START TO PLOT
     from plotly.subplots import make_subplots
     fig = make_subplots(specs=[[{"secondary_y": True}]])
@@ -164,9 +186,9 @@ def object_difference_lightcurve( data):
                     hovertemplate="<b>" + curve["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{y} μJy<br>" +
-                    "Magnitude: %{customdata[1]:.2f} ± %{customdata[2]:.2f}" +
-                    "<extra></extra>",
+                    "Flux: %{y} μJy<br>"   # +
+                #       "Magnitude: %{customdata[1]:.2f} ± %{customdata[2]:.2f}" +
+                   #    "<extra></extra>",
                 ),
                 secondary_y=False
             )
@@ -190,8 +212,6 @@ def object_difference_lightcurve( data):
                            xaxis="x2"))
 
     # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin = df["mjd"].min()
-    mjdMax = df["mjd"].max()
     mjdRange = mjdMax - mjdMin
     if mjdRange < 5:
         mjdRange = 5
@@ -201,9 +221,22 @@ def object_difference_lightcurve( data):
     utcMin = Time(mjdMin, format='mjd').iso
     utcMax = Time(mjdMax, format='mjd').iso
 
-    fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=14, showline=True, linewidth=1.5, linecolor='#1F2937',
-                     gridcolor='#F0F0F0', gridwidth=1,
-                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title="MJD", title_font_size=16)
+    fig.update_xaxes(
+            range=[mjdMin, mjdMax], 
+            tickformat='d', 
+            tickangle=-55, 
+            tickfont_size=14, 
+            showline=True, 
+            linewidth=1.5, 
+            linecolor='#1F2937', 
+            gridcolor='#F0F0F0', 
+            gridwidth=1,
+            zeroline=True, 
+            zerolinewidth=1.5, 
+            zerolinecolor='#1F2937', 
+            ticks='inside', 
+            title="MJD", 
+            title_font_size=16)
     fig.update_layout(xaxis2={'range': [utcMin, utcMax],
                               'showgrid': False,
                               'anchor': 'y',
@@ -216,14 +249,14 @@ def object_difference_lightcurve( data):
                               'linecolor': '#1F2937'})
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
-    ymax = df["flux"].max()
-    ymin = 1e-10
+    ymax = fluxMax
+    ymin = fluxMin
     yrange = ymax - ymin
     if yrange < 50:
         yrange = 50
     ymax += (yrange * 0.1)
-    yMagMin = -2.5 * math.log10(ymax) + 23.9
-    yMagMax = -2.5 * math.log10(ymin) + 23.9
+    #yMagMin = -2.5 * math.log10(ymax) + 23.9
+    #yMagMax = -2.5 * math.log10(ymin) + 23.9
 
     # yFluxMax = 10**((23.9 - ymin) / 2.5)
     # yFluxMin = 10**((23.9 - ymax) / 2.5)
@@ -248,43 +281,42 @@ def object_difference_lightcurve( data):
         secondary_y=False
     )
 
-    magLabels = [21.0, 20.0, 19.5, 19.0, 18.5,
-                 18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
-    if yMagMin < 14:
-        magLabels = [20.0, 16.0, 15.0, 14.0,
-                     13.0, 12.5, 12.0, 11.5, 11.0]
-    elif yMagMin < 17:
-        magLabels = [20., 19.,
-                     18.0, 17.0, 16.5, 16.0, 15.5, 15.0]
-    elif yMagMin < 18:
-        magLabels = [20., 19.5, 19.0, 18.5,
-                     18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
-    magFluxes = [10**((23.9 - m) / 2.5) for m in magLabels]
-    magLabels = [f"{m:0.1f}" for m in magLabels]
+#    magLabels = [21.0, 20.0, 19.5, 19.0, 18.5,
+#                 18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
+#    if yMagMin < 14:
+#        magLabels = [20.0, 16.0, 15.0, 14.0,
+#                     13.0, 12.5, 12.0, 11.5, 11.0]
+#    elif yMagMin < 17:
+#        magLabels = [20., 19.,
+#                     18.0, 17.0, 16.5, 16.0, 15.5, 15.0]
+#    elif yMagMin < 18:
+#        magLabels = [20., 19.5, 19.0, 18.5,
+#                     18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
+#    magFluxes = [10**((23.9 - m) / 2.5) for m in magLabels]
+#    magLabels = [f"{m:0.1f}" for m in magLabels]
 
-    fig.update_yaxes(
-        dict(
-            tickmode='array',
-            tickvals=magFluxes,
-            ticktext=magLabels
-        ),
-        range=[ymin, ymax],
-        tickformat='.1f',
-        tickfont_size=14,
-        ticksuffix=" ",
-        showline=True,
-        showgrid=False,
-        linewidth=1.5,
-        linecolor='#1F2937',
-        zeroline=True,
-        zerolinewidth=1.5,
-        zerolinecolor='#1F2937',
-        ticks='inside',
-        title="Difference Magnitude",
-        title_font_size=16,
-        secondary_y=True,
-
-    )
+#    fig.update_yaxes(
+#        dict(
+#            tickmode='array',
+#            tickvals=magFluxes,
+#            ticktext=magLabels
+#        ),
+#        range=[ymin, ymax],
+#        tickformat='.1f',
+#        tickfont_size=14,
+#        ticksuffix=" ",
+#        showline=True,
+#        showgrid=False,
+#        linewidth=1.5,
+#        linecolor='#1F2937',
+#        zeroline=True,
+#        zerolinewidth=1.5,
+#        zerolinecolor='#1F2937',
+#        ticks='inside',
+#        title="Difference Magnitude",
+#        title_font_size=16,
+#        secondary_y=True,
+#    )
 
     # UPDATE PLOT LAYOUT
     fig.update_layout(
