@@ -153,15 +153,16 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
         chk:
     """
     t = time.time()
-    # clear the cache and remake the directory
-    watchlist_dir = cache_dir + '/wl_%d/' % wl_id
-    os.mkdir(watchlist_dir)
+    # make it in a new directory
+    watchlist_dir     = cache_dir + '/wl_%d/' % wl_id
+    watchlist_dir_new = cache_dir + '/wl_%d_new/' % wl_id
+    os.mkdir(watchlist_dir_new)
 
     # compute the list of mocs
     moclist = moc_watchlists(cones, max_depth, chk)
     
     # write the watchlist.csv
-    w = open(watchlist_dir + 'watchlist.csv', 'w')
+    w = open(watchlist_dir_new + 'watchlist.csv', 'w')
     ralist   = cones['ra']
     delist   = cones['de']
     radius   = cones['radius']
@@ -170,12 +171,17 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
     for i in range(len(ralist)):
         w.write('%d, %f, %f, %.3e, %s\n' % 
             (cone_ids[i], ralist[i], delist[i], radius[i], names[i]))
+    w.close()
 
     # now write the moc files
     for i in range(len(moclist)):
-        moclist[i].write(watchlist_dir + 'moc%03d.fits'%i)
+        moclist[i].write(watchlist_dir_new + 'moc%03d.fits'%i)
     logf.write('Watchlist "%s" with %d cones rebuilt in %.2f seconds\n' 
             % (name, len(ralist), time.time() - t))
+
+    # move the new stuff into the correct directory name
+    cmd = 'rm -r %s; mv %s %s' % (watchlist_dir, watchlist_dir_new, watchlist_dir)
+    execute_cmd(cmd, logfile)
 
 if __name__ == "__main__":
     import sys
@@ -205,28 +211,17 @@ if __name__ == "__main__":
 
     max_depth = settings.WATCHLIST_MAX_DEPTH
     chk       = settings.WATCHLIST_CHUNK
-
     cache_dir = settings.WATCHLIST_MOCS
-    new_cache_dir = cache_dir + '_new'
-    cmd = 'mkdir %s' % new_cache_dir
-    execute_cmd(cmd, logfile)
 
     # who needs to be recomputed
 #    try:
     msl = db_connect.readonly()
     watchlists = fetch_active_watchlists(msl, cache_dir)
 
-    for watchlist in watchlists['keep']:
-        wl_id = watchlist['wl_id']
-        cmd = 'mv %s/wl_%d %s' % (cache_dir, wl_id, new_cache_dir)
-        execute_cmd(cmd, logfile)
-
     for watchlist in watchlists['get']:
         # get the data from the database
         cones = fetch_watchlist(msl, watchlist['wl_id'], watchlist['radius'])
         rebuild_cache(watchlist['wl_id'], watchlist['name'], \
-            cones, max_depth, new_cache_dir, chk)
+            cones, max_depth, cache_dir, chk)
 
-    execute_cmd('rm -r %s'  % cache_dir, logfile)
-    execute_cmd('mv %s %s' % (new_cache_dir, cache_dir), logfile)
     sys.exit(0)
