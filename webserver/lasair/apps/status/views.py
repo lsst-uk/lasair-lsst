@@ -49,10 +49,6 @@ def status(request, nid):
     try:
         filename = '%s_%d.json' % (settings.SYSTEM_STATUS, nid)
         jsonstr = open(filename).read()
-    except:
-        jsonstr = ''
-
-    try:
         status = json.loads(jsonstr)
     except:
         status = {}
