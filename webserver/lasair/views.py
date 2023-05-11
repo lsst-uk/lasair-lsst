@@ -119,7 +119,9 @@ def index(request):
         # MAKE RELATIVE HOME PATH ABSOLUTE
         from os.path import expanduser
         home = expanduser("~")
-        news = open(f'{home}/news.txt').read()
+        newsfile = open(f'{home}/news.txt')
+        news = newsfile.read()
+        newsfile.close()
     except:
         news = ''
 

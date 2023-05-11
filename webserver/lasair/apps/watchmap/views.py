@@ -8,7 +8,6 @@ import json
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
-from mocpy import MOC, World2ScreenMPL
 from subprocess import Popen, PIPE
 from random import randrange
 from lasair import settings

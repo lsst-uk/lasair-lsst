@@ -1,6 +1,6 @@
 import io
 import base64
-from mocpy import MOC, World2ScreenMPL
+from mocpy import MOC, WCS
 import matplotlib.pyplot as plt
 from src import db_connect
 import astropy.units as u
@@ -62,7 +62,7 @@ def make_image_of_MOC(fits_bytes, request):
     notmoc = moc.complement()
 
     fig = plt.figure(111, figsize=(10, 5))
-    with World2ScreenMPL(fig, fov=360 * u.deg, projection="AIT") as wcs:
+    with WCS(fig, fov=360 * u.deg, projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         notmoc.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="lightgray", linewidth=None)
         moc.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="red", linewidth=None)
