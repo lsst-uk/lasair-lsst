@@ -13,6 +13,7 @@ var JS9Prefs = {
     },
     "imageOpts": {
         "colormap": "grey",
-        "scale": "linear"
+        "scale": "linear",
+        "flip": "y"
     }
 }
