@@ -11,6 +11,7 @@ Usage:
     ingest.py [--maxalert=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
+
 Options:
     --maxalert=MAX     Number of alerts to process, default is infinite
     --group_id=GID     Group ID for kafka, default is from settings
