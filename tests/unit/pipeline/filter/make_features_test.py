@@ -11,7 +11,7 @@ import json
 import os
 import sys
 import context
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter/features_ZTF')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter')))
 from insert_query import create_insert_query, create_insert_annotation
 
 # the expected attributes in the 'sherlock' annotation
