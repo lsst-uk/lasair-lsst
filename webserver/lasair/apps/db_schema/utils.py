@@ -35,7 +35,7 @@ def get_schema_dict(schema_name):
 
     ```python
     from lasair.apps.db_schema import get_schema
-    schemaDict = get_schema_dict("objects")
+    schemaDict = get_schema_dict("diaObjects")
     ```           
     """
 #    schemaDict = {k["name"]: k["doc"] for k in get_schema(schema_name)}
