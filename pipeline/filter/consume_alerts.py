@@ -146,7 +146,7 @@ def kafka_consume(consumer, maxalert):
 #            break
 
         if nalert_in%1000 == 0:
-            log.info('%d nalert_in %d nalert_out  %d time %.1f' % 
+            log.info('nalert_in %d nalert_out  %d time %.1f' % \
                 (nalert_in, nalert_out, time.time()-startt))
             sys.stdout.flush()
             # refresh the database every 1000 alerts
@@ -154,7 +154,7 @@ def kafka_consume(consumer, maxalert):
             msl.close()
             msl = db_connect.local()
 
-    log.info('finished %d in, %d out % (nalert_in, nalert_out))
+    log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
     ms = manage_status(settings.SYSTEM_STATUS)
     nid  = date_nid.nid_now()

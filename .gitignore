@@ -127,5 +127,21 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Swap files
+*.swp
+/static
+/lasair.sublime-project
+/lasair.sublime-workspace
+node_modules
+#webserver/staticfiles/build/
+/docs/build
+
+# Settings files and compiled binaries
+settings.py
+
+# Symlinks and directories
+admin/
+
 /lasair-lsst.sublime-project
 /lasair-lsst.sublime-workspace

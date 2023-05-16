@@ -248,10 +248,10 @@ def watchlist_detail(request, wl_id):
     # GRAB ALL WATCHLIST MATCHES
     query_hit = f"""
 SELECT
-h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.objectId, o.ramean,o.decmean, o.rmag, o.gmag, jdnow()-o.jdmax as "last detected (days ago)"
+h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
 FROM watchlist_cones AS c
 NATURAL JOIN watchlist_hits as h
-NATURAL JOIN objects AS o
+NATURAL JOIN diaObjects AS o
 WHERE c.wl_id={wl_id} limit {resultCap}
 """
 
@@ -279,7 +279,7 @@ WHERE c.wl_id={wl_id} limit {resultCap}
         limit = False
 
     # ADD SCHEMA
-    schema = {**get_schema_dict("objects"), **get_schema_dict("watchlist_hits")}
+    schema = {**get_schema_dict("diaObjects"), **get_schema_dict("watchlist_hits")}
     schema["Catalogue ID"] = schema["name"]
     schema["separation (arcsec)"] = schema["arcsec"]
     schema["last detected (days ago)"] = "When was object last detected"

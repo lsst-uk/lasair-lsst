@@ -33,7 +33,10 @@ def read_area_cache_files(cache_dir):
         except:  continue
 
         gfile = cache_dir + '/' + ar_file
-        moc = MOC.from_fits(gfile)
+        try:
+            moc = MOC.from_fits(gfile)
+        except:
+            continue
         area = {'ar_id':ar_id, 'moc':moc}
         arealist.append(area)
     return arealist

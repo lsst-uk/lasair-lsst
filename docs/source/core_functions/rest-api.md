@@ -24,7 +24,7 @@ Request authentication is via the API key. For GET queries, the key can go in th
 
 ##### Get Your Token
 
-Once you are logged in on the website, clik on your name at the top right, and choose "My Profile". The API key is shown there.
+Once you are logged in on the website, click on your name at the top right, and choose "My Profile". The API key is shown there.
 
 #### Methods
 

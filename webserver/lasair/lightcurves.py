@@ -26,44 +26,32 @@ class lightcurve_fetcher():
         else:
             raise lightcurve_fetcher_error('Must give either cassandra_hosts or fileroot')
 
-    def fetch(self, objectId, full=False):
-        if self.using_cassandra:
-            if full:
-                query = "SELECT * "
-            else:
-                query = "SELECT candid, jd, ra, dec, fid, nid, magpsf, sigmapsf, "
-                query += "magnr,sigmagnr, magzpsci, "
-                query += "isdiffpos, ssdistnr, ssnamenr, drb "
-            query += "from candidates where objectId = '%s'" % objectId
-            ret = self.session.execute(query)
-            candidates = []
-            for cand in ret:
-                if cand['isdiffpos'] == '1':
-                    cand['isdiffpos'] = 't'
-                if cand['isdiffpos'] == '0':
-                    cand['isdiffpos'] = 'f'
-                candidates.append(cand)
-
-            query = "SELECT jd, fid, diffmaglim "
-            query += "from noncandidates where objectId = '%s'" % objectId
-            ret = self.session.execute(query)
-            for cand in ret:
-                candidates.append(cand)
-            return candidates
+    def fetch(self, diaObjectId, full=False):
+        if full:
+            query = "SELECT * "
         else:
-            store = objectStore(suffix='json', fileroot=self.fileroot)
-            lc = store.getObject(objectId)
+            query = "SELECT diaSourceId, midPointTai, ra, decl, filterName, nid, psFlux, psFluxErr "
+        query += "from diaSources where diaObjectId = %s" % diaObjectId
+        ret = self.session.execute(query)
+        diaSources = []
+        for diaSource in ret:
+            diaSources.append(diaSource)
 
-            if not lc:
-                raise lightcurve_fetcher_error('Object %s does not exist' % objectId)
+        query = "SELECT midPointTai, filterName, psFlux "
+        query += "from diaForcedSources where diaObjectId = %s" % diaObjectId
+        ret = self.session.execute(query)
+        diaForcedSources = []
+        for diaForcedSource in ret:
+            diaForcedSources.append(diaForcedSource)
 
-            try:
-                candlist = json.loads(lc)
-                candidates = candlist['candidates']
-                return candidates
-            except:
-                print(lc)
-                raise lightcurve_fetcher_error('Cannot parse json for object %s' % objectId)
+        query = "SELECT midPointTai, filterName, diaNoise "
+        query += "from diaNondetectionLimits where diaObjectId = %s" % diaObjectId
+        ret = self.session.execute(query)
+        diaNondetectionLimits = []
+        for diaNondetectionLimit in ret:
+            diaNondetectionLimits.append(diaNondetectionLimit)
+
+        return (diaSources, diaForcedSources, diaNondetectionLimits)
 
     def close(self):
         if self.session:
@@ -73,4 +61,7 @@ class lightcurve_fetcher():
 if __name__ == "__main__":
     LF = lightcurve_fetcher(cassandra_hosts=['192.168.0.11'])
 
-    candidates = LF.fetch('ZTF21abcmlzt')
+    (diaSources, diaForcedSources, diaNondetectionLimits) = LF.fetch(177261894535479587)
+    print(len(diaSources))
+    print(len(diaForcedSources))
+    print(len(diaNondetectionLimits))

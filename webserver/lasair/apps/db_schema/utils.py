@@ -20,7 +20,7 @@ def get_schema(
     scheme = get_schema('objects')
     ```           
     """
-    schema_package = importlib.import_module('schema.' + schema_name)
+    schema_package = importlib.import_module('schema.lasair_schema.' + schema_name)
     return schema_package.schema['fields']
 
 
@@ -38,7 +38,13 @@ def get_schema_dict(schema_name):
     schemaDict = get_schema_dict("objects")
     ```           
     """
-    schemaDict = {k["name"]: k["doc"] for k in get_schema(schema_name)}
+#    schemaDict = {k["name"]: k["doc"] for k in get_schema(schema_name)}
+    schemaDict = {}
+    for k in get_schema(schema_name):
+        if 'doc' in k:
+            schemaDict[k['name']] = k['doc']
+        else:
+            schemaDict[k['name']] = ''
     return schemaDict
 
 
