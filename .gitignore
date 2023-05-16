@@ -127,3 +127,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/lasair-lsst.sublime-project
+/lasair-lsst.sublime-workspace
