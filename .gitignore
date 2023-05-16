@@ -143,3 +143,5 @@ settings.py
 # Symlinks and directories
 admin/
 
+/lasair-lsst.sublime-project
+/lasair-lsst.sublime-workspace
