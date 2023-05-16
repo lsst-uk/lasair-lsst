@@ -192,7 +192,7 @@ def build_query(select_expression, from_expression, where_condition):
             crossmatch_tns = True
 
     # List of tables
-    from_table_list = ['objects']
+    from_table_list = ['diaObjects']
     if sherlock_classifications:
         from_table_list.append('sherlock_classifications')
     if watchlist_id:
@@ -214,25 +214,25 @@ def build_query(select_expression, from_expression, where_condition):
     # Extra clauses of the WHERE expression to make the JOINs
     where_clauses = []
     if sherlock_classifications:
-        where_clauses.append('objects.objectId=sherlock_classifications.objectId')
+        where_clauses.append('diaObjects.objectId=sherlock_classifications.objectId')
     if watchlist_id:
-        where_clauses.append('objects.objectId=watchlist_hits.objectId')
+        where_clauses.append('diaObjects.objectId=watchlist_hits.objectId')
         where_clauses.append('watchlist_hits.wl_id=%s' % watchlist_id)
     if area_ids:
         if len(area_ids) == 1:
-            where_clauses.append('objects.objectId=area_hits.objectId')
+            where_clauses.append('diaObjects.objectId=area_hits.objectId')
             where_clauses.append(f'area_hits.ar_id={area_ids[0]}')
         else:
             for i, a in enumerate(area_ids):
-                where_clauses.append(f'objects.objectId=ar{i}.objectId')
+                where_clauses.append(f'diaObjects.objectId=ar{i}.objectId')
                 where_clauses.append(f'ar{i}.ar_id={a}')
     if crossmatch_tns:
-        where_clauses.append('objects.objectId=watchlist_hits.objectId')
+        where_clauses.append('diaObjects.objectId=watchlist_hits.objectId')
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
     if annotation_topics:
         for at in annotation_topics:
-            where_clauses.append('objects.objectId=%s.objectId' % at)
+            where_clauses.append('diaObjects.objectId=%s.objectId' % at)
             where_clauses.append('%s.topic="%s"' % (at, at))
 
     # if the WHERE is just an ORDER BY, then we mustn't have AND before it
