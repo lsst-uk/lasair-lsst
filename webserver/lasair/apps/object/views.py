@@ -20,7 +20,7 @@ from .utils import object_difference_lightcurve
 sys.path.append('../common')
 
 
-def object_detail(request, objectId):
+def object_detail(request, diaObjectId):
     """*display details of an individual transient object*
 
     **Key Arguments:**
@@ -38,11 +38,11 @@ def object_detail(request, objectId):
     ]
     ```           
     """
-    data = objjson(objectId, full=True)
+    data = objjson(diaObjectId, full=True)
 
     if not data:
         return render(request, 'error.html',
-                      {'message': 'Object %s not in database' % objectId})
+                      {'message': 'Object %s not in database' % diaObjectId})
 
     if 'sherlock' in data and 'classification' in data['sherlock']:
         data['sherlock']['classification_expanded'] = data['sherlock']['classification']

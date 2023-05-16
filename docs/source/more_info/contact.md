@@ -16,6 +16,7 @@ respond to a message sent there.
     * Terry Sloan
     * Roy Williams
 * Queen's University Belfast
-    * Stephen Smartt
     * Ken Smith
     * Dave Young
+* University of Oxford
+    * Stephen Smartt

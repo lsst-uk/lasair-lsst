@@ -6,6 +6,7 @@ import sys
 import math
 import numpy as np
 import ephem
+from features import create_lasair_features
 from gkhtm import _gkhtm as htmCircle
 
 def create_insert_query(alert):
@@ -25,8 +26,33 @@ def create_insert_query(alert):
         else:
             diaSourceList = [alert['diaSource']]
 
-    lasair_features = create_lasair_features(diaObject, diaSourceList)
-    sets = {**diaObject, **lasair_features}
+    # Make a list of diaForcedSources
+    if 'prvrDdiaForcedSources' in alert:
+        diaForcedSourceList = alert['prvForcedDiaSources'] + [alert['diaSource']]
+    else:
+        diaForcedSourceList = []
+
+    # Make a list of diaNondetectionLimits
+    if 'prvDiaNondetectionLimits' in alert:
+        diaNondetectionLimitsList = alert['prvDiaNondetectionLimits']
+    else:
+        diaNondetectionLimitsList = []
+
+    lasair_features = create_lasair_features(
+            diaObject, 
+            diaSourceList, 
+            diaForcedSourceList, 
+            diaNondetectionLimitsList)
+
+    # Compute the HTM ID for later cone searches
+    try:
+        htm16 = htmCircle.htmID(16, diaObject['ra'], diaObject['decl'])
+    except:
+        htm16 = 0
+        print('ERROR: filter/insert_query: Cannot compute HTM index')
+        sys.stdout.flush()
+
+    sets = {**diaObject, 'htm16':htm16, **lasair_features}
 
     # Make the query
     list = []
@@ -43,42 +69,6 @@ def create_insert_query(alert):
             list.append(key + '=' + str(value))
     query += ',\n'.join(list)
     return query
-
-def create_lasair_features(diaObject, diaSourceList):
-    taimax = 0.0
-    taimin = 1000000000.
-    for diaSource in diaSourceList:
-        tai = diaSource['midPointTai']
-        if tai > taimax: 
-            taimax = tai
-        if tai < taimin: 
-            taimin = tai
-
-    ncand = 0
-    ncand_7 = 0
-    for diaSource in diaSourceList:
-        tai = diaSource['midPointTai']
-        ncand += 1
-        if taimax-tai < 7.0: 
-            ncand_7 += 1
-
-    # Compute the HTM ID for later cone searches
-    try:
-        htm16 = htmCircle.htmID(16, diaObject['ra'], diaObject['decl'])
-    except:
-        htm16 = 0
-        print('ERROR: filter/insert_query: Cannot compute HTM index')
-        sys.stdout.flush()
-
-    # dictionary of attributes
-    sets = {
-        'taimax' : taimax,
-        'taimin' : taimin,
-        'ncand'  : ncand,
-        'ncand_7': ncand_7,
-        'htm16'  : htm16,
-    }
-    return sets
 
 def create_insert_annotation(diaObjectId, annClass, ann, attrs, table, replace):
     """create_insert_annotation.

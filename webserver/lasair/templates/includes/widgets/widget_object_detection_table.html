@@ -16,7 +16,7 @@
 
             <div class="col-7 col-md-8 px-xl-0">
                 <div>
-                    <h2 class="h5 text-gray-400 mb-0 ps-2">ZTF Alert Packet Data{% include "includes/info_tooltip.html" with info="Each row contains data measured at the location of transient on a single ZTF exposure" position="auto" %}</h2>
+                    <h2 class="h5 text-gray-400 mb-0 ps-2">LSST Alert Packet Data{% include "includes/info_tooltip.html" with info="Each row contains data measured at the location of transient on a single LSST exposure" position="auto" %}</h2>
                 </div>
             </div>
             <div class="col-3  px-xl-1">
@@ -47,34 +47,24 @@
                         <th>MJD</th>
                         <th>UTC</th>
                         <th>Filter</th>
-                        <th>magpsf</th>
-                        <th>difference flux status</th>
+                        <th>difference flux</th>
                         <th>images</th>
                         <th>alert packet</th>
                     </tr></thead>
                 <tbody>
-                    {% for cand in data.candidates %}
+                    {% for cand in data.diaSources %}
 
                         <tr>
-                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.mjd|floatformat:6 }}{% if not cand.candid %}</font>{% endif %}</td>
-                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.utc }}{% if not cand.candid %}</font>{% endif %}</td>
-                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{% if cand.fid == 1 %}g{% else %}r{% endif %}{% if not cand.candid %}</font>{% endif %}</td>
-                            <td>{% if not cand.candid %}<font color="gray" size=-2>{% endif %}{{ cand.magpsf|floatformat:3 }} {% if cand.candid %}&plusmn; {{ cand.sigmapsf|floatformat:3 }}{% endif %}{% if not cand.candid %}</font>{% endif %}</td>
+                            <td>{{ cand.mjd|floatformat:6 }}</td>
+                            <td>{{ cand.utc }}</td>
+			    <td>{{ cand.filtername }}</td>
+			    <td>{{ cand.psflux|floatformat:0 }} &plusmn; {{ cand.psfluxerr|floatformat:0 }}</td>
+                            <td>
+                                {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{ cand.diasourceid }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
+                                {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{ cand.diasourceid }}_cutoutDifference");'><small>diff</small></a> {% endif %}
+                            </td>
 
-
-                            <td> {% if cand.candid %}{{ cand.isdiffpos|replace:"t|+ve"|replace:"f|-ve" }}
-                            {% else %}<font color="gray" size=-2>limit</font>
-                            {% endif %}</td>
-
-
-
-                            <td>{% if cand.candid > 0 %}
-                                {% if cand.image_urls.Science %}<a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutScience");'><small>target</small></a> {% endif %}
-                                {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
-                                {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{ cand.candid }}_cutoutDifference");'><small>diff</small></a> {% endif %}
-                            {% endif %}</td>
-
-                            <td> {% if cand.candid %}<a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a>{% endif %}</td>
+                            <td> <a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a></td>
 
                         </tr>
 

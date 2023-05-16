@@ -8,7 +8,6 @@ import json
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
-from mocpy import MOC, World2ScreenMPL
 from subprocess import Popen, PIPE
 from random import randrange
 from lasair import settings
@@ -188,10 +187,10 @@ def watchmap_detail(request, ar_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.objectId, o.ramean,o.decmean, o.rmag, o.gmag, jdnow()-o.jdmax as "last detected (days ago)"
-FROM area_hits as h, objects AS o
+o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
+FROM area_hits as h, diaObjects AS o
 WHERE h.ar_id={ar_id}
-AND o.objectId=h.objectId
+AND o.diaObjectId=h.diaObjectId
 limit {resultCap}
 """
 
@@ -219,7 +218,7 @@ limit {resultCap}
         limit = False
 
     # ADD SCHEMA
-    schema = get_schema_dict("objects")
+    schema = get_schema_dict("diaObjects")
 
     if len(table):
         for k in table[0].keys():

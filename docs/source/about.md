@@ -28,7 +28,7 @@ SQL filters and code can be made public, shared with a group of colleagues,
 copied, and edited.
 SQL filters can be escalated from static (run on command) to streaming filters, 
 that run whenever new alerts arrive. A broad overview of the Lasair design is 
-given in Figure 1.
+given in the diagram below.
 
 ## How Lasair Works
 Lasair runs in the Somerville computing cloud at the Advanced Computing Facility 
@@ -41,7 +41,7 @@ job, some more compute/data intensive than others, so it is difficult to know a
 priori how much resource should be allocated to each. Our design gives 
 flexibility: each cluster can be grown or reduced according to need. Also, 
 there are various persistent data stores, again, each is driven by a resilient 
-cluster that can be grown or reduced according to need. Figure 1 shows the 
+cluster that can be grown or reduced according to need. The diagram shows the 
 concept: data enters the Kafka system on the left and progresses to the right. 
 The green cluster reads, processes, and puts different data into the Kafka bus; 
 as soon as that starts the yellow cluster pulls and pushes; eventually the 
@@ -55,7 +55,7 @@ computing centre and not controlled by us, but they are in this picture because
 just like the others, they push data into the data storage and may read from 
 Kafka.
 
-The Kafka system is represented by the green nodes in Figure 2 as well as the 
+The Kafka system is represented by the green nodes in the diagram as well as the 
 grey arrow at the top. It is responsible for reading and caching the alert 
 packets from the USA, as well as sending it to the compute nodes and receiving 
 their resulting packets.
@@ -203,9 +203,9 @@ currently can provide streams of objects matched to known stars (via watch
 lists of $10^6$ objects) and trigger on a particular magnitude variability 
 index. We are working with scientists within TVS in particular to define 
 features that can be measured on the incoming stream and used to provide 
-alerts.  For example, outbursts of AM CVn stars\cite{AMCVn} which are then 
-linked to the binary system's long term lightcurve (SDSS J1240-0159 is a recent 
-example). Lasair-LSST will expand on its current functionality to provide 
+alerts.  For example, outbursts of [AM CVn stars](https://en.wikipedia.org/wiki/AM_Canum_Venaticorum_star) 
+which are then linked to the binary system's long term lightcurve 
+Lasair-LSST will expand on its current functionality to provide 
 seamless cross-links to the data releases within the UK IDAC infrastructure. 
 
 ### Solar System objects
