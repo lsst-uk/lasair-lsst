@@ -66,7 +66,7 @@
                 { key : "MYSQL > jdnow", value: "jdnow()", info: "The current time in Julian Days"},
                 { key : "MYSQL > as", value: "as", info: false},
                 { key : "MYSQL > BETWEEN", value: "BETWEEN xx AND xx", info: ""},
-                { key : "MYSQL > LIKE", value: "LIKE `%xx%`", info: ""}
+                { key : "MYSQL > LIKE", value: "LIKE '%xx%'", info: ""}
             ];
             var tableColumns = [];
             {% for schema_name, schema_content in schemas_core.items %}
