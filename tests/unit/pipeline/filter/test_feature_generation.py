@@ -3,6 +3,7 @@ Test that for every feature defined in the features schema,
 an iplementation exists.
 """
 import sys
+import importlib
 import unittest.main
 from unittest import TestCase
 import context
@@ -17,14 +18,15 @@ class FeatureTest(TestCase):
     """For every feature defined in the schema, try to import the implementation."""
     for feature in objectSchema['fields']:
       name = feature['name']
-      exec(f"from {name} import {name}")
+      featureModule = importlib.import_module(name)
 
   def test2_get_schema(self):
     """Check that for every feature we can get the schema."""
     for feature in objectSchema['fields']:
       name = feature['name']
-      exec(f"from {name} import {name}")
-      schema = eval(f"{name}.get_schema()")
+      featureModule = importlib.import_module(name)
+      featureClass = getattr(featureModule, name)
+      schema = featureClass.get_schema()
       # check that returned schema is a dict
       self.assertTrue(isinstance(schema, dict))
       # check that schema contains a "type" element
@@ -34,8 +36,9 @@ class FeatureTest(TestCase):
     """Check that we get a documentation string back."""
     for feature in objectSchema['fields']:
       name = feature['name']
-      exec(f"from {name} import {name}")
-      info = eval(f"{name}.get_info()")
+      featureModule = importlib.import_module(name)
+      featureClass = getattr(featureModule, name)
+      info = featureClass.get_info()
       # check that the info string is a string
       self.assertTrue(isinstance(info, str))
 
@@ -45,8 +48,9 @@ class FeatureTest(TestCase):
       alert = json.load(f)
       for feature in objectSchema['fields']:
         name = feature['name']
-        exec(f"from {name} import {name}")
-        result = eval(f"{name}.run(alert)")
+        featureModule = importlib.import_module(name)
+        featureClass = getattr(featureModule, name)
+        result = featureClass.run(alert)
         # check that the result is a dict
         self.assertTrue(isinstance(result, dict))
         # check that the result is the type specified in the schema
