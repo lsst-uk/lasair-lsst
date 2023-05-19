@@ -1,15 +1,26 @@
+import sys
+sys.path.append("../../../common/schema/lasair_schema")
+from diaObjects import schema as objectSchema
+
 class FeatureInterface:
   """Interface used by feature processors"""
 
-  def get_info(self) -> str:
+  @classmethod
+  def get_info(cls) -> str:
     """Get a string with information about the schema"""
-    return(__doc__)
+    # use the "doc" entry from the schema if it exists, otherwise use the docstring
+    return cls.get_schema().get("doc", cls.__doc__)
 
-  def get_schema(self) -> dict:
+  @classmethod
+  def get_schema(cls) -> dict:
     """Get the schema for the feature output"""
-    pass
+    for feature in objectSchema['fields']:
+      name = feature['name']
+      if name == cls.__name__:
+        return feature
 
-  def run(self, alert) -> dict:
+  @classmethod
+  def run(cls, alert) -> dict:
     """Generate the feature for the given alert"""
     pass
 

@@ -1,8 +1,18 @@
 from FeatureInterface import FeatureInterface
-from lasair.apps.object import mjd_now
+#from lasair.apps.object import mjd_now
 
 class ncand(FeatureInterface):
-  def get_schema(self) -> dict:
+  """Number of daiSource in light curve"""
+
+  @classmethod
+  def run(cls, alert) -> dict:
+    # do something
+    n = 1
+    return {
+      "ncand": n
+    }
+
+  def _get_schema(self) -> dict:
     schema = [{
       "name": "ncand",
       "type": "int"
@@ -12,11 +22,11 @@ class ncand(FeatureInterface):
     }]
     return schema
 
-  def run(self, alert) -> dict:
+  def _run(self, alert) -> dict:
     taiList = [diaSource['midPointTai'] for diaSource in alert['diaSourceList']]
     taiNow = mjd_now()
     ncand_7 = 0
-    for tai in taiList
+    for tai in taiList:
         if tai > taiNow -7:
             ncand_7 += 1
     return {
