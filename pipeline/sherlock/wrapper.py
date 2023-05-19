@@ -48,7 +48,7 @@ def consume(conf, log, alerts, consumer):
             elif not msg.error():
                 log.debug("Got message with offset " + str(msg.offset()))
                 alert = json.loads(msg.value())
-                #name = alert.get('diaObjectId', alert.get('diaSourceId'))
+                #name = alert.get('objectId', alert.get('candid'))
                 #alerts[name] = alert
                 alerts.append(alert)
                 n += 1
@@ -115,7 +115,7 @@ def classify(conf, log, alerts):
     if conf['cache_db']:
         names = []
         for alert in alerts:
-            name = alert.get('objectId', alert.get('diaSourceId'))
+            name = alert.get('objectId', alert.get('candid'))
             names.append(name)
         query = "SELECT * FROM cache WHERE name IN ('{}');".format("','".join(names))
         url = urlparse(conf['cache_db'])
@@ -154,12 +154,17 @@ def classify(conf, log, alerts):
     ra = []
     dec = []
     for alert in alerts:
-        name = alert.get('diaObjectId', alert.get('diaSourceId'))
+        name = alert.get('objectId', alert.get('candid'))
+        # ignore SS alerts
+        ssnamenr = alert['candidate'].get('ssnamenr', "null")
+        if ssnamenr != "null":
+            log.debug("Skipping classification for solar system alert {}".format(name))
+            continue
         if not name in annotations:
             if not name in names:
                 names.append(name)
-                ra.append(alert['diaSource']['ra'])
-                dec.append(alert['diaSource']['decl'])
+                ra.append(alert['candidate']['ra'])
+                dec.append(alert['candidate']['dec'])
 
     # set up sherlock
     classifier = transient_classifier(
@@ -239,7 +244,7 @@ def classify(conf, log, alerts):
     # add the annotations to the alerts
     n = 0
     for alert in alerts:
-        name = alert.get('diaObjectId', alert.get('diaSourceId'))
+        name = alert.get('objectId', alert.get('candid'))
         if name in annotations:
             annotations[name]['annotator'] = "https://github.com/thespacedoctor/sherlock/releases/tag/v{}".format(sherlock_version)
             annotations[name]['additional_output'] = "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/" + name
