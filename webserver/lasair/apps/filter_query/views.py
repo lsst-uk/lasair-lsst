@@ -235,7 +235,7 @@ def filter_query_create(request, mq_id=False):
 
     # BUILD CONTENT FOR THE CREATION FORM
     schemas_core = {
-        'diaObjects': get_schema('diaObjects'),
+        'objects': get_schema('objects'),
         'crossmatch_tns': get_schema('crossmatch_tns'),
         'sherlock_classifications': get_schema('sherlock_classifications')
     }
@@ -293,7 +293,7 @@ def filter_query_create(request, mq_id=False):
             active = form.initial["active"]
 
         # EXTRA DEFAULTS
-        tables = "diaObjects"
+        tables = "objects"
         limit = 1000
         offset = 0
 

@@ -38,11 +38,7 @@ def create_insert_query(alert):
     else:
         diaNondetectionLimitsList = []
 
-    lasair_features = create_lasair_features(
-            diaObject, 
-            diaSourceList, 
-            diaForcedSourceList, 
-            diaNondetectionLimitsList)
+    lasair_features = create_lasair_features(alert)
 
     # Compute the HTM ID for later cone searches
     try:
@@ -52,11 +48,11 @@ def create_insert_query(alert):
         print('ERROR: filter/insert_query: Cannot compute HTM index')
         sys.stdout.flush()
 
-    sets = {**diaObject, 'htm16':htm16, **lasair_features}
+    sets = {'htm16':htm16, **lasair_features}
 
     # Make the query
     list = []
-    query = 'REPLACE INTO diaObjects SET '
+    query = 'REPLACE INTO objects SET '
     for key,value in sets.items():
         print
         if not value:

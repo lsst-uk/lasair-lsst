@@ -6,11 +6,10 @@ import sys
 import math
 import numpy as np
 
-def create_lasair_features(diaObject, 
-        diaSourceList, diaForcedSourceList, diaNondetectionLimitsList):
+def create_lasair_features(alert):
     taimax = 0.0
     taimin = 1000000000.
-    for diaSource in diaSourceList:
+    for diaSource in alert['diaSourceList']:
         tai = diaSource['midPointTai']
         if tai > taimax: 
             taimax = tai
@@ -19,7 +18,7 @@ def create_lasair_features(diaObject,
 
     ncand = 0
     ncand_7 = 0
-    for diaSource in diaSourceList:
+    for diaSource in alert['diaSourceList']:
         tai = diaSource['midPointTai']
         ncand += 1
         if taimax-tai < 7.0: 

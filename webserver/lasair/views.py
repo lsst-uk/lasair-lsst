@@ -35,15 +35,14 @@ def index(request):
 
     # query finds only mag<17 alerts with at least 2 in light curve, with age < 7
     query = """
-    SELECT diaObjects.diaObjectId,
-       diaObjects.ra, diaObjects.decl,
-       diaObjects.gPSFluxMean, diaObjects.rPSFluxMean, jdnow()-diaObjects.taimax AS "last detected",
+    SELECT objects.diaObjectId,
+       objects.ra, objects.decl,
+       jdnow()-objects.taimax AS "last detected",
        sherlock_classifications.classification AS "predicted type"
-    FROM diaObjects, sherlock_classifications
-    WHERE diaObjects.diaObjectId=sherlock_classifications.diaObjectId
-       AND diaObjects.taimax > jdnow()-7
-       AND (diaObjects.rPSFluxMean > 0.1 OR diaObjects.rPSFluxMean > 0.1)
-       AND diaObjects.ncand > 1
+    FROM objects, sherlock_classifications
+    WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
+       AND objects.taimax > jdnow()-7
+       AND objects.ncand > 1
        AND sherlock_classifications.classification in 
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
@@ -55,7 +54,7 @@ def index(request):
 
     table = cursor.fetchall()
     # ADD SCHEMA
-    schema = get_schema_dict("diaObjects")
+    schema = get_schema_dict("objects")
 
     if len(table):
         for k in table[0].keys():
