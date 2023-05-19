@@ -79,6 +79,15 @@ def makeObject(diaObjectId):
 
     diaObject = {
         'diaObjectId': diaObjectId,
+        'ra': 0.0,
+        'decl': 0.0,
+        'radecTai': 0.0,
+        'uPSFluxMean': 0.0,
+        'gPSFluxMean': 0.0,
+        'rPSFluxMean': 0.0,
+        'iPSFluxMean': 0.0,
+        'zPSFluxMean': 0.0,
+        'yPSFluxMean': 0.0,
     }
 
     alert = {
