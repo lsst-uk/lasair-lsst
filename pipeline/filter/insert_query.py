@@ -17,27 +17,6 @@ def create_insert_query(alert):
     Args:
         alert:
     """
-    diaObject = alert['diaObject']
-
-    # Make a list of diaSources
-    if 'diaSource' in alert and alert['diaSource'] != None:
-        if 'prvDiaSources' in alert and alert['prvDiaSources'] != None:
-            diaSourceList = alert['prvDiaSources'] + [alert['diaSource']]
-        else:
-            diaSourceList = [alert['diaSource']]
-
-    # Make a list of diaForcedSources
-    if 'prvrDdiaForcedSources' in alert:
-        diaForcedSourceList = alert['prvForcedDiaSources'] + [alert['diaSource']]
-    else:
-        diaForcedSourceList = []
-
-    # Make a list of diaNondetectionLimits
-    if 'prvDiaNondetectionLimits' in alert:
-        diaNondetectionLimitsList = alert['prvDiaNondetectionLimits']
-    else:
-        diaNondetectionLimitsList = []
-
     lasair_features = create_lasair_features(alert)
 
     # Compute the HTM ID for later cone searches
@@ -54,7 +33,6 @@ def create_insert_query(alert):
     list = []
     query = 'REPLACE INTO objects SET '
     for key,value in sets.items():
-        print
         if not value:
             list.append(key + '= NULL')
         elif math.isnan(value):

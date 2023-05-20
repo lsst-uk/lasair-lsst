@@ -15,9 +15,6 @@ except:
 query = 'TRUNCATE TABLE objects'
 cursor.execute(query)
 
-query = 'TRUNCATE TABLE ssObjects'
-cursor.execute(query)
-
 query = 'TRUNCATE TABLE sherlock_classifications'
 cursor.execute(query)
 

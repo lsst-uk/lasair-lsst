@@ -27,7 +27,7 @@ def minMaxTai(alert=None):
             "taimax": 0.0,
         }
 
-    taiList = [diaSource['midPointTai'] for diaSource in alert['diaSourceList']]
+    taiList = [diaSource['midPointTai'] for diaSource in alert['diaSourcesList']]
     return {
         "taimin": min(taiList),
         "taimax": max(taiList),
@@ -46,7 +46,7 @@ def ncand(alert=None):
             "ncand_7": 0,
         }
   
-    taiList = [diaSource['midPointTai'] for diaSource in alert['diaSourceList']]
+    taiList = [diaSource['midPointTai'] for diaSource in alert['diaSourcesList']]
     taiNow = mjd_now()
     ncand_7 = 0
     for tai in taiList:
