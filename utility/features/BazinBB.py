@@ -35,7 +35,7 @@ def makeObject(diaObjectId):
     filterNameList = []
     for i in range(nsource):
         filterName = random.choice(list(wl.keys()))
-        flux = bazinBB(t[i], wl[filterName], p) + sigma*random.normalvariate()
+        flux = bazinBB(t[i], wl[filterName], p) + sigma*random.normalvariate(0.0, 1.0)
         filterNameList.append(filterName)
         fluxList.append(flux)
         if idet == -1 and flux > 5*sigma:
@@ -46,8 +46,8 @@ def makeObject(diaObjectId):
 
     print(diaObjectId, inondet, idet, nsource)
 
-    diaSourceList = []
-    diaForcedSourceList = []
+    diaSourcesList = []
+    diaForcedSourcesList = []
     diaNondetectionLimitsList = []
     for i in range(0, nsource):
         diaSourceId = 1000+i
@@ -58,7 +58,7 @@ def makeObject(diaObjectId):
                 "diaNoise": fluxList[i],
             })
         elif i < idet:
-            diaForcedSourceList.append({
+            diaForcedSourcesList.append({
                 "diaSourceId": random.randint(1000, 5000),
                 "midPointTai": t[i],
                 "filterName": filterNameList[i],
@@ -66,15 +66,15 @@ def makeObject(diaObjectId):
                 "psFluxErr": sigma,
             })
         else:
-            diaSourceList.append({
+            diaSourcesList.append({
                 "diaSourceId": random.randint(1000, 5000),
                 "midPointTai": t[i],
                 "filterName": filterNameList[i],
                 "psFlux": fluxList[i],
                 "psFluxErr": sigma,
             })
-    diaSourceList             = sorted(diaSourceList,             key=lambda ds:ds['midPointTai'])
-    diaForcedSourceList       = sorted(diaForcedSourceList,       key=lambda ds:ds['midPointTai'])
+    diaSourcesList            = sorted(diaSourcesList,            key=lambda ds:ds['midPointTai'])
+    diaForcedSourcesList      = sorted(diaForcedSourcesList,      key=lambda ds:ds['midPointTai'])
     diaNondetectionLimitsList = sorted(diaNondetectionLimitsList, key=lambda ds:ds['midPointTai'])
 
     diaObject = {
@@ -92,8 +92,8 @@ def makeObject(diaObjectId):
 
     alert = {
         'diaObject'                : diaObject,
-        'diaSourceList'            : diaSourceList,
-        'diaForcedSourceList'      : diaForcedSourceList,
+        'diaSourcesList'           : diaSourcesList,
+        'diaForcedSourcesList'     : diaForcedSourcesList,
         'diaNondetectionLimitsList': diaNondetectionLimitsList,
     }
     return alert
