@@ -162,14 +162,14 @@ def build_query(select_expression, from_expression, where_condition):
         if table == 'sherlock_classifications':
             sherlock_classifications = True
 
-        if table.startswith('watchlist'):
+        if table.startswith('watchlist:'):
             w = table.split(':')
             try:
                 watchlist_id = int(w[1])
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form watchlist:nnn' % table)
 
-        if table.startswith('area'):
+        if table.startswith('area:'):
             w = table.split(':')
             try:
                 area_ids = w[1].split('&')
@@ -192,7 +192,7 @@ def build_query(select_expression, from_expression, where_condition):
             crossmatch_tns = True
 
     # List of tables
-    from_table_list = ['objects']
+    from_table_list = ['diaObjects']
     if sherlock_classifications:
         from_table_list.append('sherlock_classifications')
     if watchlist_id:
@@ -228,6 +228,7 @@ def build_query(select_expression, from_expression, where_condition):
                 where_clauses.append(f'ar{i}.ar_id={a}')
     if crossmatch_tns:
         where_clauses.append('objects.diaObjectId=watchlist_hits.diaObjectId')
+
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
     if annotation_topics:

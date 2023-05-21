@@ -17,7 +17,7 @@ def get_schema(
 
     ```python
     from lasair.apps.db_schema import get_schema
-    scheme = get_schema('objects')
+    scheme = get_schema('diaObjects')
     ```           
     """
     schema_package = importlib.import_module('schema.lasair_schema.' + schema_name)
@@ -35,7 +35,7 @@ def get_schema_dict(schema_name):
 
     ```python
     from lasair.apps.db_schema import get_schema
-    schemaDict = get_schema_dict("objects")
+    schemaDict = get_schema_dict("diaObjects")
     ```           
     """
 #    schemaDict = {k["name"]: k["doc"] for k in get_schema(schema_name)}
@@ -67,7 +67,7 @@ def get_schema_for_query_selected(
 
     # GET ALL SCHEMA IN SINGLE DICTIONARY
     schemas = {
-        'objects': get_schema_dict('objects'),
+        'objects': get_schema_dict('diaObjects'),
         'sherlock_classifications': get_schema_dict('sherlock_classifications'),
         'crossmatch_tns': get_schema_dict('crossmatch_tns'),
         'annotations': get_schema_dict('annotations'),
