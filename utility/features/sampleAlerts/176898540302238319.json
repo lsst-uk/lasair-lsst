@@ -20,7 +20,7 @@
     "nearbyObj3LnP": NaN,
     "flags": 1
   },
-  "diaSourceList": [
+  "diaSourcesList": [
     {
       "diaSourceId": 176898540302238319,
       "midPointTai": 57072.36415906422,
@@ -127,6 +127,6 @@
       "psFluxErr": 1248.1263427734375
     }
   ],
-  "diaForcedSourceList": [],
+  "diaForcedSourcesList": [],
   "diaNondetectionLimitsList": []
 }

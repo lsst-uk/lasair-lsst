@@ -8,7 +8,7 @@ The SQL looks like
 Note that this part of query is added outside of this code
     LIMIT <limit> OFFSET <offset>
 Example:
-    select_expression = 'objectId'
+    select_expression = 'diaObjectId'
     from_expression   = 'objects'
     where_condition   = 'mag < 14 ORDER BY jd'
 The syntax checking happens in two stages, first in this code and then in the SQL engine.
@@ -214,25 +214,26 @@ def build_query(select_expression, from_expression, where_condition):
     # Extra clauses of the WHERE expression to make the JOINs
     where_clauses = []
     if sherlock_classifications:
-        where_clauses.append('diaObjects.diaObjectId=sherlock_classifications.diaObjectId')
+        where_clauses.append('objects.diaObjectId=sherlock_classifications.diaObjectId')
     if watchlist_id:
-        where_clauses.append('diaObjects.diaObjectId=watchlist_hits.diaObjectId')
+        where_clauses.append('objects.diaObjectId=watchlist_hits.diaObjectId')
         where_clauses.append('watchlist_hits.wl_id=%s' % watchlist_id)
     if area_ids:
         if len(area_ids) == 1:
-            where_clauses.append('diaObjects.diaObjectId=area_hits.diaObjectId')
+            where_clauses.append('objects.diaObjectId=area_hits.diaObjectId')
             where_clauses.append(f'area_hits.ar_id={area_ids[0]}')
         else:
             for i, a in enumerate(area_ids):
-                where_clauses.append(f'diaObjects.diaObjectId=ar{i}.diaObjectId')
+                where_clauses.append(f'objects.diaObjectId=ar{i}.diaObjectId')
                 where_clauses.append(f'ar{i}.ar_id={a}')
     if crossmatch_tns:
-        where_clauses.append('diaObjects.diaObjectId=watchlist_hits.diaObjectId')
+        where_clauses.append('objects.diaObjectId=watchlist_hits.diaObjectId')
+
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
     if annotation_topics:
         for at in annotation_topics:
-            where_clauses.append('diaObjects.diaObjectId=%s.diaObjectId' % at)
+            where_clauses.append('objects.diaObjectId=%s.diaObjectId' % at)
             where_clauses.append('%s.topic="%s"' % (at, at))
 
     # if the WHERE is just an ORDER BY, then we mustn't have AND before it

@@ -188,7 +188,7 @@ def watchmap_detail(request, ar_id):
     query_hit = f"""
 SELECT
 o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
-FROM area_hits as h, diaObjects AS o
+FROM area_hits as h, objects AS o
 WHERE h.ar_id={ar_id}
 AND o.diaObjectId=h.diaObjectId
 limit {resultCap}
@@ -218,7 +218,7 @@ limit {resultCap}
         limit = False
 
     # ADD SCHEMA
-    schema = get_schema_dict("diaObjects")
+    schema = get_schema_dict("objects")
 
     if len(table):
         for k in table[0].keys():

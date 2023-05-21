@@ -17,48 +17,28 @@ def create_insert_query(alert):
     Args:
         alert:
     """
-    diaObject = alert['diaObject']
+    lasair_features = create_lasair_features(alert)
 
-    # Make a list of diaSources
-    if 'diaSource' in alert and alert['diaSource'] != None:
-        if 'prvDiaSources' in alert and alert['prvDiaSources'] != None:
-            diaSourceList = alert['prvDiaSources'] + [alert['diaSource']]
-        else:
-            diaSourceList = [alert['diaSource']]
-
-    # Make a list of diaForcedSources
-    if 'prvrDdiaForcedSources' in alert:
-        diaForcedSourceList = alert['prvForcedDiaSources'] + [alert['diaSource']]
-    else:
-        diaForcedSourceList = []
-
-    # Make a list of diaNondetectionLimits
-    if 'prvDiaNondetectionLimits' in alert:
-        diaNondetectionLimitsList = alert['prvDiaNondetectionLimits']
-    else:
-        diaNondetectionLimitsList = []
-
-    lasair_features = create_lasair_features(
-            diaObject, 
-            diaSourceList, 
-            diaForcedSourceList, 
-            diaNondetectionLimitsList)
+    obj = alert['diaObject']
 
     # Compute the HTM ID for later cone searches
     try:
-        htm16 = htmCircle.htmID(16, diaObject['ra'], diaObject['decl'])
+        htm16 = htmCircle.htmID(16, obj['ra'], obj['decl'])
     except:
         htm16 = 0
         print('ERROR: filter/insert_query: Cannot compute HTM index')
         sys.stdout.flush()
 
-    sets = {**diaObject, 'htm16':htm16, **lasair_features}
+    sets = {
+        'diaObjectId':obj['diaObjectId'], 
+        'htm16':htm16, 
+        **lasair_features
+    }
 
     # Make the query
     list = []
-    query = 'REPLACE INTO diaObjects SET '
+    query = 'REPLACE INTO objects SET '
     for key,value in sets.items():
-        print
         if not value:
             list.append(key + '= NULL')
         elif math.isnan(value):

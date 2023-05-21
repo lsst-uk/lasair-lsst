@@ -19,7 +19,7 @@ def schema_index(request):
     - `request` -- the page request       
     """
     schemas = {
-        'diaObjects': get_schema('diaObjects'),
+        'objects': get_schema('objects'),
         'crossmatch_tns': get_schema('crossmatch_tns'),
         'sherlock_classifications': get_schema('sherlock_classifications'),
         '<annotator>': get_schema('annotations'),

@@ -189,7 +189,7 @@ def run_filter(args):
         log.error('ERROR in filter/filter: cannot build CSV from local database')
         sys.exit(0)
     
-    tablelist = ['diaObjects', 'sherlock_classifications', 'watchlist_hits', 'area_hits']
+    tablelist = ['objects', 'sherlock_classifications', 'watchlist_hits', 'area_hits']
     
     ##### send CSV file to central database
     t = time.time()
