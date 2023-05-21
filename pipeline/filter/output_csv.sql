@@ -1,4 +1,4 @@
-SELECT * FROM diaObjects INTO OUTFILE '/data/mysql/objects.txt' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
+SELECT * FROM objects INTO OUTFILE '/data/mysql/objects.txt' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
 
 SELECT * FROM sherlock_classifications INTO OUTFILE '/data/mysql/sherlock_classifications.txt' FIELDS TERMINATED BY ',' ENCLOSED BY '"' LINES TERMINATED BY '\n';
 

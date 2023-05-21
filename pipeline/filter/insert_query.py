@@ -19,15 +19,21 @@ def create_insert_query(alert):
     """
     lasair_features = create_lasair_features(alert)
 
+    obj = alert['diaObject']
+
     # Compute the HTM ID for later cone searches
     try:
-        htm16 = htmCircle.htmID(16, diaObject['ra'], diaObject['decl'])
+        htm16 = htmCircle.htmID(16, obj['ra'], obj['decl'])
     except:
         htm16 = 0
         print('ERROR: filter/insert_query: Cannot compute HTM index')
         sys.stdout.flush()
 
-    sets = {'htm16':htm16, **lasair_features}
+    sets = {
+        'diaObjectId':obj['diaObjectId'], 
+        'htm16':htm16, 
+        **lasair_features
+    }
 
     # Make the query
     list = []
