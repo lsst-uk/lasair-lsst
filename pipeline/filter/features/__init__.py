@@ -38,5 +38,8 @@ __all__ = [
   "iPSFluxMean",
   "zPSFluxMean",
   "yPSFluxMean",
-  "ncand"
+  "taimax",
+  "taimin",
+  "ncand",
+  "ncand_7"
 ]
