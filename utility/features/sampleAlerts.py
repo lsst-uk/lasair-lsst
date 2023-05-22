@@ -6,9 +6,9 @@ for filename in sorted(os.listdir(fr)):
     f = json.loads(open(gfile).read())
 
     j = {
-        'diaObject':f['diaObject'],
-        'diaSourceList':f['diaSourceList'],
-        'diaForcedSourceList':f['diaForcedSourceList'],
+        'diaObject'                :f['diaObject'],
+        'diaSourcesList'           :f['diaSource.List'],
+        'diaForcedSourcesList'     :f['diaForcedSourcesList'],
         'diaNondetectionLimitsList':f['diaNondetectionLimitsList'],
     }
 

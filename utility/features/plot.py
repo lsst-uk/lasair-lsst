@@ -42,8 +42,8 @@ def plotit(ax, filename):
     lc = json.loads(open(filename).read())
     diaObject                 = lc['diaObject']
 
-    plottype(ax, 'det',   lc['diaSourceList'])
-    plottype(ax, 'fdet',  lc['diaForcedSourceList'])
+    plottype(ax, 'det',   lc['diaSourcesList'])
+    plottype(ax, 'fdet',  lc['diaForcedSourcesList'])
     plottype(ax, 'nondet',lc['diaNondetectionLimitsList'])
 
     ax.legend()
