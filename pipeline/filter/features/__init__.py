@@ -29,5 +29,8 @@ __all__ = [
   "CopyFeature",
   "diaObjectId",
   "htm16",
+  "ra",
+  "decl",
+  "radecTai",
   "ncand"
 ]
