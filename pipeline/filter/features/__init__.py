@@ -32,5 +32,11 @@ __all__ = [
   "ra",
   "decl",
   "radecTai",
+  "uPSFluxMean",
+  "gPSFluxMean",
+  "rPSFluxMean",
+  "iPSFluxMean",
+  "zPSFluxMean",
+  "yPSFluxMean",
   "ncand"
 ]
