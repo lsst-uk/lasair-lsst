@@ -7,7 +7,7 @@ class FeatureInterface:
 
   @classmethod
   def get_info(cls) -> str:
-    """Get a string with information about the schema"""
+    """Get a string with information about the feature"""
     # use the "doc" entry from the schema if it exists, otherwise use the docstring
     return cls.get_schema().get("doc", cls.__doc__)
 
@@ -18,6 +18,7 @@ class FeatureInterface:
       name = feature['name']
       if name == cls.__name__:
         return feature
+    return {}
 
   @classmethod
   def run(cls, alert):

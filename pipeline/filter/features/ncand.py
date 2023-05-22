@@ -1,5 +1,4 @@
-from FeatureInterface import FeatureInterface
-#from lasair.apps.object import mjd_now
+from features.FeatureInterface import FeatureInterface
 
 class ncand(FeatureInterface):
   """Number of diaSource in light curve"""
