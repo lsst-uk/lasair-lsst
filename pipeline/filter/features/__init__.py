@@ -28,5 +28,6 @@ __all__ = [
   "FeatureInterface",
   "CopyFeature",
   "diaObjectId",
+  "htm16",
   "ncand"
 ]
