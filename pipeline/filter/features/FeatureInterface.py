@@ -1,6 +1,6 @@
 import sys
 sys.path.append("../../../common/schema/lasair_schema")
-from diaObjects import schema as objectSchema
+from objects import schema as objectSchema
 
 class FeatureInterface:
   """Interface used by feature processors"""
@@ -20,7 +20,7 @@ class FeatureInterface:
         return feature
 
   @classmethod
-  def run(cls, alert) -> dict:
+  def run(cls, alert):
     """Generate the feature for the given alert"""
     pass
 

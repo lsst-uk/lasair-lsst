@@ -2,15 +2,12 @@ from FeatureInterface import FeatureInterface
 #from lasair.apps.object import mjd_now
 
 class ncand(FeatureInterface):
-  """Number of daiSource in light curve"""
+  """Number of diaSource in light curve"""
 
   @classmethod
-  def run(cls, alert) -> dict:
+  def run(cls, alert):
     # do something
-    n = 1
-    return {
-      "ncand": n
-    }
+    return 1
 
   def _get_schema(self) -> dict:
     schema = [{

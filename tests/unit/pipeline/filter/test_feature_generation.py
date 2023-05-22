@@ -52,9 +52,9 @@ class FeatureTest(TestCase):
         featureClass = getattr(featureModule, name)
         result = featureClass.run(alert)
         # check that the result is a dict
-        self.assertTrue(isinstance(result, dict))
+        #self.assertTrue(isinstance(result, dict))
         # check that the result is the type specified in the schema
-        self.assertTrue(isinstance(result[name], eval(feature['type'])))
+        self.assertTrue(isinstance(result, eval(feature['type'])))
 
 if __name__ == '__main__':
   import xmlrunner
