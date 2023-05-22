@@ -8,9 +8,3 @@ class diaObjectId(CopyFeature):
   def get_schema(cls) -> dict:
     """Get the schema for the feature output"""
     return { "name": "diaObjectId", "type": "int", "extra": "NOT NULL" }
-
-#  @classmethod
-#  def run(cls, alert):
-#    # do something
-#    return "2"
-
