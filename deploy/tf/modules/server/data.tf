@@ -1,0 +1,13 @@
+# Data sources
+## Get Image ID
+data "openstack_images_image_v2" "image" {
+  name        = "ubuntu-jammy" # Name of image to be used
+  most_recent = true
+}
+
+## Get flavor id
+data "openstack_compute_flavor_v2" "flavor" {
+   name = "tiny"
+#  name = "TestUtilityFlavor" # flavor to be used
+}
+

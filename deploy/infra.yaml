@@ -1,0 +1,27 @@
+---
+
+- name: deploy openstack infrastructure
+
+  hosts: localhost
+  gather_facts: False
+
+  vars_files:
+    - settings.yaml
+
+  vars:
+    tf_path: "./tf"
+
+  tasks:
+
+    - name: deploy
+      register: tf_output
+      community.general.terraform:
+        project_path: "{{ tf_path }}"
+        state: planned
+        plan_file: plan
+        complex_vars: true
+        variables:
+          instances: "{{ instances }}"
+          base_name: "{{ lasair_name }}"
+
+
