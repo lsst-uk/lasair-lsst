@@ -13,280 +13,266 @@
   },
   "diaSourcesList": [
     {
-      "diaSourceId": 3159,
-      "midPointTai": -13.866382863570294,
-      "filterName": "r",
-      "psFlux": 6381.601071066765,
+      "diaSourceId": 3151,
+      "midPointTai": -13.559454610989594,
+      "filterName": "i",
+      "psFlux": 5273.313981824742,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 1555,
-      "midPointTai": -13.812026401912796,
-      "filterName": "z",
-      "psFlux": 3552.1295614417777,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 3723,
-      "midPointTai": -13.100669786561816,
-      "filterName": "g",
-      "psFlux": 8184.124622391788,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 1455,
-      "midPointTai": -11.400498864342003,
-      "filterName": "g",
-      "psFlux": 7968.601056353198,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 3018,
-      "midPointTai": -10.495588659704069,
-      "filterName": "g",
-      "psFlux": 8783.087148014833,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 3861,
-      "midPointTai": -9.859254608451442,
-      "filterName": "r",
-      "psFlux": 11525.01969515635,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 3494,
-      "midPointTai": -9.69466220791486,
-      "filterName": "r",
-      "psFlux": 11803.372894603615,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 4299,
-      "midPointTai": -9.507998172783438,
+      "diaSourceId": 3359,
+      "midPointTai": -13.096488417389288,
       "filterName": "u",
-      "psFlux": 5316.197664618495,
+      "psFlux": 3398.0866252700216,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 4242,
-      "midPointTai": -9.18791275019674,
-      "filterName": "i",
-      "psFlux": 10055.932016634004,
+      "diaSourceId": 4840,
+      "midPointTai": -13.047401140950292,
+      "filterName": "z",
+      "psFlux": 5227.977927595861,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 1038,
-      "midPointTai": -8.96061988804022,
+      "diaSourceId": 1459,
+      "midPointTai": -12.789191542689242,
       "filterName": "g",
-      "psFlux": 12742.62269444216,
+      "psFlux": 4484.991705500876,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3684,
-      "midPointTai": -8.799768108691696,
-      "filterName": "g",
-      "psFlux": 11501.071285157044,
+      "diaSourceId": 1180,
+      "midPointTai": -12.786212585353173,
+      "filterName": "z",
+      "psFlux": 6366.99997882802,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 2784,
-      "midPointTai": -8.527881042770655,
-      "filterName": "i",
-      "psFlux": 13852.70162349064,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 1554,
-      "midPointTai": -8.508407481704904,
-      "filterName": "u",
-      "psFlux": 8850.614800887079,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 2077,
-      "midPointTai": -7.097361333743326,
-      "filterName": "g",
-      "psFlux": 16488.815393092344,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 4868,
-      "midPointTai": -7.03189932126379,
+      "diaSourceId": 2718,
+      "midPointTai": -11.72374414584815,
       "filterName": "r",
-      "psFlux": 16791.843323621502,
+      "psFlux": 7381.540310419762,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 1920,
-      "midPointTai": -6.580710865632707,
-      "filterName": "i",
-      "psFlux": 17050.7142405019,
+      "diaSourceId": 4873,
+      "midPointTai": -11.424465431123235,
+      "filterName": "g",
+      "psFlux": 6882.600527205027,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 2697,
-      "midPointTai": -4.075590572060223,
-      "filterName": "i",
-      "psFlux": 26640.212588417133,
+      "diaSourceId": 2993,
+      "midPointTai": -10.800588993844347,
+      "filterName": "u",
+      "psFlux": 6876.0020858446105,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 2810,
-      "midPointTai": -3.451625664958371,
+      "diaSourceId": 3875,
+      "midPointTai": -10.168169948484149,
+      "filterName": "g",
+      "psFlux": 10455.696397234577,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1754,
+      "midPointTai": -9.942024355524635,
+      "filterName": "r",
+      "psFlux": 10428.098897436515,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1123,
+      "midPointTai": -9.381059722418092,
       "filterName": "z",
-      "psFlux": 23736.46581496837,
+      "psFlux": 9195.336129426649,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3201,
-      "midPointTai": -2.83372731991021,
-      "filterName": "i",
-      "psFlux": 31195.647021924087,
+      "diaSourceId": 3065,
+      "midPointTai": -4.847616658290313,
+      "filterName": "g",
+      "psFlux": 25195.992110874842,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 2703,
-      "midPointTai": -1.3425514925078517,
+      "diaSourceId": 3046,
+      "midPointTai": -4.089519773876834,
       "filterName": "z",
-      "psFlux": 27318.061820675783,
+      "psFlux": 20347.363050520802,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 4730,
-      "midPointTai": -1.015049544413717,
+      "diaSourceId": 3692,
+      "midPointTai": -0.232133107765236,
+      "filterName": "r",
+      "psFlux": 41403.78395424737,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 2063,
+      "midPointTai": 0.6810549004397046,
+      "filterName": "i",
+      "psFlux": 39089.345731433816,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 4707,
+      "midPointTai": 0.8694513507252211,
+      "filterName": "i",
+      "psFlux": 38455.11020212811,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1049,
+      "midPointTai": 0.8889073769155722,
+      "filterName": "u",
+      "psFlux": 27078.634890680394,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 2559,
+      "midPointTai": 0.9962699565763344,
+      "filterName": "r",
+      "psFlux": 42792.50590995578,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 2055,
+      "midPointTai": 2.1402437532042136,
       "filterName": "y",
-      "psFlux": 23019.040906104274,
+      "psFlux": 24912.423389939355,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 1266,
-      "midPointTai": -0.6046551730554022,
-      "filterName": "r",
-      "psFlux": 39998.10470441505,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 1299,
-      "midPointTai": 0.6327247399773057,
+      "diaSourceId": 1307,
+      "midPointTai": 3.958719001830751,
       "filterName": "g",
-      "psFlux": 42037.53993823451,
+      "psFlux": 41458.54307499009,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3918,
-      "midPointTai": 0.7017765083381988,
-      "filterName": "u",
-      "psFlux": 26933.710531438093,
+      "diaSourceId": 3614,
+      "midPointTai": 4.043274029900022,
+      "filterName": "z",
+      "psFlux": 30967.222575949723,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 2018,
-      "midPointTai": 0.7179189642963557,
-      "filterName": "r",
-      "psFlux": 43717.58201967891,
+      "diaSourceId": 1641,
+      "midPointTai": 4.111466347319656,
+      "filterName": "i",
+      "psFlux": 38357.616451477625,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 4075,
-      "midPointTai": 0.7550846885885605,
+      "diaSourceId": 3498,
+      "midPointTai": 4.830210284136228,
       "filterName": "y",
-      "psFlux": 24523.779026053766,
+      "psFlux": 23568.112937086637,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3620,
-      "midPointTai": 1.558605093156455,
-      "filterName": "i",
-      "psFlux": 39617.92357612346,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 4708,
-      "midPointTai": 1.5731927077476762,
-      "filterName": "i",
-      "psFlux": 39960.73930142026,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 4358,
-      "midPointTai": 1.762480835045256,
+      "diaSourceId": 2379,
+      "midPointTai": 5.959838308940611,
       "filterName": "u",
-      "psFlux": 28978.206276335768,
+      "psFlux": 24398.07192685347,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3874,
-      "midPointTai": 4.670715983975491,
+      "diaSourceId": 1026,
+      "midPointTai": 6.13924380584541,
+      "filterName": "y",
+      "psFlux": 22670.073034249934,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 3640,
+      "midPointTai": 6.2373723084602695,
       "filterName": "i",
-      "psFlux": 37514.48266369401,
+      "psFlux": 35250.4580749086,
       "psFluxErr": 1000
     },
     {
-      "diaSourceId": 3425,
-      "midPointTai": 4.705140019687825,
-      "filterName": "g",
-      "psFlux": 40300.70109091003,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 1080,
-      "midPointTai": 4.777312162720182,
-      "filterName": "z",
-      "psFlux": 31269.299737107896,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 4013,
-      "midPointTai": 5.203168940308608,
-      "filterName": "z",
-      "psFlux": 29471.941800976645,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 1897,
-      "midPointTai": 6.399579522142886,
+      "diaSourceId": 2522,
+      "midPointTai": 6.260721629321818,
       "filterName": "r",
-      "psFlux": 39878.01655893006,
+      "psFlux": 41500.52042245682,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 3067,
+      "midPointTai": 7.263960595200736,
+      "filterName": "y",
+      "psFlux": 19505.565037063665,
       "psFluxErr": 1000
     }
   ],
   "diaForcedSourcesList": [
     {
-      "diaSourceId": 1980,
-      "midPointTai": -16.07844799300359,
-      "filterName": "z",
-      "psFlux": 4123.589228476597,
-      "psFluxErr": 1000
-    },
-    {
-      "diaSourceId": 2147,
-      "midPointTai": -15.964669508917968,
-      "filterName": "r",
-      "psFlux": 2539.5164365576725,
+      "diaSourceId": 3506,
+      "midPointTai": -14.067565420691322,
+      "filterName": "u",
+      "psFlux": 2547.211243575308,
       "psFluxErr": 1000
     }
   ],
   "diaNondetectionLimitsList": [
     {
-      "midPointTai": -19.86674943345018,
+      "midPointTai": -19.927313682384412,
+      "filterName": "y",
+      "diaNoise": 685.1570667593226
+    },
+    {
+      "midPointTai": -19.509616577898967,
+      "filterName": "u",
+      "diaNoise": 51.84387816387812
+    },
+    {
+      "midPointTai": -19.38832015210717,
+      "filterName": "i",
+      "diaNoise": 346.1763309994294
+    },
+    {
+      "midPointTai": -19.12138694717744,
+      "filterName": "y",
+      "diaNoise": 928.508892263337
+    },
+    {
+      "midPointTai": -18.47057148920782,
+      "filterName": "z",
+      "diaNoise": 1776.7958218025874
+    },
+    {
+      "midPointTai": -18.208103583877705,
+      "filterName": "z",
+      "diaNoise": 1983.337405680252
+    },
+    {
+      "midPointTai": -17.14880685662742,
+      "filterName": "i",
+      "diaNoise": 3042.6038491771233
+    },
+    {
+      "midPointTai": -15.88956282502097,
+      "filterName": "z",
+      "diaNoise": 3233.6113221026517
+    },
+    {
+      "midPointTai": -15.266149227941405,
       "filterName": "r",
-      "diaNoise": 943.6250950259198
+      "diaNoise": 3739.0319739507363
     },
     {
-      "midPointTai": -19.717160292956326,
-      "filterName": "g",
-      "diaNoise": 344.76820600268115
+      "midPointTai": -14.774113183114801,
+      "filterName": "z",
+      "diaNoise": 3459.261701906313
     },
     {
-      "midPointTai": -18.955161908356764,
-      "filterName": "g",
-      "diaNoise": 1794.0386042556504
-    },
-    {
-      "midPointTai": -16.943705421728943,
-      "filterName": "g",
-      "diaNoise": 2993.8012560046695
+      "midPointTai": -14.157750486646314,
+      "filterName": "z",
+      "diaNoise": 4121.577933519953
     }
   ]
 }
