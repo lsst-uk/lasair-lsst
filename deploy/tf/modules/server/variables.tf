@@ -39,3 +39,7 @@ variable "number" {
   type    = number
   default = 1
 }
+
+variable "group_id" {
+  type = string
+}

@@ -7,7 +7,12 @@ data "openstack_images_image_v2" "image" {
 
 ## Get flavor id
 data "openstack_compute_flavor_v2" "flavor" {
-   name = "tiny"
+   name = var.flavor
 #  name = "TestUtilityFlavor" # flavor to be used
 }
+
+## Get server group
+#data "openstack_compute_servergroup_v2" "group" {
+#  name = "var.group"
+#}
 
