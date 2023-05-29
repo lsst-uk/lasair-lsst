@@ -20,7 +20,6 @@ resource "openstack_compute_instance_v2" "server" {
   }
 
   scheduler_hints {
-    #group = data.openstack_compute_servergroup_v2.group.id
     group = var.group_id
   }
 }

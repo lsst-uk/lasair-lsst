@@ -23,23 +23,20 @@ variable "extra_vol" {
 
 variable "network" {
   type    = string
-  default = "lasair" # default network to be used
+  default = "lasair"
 }
 
 variable "security_groups" {
   type    = list(string)
-  default = ["default"]  # Name of default security group
+  default = ["default"]
 }
 
+# name for the instance
 variable "name" {
   type    = string
 }
 
-variable "number" {
-  type    = number
-  default = 1
-}
-
+# UUID of the server group
 variable "group_id" {
   type = string
 }

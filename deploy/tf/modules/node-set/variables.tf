@@ -39,3 +39,9 @@ variable "number" {
   type    = number
   default = 1
 }
+
+# UUID of the default servergroup to use for singleton instances
+variable "default_group_id" {
+  type = string
+}
+

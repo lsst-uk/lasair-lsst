@@ -21,6 +21,12 @@ variable "instances" {
   type = map(any)
 }
 
+# create a default servergroup for singleton instances
+resource "openstack_compute_servergroup_v2" "group" {
+  name     = "${var.base_name}-default"
+  policies = ["soft-affinity"]
+}
+
 # iterate over instances map
 # create a node-set for each entry
 module "node-set" {
@@ -30,6 +36,7 @@ module "node-set" {
   number = can(each.value.number) ? each.value.number : 1
   root_vol_size = can(each.value.root_volume_size) ? each.value.root_volume_size : 25
   extra_vol = can(each.value.extra_volumes) ? each.value.extra_volumes : {}
+  default_group_id = openstack_compute_servergroup_v2.group.id
 #  extra_vol = {
 #    tmp = {
 #      size = 5

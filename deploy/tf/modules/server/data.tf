@@ -11,8 +11,4 @@ data "openstack_compute_flavor_v2" "flavor" {
 #  name = "TestUtilityFlavor" # flavor to be used
 }
 
-## Get server group
-#data "openstack_compute_servergroup_v2" "group" {
-#  name = "var.group"
-#}
 

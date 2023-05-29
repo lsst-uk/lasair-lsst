@@ -1,10 +1,12 @@
 locals {
-  group = "foo-default"
+  group = var.name
 }
 
+# create a servergroup only if we have multiple instances
 resource "openstack_compute_servergroup_v2" "group" {
+  count = (var.number > 1) ? 1 : 0
   name     = local.group
-  policies = ["soft-affinity"]
+  policies = ["soft-anti-affinity"]
 }
 
 module "server" {
@@ -13,5 +15,5 @@ module "server" {
   name      = (var.number > 1) ? "${var.name}-${count.index}" : var.name
   root_vol_size = var.root_vol_size
   extra_vol = var.extra_vol
-  group_id  = openstack_compute_servergroup_v2.group.id
+  group_id  = (var.number > 1) ? openstack_compute_servergroup_v2.group[0].id : var.default_group_id
 }
