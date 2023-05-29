@@ -11,4 +11,8 @@ data "openstack_compute_flavor_v2" "flavor" {
 #  name = "TestUtilityFlavor" # flavor to be used
 }
 
-
+# Get extra network ids
+data "openstack_networking_network_v2" "extra_networks" {
+  count = length(var.extra_networks)
+  name = var.extra_networks[count.index]
+}

@@ -51,3 +51,8 @@ variable "floating_ip" {
   default = false
 }
 
+# Additional networks
+variable "extra_networks" {
+  type = list(string)
+  default = []
+}

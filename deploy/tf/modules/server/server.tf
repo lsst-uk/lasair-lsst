@@ -1,5 +1,5 @@
 # Create a floating IP if floating_ip is true
-resource "openstack_networking_floatingip_v2" "myip" {
+resource "openstack_networking_floatingip_v2" "floating_ip" {
   count = var.floating_ip ? 1 : 0
   pool = "external"
 }
@@ -30,12 +30,19 @@ resource "openstack_compute_instance_v2" "server" {
   }
 }
 
-# Attache the floating IP if necessary
-resource "openstack_compute_floatingip_associate_v2" "myip" {
+# Attach the floating IP if necessary
+resource "openstack_compute_floatingip_associate_v2" "floating_ip" {
   count = var.floating_ip ? 1 : 0
-  floating_ip = "${openstack_networking_floatingip_v2.myip[0].address}"
+  floating_ip = "${openstack_networking_floatingip_v2.floating_ip[0].address}"
   instance_id = "${openstack_compute_instance_v2.server.id}"
   fixed_ip    = "${openstack_compute_instance_v2.server.network.0.fixed_ip_v4}"
+}
+
+# Attach any extra networks
+resource "openstack_compute_interface_attach_v2" "attachments" {
+  count = length(var.extra_networks)
+  instance_id = openstack_compute_instance_v2.server.id
+  network_id  = data.openstack_networking_network_v2.extra_networks[count.index].id
 }
 
 # Create extra volumes	

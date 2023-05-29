@@ -21,6 +21,12 @@ variable "instances" {
   type = map(any)
 }
 
+# list of extra networks
+variable "extra_networks" {
+  type = list(string)
+  default = []
+}
+
 # create a default servergroup for singleton instances
 resource "openstack_compute_servergroup_v2" "group" {
   name     = "${var.base_name}-default"
@@ -38,7 +44,7 @@ module "node-set" {
   extra_vol = can(each.value.extra_volumes) ? each.value.extra_volumes : {}
   default_group_id = openstack_compute_servergroup_v2.group.id
   floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
-
+  extra_networks = var.extra_networks
 #  extra_vol = {
 #    tmp = {
 #      size = 5
