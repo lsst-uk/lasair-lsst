@@ -40,3 +40,9 @@ variable "name" {
 variable "group_id" {
   type = string
 }
+
+variable "floating_ip" {
+  type = bool
+  default = false
+}
+

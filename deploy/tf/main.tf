@@ -37,6 +37,8 @@ module "node-set" {
   root_vol_size = can(each.value.root_volume_size) ? each.value.root_volume_size : 25
   extra_vol = can(each.value.extra_volumes) ? each.value.extra_volumes : {}
   default_group_id = openstack_compute_servergroup_v2.group.id
+  floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
+
 #  extra_vol = {
 #    tmp = {
 #      size = 5

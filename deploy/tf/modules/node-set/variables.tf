@@ -45,3 +45,9 @@ variable "default_group_id" {
   type = string
 }
 
+# Assign a floating IP
+variable "floating_ip" {
+  type = bool
+  default = false
+}
+
