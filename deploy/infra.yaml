@@ -14,7 +14,7 @@
   tasks:
 
     - name: deploy
-      register: tf_output
+      register: tf_result
       community.general.terraform:
         project_path: "{{ tf_path }}"
         state: planned
@@ -25,7 +25,15 @@
         variables:
           instances: "{{ instances }}"
           base_name: "{{ lasair_name }}"
+          share_size: "{{ share_size }}"
+          share_user: "{{ os.share_user }}"
+          share_network: "{{ os.share_network_name }}"
           extra_networks:
             - "{{ os.share_network_name }}"
+
+    - name: get_result
+      ansible.builtin.debug:
+        #msg: "{{ tf_result.outputs }}"
+        msg: "{{ tf_result }}"
 
 
