@@ -17,8 +17,8 @@
       register: tf_result
       community.general.terraform:
         project_path: "{{ tf_path }}"
-        state: planned
-        #state: present
+        #state: planned
+        state: present
         #state: absent
         plan_file: plan
         complex_vars: true
@@ -31,9 +31,13 @@
           extra_networks:
             - "{{ os.share_network_name }}"
 
-    - name: get_result
+    - name: show_result
       ansible.builtin.debug:
-        #msg: "{{ tf_result.outputs }}"
-        msg: "{{ tf_result }}"
+        msg: "{{ tf_result.outputs }}"
+        #msg: "{{ tf_result }}"
 
+    - name: update exports.yaml
+      template:
+        src: exports.yaml.j2
+        dest: exports.yaml
 

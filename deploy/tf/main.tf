@@ -1,4 +1,6 @@
-# Configure the OpenStack Provider
+######################################################################
+# OpenStack provider
+
 terraform {
   required_providers {
     openstack = {
@@ -11,6 +13,9 @@ provider "openstack" {
   cloud  = "openstack" # cloud defined in cloud.yml file
 }
 
+######################################################################
+# Input variables
+
 # base name for the deployment
 variable "base_name" {
   type = string
@@ -21,18 +26,11 @@ variable "instances" {
   type = map(any)
 }
 
-# list of extra networks
+# list of extra networks to add to all instances
 variable "extra_networks" {
   type = list(string)
   default = []
 }
-
-#      name: { get_param: OS::stack_name }
-#      description: "Lasair shared filesystem"
-#      access_rules: [{"access_level": "rw", "access_type": "cephx", "access_to": { get_param: share_user} }]
-#      size: { get_param: share_size }
-#      share_protocol: "CEPHFS"
-#      share_type: "default"
 
 # size of shared filesystem
 variable "share_size" {
@@ -49,10 +47,16 @@ variable "share_network" {
   type = string
 }
 
+######################################################################
+# Data
+
 # get share network id
 data "openstack_networking_network_v2" "share_network" {
   name = var.share_network
 }
+
+######################################################################
+# Top level resources
 
 # create shared filesystem
 resource "openstack_sharedfilesystem_share_v2" "share" {
@@ -60,7 +64,7 @@ resource "openstack_sharedfilesystem_share_v2" "share" {
   description      = "Lasair shared filesystem"
   share_proto      = "CEPHFS"
   size             = var.share_size
-  share_network_id = data.openstack_networking_network_v2.share_network.id
+  share_type       = "default"
 }
 
 # create an access rule for the share
@@ -71,16 +75,14 @@ resource "openstack_sharedfilesystem_share_access_v2" "share_access" {
   access_level = "rw"
 }
 
-# output the export path
-output "export_locations" {
-  value = openstack_sharedfilesystem_share_v2.share.export_locations
-}
-
 # create a default servergroup for singleton instances
 resource "openstack_compute_servergroup_v2" "group" {
   name     = "${var.base_name}-default"
   policies = ["soft-affinity"]
 }
+
+######################################################################
+# Instances
 
 # iterate over instances map
 # create a node-set for each entry
@@ -94,15 +96,14 @@ module "node-set" {
   default_group_id = openstack_compute_servergroup_v2.group.id
   floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
   extra_networks = var.extra_networks
-#  extra_vol = {
-#    tmp = {
-#      size = 5
-#      type = "ceph-ssd"
-#    },
-#    db = {
-#      size = each.value.volume_size
-#      type = "ceph-hdd"
-#    }
-#  }
 }
+
+######################################################################
+# Outputs
+
+# output the export locations
+output "export_locations" {
+  value = openstack_sharedfilesystem_share_v2.share.export_locations
+}
+
 

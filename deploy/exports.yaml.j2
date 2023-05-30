@@ -2,10 +2,4 @@
 
 ---
 ceph:
-{% for output in stack_create.stack.outputs %}
-  {%- if output.description == "Export locations" %}
-    exports: {{ output.output_value | regex_replace('^\[', '') | regex_replace('\]$', '')  }}
-  {%- endif %}
-{%- endfor %}
-
-
+    exports: {{ tf_result.outputs.export_locations.value[0].path }}
