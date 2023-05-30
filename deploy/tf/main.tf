@@ -96,6 +96,7 @@ module "node-set" {
   default_group_id = openstack_compute_servergroup_v2.group.id
   floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
   extra_networks = var.extra_networks
+  flavor = can(each.value.flavor) ? each.value.flavor : "tiny"
 }
 
 ######################################################################

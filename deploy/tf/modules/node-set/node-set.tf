@@ -18,6 +18,7 @@ module "server" {
   group_id  = (var.number > 1) ? openstack_compute_servergroup_v2.group[0].id : var.default_group_id
   floating_ip = var.floating_ip
   extra_networks = var.extra_networks
+  flavor = var.flavor
 }
 
 output "private_ips" {
