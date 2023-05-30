@@ -108,5 +108,6 @@ output "export_locations" {
 
 # output the private IPs
 output "private_ips" {
-  value = [ for ns in module.node-set : ns.private_ips ]
+  value = flatten([ for ns in module.node-set : ns.private_ips ])
 }
+

@@ -41,3 +41,19 @@
         src: exports.yaml.j2
         dest: exports.yaml
 
+    - name: update /etc/hosts
+      become: true
+      lineinfile:
+        path: /etc/hosts
+        regexp: '\s{{ item.hostname }}$'
+        line: "{{ item.address }} {{ item.hostname }}"
+      loop: |
+        [
+        {%- for value in tf_result.outputs.private_ips.value %}
+          {%- if value.address is defined %}
+            { 'address': '{{ value.address }}', 'hostname': '{{ value.name }}' },
+          {%- endif %}
+        {%- endfor %}
+        ]
+
+
