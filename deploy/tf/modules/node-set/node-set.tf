@@ -19,3 +19,10 @@ module "server" {
   floating_ip = var.floating_ip
   extra_networks = var.extra_networks
 }
+
+output "private_ips" {
+  value = [ for server in module.server : {
+    name = server.name
+    address = server.private_ip
+  } ]
+}

@@ -59,3 +59,14 @@ resource "openstack_compute_volume_attach_v2" "attached" {
   instance_id = "${openstack_compute_instance_v2.server.id}"
   volume_id   = each.value.id
 }
+
+# Output the name
+output "name" {
+  value = var.name
+}
+
+# Output the private IP
+output "private_ip" {
+  value = openstack_compute_instance_v2.server.network.0.fixed_ip_v4
+}
+
