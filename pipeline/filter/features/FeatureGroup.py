@@ -1,6 +1,8 @@
 import sys
+from importlib import import_module
 sys.path.append("../../../common/schema/lasair_schema")
 from objects import schema as objectSchema
+import features
 
 class FeatureGroup:
   """FeatureGroups are collections of related features that are
@@ -16,6 +18,25 @@ class FeatureGroup:
   def run(self) -> dict:
     """Run the alert processing to generate the features."""
     return {}   
+
+  # The run_all utility method is probably how you usually want to
+  # call this class, e.g.
+  #
+  # from features.FeatureGroup import FeatureGroup
+  # output = FeatureGroup.run_all(alert)
+
+  @classmethod
+  def run_all(cls, alert):
+    """Utility method to run all known feature groups on an alert and
+       collate the output."""
+    output = {}
+    for group in features.__all__:
+      import_module(f"features.{group}")
+      groupModule = getattr(features, group)
+      groupClass = getattr(groupModule, group)
+      groupInst = groupClass(alert)
+      output.update(groupInst.run())
+    return output
 
   # The following are reasonable default implementations and probably
   # don't normally need to be overridden.

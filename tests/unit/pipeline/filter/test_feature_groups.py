@@ -66,6 +66,14 @@ class FeatureTest(TestCase):
         type = schema[feature]['type']
         self.assertTrue(isinstance(output[name], eval(type)))
 
+  def test4_run_all(self):
+    """Test the run_all method"""
+    from features.FeatureGroup import FeatureGroup
+    with open("sample_alerts/lsst1.json") as f:
+      alert = json.load(f)
+      output = FeatureGroup.run_all(alert)
+      self.assertTrue(isinstance(output, dict))
+
 if __name__ == '__main__':
   import xmlrunner
   runner = xmlrunner.XMLTestRunner(output='test-reports')
