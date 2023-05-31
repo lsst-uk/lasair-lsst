@@ -1,0 +1,50 @@
+import sys
+sys.path.append("../../../common/schema/lasair_schema")
+from objects import schema as objectSchema
+
+class FeatureGroup:
+  """FeatureGroups are collections of related features that are
+     computed at the same time. This is an abstract class, feature
+     groups should provide a list of features and implement the
+     run method."""
+
+  _features = []
+
+  def __init__(self, alert):
+    self.alert = alert
+
+  def run(self) -> dict:
+    """Run the alert processing to generate the features."""
+    return {}   
+
+  # The following are reasonable default implementations and probably
+  # don't normally need to be overridden.
+
+  @classmethod
+  def get_features(cls) -> list:
+    """Get a list of features implemented by this group."""
+    return cls._features
+
+  @classmethod
+  def get_info(cls) -> dict:
+    """Get a dict with descriptions for the features in this group."""
+    # Default implementation builds a description from the schema.
+    info = {}
+    schema = cls.get_schema()
+    for feature in cls.get_features():
+      # use the "doc" entry from the schema if it exists, else empty string
+      info[feature] = schema[feature].get("doc", "")
+    return info
+
+  @classmethod
+  def get_schema(cls) -> dict:
+    """Get the schema for this feature group"""
+    # Default implementation builds our schema from the main schema.
+    schema = {}
+    our_features = cls.get_features()
+    for feature in objectSchema['fields']:
+      name = feature['name']
+      if name in our_features:
+        schema[name] = feature
+    return schema
+

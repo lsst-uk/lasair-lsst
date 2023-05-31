@@ -1,19 +1,4 @@
 __all__ = [
-  "FeatureInterface",
-  "CopyFeature",
-  "diaObjectId",
-  "htm16",
-  "ra",
-  "decl",
-  "radecTai",
-  "uPSFluxMean",
-  "gPSFluxMean",
-  "rPSFluxMean",
-  "iPSFluxMean",
-  "zPSFluxMean",
-  "yPSFluxMean",
-  "taimax",
-  "taimin",
-  "ncand",
-  "ncand_7"
+  "FeatureGroup",
+  "taiminmax",
 ]
