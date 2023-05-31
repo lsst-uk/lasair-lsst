@@ -67,5 +67,10 @@ class FeatureGroup:
       name = feature['name']
       if name in our_features:
         schema[name] = feature
+        # replace any non-python types with equivalents
+        if schema[name]['type'] == "double":
+          schema[name]['type'] = "float"
+        elif schema[name]['type'] == "long":
+          schema[name]['type'] = "int"
     return schema
 
