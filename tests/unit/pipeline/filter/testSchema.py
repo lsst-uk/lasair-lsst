@@ -14,12 +14,12 @@ schema = {
 #    { "name": "radecTai", "type": "double", "doc": "MJD of latest detection" },
 
 
-#    { "name": "uPSFluxMean", "type": "float", "doc": "Mean u flux in nJansky" },
-#    { "name": "gPSFluxMean", "type": "float", "doc": "Mean g flux in nJansky" },
-#    { "name": "rPSFluxMean", "type": "float", "doc": "Mean r flux in nJansky" },
-#    { "name": "iPSFluxMean", "type": "float", "doc": "Mean i flux in nJansky" },
-#    { "name": "zPSFluxMean", "type": "float", "doc": "Mean z flux in nJansky" },
-#    { "name": "yPSFluxMean", "type": "float", "doc": "Mean y flux in nJansky" },
+    { "name": "uPSFluxMean", "type": "float", "doc": "Mean u flux in nJansky" },
+    { "name": "gPSFluxMean", "type": "float", "doc": "Mean g flux in nJansky" },
+    { "name": "rPSFluxMean", "type": "float", "doc": "Mean r flux in nJansky" },
+    { "name": "iPSFluxMean", "type": "float", "doc": "Mean i flux in nJansky" },
+    { "name": "zPSFluxMean", "type": "float", "doc": "Mean z flux in nJansky" },
+    { "name": "yPSFluxMean", "type": "float", "doc": "Mean y flux in nJansky" },
 
     { "name": "taimax", "type": "double", "doc": "Latest MJD of a diaSource" },
     { "name": "taimin", "type": "double", "doc": "Earliest MJD of a diaSource" },

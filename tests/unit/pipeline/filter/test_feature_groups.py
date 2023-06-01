@@ -52,15 +52,17 @@ class FeatureTest(TestCase):
     with open("sample_alerts/lsst1.json") as f:
       alert = json.load(f)
       output = {}
+      schema = {}
       for group in features.__all__:
         groupModule = getattr(features, group)
         groupClass = getattr(groupModule, group)
+        schema.update(groupClass.get_schema())
         groupInst = groupClass(alert)
         output.update(groupInst.run())
       # check the output exists
+      self.assertTrue(isinstance(schema, dict))
       self.assertTrue(isinstance(output, dict))
       # check the output matches the schema
-      schema = groupClass.get_schema()
       for feature in schema:
         name = schema[feature]['name']
         type = schema[feature]['type']
