@@ -2,7 +2,6 @@ import math
 import numpy as np
 from scipy.optimize import leastsq
 
-from features.FeatureGroup import FeatureGroup
 # ugrizy filter names
 filterNames = ['u', 'g', 'r', 'i', 'z', 'y']
 
@@ -65,8 +64,10 @@ def fitExp(alert, pexpit0, sigma):
 
     return dict
 
+#############################################
+from features.FeatureGroup import FeatureGroup
 class fitExp(FeatureGroup):
-    """Fit exponentials separatey to each filter"""
+    """Fit exponentials separately to each filter"""
 
     _features = [
         "uExpRate", "uExpRateErr"
