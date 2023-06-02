@@ -1,7 +1,4 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# # Fitting Bazin curves with pre-peak samples: Time-Wavelength
+# Fitting Bazin curves with pre-peak samples: Time-Wavelength
 # In this notebook we conside the Bazin supernova light curve:
 # 
 # Define
@@ -117,26 +114,22 @@ def fit_bazin(alert, pbazin0, sigma):
     SSE = np.sum(func_bazin(fit, tlobs, fobs)**2)
 #    AIC_bazin = 100 + npoint*math.log(SSE_bazin/npoint) + 2*5
     Rsq = SSE/SST
-    if Rsq > 0.25: return None
-    dict = {'npoint':npoint, 'Rsq':Rsq}
-    dict['A'] = fit[0]*maxfobs
-    dict['T'] = fit[1]
-    dict['t0'] = fit[2]+avgtobs
-    dict['kr'] = fit[3]
-    dict['kf'] = fit[4]
-    if dict['kr'] < 0.0: return None
-    if dict['kf'] < 0.0: return None
-    if dict['kr'] > 2.0: return None
-    if dict['kf'] > 2.0: return None
+    if Rsq > 0.25: return (1.0, None)
+    dict = {}
+    dict['BazinExpTemp'] = fit[1]
+    dict['BazinExpRiseRate'] = fit[3]
+    dict['BazinExpFallRate'] = fit[4]
+    if dict['BazinExpRiseRate'] < 0.0: return (1.0, None)
+    if dict['BazinExpFall'] < 0.0: return (1.0, None)
+    if dict['BazinExpRiseRate'] > 2.0: return (1.0, None)
+    if dict['BazinExpFallRate'] > 2.0: return (1.0, None)
     
-    dict['Aerr'] = err[0]*maxfobs
-    dict['Terr'] = err[1]
-    dict['t0err'] = err[2]
-    dict['krerr'] = err[3]
-    dict['kferr'] = err[4]
-    if dict['kferr'] > dict['kf']: return None
-    if dict['krerr'] > dict['kr']: return None
-    return dict
+    dict['BazinExpTempErr'] = err[1]
+    dict['BazinExpRiseRateErr'] = err[3]
+    dict['BazinExpFallRateErr'] = err[4]
+    if dict['BazinExpFallRateErr'] > dict['BazinExpFallRate']: return (1.0, None)
+    if dict['BazinExpRiseRateErr'] > dict['BazinExpRiseRate']: return (1.0, None)
+    return (Rsq, dict)
 
 def fit_expit(alert, pexpit0, sigma):           
     sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
@@ -158,35 +151,31 @@ def fit_expit(alert, pexpit0, sigma):
     try:
         err = np.sqrt(np.diag(cov))*sigma
     except:
-        print('negative cov matrix')
-        return None
+        return (1.0, None)
     
     SSE = np.sum(func_expit(fit, tlobs, fobs)**2)
-#    AIC_bazin = 100 + npoint*math.log(SSE_bazin/npoint) + 2*5
     Rsq = SSE/SST
-    if Rsq > 0.25: return None
-    dict = {'npoint':npoint, 'Rsq':Rsq}
+    if Rsq > 0.25: return (1.0, None)
 
-    dict['A'] = fit[0]*maxfobs
-    dict['T'] = fit[1]
-    dict['k'] = fit[2]
-    if dict['k'] < 0.0: return None
-    if dict['k'] > 2.0: return None
+    dict = {}
+    dict['BazinExpTemp'] = fit[1]
+    dict['BazinExpRiseRate'] = fit[2]
+    if dict['BazinExpRiseRate'] < 0.0: return None
+    if dict['BazinExpRiseRate'] > 2.0: return None
     
-    dict['Aerr'] = err[0]*maxfobs
-    dict['Terr'] = err[1]
-    dict['kerr'] = err[2]
-    if dict['kerr'] > dict['k']: return None
-    return dict
+    dict['BazinExpTempErr'] = err[1]
+    dict['BazinExpRiseRateErr'] = err[2]
+    if dict['BazinExpRiseRateErr'] > dict['BazinExpRiseRate']: return None
+    return (Rsq, dict)
 
 def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
     if len(alert['diaSourcesList']) < 4:
         return None
-    dicte = fit_expit(alert, pexpit0, sigma)
-    dictb = fit_bazin(alert, pbazin0, sigma)
+    (Rsqe, dicte) = fit_expit(alert, pexpit0, sigma)
+    (Rsqb, dictb) = fit_bazin(alert, pbazin0, sigma)
     if dicte and dictb:
-        if dicte['Rsq'] < dictb['Rsq']: return dicte
-        else:                           return dictb
+        if Rsqe < Rsqb: return dicte
+        else:           return dictb
     elif dicte:
         return dicte
     elif dictb:
@@ -194,40 +183,30 @@ def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
     else:
         return None
 
-if __name__ == '__main__':
-    import os, sys, json
-    A = 1
-    T = 4
-    t0 = 0
-    kr = 0.01
-    kf = 0.005
-    pexpit0 = [A, T, kr-kf]
-    pbazin0 = [A, T, t0, kr, kf]
+##################################################
+from features.FeatureGroup import FeatureGroup
 
-    sigma = 0.1
+class timing(FeatureGroup):
+    """Min and Max time of the diaSources"""
 
-    if len(sys.argv) > 1:
-        samples = sys.argv[1]
-    else:
-        print('Must add name of sample set')
-        sys.exit()
+    _features = [
+        "BazinExpRiseRate", 
+        "BazinExpFallRate", 
+        "BazinExpTemp",
+        "BazinExpRiseRateErr", 
+        "BazinExpFallRateErr", 
+        "BazinExpTempErr",
+    ]    
 
-    for file in sorted(os.listdir(samples)):
-        if not file.endswith('.json'):
-            continue
-        try:
-            alert = json.loads(open(samples+'/'+file).read())
-        except Exception as e:
-            print(file, e)
-            continue
+    def run(self):
+        A = 1
+        T = 4
+        t0 = 0
+        kr = 0.01
+        kf = 0.005
+        pexpit0 = [A, T, kr-kf]
+        pbazin0 = [A, T, t0, kr, kf]
+        sigma = 0.1
 
         dict = fitBazinExpBB(alert, pexpit0, pbazin0, sigma)
-        if dict:
-            if 'k' in dict:
-                print('%15s T=%.3f pm %.3f k=%.3f pm %.3f beb_kf=None'% 
-                    (file, dict['T'], dict['Terr'], dict['k'], dict['kerr']))
-            else:
-                print('%15s T=%.3f pm %.3f k=%.3f pm %.3f kf=%.3f pm %.3f'% 
-                    (file, dict['T'], dict['Terr'], dict['kr'], dict['krerr'], dict['kf'], dict['kferr']))
-        else:
-                print('%15s beb_T=None beb_k=None beb_kf=None' % file)
+        return dict

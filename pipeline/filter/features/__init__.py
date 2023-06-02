@@ -1,4 +1,9 @@
 __all__ = [
-  "taiminmax",
-  "psFluxMean",
+    "diaObjectCopy",
+    "timing",
+    "latestFlux",
+    "sherlock",
+    "jump",
+    "fitExp",
+    "bazinExpBlackBody",
 ]
