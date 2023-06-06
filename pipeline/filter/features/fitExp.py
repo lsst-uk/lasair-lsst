@@ -16,7 +16,7 @@ def func_expit(params, t, f):
     residual = f - expit(t, params)
     return residual
 
-def fitExp(alert, pexpit0, sigma):
+def fitExpImpl(alert, pexpit0, sigma):
     sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
 
@@ -70,16 +70,16 @@ class fitExp(FeatureGroup):
     """Fit exponentials separately to each filter"""
 
     _features = [
-        "uExpRate", "uExpRateErr"
-        "gExpRate", "gExpRateErr"
-        "rExpRate", "rExpRateErr"
-        "iExpRate", "iExpRateErr"
-        "zExpRate", "zExpRateErr"
-        "yExpRate", "yExpRateErr"
-    ]    
+        "uExpRate", "uExpRateErr",
+        "gExpRate", "gExpRateErr",
+        "rExpRate", "rExpRateErr",
+        "iExpRate", "iExpRateErr",
+        "zExpRate", "zExpRateErr",
+        "yExpRate", "yExpRateErr",
+    ]
     def run(self):
         A = 1
         k = 0.1
         pexpit0 = [A, k]
         sigma = 0.1
-        return fitExp(alert, pexpit0, sigma)
+        return fitExpImpl(self.alert, pexpit0, sigma)

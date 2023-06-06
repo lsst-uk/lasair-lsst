@@ -7,7 +7,6 @@ import math
 import numpy as np
 import ephem
 from features import create_lasair_features
-from gkhtm import _gkhtm as htmCircle
 
 def create_insert_query(alert):
     """create_insert_query.
@@ -19,26 +18,10 @@ def create_insert_query(alert):
     """
     lasair_features = create_lasair_features(alert)
 
-    obj = alert['diaObject']
-
-    # Compute the HTM ID for later cone searches
-    try:
-        htm16 = htmCircle.htmID(16, obj['ra'], obj['decl'])
-    except:
-        htm16 = 0
-        print('ERROR: filter/insert_query: Cannot compute HTM index')
-        sys.stdout.flush()
-
-    sets = {
-        'diaObjectId':obj['diaObjectId'], 
-        'htm16':htm16, 
-        **lasair_features
-    }
-
     # Make the query
     list = []
     query = 'REPLACE INTO objects SET '
-    for key,value in sets.items():
+    for key,value in lasair_features.items():
         if not value:
             list.append(key + '= NULL')
         elif math.isnan(value):

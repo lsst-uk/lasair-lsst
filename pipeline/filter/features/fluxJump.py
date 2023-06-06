@@ -1,3 +1,4 @@
+import math
 from features.FeatureGroup import FeatureGroup
 
 class fluxJump(FeatureGroup):
@@ -9,7 +10,7 @@ class fluxJump(FeatureGroup):
 
     def run(self):
         days = 1 # go back a day from last diaSource
-        sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
+        sources = self.alert['diaForcedSourcesList'] + self.alert['diaSourcesList']
         sources = sorted(sources, key=lambda source: source['midPointTai'])
     
         tobs = [s['midPointTai']    for s in sources]

@@ -27,8 +27,6 @@
 
 import math
 import numpy as np
-import matplotlib.pyplot as plt
-import colorsys
 
 # Wavelengths of the ugrizy filters
 wl = {
@@ -116,19 +114,19 @@ def fit_bazin(alert, pbazin0, sigma):
     Rsq = SSE/SST
     if Rsq > 0.25: return (1.0, None)
     dict = {}
-    dict['BazinExpTemp'] = fit[1]
-    dict['BazinExpRiseRate'] = fit[3]
-    dict['BazinExpFallRate'] = fit[4]
-    if dict['BazinExpRiseRate'] < 0.0: return (1.0, None)
-    if dict['BazinExpFall'] < 0.0: return (1.0, None)
-    if dict['BazinExpRiseRate'] > 2.0: return (1.0, None)
-    if dict['BazinExpFallRate'] > 2.0: return (1.0, None)
+    dict['bazinExpTemp'] = fit[1]
+    dict['bazinExpRiseRate'] = fit[3]
+    dict['bazinExpFallRate'] = fit[4]
+    if dict['bazinExpRiseRate'] < 0.0: return (1.0, None)
+    if dict['bazinExpFallRate'] < 0.0: return (1.0, None)
+    if dict['bazinExpRiseRate'] > 2.0: return (1.0, None)
+    if dict['bazinExpFallRate'] > 2.0: return (1.0, None)
     
-    dict['BazinExpTempErr'] = err[1]
-    dict['BazinExpRiseRateErr'] = err[3]
-    dict['BazinExpFallRateErr'] = err[4]
-    if dict['BazinExpFallRateErr'] > dict['BazinExpFallRate']: return (1.0, None)
-    if dict['BazinExpRiseRateErr'] > dict['BazinExpRiseRate']: return (1.0, None)
+    dict['bazinExpTempErr'] = err[1]
+    dict['bazinExpRiseRateErr'] = err[3]
+    dict['bazinExpFallRateErr'] = err[4]
+    if dict['bazinExpFallRateErr'] > dict['bazinExpFallRate']: return (1.0, None)
+    if dict['bazinExpRiseRateErr'] > dict['bazinExpRiseRate']: return (1.0, None)
     return (Rsq, dict)
 
 def fit_expit(alert, pexpit0, sigma):           
@@ -158,14 +156,14 @@ def fit_expit(alert, pexpit0, sigma):
     if Rsq > 0.25: return (1.0, None)
 
     dict = {}
-    dict['BazinExpTemp'] = fit[1]
-    dict['BazinExpRiseRate'] = fit[2]
-    if dict['BazinExpRiseRate'] < 0.0: return None
-    if dict['BazinExpRiseRate'] > 2.0: return None
+    dict['bazinExpTemp'] = fit[1]
+    dict['bazinExpRiseRate'] = fit[2]
+    if dict['bazinExpRiseRate'] < 0.0: return None
+    if dict['bazinExpRiseRate'] > 2.0: return None
     
-    dict['BazinExpTempErr'] = err[1]
-    dict['BazinExpRiseRateErr'] = err[2]
-    if dict['BazinExpRiseRateErr'] > dict['BazinExpRiseRate']: return None
+    dict['bazinExpTempErr'] = err[1]
+    dict['bazinExpRiseRateErr'] = err[2]
+    if dict['bazinExpRiseRateErr'] > dict['bazinExpRiseRate']: return None
     return (Rsq, dict)
 
 def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
@@ -186,16 +184,16 @@ def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
 ##################################################
 from features.FeatureGroup import FeatureGroup
 
-class timing(FeatureGroup):
+class bazinExpBlackBody(FeatureGroup):
     """Min and Max time of the diaSources"""
 
     _features = [
-        "BazinExpRiseRate", 
-        "BazinExpFallRate", 
-        "BazinExpTemp",
-        "BazinExpRiseRateErr", 
-        "BazinExpFallRateErr", 
-        "BazinExpTempErr",
+        "bazinExpRiseRate", 
+        "bazinExpFallRate", 
+        "bazinExpTemp",
+        "bazinExpRiseRateErr", 
+        "bazinExpFallRateErr", 
+        "bazinExpTempErr",
     ]    
 
     def run(self):
@@ -208,5 +206,5 @@ class timing(FeatureGroup):
         pbazin0 = [A, T, t0, kr, kf]
         sigma = 0.1
 
-        dict = fitBazinExpBB(alert, pexpit0, pbazin0, sigma)
+        dict = fitBazinExpBB(self.alert, pexpit0, pbazin0, sigma)
         return dict

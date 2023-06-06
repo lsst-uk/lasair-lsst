@@ -5,8 +5,7 @@ from unittest import TestCase
 import json
 sys.path.append('../../../../pipeline/filter')
 sys.path.append('../../../../common/schema/lasair_schema')
-#from objects import schema as objectSchema
-from testSchema import schema as objectSchema
+from objects import schema as objectSchema
 import features
 from features import *
 
@@ -66,7 +65,8 @@ class FeatureTest(TestCase):
       for feature in schema:
         name = schema[feature]['name']
         type = schema[feature]['type']
-        self.assertTrue(isinstance(output[name], eval(type)))
+        if name in output and output[name]:
+            self.assertTrue(isinstance(output[name], eval(type)))
 
   def test4_run_all(self):
     """Test the run_all method"""

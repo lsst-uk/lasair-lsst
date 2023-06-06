@@ -19,11 +19,7 @@ def bazinBB(t, lam, p):
     f = A * blackbody(lam, T) * ef/(1+er)
     return f
 
-def makeObject(diaObjectId):
-    tmin = -20
-    tmax =  8
-    nsource = 40
-    sigma = 1000
+def makeObject(diaObjectId, tmin, tmax, nsource, sigma):
     p = [100000, 5, 0, 0.3, 0.1]
     t = []
     for i in range(nsource):
@@ -100,8 +96,27 @@ def makeObject(diaObjectId):
 
 #######################
 to = 'BazinBB'
+# full bazin incl past peak
+#for i in range(10):
+#    tmin    = -20
+#    tmax    =  8
+#    nsource = 40
+#    sigma   = 1000
+#    j = makeObject(1000 + i, tmin, tmax, nsource, sigma)
+#    if not j: continue
+#    gfile = to + '/' + str(j['diaObject']['diaObjectId']) + '.json'
+#    f = open(gfile, 'w')
+#    f.write(json.dumps(j, indent=2))
+#    f.close()
+
+# pre peak -- should be exp
 for i in range(10):
-    j = makeObject(1000 + i)
+    tmin    = -20
+    tmax    = -1 
+    nsource = 8
+    sigma   = 1000
+    j = makeObject(3000 + i, tmin, tmax, nsource, sigma)
+    if not j: continue
     gfile = to + '/' + str(j['diaObject']['diaObjectId']) + '.json'
     f = open(gfile, 'w')
     f.write(json.dumps(j, indent=2))

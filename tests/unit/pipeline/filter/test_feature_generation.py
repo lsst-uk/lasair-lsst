@@ -24,7 +24,7 @@ class FeatureTest(TestCase):
       # check that returned schema is a dict
       self.assertTrue(isinstance(schema, dict))
       # check that schema contains a "type" element
-      self.assertIn("type", schema)
+      self.assertIn("type", schema[name])
 
   def test2_get_info(self):
     """Check that we get a documentation string back."""
@@ -34,7 +34,7 @@ class FeatureTest(TestCase):
       featureClass = getattr(featureModule, name)
       info = featureClass.get_info()
       # check that the info string is a string
-      self.assertTrue(isinstance(info, str))
+      self.assertTrue(isinstance(info[name], str))
 
   def test3_run_feature(self):
     """Check that the feature runs"""
@@ -45,9 +45,9 @@ class FeatureTest(TestCase):
         featureModule = getattr(features, name)
         featureClass = getattr(featureModule, name)
         schema = featureClass.get_schema()
-        result = featureClass.run(alert)
+        result = featureClass(alert).run()
         # check that the result is the type specified in the schema
-        self.assertIsInstance(result, eval(schema['type']))
+        self.assertIsInstance(result[name], eval(schema[name]['type']))
 
 if __name__ == '__main__':
   import xmlrunner

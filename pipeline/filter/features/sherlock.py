@@ -4,20 +4,20 @@ class sherlock(FeatureGroup):
     """Features that need the sherlock packet"""
 
     _features = [
-        "absoluteFlux",
+        "absFlux",
     ]    
 
     def run(self):
-        absoluteFlux = None
-        if 'annotations' in alert:
-            annotations = alert['annotations']
+        absFlux = None
+        if 'annotations' in self.alert:
+            annotations = self.alert['annotations']
             if 'sherlock' in annotations:
-                ann = alert['annotations'][sherlock]:
+                ann = alert['annotations'][sherlock]
                 if 'blabla' in ann:
                     # figure out absolute flux
-                    absoluteFlux = 100
+                    absFlux = 100
                     
         return { 
-            "absoluteFlux": absoluteFlux, 
+            "absFlux": absFlux, 
         }
 

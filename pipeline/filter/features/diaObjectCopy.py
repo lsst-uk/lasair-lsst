@@ -4,8 +4,8 @@ class diaObjectCopy(FeatureGroup):
     """Several features are simply copied from the diaObject that Rubin provides"""
 
     _features = [
+        'diaObjectId',
         'ra', 'decl',
-        'nDiaSources',
         'gPSFluxMax',
         'gPSFluxMean',
         'gPSFluxMaxSlope',
@@ -21,8 +21,11 @@ class diaObjectCopy(FeatureGroup):
 
         # copy the values from the alert
         output = {}
-        object = self.alert.get("diaObject")
+        object = self.alert["diaObject"]
         for f in self._features:
-            output[f] = object.get(f)
+            if f in object:
+                output[f] = object[f]
+            else:
+                output[f] = None
         return output
 

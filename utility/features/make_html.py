@@ -3,7 +3,7 @@ from getJump       import getJump
 from fitExp        import fitExp
 from fitBazinExpBB import fitBazinExpBB
 
-samplesdirs = ['DP02', 'BazinBB', 'plasticc']
+samplesdirs = ['DP02', 'BazinBB', 'plasticc', 'sampleAlerts']
 filterNames = ['u', 'g', 'r', 'i', 'z', 'y']
 
 A = 1 
@@ -17,8 +17,8 @@ def r(q):
     if q: return '%6.3f'%q
     else: return '      '
 
-f = open('features.html', 'w')
 for samples in samplesdirs:
+    f = open('features_%s.html'%samples, 'w')
     for _file in sorted(os.listdir(samples)):
         if not _file.endswith('.json'):
             continue
@@ -50,3 +50,4 @@ for samples in samplesdirs:
                 % (r(dict['k']), r(dict['kerr']), r(dict['T']), r(dict['Terr'])))
 
         f.write('</pre></td></tr></table><hr/>\n')
+    f.close()
