@@ -34,6 +34,7 @@ schema = {
 
 # Timing
     { "name": "nDiaSources",     "type": "int", 
+        "extra": "CONSTRAINT nDiaSources > 0",
         "doc": "Number of diaSources associated with this diaObject"},
     { "name": "maxTai", "type": "double", "doc": "Latest MJD of a diaSource" },
     { "name": "minTai", "type": "double", "doc": "Earliest MJD of a diaSource" },

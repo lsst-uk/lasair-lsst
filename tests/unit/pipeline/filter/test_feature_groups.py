@@ -58,6 +58,7 @@ class FeatureTest(TestCase):
         schema.update(groupClass.get_schema())
         groupInst = groupClass(alert)
         output.update(groupInst.run())
+        #print(groupInst.run())
       # check the output exists
       self.assertTrue(isinstance(schema, dict))
       self.assertTrue(isinstance(output, dict))
@@ -65,7 +66,12 @@ class FeatureTest(TestCase):
       for feature in schema:
         name = schema[feature]['name']
         type = schema[feature]['type']
-        if name in output and output[name]:
+
+        # name is from the schema and is in the feature set
+        self.assertIn(name, output)
+
+        # if it has been generated and not null, check the type
+        if output[name]:
             self.assertTrue(isinstance(output[name], eval(type)))
 
   def test4_run_all(self):

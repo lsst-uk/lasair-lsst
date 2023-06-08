@@ -6,7 +6,8 @@ import sys
 import math
 import numpy as np
 import ephem
-from features import create_lasair_features
+sys.path.append('../../common/schema/lasair_schema')
+from features.FeatureGroup import FeatureGroup
 
 def create_insert_query(alert):
     """create_insert_query.
@@ -16,7 +17,9 @@ def create_insert_query(alert):
     Args:
         alert:
     """
-    lasair_features = create_lasair_features(alert)
+
+    lasair_features = FeatureGroup.run_all(alert)
+    print(lasair_features)
 
     # Make the query
     list = []
