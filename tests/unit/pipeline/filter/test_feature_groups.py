@@ -66,13 +66,13 @@ class FeatureTest(TestCase):
       for feature in schema:
         name = schema[feature]['name']
         type = schema[feature]['type']
-
-        # name is from the schema and is in the feature set
+        # check name is in the feature set
         self.assertIn(name, output)
-
-        # if it has been generated and not null, check the type
-        if output[name]:
-            self.assertTrue(isinstance(output[name], eval(type)))
+        # check that either the type is ok or that the output is None and allowed to be so 
+        self.assertTrue(
+          (isinstance(output[name], eval(type))) or
+          (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
+          )
 
   def test4_run_all(self):
     """Test the run_all method"""
