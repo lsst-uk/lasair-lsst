@@ -48,23 +48,10 @@
       line: "{{ settings.id_rsa_pub }}"
       mode: 0600
 
-  - name: get terraform apt key
-    become: true
-    ansible.builtin.get_url:
-      url: https://apt.releases.hashicorp.com/gpg
-      dest: /usr/share/keyrings/hashicorp-archive-keyring.asc
-
-  - name: add terraform repo
-    become: true
-    ansible.builtin.apt_repository:
-      repo: "deb [arch=amd64 signed-by=/usr/share/keyrings/hashicorp-archive-keyring.asc] https://apt.releases.hashicorp.com {{ ansible_distribution_release }} main"
-      state: present
-
   - name: Install apt packages
     become: true
     apt:
       pkg: 
-        - terraform
         - python3-hvac
         - python3-openstackclient
         - python3-manilaclient
@@ -86,6 +73,13 @@
     community.general.snap:
       name:
         - vault
+
+  - name: Install terraform snap
+    become: true
+    community.general.snap:
+      name:
+        - terraform
+      classic: true
 
   - name: Set SSH client config
     copy:
