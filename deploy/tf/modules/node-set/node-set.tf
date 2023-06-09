@@ -19,6 +19,7 @@ module "server" {
   floating_ip = var.floating_ip
   extra_networks = var.extra_networks
   flavor = var.flavor
+  image_name = var.image_name
 }
 
 output "private_ips" {

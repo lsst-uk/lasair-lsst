@@ -56,3 +56,9 @@ variable "extra_networks" {
   type = list(string)
   default = []
 }
+
+variable "image_name" {
+  type = string
+  default = "ubuntu-jammy"
+}
+

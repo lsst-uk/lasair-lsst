@@ -47,6 +47,10 @@ variable "share_network" {
   type = string
 }
 
+variable "image_name" {
+  type = string
+}
+
 ######################################################################
 # Data
 
@@ -97,6 +101,7 @@ module "node-set" {
   floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
   extra_networks = var.extra_networks
   flavor = can(each.value.flavor) ? each.value.flavor : "tiny"
+  image_name = var.image_name
 }
 
 ######################################################################
