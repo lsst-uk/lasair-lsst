@@ -60,7 +60,7 @@ data "openstack_networking_network_v2" "share_network" {
 
 # create shared filesystem
 resource "openstack_sharedfilesystem_share_v2" "share" {
-  name             = "cephfs_share"
+  name             = "${var.base_name}"
   description      = "Lasair shared filesystem"
   share_proto      = "CEPHFS"
   size             = var.share_size

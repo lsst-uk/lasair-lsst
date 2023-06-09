@@ -18,8 +18,8 @@
       community.general.terraform:
         project_path: "{{ tf_path }}"
         #state: planned
-        #state: present
-        state: absent
+        state: present
+        #state: absent
         plan_file: plan
         complex_vars: true
         variables:
