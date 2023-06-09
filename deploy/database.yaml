@@ -27,6 +27,17 @@
         fstype: ext4
         opts: nofail
         state: mounted
+    - name: create filesystem for tmp
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/sdc
+    - name: ensure tmp filesystem is mounted
+      ansible.posix.mount:
+        path: /tmp
+        src: /dev/sdc
+        fstype: ext4
+        opts: nofail
+        state: mounted
   tags: filesystem
 
 - hosts: db
