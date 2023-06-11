@@ -40,8 +40,8 @@
                 </tr>
                 {% for row in table %}<tr>
                     {% for key, value in row.items %}
-                        {% if key == "objectId" %}
-                            <td><a href=/object/{{ row.objectId }} target="_blank">{{ value }}</a></td>
+                        {% if key == "diaObjectId" %}
+                            <td><a href=/objects/{{ row.diaObjectId }} target="_blank">{{ value }}</a></td>
                         {% elif key == "content" %}
                             <td>{{ value|safe }}</td>
                         {% else %}

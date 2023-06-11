@@ -1,0 +1,72 @@
+{
+  "diaObject": {
+    "diaObjectId": 3009,
+    "ra": 0.0,
+    "decl": 0.0,
+    "radecTai": 0.0,
+    "uPSFluxMean": 0.0,
+    "gPSFluxMean": 0.0,
+    "rPSFluxMean": 0.0,
+    "iPSFluxMean": 0.0,
+    "zPSFluxMean": 0.0,
+    "yPSFluxMean": 0.0
+  },
+  "diaSourcesList": [
+    {
+      "diaSourceId": 1755,
+      "midPointTai": -10.982731684023868,
+      "filterName": "r",
+      "psFlux": 10556.436626179635,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1226,
+      "midPointTai": -6.136711618597632,
+      "filterName": "u",
+      "psFlux": 12962.889660674944,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1497,
+      "midPointTai": -3.649657224360208,
+      "filterName": "i",
+      "psFlux": 26240.11964263637,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 3628,
+      "midPointTai": -2.037184524306177,
+      "filterName": "u",
+      "psFlux": 21954.832293357078,
+      "psFluxErr": 1000
+    }
+  ],
+  "diaForcedSourcesList": [
+    {
+      "diaSourceId": 4402,
+      "midPointTai": -17.037820815361037,
+      "filterName": "z",
+      "psFlux": 2709.6359228199135,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 3764,
+      "midPointTai": -13.42919777015086,
+      "filterName": "i",
+      "psFlux": 4831.788204061132,
+      "psFluxErr": 1000
+    }
+  ],
+  "diaNondetectionLimitsList": [
+    {
+      "midPointTai": -19.96490100624391,
+      "filterName": "r",
+      "diaNoise": 1434.2198264593605
+    },
+    {
+      "midPointTai": -18.717496166844093,
+      "filterName": "u",
+      "diaNoise": 64.52140600610551
+    }
+  ]
+}

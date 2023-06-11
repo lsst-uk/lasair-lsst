@@ -95,7 +95,7 @@ def fetch_alerts(msl):
     """
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    query = 'SELECT diaObjectId, ra, decl from diaObjects'
+    query = 'SELECT diaObjectId, ra, decl from objects'
     cursor.execute(query)
     objlist = []
     ralist = []

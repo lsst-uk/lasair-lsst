@@ -1,0 +1,95 @@
+{
+  "diaObject": {
+    "diaObjectId": 8568272,
+    "ra": 0.0,
+    "decl": 0.0,
+    "radecTai": 0.0,
+    "uPSFluxMean": 0.0,
+    "gPSFluxMean": 0.0,
+    "rPSFluxMean": 0.0,
+    "iPSFluxMean": 0.0,
+    "zPSFluxMean": 0.0,
+    "yPSFluxMean": 0.0
+  },
+  "diaSourcesList": [
+    {
+      "diaSourceId": 3644,
+      "midPointTai": -77.77909999999974,
+      "filterName": "r",
+      "psFlux": -0.342338,
+      "psFluxErr": 17.53824
+    },
+    {
+      "diaSourceId": 2051,
+      "midPointTai": -75.81719999999768,
+      "filterName": "g",
+      "psFlux": 2.605133,
+      "psFluxErr": 8.67264
+    },
+    {
+      "diaSourceId": 1190,
+      "midPointTai": -53.95799999999872,
+      "filterName": "z",
+      "psFlux": 43.62545,
+      "psFluxErr": 36.05405
+    },
+    {
+      "diaSourceId": 4095,
+      "midPointTai": -48.87659999999596,
+      "filterName": "r",
+      "psFlux": 4.971199,
+      "psFluxErr": 12.293366
+    },
+    {
+      "diaSourceId": 2106,
+      "midPointTai": -44.955699999998615,
+      "filterName": "z",
+      "psFlux": 53.470501,
+      "psFluxErr": 20.244926
+    },
+    {
+      "diaSourceId": 4555,
+      "midPointTai": -25.947199999995064,
+      "filterName": "i",
+      "psFlux": 427.724579,
+      "psFluxErr": 15.13619
+    },
+    {
+      "diaSourceId": 3622,
+      "midPointTai": -23.931699999993725,
+      "filterName": "z",
+      "psFlux": 360.616272,
+      "psFluxErr": 32.986633
+    },
+    {
+      "diaSourceId": 3949,
+      "midPointTai": -19.912799999998242,
+      "filterName": "z",
+      "psFlux": 422.086243,
+      "psFluxErr": 41.933594
+    },
+    {
+      "diaSourceId": 2922,
+      "midPointTai": -18.985999999997148,
+      "filterName": "i",
+      "psFlux": 497.045441,
+      "psFluxErr": 12.132069
+    },
+    {
+      "diaSourceId": 4527,
+      "midPointTai": -1.9918999999936204,
+      "filterName": "z",
+      "psFlux": 493.587341,
+      "psFluxErr": 28.610613
+    },
+    {
+      "diaSourceId": 3520,
+      "midPointTai": 0.0,
+      "filterName": "i",
+      "psFlux": 520.132019,
+      "psFluxErr": 13.810539
+    }
+  ],
+  "diaForcedSourcesList": [],
+  "diaNondetectionLimitsList": []
+}
