@@ -16,6 +16,8 @@ class sherlock(FeatureGroup):
                 if 'blabla' in ann:
                     # figure out absolute flux
                     absFlux = 100
+                    if verbose:
+                        print('absFlux: Value is %.2e' % absFlux)
                     
         return { 
             "absFlux": absFlux, 

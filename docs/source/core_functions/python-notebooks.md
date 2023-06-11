@@ -9,7 +9,7 @@
 Below are some Google colab notebooks that use Lasair API, which has a token authentication scheme. 
 The notebooks below have a fake token "xxxxxxx" that doesn't work. To use the notebooks, you will need to :
 
-*   Get a Lasair account [here]({%lasairurl%}/signup), and log in to the Lasair website.
+*   Get a Lasair account [here]({%lasairurl%}/register), and log in to the Lasair website.
 *   Click on your username at the top right and select "My Profile"
 *   Copy the notebook to your own Google account, and replace the xxxxxxx with your own token.
 

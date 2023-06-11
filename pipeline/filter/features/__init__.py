@@ -1,7 +1,7 @@
 __all__ = [
     "htm16",
     "diaObjectCopy",
-    "timing",
+    "counting",
     "latestFlux",
     "sherlock",
     "fluxJump",

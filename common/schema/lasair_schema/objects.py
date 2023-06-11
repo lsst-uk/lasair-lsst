@@ -32,10 +32,16 @@ schema = {
     { "name": "rPSFluxNdata", "type": "int", 
         "doc": "The number of data points used to compute rPSFluxChi2" },
 
-# Timing
-    { "name": "nDiaSources",     "type": "int", 
-        "extra": "CONSTRAINT nDiaSources > 0",
+# Counting, max, min
+    { "name": "nSources",     "type": "int", 
+        "extra": "NOT NULL",
         "doc": "Number of diaSources associated with this diaObject"},
+    { "name": "nuSources", "type": "int", "doc": "Number of u sources" },
+    { "name": "ngSources", "type": "int", "doc": "Number of u sources" },
+    { "name": "nrSources", "type": "int", "doc": "Number of u sources" },
+    { "name": "niSources", "type": "int", "doc": "Number of u sources" },
+    { "name": "nzSources", "type": "int", "doc": "Number of u sources" },
+    { "name": "nySources", "type": "int", "doc": "Number of u sources" },
     { "name": "maxTai", "type": "double", "doc": "Latest MJD of a diaSource" },
     { "name": "minTai", "type": "double", "doc": "Earliest MJD of a diaSource" },
 

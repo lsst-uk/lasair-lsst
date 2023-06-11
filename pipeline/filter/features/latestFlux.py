@@ -24,4 +24,8 @@ class latestFlux(FeatureGroup):
             fnf = fn + 'PSFlux'
             if not dict[fnf]:
                 dict[fnf] = ds['psFlux']
-            return dict
+        if self.verbose:
+            for f in self._features:
+                if f not in dict:
+                    print('latestFlux: %s not available' % f)
+        return dict

@@ -26,6 +26,7 @@ class diaObjectCopy(FeatureGroup):
             if f in object:
                 output[f] = object[f]
             else:
+                if self.verbose: print('diaObjectCopy: did not find %s' % f)
                 output[f] = None
         return output
 

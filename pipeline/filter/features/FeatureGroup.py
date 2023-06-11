@@ -12,8 +12,9 @@ class FeatureGroup:
 
     _features = []
 
-    def __init__(self, alert):
+    def __init__(self, alert, verbose=False):
         self.alert = alert
+        self.verbose = verbose
 
     def run(self) -> dict:
         """Run the alert processing to generate the features."""
@@ -26,7 +27,7 @@ class FeatureGroup:
     # output = FeatureGroup.run_all(alert)
 
     @classmethod
-    def run_all(cls, alert):
+    def run_all(cls, alert, verbose=False):
         """Utility method to run all known feature groups on an alert and
              collate the output."""
         output = {}
@@ -34,8 +35,11 @@ class FeatureGroup:
             import_module(f"features.{group}")
             groupModule = getattr(features, group)
             groupClass = getattr(groupModule, group)
-            groupInst = groupClass(alert)
-            output.update(groupInst.run())
+            groupInst = groupClass(alert, verbose)
+            dict = groupInst.run()
+            if verbose: 
+                print('%s: %s' % (group, str(dict)))
+            output.update(dict)
         return output
 
     # The following are reasonable default implementations and probably

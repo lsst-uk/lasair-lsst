@@ -18,8 +18,10 @@ def create_insert_query(alert):
         alert:
     """
 
-    lasair_features = FeatureGroup.run_all(alert)
-    print(lasair_features)
+    verbose = False
+    lasair_features = FeatureGroup.run_all(alert, verbose)
+    if verbose:
+        print(lasair_features)
 
     # Make the query
     list = []
@@ -34,6 +36,8 @@ def create_insert_query(alert):
         else:
             list.append(key + '=' + str(value))
     query += ',\n'.join(list)
+    if verbose:
+        print(query)
     return query
 
 def create_insert_annotation(diaObjectId, annClass, ann, attrs, table, replace):

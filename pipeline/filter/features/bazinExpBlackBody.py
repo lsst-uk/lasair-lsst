@@ -169,8 +169,12 @@ def fit_expit(alert, pexpit0, sigma):
     return (Rsq, dict)
 
 def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
+    empty = {
+        'bazinExpTemp': None, 'bazinExpRiseRate': None, 'bazinExpFallRate': None,
+        'bazinExpTempErr': None, 'bazinExpRiseRateErr': None, 'bazinExpFallRateErr': None,
+    }
     if len(alert['diaSourcesList']) < 4:
-        return None
+        return empty
     (Rsqe, dicte) = fit_expit(alert, pexpit0, sigma)
     (Rsqb, dictb) = fit_bazin(alert, pbazin0, sigma)
     if dicte and dictb:
@@ -181,7 +185,7 @@ def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
     elif dictb:
         return dictb
     else:
-        return None
+        return empty
 
 ##################################################
 from features.FeatureGroup import FeatureGroup
@@ -196,7 +200,7 @@ class bazinExpBlackBody(FeatureGroup):
         "bazinExpRiseRateErr", 
         "bazinExpFallRateErr", 
         "bazinExpTempErr",
-    ]    
+    ]
 
     def run(self):
         A = 1
@@ -207,6 +211,11 @@ class bazinExpBlackBody(FeatureGroup):
         pexpit0 = [A, T, kr-kf]
         pbazin0 = [A, T, t0, kr, kf]
         sigma = 0.1
+
+        # no whinging about overflows during normal running
+        if not self.verbose:
+            np.seterr(over   ='ignore')
+            np.seterr(invalid='ignore')
 
         dict = fitBazinExpBB(self.alert, pexpit0, pbazin0, sigma)
         return dict

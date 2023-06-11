@@ -56,7 +56,7 @@ class FeatureTest(TestCase):
         groupModule = getattr(features, group)
         groupClass = getattr(groupModule, group)
         schema.update(groupClass.get_schema())
-        groupInst = groupClass(alert)
+        groupInst = groupClass(alert, verbose=True)
         output.update(groupInst.run())
         #print(groupInst.run())
       # check the output exists
@@ -79,7 +79,7 @@ class FeatureTest(TestCase):
     from features.FeatureGroup import FeatureGroup
     with open("sample_alerts/lsst1.json") as f:
       alert = json.load(f)
-      output = FeatureGroup.run_all(alert)
+      output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 
 if __name__ == '__main__':

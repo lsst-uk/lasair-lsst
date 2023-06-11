@@ -33,6 +33,8 @@ class fluxJump(FeatureGroup):
                 if fobs[i] > max_flux:
                     max_flux = fobs[i]
         if n < 4:
+            if self.verbose:
+                print('fluxJump: Only %d previous sources' % n)
             return dict
                
         meanf = fluxsum/n

@@ -16,7 +16,7 @@ def func_expit(params, t, f):
     residual = f - expit(t, params)
     return residual
 
-def fitExpImpl(alert, pexpit0, sigma):
+def fitExpImpl(alert, pexpit0, sigma, verbose):
     sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
 
@@ -51,13 +51,16 @@ def fitExpImpl(alert, pexpit0, sigma):
         try:
             err = np.sqrt(np.diag(cov))*sigma
         except:
-            print('negative cov matrix')
+            if verbose:
+                print('fitExp: Filter %s: negative cov matrix' % filterName)
             continue
 
         SSE = np.sum(func_expit(fit, tobs, fobs)**2)
 #    AIC_bazin = 100 + npoint*math.log(SSE_bazin/npoint) + 2*5
         Rsq = SSE/SST
         if Rsq > 0.25: 
+            if verbose:
+                print('fitExp: Filter %s: Rsq less than 0.25' % filterName)
             continue
         dict[filterName + 'ExpRate']    = fit[1]
         dict[filterName + 'ExpRateErr'] = err[1]
@@ -82,4 +85,4 @@ class fitExp(FeatureGroup):
         k = 0.1
         pexpit0 = [A, k]
         sigma = 0.1
-        return fitExpImpl(self.alert, pexpit0, sigma)
+        return fitExpImpl(self.alert, pexpit0, sigma, self.verbose)
