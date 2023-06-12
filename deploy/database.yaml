@@ -38,6 +38,10 @@
         fstype: ext4
         opts: nofail
         state: mounted
+    - name: ensure /tmp is writable
+      ansible.builtin.file:
+        path: /tmp
+        mode: "0777"
   tags: filesystem
 
 - hosts: db
