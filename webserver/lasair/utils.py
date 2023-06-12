@@ -131,7 +131,7 @@ def objjson(diaObjectId, full=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     query = 'SELECT ncand, ra, decl, taimin as mjdmin, taimax as mjdmax '
-    query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
+    query += 'FROM diaObjects WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:
         objectData = row

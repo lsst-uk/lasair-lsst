@@ -138,12 +138,12 @@ def kafka_consume(consumer, maxalert):
         # Apply filter to each alert
         alert = json.loads(msg.value())
         nalert_in += 1
-        try:
+#        print(alert['diaSource']['diaObjectId'])
+        if 1:
             d = alert_filter(alert, msl)
             nalert_out += d
-        except Exception as e:
-            print('Alert filter exception:', str(e))
-            break
+#        except:
+#            break
 
         if nalert_in%1000 == 0:
             log.info('nalert_in %d nalert_out  %d time %.1f' % \

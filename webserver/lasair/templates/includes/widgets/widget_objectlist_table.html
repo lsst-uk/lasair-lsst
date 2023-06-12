@@ -76,8 +76,8 @@
                             <tr>
                                 {% for key in object.keys %}
 
-                                    {% if key == "diaObjectId" %}
-                                        <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
+                                    {% if key == "objectId" %}
+                                        <td><a href='{% url "object_detail" object.objectId %}'>{{ object.objectId }}</a></td>
 
                                     {% elif key in 'decmean' %}
                                         <td>{{object|keyvalue:key|floatformat:6 }}</td>

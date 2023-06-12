@@ -6,8 +6,8 @@ import sys
 import math
 import numpy as np
 import ephem
-sys.path.append('../../common/schema/lasair_schema')
-from features.FeatureGroup import FeatureGroup
+from features import create_lasair_features
+from gkhtm import _gkhtm as htmCircle
 
 def create_insert_query(alert):
     """create_insert_query.
@@ -17,16 +17,48 @@ def create_insert_query(alert):
     Args:
         alert:
     """
+    diaObject = alert['diaObject']
 
-    verbose = False
-    lasair_features = FeatureGroup.run_all(alert, verbose)
-    if verbose:
-        print(lasair_features)
+    # Make a list of diaSources
+    if 'diaSource' in alert and alert['diaSource'] != None:
+        if 'prvDiaSources' in alert and alert['prvDiaSources'] != None:
+            diaSourceList = alert['prvDiaSources'] + [alert['diaSource']]
+        else:
+            diaSourceList = [alert['diaSource']]
+
+    # Make a list of diaForcedSources
+    if 'prvrDdiaForcedSources' in alert:
+        diaForcedSourceList = alert['prvForcedDiaSources'] + [alert['diaSource']]
+    else:
+        diaForcedSourceList = []
+
+    # Make a list of diaNondetectionLimits
+    if 'prvDiaNondetectionLimits' in alert:
+        diaNondetectionLimitsList = alert['prvDiaNondetectionLimits']
+    else:
+        diaNondetectionLimitsList = []
+
+    lasair_features = create_lasair_features(
+            diaObject, 
+            diaSourceList, 
+            diaForcedSourceList, 
+            diaNondetectionLimitsList)
+
+    # Compute the HTM ID for later cone searches
+    try:
+        htm16 = htmCircle.htmID(16, diaObject['ra'], diaObject['decl'])
+    except:
+        htm16 = 0
+        print('ERROR: filter/insert_query: Cannot compute HTM index')
+        sys.stdout.flush()
+
+    sets = {**diaObject, 'htm16':htm16, **lasair_features}
 
     # Make the query
     list = []
-    query = 'REPLACE INTO objects SET '
-    for key,value in lasair_features.items():
+    query = 'REPLACE INTO diaObjects SET '
+    for key,value in sets.items():
+        print
         if not value:
             list.append(key + '= NULL')
         elif math.isnan(value):
@@ -36,8 +68,6 @@ def create_insert_query(alert):
         else:
             list.append(key + '=' + str(value))
     query += ',\n'.join(list)
-    if verbose:
-        print(query)
     return query
 
 def create_insert_annotation(diaObjectId, annClass, ann, attrs, table, replace):

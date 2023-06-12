@@ -101,7 +101,16 @@ administrators then make it possible. That user will run a method in the Lasair
 API that pushes the annotation: all this can be automated, meaning the 
 annotation may arrive within minutes of the observation that triggers it.
 
-## LSST future
+## ZTF and LSST
+The Lasair project splits into two: the existing working version, Lasair-ZTF, 
+that has been ingesting and exposing alerts from the ZTF survey for two years; 
+and the future version Lasair-LSST, which is being developed based on the 
+lessons learned from Lasair-ZTF. We are keeping the essentials of the user 
+interface of Lasair-ZTF (static and streaming SQL queries, full database 
+access, watchlists, classification and annotation), but are rebuilding the 
+backend architecture for LSST event rates, using parallel services and scalable 
+software.
+
 In the timeframe beyond the first data releases of LSST, we can expect 
 continuing change. New surveys will come on line, new robotic follow-up 
 systems, and new classification systems will proliferate, leading to more 
@@ -115,13 +124,6 @@ mechanisms for dynamic cross-match (e.g. the IAU's Transient Name Server) and
 utilising our flexible schema system. Lasair will add new tables and schemas to 
 our databases, and build information systems to make it easy for scientists to 
 navigate the deluge of metadata.
-
-## What Lasair is not
-Lasair is built to process transient alerts rapidly and make the key decision: is this an object I want to follow up? LSST alerts will come at very high rate, and Lasair takes advantage of the design of the distribution system: ["Events are sent in rich alert packets to enable standalone classification"](https://simons.berkeley.edu/sites/default/files/docs/9308/bellmlsst180226.pdf). Thus alerts are judged based only on that rich alert packet, without database interaction, leading to a very fast processing rate.
-
-The "rich data packet" means a year of past data about each object. Note that Lasair has the full light curves -- available through the object web page or API -- but queries and filters are based on these shorter light curves.
-
-We note that the LSST archives will hosted by [LSST:UK Science Platform](https://rsp.lsst.ac.uk/) and [Rubin Science Platform](https://data.lsst.cloud). These resources may be better suited for long-term archival research.
 
 ## Scientific goals of Lasair
 We aim to facilitate all four science themes of LSST within the Lasair 
@@ -196,7 +198,7 @@ Within the TVS Science Collaboration most science for variables (typically
 recurrent and periodic signals) will be achieved with the annual data releases. 
 However there is great opportunity in combining alerts with the data releases. 
 Users can discover outbursts or large amplitude variability through the alerts 
-and link to the data releases and full multi-year lightcurves. Lasair-LSST 
+and link to the data releases and full multi-year lightcurves. Lasair-ZTF 
 currently can provide streams of objects matched to known stars (via watch 
 lists of $10^6$ objects) and trigger on a particular magnitude variability 
 index. We are working with scientists within TVS in particular to define 

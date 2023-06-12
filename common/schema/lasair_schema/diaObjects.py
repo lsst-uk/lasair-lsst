@@ -1557,9 +1557,37 @@ schema = {
     {
       "name": "flags",
       "type": "long"
+    },
+    {
+      "name": "taimax",
+      "type": "double",
+      "doc": "Latest MJD of a diaSource"
+    },
+    {
+      "name": "taimin",
+      "type": "double",
+      "doc": "Earliest MJD of a diaSource"
+    },
+    {
+      "name": "ncand",
+      "type": "int",
+      "doc": "Number of daiSource in light curve"
+    },
+    {
+      "name": "ncand_7",
+      "type": "int",
+      "doc": "Number of diaSource in last 7 days"
+    },
+    {
+      "name": "htm16",
+      "type": "bigint",
+      "doc": "Hierarchical Triangular Mesh level 16",
+      "extra": "NOT NULL"
     }
   ],
   "indexes": [
-    "PRIMARY KEY (diaObjectId, radecTai)"
+    "PRIMARY KEY (diaObjectId)",
+    "KEY htmid16idx (htm16)",
+    "KEY idxRadecTai (radecTai)"
   ]
 }

@@ -151,8 +151,8 @@ A.init.then(() => {
     aladin.addCatalog(sherlockcat);
 {% endif %}
 
-{% if data.diaObjectId %}
-    var objectcat = A.catalog({name: "{{ data.diaObjectId }}", sourceSize: 10, color: "red", shape:"circle"});
+{% if data.objectId %}
+    var objectcat = A.catalog({name: "{{ data.objectId }}", sourceSize: 10, color: "red", shape:"circle"});
     var thisobject = A.source(
         {{ data.objectData.ramean }},
         {{ data.objectData.decmean }});

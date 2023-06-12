@@ -162,7 +162,6 @@ def filter_query_detail(request, mq_id, action=False):
         duplicateForm = DuplicateFilterQueryForm(instance=filterQuery, request=request)
 
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
-
     filterQuery.real_sql = build_query(filterQuery.selected, filterQuery.tables, filterQuery.conditions)
 
     cursor.execute(f'SELECT name, selected, tables, conditions, real_sql FROM myqueries WHERE mq_id={mq_id}')
@@ -236,7 +235,7 @@ def filter_query_create(request, mq_id=False):
 
     # BUILD CONTENT FOR THE CREATION FORM
     schemas_core = {
-        'objects': get_schema('objects'),
+        'diaObjects': get_schema('diaObjects'),
         'crossmatch_tns': get_schema('crossmatch_tns'),
         'sherlock_classifications': get_schema('sherlock_classifications')
     }
@@ -294,7 +293,7 @@ def filter_query_create(request, mq_id=False):
             active = form.initial["active"]
 
         # EXTRA DEFAULTS
-        tables = "objects"
+        tables = "diaObjects"
         limit = 1000
         offset = 0
 
@@ -307,10 +306,7 @@ def filter_query_create(request, mq_id=False):
         if watchmaps:
             watchmaps[:] = [str(w) for w in watchmaps]
             tables += f", area:{('&').join(watchmaps)}"
-
         if annotators:
-            for a in annotators:
-                tables = tables.replace(a + ",", "").replace(a, "")
             tables += f", annotator:{('&').join(annotators)}"
 
         # RUN?
@@ -376,7 +372,7 @@ def filter_query_create(request, mq_id=False):
 
             filtername = form.cleaned_data.get('name')
 #            messages.success(request, f'The "{filtername}" filter has been successfully {verb}')
-            messages.success(request, message)  # hack hack
+            messages.success(request, message)     ####  hack hack
             return redirect(f'filter_query_detail', filterQuery.pk)
 
     else:

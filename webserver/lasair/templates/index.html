@@ -172,7 +172,7 @@
                         L = new Array;
                         for(k=0; k<alerts[iclass][iage].length; k++){
                             a = alerts[iclass][iage][k];
-                            var title = '<a href="/objects/' + a.diaObjectId + '/" target="_blank">' + a.diaObjectId + '</a>';
+                            var title = '<a href="/objects/' + a.objectId + '/" target="_blank">' + a.objectId + '</a>';
                             var desc = 'Class:' + a.class + ' Mag:' + a.mag.toFixed(1) + ' Age:' + a.age.toFixed(1) +' days';
                             L.push(A.marker(a.coordinates[0], a.coordinates[1], {popupTitle: title, popupDesc: desc}));
                         }

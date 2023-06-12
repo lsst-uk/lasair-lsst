@@ -33,22 +33,11 @@ filenames = {
     dir + '/2020-11-15/simulated-sso/all_visits_simulated-sso_2020-11-15.avro'
 }
 
-filenames = {
-    'single_ccd_sample3':        # 219 alerts
-    dir + '/2020-07-06/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-06.avro',
-    'single_visit_sample3':      # 6834 alerts
-    dir + '/2020-07-06/DECam-HiTS/single_visit_sample_DECam-HiTS_2020-07-06.avro',
+#filenames = {
+#    'single_ccd_sample3':        # 219 alerts
+#    dir + '/2020-07-06/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-06.avro',
+#}
 
-    'single_ccd_sample4':       # 217 alerts
-    dir + '/2020-07-15/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-15.avro',
-    'single_visit_sample4':     # 6734 alerts
-    dir + '/2020-07-15/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-15.avro',
-}
-
-filenames = {
-    'single_ccd_sample3':        # 219 alerts
-    dir + '/2020-07-06/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-06.avro',
-}
 
 conf = {
     'bootstrap.servers': KAFKA,

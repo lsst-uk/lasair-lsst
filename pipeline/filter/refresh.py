@@ -12,7 +12,10 @@ except:
     print('ERROR in filter/refresh: cannot clear local database')
     sys.stdout.flush()
 
-query = 'TRUNCATE TABLE objects'
+query = 'TRUNCATE TABLE diaObjects'
+cursor.execute(query)
+
+query = 'TRUNCATE TABLE ssObjects'
 cursor.execute(query)
 
 query = 'TRUNCATE TABLE sherlock_classifications'

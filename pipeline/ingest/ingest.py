@@ -85,100 +85,102 @@ def insert_cassandra(alert, cassandra_session):
     if not cassandra_session:
         return None   # failure of batch
 
-    executeLoad(cassandra_session, 'diaObjects', [alert['diaObject']])
+    # if it does not have all the LSST attributes, don't try to ingest
+    if not 'diaSourceId' in alert['diaSource'] or not alert['diaSource']['diaSourceId']:
+        return 0
+
+    diaSourceList            = []
+    diaForcedSourceList      = []
+    diaNondetectionLimitList = []
+    ssObjectList             = []
+    # Make a list of diaSource, diaForcedSource, diaNondetection in time order
+    if 'diaSource' in alert and alert['diaSource'] != None:
+        if 'prvDiaSources' in alert and alert['prvDiaSources'] != None:
+            diaSourceList = alert['prvDiaSources'] + [alert['diaSource']]
+        else:
+            diaSourceList = [alert['diaSource']]
+
+        if 'prvDiaForcedSources' in alert and alert['prvDiaForcedSources'] != None:
+            diaForcedSourceList = alert['prvDiaForcedSources']
+
+        if 'prvDiaNondetectionLimits' in alert and alert['prvDiaNondetectionLimits'] != None:
+            diaNondetectionLimitList = alert['prvDiaNondetectionLimits']
+
+        if 'ssObject' in alert and alert['ssObject'] != None:
+            ssObjectList = [alert['ssObject']]
+
+    if len(diaSourceList) == 0:
+        # No point continuing. We have no data.
+        print('No diaSources')
+        return 0
+
+    # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,
+    # but the new C++ bulk code is 100 times faster than doing it one at a time.
     # Note that although we are inserting them into cassandra, we are NOT using
     # HTM indexing inside Cassandra. Hence this is a redundant column.
 
     # Now add the htmid16 value into each dict.
+    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourceList])
+    for i in range(len(diaSourceList)):
+        diaSourceList[i]['htm16'] = htm16s[i]
+    executeLoad(cassandra_session, 'diaSources', diaSourceList)
 
-    diaSourcesList = alert['diaSourcesList']
-    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourcesList])
-    for i in range(len(diaSourcesList)):
-        diaSourcesList[i]['htm16'] = htm16s[i]
-    if len(diaSourcesList) > 0:
-        executeLoad(cassandra_session, 'diaSources', diaSourcesList)
+    if len(diaForcedSourceList) > 0:
+        executeLoad(cassandra_session, 'diaForcedSources', diaForcedSourceList)
 
-    if len(alert['diaForcedSourcesList']) > 0:
-        executeLoad(cassandra_session, 'diaForcedSources', alert['diaForcedSourcesList'])
+    if len(diaNondetectionLimitList) > 0:
+        executeLoad(cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitList)
 
-    if len(alert['diaNondetectionLimitsList']) > 0:
-        executeLoad(cassandra_session, 'diaNondetectionLimits', alert['diaNondetectionLimitsList'])
+    if len(ssObjectList) > 0:
+        # should there be HTM for these?
+        executeLoad(cassandra_session, 'ssObjects', ssObjectList)
 
-    return
+    return len(diaSourceList)
 
-def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session):
+def handle_alert(alert, image_store, producer, topic_out, cassandra_session):
     """handle_alert.
     Filter to apply to each alert.
 
     Args:
-        lsst_alert:
+        alert:
         image_store:
         producer:
         topic_out:
     """
     global log
     # here is the part of the alert that has no binary images
-    lsst_alert_noimages = msg_text(lsst_alert)
-    if not lsst_alert_noimages:
+    alert_noimages = msg_text(alert)
+    if not alert_noimages:
         log.error('ERROR:  in ingest/ingest: No json in alert')
-        return 0  # ingest batch failed
+        return None  # ingest batch failed
 
-    # ID for the latest detection, this is what the cutouts belong to
-    diaSourceId = lsst_alert_noimages['diaSource']['diaSourceId']
+    diaSourceId = alert_noimages['diaSource']['diaSourceId']
 
     # store the fits images
     if image_store:
-        if store_images(lsst_alert, image_store, diaSourceId) == None:
+        if store_images(alert, image_store, diaSourceId) == None:
             log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
-            return 0   # ingest batch failed
-
-    # Build a new alert packet
-    diaObject                 = lsst_alert['diaObject']
-    diaSourcesList            = []
-    diaForcedSourcesList      = []
-    diaNondetectionLimitsList = []
-    # Make a list of diaSource, diaForcedSource, diaNondetection in time order
-    if 'diaSource' in lsst_alert and lsst_alert['diaSource'] != None:
-        if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources'] != None:
-            diaSourcesList = lsst_alert['prvDiaSources'] + [lsst_alert['diaSource']]
-        else:
-            diaSourcesList = [lsst_alert['diaSource']]
-
-        if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources'] != None:
-            diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
-
-        if 'prvDiaNondetectionLimits' in lsst_alert and lsst_alert['prvDiaNondetectionLimits'] != None:
-            diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
-
-    alert = {
-        'diaObject':                 diaObject,
-        'diaSourcesList':            diaSourcesList,
-        'diaForcedSourcesList':      diaForcedSourcesList,
-        'diaNondetectionLimitsList': diaNondetectionLimitsList,
-    }
-
-    # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,
-    # but the new C++ bulk code is 100 times faster than doing it one at a time.
+            return None   # ingest batch failed
 
     # Call on Cassandra
     try:
-        ndiaSource = insert_cassandra(alert, cassandra_session)
-    except Exception as e:
-        log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
-        return 0  # ingest batch failed
+        ndiaSource = insert_cassandra(alert_noimages, cassandra_session)
+    except:
+        log.error('ERROR in ingest/ingest: Cassandra insert failed')
+        return None  # ingest batch failed
 
     # produce to kafka
     if producer is not None:
         try:
-            s = json.dumps(alert)
-            producer.produce(topic_out, json.dumps(alert))
+            s = json.dumps(alert_noimages)
+            producer.produce(topic_out, json.dumps(alert_noimages))
         except Exception as e:
             log.error("ERROR in ingest/ingest: Kafka production failed for %s" % topic_out)
             log.error("ERROR:", e)
             sys.stdout.flush()
             return None   # ingest failed
 
-    return len(diaSourcesList)
+    return 1
 
 def run_ingest(args):
     """run.
@@ -306,7 +308,7 @@ def run_ingest(args):
         # read the avro contents
 #        try:
         bytes_io = io.BytesIO(msg.value())
-        lsst_alert = fastavro.schemaless_reader(bytes_io, pschema)
+        alert = fastavro.schemaless_reader(bytes_io, pschema)
 #        except:
 #            log.error('ERROR in ingest/ingest: ', msg.value())
 #            break
@@ -318,7 +320,11 @@ def run_ingest(args):
             break
 
         # Apply filter to each alert
-        idiaSource = handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session)
+        idiaSource = handle_alert(alert, image_store, producer, topic_out, cassandra_session)
+
+        if idiaSource == None:
+            log.info('Ingestion failed ')
+            return 0
 
         nalert += 1
         ntotalalert += 1

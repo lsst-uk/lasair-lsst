@@ -3,9 +3,7 @@ from src import db_connect
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from lasair.utils import datetime_converter
 import settings
-import os
-import json
-import time
+import os, json
 from datetime import datetime
 from confluent_kafka import admin, Producer
 
@@ -213,8 +211,7 @@ def topic_refresh(real_sql, topic, limit=10):
         message += "ERROR in filter/run_active_queries: cannot produce to public kafka: %s" % str(e)
 
     return message
-
-
+   
 def delete_stream_file(request, query_name):
     """*delete a filter kafka log file*
 
