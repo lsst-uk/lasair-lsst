@@ -20,6 +20,7 @@ module "server" {
   extra_networks = var.extra_networks
   flavor = var.flavor
   image_name = var.image_name
+  keypair = var.keypair
 }
 
 output "private_ips" {

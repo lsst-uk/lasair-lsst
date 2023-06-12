@@ -1,6 +1,5 @@
 variable "keypair" {
   type    = string
-  default = "gareth"   # name of keypair created
 }
 
 variable "flavor" {

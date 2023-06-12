@@ -51,6 +51,10 @@ variable "image_name" {
   type = string
 }
 
+variable "keypair" {
+  type    = string
+}
+
 ######################################################################
 # Data
 
@@ -102,6 +106,7 @@ module "node-set" {
   extra_networks = var.extra_networks
   flavor = can(each.value.flavor) ? each.value.flavor : "tiny"
   image_name = var.image_name
+  keypair = var.keypair
 }
 
 ######################################################################

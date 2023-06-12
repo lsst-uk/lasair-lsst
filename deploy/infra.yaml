@@ -26,6 +26,7 @@
         variables:
           instances: "{{ instances }}"
           base_name: "{{ lasair_name }}"
+          keypair: "{{ os.keypair_name }}"
           image_name: "{{ os.image_name }}"
           share_size: "{{ share_size }}"
           share_user: "{{ os.share_user }}"
