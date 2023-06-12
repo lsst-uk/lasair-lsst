@@ -161,8 +161,8 @@
         port: 3306
         timeout: 3600
     - name: Wait for another 60s to make sure everything is done
-      wait_for:
-        timeout: 60
+      ansible.builtin.pause:
+        seconds: 60
   tags: wait
 
   # Work in progress - stepping over this one play at a time appears to work
