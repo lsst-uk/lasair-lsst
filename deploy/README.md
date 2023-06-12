@@ -51,8 +51,8 @@ only 2.9 so we must install Ansible using pip:
 $ git clone https://github.com/lsst-uk/lasair-lsst.git
 ```
 
-5. Get the ```openrc.sh``` file (or possibly application credential)
-for the OpenStack cloud, copy it to the login instance and source it. 
+5. Get an application credential for the OpenStack cloud (in openrc format),
+copy it to the login instance and source it. 
 
 6. Set the VAULT_TOKEN environment variable, e.g.:
 ```
