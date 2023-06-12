@@ -39,15 +39,6 @@
       - "export VAULT_TOKEN=`cat ~/.vault-token`"
       - "export VAULT_ADDR='{{ vault.url }}'"
 
-  - name: Add vault public key
-    vars:
-      settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url, token_validate='false')}}"
-    ansible.builtin.lineinfile:
-      create: yes
-      path: "{{ ansible_env.HOME }}/.ssh/authorized_keys"
-      line: "{{ settings.id_rsa_pub }}"
-      mode: 0600
-
   - name: Install apt packages
     become: true
     apt:
@@ -61,6 +52,15 @@
         - kafkacat
       state: present
       update-cache: yes
+
+  - name: Add vault public key
+    vars:
+      settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url, token_validate='false')}}"
+    ansible.builtin.lineinfile:
+      create: yes
+      path: "{{ ansible_env.HOME }}/.ssh/authorized_keys"
+      line: "{{ settings.id_rsa_pub }}"
+      mode: 0600
 
   - name: Install python packages
     pip:
