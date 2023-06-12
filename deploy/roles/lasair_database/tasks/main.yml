@@ -32,10 +32,11 @@
     login_db: "{{ mysql_db_name }}"
     single_transaction: yes
   with_items:
-    - "/common/schema/objects.sql"
-    - "/common/schema/sherlock_classifications.sql"
-    - "/common/schema/crossmatch_tns.sql"
-    - "/common/schema/area_hits.sql"
-    - "/common/schema/watchlist_hits.sql"
-    - "/common/schema/annotations.sql"
+    - "/common/schema/lasair_sql/objects.sql"
+    - "/common/schema/lasair_sql/sherlock_classifications.sql"
+    - "/common/schema/lasair_sql/crossmatch_tns.sql"
+    - "/common/schema/lasair_sql/area_hits.sql"
+    - "/common/schema/lasair_sql/watchlist_hits.sql"
+    - "/common/schema/lasair_sql/annotations.sql"
+    - "/common/schema/lasair_sql/ssObjects.sql"
 
