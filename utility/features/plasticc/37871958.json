@@ -1,0 +1,88 @@
+{
+  "diaObject": {
+    "diaObjectId": 37871958,
+    "ra": 0.0,
+    "decl": 0.0,
+    "radecTai": 0.0,
+    "uPSFluxMean": 0.0,
+    "gPSFluxMean": 0.0,
+    "rPSFluxMean": 0.0,
+    "iPSFluxMean": 0.0,
+    "zPSFluxMean": 0.0,
+    "yPSFluxMean": 0.0
+  },
+  "diaSourcesList": [
+    {
+      "diaSourceId": 4502,
+      "midPointTai": -55.92399999999907,
+      "filterName": "i",
+      "psFlux": 71.133949,
+      "psFluxErr": 36.958515
+    },
+    {
+      "diaSourceId": 3262,
+      "midPointTai": -52.92540000000008,
+      "filterName": "i",
+      "psFlux": -64.542458,
+      "psFluxErr": 29.093754
+    },
+    {
+      "diaSourceId": 3683,
+      "midPointTai": -49.92639999999665,
+      "filterName": "i",
+      "psFlux": 17.189344,
+      "psFluxErr": 45.099384
+    },
+    {
+      "diaSourceId": 2218,
+      "midPointTai": -35.95959999999468,
+      "filterName": "z",
+      "psFlux": 166.643356,
+      "psFluxErr": 20.493006
+    },
+    {
+      "diaSourceId": 1902,
+      "midPointTai": -22.977500000000873,
+      "filterName": "r",
+      "psFlux": 3401.526123,
+      "psFluxErr": 165.838455
+    },
+    {
+      "diaSourceId": 2176,
+      "midPointTai": -21.993099999999686,
+      "filterName": "u",
+      "psFlux": 5105.168945,
+      "psFluxErr": 482.606049
+    },
+    {
+      "diaSourceId": 2031,
+      "midPointTai": -20.005700000001525,
+      "filterName": "g",
+      "psFlux": 4774.328125,
+      "psFluxErr": 307.766296
+    },
+    {
+      "diaSourceId": 3131,
+      "midPointTai": -18.003099999994447,
+      "filterName": "r",
+      "psFlux": 4207.652832,
+      "psFluxErr": 204.808121
+    },
+    {
+      "diaSourceId": 3342,
+      "midPointTai": -15.009699999995064,
+      "filterName": "r",
+      "psFlux": 4589.280273,
+      "psFluxErr": 223.513184
+    },
+    {
+      "diaSourceId": 4779,
+      "midPointTai": -10.036000000000058,
+      "filterName": "z",
+      "psFlux": 3934.313477,
+      "psFluxErr": 128.181458
+    }
+  ],
+  "diaForcedSourcesList": [],
+  "diaNondetectionLimitsList": []
+}

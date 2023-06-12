@@ -18,7 +18,7 @@ pipeline {
                 }
                 dir('tests/unit/pipeline/filter') {
                     sh 'python3 test_watchlist.py'
-                    sh 'python3 test_feature_generation.py'
+                    sh 'python3 test_feature_groups.py'
                 }
                 dir('tests/unit/services/annotations/') {
                     sh 'python3 kafka_test.py'

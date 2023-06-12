@@ -1,0 +1,89 @@
+{
+  "diaObject": {
+    "diaObjectId": 1326529992586170766,
+    "ra": 0.0,
+    "decl": 0.0,
+    "radecTai": 0.0,
+    "uPSFluxMean": 0.0,
+    "gPSFluxMean": 0.0,
+    "rPSFluxMean": 0.0,
+    "iPSFluxMean": 0.0,
+    "zPSFluxMean": 0.0,
+    "yPSFluxMean": 0.0
+  },
+  "diaSourcesList": [
+    {
+      "diaSourceId": 614826206415552610,
+      "filterName": "r",
+      "midPointTai": 61259.3484542,
+      "psFlux": 9146.2896996,
+      "psFluxErr": 189.3747683
+    },
+    {
+      "diaSourceId": 617478931225772141,
+      "filterName": "r",
+      "midPointTai": 61265.2994712,
+      "psFlux": 19370.296535,
+      "psFluxErr": 197.9584309
+    },
+    {
+      "diaSourceId": 620394155847188655,
+      "filterName": "r",
+      "midPointTai": 61272.3233502,
+      "psFlux": 24320.669245,
+      "psFluxErr": 206.7471331
+    },
+    {
+      "diaSourceId": 620398445445775466,
+      "filterName": "r",
+      "midPointTai": 61272.3269382,
+      "psFlux": 24055.9309317,
+      "psFluxErr": 202.4367964
+    },
+    {
+      "diaSourceId": 621488817383145565,
+      "filterName": "i",
+      "midPointTai": 61274.3634982,
+      "psFlux": 20836.8787961,
+      "psFluxErr": 296.0976226
+    },
+    {
+      "diaSourceId": 621493127919698002,
+      "filterName": "i",
+      "midPointTai": 61274.3671152,
+      "psFlux": 20128.4378393,
+      "psFluxErr": 291.1113106
+    },
+    {
+      "diaSourceId": 621509177138741337,
+      "filterName": "i",
+      "midPointTai": 61274.3834362,
+      "psFlux": 20656.1005724,
+      "psFluxErr": 295.5529306
+    }
+  ],
+  "diaForcedSourcesList": [
+    {
+      "diaSourceId": 1611,
+      "filterName": "u",
+      "midPointTai": 61243.48152958216,
+      "psFlux": 993.762591579118,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1399,
+      "filterName": "g",
+      "midPointTai": 61241.47648493142,
+      "psFlux": 297.4619520139065,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 1165,
+      "filterName": "i",
+      "midPointTai": 61240.94029933111,
+      "psFlux": 264.96580488574523,
+      "psFluxErr": 1000
+    }
+  ],
+  "diaNondetectionLimitsList": []
+}

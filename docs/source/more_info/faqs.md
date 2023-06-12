@@ -46,7 +46,7 @@ Choosing interesting alerts can be based on several criteria: The characteristic
 
 ## Why should I register on the Lasair website?
 
-Registration is easy, and just requires a valid email (signup [here]({%lasairurl%}/signup)). You can then build and save queries, watchlists, and watchmaps (sky areas), convert those to real-time slert treams, and use the Lasair API.
+Registration is easy, and just requires a valid email (register [here]({%lasairurl%}/register)). You can then build and save queries, watchlists, and watchmaps (sky areas), convert those to real-time slert treams, and use the Lasair API.
 
 ## Besides Lasair, what other websites carry astronommical transients?
 
