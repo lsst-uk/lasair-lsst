@@ -39,8 +39,9 @@ who need to can log into this instance by adding their public
 ssh keys to the authorized_keys file.
 
 3. Install Ansible. We require version 2.10 or later.
-If we are using Ubuntu 20.04 then the packaged version of Ansible is
-only 2.9 so we must install using pip:
+If we are using Ubuntu 22.04 then it is fine to just install the default Ansible
+package using apt; if we are still using 20.04 then the packaged version of Ansible is
+only 2.9 so we must install Ansible using pip:
 ```
 # apt-get update && apt-get install python3-pip && pip3 install ansible hvac
 ```
