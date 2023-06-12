@@ -19,22 +19,22 @@
     - name: create filesystem for data
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/sdb
+        dev: /dev/vdb
     - name: ensure data filesystem is mounted
       ansible.posix.mount:
         path: /var/lib/mysql
-        src: /dev/sdb
+        src: /dev/vdb
         fstype: ext4
         opts: nofail
         state: mounted
     - name: create filesystem for tmp
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/sdc
+        dev: /dev/vdc
     - name: ensure tmp filesystem is mounted
       ansible.posix.mount:
         path: /tmp
-        src: /dev/sdc
+        src: /dev/vdc
         fstype: ext4
         opts: nofail
         state: mounted
