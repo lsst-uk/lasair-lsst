@@ -4,8 +4,9 @@
   #- src: git+https://github.com/genghisken/gkansible.git#/gkansible/roles/install-mysql-sherlock
 
 collections:
-  - openstack.cloud
-  - community.general
+  #- name: openstack.cloud
+  #  version: "<2.0"
+  #- community.general
   - name: git+https://github.com/genghisken/gkansible.git
     type: git
     version: master

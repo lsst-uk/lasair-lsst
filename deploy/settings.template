@@ -25,13 +25,23 @@ instances:
   frontend_db:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      db:
+        size: 10
+        type: ceph-ssd
+      tmp:
+        size: 10
     floating_ip: false
     flavor: tiny
   backend_db:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      db:
+        size: 10
+        type: ceph-ssd
+      tmp:
+        size: 10
     floating_ip: false
     flavor: tiny
   cluster_control:
@@ -73,7 +83,10 @@ instances:
   sherlock:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      sherlock:
+        size: 10
+        type: ceph-ssd
     floating_ip: false
     flavor: tiny
   filter:
