@@ -1,6 +1,19 @@
 ---
+- hosts: localhost
+  gather_facts: true
+  tasks:
+    - name: ensure os config dir exists
+      ansible.builtin.file:
+        path: ~/.config/openstack
+        state: directory
+    - name: create clouds.yml
+      ansible.builtin.template:
+        src: clouds.yml.j2
+        dest: ~/.config/openstack/clouds.yml
+
 - name: create ssh keypair 
   import_playbook: keypair.yaml
+
 - name: deploy infrastructure using terraform
   import_playbook: infra.yaml
 

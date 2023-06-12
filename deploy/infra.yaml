@@ -17,10 +17,11 @@
       register: tf_result
       community.general.terraform:
         project_path: "{{ tf_path }}"
+        force_init: true
         #state: planned
         state: present
         #state: absent
-        plan_file: plan
+        #plan_file: plan
         complex_vars: true
         variables:
           instances: "{{ instances }}"
