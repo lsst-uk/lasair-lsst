@@ -48,7 +48,7 @@ only 2.9 so we must install Ansible using pip:
 
 4. Clone this repository:
 ```
-$ git clone https://github.com/lsst-uk/lasair-deploy.git
+$ git clone https://github.com/lsst-uk/lasair-lsst.git
 ```
 
 5. Get the ```openrc.sh``` file (or possibly application credential)
