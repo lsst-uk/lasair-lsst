@@ -18,10 +18,11 @@
         - gkutils
         - numpy
         - ephem
-        - confluent-kafka==1.5
+        - confluent-kafka==2.1.1
         - mysql-connector-python
         - mocpy
         - docopt
+        - scipy
 
 #- name: Create csvfiles directory
 #  file:
