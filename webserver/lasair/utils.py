@@ -33,7 +33,7 @@ def datetime_converter(o):
         return o.__str__()
 
 
-def jd_from_iso(date):
+def mjd_from_iso(date):
     """convert and return a Julian Date from ISO format date
 
      **Key Arguments:**
@@ -44,8 +44,8 @@ def jd_from_iso(date):
         date += 'Z'
     parsed_t = dp.parse(date)
     unix = int(parsed_t.strftime('%s'))
-    jd = unix / 86400 + 2440587.5
-    return jd
+    mjd = unix / 86400 + 40587
+    return mjd
 
 
 def mjd_now():

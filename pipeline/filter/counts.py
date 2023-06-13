@@ -17,14 +17,14 @@ def batch_statistics():
     How many objects updated since last midnight
     """
     t = time.time()
-    jdnow = (time.time() / 86400 + 2440587.5)
-    midnight = math.floor(jdnow - 0.5) + 0.5
+    mjdnow = (time.time() / 86400 + 40587)
+    midnight = math.floor(mjdnow - 0.5) + 0.5
 
     msl_main = db_connect.readonly()
     cursor = msl_main.cursor(buffered=True, dictionary=True)
 
     # objects modified since last midnight
-    query = 'SELECT count(*) AS count FROM objects WHERE jdmax > %.1f' % midnight
+    query = 'SELECT count(*) AS count FROM objects WHERE maxTai > %.1f' % midnight
     try:
         cursor.execute(query)
         for row in cursor:
@@ -34,7 +34,7 @@ def batch_statistics():
         count = -1
 
     # total number of objects
-    query = 'SELECT count(*) AS total_count, jdnow()-max(jdmax) AS since FROM objects'
+    query = 'SELECT count(*) AS total_count, mjdnow()-max(maxTai) AS since FROM objects'
 
     try:
         cursor.execute(query)
@@ -53,9 +53,9 @@ def batch_statistics():
     msl_local = db_connect.local()
     cursor = msl_local.cursor(buffered=True, dictionary=True)
     query = 'SELECT '
-    query += 'jdnow()-max(jdmax) AS min_delay, '
-    query += 'jdnow()-avg(jdmax) AS avg_delay, '
-    query += 'jdnow()-min(jdmax) AS max_delay '
+    query += 'mjdnow()-max(maxTai) AS min_delay, '
+    query += 'mjdnow()-avg(maxTai) AS avg_delay, '
+    query += 'mjdnow()-min(maxTai) AS max_delay '
     query += 'FROM objects'
     try:
         cursor.execute(query)

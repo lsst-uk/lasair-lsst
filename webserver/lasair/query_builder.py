@@ -10,7 +10,7 @@ Note that this part of query is added outside of this code
 Example:
     select_expression = 'diaObjectId'
     from_expression   = 'objects'
-    where_condition   = 'mag < 14 ORDER BY jd'
+    where_condition   = 'mag < 14 ORDER BY maxTai'
 The syntax checking happens in two stages, first in this code and then in the SQL engine.
 The limit and offset are checked here that they are integers.
 
