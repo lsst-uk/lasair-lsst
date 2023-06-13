@@ -192,7 +192,7 @@ def build_query(select_expression, from_expression, where_condition):
             crossmatch_tns = True
 
     # List of tables
-    from_table_list = ['diaObjects']
+    from_table_list = ['objects']
     if sherlock_classifications:
         from_table_list.append('sherlock_classifications')
     if watchlist_id:

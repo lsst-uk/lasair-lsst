@@ -37,12 +37,12 @@ def index(request):
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
-       jdnow()-objects.taimax AS "last detected",
+       jdnow()-objects.maxTai AS "last detected",
        sherlock_classifications.classification AS "predicted type"
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.taimax > jdnow()-7
-       AND objects.ncand > 1
+       AND objects.maxTai > jdnow()-7
+       AND objects.nSources > 1
        AND sherlock_classifications.classification in 
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
