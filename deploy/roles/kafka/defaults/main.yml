@@ -4,7 +4,7 @@
 dns_lookup: true
 internal_only: true
 data_fs:
-  dev: "/dev/sdb"
+  dev: "/dev/vdb"
   path: "/kafka"
   type: "ext4"
 

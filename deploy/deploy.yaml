@@ -133,11 +133,11 @@
     - name: create filesystem for data
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/sdb
+        dev: /dev/vdb
     - name: ensure data filesystem is mounted
       ansible.posix.mount:
         path: /var/lib/cassandra
-        src: /dev/sdb
+        src: /dev/vdb
         fstype: ext4
         opts: nofail
         state: mounted
