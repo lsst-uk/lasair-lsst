@@ -40,11 +40,11 @@
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
   tasks:
     - name: validate object db schema
-      command: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --url=https://raw.githubusercontent.com/lsst-uk/lasair-lsst/{{ lasair_version }}/common/schema/lasair_schema/objects.py --format=py"
+      command: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --url=https://raw.githubusercontent.com/lsst-uk/{{ git_name }}/{{ lasair_version }}/common/schema/lasair_schema/objects.py --format=py"
       loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
       changed_when: false
     - name: validate object db schema via load balancer
-      command: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --url=https://raw.githubusercontent.com/lsst-uk/lasair-lsst/{{ lasair_version }}/common/schema/lasair_schema/objects.py --format=py"
+      command: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --url=https://raw.githubusercontent.com/lsst-uk/{{ git_name }}/{{ lasair_version }}/common/schema/lasair_schema/objects.py --format=py"
       loop: "{{ groups['cluster_control'] }}"
       changed_when: false
   tags: db
@@ -131,7 +131,7 @@
         that: >
           "{{ lookup('url', 'http://'+ansible_host+':8080/lasair/static/img/favicon/favicon.ico', split_lines=false) | hash('md5') }}"
           ==
-          "{{ lookup('url', 'https://raw.githubusercontent.com/lsst-uk/lasair4/'+lasair_version+'/webserver/static/img/favicon/favicon.ico', split_lines=false) | hash('md5') }}"
+          "{{ lookup('url', 'https://raw.githubusercontent.com/lsst-uk/{{ git_name}}/'+lasair_version+'/webserver/static/img/favicon/favicon.ico', split_lines=false) | hash('md5') }}"
         quiet: true
     - name: check redirect works
       ansible.builtin.uri:

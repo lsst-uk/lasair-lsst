@@ -25,7 +25,7 @@
 
 - name: Create tables
   community.mysql.mysql_query:
-    query: "{{ lookup('url', git_url + '/' + git_branch + item, split_lines=false) }}"
+    query: "{{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }}"
     login_host: 127.0.0.1
     login_user: "{{ mysql_db_user }}"
     login_password: "{{ mysql_db_password }}"

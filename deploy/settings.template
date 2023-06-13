@@ -8,6 +8,10 @@ lasair_name: foo
 # Git tag to deploy
 lasair_version: main
 
+# Git repository
+git_name: lasair-lsst
+git_url: https://github.com/lsst-uk/lasair-lsst.git
+
 # Instances to deploy
 instances:
   db:
