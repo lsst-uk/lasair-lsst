@@ -60,8 +60,8 @@
 			    <td>{{ cand.filtername }}</td>
 			    <td>{{ cand.psflux|floatformat:0 }} &plusmn; {{ cand.psfluxerr|floatformat:0 }}</td>
                             <td>
-                                {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{ cand.diasourceid }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
-                                {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{ cand.diasourceid }}_cutoutDifference");'><small>diff</small></a> {% endif %}
+				    {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{cand.imjd}}/{{ cand.diasourceid }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
+				    {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{cand.imjd}}/{{ cand.diasourceid }}_cutoutDifference");'><small>diff</small></a> {% endif %}
                             </td>
 
                             <td> <a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a></td>

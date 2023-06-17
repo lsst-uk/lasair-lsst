@@ -202,6 +202,7 @@ def objjson(diaObjectId, full=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointtai'])
+        diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
         diaSourceId = diaSource['diasourceid']
@@ -213,7 +214,7 @@ def objjson(diaObjectId, full=False):
         diaSource['image_urls'] = {}
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            filename = image_store.getFileName(diaSourceId_cutoutType)
+            filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
             if 1 == 1 or os.path.exists(filename):
                 url = filename.replace(
                     '/mnt/cephfs/lasair',
@@ -317,11 +318,11 @@ def string2bytes(str):
     return bytes
 
 
-def fits(request, candid_cutoutType):
+def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
     image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
     try:
-        fitsdata = image_store.getFileObject(candid_cutoutType)
+        fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
     except:
         fitsdata = ''
 
