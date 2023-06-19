@@ -44,6 +44,9 @@ WAIT_TIME              = 180
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
 
+# Avro Schema
+SCHEMA = '{{ ansible_env.HOME }}/{{ git_name }}/common/schema/alert-lsst.avsc'
+
 # Relational database mysql/galera
 ##################################
 DB_HOST                = '{{ db_host }}'
