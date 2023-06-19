@@ -159,7 +159,6 @@
   environment:
           PYTHONPATH: "{{ ansible_env.HOME }}/{{ git_name }}/common/"
   with_items:
-    - migrate --fake
     - makemigrations
     - migrate
     - collectstatic --noinput
