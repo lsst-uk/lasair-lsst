@@ -22,7 +22,6 @@ variable "extra_vol" {
 
 variable "network" {
   type    = string
-  default = "lasair" # default network to be used
 }
 
 variable "security_groups" {

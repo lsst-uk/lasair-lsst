@@ -26,6 +26,11 @@ variable "instances" {
   type = map(any)
 }
 
+# primary network to use
+variable "network" {
+  type = string
+}
+
 # list of extra networks to add to all instances
 variable "extra_networks" {
   type = list(string)
@@ -103,6 +108,7 @@ module "node-set" {
   extra_vol = can(each.value.extra_volumes) ? each.value.extra_volumes : {}
   default_group_id = openstack_compute_servergroup_v2.group.id
   floating_ip = can(each.value.floating_ip) ? each.value.floating_ip : false
+  network = var.network
   extra_networks = var.extra_networks
   flavor = can(each.value.flavor) ? each.value.flavor : "tiny"
   image_name = var.image_name

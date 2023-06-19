@@ -17,6 +17,7 @@ module "server" {
   extra_vol = var.extra_vol
   group_id  = (var.number > 1) ? openstack_compute_servergroup_v2.group[0].id : var.default_group_id
   floating_ip = var.floating_ip
+  network = var.network
   extra_networks = var.extra_networks
   flavor = var.flavor
   image_name = var.image_name
