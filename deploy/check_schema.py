@@ -50,7 +50,7 @@ if __name__ == "__main__":
     parser.add_argument('--port', type=int, default=3306, help='MySQL port number')
     parser.add_argument('--database', type=str, default='ztf', help='Name of database')
     parser.add_argument('--format', type=str, default='py', help='Schema format (json|py)')
-    parser.add_argument('--url', type=str, default="https://raw.githubusercontent.com/lsst-uk/lasair4/main/common/schema/objects.py", help='URL to get the schema from')
+    parser.add_argument('--url', type=str, default="https://raw.githubusercontent.com/lsst-uk/lasair-lsst/main/common/schema/lasair_schema/objects.py", help='URL to get the schema from')
     conf = vars(parser.parse_args())
 
     mysql_names = get_mysql_names(conf)

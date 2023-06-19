@@ -1,0 +1,20 @@
+clouds:
+  openstack:
+    
+    auth:
+      
+      auth_url: {{ ansible_env.OS_AUTH_URL }}
+      
+      application_credential_id: "{{ ansible_env.OS_APPLICATION_CREDENTIAL_ID }}"
+      application_credential_secret: "{{ ansible_env.OS_APPLICATION_CREDENTIAL_SECRET }}"
+    
+      
+        
+    region_name: "{{ ansible_env.OS_REGION_NAME }}"
+        
+      
+    interface: "{{ ansible_env.OS_INTERFACE }}"
+    identity_api_version: {{ ansible_env.OS_IDENTITY_API_VERSION }}
+    auth_type: "{{ ansible_env.OS_AUTH_TYPE }}"
+    
+

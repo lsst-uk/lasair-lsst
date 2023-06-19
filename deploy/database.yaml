@@ -19,14 +19,29 @@
     - name: create filesystem for data
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/sdb
+        dev: /dev/vdb
     - name: ensure data filesystem is mounted
       ansible.posix.mount:
         path: /var/lib/mysql
-        src: /dev/sdb
+        src: /dev/vdb
         fstype: ext4
         opts: nofail
         state: mounted
+    - name: create filesystem for tmp
+      community.general.filesystem:
+        fstype: ext4
+        dev: /dev/vdc
+    - name: ensure tmp filesystem is mounted
+      ansible.posix.mount:
+        path: /tmp
+        src: /dev/vdc
+        fstype: ext4
+        opts: nofail
+        state: mounted
+    - name: ensure /tmp is writable
+      ansible.builtin.file:
+        path: /tmp
+        mode: "0777"
   tags: filesystem
 
 - hosts: db
@@ -146,8 +161,8 @@
         port: 3306
         timeout: 3600
     - name: Wait for another 60s to make sure everything is done
-      wait_for:
-        timeout: 60
+      ansible.builtin.pause:
+        seconds: 60
   tags: wait
 
   # Work in progress - stepping over this one play at a time appears to work
