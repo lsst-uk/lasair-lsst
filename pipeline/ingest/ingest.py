@@ -59,13 +59,13 @@ def msg_text(message):
                     if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
     return message_text
 
-def store_images(message, store, diaSourceId):
+def store_images(message, store, diaSourceId, imjd):
     global log
     try:
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
             content = message[cutoutType]
             filename = '%d_%s' % (diaSourceId, cutoutType)
-            store.putObject(filename, content)
+            store.putObject(filename, imjd, content)
         return True
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)
@@ -126,9 +126,12 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     # ID for the latest detection, this is what the cutouts belong to
     diaSourceId = lsst_alert_noimages['diaSource']['diaSourceId']
 
+    # MJD for storing images
+    imjd = int(lsst_alert_noimages['diaSource']['midPointTai'])
+
     # store the fits images
     if image_store:
-        if store_images(lsst_alert, image_store, diaSourceId) == None:
+        if store_images(lsst_alert, image_store, diaSourceId, imjd) == None:
             log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
             return 0   # ingest batch failed
 

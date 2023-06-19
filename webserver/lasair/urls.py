@@ -31,7 +31,7 @@ urlpatterns = [
     path('privacy', TemplateView.as_view(template_name='privacy.html'), name='privacy'),
 
     path('admin/', admin.site.urls),
-    path('fits/<slug:candid_cutoutType>/', fits, name='fits'),
+    path('fits/<int:imjd>/<slug:candid_cutoutType>/', fits, name='fits'),
     path('', include('lasairapi.urls')),
     path('', include('lasair.apps.annotator.urls')),
     path('', include('lasair.apps.db_schema.urls')),
