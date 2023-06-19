@@ -7,7 +7,7 @@ volumes:
 services:
     zookeep:
         image:
-            confluentinc/cp-zookeeper:7.4.0
+            confluentinc/cp-zookeeper:5.4.0
         network_mode: host
         environment:
             - "ZOOKEEPER_SERVER_ID={{ play_hosts.index(inventory_hostname) + 1 }}"
