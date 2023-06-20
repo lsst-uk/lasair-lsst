@@ -1,5 +1,5 @@
-CREATE TABLE IF NOT EXISTS diaObjects(
-diaObjectId bigint NOT NULL,
+CREATE TABLE diaObjects(
+diaObjectId bigint,
 ra double,
 decl double,
 raErr float,

@@ -4,7 +4,6 @@ schema = {
     {
       "name": "diaObjectId",
       "type": "long",
-      "extra": "NOT NULL"
     },
     {
       "name": "ra",

@@ -72,7 +72,7 @@ def cql_create_table(schema):
         lines.append(s)
     #    if 'doc'     in f and f['doc']:     s += ', ' + f['doc']
     
-    cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'] + '(\n'
+    cql = 'CREATE TABLE ' + schema['name'] + '(\n'
     cql += ',\n'.join(lines)
 
     if 'indexes' in schema:
