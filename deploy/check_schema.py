@@ -35,13 +35,8 @@ def get_schema_names(conf):
     schema = requests.get(conf['url']).text
     # if schema format is python then convert to json first
     if conf['format'] == 'py':
-        print ("--------")
-        print (schema)
-        print ("--------")
         schema = re.sub("^.*{", "{", schema, count=1)
         schema = re.sub("#.*", "", schema)
-        print (schema)
-        print ("--------")
     my_objects = json.loads(schema)
     for field in my_objects['fields']:
         schema_names.append(field['name'])
