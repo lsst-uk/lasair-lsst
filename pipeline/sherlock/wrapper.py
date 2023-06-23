@@ -5,7 +5,7 @@ adds the Sherlock classification and crossmatches back into the alert and
 republishes on the output topic.
 """
 
-__version__ = "0.6.2"
+__version__ = "0.7"
 
 import warnings
 import json
@@ -115,8 +115,9 @@ def classify(conf, log, alerts):
     if conf['cache_db']:
         names = []
         for alert in alerts:
-            name = alert.get('objectId', alert.get('candid'))
-            names.append(name)
+            diaObject = alert.get('diaObject')
+            if diaObject:
+                names.append(str(diaObject['diaObjectId']))
         query = "SELECT * FROM cache WHERE name IN ('{}');".format("','".join(names))
         url = urlparse(conf['cache_db'])
         connection = pymysql.connect(
@@ -154,17 +155,21 @@ def classify(conf, log, alerts):
     ra = []
     dec = []
     for alert in alerts:
-        name = alert.get('objectId', alert.get('candid'))
-        # ignore SS alerts
-        ssnamenr = alert['candidate'].get('ssnamenr', "null")
-        if ssnamenr != "null":
-            log.debug("Skipping classification for solar system alert {}".format(name))
-            continue
-        if not name in annotations:
-            if not name in names:
-                names.append(name)
-                ra.append(alert['candidate']['ra'])
-                dec.append(alert['candidate']['dec'])
+        diaObject = alert.get('diaObject')
+        if diaObject:
+            name = str(diaObject['diaObjectId'])
+            if not name in annotations:
+                if not name in names:
+                    names.append(name)
+                    ra.append(diaObject['ra'])
+                    dec.append(diaObject['decl'])
+        else:
+            ssObject = alert.get('ssObject')
+            if ssObject:
+                ssName = str(ssObject.get('ssObjectId', ''))
+                log.debug(f"Skipping classification for solar system object { ssName }")
+            else:
+                log.debug("diaObject not present, skipping classification")
 
     # set up sherlock
     classifier = transient_classifier(
@@ -241,20 +246,21 @@ def classify(conf, log, alerts):
             connection.commit()
             connection.close()
 
+
     # add the annotations to the alerts
     n = 0
     for alert in alerts:
-        name = alert.get('objectId', alert.get('candid'))
-        if name in annotations:
-            annotations[name]['annotator'] = "https://github.com/thespacedoctor/sherlock/releases/tag/v{}".format(sherlock_version)
-            annotations[name]['additional_output'] = "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/" + name
-            # placeholders until sherlock returns these
-            #annotations[name]['summary']  = 'Placeholder'
-            if 'annotations' not in alert:
-                alert['annotations'] = {}
-            alert['annotations']['sherlock'] = []
-            alert['annotations']['sherlock'].append(annotations[name])
-            n += 1
+        diaObject = alert.get('diaObject')
+        if diaObject:
+            name = str(diaObject['diaObjectId'])
+            if name in annotations:
+                annotations[name]['annotator'] = "https://github.com/thespacedoctor/sherlock/releases/tag/v{}".format(sherlock_version)
+                annotations[name]['additional_output'] = "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/" + name
+                if 'annotations' not in alert:
+                    alert['annotations'] = {}
+                alert['annotations']['sherlock'] = []
+                alert['annotations']['sherlock'].append(annotations[name])
+                n += 1
 
     return n
 
