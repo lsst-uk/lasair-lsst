@@ -255,7 +255,7 @@ def classify(conf, log, alerts):
             name = str(diaObject['diaObjectId'])
             if name in annotations:
                 annotations[name]['annotator'] = "https://github.com/thespacedoctor/sherlock/releases/tag/v{}".format(sherlock_version)
-                annotations[name]['additional_output'] = "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/" + name
+                annotations[name]['additional_output'] = "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/" + name
                 if 'annotations' not in alert:
                     alert['annotations'] = {}
                 alert['annotations']['sherlock'] = []
