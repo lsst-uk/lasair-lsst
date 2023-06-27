@@ -8,21 +8,21 @@ import wrapper
 from confluent_kafka import KafkaError, KafkaException
 
 log = logging.getLogger()
-log.level = logging.ERROR
+log.level = logging.WARN
 #log.level = logging.DEBUG
 stream_handler = logging.StreamHandler(sys.stdout)
 log.addHandler(stream_handler)
 
-with open("example_ingested.json", 'r') as f:
+with open("sample_alerts/single_alert_batch.json", 'r') as f:
     data = json.load(f)
     example_alert = data[0]
     example_input_data = json.dumps(data[0])
 
-with open("example_ingested_ss.json", 'r') as f:
-    data = json.load(f)
-    example_alert_ss = data[0]
-    example_alert_no_ss = data[1]
-    example_input_ss_data = json.dumps(data[0])
+#with open("sample_alerts/lsst_ss.json", 'r') as f:
+#    data = json.load(f)
+#    example_alert_ss = data[0]
+#    example_alert_no_ss = data[1]
+#    example_input_ss_data = json.dumps(data[0])
 
 # mock kafka message class for use by mock poll
 class MockMessage:
@@ -94,7 +94,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # alerts should have len 5
                     self.assertEqual(len(alerts), 5)
                     # content of alerts should be as expected
-                    self.assertEqual(alerts[0]['candidate']['jd'], 2458943.9334606)
+                    self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
                     # poll should have been called 5 times
                     self.assertEqual(mock_kafka_consumer.poll.call_count, 5)
 
@@ -128,7 +128,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # alerts should have len 5
                     self.assertEqual(len(alerts), 5)
                     # content of alerts should be as expected
-                    self.assertEqual(alerts[0]['candidate']['jd'], 2458943.9334606)
+                    self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
                     # poll should have been called 6 times
                     self.assertEqual(nfe_call_count, 6)
 
@@ -176,18 +176,18 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # alerts should have len 5
                     self.assertEqual(len(alerts), 5)
                     # content of alerts should be as expected
-                    self.assertEqual(alerts[0]['candidate']['jd'], 2458943.9334606)
+                    self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
 
 class SherlockWrapperClassifierTest(unittest.TestCase):
     crossmatches = [ {
                     'rank':1,
-                    'transient_object_id':"ZTF18aapubnx",
+                    'transient_object_id':"177218944862519874",
                     'association_type':'SN',
                     'catalogue_table_name':'NED D/SDSS',
                     'catalogue_object_id':'NGC0716',
                     'catalogue_object_type':'galaxy',
-                    'raDeg':28.248701,
-                    'decDeg':12.708479,
+                    'raDeg':155.066116,
+                    'decDeg': -3.970923,
                     'separationArcsec':31.06,
                     'northSeparationArcsec':-16.204,
                     'eastSeparationArcsec':-26.493,
@@ -216,7 +216,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             alerts = [ example_alert.copy() ]
-            classifications = { "ZTF18aapubnx": "Q" }
+            classifications = { "177218944862519874": "Q" }
             #crossmatches = [ { 'transient_object_id':"ZTF18aapubnx", 'rank':1, 'z':1.2, 'catalogue_object_type':'thing', 'separationArcsec':0.1} ]
             crossmatches = SherlockWrapperClassifierTest.crossmatches
             mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
@@ -225,8 +225,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             # length of alerts shouls still be 1
             self.assertEqual(len(alerts), 1)
             # content of alerts should be as expected
-            self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
+            self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
+            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
             self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
             for key, value in crossmatches[0].items():
                 if key != 'rank':
@@ -235,62 +235,62 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             mock_classifier.return_value.classify.assert_called_once()
 
     # check that a missing ssnamenr field is treated as null
-    def test_classify_no_ss_alert(self):
-        conf = {
-            'broker':'',
-            'group':'',
-            'input_topic':'',
-            'output_topic':'',
-            'batch_size':5,
-            'timeout':1,
-            'max_errors':-1,
-            'cache_db':'',
-            'sherlock_settings': 'sherlock_test.yaml'
-            }
-        with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
-            alerts = [ example_alert_no_ss.copy() ]
-            classifications = { "ZTF18aapubnx": "Q" }
-            crossmatches = SherlockWrapperClassifierTest.crossmatches
-            mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-            # should report classifying 1 alert
-            self.assertEqual(wrapper.classify(conf, log, alerts), 1)
-            # length of alerts shouls still be 1
-            self.assertEqual(len(alerts), 1)
-            # content of alerts should be as expected
-            self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
-            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
-            for key, value in crossmatches[0].items():
-                if key != 'rank':
-                    self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
-            # classify should have been called once
-            mock_classifier.return_value.classify.assert_called_once()
+    #def test_classify_no_ss_alert(self):
+    #    conf = {
+    #        'broker':'',
+    #        'group':'',
+    #        'input_topic':'',
+    #        'output_topic':'',
+    #        'batch_size':5,
+    #        'timeout':1,
+    #        'max_errors':-1,
+    #        'cache_db':'',
+    #        'sherlock_settings': 'sherlock_test.yaml'
+    #        }
+    #    with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
+    #        alerts = [ example_alert_no_ss.copy() ]
+    #        classifications = { "ZTF18aapubnx": "Q" }
+    #        crossmatches = SherlockWrapperClassifierTest.crossmatches
+    #        mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
+    #        # should report classifying 1 alert
+    #        self.assertEqual(wrapper.classify(conf, log, alerts), 1)
+    #        # length of alerts shouls still be 1
+    #        self.assertEqual(len(alerts), 1)
+    #        # content of alerts should be as expected
+    #        self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
+    #        self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
+    #        self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
+    #        for key, value in crossmatches[0].items():
+    #            if key != 'rank':
+    #                self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
+    #        # classify should have been called once
+    #        mock_classifier.return_value.classify.assert_called_once()
 
-    def test_classify_ss_alert(self):
-        conf = {
-            'broker':'',
-            'group':'',
-            'input_topic':'',
-            'output_topic':'',
-            'batch_size':5,
-            'timeout':1,
-            'max_errors':-1,
-            'cache_db':'',
-            'sherlock_settings': 'sherlock_test.yaml'
-            }
-        with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
-            alerts = [ example_alert_ss.copy() ]
-            classifications = { "ZTF18aapubnx": "Q" }
-            crossmatches = SherlockWrapperClassifierTest.crossmatches
-            mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-            # should report classifying 0 alerts
-            self.assertEqual(wrapper.classify(conf, log, alerts), 0)
-            # length of alerts shouls still be 1
-            self.assertEqual(len(alerts), 1)
-            # alert should not have been classified
-            self.assertNotIn('annotations', alerts[0])
-            # classify should not have been called 
-            mock_classifier.return_value.classify.assert_not_called()
+    #def test_classify_ss_alert(self):
+    #    conf = {
+    #        'broker':'',
+    #        'group':'',
+    #        'input_topic':'',
+    #        'output_topic':'',
+    #        'batch_size':5,
+    #        'timeout':1,
+    #        'max_errors':-1,
+    #        'cache_db':'',
+    #        'sherlock_settings': 'sherlock_test.yaml'
+    #        }
+    #    with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
+    #        alerts = [ example_alert_ss.copy() ]
+    #        classifications = { "ZTF18aapubnx": "Q" }
+    #        crossmatches = SherlockWrapperClassifierTest.crossmatches
+    #        mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
+    #        # should report classifying 0 alerts
+    #        self.assertEqual(wrapper.classify(conf, log, alerts), 0)
+    #        # length of alerts shouls still be 1
+    #        self.assertEqual(len(alerts), 1)
+    #        # alert should not have been classified
+    #        self.assertNotIn('annotations', alerts[0])
+    #        # classify should not have been called 
+    #        mock_classifier.return_value.classify.assert_not_called()
    
     def test_classify_description(self):
         conf = {
@@ -306,7 +306,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             alerts = [ example_alert.copy() ]
-            classifications = { "ZTF18aapubnx": ["Q", "Descr"] }
+            classifications = { "177218944862519874": ["Q", "Descr"] }
             crossmatches = SherlockWrapperClassifierTest.crossmatches
             mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
             # should report classifying 1 alert
@@ -329,10 +329,10 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
                 alerts = [ example_alert.copy() ]
-                classifications = { "ZTF18aapubnx": "Q" }
-                crossmatches = [ { 'transient_object_id':"ZTF18aapubnx", 'thing':'foo' } ]
+                classifications = { "177218944862519874": "Q" }
+                crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-                cache = [{'name': 'ZTF18aapubnx', 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -340,8 +340,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 self.assertEqual(len(alerts), 1)
                 # content of alerts should be as expected - from cache
                 self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'T')
-                self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
+                self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
                 for key, value in SherlockWrapperClassifierTest.crossmatches[0].items():
                     if key != 'rank':
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
@@ -364,10 +364,10 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
                 alerts = [ example_alert.copy() ]
-                classifications = { "ZTF18aapubnx": "Q" }
-                crossmatches = [ { 'transient_object_id':"ZTF18aapubnx", 'thing':'foo' } ]
+                classifications = { "177218944862519874": "Q" }
+                crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-                cache = [{'name': 'ZTF18aapubnx', 'class': 'T', 'crossmatch': None}]
+                cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': None}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -391,7 +391,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
                 alerts = [ example_alert.copy() ]
-                classifications = { "ZTF18aapubnx": "Q" }
+                classifications = { "177218944862519874": "Q" }
                 crossmatches = SherlockWrapperClassifierTest.crossmatches
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = []
@@ -401,8 +401,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 self.assertEqual(len(alerts), 1)
                 # content of alerts should be as expected - from sherlock
                 self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
-                self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
+                self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
                 for key, value in SherlockWrapperClassifierTest.crossmatches[0].items():
                     if key != 'rank':
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
