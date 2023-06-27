@@ -226,7 +226,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             self.assertEqual(len(alerts), 1)
             # content of alerts should be as expected
             self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/177218944862519874")
+            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
             self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
             for key, value in crossmatches[0].items():
                 if key != 'rank':
@@ -258,7 +258,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
     #        self.assertEqual(len(alerts), 1)
     #        # content of alerts should be as expected
     #        self.assertRegexpMatches(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-    #        self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
+    #        self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/ZTF18aapubnx")
     #        self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
     #        for key, value in crossmatches[0].items():
     #            if key != 'rank':
@@ -341,7 +341,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 # content of alerts should be as expected - from cache
                 self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'T')
                 self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/177218944862519874")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
                 for key, value in SherlockWrapperClassifierTest.crossmatches[0].items():
                     if key != 'rank':
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
@@ -402,7 +402,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 # content of alerts should be as expected - from sherlock
                 self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
                 self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-ztf.lsst.ac.uk/api/sherlock/object/177218944862519874")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
                 for key, value in SherlockWrapperClassifierTest.crossmatches[0].items():
                     if key != 'rank':
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
