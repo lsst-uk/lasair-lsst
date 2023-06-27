@@ -34,6 +34,17 @@ def index(request):
     base_colors = ['dc322f', '268bd2', '2aa198', 'b58900']
 
     # query finds only mag<17 alerts with at least 2 in light curve, with age < 7
+#    query = """
+#    SELECT objects.diaObjectId,
+#       objects.ra, objects.decl,
+#       tainow()-objects.maxTai AS "last detected",
+#       sherlock_classifications.classification AS "predicted type"
+#    FROM objects, sherlock_classifications
+#    WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
+#       AND objects.maxTai > tainow()-7
+#       AND objects.nSources > 1
+#       AND sherlock_classifications.classification in 
+#    """
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
@@ -41,7 +52,6 @@ def index(request):
        sherlock_classifications.classification AS "predicted type"
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.maxTai > tainow()-7
        AND objects.nSources > 1
        AND sherlock_classifications.classification in 
     """

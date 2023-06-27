@@ -281,8 +281,8 @@ def object_difference_lightcurve( data):
         secondary_y=False
     )
 
-#    magLabels = [21.0, 20.0, 19.5, 19.0, 18.5,
-#                 18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
+    magLabels = [21.0, 20.0, 19.5, 19.0, 18.5,
+                 18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
 #    if yMagMin < 14:
 #        magLabels = [20.0, 16.0, 15.0, 14.0,
 #                     13.0, 12.5, 12.0, 11.5, 11.0]
@@ -292,31 +292,31 @@ def object_difference_lightcurve( data):
 #    elif yMagMin < 18:
 #        magLabels = [20., 19.5, 19.0, 18.5,
 #                     18.0, 17.5, 17.0, 16.5, 16.0, 15.5, 15.0]
-#    magFluxes = [10**((23.9 - m) / 2.5) for m in magLabels]
-#    magLabels = [f"{m:0.1f}" for m in magLabels]
+    magFluxes = [10**((23.9 - m) / 2.5) for m in magLabels]
+    magLabels = [f"{m:0.1f}" for m in magLabels]
 
-#    fig.update_yaxes(
-#        dict(
-#            tickmode='array',
-#            tickvals=magFluxes,
-#            ticktext=magLabels
-#        ),
-#        range=[ymin, ymax],
-#        tickformat='.1f',
-#        tickfont_size=14,
-#        ticksuffix=" ",
-#        showline=True,
-#        showgrid=False,
-#        linewidth=1.5,
-#        linecolor='#1F2937',
-#        zeroline=True,
-#        zerolinewidth=1.5,
-#        zerolinecolor='#1F2937',
-#        ticks='inside',
-#        title="Difference Magnitude",
-#        title_font_size=16,
-#        secondary_y=True,
-#    )
+    fig.update_yaxes(
+        dict(
+            tickmode='array',
+            tickvals=magFluxes,
+            ticktext=magLabels
+        ),
+        range=[ymin, ymax],
+        tickformat='.1f',
+        tickfont_size=14,
+        ticksuffix=" ",
+        showline=True,
+        showgrid=False,
+        linewidth=1.5,
+        linecolor='#1F2937',
+        zeroline=True,
+        zerolinewidth=1.5,
+        zerolinecolor='#1F2937',
+        ticks='inside',
+        title="Difference Magnitude",
+        title_font_size=16,
+        secondary_y=True,
+    )
 
     # UPDATE PLOT LAYOUT
     fig.update_layout(

@@ -320,7 +320,8 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+#    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+    image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits') # HACK
     try:
         fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
     except:
