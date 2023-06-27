@@ -59,7 +59,7 @@ class SherlockWrapperIntegrationTest(TestCase):
         #subprocess.Popen(["bin/kafka-server-start.sh", "config/server.properties"], cwd="/opt/kafka")
         #sleep(20)
 
-        with open("sample_alerts/single_alert_batch.json", 'r') as f:
+        with open("sample_alerts/5_alert_batch.json", 'r') as f:
             # load example data
             data = json.load(f)
             # try to delete the topics
