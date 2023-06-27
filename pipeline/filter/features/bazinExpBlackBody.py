@@ -159,13 +159,13 @@ def fit_expit(alert, pexpit0, sigma):
     dict['bazinExpTemp'] = fit[1]
     dict['bazinExpRiseRate'] = fit[2]
     dict['bazinExpFallRate'] = None
-    if dict['bazinExpRiseRate'] < 0.0: return None
-    if dict['bazinExpRiseRate'] > 2.0: return None
+    if dict['bazinExpRiseRate'] < 0.0: return (1.0, None)
+    if dict['bazinExpRiseRate'] > 2.0: return (1.0, None)
     
     dict['bazinExpTempErr'] = err[1]
     dict['bazinExpRiseRateErr'] = err[2]
     dict['bazinExpFallRateErr'] = None
-    if dict['bazinExpRiseRateErr'] > dict['bazinExpRiseRate']: return None
+    if dict['bazinExpRiseRateErr'] > dict['bazinExpRiseRate']: return (1.0, None)
     return (Rsq, dict)
 
 def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
