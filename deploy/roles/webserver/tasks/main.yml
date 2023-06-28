@@ -159,7 +159,11 @@
   environment:
           PYTHONPATH: "{{ ansible_env.HOME }}/{{ git_name }}/common/"
   with_items:
-    - makemigrations
+    - makemigrations annotator
+    - makemigrations filter_query
+    - makemigrations watchlist
+    - makemigrations watchmap
+    - makemigrations users
     - migrate
     - collectstatic --noinput
 
@@ -190,10 +194,10 @@
     DJANGO_SUPERUSER_PASSWORD: "{{ django_password }}"
   ignore_errors: true
 
-- name: Add default profile pic
-  copy:
-    src: default.jpg
-    dest: "{{ item }}"
-  loop:
-    - media/default.jpg
-    - media/profile_pics/default.jpg
+  #- name: Add default profile pic
+  #  copy:
+  #    src: default.jpg
+  #    dest: "{{ item }}"
+  #  loop:
+  #    - media/default.jpg
+  #    - media/profile_pics/default.jpg

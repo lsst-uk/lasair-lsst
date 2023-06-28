@@ -12,7 +12,7 @@ class sherlock(FeatureGroup):
         if 'annotations' in self.alert:
             annotations = self.alert['annotations']
             if 'sherlock' in annotations:
-                ann = alert['annotations'][sherlock]
+                ann = annotations['sherlock']
                 if 'blabla' in ann:
                     # figure out absolute flux
                     absFlux = 100
