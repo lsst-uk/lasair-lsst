@@ -91,37 +91,39 @@ def index(request):
         alerts[iclass] = [[] for iage in range(nage)]
 
     for row in table:
-        if row['gmag']:
-            if row['rmag']:
-                mag = min(row['gmag'], row['rmag'])
-            else:
-                mag = row['gmag']
-        else:
-            if row['rmag']:
-                mag = row['rmag']
-            else:
-                continue
+        mag = 16
+#        if row['gmag']:
+#            if row['rmag']:
+#                mag = min(row['gmag'], row['rmag'])
+#            else:
+#                mag = row['gmag']
+#        else:
+#            if row['rmag']:
+#                mag = row['rmag']
+#            else:
+#                continue
 
         iclass = sherlock_classes.index(row["predicted type"])
 
         age = row["last detected"]
-        if age < 1:
-            iage = 0
-        elif age < 2:
-            iage = 1
-        elif age < 3:
-            iage = 2
-        elif age < 4:
-            iage = 3
-        else:
-            iage = 4
+        iage = 1
+#        if age < 1:
+#            iage = 0
+#        elif age < 2:
+#            iage = 1
+#        elif age < 3:
+#            iage = 2
+#        elif age < 4:
+#            iage = 3
+#        else:
+#            iage = 4
 
         alerts[iclass][iage].append({
             'diaObjectId': row['diaObjectId'],
             'age': row["last detected"],
             'class': row["predicted type"],
             'mag': mag,
-            'coordinates': [row['ramean'], row['decmean']]
+            'coordinates': [row['ra'], row['decl']]
         })
 
     try:
