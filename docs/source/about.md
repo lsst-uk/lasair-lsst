@@ -79,7 +79,12 @@ tags. Other tables have already been copied into the local database from the
 main SQL database (see Background Services below). After a batch of perhaps 
 10,000 alerts are ingested to the local database, it can now execute the 
 user-made queries and push out results via the public Kafka system – or via 
-email if the user has chosen this option. The tables in the local database are 
+email if the user has chosen this option. **NOTE** User-made queries have a time-out 
+of 10 seconds, so they can't hold up the entire system if they are too resource intensive.
+Usually, however, a user query will execute in a second or less since there are only 10,000
+objects in the local database.
+
+The tables in the local database are 
 then pushed to the main SQL database and replace any earlier information where 
 and object is already known. Once a batch is finished, the local database 
 tables are truncated and a new batch started.
