@@ -35,6 +35,9 @@ pipeline {
         }
         stage('Integration Tests') {
             steps {
+                dir('tests/integration/example') {
+                    sh 'python3 test_example.py'
+                }
                 dir('tests/integration/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
                 }
