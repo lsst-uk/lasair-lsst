@@ -9,7 +9,7 @@ Role Variables
 `replication_factor`: Replication Factor (default = 3)
 `keyspace`: Cassandra keyspace (default `lasair`)
 `git_raw_url`: The Raw git URL (default `https://raw.githubusercontent.com/lsst-uk/lasair-lsst`)
-`branch`: The branch on github that contains the correct CQL schema files (default `main`)
+`git_branch`: The branch on github that contains the correct CQL schema files (default `main`)
 
 
 These values do not need to be overridden and the default values should suffice.
