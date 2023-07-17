@@ -189,7 +189,10 @@ def topic_refresh(real_sql, topic, limit=10):
         message += 'Topic is ' + topic + '<br/>'
         message += str(e) + '<br/>'
 
-    query = real_sql + ' LIMIT %d' % limit
+    timeout = 30
+    query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s' \
+            % (timeout, real_sql, limit))
+
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     query_results = []
