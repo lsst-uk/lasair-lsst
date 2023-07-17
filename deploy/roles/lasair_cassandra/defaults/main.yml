@@ -1,0 +1,9 @@
+---
+
+replication_factor: 3
+keyspace: 'lasair'
+
+# url to get git repo content from
+git_raw_url: "https://raw.githubusercontent.com/lsst-uk/lasair-lsst"
+# git branch to use
+git_branch: main

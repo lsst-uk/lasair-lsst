@@ -1,4 +1,4 @@
-CREATE TABLE diaForcedSources(
+CREATE TABLE IF NOT EXISTS diaForcedSources(
 diaForcedSourceId bigint,
 ccdVisitId bigint,
 diaObjectId bigint,
