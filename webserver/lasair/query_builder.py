@@ -246,8 +246,7 @@ def build_query(select_expression, from_expression, where_condition):
                 where_clauses.append(where_condition)
 
     # Now we can build the real SQL
-    sql = 'SELECT /*+ MAX_EXECUTION_TIME(%d) */ ' % max_execution_time
-    sql += select_expression
+    sql = 'SELECT ' + select_expression
 
     # FROM these tables
     sql += ' \nFROM ' + ', '.join(from_table_list)
