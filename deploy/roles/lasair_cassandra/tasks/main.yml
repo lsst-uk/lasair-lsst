@@ -1,0 +1,19 @@
+---
+# To be executed on ONE CASSANDRA NODE ONLY. (Doesn't matter which one!)
+# Code can be executed as often as necessary. Does not need to be idempotent.
+
+- name: Create keyspace
+  command: "{{ item }}"
+  with_items:
+    - "cqlsh -e \"create keyspace if not exists {{ keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor': {{ replication_factor }} };\""
+
+- name: Create tables
+  command: "cqlsh -e 'use {{ keyspace }}; {{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }};'"
+  with_items:
+    - "/common/schema/lasair_cql/diaForcedSources.cql"
+    - "/common/schema/lasair_cql/diaNondetectionLimits.cql"
+    - "/common/schema/lasair_cql/diaSources.cql"
+    - "/common/schema/lasair_cql/diaObjects.cql"
+
+- name: flush handlers
+  meta: flush_handlers

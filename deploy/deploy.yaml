@@ -168,8 +168,9 @@
     - settings.yaml
   vars:
     cassandra_cluster_name: "{{ lasair_name }}"
+    git_branch: "{{ lasair_version }}"
   roles:
-    - gkansible.gkservercollection.cassandra_schema_lasair
+    - lasair_cassandra
   tags: cassandra
 
 - hosts: parallel_ssh
