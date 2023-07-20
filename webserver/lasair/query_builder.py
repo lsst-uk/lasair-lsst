@@ -49,6 +49,7 @@ select_forbidden_word_list = [
     'high_priority', 'straight_join',
     'sql_small_result', 'sql_big_result', 'sql_buffer_result',
     'sql_no_cache', 'sql_calc_found_rows',
+    'sleep',
 ]
 
 

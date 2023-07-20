@@ -63,7 +63,7 @@ def run_filter(
     if error:
         return None, None, None, None, error
     sqlquery_real = build_query(selected, tables, conditions)
-    sqlquery_limit = sqlquery_real + ' LIMIT %d OFFSET %d' % (limit, offset)
+    sqlquery_limit = 'SET STATEMENT max_statement_time=10 FOR %s LIMIT %d OFFSET %d' % (sqlquery_real, limit, offset)
 
     nalert = 0
     msl = db_connect.readonly()
@@ -189,7 +189,10 @@ def topic_refresh(real_sql, topic, limit=10):
         message += 'Topic is ' + topic + '<br/>'
         message += str(e) + '<br/>'
 
-    query = real_sql + ' LIMIT %d' % limit
+    timeout = 30
+    query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s' \
+            % (timeout, real_sql, limit))
+
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     query_results = []

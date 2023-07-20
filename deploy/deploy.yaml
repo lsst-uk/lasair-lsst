@@ -34,7 +34,7 @@
   vars:
     internal_only: true
     source: public.alerts.ztf.uw.edu:9092
-    start_mirrormaker: true # don't start mirrormaker automatically by default
+    start_mirrormaker: false # don't start mirrormaker automatically by default
   roles:
     - kafka
     - mirrormaker # we currently run mirrormaker on the same hosts as kafka 
