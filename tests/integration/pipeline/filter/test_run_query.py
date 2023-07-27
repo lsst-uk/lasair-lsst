@@ -71,7 +71,9 @@ class RunQueryTest(TestCase):
         # patch out the send email function
         with mock.patch('run_active_queries.send_email') as mock_email:
             query_results = run_query(querydict, RunQueryTest.msl)
-            #TODO: actually check something here
+            args = mock_email.call_args[0]
+            email_body = args[2]
+            self.assertIn('error in your SQL syntax', email_body)
 
     def test_3_timeout_err(self):
         """Timeout error"""
@@ -80,7 +82,9 @@ class RunQueryTest(TestCase):
         # patch out the send email function
         with mock.patch('run_active_queries.send_email') as mock_email:
             query_results = run_query(querydict, RunQueryTest.msl)
-            #TODO: actually check something here
+            args = mock_email.call_args[0]
+            email_body = args[2]
+            self.assertIn('max_statement_time exceeded', email_body)
 
 if __name__ == '__main__':
     import xmlrunner
