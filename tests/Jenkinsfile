@@ -38,6 +38,9 @@ pipeline {
                 dir('tests/integration/example') {
                     sh 'python3 test_example.py'
                 }
+                dir('tests/integration/pipeline/filter') {
+                    sh 'python3 test_run_query.py'
+                }
                 dir('tests/integration/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
                 }
