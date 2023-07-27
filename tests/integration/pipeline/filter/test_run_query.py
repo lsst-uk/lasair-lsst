@@ -7,8 +7,8 @@ import unittest.main
 from unittest import TestCase, expectedFailure, mock
 import mysql.connector
 from mysql.connector.errors import *
-sys.path.append('../../../../pipeline/filter')
-sys.path.append('../../../../common')
+sys.path.append('/home/ubuntu/lasair-lsst/pipeline/filter')
+sys.path.append('/home/ubuntu/lasair-lsst/common')
 import settings
 from run_active_queries import run_query
 
