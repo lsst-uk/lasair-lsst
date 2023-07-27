@@ -48,6 +48,7 @@ pipeline {
             post {
                 always {
                     junit 'tests/integration/pipeline/sherlock/test-reports/*.xml'
+                    junit 'tests/integration/pipeline/filter/test-reports/*.xml'
                 }
             }
         }
