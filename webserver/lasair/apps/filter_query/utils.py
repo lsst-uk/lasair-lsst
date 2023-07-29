@@ -63,7 +63,7 @@ def run_filter(
     if error:
         return None, None, None, None, error
     sqlquery_real = build_query(selected, tables, conditions)
-    sqlquery_limit = 'SET STATEMENT max_statement_time=10 FOR %s LIMIT %d OFFSET %d' % (sqlquery_real, limit, offset)
+    sqlquery_limit = 'SET STATEMENT max_statement_time=60 FOR %s LIMIT %d OFFSET %d' % (sqlquery_real, limit, offset)
 
     nalert = 0
     msl = db_connect.readonly()
