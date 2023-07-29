@@ -25,9 +25,9 @@ from astropy.time import Time
 import math
 
 # globals
-fig     = None    # the figure being plotted
-fluxAbs = None    # flux multipler for diatance
-magAbs  = None    # magnitude addition for distance
+fig       = None    # the figure being plotted
+nuLnuLsun = None    # flux multipler for nuLnu (see bottom of this file)
+magAbs    = None    # magnitude addition for distance
 
 # Colors for the various filterNames
 filterColor = {
@@ -88,20 +88,20 @@ def plotList(alert, pointList, size, symbol, distanceMpc):
                     "<extra></extra>",
         ))
     
-#        if distanceMpc:
-#            fig.add_trace(go.Scatter(
-#                x=dflux['utc'], 
-#                y=fluxAbs*dflux['flux'],
-#                error_y = {'type':'data', 'array':fluxAbs*dflux['fluxerr']},
-#                mode='markers', marker=dict(color=color, size=size, symbol=symbol),
-#                xaxis='x', yaxis='y2',
-#                customdata=np.stack((dflux['utc'], dflux['flux'], dflux['fluxdays']), axis=-1),
-#                hovertemplate="<b>" + dflux["name"] + "</b><br>" +
-#                    "MJD: %{customdata[2]:.2f}<br>" +
-#                    "UTC: %{customdata[0]}<br>" +
-#                    "Flux: %{customdata[1]:.0f} μJy<br>" +
-#                    "<extra></extra>",
-#            ))
+        if distanceMpc:
+            fig.add_trace(go.Scatter(
+                x=dflux['utc'], 
+                y=nuLnuLsun*dflux['flux'],
+                error_y = {'type':'data', 'array':nuLnuLsun*dflux['fluxerr']},
+                mode='markers', marker=dict(color=color, size=size, symbol=symbol),
+                xaxis='x', yaxis='y2',
+                customdata=np.stack((dflux['utc'], dflux['flux'], dflux['fluxdays']), axis=-1),
+                hovertemplate="<b>" + dflux["name"] + "</b><br>" +
+                    "MJD: %{customdata[2]:.2f}<br>" +
+                    "UTC: %{customdata[0]}<br>" +
+                    "Flux: %{customdata[1]:.0f} μJy<br>" +
+                    "<extra></extra>",
+            ))
     
         mag    = []
         magerr = []
@@ -152,7 +152,7 @@ def object_difference_lightcurve(alert):
     """ 
     Plot the entire alert with its 6 colors and 3 types of symbol
     """
-    global fig, fluxAbs, magAbs
+    global fig, nuLnuLsun, magAbs
 
     if 'sherlock' in alert and 'distance' in alert['sherlock']:
         distanceMpc = alert['sherlock']['distance']
@@ -211,8 +211,8 @@ def object_difference_lightcurve(alert):
     
     if distanceMpc:
         # add to mag to get abs mag
-        magAbs =  - 5*math.log10(distanceMpc) - 25  # add to get abs mag
-        fluxAbs     = distanceMpc*distanceMpc/100000  # multiplier to get abs flux
+        magAbs    =  - 5*math.log10(distanceMpc) - 25  # add to get abs mag
+        nuLnuLsun = distanceMpc*distanceMpc * 0.1563   # multiplier to get abs flux
     
     fig = go.Figure()
     
@@ -238,12 +238,12 @@ def object_difference_lightcurve(alert):
     
     if distanceMpc:
         fig.update_layout(
-#            yaxis2=dict(
-#                title='absolute flux (MJ)',
-#                anchor='x', side='right',
-#                range=[fluxAbs*fluxMin,fluxAbs*fluxMax],
-#                domain=[0.525, 1.0],
-#            ),
+            yaxis2=dict(
+                title='nuLnu/Lsun',
+                anchor='x', side='right',
+                range=[nuLnuLsun*fluxMin,nuLnuLsun*fluxMax],
+                domain=[0.525, 1.0],
+            ),
         
             yaxis4=dict(
                 title='absolute magnitude',
@@ -288,3 +288,27 @@ if __name__ == '__main__':
     
     htmlLightcurve = object_difference_lightcurve(alert)
     fig.show()
+
+# Compute the nuLnu luminosity of a source given:
+# -- flux f measured in nanoJansky
+# -- distance D measured in megaParsec
+# -- we choose fixed nu from the middle of the optical band, 600 nm
+# 
+# (1) Definition of jansky is 1.e-23 erg/s/cm2/Hz
+# Since f is nano Jamsky, we have flux = 1.e-32 f in erg/s/cm2/Hz
+# 
+# (2) Definition of parsec     = 3.0857e18     cm
+# Since D is Mpc, the distance   = 3.0857e24 D   cm
+# 
+# (3) Chosen wavelength = lambda = 600 nanometers = 6.0e-5  cm
+# nu = central frequency = c/lambda
+#     = 2.998e10/(6.0e-5)
+#     = 5.000e14 Hz
+# 
+# (4) nuLnu = (5.000e14) x 4pi x (3.0857e24 D)^2 x (1.e-32 f)
+#     = (D^2 f) x 598.3e30 erg/sec
+#     = (D^2 f) x 5.983e32 erg/sec
+#     = (D^2 f) x 5.983e25 watts
+# 
+# (5) Luminosity of sun = 3.828e26 W
+#     so nuLnu/Lsun = (D^2 f) x 0.1563
