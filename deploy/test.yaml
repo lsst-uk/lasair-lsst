@@ -47,6 +47,10 @@
       command: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --url=https://raw.githubusercontent.com/lsst-uk/{{ git_name }}/{{ lasair_version }}/common/schema/lasair_schema/objects.py --format=py"
       loop: "{{ groups['cluster_control'] }}"
       changed_when: false
+    - name: validate db functions
+      command: "python3 check_db_func.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306"
+      loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
+      changed_when: false
   tags: db
 
 # kafka tests
