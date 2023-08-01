@@ -92,7 +92,7 @@ class SherlockWrapperIntegrationTest(TestCase):
             'bootstrap.servers': conf['broker'],
             'group.id': conf['group'],
             'session.timeout.ms': 6000,
-            'default.topic.config': {'auto.offset.reset': 'smallest'}
+            'default.topic.config': {'auto.offset.reset': 'earliest'}
         }
         c = Consumer(settings, logger=log)
         c.subscribe([conf['output_topic']])

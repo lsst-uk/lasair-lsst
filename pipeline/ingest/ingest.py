@@ -263,7 +263,7 @@ def run_ingest(args):
         'bootstrap.servers'   : '%s' % settings.KAFKA_SERVER,
         'group.id'            : group_id,
         'enable.auto.commit'  : False,
-        'default.topic.config': {'auto.offset.reset': 'smallest'},
+        'default.topic.config': {'auto.offset.reset': 'earliest'},
 
         # wait twice wait time before forgetting me
         'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  

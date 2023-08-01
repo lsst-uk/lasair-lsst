@@ -50,7 +50,7 @@ def get_annotations(topics, maxannotation):
         'sasl.mechanisms':   'SCRAM-SHA-256',
         'group.id':           settings.PUBLIC_GROUP_ID,
         'default.topic.config': {
-             'auto.offset.reset': 'smallest'
+             'auto.offset.reset': 'earliest'
         }
     }
 

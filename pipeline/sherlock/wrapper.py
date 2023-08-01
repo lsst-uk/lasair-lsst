@@ -5,7 +5,7 @@ adds the Sherlock classification and crossmatches back into the alert and
 republishes on the output topic.
 """
 
-__version__ = "0.7.1"
+__version__ = "0.7.2"
 
 import warnings
 import json
@@ -294,7 +294,7 @@ def run(conf, log):
         'group.id': conf['group'],
         'session.timeout.ms': 30000,
         'max.poll.interval.ms': conf['max_poll_interval'],
-        'default.topic.config': {'auto.offset.reset': 'smallest'},
+        'default.topic.config': {'auto.offset.reset': 'earliest'},
         'enable.auto.commit': False
     }
 
