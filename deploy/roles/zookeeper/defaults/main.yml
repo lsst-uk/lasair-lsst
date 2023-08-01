@@ -1,0 +1,8 @@
+---
+# defaults file for roles/zookeepers
+#
+data_fs:
+  dev: "/dev/vdb"
+  path: "/data"
+  type: "ext4"
+
