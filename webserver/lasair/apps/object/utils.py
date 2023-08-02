@@ -41,7 +41,7 @@ filterColor = {
 
 def flux2mag(flux):
     # Compute magnitude from flux
-    if flux > 0: return 23.9 - 2.5*math.log10(flux)
+    if flux > 0: return 31.4 - 2.5*math.log10(flux)
     else:        return None
 
 def fluxerr2magerr(fluxerr, flux):
