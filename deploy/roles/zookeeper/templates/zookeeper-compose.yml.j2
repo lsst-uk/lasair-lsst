@@ -33,6 +33,10 @@ services:
             - "KAFKA_OPTS=-Dzookeeper.admin.enableServer=false -javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=0.0.0.0:8082:/opt/jmx_exporter/zookeeper.yml"
 
         volumes:
-            - "zklog:/var/lib/zookeeper/log"
-            - "zkdata:/var/lib/zookeeper/data"
+            - type:   "bind"
+              source: "{{ mntpath }}/log"
+              target: /var/lib/zookeeper/log
+            - type:   "bind"
+              source: "{{ mntpath }}/data"
+              target: /var/lib/zookeeper/data
             - /opt/jmx_exporter:/opt/jmx_exporter
