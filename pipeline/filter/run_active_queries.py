@@ -86,7 +86,7 @@ def run_annotation_queries(query_list):
     conf = {
         'bootstrap.servers':   settings.KAFKA_SERVER,
         'group.id':            settings.ANNOTATION_GROUP_ID,
-        'default.topic.config': {'auto.offset.reset': 'smallest'}
+        'default.topic.config': {'auto.offset.reset': 'earliest'}
     }
     streamReader = Consumer(conf)
     topic = 'ztf_annotations'
