@@ -2,12 +2,26 @@
 # tasks file for roles/zookeeper
 #- debug: msg="play_hosts={{play_hosts}}"
 
+- import_tasks: setup_fs.yml
 - import_tasks: prometheus_exporter.yml
+
+- name: "Create Zookeeper directories"
+  become: true
+  file:
+    path: "{{ data_fs.path }}/{{ item }}"
+    state: directory
+    mode: 0777
+  loop:
+    - "zookeeper"
+    - "zookeeper/log"
+    - "zookeeper/data"
 
 - name: "Deploy Zookeeper compose file"
   template:
     src:  zookeeper-compose.yml.j2
     dest: zookeeper-compose.yml
+  vars:
+    mntpath: "{{ data_fs.path }}/zookeeper"
 
 - name: "Start Zookeeper services"
   become: true

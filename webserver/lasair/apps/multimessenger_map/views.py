@@ -1,4 +1,4 @@
-from lasair.utils import jd_from_iso
+from lasair.utils import mjd_from_iso
 import time
 import math
 import dateutil.parser as dp
@@ -69,7 +69,7 @@ def mm_map_detail(request, skymap_id_version):
         skymap_distance = '%.1f &plusmn %.1f Mpc' % (float(skymap_data['meta']['DISTMEAN']), float(skymap_data['meta']['DISTSTD']))
     niddate1 = niddate2 = isodate.split('T')[0].replace('-', '')
     tilelist = skymap_data['meta']['histogram']
-    jd = jd_from_iso(isodate)
+    mjd = mjd_from_iso(isodate)
     jd1delta = -1.0
     jd2delta = 1.0
     ztf_wanted = coverage_wanted = False
@@ -93,7 +93,7 @@ def mm_map_detail(request, skymap_id_version):
 # ZTF candidates
     ztf_data = []
     ztfquery = "SELECT objectId,jd,ra,decl,fid,magpsf "
-    ztfquery += "FROM candidates WHERE jd BETWEEN %f and %f AND \n(" % (jd + jd1delta, jd + jd2delta)
+    ztfquery += "FROM candidates WHERE jd BETWEEN %f and %f AND \n(" % (mjd + jd1delta, mjd + jd2delta)
     constraint_list = []
     for tile in tilelist:
         constraint = "(ra BETWEEN %.1f and %.1f AND decl BETWEEN %.1f AND %.1f)\n"

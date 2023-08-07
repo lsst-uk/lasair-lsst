@@ -86,7 +86,7 @@ def run_annotation_queries(query_list):
     conf = {
         'bootstrap.servers':   settings.KAFKA_SERVER,
         'group.id':            settings.ANNOTATION_GROUP_ID,
-        'default.topic.config': {'auto.offset.reset': 'smallest'}
+        'default.topic.config': {'auto.offset.reset': 'earliest'}
     }
     streamReader = Consumer(conf)
     topic = 'ztf_annotations'
@@ -175,26 +175,26 @@ def run_query(query, msl, annotator=None, objectId=None):
         # run the query against main for this specific object that has been annotated
         sqlquery_real = query_for_object(sqlquery_real, objectId)
 
-    # in any case, limit the output
-    sqlquery_real += (' LIMIT %d' % limit)
+    # in any case, 10 second timeout and limit the output
+    sqlquery_real = ('SET STATEMENT max_statement_time=10 FOR %s LIMIT %d' % (sqlquery_real, limit))
 
     cursor = msl.cursor(buffered=True, dictionary=True)
     n = 0
     query_results = []
+    utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
     try:
         cursor.execute(sqlquery_real)
         for record in cursor:
             recorddict = dict(record)
-            utcnow = datetime.datetime.utcnow()
-            recorddict['UTC'] = utcnow.strftime("%Y-%m-%d %H:%M:%S")
+            recorddict['UTC'] = utc
             #print(recorddict)
             query_results.append(recorddict)
             n += 1
     except Exception as e:
-        print("SQL error for %s" % topic)
-        print(e)
+        error = "%s UTC: Your streaming query %s didn't run, the error is: %s, please check it, and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e))
+        print(error)
         print(sqlquery_real)
-        sys.stdout.flush()
+        send_email(email, topic, error)
         return []
 
     return query_results
@@ -290,7 +290,7 @@ def dispose_email(allrecords, last_email, query):
         sys.stdout.flush()
         return last_email
 
-def send_email(email, topic, message, message_html):
+def send_email(email, topic, message, message_html=''):
     """send_email.
 
     Args:
@@ -305,7 +305,8 @@ def send_email(email, topic, message, message_html):
     msg['To']      = email
 
     msg.attach(MIMEText(message, 'plain'))
-    msg.attach(MIMEText(message_html, 'html'))
+    if len(message_html) > 0:
+        msg.attach(MIMEText(message_html, 'html'))
     s = smtplib.SMTP('localhost')
     s.sendmail('donotreply@lasair.roe.ac.uk', email, msg.as_string())
     s.quit()

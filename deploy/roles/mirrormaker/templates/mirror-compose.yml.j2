@@ -6,7 +6,8 @@ services:
 
         image:
             #atolmis/kafka
-            gpfrancis/lasairmm:2.4.0
+            #gpfrancis/lasairmm:2.4.0
+            "confluentinc/cp-kafka:7.4.0"
         network_mode: host
         volumes:
             - /etc/mirror/producer.config:/etc/mirror/producer.config
@@ -16,7 +17,7 @@ services:
             - "KAFKA_HEAP_OPTS=-Xmx1G"
             - "KAFKA_OPTS=-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=0.0.0.0:8081:/opt/jmx_exporter/mirrormaker.yml"
         command: [
-             "bin/kafka-mirror-maker.sh",
+             "kafka-mirror-maker",
              "--num.streams",
              "{{ numstreams }}",
              "--consumer.config",

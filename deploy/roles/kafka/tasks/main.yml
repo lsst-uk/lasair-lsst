@@ -6,6 +6,7 @@
     msg: "DNS lookup failed for {{ inventory_hostname }}.{{ domain }}"
   when: dns_lookup and not internal_only
 
+- import_tasks: setup_fs.yml
 - import_tasks: prometheus_exporter.yml
 - import_tasks: auth_setup.yml
   when: not internal_only

@@ -20,7 +20,7 @@
     user:   "{{ ansible_env.USER }}"
     minute: '10'
     hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/lasair4/services/externalBrokers/TNS; python3 tns_runner.py)"
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services/externalBrokers/TNS; python3 tns_runner.py)"
 
 # Dump the crossmatch_tns table to CephFS (30 past midnight)
 - name: "Crontab to dump crossmatch_tns"
@@ -29,7 +29,7 @@
     user:   "{{ ansible_env.USER }}"
     minute: '22'
     hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/lasair4/services; python3 crossmatch_tns_dump.py)"
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 crossmatch_tns_dump.py)"
 
 # Dump the annotations table to CephFS (4 past midnight)
 - name: "Crontab to dump annotations"
@@ -38,7 +38,7 @@
     user:   "{{ ansible_env.USER }}"
     minute: '26'
     hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/lasair4/services; python3 annotations_dump.py)"
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 annotations_dump.py)"
 
 # Build MOCs from any updated watchlists from master MySQL to CephFS where filter nodes can see them (8 past midnight)
 - name: "Crontab to build MOCs"
@@ -47,7 +47,7 @@
     user:   "{{ ansible_env.USER }}"
     minute: '30'
     hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/lasair4/services; python3 make_watchlist_files.py)"
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 make_watchlist_files.py)"
 
 # Copy any updated area files (MOC) from master MySQL to CephFS where filter nodes can see them (12 minutes past midnight)
 - name: "Crontab for area files"
@@ -56,5 +56,5 @@
     user:   "{{ ansible_env.USER }}"
     minute: '34'
     hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/lasair4/services; python3 make_area_files.py)"
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 make_area_files.py)"
 

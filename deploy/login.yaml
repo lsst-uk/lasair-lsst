@@ -39,6 +39,20 @@
       - "export VAULT_TOKEN=`cat ~/.vault-token`"
       - "export VAULT_ADDR='{{ vault.url }}'"
 
+  - name: Install apt packages
+    become: true
+    apt:
+      pkg: 
+        - python3-hvac
+        - python3-openstackclient
+        - python3-manilaclient
+        - python3-mysql.connector
+        - python3-dev
+        - python3-pip
+        - kafkacat
+      state: present
+      update-cache: yes
+
   - name: Add vault public key
     vars:
       settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url, token_validate='false')}}"
@@ -47,21 +61,6 @@
       path: "{{ ansible_env.HOME }}/.ssh/authorized_keys"
       line: "{{ settings.id_rsa_pub }}"
       mode: 0600
-
-  - name: Install apt packages
-    become: true
-    apt:
-      pkg: 
-        - python3-hvac
-        - kafkacat
-        - python3-openstackclient
-        - python3-heatclient
-        - python3-manilaclient
-        - python3-mysql.connector
-        - python3-dev
-        - python3-pip
-      state: present
-      update-cache: yes
 
   - name: Install python packages
     pip:
@@ -74,6 +73,13 @@
     community.general.snap:
       name:
         - vault
+
+  - name: Install terraform snap
+    become: true
+    community.general.snap:
+      name:
+        - terraform
+      classic: true
 
   - name: Set SSH client config
     copy:

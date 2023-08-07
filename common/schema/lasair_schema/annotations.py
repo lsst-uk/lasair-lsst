@@ -10,7 +10,7 @@ schema = {
     },
     {
       "name": "diaObjectId",
-      "type": "string",
+      "type": "long",
       "extra": "NOT NULL",
       "doc": "ObjectId of the object that this annotator applies to"
     },

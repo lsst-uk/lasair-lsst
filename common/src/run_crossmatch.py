@@ -39,18 +39,18 @@ def crossmatch(msl, wl_id, cone_id, myRA, myDecl, name, radius):
     cursor2.execute(query2)
     n_hits = 0
     for row in cursor2:
-        objectId = row['objectId']
-        arcsec = 3600*distance(myRA, myDecl, row['ramean'], row['decmean'])
+        objectId = row['diaObjectId']
+        arcsec = 3600*distance(myRA, myDecl, row['ra'], row['decl'])
         if arcsec > radius:
             continue
         n_hits += 1
-        query3 = "INSERT INTO watchlist_hits (wl_id, cone_id, objectId, arcsec, name) VALUES\n"
+        query3 = "INSERT INTO watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
         query3 += ' (%d, %d, "%s", %.2f, "%s")' % (wl_id, cone_id, objectId, arcsec, name)
-        try:
+        if 1:
             cursor3.execute(query3)
             msl.commit()
-        except:
-            print('%s already matched with %s' % (objectId, name))
+#        except:
+#            print('%s already matched with %s' % (objectId, name))
     return n_hits
 
 if __name__ == "__main__":

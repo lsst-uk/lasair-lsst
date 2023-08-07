@@ -1,0 +1,102 @@
+---
+
+- name: deploy openstack infrastructure
+
+  hosts: localhost
+  gather_facts: False
+
+  vars_files:
+    - settings.yaml
+
+  vars:
+    tf_path: "./tf"
+
+  tasks:
+
+    - name: deploy
+      register: tf_result
+      community.general.terraform:
+        project_path: "{{ tf_path }}"
+        force_init: true
+        #state: planned
+        state: present
+        #state: absent
+        #plan_file: plan
+        complex_vars: true
+        variables:
+          instances: "{{ instances }}"
+          base_name: "{{ lasair_name }}"
+          network: "{{ os.network_name }}"
+          keypair: "{{ os.keypair_name }}"
+          image_name: "{{ os.image_name }}"
+          share_size: "{{ share_size }}"
+          share_user: "{{ os.share_user }}"
+          share_network: "{{ os.share_network_name }}"
+          extra_networks:
+            - "{{ os.share_network_name }}"
+
+#    - name: show_result
+#      ansible.builtin.debug:
+#        msg: "{{ tf_result.outputs }}"
+
+    - name: update exports.yaml
+      template:
+        src: exports.yaml.j2
+        dest: exports.yaml
+      when: tf_result.outputs.export_locations is defined
+
+    - name: update /etc/hosts
+      become: true
+      ansible.builtin.lineinfile:
+        path: /etc/hosts
+        regexp: '\s{{ item.hostname }}$'
+        line: "{{ item.address }} {{ item.hostname }}"
+      loop: |
+        [
+        {%- for value in tf_result.outputs.private_ips.value %}
+          {%- if value.address is defined %}
+            { 'address': '{{ value.address }}', 'hostname': '{{ value.name }}' },
+          {%- endif %}
+        {%- endfor %}
+        ]
+      when: tf_result.outputs.private_ips is defined
+
+    - name: add sections to inventory
+      ansible.builtin.lineinfile:
+        path: hosts
+        line: "[{{ item }}]"
+      loop: "{{ instances | list }}"
+
+    - name: add hosts to inventory
+      community.general.ini_file:
+        path: hosts
+        section: "{{ item.role }}"
+        allow_no_value: true
+        option: "{{ os.stack_name }}-{{ item.role }}{{ item.suffix }}"
+      loop: |
+        [
+        {%- for role,values in instances.items() %}
+          {%- if values.number > 1 %}
+            {%- for i in range(0, values.number) %}
+              { 'role': '{{ role }}', 'suffix': '-{{ i }}' },
+            {%- endfor %}
+          {%- elif values.number == 1 %}
+            { 'role': '{{ role }}', 'suffix': '' },
+          {%- endif %}
+        {%- endfor %}
+        ]
+      loop_control:
+        label: "{{ os.stack_name }}-{{ item.role }}{{ item.suffix }}"
+
+    # We don't currently have dedicated instances for proxy and api roles
+    # so add these to the web server
+    - name: add extra roles in inventory
+      ini_file:
+        path: hosts
+        section: "{{ item }}"
+        allow_no_value: true
+        option: "{{ os.stack_name }}-web"
+      with_items:
+        - proxy
+        - api
+      when: instances.web is defined and instances.web.number > 0
