@@ -96,6 +96,11 @@ def run_filter(
 
     return table, tableSchema, count, topic, error
 
+    if "order by" in conditions.lower():
+        sortTable = False
+    else:
+        sortTable = True
+
     if json_checked:
         return HttpResponse(json.dumps(table, indent=2), content_type="application/json")
     else:
@@ -110,7 +115,8 @@ def run_filter(
                        'nalert': count,
                        'ps': offset, 'pe': offset + count,
                        'limit': limit, 'offset': offset,
-                       "schema": tableSchema})
+                       "schema": tableSchema,
+                       'sortTable': sortTable})
 
 
 def topic_name(userid, name):
@@ -189,7 +195,9 @@ def topic_refresh(real_sql, topic, limit=10):
         message += 'Topic is ' + topic + '<br/>'
         message += str(e) + '<br/>'
 
-    query = real_sql + ' LIMIT %d' % limit
+    timeout = 30
+    query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s'
+             % (timeout, real_sql, limit))
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     query_results = []

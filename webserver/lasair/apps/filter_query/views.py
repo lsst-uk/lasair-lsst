@@ -201,6 +201,11 @@ def filter_query_detail(request, mq_id, action=False):
     else:
         limit = False
 
+    if "order by" in filterQuery.real_sql.lower():
+        sortTable = False
+    else:
+        sortTable = True
+
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
@@ -208,7 +213,8 @@ def filter_query_detail(request, mq_id, action=False):
         "schema": schema,
         "form": form,
         "duplicateForm": duplicateForm,
-        'limit': str(limit)
+        'limit': str(limit),
+        'sortTable': sortTable
     })
 
 
@@ -327,7 +333,12 @@ def filter_query_create(request, mq_id=False):
 
             sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
 
-            return render(request, 'filter_query/filter_query_create.html', {'schemas_core': schemas_core, 'schemas_addtional': schemas_addtional, 'form': form, 'table': table, 'schema': tableSchema, 'limit': str(limit), 'real_sql': sqlquery_real, "filterQ": filterQuery})
+            if "order by" in conditions.lower():
+                sortTable = False
+            else:
+                sortTable = True
+
+            return render(request, 'filter_query/filter_query_create.html', {'schemas_core': schemas_core, 'schemas_addtional': schemas_addtional, 'form': form, 'table': table, 'schema': tableSchema, 'limit': str(limit), 'real_sql': sqlquery_real, "filterQ": filterQuery, 'sortTable': sortTable})
 
         # OR SAVE?
         elif action and action.lower() == "save" and len(name) and form.is_valid():
@@ -436,13 +447,19 @@ def filter_query_log(request, topic):
         if k not in tableSchema:
             tableSchema[k] = "custom column"
 
+    if "order by" in filterQuery.conditions.lower():
+        sortTable = False
+    else:
+        sortTable = True
+
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
         'count': count,
         "schema": tableSchema,
         "form": form,
-        'limit': None
+        'limit': None,
+        'sortTable': sortTable
     })
 
 

@@ -55,49 +55,51 @@
 
 
             <div class="table-responsive p-1 pt-0">
-                <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
-                    <thead class="thead-light">
+
+	        {% if sortTable is None or sortTable != False %}
+                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
+                {%else%}
+                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
+                {% endif %}
+                <thead class="thead-light">
+                    <tr>
+                        {% for key in table.0.keys %}
+                            {% if key == "UTC" %}
+                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
+                            {%else%}
+                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr></thead>
+                <tbody>
+                    {% for object in table %}
+
                         <tr>
+                            {% for key in object.keys %}
 
-                            {% for key in table.0.keys %}
+                                {% if key == "objectId" %}
+                                    <td><a href='{% url "object_detail" object.objectId %}'>{{ object.objectId }}</a></td>
 
-                                {% if key == "UTC" %}
-                                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
+                                {% elif key in 'decmean' %}
+                                    <td>{{object|keyvalue:key|floatformat:6 }}</td>
+                                {% elif key in 'ramean' %}
+                                    <td>{{object|keyvalue:key|floatformat:5 }}</td>
+                                {% elif 'mjd' in key %}
+                                    <td>{{object|keyvalue:key|floatformat:4 }}</td>
+                                {% elif 'mag' in key %}
+                                    <td>{{object|keyvalue:key|floatformat:3 }}</td>
+                                {% elif 'last detected' in key %}
+                                    <td>{{object|keyvalue:key|floatformat:1 }}</td>
+                                {% elif key in 'UTC' %}
+                                    <td data-type="date" data-format="YYYY-MMM-DD hh:mm:ss">{{object|keyvalue:key }} UTC</td>
+                                {% elif key in 'classdict' %}
+                                    <td><code>{{object|keyvalue:key }}</code></td>
+
                                 {%else%}
-                                    <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
+				   <td>{{ object|keyvalue:key }}</td>
                                 {% endif %}
 
                             {% endfor %}
-
-                        </tr></thead>
-                    <tbody>
-                        {% for object in table %}
-
-                            <tr>
-                                {% for key in object.keys %}
-
-                                    {% if key == "diaObjectId" %}
-                                        <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
-
-                                    {% elif key in 'decmean' %}
-                                        <td>{{object|keyvalue:key|floatformat:6 }}</td>
-                                    {% elif key in 'ramean' %}
-                                        <td>{{object|keyvalue:key|floatformat:5 }}</td>
-                                    {% elif 'mjd' in key %}
-                                        <td>{{object|keyvalue:key|floatformat:4 }}</td>
-                                    {% elif 'mag' in key %}
-                                        <td>{{object|keyvalue:key|floatformat:3 }}</td>
-                                    {% elif 'last detected' in key %}
-                                        <td>{{object|keyvalue:key|floatformat:1 }}</td>
-                                    {% elif key in 'UTC' %}
-                                        <td data-type="date" data-format="YYYY-MMM-DD hh:mm:ss">{{object|keyvalue:key }} UTC</td>
-                                    {% elif key in 'classdict' %}
-                                        <td><code>{{object|keyvalue:key }}</code></td>
-                                    {%else%}
-                                        <td>{{ object|keyvalue:key }}</td>
-                                    {% endif %}
-
-                                {% endfor %}
 
                             </tr>
 
@@ -105,7 +107,6 @@
                     </tbody>
                 </table>
             </div>
-
 
             </div>
 
