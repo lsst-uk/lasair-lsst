@@ -59,7 +59,7 @@ class SherlockWrapperIntegrationTest(TestCase):
         #subprocess.Popen(["bin/kafka-server-start.sh", "config/server.properties"], cwd="/opt/kafka")
         #sleep(20)
 
-        with open("example_ingested.json", 'r') as f:
+        with open("sample_alerts/5_alert_batch.json", 'r') as f:
             # load example data
             data = json.load(f)
             # try to delete the topics
@@ -92,7 +92,7 @@ class SherlockWrapperIntegrationTest(TestCase):
             'bootstrap.servers': conf['broker'],
             'group.id': conf['group'],
             'session.timeout.ms': 6000,
-            'default.topic.config': {'auto.offset.reset': 'smallest'}
+            'default.topic.config': {'auto.offset.reset': 'earliest'}
         }
         c = Consumer(settings, logger=log)
         c.subscribe([conf['output_topic']])

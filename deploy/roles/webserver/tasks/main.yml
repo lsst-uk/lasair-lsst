@@ -97,18 +97,18 @@
 
 - name: Make sure the repo is up to date
   git:
-      repo: https://github.com/lsst-uk/lasair4.git
-      dest: "{{ ansible_env.HOME }}/lasair4"
-      version: "{{ lasair_version }}"
+    repo: "{{ git_url }}"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}"
+    version: "{{ lasair_version }}"
 
       
-# lasair4/common/settings.py
+# common/settings.py
 - import_tasks: settings.yml
 
 - name: Settings.py for django
   template:
     src:  settings.py.j2
-    dest: "{{ ansible_env.HOME }}/lasair4/webserver/lasair/settings.py"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/lasair/settings.py"
 
 - name: Create restart script
   template:
@@ -154,47 +154,50 @@
 
 - name: Django bootstrap
   shell:
-    chdir: "{{ ansible_env.HOME }}/lasair4/webserver"
+    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/webserver"
     cmd: "python3 manage.py {{ item }} --settings lasair.settings"
   environment:
-          PYTHONPATH: "{{ ansible_env.HOME }}/lasair4/common/"
+          PYTHONPATH: "{{ ansible_env.HOME }}/{{ git_name }}/common/"
   with_items:
-    - migrate --fake
-    - makemigrations
+    - makemigrations annotator
+    - makemigrations filter_query
+    - makemigrations watchlist
+    - makemigrations watchmap
+    - makemigrations users
     - migrate
     - collectstatic --noinput
 
 - name: Create symlink for services log
   file:
     src: /mnt/cephfs/lasair/services_log
-    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/services_log"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/services_log"
     state: link
 
 - name: Create symlink for streams
   file:
     src: /mnt/cephfs/lasair/streams
-    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/streams"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/streams"
     state: link
 
 - name: Create symlink for fits images
   file:
     src: /mnt/cephfs/lasair/fits
-    dest: "{{ ansible_env.HOME }}/lasair4/webserver/static/fits"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/fits"
     state: link
 
 - name: Create Django superuser
   shell:
-    chdir: "{{ ansible_env.HOME }}/lasair4/webserver"
+    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/webserver"
     cmd: "python3 manage.py createsuperuser --settings lasair.settings --noinput --username su --email {{ admin_email }}"
   environment:
-    PYTHONPATH: "{{ ansible_env.HOME }}/lasair4/common"
+    PYTHONPATH: "{{ ansible_env.HOME }}/{{ git_name }}/common"
     DJANGO_SUPERUSER_PASSWORD: "{{ django_password }}"
   ignore_errors: true
 
-- name: Add default profile pic
-  copy:
-    src: default.jpg
-    dest: "{{ item }}"
-  loop:
-    - media/default.jpg
-    - media/profile_pics/default.jpg
+  #- name: Add default profile pic
+  #  copy:
+  #    src: default.jpg
+  #    dest: "{{ item }}"
+  #  loop:
+  #    - media/default.jpg
+  #    - media/profile_pics/default.jpg

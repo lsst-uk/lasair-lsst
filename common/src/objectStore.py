@@ -1,5 +1,6 @@
 # A simple object store implemented on a file system
 # Roy Williams 2020
+# updated with primary directory as integer MJD
 
 import os
 import hashlib
@@ -8,7 +9,7 @@ class objectStore():
     """objectStore.
     """
 
-    def __init__(self, suffix='txt', fileroot='/data', double=False):
+    def __init__(self, suffix='txt', fileroot='/data'):
         """__init__.
 
         Args:
@@ -19,61 +20,61 @@ class objectStore():
         os.system('mkdir -p ' + fileroot)
         self.fileroot = fileroot
         self.suffix = suffix
-        self.double = double
     
-    def getFileName(self, objectId, mkdir=False):
+    def getFileName(self, objectId, imjd, mkdir=False):
         """getFileName.
 
         Args:
             objectId:
+            imjd:
             mkdir:
         """
+        imjddir = self.fileroot +'/' + '%d'%imjd + '/'
+        if mkdir:
+            try: os.makedirs(imjddir)
+            except: pass
+
         # hash the filename for the directory, use the last 3 digits
         # max number of directories 16**3 = 4096
         h = hashlib.md5(objectId.encode())
-        dir = h.hexdigest()[:3]
-        if self.double:
-            dir += '/' + h.hexdigest()[3:6]
-
+        imjddirhash = imjddir + h.hexdigest()[:3] + '/'
         if mkdir:
-            try:
-                os.makedirs(self.fileroot+'/'+dir)
-#                print('%s made %s' % (self.suffix, dir))
-            except:
-                pass
-        return self.fileroot +'/%s/%s.%s' % (dir, objectId, self.suffix)
+            try: os.makedirs(imjddirhash)
+            except: pass
 
-    def getFileObject(self, objectId):
+        return imjddirhash + objectId +'.' + self.suffix
+
+    def getFileObject(self, objectId, imjd):
         """getObject.
 
         Args:
             objectId:
         """
-        f = open(self.getFileName(objectId), 'rb')
+        f = open(self.getFileName(objectId, imjd), 'rb')
         return f
 
-    def getObject(self, objectId):
+    def getObject(self, objectId, imjd):
         """getObject.
 
         Args:
             objectId:
         """
         try:
-            f = open(self.getFileName(objectId))
+            f = open(self.getFileName(objectId, imjd))
             str = f.read()
             f.close()
             return str
         except:
             return None
 
-    def putObject(self, objectId, objectBlob):
+    def putObject(self, objectId, imjd, objectBlob):
         """putObject.
 
         Args:
             objectId:
             objectBlob:
         """
-        filename = self.getFileName(objectId, mkdir=True)
+        filename = self.getFileName(objectId, imjd, mkdir=True)
 #        print(objectId, filename)
         if isinstance(objectBlob, str):
             f = open(filename, 'w')
@@ -82,25 +83,10 @@ class objectStore():
         f.write(objectBlob)
         f.close()
 
-    def getObjects(self, objectIdList):
-        """getObjects.
-
-        Args:
-            objectIdList:
-        """
-        # get a bunch of objects from a bunch of identifiers
-        D = {}
-        for objectId in objectIdList:
-            s = self.getObject(objectId)
-            D[objectId] = json.loads(s)
-        return json.dumps(D, indent=2)
-
-    def putObjects(self, objectBlobDict):
-        """putObjects.
-
-        Args:
-            objectBlobDict:
-        """
-        # put a bunch of objects from a dict of objectId:object
-        for (objectId, objectBlob) in objectBlobDict.items():
-            self.putObject(objectId, objectBlob)
+if __name__ == '__main__':
+    ost = objectStore('txt', '/home/ubuntu/lasair-lsst/common/src/junk')
+    f = ost.getFileName('blabla456', 60000)
+    print(f)
+    ost.putObject('blabla456', 60000, 'lorem ipsum ...') 
+    c = ost.getObject('blabla456', 60000)
+    print(c)

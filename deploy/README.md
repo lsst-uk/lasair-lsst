@@ -39,19 +39,20 @@ who need to can log into this instance by adding their public
 ssh keys to the authorized_keys file.
 
 3. Install Ansible. We require version 2.10 or later.
-If we are using Ubuntu 20.04 then the packaged version of Ansible is
-only 2.9 so we must install using pip:
+If we are using Ubuntu 22.04 then it is fine to just install the default Ansible
+package using apt; if we are still using 20.04 then the packaged version of Ansible is
+only 2.9 so we must install Ansible using pip:
 ```
 # apt-get update && apt-get install python3-pip && pip3 install ansible hvac
 ```
 
 4. Clone this repository:
 ```
-$ git clone https://github.com/lsst-uk/lasair-deploy.git
+$ git clone https://github.com/lsst-uk/lasair-lsst.git
 ```
 
-5. Get the ```openrc.sh``` file (or possibly application credential)
-for the OpenStack cloud, copy it to the login instance and source it. 
+5. Get an application credential for the OpenStack cloud (in openrc format),
+copy it to the login instance and source it. 
 
 6. Set the VAULT_TOKEN environment variable, e.g.:
 ```
