@@ -10,7 +10,7 @@ Note that this part of query is added outside of this code
 Example:
     select_expression = 'diaObjectId'
     from_expression   = 'objects'
-    where_condition   = 'mag < 14 ORDER BY jd'
+    where_condition   = 'mag < 14 ORDER BY maxTai'
 The syntax checking happens in two stages, first in this code and then in the SQL engine.
 The limit and offset are checked here that they are integers.
 
@@ -49,6 +49,7 @@ select_forbidden_word_list = [
     'high_priority', 'straight_join',
     'sql_small_result', 'sql_big_result', 'sql_buffer_result',
     'sql_no_cache', 'sql_calc_found_rows',
+    'sleep',
 ]
 
 
@@ -192,7 +193,7 @@ def build_query(select_expression, from_expression, where_condition):
             crossmatch_tns = True
 
     # List of tables
-    from_table_list = ['diaObjects']
+    from_table_list = ['objects']
     if sherlock_classifications:
         from_table_list.append('sherlock_classifications')
     if watchlist_id:
@@ -246,8 +247,7 @@ def build_query(select_expression, from_expression, where_condition):
                 where_clauses.append(where_condition)
 
     # Now we can build the real SQL
-    sql = 'SELECT /*+ MAX_EXECUTION_TIME(%d) */ ' % max_execution_time
-    sql += select_expression
+    sql = 'SELECT ' + select_expression
 
     # FROM these tables
     sql += ' \nFROM ' + ', '.join(from_table_list)

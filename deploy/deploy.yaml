@@ -34,7 +34,7 @@
   vars:
     internal_only: true
     source: public.alerts.ztf.uw.edu:9092
-    start_mirrormaker: true # don't start mirrormaker automatically by default
+    start_mirrormaker: false # don't start mirrormaker automatically by default
   roles:
     - kafka
     - mirrormaker # we currently run mirrormaker on the same hosts as kafka 
@@ -133,11 +133,11 @@
     - name: create filesystem for data
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/sdb
+        dev: /dev/vdb
     - name: ensure data filesystem is mounted
       ansible.posix.mount:
         path: /var/lib/cassandra
-        src: /dev/sdb
+        src: /dev/vdb
         fstype: ext4
         opts: nofail
         state: mounted
@@ -168,8 +168,9 @@
     - settings.yaml
   vars:
     cassandra_cluster_name: "{{ lasair_name }}"
+    git_branch: "{{ lasair_version }}"
   roles:
-    - gkansible.gkservercollection.cassandra_schema_lasair
+    - lasair_cassandra
   tags: cassandra
 
 - hosts: parallel_ssh

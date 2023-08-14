@@ -248,7 +248,7 @@ def watchlist_detail(request, wl_id):
     # GRAB ALL WATCHLIST MATCHES
     query_hit = f"""
 SELECT
-h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
+h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, jdnow()-o.maxTai as "last detected (days ago)"
 FROM watchlist_cones AS c
 NATURAL JOIN watchlist_hits as h
 NATURAL JOIN objects AS o

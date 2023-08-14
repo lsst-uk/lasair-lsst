@@ -15,9 +15,9 @@
       - CREATE USER IF NOT EXISTS '{{ msql_db_user_readonly }}'@'localhost' IDENTIFIED BY '{{ mysql_db_password_readonly }}';
       - CREATE USER IF NOT EXISTS '{{ msql_db_user_readonly }}'@'%' IDENTIFIED BY '{{ mysql_db_password_readonly }}';
       - GRANT SELECT ON {{ mysql_db_name }}.* TO '{{ msql_db_user_readonly }}'@'%';
-      - DROP FUNCTION IF EXISTS jdnow;
-      - CREATE FUNCTION jdnow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 2440587.5);
-      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.jdnow TO '{{ msql_db_user_readonly }}'@'%';
+      - DROP FUNCTION IF EXISTS tainow;
+      - CREATE FUNCTION tainow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587);
+      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.tainow TO '{{ msql_db_user_readonly }}'@'%';
     login_host: 127.0.0.1
     login_user: root
     login_password: "{{ mysql_root_password }}"
@@ -25,17 +25,18 @@
 
 - name: Create tables
   community.mysql.mysql_query:
-    query: "{{ lookup('url', git_url + '/' + git_branch + item, split_lines=false) }}"
+    query: "{{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }}"
     login_host: 127.0.0.1
     login_user: "{{ mysql_db_user }}"
     login_password: "{{ mysql_db_password }}"
     login_db: "{{ mysql_db_name }}"
     single_transaction: yes
   with_items:
-    - "/common/schema/objects.sql"
-    - "/common/schema/sherlock_classifications.sql"
-    - "/common/schema/crossmatch_tns.sql"
-    - "/common/schema/area_hits.sql"
-    - "/common/schema/watchlist_hits.sql"
-    - "/common/schema/annotations.sql"
+    - "/common/schema/lasair_sql/objects.sql"
+    - "/common/schema/lasair_sql/sherlock_classifications.sql"
+    - "/common/schema/lasair_sql/crossmatch_tns.sql"
+    - "/common/schema/lasair_sql/area_hits.sql"
+    - "/common/schema/lasair_sql/watchlist_hits.sql"
+    - "/common/schema/lasair_sql/annotations.sql"
+    #- "/common/schema/lasair_sql/ssObjects.sql"
 

@@ -33,7 +33,7 @@ def datetime_converter(o):
         return o.__str__()
 
 
-def jd_from_iso(date):
+def mjd_from_iso(date):
     """convert and return a Julian Date from ISO format date
 
      **Key Arguments:**
@@ -44,8 +44,8 @@ def jd_from_iso(date):
         date += 'Z'
     parsed_t = dp.parse(date)
     unix = int(parsed_t.strftime('%s'))
-    jd = unix / 86400 + 2440587.5
-    return jd
+    mjd = unix / 86400 + 40587
+    return mjd
 
 
 def mjd_now():
@@ -130,7 +130,7 @@ def objjson(diaObjectId, full=False):
     message = ''
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'SELECT ncand, ra, decl, taimin as mjdmin, taimax as mjdmax '
+    query = 'SELECT nSources, ra, decl, minTai as mjdmin, maxTai as mjdmax '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:
@@ -202,6 +202,7 @@ def objjson(diaObjectId, full=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointtai'])
+        diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
         diaSourceId = diaSource['diasourceid']
@@ -213,7 +214,7 @@ def objjson(diaObjectId, full=False):
         diaSource['image_urls'] = {}
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            filename = image_store.getFileName(diaSourceId_cutoutType)
+            filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
             if 1 == 1 or os.path.exists(filename):
                 url = filename.replace(
                     '/mnt/cephfs/lasair',
@@ -317,11 +318,12 @@ def string2bytes(str):
     return bytes
 
 
-def fits(request, candid_cutoutType):
+def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+#    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+    image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits') # HACK
     try:
-        fitsdata = image_store.getFileObject(candid_cutoutType)
+        fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
     except:
         fitsdata = ''
 

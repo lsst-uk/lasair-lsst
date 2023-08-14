@@ -29,8 +29,8 @@
 
 - name: Make sure the repo is up to date
   git: 
-      repo: https://github.com/lsst-uk/lasair4.git
-      dest: "{{ ansible_env.HOME }}/lasair4"
+      repo: "{{ git_url }}"
+      dest: "{{ ansible_env.HOME }}/{{ git_name }}"
       version: "{{ lasair_version }}"
 
 - import_tasks: cron.yml

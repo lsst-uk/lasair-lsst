@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS area_hits(
-`diaObjectId` varchar(16) CHARACTER SET utf8 COLLATE utf8_unicode_ci,
+`diaObjectId` bigint,
 `ar_id` int,
 PRIMARY KEY (`diaObjectId`)
 )

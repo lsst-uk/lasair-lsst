@@ -13,7 +13,7 @@ EMAIL_PORT = 25
 
 LASAIR_ROOT = '{{ ansible_env.HOME }}/'
 
-DEBUG          = True
+DEBUG          = False
 WEB_DOMAIN     = '{{ lasair_name }}'
 READONLY_USER  = '{{ settings.master_db_readonly_username }}'
 READONLY_PASS  = '{{ settings.master_db_readonly_password }}'
@@ -91,7 +91,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'debug_toolbar',
     'widget_tweaks',
-    'django_browser_reload'
+    'django_browser_reload',
+    'captcha'
 ]
 
 MIDDLEWARE = [

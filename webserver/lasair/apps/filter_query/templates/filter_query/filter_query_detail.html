@@ -18,24 +18,27 @@
 
         <div class="row mt-4">
 
-            <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_filter_query_header.html" with real_sql=filterQ.real_sql %}
-            </div>
-
-            {% if limit and limit != "False" %}
-                <div class="col-12 mb-4">
-                    {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter, capped at "|add:limit|add:" objects." %}
-                </div>
-            {% elif 'run' in request.path %}
-
+		<div class="row mt-4">
 
                 <div class="col-12 mb-4">
-                    {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results" %}
+	{% include "includes/widgets/widget_filter_query_header.html" with real_sql=filterQ.real_sql %}
                 </div>
-            {% else %}
-                <div class="col-12 mb-4">
-                    {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Click on the run button above to execute your filter." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results" %}
-                </div>
+
+
+              {% if limit and limit != "False" %}
+                    <div class="col-12 mb-4">
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter, capped at "|add:limit|add:" objects."  sortTable=sortTable %}
+                    </div>
+                {% elif 'run' in request.path %}
+
+                 <div class="col-12 mb-4">
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results" sortTable=sortTable %}
+                    </div>
+                {% else %}
+                    <div class="col-12 mb-4">
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Click on the run button above to execute your filter." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results"  sortTable=sortTable %}
+                    </div>
+
 
 
             {% endif %}

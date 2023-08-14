@@ -1,0 +1,33 @@
+---
+
+- name: "Create data filesystems"
+  become: true
+  filesystem:
+    fstype: "{{ data_fs.type }}"
+    dev: "{{ data_fs.dev }}"
+  when: data_fs.dev is defined
+
+- name: "Create data mountpoints"
+  become: true
+  file:
+    path: "{{ data_fs.path }}"
+    state: directory
+
+- name: "Remove /mnt mount"
+  become: true
+  mount:
+    src: "{{ data_fs.dev }}"
+    path: /mnt
+    state: absent
+  when: data_fs.dev is defined
+
+- name: "Mount data filesystems"
+  become: true
+  mount:
+    path: "{{ data_fs.path }}"
+    src: "{{ data_fs.dev }}"
+    fstype: "{{ data_fs.type }}"
+    opts: nofail
+    state: mounted
+  when: data_fs.dev is defined
+

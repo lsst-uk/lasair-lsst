@@ -4,8 +4,7 @@ schema = {
   "fields": [
     {
       "name": "diaObjectId",
-      "type": "string",
-      "extra": "CHARACTER SET utf8 COLLATE utf8_unicode_ci",
+      "type": "long",
       "doc": "ZTF object identifier"
     },
     {

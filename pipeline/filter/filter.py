@@ -80,7 +80,7 @@ def run_filter(args):
         'group.id':           group_id,
         'max.poll.interval.ms': 20*60*1000,  # 20 minute timeout in case queries take time
         'default.topic.config': {
-             'auto.offset.reset': 'smallest'
+             'auto.offset.reset': 'earliest'
         }}
     print(conf, topic_in)
     log.info(str(conf))
