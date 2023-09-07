@@ -116,7 +116,7 @@ def query():
         dec = str(request.json.get("dec", ""))
 
     # validate input
-    if not re.search("^[\w\-,]*$", name):
+    if not re.search("^[\w\-\+,]*$", name):
         return "Error parsing parameter name", 400
     if str(lite).casefold() == "lite":
         is_lite = True
