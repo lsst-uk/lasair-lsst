@@ -50,13 +50,13 @@ def lookup(names):
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)        
         for name in names:
-            query = "SELECT ramean,decmean FROM objects WHERE objectID='{}'".format(name)
+            query = "SELECT ra,decl FROM objects WHERE diaObjectID='{}'".format(name)
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 result = cursor.fetchone()
                 if result:
-                    ra.append(result['ramean'])
-                    dec.append(result['decmean'])
+                    ra.append(result['ra'])
+                    dec.append(result['decl'])
                 else:
                     raise NotFoundException("Object {} not found".format(name))
         connection.close()
