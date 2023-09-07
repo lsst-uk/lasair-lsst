@@ -31,9 +31,8 @@
 - name: Configure and mount sherlock CephFS
   become: true
   mount:
-    boot: false
     fstype: ceph
-    opts: "secretfile=/etc/ceph/ceph.sherlock.secret,name=sherlock"
+    opts: "secretfile=/etc/ceph/ceph.sherlock.secret,name=sherlock,nofail"
     path: /mnt/sherlock
     src: "{{ sherlock_share }}"
     state: mounted
