@@ -132,7 +132,6 @@ def query():
         return "Error parsing parameter dec", 400
 
     # split lists
-    name = name.split(",")
     ra = ra.split(",")
     dec = dec.split(",")
 
@@ -140,10 +139,15 @@ def query():
         return "ra and dec lists must be equal length", 400
 
     # fill in names if not present
-    if len(name) != len(ra):
+    if name == "":
         name = []
         for i in range(len(ra)):
             name.append("query"+str(i))
+    else:
+        name = name.split(",")
+
+    if len(ra) != len(name):
+        return "name list incorrect length", 400
 
     # run Sherlock
     classifications, crossmatches = classify(
