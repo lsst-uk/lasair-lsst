@@ -74,10 +74,13 @@ def object(name=""):
     lite = str(request.args.get("lite", ""))
     if request.is_json:
         lite = str(request.json.get("lite", ""))
-    if str(lite).casefold() == "lite":
+    if str(lite).casefold() == "true":
         is_lite = True
     else:
         is_lite = False
+
+    if not re.search("^[\w\-\+,]*$", name):
+        return "Error parsing parameter name", 400
 
     names = name.split(',')
     try:
@@ -118,7 +121,7 @@ def query():
     # validate input
     if not re.search("^[\w\-\+,]*$", name):
         return "Error parsing parameter name", 400
-    if str(lite).casefold() == "lite":
+    if str(lite).casefold() == "true":
         is_lite = True
     else:
         is_lite = False
@@ -149,12 +152,16 @@ def query():
     if len(ra) != len(name):
         return "name list incorrect length", 400
 
+    # convert ra and dec to float
+    ra = list(map(float, ra))
+    dec = list(map(float, dec))
+
     # run Sherlock
     classifications, crossmatches = classify(
             name,
             ra,
             dec,
-            lite=is_lite)
+            is_lite)
     result = {
             'classifications': classifications,
             'crossmatches': crossmatches
