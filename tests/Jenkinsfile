@@ -23,6 +23,9 @@ pipeline {
                 dir('tests/unit/services/annotations/') {
                     sh 'python3 kafka_test.py'
                 }
+                dir('tests/unit/services/sherlock/') {
+                    sh 'python3 test_sherlock.py'
+                }
             }
             post {
                 always {
