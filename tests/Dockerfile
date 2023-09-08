@@ -27,7 +27,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig
+  swig \
+  flask
 
 # Required for filter
 RUN pip3 install \
