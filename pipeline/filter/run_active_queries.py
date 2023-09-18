@@ -301,14 +301,14 @@ def send_email(email, topic, message, message_html=''):
     msg = MIMEMultipart('alternative')
 
     msg['Subject'] = 'Lasair query ' + topic
-    msg['From']    = 'donotreply@lasair.roe.ac.uk'
+    msg['From']    = 'lasair@lsst.ac.uk'
     msg['To']      = email
 
     msg.attach(MIMEText(message, 'plain'))
     if len(message_html) > 0:
         msg.attach(MIMEText(message_html, 'html'))
     s = smtplib.SMTP('localhost')
-    s.sendmail('donotreply@lasair.roe.ac.uk', email, msg.as_string())
+    s.sendmail('lasair@lsst.ac.uk', email, msg.as_string())
     s.quit()
 
 def dispose_kafka(query_results, topic):
