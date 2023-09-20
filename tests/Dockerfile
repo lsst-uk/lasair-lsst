@@ -20,14 +20,15 @@ RUN pip3 install \
 # Required for tests
 RUN pip3 install \
   xmlrunner \
-  cryptography
+  cryptography \
+  flask
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig
+  swig 
 
 # Required for filter
 RUN pip3 install \
