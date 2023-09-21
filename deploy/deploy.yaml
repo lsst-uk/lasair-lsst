@@ -122,6 +122,8 @@
     - settings.yaml
   vars:
     enable_letsencrypt: true
+    # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
+    use_hsts: false 
   roles:
     - proxy
   tags: proxy
