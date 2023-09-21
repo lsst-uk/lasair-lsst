@@ -285,7 +285,12 @@
 
 - hosts: web
   gather_facts: false
-  # TODO
+  tasks:
+    - name: Restart web server
+      command:
+        cmd: "{{ ansible_env.HOME }}/restart_webserver.sh"
+    when: command == "start"
+  # No need to stop Apache
   tags: web
 
 - hosts: proxy
