@@ -125,7 +125,7 @@
   tasks:
     - name: Start Mirrormaker
       community.docker.docker_compose:
-       project_name: mirrormaker
+        project_name: mirrormaker
         project_src: '.'
         files:
           - mirror-compose.yml
@@ -135,8 +135,8 @@
         stopped: false
       when: command == "start"
     - name: Stop Mirrormaker
-       project_name: mirrormaker
       community.docker.docker_compose:
+        project_name: mirrormaker
         project_src: '.'
         files:
           - mirror-compose.yml
@@ -145,7 +145,7 @@
         state: present
         stopped: true
       when: command == "stop"
-  tags: mirror
+  tags: mirror, pipeline
 
 - hosts: kafka_pub
   gather_facts: false
@@ -198,15 +198,18 @@
 - hosts: ingest
   gather_facts: false
   become: true
-    ansible.builtin.systemd:
-      state: started
-      name: lasair-ingest 
-    when: command == "start"
-    ansible.builtin.systemd:
-      state: stopped
-      name: lasair-ingest 
-    when: command == "stop"
-  tags: ingest
+  tasks:
+    - name: Start Ingest
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-ingest 
+      when: command == "start"
+    - name: Stop Ingest
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-ingest 
+      when: command == "stop"
+  tags: ingest, pipeline
   
 # sherlock node - kafka wrapper
 - hosts: sherlock
@@ -239,7 +242,7 @@
       when: command == "stop"
   vars_files:
     - settings.yaml
-  tags: sherlock
+  tags: sherlock, pipeline
   
 # sherlock node - service
 - hosts: sherlock
@@ -273,15 +276,18 @@
 - hosts: filter
   gather_facts: false
   become: true
-    ansible.builtin.systemd:
-      state: started
-      name: lasair-filter 
-    when: command == "start"
-    ansible.builtin.systemd:
-      state: stopped
-      name: lasair-filter 
-    when: command == "stop"
-  tags: filter
+  tasks:
+    - name: Start Filter
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-filter 
+      when: command == "start"
+    - name: Stop Filter
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-filter 
+      when: command == "stop"
+  tags: filter, pipeline
 
 - hosts: web
   gather_facts: false
@@ -289,7 +295,7 @@
     - name: Restart web server
       command:
         cmd: "{{ ansible_env.HOME }}/restart_webserver.sh"
-    when: command == "start"
+      when: command == "start"
   # No need to stop Apache
   tags: web
 
