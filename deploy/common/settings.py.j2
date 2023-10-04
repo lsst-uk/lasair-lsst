@@ -105,6 +105,9 @@ WEB_DOMAIN             = '{{ lasair_name }}'
 #LASAIR_URL             = 'lasair-iris.roe.ac.uk'
 LASAIR_URL             = '{{ lasair_name }}.{{ domain }}'
 
+# Default from address to use when sending emails
+LASAIR_EMAIL           = '{{ lasair_email }}'
+
 # The API calls this internal node for Sherlock
 {% if groups['sherlock'] is defined and groups['sherlock']|length > 0 %}
 SHERLOCK_SERVICE       = "{{ groups['sherlock'][0] }}"
