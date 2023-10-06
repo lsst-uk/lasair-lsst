@@ -16,7 +16,7 @@
 
 - name: "Get JMX exporter jar"
   get_url:
-    url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.3.0/jmx_prometheus_javaagent-0.3.0.jar
+    url: https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.9/jmx_prometheus_javaagent-0.9.jar
     dest: /opt/jmx_exporter/jmx_prometheus_javaagent.jar
     mode: '0644'
 
