@@ -18,7 +18,7 @@ import json
 import re
 import copy
 import time
-from datetime import datetime
+import datetime
 from django.contrib import messages
 import os
 import sys
@@ -120,6 +120,8 @@ def filter_query_detail(request, mq_id, action=False):
                 filterQuery.public = 1
             else:
                 filterQuery.public = 0
+            filterQuery.date_expire = \
+                    datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
             tn = topic_name(request.user.id, filterQuery.name)
@@ -152,6 +154,8 @@ def filter_query_detail(request, mq_id, action=False):
             newFil.public = True
         else:
             newFil.public = False
+        newFil.date_expire = \
+            datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
         newFil.save()
         filterQuery = newFil
         mq_id = filterQuery.pk
@@ -377,6 +381,8 @@ def filter_query_create(request, mq_id=False):
                                            real_sql=sqlquery_real, topic_name=tn)
                 verb = "created"
 
+            filterQuery.date_expire = \
+                datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
             filterQuery.save()
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
