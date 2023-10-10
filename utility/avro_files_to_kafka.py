@@ -12,25 +12,28 @@ import json, sys, os
 dir = '/mnt/cephfs/sample_precursor_alerts'
 
 # the kafka server where the alerts will go
-KAFKA = 'lasair-lsst-dev-kafka-0'
+KAFKA = 'lasair-lsst-dev-kafka'
 
 # the big files with many alerts each
 # the key will be the topic name, the value is the file to read from
 filenames = {
-'single_ccd_sample3':        # 219 alerts
+'single_ccd_sample3':        # 219 alerts, 465M
 dir + '/2020-07-06/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-06.avro',
-'single_ccd_sample4':       # 217 alerts
+'single_ccd_sample4':        # 217 alerts, 17M
 dir + '/2020-07-15/DECam-HiTS/single_ccd_sample_DECam-HiTS_2020-07-15.avro',
 
-'single_visit_sample3':      # 6834 alerts
+'single_visit_sample3':      # 6834 alerts, 22G
 dir + '/2020-07-06/DECam-HiTS/single_visit_sample_DECam-HiTS_2020-07-06.avro',
-'single_visit_sample4':     # 6734 alerts
+'single_visit_sample4':      # 6734 alerts, 41G
 dir + '/2020-07-15/DECam-HiTS/single_visit_sample_DECam-HiTS_2020-07-15.avro',
 
-'all_visits4':               # 678355 alerts
+'all_visits_sample3':        # lots and lots 939G
+dir + '/2020-07-06/DECam-HiTS/all_visits_DECam-HiTS_2020-07-06.avro',
+'all_visits_sample4':        # 678355 alerts, 450M
 dir + '/2020-07-15/DECam-HiTS/all_visits_DECam-HiTS_2020-07-15.avro',
-'all_visits_simulated-sso4': # 500000 alerts
-dir + '/2020-11-15/simulated-sso/all_visits_simulated-sso_2020-11-15.avro'
+
+'simulated_sso':             # ????? alerts, 1.7G
+dir + '/2020-11-15/simulated-sso/all_visits_simulated-sso_2020-11-15.avro',
 }
 
 conf = {
@@ -49,6 +52,7 @@ if len(sys.argv) < 2:
 
 topic = sys.argv[1]
 filename = filenames[topic]
+os.system('ls -l ' + filename)
 
 # topic names derived from file names as above
 nalert = 0
