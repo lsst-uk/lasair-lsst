@@ -30,7 +30,6 @@
     - gkansible.gkservercollection.mysql_sherlock
     - gkansible.gkservercollection.cassandra4
     - gkansible.gkservercollection.cassandra_start_service
-    - gkansible.gkservercollection.cassandra_schema_lasair
     - kafka
     - jenkins
 
