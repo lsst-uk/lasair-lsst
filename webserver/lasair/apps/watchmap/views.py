@@ -70,7 +70,7 @@ def watchmap_index(request):
                 fits_string = bytes2string(fits_bytes)
                 png_bytes = make_image_of_MOC(fits_bytes, request=request)
                 png_string = bytes2string(png_bytes)
-                expire = datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
                 wm = Watchmap(user=request.user, name=name, description=description,
                     moc=fits_string, mocimage=png_string, active=active, public=public, date_expire=expire)
@@ -157,7 +157,7 @@ def watchmap_detail(request, ar_id):
                     else:
                         watchmap.public = 0
                     watchmap.date_expire = \
-                        datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                        datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
                     watchmap.save()
                     messages.success(request, f'Your watchmap has been successfully updated')
     elif request.method == 'POST' and action == "copy":
@@ -180,7 +180,7 @@ def watchmap_detail(request, ar_id):
             else:
                 newWm.public = False
             newWm.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWm.save()
             wm = newWm
             ar_id = wm.pk

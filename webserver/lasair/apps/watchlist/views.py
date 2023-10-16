@@ -92,7 +92,7 @@ def watchlist_index(request):
                 except Exception as e:
                     messages.error(request, f'Bad line {len(cone_list)}: {line}\n{str(e)}')
 
-            expire = datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+            expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius, date_expire=expire)
             wl.save()
             cones = []
@@ -189,7 +189,7 @@ def watchlist_detail(request, wl_id):
                 if watchlist.radius > 360:
                     watchlist.radius = 360
                 watchlist.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
                 watchlist.save()
                 messages.success(request, f'Your watchlist has been successfully updated')
         # REQUEST TO REFRESH THE WATCHLIST MATCHES
@@ -219,7 +219,7 @@ def watchlist_detail(request, wl_id):
             else:
                 newWl.public = False
             newWl.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWl.save()
             wl = newWl
 

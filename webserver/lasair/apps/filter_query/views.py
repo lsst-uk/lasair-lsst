@@ -121,7 +121,7 @@ def filter_query_detail(request, mq_id, action=False):
             else:
                 filterQuery.public = 0
             filterQuery.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
             tn = topic_name(request.user.id, filterQuery.name)
@@ -155,7 +155,7 @@ def filter_query_detail(request, mq_id, action=False):
         else:
             newFil.public = False
         newFil.date_expire = \
-            datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+            datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
         newFil.save()
         filterQuery = newFil
         mq_id = filterQuery.pk
@@ -382,7 +382,7 @@ def filter_query_create(request, mq_id=False):
                 verb = "created"
 
             filterQuery.date_expire = \
-                datetime.datetime.now() + datetime.timedelta(days=30*settings.ACTIVE_EXPIRE)
+                datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             filterQuery.save()
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE

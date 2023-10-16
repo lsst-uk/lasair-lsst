@@ -58,3 +58,19 @@
     hour:   '0'
     job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 make_area_files.py)"
 
+# Send warnings of active resources about to expire
+- name: "Crontab for expiry warnings"
+  cron:
+    name:   "Expiry warnings"
+    user:   "{{ ansible_env.USER }}"
+    weekday: '0'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 check_expire.py --action=warning    --days=28)"
+ 
+# Send warnings of active resources about to expire
+- name: "Crontab for expiry of resources"
+  cron:
+    name:   "Expiry warnings"
+    user:   "{{ ansible_env.USER }}"
+    hour: '1'
+    minute: '10'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; python3 check_expire.py --action=expiration    --days=0)"
