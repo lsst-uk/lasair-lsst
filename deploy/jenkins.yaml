@@ -28,6 +28,8 @@
     - gkansible.gkservercollection.mariadb
     - lasair_database    
     - gkansible.gkservercollection.mysql_sherlock
+    - gkansible.gkservercollection.cassandra4
+    - gkansible.gkservercollection.cassandra_start_service
     - kafka
     - jenkins
 
