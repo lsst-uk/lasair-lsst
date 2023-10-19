@@ -193,7 +193,7 @@ def watchmap_detail(request, ar_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.maxTai as "last detected (days ago)"
 FROM area_hits as h, objects AS o
 WHERE h.ar_id={ar_id}
 AND o.diaObjectId=h.diaObjectId
