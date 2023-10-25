@@ -4,6 +4,9 @@ import argparse
 import string
 from random import choices
 from confluent_kafka import Producer, KafkaError
+from time import perf_counter
+
+max_batch = 100000
 
 def send(conf):
     kafka_conf = {
@@ -11,10 +14,16 @@ def send(conf):
         'client.id': 'client-1',
     }
     p = Producer(kafka_conf)
+    start_t = perf_counter()
     for i in range(conf['n']):
         msg = ''.join(choices(string.ascii_letters, k=conf['s']))
         p.produce(conf['topic'], msg)
+        if i % max_batch == 0:
+            p.flush()
     p.flush()
+    end_t = perf_counter()
+    tt = end_t - start_t
+    print(f"Produced {conf['n']} messages in {tt} s")
 
 if __name__ == '__main__':
     # parse cmd line arguments
