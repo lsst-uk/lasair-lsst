@@ -3,6 +3,7 @@ from .forms import WatchlistForm, UpdateWatchlistForm, DuplicateWatchlistForm
 import time
 import random
 import json
+import datetime
 from subprocess import Popen, PIPE
 from lasair.apps.watchlist.models import Watchlist, WatchlistCone
 from django.http import HttpResponse, HttpResponseRedirect
@@ -91,7 +92,8 @@ def watchlist_index(request):
                 except Exception as e:
                     messages.error(request, f'Bad line {len(cone_list)}: {line}\n{str(e)}')
 
-            wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius)
+            expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+            wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius, date_expire=expire)
             wl.save()
             cones = []
             for cone in cone_list:
@@ -186,6 +188,8 @@ def watchlist_detail(request, wl_id):
                 watchlist.radius = float(request.POST.get('radius'))
                 if watchlist.radius > 360:
                     watchlist.radius = 360
+                watchlist.date_expire = \
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
                 watchlist.save()
                 messages.success(request, f'Your watchlist has been successfully updated')
         # REQUEST TO REFRESH THE WATCHLIST MATCHES
@@ -214,6 +218,8 @@ def watchlist_detail(request, wl_id):
                 newWl.public = True
             else:
                 newWl.public = False
+            newWl.date_expire = \
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWl.save()
             wl = newWl
 

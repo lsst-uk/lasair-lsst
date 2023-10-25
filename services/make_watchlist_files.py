@@ -114,10 +114,10 @@ def fetch_active_watchlists(msl, cache_dir):
 
     keep = []
     get  = []
-    cursor.execute('SELECT wl_id, name, radius, timestamp FROM watchlists WHERE active > 0 ')
+    cursor.execute('SELECT wl_id, name, radius, date_modified FROM watchlists WHERE active > 0 ')
     for row in cursor:
         # unix time of last update from the database
-        watchlist_timestamp = time.mktime(row['timestamp'].timetuple())
+        watchlist_timestamp = time.mktime(row['date_modified'].timetuple())
 
         # directory where the cache files are kept
         watchlist_dir = cache_dir + '/wl_%d'%row['wl_id']
