@@ -32,6 +32,7 @@ import settings
 
 sys.path.append('../../common/src')
 import objectStore, manage_status, date_nid, slack_webhook
+import objectStoreCass
 import lasairLogging
 
 stop = False
@@ -65,7 +66,10 @@ def store_images(message, store, diaSourceId, imjd):
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
             content = message[cutoutType]
             filename = '%d_%s' % (diaSourceId, cutoutType)
-            store.putObject(filename, imjd, content)
+            if settings.USE_CUTOUTCASS:
+                store.putObject(filename, content)
+            else:
+                store.putObject(filename, imjd, content)
         return True
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)
@@ -230,15 +234,17 @@ def run_ingest(args):
         log.info('Lockfile not present')
         return  0
 
-    # set up image store in shared file system
-    if fitsdir and len(fitsdir) > 0:
+    # set up image store in Cassandra or shared file system
+    if settings.USE_CUTOUTCASS:
+        image_store = objectStoreCass.objectStoreCass()
+    elif fitsdir and len(fitsdir) > 0:
         image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
     else:
-        log.error('ERROR in ingest/ingestBatch: No image directory found for file storage')
+        log.error('ERROR in ingest/ingestBatch: Cannot store cutouts. USE_CUTOUTCASS=%s' % settings.USE_CUTOUTCASS)
         sys.stdout.flush()
         image_store = None
 
-    # connect to cassandra cluster
+    # connect to cassandra cluster for alerts (not cutouts)
     try:
         cluster = Cluster(settings.CASSANDRA_HEAD)
         cassandra_session = cluster.connect()
