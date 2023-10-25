@@ -34,9 +34,9 @@ class Watchlist(models.Model):
     active = models.BooleanField(blank=True, null=True)
     public = models.BooleanField(blank=True, null=True)
     radius = models.FloatField(blank=True, null=True)
-    timestamp = models.DateTimeField(auto_now=True, editable=False, blank=True, null=True)
-    date_created = models.DateTimeField(auto_now=True, editable=False, blank=True, null=True)
-    date_modified = models.DateTimeField(auto_now=True, editable=False, blank=True, null=True)
+    date_created  = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
+    date_modified = models.DateTimeField(auto_now=    True, editable=False, blank=True, null=True)
+    date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
 
     class Meta:
         """Meta.

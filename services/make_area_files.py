@@ -61,10 +61,10 @@ def fetch_active_areas(msl, cache_dir):
 
     keep = []
     get  = []
-    cursor.execute('SELECT ar_id, name, timestamp FROM areas WHERE active > 0 ')
+    cursor.execute('SELECT ar_id, name, date_modified FROM areas WHERE active > 0 ')
     for row in cursor:
         # unix time of last update from the database
-        area_timestamp = time.mktime(row['timestamp'].timetuple())
+        area_timestamp = time.mktime(row['date_modified'].timetuple())
 
         # directory where the cache files are kept
         area_file = cache_dir + '/ar_%d.fits'%row['ar_id']

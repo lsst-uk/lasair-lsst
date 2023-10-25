@@ -5,6 +5,7 @@ import tempfile
 import io
 import time
 import json
+import datetime
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
@@ -69,9 +70,10 @@ def watchmap_index(request):
                 fits_string = bytes2string(fits_bytes)
                 png_bytes = make_image_of_MOC(fits_bytes, request=request)
                 png_string = bytes2string(png_bytes)
+                expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
                 wm = Watchmap(user=request.user, name=name, description=description,
-                              moc=fits_string, mocimage=png_string, active=active, public=public)
+                    moc=fits_string, mocimage=png_string, active=active, public=public, date_expire=expire)
                 wm.save()
                 watchmapname = form.cleaned_data.get('name')
                 messages.success(request, f"The '{watchmapname}' watchmap has been successfully created")
@@ -154,6 +156,8 @@ def watchmap_detail(request, ar_id):
                         watchmap.public = 1
                     else:
                         watchmap.public = 0
+                    watchmap.date_expire = \
+                        datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
                     watchmap.save()
                     messages.success(request, f'Your watchmap has been successfully updated')
     elif request.method == 'POST' and action == "copy":
@@ -175,6 +179,8 @@ def watchmap_detail(request, ar_id):
                 newWm.public = True
             else:
                 newWm.public = False
+            newWm.date_expire = \
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWm.save()
             wm = newWm
             ar_id = wm.pk
@@ -187,7 +193,7 @@ def watchmap_detail(request, ar_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.taimax as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, jdnow()-o.maxTai as "last detected (days ago)"
 FROM area_hits as h, objects AS o
 WHERE h.ar_id={ar_id}
 AND o.diaObjectId=h.diaObjectId
