@@ -78,6 +78,10 @@ CASSANDRA_HEAD          = {{ groups['cassandranodes'] }}
 CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
+# Cutouts in Cassandra
+USE_CUTOUTCASS          = True
+CUTOUTCASS_HOSTS        = ['lasair-lsst-dev-cutoutcass']
+
 # Directories on share Cephfs
 #############################
 IMAGEFITS              = '/mnt/cephfs/lasair/fits'
