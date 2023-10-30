@@ -1,4 +1,4 @@
-from src import objectStore
+from src import objectStore, objectStoreCass
 import sys
 import os
 from django.shortcuts import get_object_or_404
@@ -193,11 +193,7 @@ def objjson(diaObjectId, full=False):
     count_all_diaSources = len(diaSources)
     count_all_diaForcedSources = len(diaForcedSources)
     count_diaNonDetectionLimits = len(diaNondetectionLimits)
-#    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
-    image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits')  ## HACK
     image_urls = {}
-#    fff = open('/home/ubuntu/message.txt', 'w')   # HACK
-#    fff.write('%d %d %d\n' % (count_all_diaSources, count_all_diaForcedSources, count_diaNonDetectionLimits))  # HACK
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
@@ -214,16 +210,18 @@ def objjson(diaObjectId, full=False):
         diaSource['image_urls'] = {}
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
-            if 1 == 1 or os.path.exists(filename):
-                url = filename.replace(
-                    '/mnt/cephfs/lasair',
-#                    f'https://{settings.LASAIR_URL}/lasair/static')
-                    f'localhost:8080/lasair/static')  ### HACK
+            if settings.USE_CUTOUTCASS:
+                url = 'https://%s/fits/99999/%s' % (settings.LASAIR_URL, diaSourceId_cutoutType)
+            else:
+                filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
+                if os.path.exists(filename):
+                    url = filename.replace(
+                        '/mnt/cephfs/lasair', f'https://{settings.LASAIR_URL}/lasair/static')
+                else:
+                    url = None
+            if url:
                 diaSource['image_urls'][cutoutType] = url
 
-#        fff.write(str(diaSource) + '\n\n')    # HACK
-#    fff.close()    # HACK
     if count_all_diaSources == 0:
         return None
 
@@ -320,12 +318,18 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-#    image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
-    image_store = objectStore.objectStore(suffix='fits', fileroot='/mnt/cephfs/lasair/fits') # HACK
-    try:
-        fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
-    except:
-        fitsdata = ''
+    if settings.USE_CUTOUTCASS:
+        osc = objectStoreCass()
+        try:
+            fitsData = osc.getObject(candid_cutoutType)
+        except:
+            fitsdata = ''
+    else:
+        image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+        try:
+            fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
+        except:
+            fitsdata = ''
 
     response = HttpResponse(fitsdata, content_type='image/fits')
     response['Content-Disposition'] = 'attachment; filename="%s.fits"' % candid_cutoutType

@@ -16,7 +16,11 @@ class objectStoreCass():
         """__init__.
 
         """
-        self.cluster = Cluster(settings.CUTOUTCASS_HOSTS)
+        try:
+            hosts = settings.CUTOUTCASS_HOSTS
+        except:
+            hosts = ['localhost']
+        self.cluster = Cluster(hosts)
         self.session = self.cluster.connect()
         self.session.set_keyspace('cutouts')
     
