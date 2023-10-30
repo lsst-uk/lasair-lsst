@@ -6,7 +6,7 @@ from random import choices
 from confluent_kafka import Producer, KafkaError
 from time import perf_counter
 
-max_batch = 100000
+max_batch = 10000
 
 def send(conf):
     kafka_conf = {
