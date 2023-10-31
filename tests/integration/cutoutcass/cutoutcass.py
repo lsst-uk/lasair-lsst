@@ -12,8 +12,8 @@ import sys
 sys.path.append('../../../common/src')
 import objectStoreCass
 
-keyspace = 'cutouts'
-keyspace = 'junk'
+# the real keyspace is called 'cutouts' but we use a different one for the test
+keyspace = 'cutouts_test'
 
 # This file is part of the test and is in the repo
 objectId = '181071530527032078_cutoutTemplate'
