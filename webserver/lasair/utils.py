@@ -319,9 +319,9 @@ def string2bytes(str):
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
     if settings.USE_CUTOUTCASS:
-        osc = objectStoreCass()
+        osc = objectStoreCass.objectStoreCass()
         try:
-            fitsData = osc.getObject(candid_cutoutType)
+            fitsdata = osc.getObject(candid_cutoutType)
         except:
             fitsdata = ''
     else:
