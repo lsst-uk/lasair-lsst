@@ -4,6 +4,7 @@ Test of Cassandra usage for cutout images
 Requires a functional cassandra running on localhost.
 """
 
+import os
 import unittest.main
 from unittest import TestCase, expectedFailure
 from cassandra.cluster import Cluster
@@ -19,7 +20,7 @@ objectId = '181071530527032078_cutoutTemplate'
 
 # Make the keyspace and the table
 create_keyspace = """
-CREATE KEYSPACE %s WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3 };
+CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', 'replication_factor' : 3 };
 """ % keyspace
 
 create_table = """
@@ -36,46 +37,41 @@ class CassandraCutoutTest(TestCase):
     def setUpClass(cls):
         """Set up connection, keyspace, table."""
         cluster = Cluster(['localhost'])
-        self.session = cluster.connect()
-        self.session.execute(create_keyspace)
-        self.session.set_keyspace(keyspace)
-        self.session.execute(create_table)
+        cls.session = cluster.connect()
+        cls.session.execute(create_keyspace)
+        cls.session.set_keyspace(keyspace)
+        cls.session.execute(create_table)
+        cls.osc = objectStoreCass.objectStoreCass(cls.session)
 
     @classmethod
     def tearDownClass(cls):
         """Get rid of the test table, keyspace, connection"""
-        self.session.execute("DROP TABLE cutouts")
-        self.session.execute("DROP KEYSPACE %s" % keyspace)
-        self.session.close()
+        cls.session.execute("DROP TABLE cutouts")
+        cls.session.execute("DROP KEYSPACE %s" % keyspace)
+        cls.session.shutdown()
 
-    def test_1_write(self):
+    def test_1_write(cls):
         """Write something to the database"""
-        query = f"INSERT INTO { conf['table'] } ( id, foo ) VALUES ( 1, 0.123 )"
-        with ExampleIntegrationTest.connection.cursor() as cursor:
-            count = cursor.execute(query)
-            self.assertEqual(count, 1)
-        # read the file
         filename = objectId + '.fits'
         objectBlob = open(filename, 'rb').read()
         
         # put into cassandra
-        self.osc = objectStoreCass.objectStoreCass()
-        self.osc.putObject(objectId, objectBlob)
+        cls.osc.putObject(objectId, objectBlob)
 
         # look for it in there
         query = "SELECT cutout from cutouts where cutout='%s'" % objectId
-        rows = self.session.execute(sql)
-        self.assertEqual(len(rows), 1)
+        rows = cls.session.execute(query)
+        cls.assertEqual(len(list(rows)), 1)
 
-    def test_2_read(self):
+    def test_2_read(cls):
         """Read something from the database"""
-        cutout = self.osc.getObject(objectId)
+        cutout = cls.osc.getObject(objectId)
         fp = open(objectId + '_copy.fits', 'wb')
         fp.write(cutout)
         fp.close()
         # assert files are the same
         cmd = 'cmp %s.fits %s_copy.fits' % (objectId, objectId)
-        self.assertEqual(os.system(cmd), 0)
+        cls.assertEqual(os.system(cmd), 0)
 
 if __name__ == '__main__':
     import xmlrunner

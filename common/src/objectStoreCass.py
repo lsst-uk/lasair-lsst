@@ -12,17 +12,23 @@ class objectStoreCass():
     """objectStoreCass.
     """
 
-    def __init__(self):
+    def __init__(self, pass_session = None):
         """__init__.
 
         """
-        try:
-            hosts = settings.CUTOUTCASS_HOSTS
-        except:
-            hosts = ['localhost']
-        self.cluster = Cluster(hosts)
-        self.session = self.cluster.connect()
-        self.session.set_keyspace('cutouts')
+        if pass_session:
+            # will use existing session and keyspace
+            self.session = pass_session
+
+        else:
+            # create session and use keyspace 'cutouts'
+            try:
+                hosts = settings.CUTOUTCASS_HOSTS
+            except:
+                hosts = ['localhost']
+            self.cluster = Cluster(hosts)
+            self.session = self.cluster.connect()
+            self.session.set_keyspace('cutouts')
     
     def getObject(self, objectId):
         """getObject.
