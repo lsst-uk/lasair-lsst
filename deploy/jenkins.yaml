@@ -38,9 +38,9 @@
   tasks:
     - name: restart cassandra
       shell: "update-alternatives --set java $(update-alternatives --list java | grep java-11);
-        sleep 1;
+        sleep 3;
         service cassandra stop;
-        sleep 1;
+        sleep 3;
         service cassandra start;
-        sleep 1;
+        sleep 3;
         update-alternatives --set java $(update-alternatives --list java | sort | tail -n1)"
