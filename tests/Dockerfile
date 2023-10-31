@@ -21,7 +21,7 @@ RUN pip3 install \
   numpy  \
   scipy
 RUN pip3 install \
-  confluent-kafka==1.7.5 \
+  confluent-kafka==1.7.0 \
   qub-sherlock==2.2.0
 
 # Required for tests
