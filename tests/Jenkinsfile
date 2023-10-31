@@ -42,6 +42,9 @@ pipeline {
                 dir('tests/integration/example') {
                     sh 'python3 test_example.py'
                 }
+                dir('tests/integration/cutoutcass') {
+                    sh 'python3 cutoutcass.py'
+                }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'
                 }
