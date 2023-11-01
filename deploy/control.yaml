@@ -315,9 +315,45 @@
       when: command == "stop"
   tags: proxy
 
-- hosts: cassandranodes
+- name: Cassandra seed nodes
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :cassandranodes[2] {% endif %}" 
   gather_facts: false
   # TODO 
+  tasks:
+    - name: Start Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+  tags: cassandra
+
+- name: Cassandra non-seed nodes
+  hosts: "cassandranodes:!cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :!cassandranodes[2] {% endif %}"
+  gather_facts: false
+  # TODO 
+  tasks:
+    - name: Start Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+    - name: Stop Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped 
+      when: command == "stop"
+  tags: cassandra
+
+- name: Cassandra seed nodes
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :cassandranodes[2] {% endif %}" 
+  gather_facts: false
+  # TODO 
+  tasks:
+    - name: Start Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped
+      when: command == "stop"
   tags: cassandra
 
 #- hosts: parallel_ssh
