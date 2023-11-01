@@ -316,7 +316,7 @@
   tags: proxy
 
 - name: Cassandra seed nodes
-  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :cassandranodes[2] {% endif %}" 
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
   gather_facts: false
   # TODO 
   tasks:
@@ -328,7 +328,7 @@
   tags: cassandra
 
 - name: Cassandra non-seed nodes
-  hosts: "cassandranodes:!cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :!cassandranodes[2] {% endif %}"
+  hosts: "cassandranodes:!cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :!cassandranodes[2] {% endif %}"
   gather_facts: false
   # TODO 
   tasks:
@@ -345,7 +345,7 @@
   tags: cassandra
 
 - name: Cassandra seed nodes
-  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 2 %} :cassandranodes[2] {% endif %}" 
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
   gather_facts: false
   # TODO 
   tasks:
