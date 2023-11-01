@@ -211,7 +211,7 @@ def objjson(diaObjectId, full=False):
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
             if settings.USE_CUTOUTCASS:
-                url = 'https://%s/fits/99999/%s' % (settings.LASAIR_URL, diaSourceId_cutoutType)
+                url = 'https://%s/fits/%d/%s' % (settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
             else:
                 filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
                 if os.path.exists(filename):
@@ -321,7 +321,7 @@ def fits(request, imjd, candid_cutoutType):
     if settings.USE_CUTOUTCASS:
         osc = objectStoreCass.objectStoreCass()
         try:
-            fitsdata = osc.getObject(candid_cutoutType)
+            fitsdata = osc.getObject(candid_cutoutType, imjd)
         except:
             fitsdata = ''
     else:

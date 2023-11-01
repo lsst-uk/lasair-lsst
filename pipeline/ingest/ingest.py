@@ -66,10 +66,8 @@ def store_images(message, store, diaSourceId, imjd):
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
             content = message[cutoutType]
             filename = '%d_%s' % (diaSourceId, cutoutType)
-            if settings.USE_CUTOUTCASS:
-                store.putObject(filename, content)
-            else:
-                store.putObject(filename, imjd, content)
+            # store may be cutouts or cephfs
+            store.putObject(filename, imjd, content)
         return True
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)

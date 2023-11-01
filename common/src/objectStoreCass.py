@@ -30,7 +30,7 @@ class objectStoreCass():
             self.session = self.cluster.connect()
             self.session.set_keyspace('cutouts')
     
-    def getObject(self, objectId):
+    def getObject(self, objectId, imjd=None):
         """getObject.
 
         Args:
@@ -42,14 +42,14 @@ class objectStoreCass():
         for row in rows:
             return row.cutoutimage
 
-    def putObject(self, objectId, objectBlob):
+    def putObject(self, objectId, mjd, objectBlob):
         """putObject. put in the blob with given identifier
 
         Args:
             objectId:
             objectBlob:
         """
-        sql = "insert into cutouts (cutout,cutoutimage) values (%s,%s)"
+        sql = f"insert into cutouts (cutout,mjd,cutoutimage) values (%s,{mjd},%s)"
         blobData = bytearray(objectBlob)
         self.session.execute(sql, [objectId, blobData])
 
@@ -61,8 +61,15 @@ if __name__ == "__main__":
     sys.path.append('..')
     import settings
     objectId = '181071530527032078_cutoutTemplate'
+    fp = open(objectId + '.fits', 'rb')
+    objectBlob = fp.read(cutout)
+    fp.close()
+
+    mjd = 60000
     osc = objectStoreCass()
+    osc.putObject(objectId, mjd, objectBlob)
+
     cutout = osc.getObject(objectId)
-    fp = open(objectId + '.fits', 'wb')
+    fp = open(objectId + '_copy.fits', 'wb')
     fp.write(cutout)
     fp.close()

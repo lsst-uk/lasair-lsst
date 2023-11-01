@@ -26,8 +26,9 @@ CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', '
 create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
    cutout        ascii,
+   mjd           int,
    cutoutimage   blob,
-  PRIMARY KEY (cutout)
+  PRIMARY KEY (cutout, mjd)
  );
 """
 
@@ -56,7 +57,8 @@ class CassandraCutoutTest(TestCase):
         objectBlob = open(filename, 'rb').read()
         
         # put into cassandra
-        cls.osc.putObject(objectId, objectBlob)
+        mjd = 60000
+        cls.osc.putObject(objectId, mjd, objectBlob)
 
         # look for it in there
         query = "SELECT cutout from cutouts where cutout='%s'" % objectId
