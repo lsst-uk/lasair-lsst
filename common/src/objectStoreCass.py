@@ -36,11 +36,12 @@ class objectStoreCass():
         Args:
             objectId: identifier for blob
         """
-        sql = "select cutoutimage from cutouts where cutout='%s'"
+        sql = "select cutoutimage from cutouts where cutout='%s' ALLOW FILTERING"
         sql = sql % objectId
         rows = self.session.execute(sql)
         for row in rows:
             return row.cutoutimage
+        return None
 
     def putObject(self, objectId, mjd, objectBlob):
         """putObject. put in the blob with given identifier
@@ -60,16 +61,20 @@ if __name__ == "__main__":
     import sys
     sys.path.append('..')
     import settings
-    objectId = '181071530527032078_cutoutTemplate'
-    fp = open(objectId + '.fits', 'rb')
-    objectBlob = fp.read(cutout)
-    fp.close()
+    mjd = 57072
+    objectId = '176805391051522611_cutoutTemplate'
+#    fp = open(objectId + '.fits', 'rb')
+#    objectBlob = fp.read(cutout)
+#    fp.close()
 
-    mjd = 60000
     osc = objectStoreCass()
-    osc.putObject(objectId, mjd, objectBlob)
+#    osc.putObject(objectId, mjd, objectBlob)
 
     cutout = osc.getObject(objectId)
-    fp = open(objectId + '_copy.fits', 'wb')
-    fp.write(cutout)
-    fp.close()
+    if cutout:
+        fp = open(objectId + '_copy.fits', 'wb')
+        fp.write(cutout)
+        fp.close()
+        print('cutout written to file')
+    else:
+        print('cutout not found')
