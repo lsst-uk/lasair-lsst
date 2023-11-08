@@ -67,7 +67,7 @@ def store_images(message, store, diaSourceId, imjd, diaObjectId):
             content = message[cutoutType]
             cutoutId = '%d_%s' % (diaSourceId, cutoutType)
             # store may be cutouts or cephfs
-            if settings.CUTOUTCASS:
+            if settings.USE_CUTOUTCASS:
                 store.putCutout(cutoutId, imjd, diaObjectId, content)
             else:
                 store.putObject(cutoutId, imjd, content)
@@ -132,7 +132,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     diaSourceId = lsst_alert_noimages['diaSource']['diaSourceId']
 
     # objectID
-    diaObjectId = lsst_alert_noimages['diaObjectId']
+    diaObjectId = lsst_alert_noimages['diaSource']['diaObjectId']
 
     # MJD for storing images
     imjd = int(lsst_alert_noimages['diaSource']['midPointTai'])

@@ -50,7 +50,7 @@ class cutoutStore():
             cutoutId:
             cutoutBlob:
         """
-        sql = f"insert into cutouts (cutoutId,imjd,cutoutimage) values (%s,{imjd},%s)"
+        sql = f"insert into cutouts (cutoutId,imjd,objectId,cutoutimage) values (%s,{imjd},{objectId},%s)"
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 

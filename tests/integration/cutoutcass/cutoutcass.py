@@ -26,7 +26,7 @@ CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', '
 create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
    cutoutId      ascii,
-   objectId      ascii,
+   objectId      bigint,
    imjd          int,
    cutoutimage   blob,
   PRIMARY KEY (cutoutId, imjd)
