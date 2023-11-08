@@ -1,4 +1,4 @@
-# A simple object store implemented on Cassandra
+# A simple cutout store implemented on Cassandra
 # Roy Williams and Ken Smith 2023
 
 from cassandra.cluster import Cluster
@@ -8,8 +8,8 @@ except:
     pass
 import os
 
-class objectStoreCass():
-    """objectStoreCass.
+class cutoutStore():
+    """cutoutStore.
     """
 
     def __init__(self, pass_session = None):
@@ -30,29 +30,29 @@ class objectStoreCass():
             self.session = self.cluster.connect()
             self.session.set_keyspace('cutouts')
     
-    def getObject(self, objectId, imjd=None):
-        """getObject.
+    def getCutout(self, cutoutId, imjd):
+        """getCutout.
 
         Args:
-            objectId: identifier for blob
+            cutoutId: identifier for blob
         """
-        sql = "select cutoutimage from cutouts where cutout='%s' ALLOW FILTERING"
-        sql = sql % objectId
+        sql = "select cutoutimage from cutouts where mjd=%d and cutout='%s'"
+        sql = sql % (imjd, cutoutId)
         rows = self.session.execute(sql)
         for row in rows:
             return row.cutoutimage
         return None
 
-    def putObject(self, objectId, mjd, objectBlob):
-        """putObject. put in the blob with given identifier
+    def putCutout(self, cutoutId, imjd, objectId, cutoutBlob):
+        """putCutout. put in the blob with given identifier
 
         Args:
-            objectId:
-            objectBlob:
+            cutoutId:
+            cutoutBlob:
         """
-        sql = f"insert into cutouts (cutout,mjd,cutoutimage) values (%s,{mjd},%s)"
-        blobData = bytearray(objectBlob)
-        self.session.execute(sql, [objectId, blobData])
+        sql = f"insert into cutouts (cutout,mjd,cutoutimage) values (%s,{imjd},%s)"
+        blobData = bytearray(cutoutBlob)
+        self.session.execute(sql, [cutoutId, blobData])
 
     def close(self):
         self.cluster.shutdown()
@@ -61,18 +61,18 @@ if __name__ == "__main__":
     import sys
     sys.path.append('..')
     import settings
-    mjd = 57072
-    objectId = '176805391051522611_cutoutTemplate'
-#    fp = open(objectId + '.fits', 'rb')
-#    objectBlob = fp.read(cutout)
+    imjd = 57072
+    cutoutId = '176805391051522611_cutoutTemplate'
+#    fp = open(cutoutId + '.fits', 'rb')
+#    cutoutBlob = fp.read(cutout)
 #    fp.close()
 
-    osc = objectStoreCass()
-#    osc.putObject(objectId, mjd, objectBlob)
+    osc = cutoutStore()
+#    osc.putCutout(cutoutId, imjd, cutoutBlob)
 
-    cutout = osc.getObject(objectId)
+    cutout = osc.getCutout(imjd, cutoutId)
     if cutout:
-        fp = open(objectId + '_copy.fits', 'wb')
+        fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)
         fp.close()
         print('cutout written to file')

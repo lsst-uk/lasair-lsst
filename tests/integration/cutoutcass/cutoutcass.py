@@ -10,13 +10,13 @@ from unittest import TestCase, expectedFailure
 from cassandra.cluster import Cluster
 import sys
 sys.path.append('../../../common/src')
-import objectStoreCass
+import cutoutStore
 
 # the real keyspace is called 'cutouts' but we use a different one for the test
 keyspace = 'cutouts_test'
 
 # This file is part of the test and is in the repo
-objectId = '181071530527032078_cutoutTemplate'
+cutoutId = '181071530527032078_cutoutTemplate'
 
 # Make the keyspace and the table
 create_keyspace = """
@@ -25,10 +25,11 @@ CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', '
 
 create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
-   cutout        ascii,
-   mjd           int,
+   cutoutId      ascii,
+   objectId      ascii,
+   imjd          int,
    cutoutimage   blob,
-  PRIMARY KEY (cutout, mjd)
+  PRIMARY KEY (cutoutId, imjd)
  );
 """
 
@@ -53,26 +54,26 @@ class CassandraCutoutTest(TestCase):
 
     def test_1_write(cls):
         """Write something to the database"""
-        filename = objectId + '.fits'
-        objectBlob = open(filename, 'rb').read()
+        filename = cutoutId + '.fits'
+        cutoutBlob = open(filename, 'rb').read()
         
         # put into cassandra
-        mjd = 60000
-        cls.osc.putObject(objectId, mjd, objectBlob)
+        imjd = 60000
+        cls.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
 
         # look for it in there
-        query = "SELECT cutout from cutouts where cutout='%s'" % objectId
+        query = "SELECT cutout from cutouts where cutout='%s'" % cutoutId
         rows = cls.session.execute(query)
         cls.assertEqual(len(list(rows)), 1)
 
     def test_2_read(cls):
         """Read something from the database"""
-        cutout = cls.osc.getObject(objectId)
-        fp = open(objectId + '_copy.fits', 'wb')
+        cutout = cls.osc.getCutout(cutoutId, imjd)
+        fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)
         fp.close()
         # assert files are the same
-        cmd = 'cmp %s.fits %s_copy.fits' % (objectId, objectId)
+        cmd = 'cmp %s.fits %s_copy.fits' % (cutoutId, cutoutId)
         cls.assertEqual(os.system(cmd), 0)
 
 if __name__ == '__main__':
