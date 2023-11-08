@@ -59,7 +59,7 @@ class CassandraCutoutTest(TestCase):
         
         # put into cassandra
         imjd = 60000
-        objectId = 'test123'
+        objectId = 1234567890
         cls.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
 
         # look for it in there
