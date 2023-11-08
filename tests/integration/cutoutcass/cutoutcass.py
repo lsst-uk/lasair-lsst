@@ -43,7 +43,7 @@ class CassandraCutoutTest(TestCase):
         cls.session.execute(create_keyspace)
         cls.session.set_keyspace(keyspace)
         cls.session.execute(create_table)
-        cls.osc = objectStoreCass.objectStoreCass(cls.session)
+        cls.osc = cutoutStore.cutoutStore(cls.session)
 
     @classmethod
     def tearDownClass(cls):
@@ -59,15 +59,17 @@ class CassandraCutoutTest(TestCase):
         
         # put into cassandra
         imjd = 60000
+        objectId = 'test123'
         cls.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
 
         # look for it in there
-        query = "SELECT cutout from cutouts where cutout='%s'" % cutoutId
+        query = "SELECT cutoutId from cutouts where cutoutId='%s' and imjd=%d" % (cutoutId, imjd)
         rows = cls.session.execute(query)
         cls.assertEqual(len(list(rows)), 1)
 
     def test_2_read(cls):
         """Read something from the database"""
+        imjd = 60000
         cutout = cls.osc.getCutout(cutoutId, imjd)
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)

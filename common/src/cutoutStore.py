@@ -36,7 +36,7 @@ class cutoutStore():
         Args:
             cutoutId: identifier for blob
         """
-        sql = "select cutoutimage from cutouts where mjd=%d and cutout='%s'"
+        sql = "select cutoutimage from cutouts where imjd=%d and cutoutId='%s'"
         sql = sql % (imjd, cutoutId)
         rows = self.session.execute(sql)
         for row in rows:
@@ -50,7 +50,7 @@ class cutoutStore():
             cutoutId:
             cutoutBlob:
         """
-        sql = f"insert into cutouts (cutout,mjd,cutoutimage) values (%s,{imjd},%s)"
+        sql = f"insert into cutouts (cutoutId,imjd,cutoutimage) values (%s,{imjd},%s)"
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
