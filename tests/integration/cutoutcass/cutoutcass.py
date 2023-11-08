@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS cutouts (
    objectId      bigint,
    imjd          int,
    cutoutimage   blob,
-  PRIMARY KEY (cutoutId, imjd)
+  PRIMARY KEY (imjd, cutoutId)
  );
 """
 
