@@ -1,4 +1,4 @@
-from src import objectStore, objectStoreCass
+from src import objectStore, cutoutStore
 import sys
 import os
 from django.shortcuts import get_object_or_404
