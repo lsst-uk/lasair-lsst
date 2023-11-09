@@ -72,7 +72,7 @@ def object(name=""):
     """
 
     lite = str(request.args.get("lite", ""))
-    if request.is_json:
+    if request.is_json and request.json is not None:
         lite = str(request.json.get("lite", ""))
     if str(lite).casefold() == "true":
         is_lite = True
@@ -113,10 +113,13 @@ def query():
     ra = str(request.args.get("ra", ""))
     dec = str(request.args.get("dec", ""))
     if request.is_json:
-        name = str(request.json.get("name", ""))
-        lite = str(request.json.get("lite", ""))
-        ra = str(request.json.get("ra", ""))
-        dec = str(request.json.get("dec", ""))
+        if request.json is not None:
+            name = str(request.json.get("name", ""))
+            lite = str(request.json.get("lite", ""))
+            ra = str(request.json.get("ra", ""))
+            dec = str(request.json.get("dec", ""))
+        else:
+            return "Missing required parameters", 400
 
     # validate input
     if not re.search("^[\w\-\+,]*$", name):
