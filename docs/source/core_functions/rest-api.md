@@ -9,6 +9,10 @@ The Lasair API uses either HTTP GET or POST. Arguments can be passed in the quer
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
+#### Sample Notebooks
+There is an [accompanying set of jupyter notebooks](../python-notebooks.html)
+ that show how to use the API.
+
 #### Throttling of API Usage
 
 The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
