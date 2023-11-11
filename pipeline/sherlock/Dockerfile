@@ -13,7 +13,7 @@ RUN pip3 install \
   numpy
 RUN pip3 install \
   confluent-kafka==2.1.1 \
-  qub-sherlock==2.2.0
+  qub-sherlock==2.3.0
 
 COPY wrapper.py /
 COPY wrapper_runner.py /

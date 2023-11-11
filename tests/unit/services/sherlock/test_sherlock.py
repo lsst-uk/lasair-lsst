@@ -106,6 +106,14 @@ class SherlockServiceTest(unittest.TestCase):
                 self.fail(f"Response: {response.status}: {response.text}")
             mock_classify.assert_called_once_with(["bar+0"], [2.3], [1.2], False)
 
+    def test_query_missing(self):
+        """
+        Check that passing an empty query gives a 400 error.
+        """
+        client = app.test_client()
+        response = client.post("/query", json={})
+        self.assertEqual(response.status_code, 400)
+
     def test_query_invalid_dec(self):
         """
         Check that passing an invalid value for dec gives a 400 error.
