@@ -1,6 +1,13 @@
 ## Alert Streams
 
-The Lasair broker can send immediate “push” notifications when your active query/filter sees and interesting alert. Here is how to make that happen with email notification. First make sure you are logged in to your Lasair account (top left of screen, then go to create new stored query. This page is about how to get email alerts from your active query; the process is very similar for Kafka alerts, except that you will fetch the results by machine instead of by email. See article Reading a Kafka Stream.
+The Lasair broker can send immediate “push” notifications when your active query/filter sees and interesting alert. Here is how to make that happen with email notification. First make sure you are logged in to your Lasair account (top left of screen, then go to create new stored query. This page is about how to get email alerts from your active query; the process is very similar for Kafka alerts, except that you will fetch the results by machine instead of by email.
+
+### Resources
+- See the "fetch_kafka" notebook in the [Lasair API Examples notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/notebooks/API_examples).
+- See the [Lasair Marshall Notebook](https://github.com/lsst-uk/lasair-examples/tree/main/notebooks/marshall).
+- Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
+
+### Streaming Filters
 
 You will need to be logged in to your Lasair account. Make a filter as in the
 previous section, then click “Save". You will then be prompted for "Filter Settings", which you can fill in like this:
