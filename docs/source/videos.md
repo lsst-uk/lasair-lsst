@@ -28,3 +28,7 @@ This video explains two important concepts: Topic and GroupId
 
 * You can browse the output of a filter with the Lasair Marshall Notebook.
 This video shows how it works.
+<<<<<<< HEAD
+=======
+
+>>>>>>> 7070d15e4ea8a63905df25cfd353612c6adb6c26
