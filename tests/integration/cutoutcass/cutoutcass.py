@@ -50,7 +50,7 @@ class CassandraCutoutTest(TestCase):
     def tearDownClass(cls):
         """Get rid of the test table, keyspace, connection"""
         cls.session.execute("DROP TABLE cutouts")
-        cls.session.execute("DROP KEYSPACE %s" % keyspace)
+        cls.session.execute("DROP KEYSPACE %s" % keyspace, timeout=300)
         cls.session.shutdown()
 
     def test_1_write(cls):
