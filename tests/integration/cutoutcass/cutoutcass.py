@@ -40,7 +40,7 @@ class CassandraCutoutTest(TestCase):
         """Set up connection, keyspace, table."""
         cluster = Cluster(['localhost'])
         cls.session = cluster.connect()
-        cls.session.default_timeout = 5
+        cls.session.default_timeout = 2
         cls.session.execute(create_keyspace)
         cls.session.set_keyspace(keyspace)
         cls.session.execute(create_table)
