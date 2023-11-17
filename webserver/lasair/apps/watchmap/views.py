@@ -26,7 +26,7 @@ from .forms import WatchmapForm, UpdateWatchmapForm, DuplicateWatchmapForm
 from .utils import make_image_of_MOC, add_watchmap_metadata
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
-
+from src import bad_fits
 
 @csrf_exempt
 def watchmap_index(request):
@@ -66,7 +66,14 @@ def watchmap_index(request):
                 active = False
 
             if 'watchmap_file' in request.FILES:
-                fits_bytes = (request.FILES['watchmap_file']).read()
+                fits_stream = (request.FILES['watchmap_file'])
+                fits_message = bad_fits.bad_moc_stream(fits_stream)
+                fits_stream.seek(0)
+                if fits_message is not None:
+                    messages.error(request, f'Bad FITS file: {fits_message}')
+                    return render(request, 'error.html')
+
+                fits_bytes = fits_stream.read()
                 fits_string = bytes2string(fits_bytes)
                 png_bytes = make_image_of_MOC(fits_bytes, request=request)
                 png_string = bytes2string(png_bytes)

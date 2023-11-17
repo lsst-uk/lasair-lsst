@@ -12,6 +12,7 @@ pipeline {
                 dir('tests/unit/common/src') {
                     sh 'python3 test_manage_status.py'
                     sh 'python3 test_logging.py'
+                    sh 'python3 test_bad_fits.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
