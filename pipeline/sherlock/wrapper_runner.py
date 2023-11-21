@@ -1,46 +1,69 @@
-"""Run the Sherlock wrapper, monitor the output and send a slack alert on errors.
-Attempt to restart if the wrapper process exits, with an exponential backoff"""
+import logging
+from multiprocessing import Process, connection
+from time import sleep
+from multiprocessing_logging import install_mp_handler
 
-import subprocess
-import sys
-import re
-import time
-import json
-import slack_webhook
+# desired number of processes
+n = 2
 
-delay = 60
-max_delay = 21600
-sys.argv.pop(0)
+# delay between restarts
+delay = 15
 
-def send_msg(m):
-    try:
-        slack_webhook.send(settings['slack_url'], m)
-    except Exception as e:
-        print ("Error sending Slack message")
-        print (repr(e))
+# max number of restarts
+max_restarts = 10
 
+def run(log, process):
+    if process % 2 == 0:
+        print(f"foo{process} err")
+        return "1"
+    for i in range(4):
+        log.info(f"foo{process} {i}")
+        print(f"foo{process} {i}")
+        sleep(1)
 
-with open("/opt/lasair/wrapper_runner.json") as file:
-    settings = json.load(file)
+if __name__ == '__main__':
+    logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
+    logging.basicConfig(format=logformat, level=logging.DEBUG)
+    log = logging.getLogger("mptest")
+    install_mp_handler()
 
-print ("Starting Sherlock wrapper.")
-sys.stdout.flush()
-
-while True:
-    proc = subprocess.Popen(sys.argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    procs = []
+    sentinels = []
+    i = 0
     while True:
-        rbin = proc.stdout.readline()
-        if len(rbin) == 0: break
-        line = rbin.decode('UTF-8').rstrip()
-        print (line)
-        sys.stdout.flush()
-        if re.search("(ERROR:)|(CRITICAL:)", line):
-            send_msg(line)
-    proc.wait()
-    time.sleep(delay)
-    delay = delay * 2
-    if delay > max_delay:
-        delay = max_delay
-    print ("Attempting to restart Sherlock wrapper.")
-    send_msg("Attempting to restart Sherlock wrapper.")
+        # if number of processes < desired then start another one
+        if len(procs) < n:
+            log.info(f"Starting wrapper process {i}")
+            p = Process(target=run, args=(log,i))
+            procs.append(p)
+            p.start()
+            sentinels.append(p.sentinel)
+            i += 1
+        # if desired number of processes then wait for one to finish
+        else:
+            log.debug("Waiting on wrapper process")
+            # when a sentinel indicaates a process has ended, remove process and sentinel from lists
+            for s in connection.wait(sentinels):
+                log.info(f"Wrapper process ended")
+                sentinels.remove(s)
+                for p in procs:
+                    if p.sentinel == s:
+                        procs.remove(p)
+                        p.close()
+            if i >= n:
+                if i - n >= max_restarts:
+                    log.info(f"Max restarts exceeded, giving up")
+                    break
+                log.info(f"Sleeping for {delay}s")
+                sleep(delay)
+
+    log.debug("Terminating remaining processes")
+    for p in procs:
+        p.terminate()
+    log.debug("Waiting for remaining processes to terminate")
+    for p in procs:
+        p.join()
+        p.close()
+
+    log.info("Wrapper runner exiting")
 
