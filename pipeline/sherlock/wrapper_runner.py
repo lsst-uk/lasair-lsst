@@ -2,10 +2,12 @@ import sys
 sys.path.append('../../common/src')
 import logging
 import json
+import yaml
 from multiprocessing import Process, connection
 from time import sleep
 from multiprocessing_logging import install_mp_handler
 import slack_webhook
+import wrapper
 
 # default config file location
 conffile = "wrapper_runner.json"
@@ -19,21 +21,19 @@ class SlackHandler(logging.Handler):
             print ("Error sending Slack message")
             print (repr(e))
 
-def run(log, process):
-    if process % 2 == 0:
-        print(f"foo{process} err")
-        return "1"
-    for i in range(4):
-        log.info(f"foo{process} {i}")
-        print(f"foo{process} {i}")
-        sleep(1)
-
 if __name__ == '__main__':
     with open(conffile) as file:
         settings = json.load(file)
     n = settings.get('procs', 1)
     delay = settings.get('delay', 2)
     max_restarts = settings.get('max_restarts', 10)
+    wrapper_conf_file = settings.get('wrapper_conf_file', 'wrapper_config.yaml')
+
+    conf = []
+    with open(wrapper_conf, "r") as f:
+        cfg = yaml.safe_load(f)
+        for key,value in cfg.items():
+            conf[key] = value
 
     logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
     logging.basicConfig(format=logformat, level=logging.DEBUG)
@@ -48,7 +48,7 @@ if __name__ == '__main__':
         # if number of processes < desired then start another one
         if len(procs) < n:
             log.info(f"Starting wrapper process {i}")
-            p = Process(target=run, args=(log,i))
+            p = Process(target=wrapper.run, args=(conf, log))
             procs.append(p)
             p.start()
             sentinels.append(p.sentinel)
