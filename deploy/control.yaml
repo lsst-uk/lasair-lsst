@@ -31,9 +31,16 @@
   tags: db
 
 # galera cluster
-- hosts: cluster_control,frontend_db,backend_db
+- hosts: cluster_control
   gather_facts: false
-  # TODO
+  become: true
+  tasks:
+    - name: Start Galera cluster
+      ansible.builtin.command: s9s cluster --start --cluster-id=1
+      when: command == "start"
+    - name: Stop Galera cluster
+      ansible.builtin.command: s9s cluster --stop --cluster-id=1
+      when: command == "stop"
   tags: db
 
 # service node - cron jobs etc.
