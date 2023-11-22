@@ -8,14 +8,7 @@ from multiprocessing_logging import install_mp_handler
 import slack_webhook
 
 # default config file location
-#conffile = "/opt/lasair/wrapper_runner.json"
 conffile = "wrapper_runner.json"
-
-# delay between restarts
-delay = 15
-
-# max number of restarts
-max_restarts = 10
 
 class SlackHandler(logging.Handler):
     def emit(self, record):
@@ -38,7 +31,9 @@ def run(log, process):
 if __name__ == '__main__':
     with open(conffile) as file:
         settings = json.load(file)
-    n = settings.get('n', 1)
+    n = settings.get('procs', 1)
+    delay = settings.get('delay', 2)
+    max_restarts = settings.get('max_restarts', 10)
 
     logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
     logging.basicConfig(format=logformat, level=logging.DEBUG)
