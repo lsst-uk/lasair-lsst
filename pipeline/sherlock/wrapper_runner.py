@@ -1,16 +1,30 @@
+import sys
+sys.path.append('../../common/src')
 import logging
+import json
 from multiprocessing import Process, connection
 from time import sleep
 from multiprocessing_logging import install_mp_handler
+import slack_webhook
 
-# desired number of processes
-n = 2
+# default config file location
+#conffile = "/opt/lasair/wrapper_runner.json"
+conffile = "wrapper_runner.json"
 
 # delay between restarts
 delay = 15
 
 # max number of restarts
 max_restarts = 10
+
+class SlackHandler(logging.Handler):
+    def emit(self, record):
+        log_entry = self.format(record)
+        try:
+            slack_webhook.send(settings['slack_url'], log_entry)
+        except Exception as e:
+            print ("Error sending Slack message")
+            print (repr(e))
 
 def run(log, process):
     if process % 2 == 0:
@@ -22,10 +36,15 @@ def run(log, process):
         sleep(1)
 
 if __name__ == '__main__':
+    with open(conffile) as file:
+        settings = json.load(file)
+    n = settings.get('n', 1)
+
     logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
     logging.basicConfig(format=logformat, level=logging.DEBUG)
     log = logging.getLogger("mptest")
     install_mp_handler()
+    log.addHandler(SlackHandler(level=logging.ERROR))
 
     procs = []
     sentinels = []
