@@ -8,18 +8,10 @@ from time import sleep
 from multiprocessing_logging import install_mp_handler
 import slack_webhook
 import wrapper
+import lasairLogging
 
 # default config file location
 conffile = "wrapper_runner.json"
-
-class SlackHandler(logging.Handler):
-    def emit(self, record):
-        log_entry = self.format(record)
-        try:
-            slack_webhook.send(settings['slack_url'], log_entry)
-        except Exception as e:
-            print ("Error sending Slack message")
-            print (repr(e))
 
 if __name__ == '__main__':
     with open(conffile) as file:
@@ -36,10 +28,13 @@ if __name__ == '__main__':
             conf[key] = value
 
     logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
-    logging.basicConfig(format=logformat, level=logging.DEBUG)
-    log = logging.getLogger("mptest")
+    lasairLogging.basicConfig(
+        filename='/home/ubuntu/logs/ingest.log',
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
+    log = lasairLogging.getLogger("wrapper_runner")
     install_mp_handler()
-    log.addHandler(SlackHandler(level=logging.ERROR))
 
     procs = []
     sentinels = []
