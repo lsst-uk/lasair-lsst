@@ -6,7 +6,7 @@
       "name": "DiaObject",
       "type": {
         "type": "record",
-        "name": "DP02_DiaObject",
+        "name": "DiaObject",
         "fields": [
           {
             "name": "decl",
@@ -705,7 +705,7 @@
       "name": "DiaSource",
       "type": {
         "type": "record",
-        "name": "DP02_DiaSource",
+        "name": "DiaSource",
         "fields": [
           {
             "name": "apFlux",
@@ -814,7 +814,7 @@
           },
           {
             "name": "filterName",
-            "type": "char",
+            "type": "string",
             "doc": "Band used to take this observation"
           },
           {
@@ -1059,11 +1059,11 @@
       "name": "ForcedSourceOnDiaObject",
       "type": {
         "type": "record",
-        "name": "DP02_ForcedSourceOnDiaObject",
+        "name": "ForcedSourceOnDiaObject",
         "fields": [
           {
             "name": "band",
-            "type": "char",
+            "type": "string",
             "doc": "Abstract filter that is not associated with a particular instrument"
           },
           {
@@ -1233,7 +1233,7 @@
           },
           {
             "name": "skymap",
-            "type": "char",
+            "type": "string",
             "doc": "Name of skymap used for coadd projection"
           },
           {

@@ -1,5 +1,6 @@
-import sys, os, requests, time, settings
+import sys, os, requests, time, settings, json
 import pyvo as pyvo
+import numpy as np
 from astropy.io import ascii
 
 url = 'https://data.lsst.cloud/api/tap'
@@ -25,7 +26,7 @@ def getDiaObject(howMany, howManySources):
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
-    return DiaSrcs
+    return list(DiaSrcs)
 
 def getDiaSource(diaObjectId):
     query = """
@@ -36,7 +37,7 @@ def getDiaSource(diaObjectId):
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
-    return DiaSrcs
+    return list(DiaSrcs)
 
 def getForcedSourceOnDiaObject(diaObjectId):
     query = """
@@ -47,7 +48,11 @@ def getForcedSourceOnDiaObject(diaObjectId):
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
-    return DiaSrcs
+    return list(DiaSrcs)
+
+def np_encoder(object):
+    if isinstance(object, np.generic):
+        return object.item()
 
 if __name__ == '__main__':
     if len(sys.argv) > 2:
@@ -59,28 +64,29 @@ if __name__ == '__main__':
 
     print('Fetching %d objects with more than %d sources' % (howMany, howManySources))
     dir = '../data/data_%04d_%d' % (howMany, howManySources)
-    os.system('mkdir %s' % dir)
-    os.system('mkdir %s/diaSource' % dir)
-    os.system('mkdir %s/forcedSourceOnDiaObject' % dir)
+    os.system('mkdir -p %s' % dir)
 
-    objects = getDiaObject(howMany, howManySources)
-    ascii.write(objects, dir + '/diaObject.csv', format='csv', overwrite=True)
+    diaObjectList = getDiaObject(howMany, howManySources)
 
-    diaObjectIdList = objects['diaObjectId']
     t00 = t0 = time.time()
     n = 0
-    for diaObjectId in diaObjectIdList:
+    for diaObject in diaObjectList:
+        diaObjectId = diaObject['diaObjectId']
         t1 = time.time()
         if t1-t0 > 60:
             print('%d objects in %.1f minutes' % (n, (t1-t00)/60))
             t0 = t1
-#        print(diaObjectId)
 
-        sources = getDiaSource(diaObjectId)
-        ascii.write(sources, dir + '/diaSource/%d.csv'%diaObjectId, \
-            format='csv', overwrite=True)
+        sources = [dict(s) for s in getDiaSource(diaObjectId)]
+        fsources = [dict(s) for s in getForcedSourceOnDiaObject(diaObjectId)]
 
-        fsources = getForcedSourceOnDiaObject(diaObjectId)
-        ascii.write(sources, dir + '/forcedSourceOnDiaObject/%d.csv'%diaObjectId, \
-            format='csv', overwrite=True)
+        obj = {
+            'DiaObject'                   : dict(diaObject),
+            'DiaSourceList'               : sources,
+            'ForcedSourceOnDiaObjectsList': fsources
+        }
+        f = open(dir + '/%d.json' % diaObjectId, 'w')
+        s = json.dumps(obj, indent=2, default=np_encoder)
+        f.write(s)
+        f.close()
         n += 1

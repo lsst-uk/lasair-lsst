@@ -2,12 +2,16 @@ import json, sys
 from yaml import load, dump
 from yaml import CLoader as Loader, CDumper as Dumper
 
+def fix_type(typ):
+    if typ == 'char': return 'string'
+    else: return typ
+
 def table_schema(table):
     fields = []
     for column in table['columns']:
         field = {
             'name':column['name'], 
-            'type':column['datatype'], 
+            'type':fix_type(column['datatype']), 
             'doc':column['description'],
         }
         fields.append(field)
@@ -16,7 +20,7 @@ def table_schema(table):
         "name": table['name'],
         "type": {
             "type": "record",
-            "name": "DP02_" + table['name'],
+            "name": table['name'],
             "fields": fields,
         }
     }
@@ -27,6 +31,7 @@ def get_table(tables, table_name):
 #        print(table['name'])
         if table['name'] == table_name:
             return table_schema(table)
+    print('ERROR: table %s not found' % table_name)
 
 
 #######
@@ -45,7 +50,6 @@ schema['fields'].append(s)
 
 s = get_table(tables, 'DiaSource')
 schema['fields'].append(s)
-
 s = {
   "name": "DiaSourcesList",
   "type": [ "null", { "type": "array", "items": "DiaSource" } ]
@@ -54,7 +58,6 @@ schema['fields'].append(s)
 
 s = get_table(tables, 'ForcedSourceOnDiaObject')
 schema['fields'].append(s)
-
 s = {
   "name": "ForcedSourceOnDiaObjectsList",
   "type": [ "null", { "type": "array", "items": "ForcedSourceOnDiaObject" } ]
