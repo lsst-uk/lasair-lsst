@@ -37,6 +37,7 @@ Can now use the CQL to make Cassandra tables and the SQL to make Galera tables
 ### Get data RSP --> Lasair Kafka
 Get some data via TAP interface (slow). First put your RSP token in `settings.py` as
 ```
+cd ..
 RSP_TOKEN = 'gt-ZhwzwDmLzxxxxxxxxxxxxxxxxxxxxxxxxx7TJMl_gw'
 ```
 

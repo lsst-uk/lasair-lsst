@@ -5,7 +5,7 @@ from confluent_kafka import Producer, KafkaError
 if __name__ == '__main__':
     datadir = 'data/' + sys.argv[1]
 
-    schemafile = '../schema/dp02.avsc'
+    schemafile = 'schema/dp02.avsc'
     schema = json.loads(open(schemafile).read())
     parsed_schema = fastavro.parse_schema(schema)
 
