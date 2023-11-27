@@ -79,6 +79,22 @@ class CassandraCutoutTest(TestCase):
         cmd = 'cmp %s.fits %s_copy.fits' % (cutoutId, cutoutId)
         cls.assertEqual(os.system(cmd), 0)
 
+    def test_3_async_write(cls):
+        """Write something to the database"""
+        filename = cutoutId + '.fits'
+        cutoutBlob = open(filename, 'rb').read()
+        
+        # put into cassandra
+        imjd = 60001
+        objectId = 1234567891
+        future = cls.osc.putCutoutAsync(cutoutId, imjd, objectId, cutoutBlob)
+        future.result()
+
+        # look for it in there
+        query = "SELECT cutoutId from cutouts where cutoutId='%s' and imjd=%d" % (cutoutId, imjd)
+        rows = cls.session.execute(query)
+        cls.assertEqual(len(list(rows)), 1)
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')
