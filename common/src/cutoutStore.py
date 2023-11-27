@@ -66,7 +66,6 @@ class cutoutStore():
         return self.session.execute_async(sql, [cutoutId, blobData])
 
     def close(self):
-    def close(self):
         self.cluster.shutdown()
 
 if __name__ == "__main__":
