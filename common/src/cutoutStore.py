@@ -54,7 +54,7 @@ class cutoutStore():
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
-    def putCutout(self, cutoutId, imjd, objectId, cutoutBlob):
+    def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob):
         """putCutoutAsync. put in the blob with given identifier. Use async communication and return a future object.
 
         Args:
