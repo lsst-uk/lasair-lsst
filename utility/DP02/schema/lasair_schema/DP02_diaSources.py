@@ -337,5 +337,5 @@ schema = {
       "doc": "1-sigma uncertainty on y position"
     }
   ],
-  "indexes": []
+  "indexes": ["PRIMARY KEY (diaObjectId, midPointTai, diaSourceId)"]
 }

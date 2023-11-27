@@ -66,5 +66,5 @@ x double,
 xErr float,
 y double,
 yErr float,
-
+PRIMARY KEY (diaObjectId, midPointTai, diaSourceId)
 )

@@ -137,5 +137,5 @@ zPSFluxStetsonJ double,
 zTOTFluxMean double,
 zTOTFluxMeanErr double,
 zTOTFluxSigma double,
-
+PRIMARY KEY (diaObjectId, radecTai)
 )

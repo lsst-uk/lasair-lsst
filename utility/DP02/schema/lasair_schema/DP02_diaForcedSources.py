@@ -182,5 +182,5 @@ schema = {
       "doc": "Skymap tract ID"
     }
   ],
-  "indexes": []
+  "indexes": ["PRIMARY KEY (diaObjectId)"]
 }

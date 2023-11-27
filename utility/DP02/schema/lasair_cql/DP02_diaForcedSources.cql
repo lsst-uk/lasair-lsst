@@ -35,5 +35,5 @@ psfFluxErr double,
 psfFlux_flag boolean,
 skymap ascii,
 tract bigint,
-
+PRIMARY KEY (diaObjectId)
 )
