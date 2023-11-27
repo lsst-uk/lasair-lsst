@@ -1,9 +1,9 @@
-import os, json
+import os, sys, json
 import fastavro
 from confluent_kafka import Producer, KafkaError
 
 if __name__ == '__main__':
-    datadir = '../data/data_0005_10'
+    datadir = 'data/' + sys.argv[1]
 
     schemafile = '../schema/dp02.avsc'
     schema = json.loads(open(schemafile).read())
@@ -16,14 +16,12 @@ if __name__ == '__main__':
     p = Producer(conf)
     topic = 'DP02'
     for file in os.listdir(datadir):
-        s = open(datadir +'/'+ file).read()
+        tok = file.split('.')
+        if len(tok) < 2 or tok[1] != 'json':
+            continue
+        fileroot = tok[0]
+        s = open(datadir +'/'+ fileroot + '.json').read()
         print(file, len(s))
         obj = json.loads(s)
-        tmp = open('tmp.avro', 'wb')
-        fastavro.writer(tmp, parsed_schema, [obj])
-        tmp = open('tmp.avro', 'rb')
-        alert = tmp.read()
-        tmp.close()
-        os.remove('tmp.avro')
-        p.produce(topic, alert)
-        p.flush()
+        avrofile = open(datadir +'/'+ fileroot + '.avro', 'wb')
+        fastavro.writer(avrofile, parsed_schema, [obj])

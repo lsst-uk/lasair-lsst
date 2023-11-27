@@ -11,18 +11,18 @@ def table_schema(table):
     for column in table['columns']:
         field = {
             'name':column['name'], 
-            'type':fix_type(column['datatype']), 
+            'type': ['null', fix_type(column['datatype'])], 
             'doc':column['description'],
         }
         fields.append(field)
 
     schema = {
         "name": table['name'],
-        "type": {
+        "type": ['null', {
             "type": "record",
             "name": table['name'],
             "fields": fields,
-        }
+        }]
     }
     return schema
 

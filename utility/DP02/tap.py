@@ -63,7 +63,7 @@ if __name__ == '__main__':
         howManySources = 10
 
     print('Fetching %d objects with more than %d sources' % (howMany, howManySources))
-    dir = '../data/data_%04d_%d' % (howMany, howManySources)
+    dir = 'data/data_%04d_%d' % (howMany, howManySources)
     os.system('mkdir -p %s' % dir)
 
     diaObjectList = getDiaObject(howMany, howManySources)
