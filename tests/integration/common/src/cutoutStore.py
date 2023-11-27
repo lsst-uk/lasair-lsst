@@ -9,7 +9,7 @@ import unittest.main
 from unittest import TestCase, expectedFailure
 from cassandra.cluster import Cluster
 import sys
-sys.path.append('../../../common/src')
+sys.path.append('../../../../common/src')
 import cutoutStore
 
 # the real keyspace is called 'cutouts' but we use a different one for the test
