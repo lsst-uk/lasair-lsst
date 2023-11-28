@@ -50,7 +50,7 @@ def lookup(names):
             charset='utf8mb4',
             cursorclass=pymysql.cursors.DictCursor)        
         for name in names:
-            query = "SELECT ra,decl FROM objects WHERE diaObjectID='{}'".format(name)
+            query = "SELECT ra,decl FROM objects WHERE diaObjectId='{}'".format(name)
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 result = cursor.fetchone()
