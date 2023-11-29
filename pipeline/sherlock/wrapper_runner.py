@@ -58,8 +58,9 @@ if __name__ == '__main__':
                 sentinels.remove(s)
                 for p in procs:
                     if p.sentinel == s:
-                        procs.remove(p)
+                        p.join()
                         p.close()
+                        procs.remove(p)
             if i >= n:
                 if i - n >= max_restarts:
                     log.info(f"Max restarts exceeded, giving up")
