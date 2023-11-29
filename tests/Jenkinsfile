@@ -43,6 +43,9 @@ pipeline {
                 dir('tests/integration/example') {
                     sh 'python3 test_example.py'
                 }
+                dir('tests/integration/common/src') {
+                    sh 'python3 test_cutoutStore.py'
+                }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'
                 }
@@ -52,6 +55,7 @@ pipeline {
             }
             post {
                 always {
+                    junit 'tests/integration/common/src/test-reports/*.xml'
                     junit 'tests/integration/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/integration/pipeline/filter/test-reports/*.xml'
                 }

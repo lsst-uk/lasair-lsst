@@ -32,6 +32,7 @@ import settings
 
 sys.path.append('../../common/src')
 import objectStore, manage_status, date_nid, slack_webhook
+import cutoutStore
 import lasairLogging
 
 stop = False
@@ -59,13 +60,17 @@ def msg_text(message):
                     if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
     return message_text
 
-def store_images(message, store, diaSourceId, imjd):
+def store_images(message, store, diaSourceId, imjd, diaObjectId):
     global log
     try:
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
             content = message[cutoutType]
-            filename = '%d_%s' % (diaSourceId, cutoutType)
-            store.putObject(filename, imjd, content)
+            cutoutId = '%d_%s' % (diaSourceId, cutoutType)
+            # store may be cutouts or cephfs
+            if settings.USE_CUTOUTCASS:
+                store.putCutout(cutoutId, imjd, diaObjectId, content)
+            else:
+                store.putObject(cutoutId, imjd, content)
         return True
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)
@@ -126,12 +131,15 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     # ID for the latest detection, this is what the cutouts belong to
     diaSourceId = lsst_alert_noimages['diaSource']['diaSourceId']
 
+    # objectID
+    diaObjectId = lsst_alert_noimages['diaSource']['diaObjectId']
+
     # MJD for storing images
     imjd = int(lsst_alert_noimages['diaSource']['midPointTai'])
 
     # store the fits images
     if image_store:
-        if store_images(lsst_alert, image_store, diaSourceId, imjd) == None:
+        if store_images(lsst_alert, image_store, diaSourceId, imjd, diaObjectId) == None:
             log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
             return 0   # ingest batch failed
 
@@ -230,15 +238,17 @@ def run_ingest(args):
         log.info('Lockfile not present')
         return  0
 
-    # set up image store in shared file system
-    if fitsdir and len(fitsdir) > 0:
+    # set up image store in Cassandra or shared file system
+    if settings.USE_CUTOUTCASS:
+        image_store = cutoutStore.cutoutStore()
+    elif fitsdir and len(fitsdir) > 0:
         image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
     else:
-        log.error('ERROR in ingest/ingestBatch: No image directory found for file storage')
+        log.error('ERROR in ingest/ingestBatch: Cannot store cutouts. USE_CUTOUTCASS=%s' % settings.USE_CUTOUTCASS)
         sys.stdout.flush()
         image_store = None
 
-    # connect to cassandra cluster
+    # connect to cassandra cluster for alerts (not cutouts)
     try:
         cluster = Cluster(settings.CASSANDRA_HEAD)
         cassandra_session = cluster.connect()

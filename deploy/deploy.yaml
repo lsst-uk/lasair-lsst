@@ -190,3 +190,33 @@
       when: instances.parallel_ssh.started
   tags: parallel_ssh
 
+- hosts: cutoutcass
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cutoutcass
+
+- hosts: cutoutcass
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+  roles:
+    - gkansible.gkservercollection.cassandra_start_service
+  serial: 1
+  tags: cutoutcass
+
+- hosts: cutoutcass[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+    git_branch: "{{ lasair_version }}"
+  roles:
+    # todo
+  tags: cutoutcass
+
