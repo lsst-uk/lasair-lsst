@@ -1,5 +1,11 @@
 ---
 
+- name: "Install pip packages"
+  pip:
+    name:
+      - confluent-kafka
+      - multiprocessing-logging
+
 - name: Make sure the repo is up to date
   git:
     repo: "{{ git_url }}"

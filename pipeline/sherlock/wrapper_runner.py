@@ -23,7 +23,7 @@ if __name__ == '__main__':
     slack_url = settings.get('slack_url', '')
 
     conf = {}
-    with open(wrapper_conf, "r") as f:
+    with open(wrapper_conf_file, "r") as f:
         cfg = yaml.safe_load(f)
         for key,value in cfg.items():
             conf[key] = value
@@ -58,8 +58,9 @@ if __name__ == '__main__':
                 sentinels.remove(s)
                 for p in procs:
                     if p.sentinel == s:
-                        procs.remove(p)
+                        p.join()
                         p.close()
+                        procs.remove(p)
             if i >= n:
                 if i - n >= max_restarts:
                     log.info(f"Max restarts exceeded, giving up")
