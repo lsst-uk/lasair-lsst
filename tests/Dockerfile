@@ -34,4 +34,5 @@ RUN pip3 install \
   mocpy \
   mysql-connector-python \
   ephem \
-  gkhtm
+  gkhtm \
+  cassandra-driver
