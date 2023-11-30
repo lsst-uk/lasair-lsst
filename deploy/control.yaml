@@ -224,31 +224,15 @@
   become: true
   tasks:
     - name: Start Sherlock wrapper
-      community.docker.docker_compose:
-        project_name: sherlock_wrapper
-        project_src: '.'
-        files:
-          - sherlock-wrapper-compose.yml
-        services:
-          - sherlock_wrapper
-        state: present
-        scale: 2
-        stopped: false
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-sherlock 
       when: command == "start"
-    - name: Stop Kafka
-      community.docker.docker_compose:
-        project_name: sherlock_wrapper
-        project_src: '.'
-        files:
-          - sherlock-wrapper-compose.yml
-        services:
-          - sherlock_wrapper
-        state: present
-        scale: 2
-        stopped: true
+    - name: Stop Sherlock wrapper
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-sherlock 
       when: command == "stop"
-  vars_files:
-    - settings.yaml
   tags: sherlock, pipeline
   
 # sherlock node - service
@@ -297,7 +281,7 @@
   tags: filter, pipeline
 
 - hosts: web
-  gather_facts: false
+  gather_facts: true
   tasks:
     - name: Restart web server
       command:
@@ -325,7 +309,7 @@
 - name: Cassandra seed nodes
   hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
   gather_facts: false
-  # TODO 
+  become: true
   tasks:
     - name: Start Cassandra seeds
       ansible.builtin.service:
@@ -342,7 +326,7 @@
 - name: Cassandra non-seed nodes
   hosts: "cassandranodes:!cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :!cassandranodes[2] {% endif %}"
   gather_facts: false
-  # TODO 
+  become: true
   tasks:
     - name: Start Cassandra non-seeds
       ansible.builtin.service:
@@ -359,7 +343,7 @@
 - name: Cassandra seed nodes
   hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
   gather_facts: false
-  # TODO 
+  become: true
   tasks:
     - name: Stop Cassandra seeds
       ansible.builtin.service:
