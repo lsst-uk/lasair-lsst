@@ -35,4 +35,5 @@ RUN pip3 install \
   mysql-connector-python \
   ephem \
   gkhtm \
+  gkdbutils \
   cassandra-driver
