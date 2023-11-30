@@ -2,15 +2,10 @@ import unittest, unittest.mock
 
 import signal
 import subprocess
-
+import pickle
 import context
 import ingest
 
-import settings
-import fastavro
-import pickle
-import io
-import json
 
 class SherlockWrapperConsumerTest(unittest.TestCase):
 
