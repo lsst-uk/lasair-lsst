@@ -36,4 +36,5 @@ RUN pip3 install \
   ephem \
   gkhtm \
   gkdbutils \
-  cassandra-driver
+  cassandra-driver \
+  fastavro
