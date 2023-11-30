@@ -103,11 +103,8 @@ def insert_cassandra(alert, cassandra_session):
     if len(diaSourcesList) > 0:
         executeLoad(cassandra_session, 'diaSources', diaSourcesList)
 
-    if len(alert['diaForcedSourcesList']) > 0:
-        executeLoad(cassandra_session, 'diaForcedSources', alert['diaForcedSourcesList'])
-
-    if len(alert['diaNondetectionLimitsList']) > 0:
-        executeLoad(cassandra_session, 'diaNondetectionLimits', alert['diaNondetectionLimitsList'])
+    if len(alert['forcedSourceOnDiaObjectsList']) > 0:
+        executeLoad(cassandra_session, 'forcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
 
     return
 

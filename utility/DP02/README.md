@@ -55,7 +55,7 @@ python3 tap.py <howMany> <howManySources>
 
 Turn it into schemaless avro packets. This directory is for howMany=5 and howManySources=10
 ```
-python3 dp02_to_avro.py  data_0005_10
+python3 json_to_avro.py  data_0005_10
 ```
 
 Push it into Lasair Kafka ready for ingestion, with topic `DP02`
