@@ -78,6 +78,10 @@ CASSANDRA_HEAD          = {{ groups['cassandranodes'] }}
 CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
+# Cutouts in Cassandra
+USE_CUTOUTCASS          = True
+CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
+
 # Directories on share Cephfs
 #############################
 IMAGEFITS              = '/mnt/cephfs/lasair/fits'
@@ -104,6 +108,9 @@ WEB_DOMAIN             = '{{ lasair_name }}'
 # To include links in emails of filter results
 #LASAIR_URL             = 'lasair-iris.roe.ac.uk'
 LASAIR_URL             = '{{ lasair_name }}.{{ domain }}'
+
+# Default from address to use when sending emails
+LASAIR_EMAIL           = '{{ lasair_email }}'
 
 # The API calls this internal node for Sherlock
 {% if groups['sherlock'] is defined and groups['sherlock']|length > 0 %}

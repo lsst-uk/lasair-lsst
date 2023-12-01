@@ -8,6 +8,5 @@ urlpatterns = [
     path('filters/<int:mq_id>/update/', views.filter_query_create, name='filter_query_update'),
     path('filters/<int:mq_id>/', views.filter_query_detail, name='filter_query_detail'),
     path('filters/<int:mq_id>/<slug:action>/', views.filter_query_detail, name='filter_query_detail_run'),
-    path('filters/log/<slug:topic>/', views.filter_query_log, name='filter_query_log'),
-
+    path('filters/log/(?P<topic>[-a-zA-Z0-9_.]+)/', views.filter_query_log, name='filter_query_log'),
 ]

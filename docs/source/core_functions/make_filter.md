@@ -58,7 +58,13 @@ that `id` applies. Here are some sample results fromn the query above:
 
 <img src="../_images/make_filter/sherlock.png" width="600px"/>
 
-The TNS table `crossmatch_tns` operates in a similar way to the `sherlock_classificaitons` table. See the Schema Browser for details of the available attributes.
+The TNS table `crossmatch_tns` operates in a similar way to the `sherlock_classifications` table. 
+You can, for example, find all the recent Tidal Disruption Events that coincide with ZTF alerts, 
+with redshift and the latest first:
+
+<img src="../_images/make_filter/TNS_TDE.png" width="600px"/>
+
+See the Schema Browser for details of the available attributes.
 
 ### Filtering on a Watchlist/Watchmap
 You can select on objects coincident with a watchlist, either your own
@@ -84,18 +90,39 @@ and it has attributes:
    * `topic`: the name of the annotator, generally associated with a specific user who is responsible.
    * `classification`: a short string drawn from a fixed vocabulary, eg "kilonova".
    * `explanation`: a natural language explanation of the classification, eg “probable kilonova but could also be supernova”
-   * `classjson`: the annotation expressed as a JSON dictionary
+   * `classdict`: the annotation expressed as a JSON dictionary
    * `url`: a URL where more information can be obtained about the classification of this object
 
-These can be selected and used in the query as with the watchlist/watchmap, 
-except for the `classjson` attribute which is different and more complex.
-While most attributes in SQL are strings or numbers, the `classjson` can 
-contain lists and dictionaries. If for example the `classjson` is a dictionary
-with keys `color` and `size`, then this clause will extract the color
-when the size is greater than 4:
+Here for example, we utilise an annotator called `fastfinder`, to see the classification and 
+timestamp, with the latest at the top of the listing:
+<img src="../_images/make_filter/fastfinder1.png" width="600px"/>
+
+The `classdict` is a bit more complicated, because it is a schema-free collection of data
+as chosen by the implementor of the annotator. In the case of `fastfinder`, a typical `classdict`
+is:
 ```
-SELECT JSON_EXTRACT(jdoc, '$.color') AS color FROM jtable
-WHERE
-JSON_EXTRACT(jdoc, '$.size') > 4;
+{
+    "lsst-g": {},
+    "lsst-r": {
+        "absolute_peak_mag_val": -19.116,
+        "absolute_peak_mag_err": 0.149,
+        "overall_decline_rate_val": 0.072,
+        "overall_decline_rate_err": 0.045
+    },
+    "in-major-body": {
+        "Galactic Plane": "N",
+        "M31": "N"
+    }
+}
 ```
 
+We can SELECT on these values, as well as use them for the WHERE clause, with a SQL clause like this:
+```
+SELECT
+objects.objectId,
+JSON_EXTRACT(fastfinder.classdict, '$.lsst-r.absolute_peak_mag_val') as absrmag
+WHERE
+JSON_EXTRACT(fastfinder.classdict, '$.lsst-r.absolute_peak_mag_val') < -19
+```
+with a result as shown below
+<img src="../_images/make_filter/fastfinder2.png" width="600px"/>
