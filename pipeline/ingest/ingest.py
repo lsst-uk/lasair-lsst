@@ -50,20 +50,12 @@ def now():
     # current UTC as string
     return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
 
-def msg_text(message):
-    """msg_text. Remove postage stamp cutouts from an alert message.
-
-    Args:
-        message:
-    """
-    message_text = {k: message[k] for k in message
-                    if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
-    return message_text
-
 def store_images(message, store, diaSourceId, imjd, diaObjectId):
     global log
     try:
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+            if not cutoutType in message: 
+                continue
             content = message[cutoutType]
             cutoutId = '%d_%s' % (diaSourceId, cutoutType)
             # store may be cutouts or cephfs
@@ -90,7 +82,7 @@ def insert_cassandra(alert, cassandra_session):
     if not cassandra_session:
         return None   # failure of batch
 
-    executeLoad(cassandra_session, 'diaObjects', [alert['diaObject']])
+    executeLoad(cassandra_session, 'DiaObjects', [alert['diaObject']])
     # Note that although we are inserting them into cassandra, we are NOT using
     # HTM indexing inside Cassandra. Hence this is a redundant column.
 
@@ -101,10 +93,10 @@ def insert_cassandra(alert, cassandra_session):
     for i in range(len(diaSourcesList)):
         diaSourcesList[i]['htm16'] = htm16s[i]
     if len(diaSourcesList) > 0:
-        executeLoad(cassandra_session, 'diaSources', diaSourcesList)
+        executeLoad(cassandra_session, 'DiaSources', diaSourcesList)
 
     if len(alert['forcedSourceOnDiaObjectsList']) > 0:
-        executeLoad(cassandra_session, 'forcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
+        executeLoad(cassandra_session, 'ForcedSourceOnDiaObjects', alert['diaForcedSourcesList'])
 
     return
 
@@ -119,50 +111,32 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
         topic_out:
     """
     global log
-    # here is the part of the alert that has no binary images
-    lsst_alert_noimages = msg_text(lsst_alert)
-    if not lsst_alert_noimages:
-        log.error('ERROR:  in ingest/ingest: No json in alert')
-        return 0  # ingest batch failed
+
+    # Build a new alert packet
+    diaObject                 = lsst_alert['DiaObject']
+    diaForcedSourcesList      = lsst_alert['ForcedSourceOnDiaObjectList']
+    diaSourcesList            = lsst_alert['DiaSourceList']
+    diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)
+    lastSource = diaSourcesList[0]
 
     # ID for the latest detection, this is what the cutouts belong to
-    diaSourceId = lsst_alert_noimages['diaSource']['diaSourceId']
-
-    # objectID
-    diaObjectId = lsst_alert_noimages['diaSource']['diaObjectId']
+    diaSourceId = lastSource['diaSourceId']
 
     # MJD for storing images
-    imjd = int(lsst_alert_noimages['diaSource']['midPointTai'])
+    imjd = int(lastSource['midPointTai'])
+
+    # objectID
+    diaObjectId = diaObject['diaObjectId']
 
     # store the fits images
     if image_store:
         if store_images(lsst_alert, image_store, diaSourceId, imjd, diaObjectId) == None:
             log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
-            return 0   # ingest batch failed
-
-    # Build a new alert packet
-    diaObject                 = lsst_alert['diaObject']
-    diaSourcesList            = []
-    diaForcedSourcesList      = []
-    diaNondetectionLimitsList = []
-    # Make a list of diaSource, diaForcedSource, diaNondetection in time order
-    if 'diaSource' in lsst_alert and lsst_alert['diaSource'] != None:
-        if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources'] != None:
-            diaSourcesList = lsst_alert['prvDiaSources'] + [lsst_alert['diaSource']]
-        else:
-            diaSourcesList = [lsst_alert['diaSource']]
-
-        if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources'] != None:
-            diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
-
-        if 'prvDiaNondetectionLimits' in lsst_alert and lsst_alert['prvDiaNondetectionLimits'] != None:
-            diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
 
     alert = {
         'diaObject':                 diaObject,
         'diaSourcesList':            diaSourcesList,
         'diaForcedSourcesList':      diaForcedSourcesList,
-        'diaNondetectionLimitsList': diaNondetectionLimitsList,
     }
 
     # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,

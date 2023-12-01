@@ -81,9 +81,9 @@ if __name__ == '__main__':
         fsources = [dict(s) for s in getForcedSourceOnDiaObject(diaObjectId)]
 
         obj = {
-            'DiaObject'                   : dict(diaObject),
-            'DiaSourceList'               : sources,
-            'ForcedSourceOnDiaObjectsList': fsources
+            'DiaObject'                  : dict(diaObject),
+            'DiaSourceList'              : sources,
+            'ForcedSourceOnDiaObjectList': fsources
         }
         f = open(dir + '/%d.json' % diaObjectId, 'w')
         s = json.dumps(obj, indent=2, default=np_encoder)

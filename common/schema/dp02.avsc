@@ -1667,7 +1667,7 @@
       ]
     },
     {
-      "name": "DiaSourcesList",
+      "name": "DiaSourceList",
       "type": [
         "null",
         {
@@ -1977,7 +1977,7 @@
       ]
     },
     {
-      "name": "ForcedSourceOnDiaObjectsList",
+      "name": "ForcedSourceOnDiaObjectList",
       "type": [
         "null",
         {

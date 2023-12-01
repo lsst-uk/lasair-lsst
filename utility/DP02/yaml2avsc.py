@@ -51,7 +51,7 @@ schema['fields'].append(s)
 s = get_table(tables, 'DiaSource')
 schema['fields'].append(s)
 s = {
-  "name": "DiaSourcesList",
+  "name": "DiaSourceList",
   "type": [ "null", { "type": "array", "items": "DiaSource" } ]
   }
 schema['fields'].append(s)
@@ -59,7 +59,7 @@ schema['fields'].append(s)
 s = get_table(tables, 'ForcedSourceOnDiaObject')
 schema['fields'].append(s)
 s = {
-  "name": "ForcedSourceOnDiaObjectsList",
+  "name": "ForcedSourceOnDiaObjectList",
   "type": [ "null", { "type": "array", "items": "ForcedSourceOnDiaObject" } ]
   }
 schema['fields'].append(s)

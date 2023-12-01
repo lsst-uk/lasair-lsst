@@ -16,8 +16,8 @@ curl -o dp02_dc2.yaml "https://raw.githubusercontent.com/lsst/sdm_schemas/main/y
 
 Convert the YAML to an AVRO schema
 ```
-python3 yaml2avsc.py < dp02_dc2.yaml > ../../../common/schema/dp02.avsc
-cd ../../../common/schema
+python3 yaml2avsc.py < dp02_dc2.yaml > ../../common/schema/dp02.avsc
+cd ../../common/schema
 ```
 
 Make the files that Lasair needs for its databases (SQL and CQL), as well as for the schema browser

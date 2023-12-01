@@ -3,14 +3,18 @@ import fastavro
 from confluent_kafka import Producer, KafkaError
 
 if __name__ == '__main__':
-    datadir = 'data/' + sys.argv[1]
+    if len(sys.argv) >= 3:
+        datadir = 'data/' + sys.argv[1]
+        topic = sys.argv[2]
+    else:
+        print('Usage: avro_to_kafka.py <dataset> <topic>')
+        sys.exit()
 
     conf = {
         'bootstrap.servers': 'lasair-lsst-dev-kafka:9092',
         'client.id': 'client-1',
     }
     p = Producer(conf)
-    topic = 'DP02new'
     for file in os.listdir(datadir):
         tok = file.split('.')
         if len(tok) < 2 or tok[1] != 'avro':
