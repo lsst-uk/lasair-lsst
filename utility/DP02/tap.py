@@ -28,23 +28,21 @@ def getDiaObject(howMany, howManySources):
     del results
     return list(DiaSrcs)
 
-def getDiaSource(diaObjectId):
+def getDiaSource(diaObjectIdList):
     query = """
     SELECT *
     FROM dp02_dc2_catalogs.DiaSource
-    WHERE diaObjectId = """ + str(diaObjectId)
-
+    WHERE diaObjectId in (%s)""" % ','.join([str(d) for d in diaObjectIdList])
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
     return list(DiaSrcs)
 
-def getForcedSourceOnDiaObject(diaObjectId):
+def getForcedSourceOnDiaObject(diaObjectIdList):
     query = """
     SELECT *
     FROM dp02_dc2_catalogs.ForcedSourceOnDiaObject
-    WHERE diaObjectId = """ + str(diaObjectId)
-
+    WHERE diaObjectId in (%s)""" % ','.join([str(d) for d in diaObjectIdList])
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
@@ -54,7 +52,26 @@ def np_encoder(object):
     if isinstance(object, np.generic):
         return object.item()
 
+def getBatch(diaObjectList):
+    dir = 'data/data_%04d_%d' % (howMany, howManySources)
+    diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
+
+    sources = getDiaSource(diaObjectIdList)
+    fsources = getForcedSourceOnDiaObject(diaObjectIdList)
+    for diaObject in diaObjectList:
+        diaObjectId = diaObject['diaObjectId']
+        obj = {
+            'DiaObject'                  : dict(diaObject),
+            'DiaSourceList'              : [dict(s) for s in  sources if s['diaObjectId']==diaObjectId],
+            'ForcedSourceOnDiaObjectList': [dict(f) for f in fsources if f['diaObjectId']==diaObjectId],
+        }
+        f = open(dir + '/%d.json' % diaObjectId, 'w')
+        s = json.dumps(obj, indent=2, default=np_encoder)
+        f.write(s)
+        f.close()
+
 if __name__ == '__main__':
+    batchSize = 10
     if len(sys.argv) > 2:
         howMany        = int(sys.argv[1])
         howManySources = int(sys.argv[2])
@@ -62,31 +79,24 @@ if __name__ == '__main__':
         howMany = 5
         howManySources = 10
 
+    if howMany < batchSize:
+        nBatch = 1
+        batchSize = howMany
+    else:
+        nBatch = howMany//batchSize
+        howMany = nBatch*batchSize
+        
     print('Fetching %d objects with more than %d sources' % (howMany, howManySources))
     dir = 'data/data_%04d_%d' % (howMany, howManySources)
     os.system('mkdir -p %s' % dir)
 
+    t0 = time.time()
     diaObjectList = getDiaObject(howMany, howManySources)
-
-    t00 = t0 = time.time()
-    n = 0
-    for diaObject in diaObjectList:
-        diaObjectId = diaObject['diaObjectId']
+    t1 = time.time()
+    print('Fetched %d objects in %.1f minutes' % (len(diaObjectList), (t1-t0)/60))
+    
+    t0 = time.time()
+    for iBatch in range(nBatch):
+        getBatch(diaObjectList[iBatch*batchSize:(iBatch+1)*batchSize])
         t1 = time.time()
-        if t1-t0 > 60:
-            print('%d objects in %.1f minutes' % (n, (t1-t00)/60))
-            t0 = t1
-
-        sources = [dict(s) for s in getDiaSource(diaObjectId)]
-        fsources = [dict(s) for s in getForcedSourceOnDiaObject(diaObjectId)]
-
-        obj = {
-            'DiaObject'                  : dict(diaObject),
-            'DiaSourceList'              : sources,
-            'ForcedSourceOnDiaObjectList': fsources
-        }
-        f = open(dir + '/%d.json' % diaObjectId, 'w')
-        s = json.dumps(obj, indent=2, default=np_encoder)
-        f.write(s)
-        f.close()
-        n += 1
+        print('%d objects in %.1f minutes' % ((iBatch+1)*batchSize, (t1-t0)/60))
