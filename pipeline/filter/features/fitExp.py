@@ -17,7 +17,7 @@ def func_expit(params, t, f):
     return residual
 
 def fitExpImpl(alert, pexpit0, sigma, verbose):
-    sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
+    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
 
     all_tobs = [s['midPointTai']    for s in sources]

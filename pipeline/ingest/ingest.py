@@ -89,14 +89,14 @@ def insert_cassandra(alert, cassandra_session):
     # Now add the htmid16 value into each dict.
 
     diaSourcesList = alert['diaSourcesList']
-    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourcesList])
-    for i in range(len(diaSourcesList)):
-        diaSourcesList[i]['htm16'] = htm16s[i]
+#    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourcesList])
+#    for i in range(len(diaSourcesList)):
+#        diaSourcesList[i]['htm16'] = htm16s[i]
     if len(diaSourcesList) > 0:
         executeLoad(cassandra_session, 'DiaSources', diaSourcesList)
 
     if len(alert['forcedSourceOnDiaObjectsList']) > 0:
-        executeLoad(cassandra_session, 'ForcedSourceOnDiaObjects', alert['diaForcedSourcesList'])
+        executeLoad(cassandra_session, 'ForcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
 
     return
 
@@ -114,7 +114,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
 
     # Build a new alert packet
     diaObject                 = lsst_alert['DiaObject']
-    diaForcedSourcesList      = lsst_alert['ForcedSourceOnDiaObjectList']
+    forcedSourceOnDiaObjectsList      = lsst_alert['ForcedSourceOnDiaObjectList']
     diaSourcesList            = lsst_alert['DiaSourceList']
     diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)
     lastSource = diaSourcesList[0]
@@ -136,7 +136,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     alert = {
         'diaObject':                 diaObject,
         'diaSourcesList':            diaSourcesList,
-        'diaForcedSourcesList':      diaForcedSourcesList,
+        'forcedSourceOnDiaObjectsList':      forcedSourceOnDiaObjectsList,
     }
 
     # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,

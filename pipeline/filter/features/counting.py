@@ -18,7 +18,7 @@ class counting(FeatureGroup):
     ]    
 
     def run(self):
-        sources = self.alert['diaSourcesList'] + self.alert['diaForcedSourcesList']
+        sources = self.alert['diaSourcesList'] + self.alert['forcedSourceOnDiaObjectsList']
         taiList        = [diaSource['midPointTai'] for diaSource in sources]
         for s in sources:
             nSource[s['filterName']] += 1
