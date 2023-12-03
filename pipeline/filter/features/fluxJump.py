@@ -10,11 +10,13 @@ class fluxJump(FeatureGroup):
 
     def run(self):
         days = 1 # go back a day from last diaSource
-        sources = self.alert['forcedSourceOnDiaObjectsList'] + self.alert['diaSourcesList']
+# why doesn't the forced source have a time?
+#        sources = self.alert['forcedSourceOnDiaObjectsList'] + self.alert['diaSourcesList']
+        sources = self.alert['diaSourcesList']
         sources = sorted(sources, key=lambda source: source['midPointTai'])
     
-        tobs = [s['midPointTai']    for s in sources]
-        fobs = [s['psFlux']         for s in sources]
+        tobs = [s['midPointTai']    for s in sources if s['psFlux'] is not None]
+        fobs = [s['psFlux']         for s in sources if s['psFlux'] is not None]
     
         max_tobs  = tobs[-1]
         max_flux = 0
