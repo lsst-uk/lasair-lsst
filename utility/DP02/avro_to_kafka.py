@@ -15,6 +15,7 @@ if __name__ == '__main__':
         'client.id': 'client-1',
     }
     p = Producer(conf)
+    n = 0
     for file in os.listdir(datadir):
         tok = file.split('.')
         if len(tok) < 2 or tok[1] != 'avro':
@@ -23,3 +24,5 @@ if __name__ == '__main__':
         avrofile = open(datadir +'/'+ fileroot + '.avro', 'rb')
         p.produce(topic, avrofile.read())
         p.flush()
+        n +=1
+    print('%d alerts pushed to topic %s' % (n, topic))
