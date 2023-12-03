@@ -53,7 +53,7 @@ def np_encoder(object):
         return object.item()
 
 def getBatch(diaObjectList):
-    dir = 'data/data_%04d_%d' % (howMany, howManySources)
+    dir = 'data/data_%06d_%d' % (howMany, howManySources)
     diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
 
     sources = getDiaSource(diaObjectIdList)
@@ -87,7 +87,7 @@ if __name__ == '__main__':
         howMany = nBatch*batchSize
         
     print('Fetching %d objects with more than %d sources' % (howMany, howManySources))
-    dir = 'data/data_%04d_%d' % (howMany, howManySources)
+    dir = 'data/data_%06d_%d' % (howMany, howManySources)
     os.system('mkdir -p %s' % dir)
 
     t0 = time.time()
