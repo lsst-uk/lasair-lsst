@@ -160,7 +160,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
             sys.stdout.flush()
             return None   # ingest failed
 
-    return len(diaSourcesList)
+    return (len(diaSourcesList), len(forcedSourceOnDiaObjectsList))
 
 def run_ingest(args):
     """run.
@@ -268,6 +268,7 @@ def run_ingest(args):
 
     nalert = 0        # number not yet send to manage_status
     ndiaSource = 0    # number not yet send to manage_status
+    nforcedSource = 0    # number not yet send to manage_status
     ntotalalert = 0   # number since this program started
     log.info('INGEST starts %s' % now())
 
@@ -280,7 +281,7 @@ def run_ingest(args):
 
         # no messages available
         if msg is None:
-            end_batch(consumer, producer, ms, nalert, ndiaSource)
+            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
             nalert = ndiaSource = 0
             log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
             sys.stdout.flush()
@@ -302,15 +303,17 @@ def run_ingest(args):
             break
 
         # Apply filter to each alert
-        idiaSource = handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session)
+        (idiaSource,iforcedSource) = \
+                handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session)
 
         nalert += 1
         ntotalalert += 1
         ndiaSource += idiaSource
+        nforcedSource += iforcedSource
 
         # every so often commit, flush, and update status
         if nalert >= 250:
-            end_batch(consumer, producer, ms, nalert, ndiaSource)
+            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
             nalert = ndiaSource = 0
             # check for lockfile
             if not os.path.isfile(settings.LOCKFILE):
@@ -319,7 +322,7 @@ def run_ingest(args):
 
     # if we exit this loop, clean up
     log.info('Shutting down')
-    end_batch(consumer, producer, ms, nalert, ndiaSource)
+    end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
 
     # shut down kafka consumer
     consumer.close()
@@ -332,11 +335,11 @@ def run_ingest(args):
     if ntotalalert > 0: return 1
     else:               return 0
 
-def end_batch(consumer, producer, ms, nalert, ndiaSource):
+def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource):
     global log
     now = datetime.now()
     date = now.strftime("%Y-%m-%d %H:%M:%S")
-    log.info('%s %d alerts %d diaSource' % (date, nalert, ndiaSource))
+    log.info('%s %d alerts %d diaSource %d forcedSource' % (date, nalert, ndiaSource, nforcedSource))
     # if this is not flushed, it will run out of memory
     if producer is not None:
         producer.flush()
