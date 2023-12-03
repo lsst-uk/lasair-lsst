@@ -39,10 +39,15 @@ def getDiaSource(diaObjectIdList):
     return list(DiaSrcs)
 
 def getForcedSourceOnDiaObject(diaObjectIdList):
-    query = """
-    SELECT *
-    FROM dp02_dc2_catalogs.ForcedSourceOnDiaObject
-    WHERE diaObjectId in (%s)""" % ','.join([str(d) for d in diaObjectIdList])
+    query = """SELECT cv.expMidptMJD AS midPointTai, fs.* FROM 
+    dp02_dc2_catalogs.ForcedSourceOnDiaObject as fs 
+    JOIN dp02_dc2_catalogs.CcdVisit as cv 
+    ON cv.CcdVisitId=fs.CcdVisitId 
+    WHERE fs.diaObjectId IN (%s)""" % ','.join([str(d) for d in diaObjectIdList])
+#    query = """
+#    SELECT *
+#    FROM dp02_dc2_catalogs.ForcedSourceOnDiaObject
+#    WHERE diaObjectId in (%s)""" % ','.join([str(d) for d in diaObjectIdList])
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results

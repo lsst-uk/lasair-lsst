@@ -82,6 +82,11 @@ schema = {
       "doc": "Set for any fatal failure"
     },
     {
+      "name": "midPointTai",
+      "type": "double",
+      "doc": "MJD of visit (added by Lasair)"
+    },
+    {
       "name": "parentObjectId",
       "type": "long",
       "doc": "Unique ObjectId of the parent of the ObjectId in context of the deblender."

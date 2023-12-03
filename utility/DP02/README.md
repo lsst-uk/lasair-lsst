@@ -30,6 +30,13 @@ cp lsst_schema/ForcedSourceOnDiaObjects.py lasair_schema/forcedSourceOnDiaObject
 
 Now edit `lasair_schema/*.py` to add primary key to "indexes" -- examples [here](https://github.com/lsst-uk/lasair-lsst/tree/main/common/schema/lasair_schema)
 
+Also, we have added a new attribute `midPointTai` to `forcedSourceOnDiaObjects`:
+```
+{    "name": "midPointTai",
+     "type": "double",
+     "doc": "MJD of visit (added by Lasair)"},
+```
+
 Now convert these modified schema to the database CREATE TABLE
 ```
 cp ../../../common/schema/convert.py .
