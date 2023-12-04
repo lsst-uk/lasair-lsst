@@ -48,7 +48,7 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/lsst1.json") as f:
+    with open("sample_alerts/1249520198176736000.json") as f:
       alert = json.load(f)
       output = {}
       schema = {}
@@ -77,7 +77,7 @@ class FeatureTest(TestCase):
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/lsst1.json") as f:
+    with open("sample_alerts/1249520198176736000.json") as f:
       alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
