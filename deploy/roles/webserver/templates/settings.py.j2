@@ -5,7 +5,7 @@ Django settings for lasair project.
 import os
 
 # EMAIL SETTINGS
-DEFAULT_FROM_EMAIL = "donotreply@roe.ac.uk"
+DEFAULT_FROM_EMAIL = "{{ lasair_email }}"
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'localhost'
 EMAIL_PORT = 25
@@ -53,6 +53,14 @@ SYSTEM_STATUS   = '/mnt/cephfs/lasair/system_status/status'
 SHERLOCK_SERVICE = '{{ sherlock_svc_host }}'
 
 TNS_WATCHLIST_ID = 141
+
+ACTIVE_EXPIRE = 180  # days fo expiry of active filter/watchlist/watchmap
+
+WATCHLIST_MAX            = 100000
+WATCHLIST_MAX_CROSSMATCH =  50000
+
+FRONT_PAGE_CACHE = LASAIR_ROOT + '/front_page_cache.json'
+FRONT_PAGE_STALE = 1800
 ################################################################
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)

@@ -20,6 +20,8 @@
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     replication_count: "{{ 1 if (groups['kafka']|length)<2 else 2 }}"
+    # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
+    use_hsts: false 
   roles:
     - lasair_cephfs
     - lasair_service
@@ -122,6 +124,8 @@
     - settings.yaml
   vars:
     enable_letsencrypt: true
+    # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
+    use_hsts: false 
   roles:
     - proxy
   tags: proxy
@@ -185,4 +189,34 @@
     - role: parallel_ssh
       when: instances.parallel_ssh.started
   tags: parallel_ssh
+
+- hosts: cutoutcass
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cutoutcass
+
+- hosts: cutoutcass
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+  roles:
+    - gkansible.gkservercollection.cassandra_start_service
+  serial: 1
+  tags: cutoutcass
+
+- hosts: cutoutcass[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+    git_branch: "{{ lasair_version }}"
+  roles:
+    # todo
+  tags: cutoutcass
 

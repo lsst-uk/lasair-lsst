@@ -26,6 +26,7 @@
         - mysql-connector-python
         - fink-client
         - lasair
+        - hmpty
 
 - name: Make sure the repo is up to date
   git: 

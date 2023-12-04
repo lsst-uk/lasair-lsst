@@ -12,6 +12,7 @@ pipeline {
                 dir('tests/unit/common/src') {
                     sh 'python3 test_manage_status.py'
                     sh 'python3 test_logging.py'
+                    sh 'python3 test_bad_fits.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'python3 test_ingest.py'
@@ -26,6 +27,9 @@ pipeline {
                 dir('tests/unit/services/annotations/') {
                     sh 'python3 kafka_test.py'
                 }
+                dir('tests/unit/services/sherlock/') {
+                    sh 'python3 test_sherlock.py'
+                }
             }
             post {
                 always {
@@ -34,6 +38,7 @@ pipeline {
                     junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
                     junit 'tests/unit/services/annotations/test-reports/*.xml'
+                    junit 'tests/unit/services/sherlock/test-reports/*.xml'
                 }
             }
         }
@@ -41,6 +46,9 @@ pipeline {
             steps {
                 dir('tests/integration/example') {
                     sh 'python3 test_example.py'
+                }
+                dir('tests/integration/common/src') {
+                    sh 'python3 test_cutoutStore.py'
                 }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'
@@ -51,6 +59,7 @@ pipeline {
             }
             post {
                 always {
+                    junit 'tests/integration/common/src/test-reports/*.xml'
                     junit 'tests/integration/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/integration/pipeline/filter/test-reports/*.xml'
                 }

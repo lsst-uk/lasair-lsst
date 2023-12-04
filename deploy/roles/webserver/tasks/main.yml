@@ -46,6 +46,8 @@
       - astrocalc
       - pandas
       - plotly
+      - numpy
+      - hmpty
       
 
 - name: Disable Apache

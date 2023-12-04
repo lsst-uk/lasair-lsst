@@ -27,7 +27,7 @@ def tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius):
 #    print(s)
 
 # refresh the watchlist so ist MOC file is remade
-    query2 = 'UPDATE watchlists SET timestamp=NOW() WHERE wl_id=%d' % settings.TNS_WATCHLIST_ID
+    query2 = 'UPDATE watchlists SET date_modified=NOW() WHERE wl_id=%d' % settings.TNS_WATCHLIST_ID
     cursor2.execute(query2)
 
     cursor3 = msl.cursor(buffered=True, dictionary=True)
