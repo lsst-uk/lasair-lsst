@@ -16,9 +16,20 @@ curl -o dp02_dc2.yaml "https://raw.githubusercontent.com/lsst/sdm_schemas/main/y
 
 Convert the YAML to an AVRO schema
 ```
-python3 yaml2avsc.py < dp02_dc2.yaml > ../../common/schema/dp02.avsc
-cd ../../common/schema
+python3 yaml2avsc.py < dp02_dc2.yaml > ../../common/schema/dp02.avsc.orig
 ```
+```
+cd ../../common/schema
+cp dp02.avsc.orig dp02.avsc
+```
+
+Modify the dp02.avsc to change psfFlux/psfFluxErr to psFlux/psFluxErr in the forcedSourceOnDiaObjects, and add the `filterName` attribute.
+
+Modifications to ForcedSourceOnDiaObjects to align with DiaSources:
+- new attribute `midPointTai` copied from `CcdVisit.expMidptMJD`
+- new attribute `filterName` copied from `CcdVisit.band`
+- `psfFlux` changed to `psFlux`
+- `psfFluxErr` changed tp `psFlux`
 
 Make the files that Lasair needs for its databases (SQL and CQL), as well as for the schema browser
 ```
@@ -29,13 +40,6 @@ cp lsst_schema/ForcedSourceOnDiaObjects.py lasair_schema/forcedSourceOnDiaObject
 ```
 
 Now edit `lasair_schema/*.py` to add primary key to "indexes" -- examples [here](https://github.com/lsst-uk/lasair-lsst/tree/main/common/schema/lasair_schema)
-
-Also, we have added a new attribute `midPointTai` to `forcedSourceOnDiaObjects`:
-```
-{    "name": "midPointTai",
-     "type": "double",
-     "doc": "MJD of visit (added by Lasair)"},
-```
 
 Now convert these modified schema to the database CREATE TABLE
 ```

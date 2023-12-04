@@ -27,6 +27,11 @@ schema = {
       "doc": "Unique DiaObject ID. Primary Key of the DiaObject Table"
     },
     {
+      "name": "filterName",
+      "type": "string",
+      "doc": "Filter name copied from CcdVisit"
+    },
+    {
       "name": "forcedSourceOnDiaObjectId",
       "type": "long",
       "doc": "Unique ID of forced source. Primary Key."
@@ -162,14 +167,14 @@ schema = {
       "doc": "Failure to derive linear least-squares fit of psf model forced on the image difference"
     },
     {
-      "name": "psfFlux",
+      "name": "psFlux",
       "type": "double",
-      "doc": "Flux derived from linear least-squares fit of psf model forced on the calexp"
+      "doc": "Flux derived from linear least-squares fit of psf model forced on the calexp (was psfFlux)"
     },
     {
-      "name": "psfFluxErr",
+      "name": "psFluxErr",
       "type": "double",
-      "doc": "Uncertainty on the flux derived from linear least-squares fit of psf model forced on the calexp"
+      "doc": "Uncertainty on the flux derived from linear least-squares fit of psf model forced on the calexp (was psfFluxErr)"
     },
     {
       "name": "psfFlux_flag",

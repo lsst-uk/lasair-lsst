@@ -39,15 +39,12 @@ def getDiaSource(diaObjectIdList):
     return list(DiaSrcs)
 
 def getForcedSourceOnDiaObject(diaObjectIdList):
-    query = """SELECT cv.expMidptMJD AS midPointTai, fs.* FROM 
+    query = """SELECT cv.expMidptMJD AS midPointTai, cv.band as filterName, 
+    fs.* FROM 
     dp02_dc2_catalogs.ForcedSourceOnDiaObject as fs 
     JOIN dp02_dc2_catalogs.CcdVisit as cv 
     ON cv.CcdVisitId=fs.CcdVisitId 
     WHERE fs.diaObjectId IN (%s)""" % ','.join([str(d) for d in diaObjectIdList])
-#    query = """
-#    SELECT *
-#    FROM dp02_dc2_catalogs.ForcedSourceOnDiaObject
-#    WHERE diaObjectId in (%s)""" % ','.join([str(d) for d in diaObjectIdList])
     results = service.search(query)
     DiaSrcs = results.to_table()
     del results
@@ -61,14 +58,31 @@ def getBatch(diaObjectList):
     dir = 'data/data_%06d_%d' % (howMany, howManySources)
     diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
 
-    sources = getDiaSource(diaObjectIdList)
-    fsources = getForcedSourceOnDiaObject(diaObjectIdList)
+    sources = []
+    for s in getDiaSource(diaObjectIdList):
+        # some fluxes are None for some reason
+        if not s['psFlux']: continue
+        ds = dict(s)
+    sources.append(ds)
+
+    fsources = []
+    for f in getForcedSourceOnDiaObject(diaObjectIdList):
+        # some fluxes are None for some reason
+        if not f['psfFlux']: continue
+        df = dict(f)
+        # forced source has psfFlux but source has psFlux
+        df['psFlux']    = df['psfFlux']
+        df['psFluxErr'] = df['psfFluxErr']
+        del df['psfFlux']
+        del df['psFluxErr']
+    fsources.append(df)
+
     for diaObject in diaObjectList:
         diaObjectId = diaObject['diaObjectId']
         obj = {
             'DiaObject'                  : dict(diaObject),
-            'DiaSourceList'              : [dict(s) for s in  sources if s['diaObjectId']==diaObjectId],
-            'ForcedSourceOnDiaObjectList': [dict(f) for f in fsources if f['diaObjectId']==diaObjectId],
+            'DiaSourceList'              : [s for s in  sources if s['diaObjectId']==diaObjectId],
+            'ForcedSourceOnDiaObjectList': [f for f in fsources if f['diaObjectId']==diaObjectId],
         }
         f = open(dir + '/%d.json' % diaObjectId, 'w')
         s = json.dumps(obj, indent=2, default=np_encoder)
