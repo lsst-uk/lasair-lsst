@@ -1,46 +1,80 @@
-"""Run the Sherlock wrapper, monitor the output and send a slack alert on errors.
-Attempt to restart if the wrapper process exits, with an exponential backoff"""
-
-import subprocess
 import sys
-import re
-import time
+sys.path.append('../../common/src')
+import logging
 import json
+import yaml
+from multiprocessing import Process, connection
+from time import sleep
+from multiprocessing_logging import install_mp_handler
 import slack_webhook
+import wrapper
+import lasairLogging
 
-delay = 60
-max_delay = 21600
-sys.argv.pop(0)
+# default config file location
+conffile = "wrapper_runner.json"
 
-def send_msg(m):
-    try:
-        slack_webhook.send(settings['slack_url'], m)
-    except Exception as e:
-        print ("Error sending Slack message")
-        print (repr(e))
+if __name__ == '__main__':
+    with open(conffile) as file:
+        settings = json.load(file)
+    n = settings.get('procs', 1)
+    delay = settings.get('delay', 2)
+    max_restarts = settings.get('max_restarts', 10)
+    wrapper_conf_file = settings.get('wrapper_conf_file', 'wrapper_config.yaml')
+    slack_url = settings.get('slack_url', '')
 
+    conf = {}
+    with open(wrapper_conf_file, "r") as f:
+        cfg = yaml.safe_load(f)
+        for key,value in cfg.items():
+            conf[key] = value
 
-with open("/opt/lasair/wrapper_runner.json") as file:
-    settings = json.load(file)
+    logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
+    lasairLogging.basicConfig(
+        filename='/home/ubuntu/wrapper.log',
+        webhook=slack_webhook.SlackWebhook(url=slack_url),
+        merge=True
+    )
+    log = lasairLogging.getLogger("wrapper_runner")
+    install_mp_handler()
 
-print ("Starting Sherlock wrapper.")
-sys.stdout.flush()
-
-while True:
-    proc = subprocess.Popen(sys.argv, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    procs = []
+    sentinels = []
+    i = 0
     while True:
-        rbin = proc.stdout.readline()
-        if len(rbin) == 0: break
-        line = rbin.decode('UTF-8').rstrip()
-        print (line)
-        sys.stdout.flush()
-        if re.search("(ERROR:)|(CRITICAL:)", line):
-            send_msg(line)
-    proc.wait()
-    time.sleep(delay)
-    delay = delay * 2
-    if delay > max_delay:
-        delay = max_delay
-    print ("Attempting to restart Sherlock wrapper.")
-    send_msg("Attempting to restart Sherlock wrapper.")
+        # if number of processes < desired then start another one
+        if len(procs) < n:
+            log.info(f"Starting wrapper process {i}")
+            p = Process(target=wrapper.run, args=(conf, log))
+            procs.append(p)
+            p.start()
+            sentinels.append(p.sentinel)
+            i += 1
+        # if desired number of processes then wait for one to finish
+        else:
+            log.debug("Waiting on wrapper process")
+            # when a sentinel indicaates a process has ended, remove process and sentinel from lists
+            for s in connection.wait(sentinels):
+                log.info(f"Wrapper process ended")
+                sentinels.remove(s)
+                for p in procs:
+                    if p.sentinel == s:
+                        p.join()
+                        p.close()
+                        procs.remove(p)
+            if i >= n:
+                if i - n >= max_restarts:
+                    log.info(f"Max restarts exceeded, giving up")
+                    break
+                log.info(f"Sleeping for {delay}s")
+                sleep(delay)
+
+    log.debug("Terminating remaining processes")
+    for p in procs:
+        p.terminate()
+    log.debug("Waiting for remaining processes to terminate")
+    for p in procs:
+        p.join()
+        p.close()
+
+    log.info("Wrapper runner exiting")
 

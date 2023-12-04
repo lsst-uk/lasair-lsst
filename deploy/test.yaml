@@ -186,6 +186,7 @@
       ansible.builtin.uri:
         url: "http://{{ ansible_host }}/query"
         status_code: 400
+        body_format: json
     - name: check that sherlocksvc returns 200 on good point query
       ansible.builtin.uri:
         url: "http://{{ ansible_host }}/query"

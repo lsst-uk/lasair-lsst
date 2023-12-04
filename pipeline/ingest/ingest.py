@@ -42,7 +42,7 @@ sigterm_raised = False
 def sigterm_handler(signum, frame):
     global sigterm_raised
     sigterm_raised = True
-    print("Caught SIGTERM")
+    #print("Caught SIGTERM")
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
@@ -194,7 +194,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
 def run_ingest(args):
     """run.
     """
-    global stop
+    global sigterm_raised
     global log
 
     # if logging wasn't set up in __main__ then do it here
@@ -304,6 +304,11 @@ def run_ingest(args):
     ms = manage_status.manage_status(settings.SYSTEM_STATUS)
 
     while ntotalalert < maxalert:
+        if sigterm_raised:
+            # clean shutdown - this should stop the consumer and commit offsets
+            log.info("Stopping ingest")
+            sys.stdout.flush()
+            break
 
         msg = consumer.poll(timeout=5)
 
@@ -323,12 +328,6 @@ def run_ingest(args):
 #        except:
 #            log.error('ERROR in ingest/ingest: ', msg.value())
 #            break
-
-        if stop:
-            # clean shutdown - this should stop the consumer and commit offsets
-            log.info("Stopping ingest")
-            sys.stdout.flush()
-            break
 
         # Apply filter to each alert
         idiaSource = handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session)

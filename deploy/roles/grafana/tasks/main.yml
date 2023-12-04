@@ -4,14 +4,14 @@
 - name: "Add Grafana GPG key"
   become: true
   apt_key:
-    id: 0E22EB88E39E12277A7760AE9E439B102CF3C0C6
-    url: https://packages.grafana.com/gpg.key
+    id: 963FA27710458545
+    url: https://apt.grafana.com/gpg.key 
     state: present
 
 - name: "Add Grafana repo"
   become: true
   apt_repository:
-    repo: "deb https://packages.grafana.com/oss/deb stable main"
+    repo: "deb https://apt.grafana.com stable main"
     state: present
 
 - name: "Install Packages"

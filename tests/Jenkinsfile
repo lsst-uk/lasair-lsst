@@ -14,6 +14,9 @@ pipeline {
                     sh 'python3 test_logging.py'
                     sh 'python3 test_bad_fits.py'
                 }
+                dir('tests/unit/pipeline/ingest') {
+                    sh 'python3 test_ingest.py'
+                }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
                 }
@@ -31,6 +34,7 @@ pipeline {
             post {
                 always {
                     junit 'tests/unit/common/src/test-reports/*.xml'
+                    junit 'tests/unit/pipeline/ingest/test-reports/*.xml'
                     junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
                     junit 'tests/unit/services/annotations/test-reports/*.xml'

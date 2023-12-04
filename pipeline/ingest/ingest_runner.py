@@ -10,6 +10,7 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN | --nid=NID]
               [--topic_out=TOUT]
+
 Options:
     --maxalert=MAX     Number of alerts to process, default is infinite
     --nprocess=nprocess  Number of processes

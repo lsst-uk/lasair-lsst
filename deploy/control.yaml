@@ -1,0 +1,359 @@
+---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: check command
+      any_errors_fatal: true
+      ansible.builtin.fail:
+        msg: command must be either start or stop
+      when: (command is not defined) or
+            (command != "start" and command != "stop")
+  tags: always
+
+#- hosts: all
+#  gather_facts: true
+
+# standalone database node
+- hosts: db
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start MariaDB
+      ansible.builtin.service:
+        name: mariadb
+        state: started
+      when: command == "start"
+    - name: Stop MariaDB
+      ansible.builtin.service:
+        name: mariadb
+        state: stopped
+      when: command == "stop"
+  tags: db
+
+# galera cluster
+- hosts: cluster_control
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Galera cluster
+      ansible.builtin.command: s9s cluster --start --cluster-id=1
+      when: command == "start"
+    - name: Stop Galera cluster
+      ansible.builtin.command: s9s cluster --stop --cluster-id=1
+      when: command == "stop"
+  tags: db
+
+# service node - cron jobs etc.
+#- hosts: svc
+#  gather_facts: false
+#  # nothing to do?
+#  tags: svc
+
+# service node - prometheus & grafana
+- hosts: svc
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Prometheus
+      ansible.builtin.service:
+        name: prometheus
+        state: started
+      when: command == "start"
+    - name: Start Grafana
+      ansible.builtin.service:
+        name: grafana-server
+        state: started
+      when: command == "start"
+    - name: Stop Grafana
+      ansible.builtin.service:
+        name: grafana-server
+        state: stopped
+      when: command == "stop"
+    - name: Stop Prometheus
+      ansible.builtin.service:
+        name: prometheus
+        state: stopped
+      when: command == "stop"
+  tags: monitor
+
+# kafkas node - zookeeper and kafka
+- hosts: kafka
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Zookeeper
+      community.docker.docker_compose:
+        project_name: zookeeper
+        project_src: '.'
+        files:
+          - zookeeper-compose.yml
+        services:
+          - zookeep
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Start Kafka
+      community.docker.docker_compose:
+        project_src: '.'
+        files:
+          - kafka-compose.yml
+        services:
+          - kafka
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Stop Kafka
+      community.docker.docker_compose:
+        project_src: '.'
+        files:
+          - kafka-compose.yml
+        services:
+          - kafka
+        state: present
+        stopped: true
+      when: command == "stop"
+    - name: Stop Zookeeper
+      community.docker.docker_compose:
+        project_name: zookeeper
+        project_src: '.'
+        files:
+          - zookeeper-compose.yml
+        services:
+          - zookeep
+        state: present
+        stopped: true
+      when: command == "stop"
+  tags: kafka
+
+# kafkas node - mirrormaker
+- hosts: kafka
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Mirrormaker
+      community.docker.docker_compose:
+        project_name: mirrormaker
+        project_src: '.'
+        files:
+          - mirror-compose.yml
+        services:
+          - mirror
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Stop Mirrormaker
+      community.docker.docker_compose:
+        project_name: mirrormaker
+        project_src: '.'
+        files:
+          - mirror-compose.yml
+        services:
+          - mirror
+        state: present
+        stopped: true
+      when: command == "stop"
+  tags: mirror, pipeline
+
+- hosts: kafka_pub
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Zookeeper
+      community.docker.docker_compose:
+        project_name: zookeeper
+        project_src: '.'
+        files:
+          - zookeeper-compose.yml
+        services:
+          - zookeep
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Start Kafka
+      community.docker.docker_compose:
+        project_src: '.'
+        files:
+          - kafka-compose.yml
+        services:
+          - kafka
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Stop Kafka
+      community.docker.docker_compose:
+        project_src: '.'
+        files:
+          - kafka-compose.yml
+        services:
+          - kafka
+        state: present
+        stopped: true
+      when: command == "stop"
+    - name: Stop Zookeeper
+      community.docker.docker_compose:
+        project_name: zookeeper
+        project_src: '.'
+        files:
+          - zookeeper-compose.yml
+        services:
+          - zookeep
+        state: present
+        stopped: true
+      when: command == "stop"
+  tags: kafka_pub
+
+- hosts: ingest
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Ingest
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-ingest 
+      when: command == "start"
+    - name: Stop Ingest
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-ingest 
+      when: command == "stop"
+  tags: ingest, pipeline
+  
+# sherlock node - kafka wrapper
+- hosts: sherlock
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Sherlock wrapper
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-sherlock 
+      when: command == "start"
+    - name: Stop Sherlock wrapper
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-sherlock 
+      when: command == "stop"
+  tags: sherlock, pipeline
+  
+# sherlock node - service
+- hosts: sherlock
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Sherlock service
+      ansible.builtin.systemd:
+        state: started
+        enabled: true
+        name: sherlocksvc
+      when: command == "start"
+    - name: Start nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: started
+      when: command == "start"
+    - name: Stop nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: stopped
+      when: command == "stop"
+    - name: Stop Sherlock service
+      ansible.builtin.systemd:
+        state: stopped
+        enabled: true
+        name: sherlocksvc
+      when: command == "stop"
+  tags: sherlocksvc
+
+- hosts: filter
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Filter
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-filter 
+      when: command == "start"
+    - name: Stop Filter
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-filter 
+      when: command == "stop"
+  tags: filter, pipeline
+
+- hosts: web
+  gather_facts: true
+  tasks:
+    - name: Restart web server
+      command:
+        cmd: "{{ ansible_env.HOME }}/restart_webserver.sh"
+      when: command == "start"
+  # No need to stop Apache
+  tags: web
+
+- hosts: proxy
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: started
+      when: command == "start"
+    - name: Stop nginx
+      ansible.builtin.systemd:
+        name: nginx.service
+        state: stopped
+      when: command == "stop"
+  tags: proxy
+
+- name: Cassandra seed nodes
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+    - name: Wait for seed nodes
+      ansible.builtin.wait_for:
+        port: 9042
+        timeout: 60
+      when: command == "start"
+  tags: cassandra
+
+- name: Cassandra non-seed nodes
+  hosts: "cassandranodes:!cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :!cassandranodes[2] {% endif %}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+    - name: Stop Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped 
+      when: command == "stop"
+  tags: cassandra
+
+- name: Cassandra seed nodes
+  hosts: "cassandranodes[0]{% if 'cassandranodes' in groups and groups['cassandranodes'] | length > 3 %} :cassandranodes[2] {% endif %}" 
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Stop Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped
+      when: command == "stop"
+  tags: cassandra
+
+#- hosts: parallel_ssh
+#  gather_facts: false
+#  # nothing to do?
+#  tags: parallel_ssh
+
