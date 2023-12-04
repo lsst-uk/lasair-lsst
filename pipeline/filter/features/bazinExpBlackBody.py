@@ -89,8 +89,7 @@ from scipy.optimize import leastsq
 
 def fit_bazin(alert, pbazin0, sigma):       
 # why no time on the forced sources
-#    sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
-    sources = [s for s in alert['diaSourcesList'] if s['psFlux'] is not None]
+    sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
     tobs = [s['midPointTai']    for s in sources]
     avgtobs = sum(tobs)/len(tobs)
@@ -132,9 +131,7 @@ def fit_bazin(alert, pbazin0, sigma):
     return (Rsq, dict)
 
 def fit_expit(alert, pexpit0, sigma):           
-# why no time on the forced sources
-#    sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
-    sources = [s for s in alert['diaSourcesList'] if s['psFlux'] is not None]
+    sources = alert['diaForcedSourcesList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
     tobs = [s['midPointTai']    for s in sources]
     avgtobs = sum(tobs)/len(tobs)

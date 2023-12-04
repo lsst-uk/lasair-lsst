@@ -27,6 +27,11 @@ schema = {
       "doc": "Unique DiaObject ID. Primary Key of the DiaObject Table"
     },
     {
+      "name": "filterName",
+      "type": "string",
+      "doc": "Copied from CcdVisit.band"
+    },
+    {
       "name": "forcedSourceOnDiaObjectId",
       "type": "long",
       "doc": "Unique ID of forced source. Primary Key."
@@ -80,6 +85,11 @@ schema = {
       "name": "localWcs_flag",
       "type": "boolean",
       "doc": "Set for any fatal failure"
+    },
+    {
+      "name": "midPointTai",
+      "type": "double",
+      "doc": "Copied from CcdVisit.expMidptMJD"
     },
     {
       "name": "parentObjectId",
@@ -157,12 +167,12 @@ schema = {
       "doc": "Failure to derive linear least-squares fit of psf model forced on the image difference"
     },
     {
-      "name": "psfFlux",
+      "name": "psFlux",
       "type": "double",
       "doc": "Flux derived from linear least-squares fit of psf model forced on the calexp"
     },
     {
-      "name": "psfFluxErr",
+      "name": "psFluxErr",
       "type": "double",
       "doc": "Uncertainty on the flux derived from linear least-squares fit of psf model forced on the calexp"
     },

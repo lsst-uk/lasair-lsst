@@ -61,21 +61,23 @@ def getBatch(diaObjectList):
     sources = []
     for s in getDiaSource(diaObjectIdList):
         # some fluxes are None for some reason
-        if not s['psFlux']: continue
+        if s['psFlux'] is None: continue
         ds = dict(s)
-    sources.append(ds)
+        sources.append(ds)
 
     fsources = []
     for f in getForcedSourceOnDiaObject(diaObjectIdList):
         # some fluxes are None for some reason
-        if not f['psfFlux']: continue
+        if f['psfFlux'] is None: continue
         df = dict(f)
         # forced source has psfFlux but source has psFlux
         df['psFlux']    = df['psfFlux']
         df['psFluxErr'] = df['psfFluxErr']
         del df['psfFlux']
         del df['psFluxErr']
-    fsources.append(df)
+        fsources.append(df)
+    print('%d/%d/%d objects/sources/forcedsources' % \
+            (len(diaObjectIdList), len(sources), len(fsources)))
 
     for diaObject in diaObjectList:
         diaObjectId = diaObject['diaObjectId']

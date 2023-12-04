@@ -17,9 +17,7 @@ def func_expit(params, t, f):
     return residual
 
 def fitExpImpl(alert, pexpit0, sigma, verbose):
-#  why doesn't the forced source have a time?
-#    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
-    sources = [s for s in alert['diaSourcesList'] if s['psFlux'] is not None]
+    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
     sources = sorted(sources, key=lambda source: source['midPointTai'])
 
     all_tobs = [s['midPointTai']    for s in sources]
