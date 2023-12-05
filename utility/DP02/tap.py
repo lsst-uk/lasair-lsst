@@ -39,8 +39,7 @@ def getDiaSource(diaObjectIdList):
     return list(DiaSrcs)
 
 def getForcedSourceOnDiaObject(diaObjectIdList):
-    query = """SELECT cv.expMidptMJD AS midPointTai, cv.band as filterName, 
-    fs.* FROM 
+    query = """SELECT cv.expMidptMJD AS midPointTai, fs.* FROM 
     dp02_dc2_catalogs.ForcedSourceOnDiaObject as fs 
     JOIN dp02_dc2_catalogs.CcdVisit as cv 
     ON cv.CcdVisitId=fs.CcdVisitId 
@@ -58,24 +57,9 @@ def getBatch(diaObjectList):
     dir = 'data/data_%06d_%d' % (howMany, howManySources)
     diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
 
-    sources = []
-    for s in getDiaSource(diaObjectIdList):
-        # some fluxes are None for some reason
-        if s['psFlux'] is None: continue
-        ds = dict(s)
-        sources.append(ds)
+    sources         = [dict(s) for s in getDiaSource(diaObjectIdList)]
+    fsources        = [dict(f) for f in getForcedSourceOnDiaObject(diaObjectIdList)]
 
-    fsources = []
-    for f in getForcedSourceOnDiaObject(diaObjectIdList):
-        # some fluxes are None for some reason
-        if f['psfFlux'] is None: continue
-        df = dict(f)
-        # forced source has psfFlux but source has psFlux
-        df['psFlux']    = df['psfFlux']
-        df['psFluxErr'] = df['psfFluxErr']
-        del df['psfFlux']
-        del df['psFluxErr']
-        fsources.append(df)
     print('%d/%d/%d objects/sources/forcedsources' % \
             (len(diaObjectIdList), len(sources), len(fsources)))
 

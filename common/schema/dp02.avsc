@@ -1725,14 +1725,6 @@
               "doc": "Unique DiaObject ID. Primary Key of the DiaObject Table"
             },
             {
-              "name": "filterName",
-              "type": [
-                "null",
-                "string"
-              ],
-              "doc": "Copied from CcdVisit.band"
-            },
-            {
               "name": "forcedSourceOnDiaObjectId",
               "type": [
                 "null",
@@ -1826,7 +1818,7 @@
                 "null",
                 "double"
               ],
-              "doc": "Copied from CcdVisit.expMidptMJD"
+              "doc": "Time of forced source copied from associated CcdVisit"
             },
             {
               "name": "parentObjectId",
@@ -1949,7 +1941,7 @@
               "doc": "Failure to derive linear least-squares fit of psf model forced on the image difference"
             },
             {
-              "name": "psFlux",
+              "name": "psfFlux",
               "type": [
                 "null",
                 "double"
@@ -1957,7 +1949,7 @@
               "doc": "Flux derived from linear least-squares fit of psf model forced on the calexp"
             },
             {
-              "name": "psFluxErr",
+              "name": "psfFluxErr",
               "type": [
                 "null",
                 "double"

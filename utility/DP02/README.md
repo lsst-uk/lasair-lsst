@@ -27,9 +27,6 @@ Modify the dp02.avsc to change psfFlux/psfFluxErr to psFlux/psFluxErr in the for
 
 Modifications to ForcedSourceOnDiaObjects to align with DiaSources:
 - new attribute `midPointTai` copied from `CcdVisit.expMidptMJD`
-- new attribute `filterName` copied from `CcdVisit.band`
-- `psfFlux` changed to `psFlux`
-- `psfFluxErr` changed tp `psFlux`
 
 Make the files that Lasair needs for its databases (SQL and CQL), as well as for the schema browser
 ```
