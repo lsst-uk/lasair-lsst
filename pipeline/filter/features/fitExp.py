@@ -1,5 +1,6 @@
 import math
 import numpy as np
+from .util import getAllFluxTimeBand
 from scipy.optimize import leastsq
 
 # ugrizy filter names
@@ -17,25 +18,20 @@ def func_expit(params, t, f):
     return residual
 
 def fitExpImpl(alert, pexpit0, sigma, verbose):
-    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
-    sources = sorted(sources, key=lambda source: source['midPointTai'])
-
-    all_tobs = [s['midPointTai']    for s in sources]
+    (all_fobs, all_tobs, band) = getAllFluxTimeBand(alert)
     if len(all_tobs) < 1:
         return None
     avgtobs = sum(all_tobs)/len(all_tobs)
-
-    all_fobs = [s['psFlux']         for s in sources]
     maxfobs = max(all_fobs)
 
     dict = {}
     for filterName in filterNames:
         tobs = []
         fobs = []
-        for s in sources:
-            if s['filterName'] == filterName:
-                tobs.append(s['midPointTai'] - avgtobs)
-                fobs.append(s['psFlux'] / maxfobs)
+        for i in range(len(all_fobs)):
+            if band[i] == filterName:
+                tobs.append(all_tobs[i] - avgtobs)
+                fobs.append(all_fobs[i] / maxfobs)
 
         npoint = len(tobs)
         dict[filterName + 'ExpRate']    = None

@@ -24,6 +24,7 @@ cp dp02.avsc.orig dp02.avsc
 ```
 
 Modify the dp02.avsc to change psfFlux/psfFluxErr to psFlux/psFluxErr in the forcedSourceOnDiaObjects, and add the `filterName` attribute.
+Also change all the attributes uPSFluxNdata in diaObject from double to ind, and for the other 5 filters also.
 
 Modifications to ForcedSourceOnDiaObjects to align with DiaSources:
 - new attribute `midPointTai` copied from `CcdVisit.expMidptMJD`

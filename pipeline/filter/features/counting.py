@@ -1,3 +1,4 @@
+from .util import getFluxTimeBand
 from features.FeatureGroup import FeatureGroup
 
 nSource = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0}
@@ -18,20 +19,19 @@ class counting(FeatureGroup):
     ]    
 
     def run(self):
-        sources = self.alert['diaSourcesList']
-        taiList        = [diaSource['midPointTai'] for diaSource in sources]
-        for s in sources:
-            nSource[s['filterName']] += 1
+        (flux, time, band) = getFluxTimeBand(self.alert)
+
+        for b in band: nSource[b] += 1
         if self.verbose:
-            print('Found %d sources' % len(taiList))
+            print('Found %d sources' % len(time))
         return { 
-            "nSources": len(taiList),
+            "nSources": len(time),
             "nuSources": nSource['u'],
             "ngSources": nSource['g'],
             "nrSources": nSource['r'],
             "niSources": nSource['i'],
             "nzSources": nSource['z'],
             "nySources": nSource['y'],
-            "minTai"  : min(taiList), 
-            "maxTai"  : max(taiList),
+            "minTai"  : min(time), 
+            "maxTai"  : max(time),
         }

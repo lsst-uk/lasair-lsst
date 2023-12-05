@@ -27,6 +27,7 @@
 
 import math
 import numpy as np
+from .util import getAllFluxTimeBand
 
 # Wavelengths of the ugrizy filters
 wl = {
@@ -88,14 +89,10 @@ def func_expit(params, tlam, f):
 from scipy.optimize import leastsq
 
 def fit_bazin(alert, pbazin0, sigma):       
-# why no time on the forced sources
-    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
-    sources = sorted(sources, key=lambda source: source['midPointTai'])
-    tobs = [s['midPointTai']    for s in sources]
+    (fobs, tobs, band) = getAllFluxTimeBand(alert)
     avgtobs = sum(tobs)/len(tobs)
     tobs = [t-avgtobs for t in tobs]
-    lobs = [wl[s['filterName']] for s in sources]
-    fobs = [s['psFlux']         for s in sources]
+    lobs = [wl[b] for b in band]
     maxfobs = max(fobs)
     fobs = [f/maxfobs for f in fobs]
 
@@ -131,13 +128,10 @@ def fit_bazin(alert, pbazin0, sigma):
     return (Rsq, dict)
 
 def fit_expit(alert, pexpit0, sigma):           
-    sources = alert['forcedSourceOnDiaObjectsList'] + alert['diaSourcesList']
-    sources = sorted(sources, key=lambda source: source['midPointTai'])
-    tobs = [s['midPointTai']    for s in sources]
+    (fobs, tobs, band) = getAllFluxTimeBand(alert)
     avgtobs = sum(tobs)/len(tobs)
     tobs = [t-avgtobs for t in tobs]
-    lobs = [wl[s['filterName']] for s in sources]
-    fobs = [s['psFlux']         for s in sources]
+    lobs = [wl[b] for b in band]
     maxfobs = max(fobs)
     fobs = [f/maxfobs for f in fobs]
 
