@@ -18,9 +18,8 @@
       community.general.terraform:
         project_path: "{{ tf_path }}"
         force_init: true
-        #state: planned
-        state: present
-        #state: absent
+        # use e.g. --extra-vars state=absent to remove
+        state: "{{ state | default('present') }}"
         #plan_file: plan
         complex_vars: true
         variables:

@@ -207,7 +207,7 @@ To add/remove instances:
 
 To remove a deployment:
 ```
-$ openstack stack delete <name>
+$ ansible-playbook infra.yaml --extra-vars state=absent
 ```
 
 If you are not going to recreate the deployment you can then go ahead and remove the network as well.
