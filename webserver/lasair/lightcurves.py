@@ -37,21 +37,14 @@ class lightcurve_fetcher():
         for diaSource in ret:
             diaSources.append(diaSource)
 
-        query = "SELECT midPointTai, filterName, psFlux "
-        query += "from diaForcedSources where diaObjectId = %s" % diaObjectId
+        query = "SELECT midPointTai, band, psfFlux, psfDiffFlux "
+        query += "from ForcedSourceOnDiaObjects where diaObjectId = %s" % diaObjectId
         ret = self.session.execute(query)
         diaForcedSources = []
         for diaForcedSource in ret:
             diaForcedSources.append(diaForcedSource)
 
-        query = "SELECT midPointTai, filterName, diaNoise "
-        query += "from diaNondetectionLimits where diaObjectId = %s" % diaObjectId
-        ret = self.session.execute(query)
-        diaNondetectionLimits = []
-        for diaNondetectionLimit in ret:
-            diaNondetectionLimits.append(diaNondetectionLimit)
-
-        return (diaSources, diaForcedSources, diaNondetectionLimits)
+        return (diaSources, diaForcedSources)
 
     def close(self):
         if self.session:
@@ -61,7 +54,6 @@ class lightcurve_fetcher():
 if __name__ == "__main__":
     LF = lightcurve_fetcher(cassandra_hosts=['192.168.0.11'])
 
-    (diaSources, diaForcedSources, diaNondetectionLimits) = LF.fetch(177261894535479587)
+    (diaSources, diaForcedSources) = LF.fetch(177261894535479587)
     print(len(diaSources))
     print(len(diaForcedSources))
-    print(len(diaNondetectionLimits))

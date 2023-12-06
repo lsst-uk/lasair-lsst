@@ -692,5 +692,5 @@ schema = {
       "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, radecTai)"]
+  "indexes": []
 }
