@@ -187,12 +187,13 @@ def objjson(diaObjectId, full=False):
                 TNS[k] = v
 
     LF = lightcurve_fetcher(cassandra_hosts=settings.CASSANDRA_HEAD)
-    (diaSources, diaForcedSources, diaNondetectionLimits) = LF.fetch(diaObjectId, full=full)
+    (diaSources, diaForcedSources) = LF.fetch(diaObjectId, full=full)
     LF.close()
 
     count_all_diaSources = len(diaSources)
     count_all_diaForcedSources = len(diaForcedSources)
-    count_diaNonDetectionLimits = len(diaNondetectionLimits)
+    if not settings.USE_CUTOUTCASS:
+        image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
     image_urls = {}
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
@@ -233,7 +234,7 @@ def objjson(diaObjectId, full=False):
                       'ncand': len(diaSources), 'MPCname': ssnamenr}
         objectData['annotation'] = 'Unknown object'
 
-    message += 'Got %d diaSources and %d diaNonDetectionLimits' % (count_all_diaSources, count_diaNonDetectionLimits)
+    message += 'Got %d diaSources' % count_all_diaSources
 
     diaSources.sort(key=lambda c: c['mjd'], reverse=True)
 
@@ -264,7 +265,6 @@ def objjson(diaObjectId, full=False):
             'objectData': objectData,
             'diaSources': diaSources,
             'diaForcedSources': diaForcedSources,
-            'diaNondetectionLimits': diaNondetectionLimits,
             'sherlock': sherlock,
             'image_urls': image_urls,
             'TNS': TNS, 'message': message}

@@ -48,7 +48,7 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/1249520198176736000.json") as f:
+    with open("sample_alerts/1251244232409089132.json") as f:
       alert = json.load(f)
       output = {}
       schema = {}
@@ -69,6 +69,7 @@ class FeatureTest(TestCase):
         # check name is in the feature set
         self.assertIn(name, output)
         # check that either the type is ok or that the output is None and allowed to be so 
+        print('===', name, type, output[name])
         self.assertTrue(
           (isinstance(output[name], eval(type))) or
           (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
@@ -77,7 +78,7 @@ class FeatureTest(TestCase):
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/1249520198176736000.json") as f:
+    with open("sample_alerts/1251244232409089132.json") as f:
       alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
