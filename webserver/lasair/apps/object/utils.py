@@ -54,15 +54,24 @@ def plotList(alert, pointList, size, symbol, distanceMpc):
         diaSource, diaForcedSource
     using all 6 colors for different filterNames
     """
+    if pointList == 'diaSources': fn = 'filtername'
+    else:                         fn = 'band'
+
     for filterName, color in filterColor.items():
         flux = []
         fluxerr = []
         fluxdays = []
         for s in alert[pointList]:
-            if s['filtername'] == filterName:
-                flux.append(s['psflux'])
+            if s[fn] == filterName:
+                if 'psflux' in s:
+                    flux.append(s['psflux'])
+                elif 'psfdiffflux' in s:
+                    flux.append(s['psfdiffflux'])
+
                 if 'psfluxerr' in s: 
                     fluxerr.append(s['psfluxerr'])
+                elif 'psfdifffluxerr' in s: 
+                    fluxerr.append(s['psfdifffluxerr'])
                 else:
                     fluxerr.append(0.0)    # HACK where is psfluxerr ???
                 fluxdays.append(s['midpointtai'])
@@ -156,6 +165,8 @@ def object_difference_lightcurve(alert):
 
     if 'sherlock' in alert and 'distance' in alert['sherlock']:
         distanceMpc = alert['sherlock']['distance']
+    else:
+        distanceMpc = None
 
     flux = []
     fluxerr = []
@@ -166,10 +177,10 @@ def object_difference_lightcurve(alert):
         fluxerr.append(s['psfluxerr'])
         fluxdays.append(s['midpointtai'])
 
-    for s in alert['diaForcedSourcesList']:
-        flux.append(s['psfDiffFlux'])
-        if 'psfDiffFluxErr' in s:
-            fluxerr.append(s['psfDiffFluxErr'])
+    for s in alert['diaForcedSources']:
+        flux.append(s['psfdiffflux'])
+        if 'psfdifffluxerr' in s:
+            fluxerr.append(s['psfdifffluxerr'])
         else:
             fluxerr.append(0.0)         # HACK why no psfluxerr????
         fluxdays.append(s['midpointtai'])

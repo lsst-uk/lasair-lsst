@@ -192,6 +192,8 @@ def objjson(diaObjectId, full=False):
 
     count_all_diaSources = len(diaSources)
     count_all_diaForcedSources = len(diaForcedSources)
+    if not settings.USE_CUTOUTCASS:
+        image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
     image_urls = {}
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
@@ -232,7 +234,7 @@ def objjson(diaObjectId, full=False):
                       'ncand': len(diaSources), 'MPCname': ssnamenr}
         objectData['annotation'] = 'Unknown object'
 
-    message += 'Got %d diaSources and %d diaNonDetectionLimits' % (count_all_diaSources, count_diaNonDetectionLimits)
+    message += 'Got %d diaSources' % count_all_diaSources
 
     diaSources.sort(key=lambda c: c['mjd'], reverse=True)
 
