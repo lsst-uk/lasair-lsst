@@ -77,7 +77,10 @@ instances:
   kafka_pub:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      kafka_pub:
+        size: 10
+        type: ceph-hdd
     floating_ip: true
     flavor: tiny
   ingest:
@@ -104,7 +107,19 @@ instances:
   cassandranodes:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      cassandra:
+        size: 10
+        type: ceph-ssd
+    floating_ip: false
+    flavor: tiny
+  cutoutcass:
+    number: 1
+    root_volume_size: 25
+    extra_volumes:
+      cutoutcass:
+        size: 10
+        type: ceph-hdd
     floating_ip: false
     flavor: tiny
   parallel_ssh:
