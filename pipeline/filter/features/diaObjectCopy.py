@@ -28,5 +28,8 @@ class diaObjectCopy(FeatureGroup):
             else:
                 if self.verbose: print('diaObjectCopy: did not find %s' % f)
                 output[f] = None
+
+        # because of a mistake in the DP0.2 schema
+        output['gPSFluxNdata'] = int(output['gPSFluxNdata'])
         return output
 

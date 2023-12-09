@@ -1,4 +1,4 @@
-import sys, os, requests, time, settings, json
+import sys, os, requests, time, settings, json, gzip
 import pyvo as pyvo
 import numpy as np
 from astropy.io import ascii
@@ -53,7 +53,7 @@ def np_encoder(object):
     if isinstance(object, np.generic):
         return object.item()
 
-def getBatch(diaObjectList):
+def getBatch(diaObjectList, iBatch):
     dir = 'data/data_%06d_%d' % (howMany, howManySources)
     diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
 
@@ -63,6 +63,7 @@ def getBatch(diaObjectList):
     print('%d/%d/%d objects/sources/forcedsources' % \
             (len(diaObjectIdList), len(sources), len(fsources)))
 
+    objList = []
     for diaObject in diaObjectList:
         diaObjectId = diaObject['diaObjectId']
         obj = {
@@ -70,10 +71,12 @@ def getBatch(diaObjectList):
             'DiaSourceList'              : [s for s in  sources if s['diaObjectId']==diaObjectId],
             'ForcedSourceOnDiaObjectList': [f for f in fsources if f['diaObjectId']==diaObjectId],
         }
-        f = open(dir + '/%d.json' % diaObjectId, 'w')
-        s = json.dumps(obj, indent=2, default=np_encoder)
-        f.write(s)
-        f.close()
+        objList.append(obj)
+
+    s = json.dumps(objList, default=np_encoder)
+    jsonfilename = dir + '/batch%03d.json.gz' % iBatch
+    with gzip.open(jsonfilename, 'wt', encoding='UTF-8') as zipfile:
+        zipfile.write(s)
 
 if __name__ == '__main__':
     batchSize = 10
@@ -102,6 +105,6 @@ if __name__ == '__main__':
     
     t0 = time.time()
     for iBatch in range(nBatch):
-        getBatch(diaObjectList[iBatch*batchSize:(iBatch+1)*batchSize])
+        getBatch(diaObjectList[iBatch*batchSize:(iBatch+1)*batchSize], iBatch)
         t1 = time.time()
         print('%d objects in %.1f minutes' % ((iBatch+1)*batchSize, (t1-t0)/60))
