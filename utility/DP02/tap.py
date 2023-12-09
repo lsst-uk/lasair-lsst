@@ -93,7 +93,7 @@ if __name__ == '__main__':
     print('Fetched %d objects in %.1f minutes' % (len(diaObjectList), (t1-t0)/60))
     
     for iBatch in range(nBatch):
-        fileOut = dirOut +'/'+ 'batch%04d.json.gz'
+        fileOut = dirOut +'/'+ 'batch%04d.json.gz'%iBatch
         mn = iBatch*batchSize
         mx = min((iBatch+1)*batchSize, len(diaObjectList))
         getBatch(diaObjectList[mn:mx], fileOut)
