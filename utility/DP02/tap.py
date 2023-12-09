@@ -16,12 +16,11 @@ auth.add_security_method_for_url(url + "/tables", "lsst-token")
 
 service = pyvo.dal.TAPService(url, auth)
 
-def getDiaObject(howMany, howManySources):
+def getDiaObject(decMin, decMax):
     query = """
-    SELECT TOP %d *
-    FROM dp02_dc2_catalogs.DiaObject 
-    WHERE nDiaSources > %d """
-    query = query % (howMany, howManySources)
+    SELECT * FROM dp02_dc2_catalogs.DiaObject 
+    WHERE decl > %f AND decl < %f """
+    query = query % (decMin, decMax)
 
     results = service.search(query)
     DiaSrcs = results.to_table()
@@ -53,15 +52,14 @@ def np_encoder(object):
     if isinstance(object, np.generic):
         return object.item()
 
-def getBatch(diaObjectList, iBatch):
-    dir = 'data/data_%06d_%d' % (howMany, howManySources)
+def getBatch(diaObjectList, fileOut):
     diaObjectIdList = [int(d['diaObjectId']) for d in diaObjectList]
 
     sources         = [dict(s) for s in getDiaSource(diaObjectIdList)]
     fsources        = [dict(f) for f in getForcedSourceOnDiaObject(diaObjectIdList)]
 
-    print('%d/%d/%d objects/sources/forcedsources' % \
-            (len(diaObjectIdList), len(sources), len(fsources)))
+#    print('%d/%d/%d objects/sources/forcedsources' % \
+#            (len(diaObjectIdList), len(sources), len(fsources)))
 
     objList = []
     for diaObject in diaObjectList:
@@ -74,37 +72,30 @@ def getBatch(diaObjectList, iBatch):
         objList.append(obj)
 
     s = json.dumps(objList, default=np_encoder)
-    jsonfilename = dir + '/batch%03d.json.gz' % iBatch
-    with gzip.open(jsonfilename, 'wt', encoding='UTF-8') as zipfile:
+    with gzip.open(fileOut, 'wt', encoding='UTF-8') as zipfile:
         zipfile.write(s)
 
 if __name__ == '__main__':
-    batchSize = 10
+    batchSize = 50
     if len(sys.argv) > 2:
-        howMany        = int(sys.argv[1])
-        howManySources = int(sys.argv[2])
-    else:
-        howMany = 5
-        howManySources = 10
+        decMin        = float(sys.argv[1])
+        decMax        = float(sys.argv[2])
 
-    if howMany < batchSize:
-        nBatch = 1
-        batchSize = howMany
-    else:
-        nBatch = howMany//batchSize
-        howMany = nBatch*batchSize
+    dirOut = 'data/data_%.4f_%.4f' % (-decMin, -decMax)
         
-    print('Fetching %d objects with more than %d sources' % (howMany, howManySources))
-    dir = 'data/data_%06d_%d' % (howMany, howManySources)
-    os.system('mkdir -p %s' % dir)
+    print('Data going to ', dirOut)
+    os.system('mkdir -p %s' % dirOut)
 
     t0 = time.time()
-    diaObjectList = getDiaObject(howMany, howManySources)
+    diaObjectList = getDiaObject(decMin, decMax)
+    nBatch = 1 + len(diaObjectList) // batchSize
     t1 = time.time()
     print('Fetched %d objects in %.1f minutes' % (len(diaObjectList), (t1-t0)/60))
     
-    t0 = time.time()
     for iBatch in range(nBatch):
-        getBatch(diaObjectList[iBatch*batchSize:(iBatch+1)*batchSize], iBatch)
+        fileOut = dirOut +'/'+ 'batch%04d.json.gz'
+        mn = iBatch*batchSize
+        mx = min((iBatch+1)*batchSize, len(diaObjectList))
+        getBatch(diaObjectList[mn:mx], fileOut)
         t1 = time.time()
-        print('%d objects in %.1f minutes' % ((iBatch+1)*batchSize, (t1-t0)/60))
+        print('%.1f minutes: from %d to %d' % ((t1-t0)/60, mn, mx))
