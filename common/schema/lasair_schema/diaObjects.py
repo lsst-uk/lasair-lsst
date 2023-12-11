@@ -63,7 +63,7 @@ schema = {
     },
     {
       "name": "gPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute gPSFluxChi2"
     },
     {
@@ -173,7 +173,7 @@ schema = {
     },
     {
       "name": "iPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute iPSFluxChi2"
     },
     {
@@ -293,7 +293,7 @@ schema = {
     },
     {
       "name": "rPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute rPSFluxChi2"
     },
     {
@@ -413,7 +413,7 @@ schema = {
     },
     {
       "name": "uPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute uPSFluxChi2"
     },
     {
@@ -523,7 +523,7 @@ schema = {
     },
     {
       "name": "yPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute yPSFluxChi2"
     },
     {
@@ -633,7 +633,7 @@ schema = {
     },
     {
       "name": "zPSFluxNdata",
-      "type": "int",
+      "type": "double",
       "doc": "The number of data points used to compute zPSFluxChi2"
     },
     {

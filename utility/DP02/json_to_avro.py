@@ -1,4 +1,4 @@
-import os, sys, json
+import os, sys, json, gzip
 import fastavro
 
 if __name__ == '__main__':
@@ -9,12 +9,16 @@ if __name__ == '__main__':
     parsed_schema = fastavro.parse_schema(schema)
 
     for file in os.listdir(datadir):
-        tok = file.split('.')
-        if len(tok) < 2 or tok[1] != 'json':
-            continue
-        fileroot = tok[0]
-        s = open(datadir +'/'+ fileroot + '.json').read()
-        print(file, len(s))
-        obj = json.loads(s)
-        avrofile = open(datadir +'/'+ fileroot + '.avro', 'wb')
-        fastavro.schemaless_writer(avrofile, parsed_schema, obj)
+        if not file.endswith('gz'): continue
+        
+        with gzip.open(datadir +'/'+ file, 'r') as fin:
+            json_bytes = fin.read()
+
+        json_str = json_bytes.decode('utf-8')
+        objList = json.loads(json_str)          
+
+        for obj in objList:
+            diaObjectId = str(obj['DiaObject']['diaObjectId'])
+            s = json.dumps(obj, indent=2)
+            avrofile = open(datadir +'/'+ diaObjectId + '.avro', 'wb')
+            fastavro.schemaless_writer(avrofile, parsed_schema, obj)
