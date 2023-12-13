@@ -1,5 +1,21 @@
 # Managing Lasair Assets with Gulp
 
+## TL;DR
+
+Just do this:
+
+```bash
+sudo apt install nodejs
+sudo apt install npm
+sudo npm install --global gulp-cli
+cd ~/lasair4/webserver/staticfiles/
+npm install
+gulp build
+cd ..
+export PYTHONPATH="$PYTHONPATH:/home/ubuntu/lasair-lsst/common/"
+python3 manage.py collectstatic --settings lasair.settings
+```
+
 ## Extra Installs Needed for a Fresh Dev Build
 
 ```bash
@@ -18,6 +34,7 @@ To build the static assets simply:
 
 ```bash
 cd ~/lasair4/webserver/staticfiles/
+npm install
 gulp build
 cd ..
 python3 manage.py collectstatic --settings lasair.settings
