@@ -1,12 +1,13 @@
-from src import objectStore, cutoutStore
 import sys
-import os
+sys.path.append('../common')
+from src import objectStore, cutoutStore
 from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.http import JsonResponse
 import dateutil.parser as dp
 from datetime import datetime, timedelta
+import os
 import time
 import json
 import math
@@ -18,7 +19,6 @@ from src import db_connect
 from datetime import date
 from lasair.lightcurves import lightcurve_fetcher
 from astropy.time import Time
-sys.path.append('../../common')
 import settings
 
 
