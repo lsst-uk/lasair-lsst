@@ -26,9 +26,13 @@ class cutoutStore():
                 hosts = settings.CUTOUTCASS_HOSTS
             except:
                 hosts = ['localhost']
-            self.cluster = Cluster(hosts)
-            self.session = self.cluster.connect()
-            self.session.set_keyspace('cutouts')
+            try:
+                self.cluster = Cluster(hosts)
+                self.session = self.cluster.connect()
+                self.session.set_keyspace('cutouts')
+            except Exception as e:
+                print('Cutoutcass session failed to create: ' + str(e))
+                self.session = None
     
     def getCutout(self, cutoutId, imjd):
         """getCutout.
