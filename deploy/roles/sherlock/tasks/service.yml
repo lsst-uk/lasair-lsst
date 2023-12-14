@@ -12,6 +12,13 @@
     src:  service_settings.yaml.j2
     dest: /opt/lasair/sherlock_service_settings.yaml
 
+- name: Link Sherlock settings file
+  become: true
+  file:
+    src: "{{ ansible_env.HOME }}/{{ git_name }}/pipeline/sherlock/sherlock_settings.yaml"
+    dest:  /opt/lasair/sherlock_settings.yaml
+    state: link
+
 - name: "Install apt packages"
   become: true
   apt:
