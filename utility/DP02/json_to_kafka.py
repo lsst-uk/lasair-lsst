@@ -1,11 +1,11 @@
-import os, sys, json, io
+import os, sys, json, io, gzip
 import fastavro
 from confluent_kafka import Producer, KafkaError
 
 if __name__ == '__main__':
     if len(sys.argv) >= 3:
-        datadir = 'data/' + sys.argv[1]
-        topic = sys.argv[2]
+        datadir = sys.argv[1]
+        topic   = sys.argv[2]
     else:
         print('Usage: json_to_kafka.py <dataset> <topic>')
         sys.exit()
@@ -21,24 +21,30 @@ if __name__ == '__main__':
     p = Producer(conf)
 
     n = 0
+    objList = None
     for file in os.listdir(datadir):
         if not file.endswith('gz'): continue
         
-        with gzip.open(datadir +'/'+ file, 'r') as fin:
-            json_bytes = fin.read()
+        del objList
+        fin = gzip.open(datadir +'/'+ file, 'r')
+        json_bytes = fin.read()
+        fin.close()
 
         json_str = json_bytes.decode('utf-8')
+        del json_bytes
         objList = json.loads(json_str)          
+        del json_str
 
         for obj in objList:
             diaObjectId = str(obj['DiaObject']['diaObjectId'])
             s = json.dumps(obj, indent=2)
             mockfile = io.BytesIO()
             fastavro.schemaless_writer(mockfile, parsed_schema, obj)
-            p.produce(topic, mockfile)
+            p.produce(topic, mockfile.getvalue())
             n +=1
-            if n%1000 == 0: 
+            if n%100 == 0: 
                 print(n)
                 p.flush()
+                p = Producer(conf)
     p.flush()
     print('%d alerts pushed to topic %s' % (n, topic))

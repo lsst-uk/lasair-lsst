@@ -4,8 +4,8 @@ from confluent_kafka import Producer, KafkaError
 
 if __name__ == '__main__':
     if len(sys.argv) >= 3:
-        datadir = 'data/' + sys.argv[1]
-        topic = sys.argv[2]
+        datadir = sys.argv[1]
+        topic   = sys.argv[2]
     else:
         print('Usage: avro_to_kafka.py <dataset> <topic>')
         sys.exit()
