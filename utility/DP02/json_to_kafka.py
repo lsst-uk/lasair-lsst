@@ -36,6 +36,9 @@ if __name__ == '__main__':
         del json_str
 
         for obj in objList:
+            # there will never be an alert with no detections
+            if obj['DiaObject']['nDiaSources'] < 1: continue
+
             diaObjectId = str(obj['DiaObject']['diaObjectId'])
             s = json.dumps(obj, indent=2)
             mockfile = io.BytesIO()

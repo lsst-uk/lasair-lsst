@@ -27,6 +27,9 @@ if __name__ == '__main__':
         print('found %d objects' % len(objList))
 
         for obj in objList:
+            # there will never be an alert with no detections
+            if obj['DiaObject']['nDiaSources'] < 1: continue
+
             diaObjectId = str(obj['DiaObject']['diaObjectId'])
             s = json.dumps(obj, indent=2)
             avrofile = open(datadir +'/'+ diaObjectId + '.avro', 'wb')
