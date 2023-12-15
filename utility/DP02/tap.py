@@ -116,4 +116,4 @@ if __name__ == "__main__":
         mx = min((iBatch+1)*batchSize, len(diaObjectList))
         getBatch(diaObjectList[mn:mx], fileOut)
         t1 = time.time()
-        print('%.1f minutes: from %d to %d' % ((t1-t0)/60, mn, mx))
+        print('%.1f minutes: %d done of %d' % ((t1-t0)/60, mx, len(diaObjectList)))
