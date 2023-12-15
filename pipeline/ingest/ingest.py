@@ -117,13 +117,15 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     forcedSourceOnDiaObjectsList      = lsst_alert['ForcedSourceOnDiaObjectList']
     diaSourcesList            = lsst_alert['DiaSourceList']
     diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)
-    lastSource = diaSourcesList[0]
 
-    # ID for the latest detection, this is what the cutouts belong to
-    diaSourceId = lastSource['diaSourceId']
+    if len(diaSourcesList) > 0:
+        lastSource = diaSourcesList[0]
 
-    # MJD for storing images
-    imjd = int(lastSource['midPointTai'])
+        # ID for the latest detection, this is what the cutouts belong to
+        diaSourceId = lastSource['diaSourceId']
+
+        # MJD for storing images
+        imjd = int(lastSource['midPointTai'])
 
     # objectID
     diaObjectId = diaObject['diaObjectId']
@@ -212,6 +214,8 @@ def run_ingest(args):
     # set up image store in Cassandra or shared file system
     if settings.USE_CUTOUTCASS:
         image_store = cutoutStore.cutoutStore()
+        if image_store.session == None:
+            image_store = None
     elif fitsdir and len(fitsdir) > 0:
         image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
     else:
