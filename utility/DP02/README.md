@@ -59,17 +59,21 @@ Make a file `settings.py` with your RSP token like this `RSP_TOKEN = 'gt-ZhwzwDm
 
 Now make a JSON file for each object and for its diaSources and forcedSourceOnDiaObjects. First argument is how many objects, next is minimum number of sources per object
 ```
-python3 tap.py <howMany> <howManySources>
+python3 tap.py /mnt/cephfs/DP02 <decMin> <decMax>
 ```
+The DP0.2 runs from about dec=-45 to about dec=-25. A gap of 0.01 degrees runs in a few minutes, so for example decMin=-31.01 and decMax=-30.00 maks a directory of data called `/mnt/cephfs/DP02/data_30.0100_30.0000`.
 
-Turn it into schemaless avro packets. This directory is for howMany=5 and howManySources=10
+Turn it into schemaless avro packets and upload to the named Kafka topic, doe example DP02.
 ```
-python3 json_to_avro.py  data_0005_10
+python3 json_to_kafka.py /mnt/cephfs/DP02/data_30.0100_30.0000 DP02
 ```
-
-Push it into Lasair Kafka ready for ingestion, with topic `DP02`
+Now you can tun ingestion and filter:
 ```
-python3 avro_to_kafka.py data_0005_10
+ssh lasair-lsst-dev-ingest-0
+cd lasair-lsst/pipeline/ingest
+python3 ingest.py --topic_in DP02
+exit
+ssh lasair-lsst-dev-filter-0
+cd lasair-lsst/pipeline/filter
+python3 filter.py --topic_in=ztf_ingest
 ```
-
-
