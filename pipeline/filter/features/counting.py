@@ -24,14 +24,22 @@ class counting(FeatureGroup):
         for b in band: nSource[b] += 1
         if self.verbose:
             print('Found %d sources' % len(time))
-        return { 
-            "nSources": len(time),
+        if len(time) > 0:
+            minTai = min(time)
+            maxTai = max(time)
+            nSources = len(time)
+        else:
+            return None
+
+        out = { 
+            "nSources": nSources,
             "nuSources": nSource['u'],
             "ngSources": nSource['g'],
             "nrSources": nSource['r'],
             "niSources": nSource['i'],
             "nzSources": nSource['z'],
             "nySources": nSource['y'],
-            "minTai"  : min(time), 
-            "maxTai"  : max(time),
+            "minTai"   : minTai, 
+            "maxTai"   : maxTai,
         }
+        return out

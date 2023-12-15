@@ -77,6 +77,10 @@ def alert_filter(alert, msl):
     # Filter to apply to each alert.
     diaObjectId = alert['diaObject']['diaObjectId']
 
+    # really not interested in alerts that have no detections!
+    if len(alert['diaSourcesList']) == 0:
+        return 0
+
     # build the insert query for this object.
     # if not wanted, returns None
     query = insert_query.create_insert_query(alert)
