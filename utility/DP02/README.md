@@ -41,7 +41,6 @@ Now edit `lasair_schema/*.py` to add primary key to "indexes" -- examples [here]
 
 Now convert these modified schema to the database CREATE TABLE
 ```
-cp ../../../common/schema/convert.py .
 python3 convert.py cql diaObjects
 python3 convert.py cql diaSources
 python3 convert.py cql forcedSourceOnDiaObjects
@@ -52,8 +51,7 @@ Can now use the CQL to make Cassandra tables and the SQL to make Galera tables
 ### Get data RSP --> Lasair Kafka
 Get some data via TAP interface (slow). First put your RSP token in `settings.py` as
 ```
-cd ..
-mkdir data
+cd ../../utility/DP02
 ```
 Make a file `settings.py` with your RSP token like this `RSP_TOKEN = 'gt-ZhwzwDmLzxxxxxxxxxxxxxxxxxxxxxxxxx7TJMl_gw'`
 
@@ -61,7 +59,7 @@ Now make a JSON file for each object and for its diaSources and forcedSourceOnDi
 ```
 python3 tap.py /mnt/cephfs/DP02 <decMin> <decMax>
 ```
-The DP0.2 runs from about dec=-45 to about dec=-25. A gap of 0.01 degrees runs in a few minutes, so for example decMin=-31.01 and decMax=-30.00 maks a directory of data called `/mnt/cephfs/DP02/data_30.0100_30.0000`.
+The DP0.2 runs from about dec=-45 to about dec=-25. A gap of 0.01 degrees runs in a few minutes, so for example decMin=-31.01 and decMax=-30.00 makes a directory of data called `/mnt/cephfs/DP02/data_30.0100_30.0000`.
 
 Turn it into schemaless avro packets and upload to the named Kafka topic, doe example DP02.
 ```
