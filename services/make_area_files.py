@@ -9,7 +9,7 @@ import os, sys, stat, time, base64
 from my_cmd import execute_cmd
 sys.path.append('../common')
 from datetime import datetime
-from src import date_nid, db_connect, slack_webhook. bad_fits
+from src import date_nid, db_connect, slack_webhook, bad_fits
 
 logfile = ''
 logf = None
