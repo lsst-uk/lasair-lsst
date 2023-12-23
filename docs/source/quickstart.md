@@ -36,7 +36,7 @@ object page,
 correctly,
     * `gmag, rmag`: the magnitudes of the latest alert in the g and r filters,
     * `jdmax`: the Julian Day (i.e.date and time) of the latest alert,
-    * `jdnow()`: an SQL function that returns the Julian Day now, so we can 
+    * `tainow()`: an SQL function that returns the Modified Julian Day now, so we can 
 subtract to get the age in days,
     * `ncandgp`: number of good, positive alerts belonging to this object. 
 * From the sherlock_classifications table:

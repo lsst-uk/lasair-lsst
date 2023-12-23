@@ -13,7 +13,7 @@ then "Create New" at top right.
 
 Fill in the form as shown here. Name and description, then check the “email” box, and fill in the SELECT as
 ```
-objects.objectId, objects.gmag, jdnow()-objects.jdmax AS since
+objects.objectId, objects.gmag, tainow()-objects.taimax AS since
 ```
 and fill in the WHERE as
 ```
