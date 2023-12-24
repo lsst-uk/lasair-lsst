@@ -168,17 +168,32 @@ post-deployment tests:
 $ ansible-playbook test.yaml
 ```
 
-## Starting MirrorMaker
+## Starting and Stopping
 
-Mirrormaker is responsible for pulling alerts from the upstream Kafka source.
-It is not started by default. To start it, edit `deploy.yaml`. In the `kafka`
-section check that the upstream source points to the correct location and 
-change the variable `start_mirrormaker` to `true`. Then run:
+To cleanly start and stop Lasair you can use the `start.sh` and `stop.sh` scripts.
+
+To start everything that is deployed:
 ```
-$ ansible-playbook deploy.yaml --tags facts,kafka
+$ ./start.sh
 ```
 
-To stop Mirrormaker, set `start_mirrormaker` to `false` and do the same.
+Similarly, to stop everything:
+```
+$ ./stop.sh
+```
+
+You can also stop and start individual components. E.g. to stop the ingest:
+```
+$ ./stop.sh ingest
+```
+
+There is also a `pipeline` tag to start/stop all of the pipeline components
+(mirrormaker, ingest, sherlock, filter).
+
+It is possible to get a full list of available tags:
+```
+$ ansible-playbook control.yaml --list-tags
+```
 
 ## Modify a deployment
 
@@ -192,7 +207,7 @@ To add/remove instances:
 
 To remove a deployment:
 ```
-$ openstack stack delete <name>
+$ ansible-playbook infra.yaml --extra-vars state=absent
 ```
 
 If you are not going to recreate the deployment you can then go ahead and remove the network as well.

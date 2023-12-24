@@ -20,6 +20,8 @@ def create_insert_query(alert):
 
     verbose = False
     lasair_features = FeatureGroup.run_all(alert, verbose)
+    if not lasair_features:
+        return None
     if verbose:
         print(lasair_features)
 

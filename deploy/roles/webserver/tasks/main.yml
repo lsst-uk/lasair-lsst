@@ -13,6 +13,7 @@
       - libmysqlclient-dev
       - swig
       - postfix
+      - pkg-config
     state: present
     update_cache: true
 
@@ -21,18 +22,13 @@
   pip: 
     executable: pip3 
     name: 
+      - numpy
       - mysql-connector-python
       - mysqlclient
+      - requests
       - django
       - djangorestframework
-      - pyephem
-      - requests
-      - MOCpy
-      - astropy
       - cassandra-driver
-      - gkhtm
-      - gkutils
-      - gkdbutils
       - mod_wsgi-httpd
       - mod_wsgi
       - confluent-kafka
@@ -43,10 +39,22 @@
       - django-browser-reload
       - django-crispy-forms
       - django-recaptcha
+
+- name: Install more python packages
+  become: true
+  pip: 
+    executable: pip3 
+    name: 
+      - pyephem
+      - MOCpy
+      - astropy
+      - gkhtm
+      - gkutils
+      - gkdbutils
       - astrocalc
       - pandas
       - plotly
-      
+      - hmpty
 
 - name: Disable Apache
   become: true

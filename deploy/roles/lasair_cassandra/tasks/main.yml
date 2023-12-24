@@ -10,10 +10,10 @@
 - name: Create tables
   command: "cqlsh -e 'use {{ keyspace }}; {{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }};'"
   with_items:
-    - "/common/schema/lasair_cql/diaForcedSources.cql"
-    - "/common/schema/lasair_cql/diaNondetectionLimits.cql"
+    - "/common/schema/lasair_cql/forcedSourceOnDiaObjects.cql"
     - "/common/schema/lasair_cql/diaSources.cql"
     - "/common/schema/lasair_cql/diaObjects.cql"
+
 
 - name: flush handlers
   meta: flush_handlers

@@ -22,11 +22,18 @@ class diaObjectCopy(FeatureGroup):
         # copy the values from the alert
         output = {}
         object = self.alert["diaObject"]
+
         for f in self._features:
             if f in object:
                 output[f] = object[f]
             else:
                 if self.verbose: print('diaObjectCopy: did not find %s' % f)
                 output[f] = None
+
+        # because of a mistake in the DP0.2 schema
+        if output['gPSFluxNdata']: output['gPSFluxNdata'] = int(output['gPSFluxNdata'])
+        else                     : output['gPSFluxNdata'] = None
+        if output['rPSFluxNdata']: output['rPSFluxNdata'] = int(output['rPSFluxNdata'])
+        else                     : output['rPSFluxNdata'] = None
         return output
 

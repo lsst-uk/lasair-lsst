@@ -77,7 +77,10 @@ instances:
   kafka_pub:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      kafka_pub:
+        size: 10
+        type: ceph-hdd
     floating_ip: true
     flavor: tiny
   ingest:
@@ -104,7 +107,19 @@ instances:
   cassandranodes:
     number: 0
     root_volume_size: 25
-    extra_volumes: {}
+    extra_volumes: 
+      cassandra:
+        size: 10
+        type: ceph-ssd
+    floating_ip: false
+    flavor: tiny
+  cutoutcass:
+    number: 1
+    root_volume_size: 25
+    extra_volumes:
+      cutoutcass:
+        size: 10
+        type: ceph-hdd
     floating_ip: false
     flavor: tiny
   parallel_ssh:
@@ -125,8 +140,14 @@ vault:
   url: https://vault.lsst.ac.uk
   path: secret/lasair
 
+# Default from address to use when sending email
+lasair_email: lasair@lsst.ac.uk
+
 # An admin email address for services that expect one
 admin_email: lasair-help@lists.roe.ac.uk
+
+# Default from address to use when sending email
+lasair_email: lasair@lsst.ac.uk
 
 # CephFS export location for the Sherlock database share
 sherlock_share: "10.19.4.16:6789,10.19.4.17:6789,10.19.4.18:6789:/volumes/_nogroup/f7d66a57-bdce-4924-8817-4b968ca9648f/7a8807b0-f30d-46a5-820a-1114071e5a04"

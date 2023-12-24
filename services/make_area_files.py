@@ -9,7 +9,7 @@ import os, sys, stat, time, base64
 from my_cmd import execute_cmd
 sys.path.append('../common')
 from datetime import datetime
-from src import date_nid, db_connect, slack_webhook
+from src import date_nid, db_connect, slack_webhook, bad_fits
 
 logfile = ''
 logf = None
@@ -51,6 +51,8 @@ def write_cache_file(msl, ar_id, cache_dir):
     f = open(area_file, 'wb')
     f.write(moc)
     f.close()
+    message = bad_fits.bad_moc_file(area_file)
+    return message
 
 def fetch_active_areas(msl, cache_dir):
     """
@@ -61,10 +63,10 @@ def fetch_active_areas(msl, cache_dir):
 
     keep = []
     get  = []
-    cursor.execute('SELECT ar_id, name, timestamp FROM areas WHERE active > 0 ')
+    cursor.execute('SELECT ar_id, name, date_modified FROM areas WHERE active > 0 ')
     for row in cursor:
         # unix time of last update from the database
-        area_timestamp = time.mktime(row['timestamp'].timetuple())
+        area_timestamp = time.mktime(row['date_modified'].timetuple())
 
         # directory where the cache files are kept
         area_file = cache_dir + '/ar_%d.fits'%row['ar_id']
@@ -113,7 +115,12 @@ if __name__ == "__main__":
         execute_cmd(cmd, logfile)
 
     for ar_id in areas['get']:
-        write_cache_file(msl, ar_id, new_cache_dir)
+        message = write_cache_file(msl, ar_id, new_cache_dir)
+        if message is not None:
+            area_file = new_cache_dir + '/ar_%d.fits' % ar_id
+            execute_cmd('rm ' + area_file, logfile)
+            logf.write('Area %s not active: %s' % (ar_id, message))
+
     execute_cmd('rm -r %s'  % cache_dir, logfile)
     execute_cmd('mv %s %s' % (new_cache_dir, cache_dir), logfile)
     sys.exit(0)

@@ -3,6 +3,7 @@ from .forms import WatchlistForm, UpdateWatchlistForm, DuplicateWatchlistForm
 import time
 import random
 import json
+import datetime
 from subprocess import Popen, PIPE
 from lasair.apps.watchlist.models import Watchlist, WatchlistCone
 from django.http import HttpResponse, HttpResponseRedirect
@@ -10,7 +11,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
-import src.run_crossmatch as run_crossmatch
+import src.run_crossmatch_optimised as run_crossmatch
 from django.conf import settings
 from django.contrib import messages
 from src import db_connect
@@ -68,8 +69,15 @@ def watchlist_index(request):
             except:
                 messages.error(request, f'Cannot parse default radius {d_radius}')
 
+            coneLines = cones.split('\n')
+            count = len(coneLines)
+
+            if count > settings.WATCHLIST_MAX:
+                messages.error(request, f"The watchlist can't contain more than {settings.WATCHLIST_MAX} sources. Please reduce the size of your watchlist and try again.")
+                return redirect(f'watchlist_index')
+
             cone_list = []
-            for line in cones.split('\n'):
+            for line in coneLines:
                 if len(line) == 0:
                     continue
                 if line[0] == '#':
@@ -91,7 +99,8 @@ def watchlist_index(request):
                 except Exception as e:
                     messages.error(request, f'Bad line {len(cone_list)}: {line}\n{str(e)}')
 
-            wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius)
+            expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+            wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius, date_expire=expire)
             wl.save()
             cones = []
             for cone in cone_list:
@@ -105,7 +114,7 @@ def watchlist_index(request):
                 WatchlistCone.objects.bulk_create(cones[(i * 50000): ((i + 1) * 50000)])
 
             watchlistname = form.cleaned_data.get('name')
-            messages.success(request, f"The '{watchlistname}' watchlist has been successfully created")
+            messages.success(request, f"The '{watchlistname}' watchlist containing {count} sources has been successfully created")
             return redirect(f'watchlist_detail', wl.pk)
 
     else:
@@ -129,13 +138,14 @@ def watchlist_index(request):
                    'form': form})
 
 
-def watchlist_detail(request, wl_id):
+def watchlist_detail(request, wl_id, action=False):
     """*return the resulting matches of a watchlist*
 
     **Key Arguments:**
 
     - `request` -- the original request
     - `wl_id` -- the watchlist catlaogue UUID
+    - `action` -- action to run against the watchlist
 
     **Usage:**
 
@@ -166,7 +176,9 @@ def watchlist_detail(request, wl_id):
         form = UpdateWatchlistForm(request.POST, instance=watchlist, request=request)
         action = request.POST.get('action')
 
-    if request.method == 'POST' and is_owner and action == 'save':
+    request.method = 'POST'
+
+    if request.method == 'POST' and is_owner and action:
         # UPDATING SETTINGS?
         if action == 'save':
             if form.is_valid():
@@ -186,12 +198,19 @@ def watchlist_detail(request, wl_id):
                 watchlist.radius = float(request.POST.get('radius'))
                 if watchlist.radius > 360:
                     watchlist.radius = 360
+                watchlist.date_expire = \
+                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
                 watchlist.save()
                 messages.success(request, f'Your watchlist has been successfully updated')
         # REQUEST TO REFRESH THE WATCHLIST MATCHES
         elif action == 'run':
-            hits = run_crossmatch.run_crossmatch(msl, watchlist.radius, watchlist.wl_id)
-            messages.success(request, f'{hits} crossmatches found')
+            hits, message = run_crossmatch.run_crossmatch(msl, watchlist.radius, watchlist.wl_id, wlMax=settings.WATCHLIST_MAX_CROSSMATCH)
+            if int(hits) == -1:
+                messages.error(request, f'{message}')
+            else:
+                messages.success(request, f'{message}')
+            duplicateForm = DuplicateWatchlistForm(instance=watchlist, request=request)
+            form = UpdateWatchlistForm(instance=watchlist, request=request)
 
     elif request.method == 'POST' and action == "copy":
 
@@ -214,6 +233,8 @@ def watchlist_detail(request, wl_id):
                 newWl.public = True
             else:
                 newWl.public = False
+            newWl.date_expire = \
+                datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWl.save()
             wl = newWl
 
@@ -243,6 +264,10 @@ def watchlist_detail(request, wl_id):
     for row in cursor:
         number_cones = row['count']
 
+    if number_cones > settings.WATCHLIST_MAX_CROSSMATCH:
+        rematchAllowed = False
+    else:
+        rematchAllowed = True
     resultCap = 1000
 
     # GRAB ALL WATCHLIST MATCHES
@@ -297,7 +322,9 @@ WHERE c.wl_id={wl_id} limit {resultCap}
         'form': form,
         'duplicateForm': duplicateForm,
         'number_cones': number_cones,
-        'limit': limit
+        'limit': limit,
+        'rematchAllowed': rematchAllowed,
+        'maxCrossmatchSize': str(settings.WATCHLIST_MAX_CROSSMATCH)
     })
 
 

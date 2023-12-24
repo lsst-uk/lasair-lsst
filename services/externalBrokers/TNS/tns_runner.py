@@ -6,41 +6,33 @@ Run the TNS refresher, putting logs where Lasair can see them
 import os,sys, time
 sys.path.append('../../../common')
 import settings
-from src import date_nid, slack_webhook
+from src import date_nid
 from datetime import datetime
-from subprocess import Popen, PIPE
+sys.path.append('../../../common/src')
+sys.path.append('../..')
+from my_cmd import execute_cmd
+import slack_webhook
+import lasairLogging
 
 def now():
     # current UTC as string
     return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
 
-nid  = date_nid.nid_now()
-date = date_nid.nid_to_date(nid)
-log = open(settings.SERVICES_LOG +'/'+ date + '.log', 'a')
+if __name__ == "__main__":
+    lasairLogging.basicConfig(
+        filename='/home/ubuntu/logs/svc.log',
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
 
-rtxt = 'poll_tns at ' +  now()
-log.write(rtxt + '\n')
+    log = lasairLogging.getLogger("svc")
 
-# start the worker in subprocess -- yesterday's update
-args = ['python3', 'poll_tns.py', '--daysAgo=1']
-process = Popen(args, stdout=PIPE, stderr=PIPE)
+    nid  = date_nid.nid_now()
+    date = date_nid.nid_to_date(nid)
+    logfile = settings.SERVICES_LOG +'/'+ date + '.log'
 
-# fetch lines of printed output
-while 1:
-    # when the worker terminates, readline returns zero
-    rbin = process.stdout.readline()
-    if len(rbin) == 0: break
+    cmd = 'echo "\\n-- poll_tns at %s"' % now()
+    execute_cmd(cmd, logfile)
 
-    # if the worher uses 'print', there will be at least the newline
-    rtxt = rbin.decode('utf-8').rstrip()
-    log.write(rtxt + '\n')
-
-    # scream to the humans if ERROR
-    if rtxt.startswith('ERROR'):
-        slack_webhook.send(settings.SLACK_URL, rtxt)
-
-# close the log and get the return code
-rc = process.wait()
-rtxt = 'poll_tns exit at ' +  now()
-log.write(rtxt + '\n')
-log.close()
+    cmd = 'python3 poll_tns.py --daysAgo=1'
+    execute_cmd(cmd, logfile)

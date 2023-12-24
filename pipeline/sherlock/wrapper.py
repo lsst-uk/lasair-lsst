@@ -5,7 +5,7 @@ adds the Sherlock classification and crossmatches back into the alert and
 republishes on the output topic.
 """
 
-__version__ = "0.7.2"
+__version__ = "0.7.6"
 
 import warnings
 import json
@@ -305,7 +305,8 @@ def run(conf, log):
 
         batch = 0
         while True:
-            if conf['max_batches'] > 0 and batch == conf['max_batches']:
+            if 'max_batches' in conf and conf['max_batches'] > 0 and batch == conf['max_batches']:
+                log.log(logging.INFO_, "reached max batches at batch { batch }")
                 break
             batch += 1
             alerts = []
@@ -313,7 +314,8 @@ def run(conf, log):
             if n==0 and conf['stop_at_end']:
                 break
     except Exception as e:
-        log.critical(str(e))
+        log.critical(f"Exception: { type(e).__name__ } { str(e) }")
+        raise e
     finally:
         consumer.close()
 

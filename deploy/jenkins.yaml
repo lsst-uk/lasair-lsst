@@ -28,6 +28,19 @@
     - gkansible.gkservercollection.mariadb
     - lasair_database    
     - gkansible.gkservercollection.mysql_sherlock
+    - gkansible.gkservercollection.cassandra4
     - kafka
     - jenkins
 
+- hosts: localhost
+  gather_facts: false
+  become: true
+  tasks:
+    - name: restart cassandra
+      shell: "update-alternatives --set java $(update-alternatives --list java | grep java-11);
+        sleep 3;
+        service cassandra stop;
+        sleep 3;
+        service cassandra start;
+        sleep 3;
+        update-alternatives --set java $(update-alternatives --list java | sort | tail -n1)"

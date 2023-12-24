@@ -1,0 +1,14 @@
+---
+- hosts: all:!localhost
+  gather_facts: true
+  become: true
+  tasks:
+    - name: apt upgrade
+      ansible.builtin.apt:
+        update_cache: true
+        upgrade: dist
+        autoremove: true
+        autoclean: true
+    - name: reboot
+      ansible.builtin.reboot:
+

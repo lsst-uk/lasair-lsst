@@ -53,7 +53,7 @@
                     {{watchlist.description}}
                 </small>
                 <small class="text-gray-500">
-                    The watchlist contains {{number_cones}} sources with a default association radius of <b>{{watchlist.radius}} arcsec</b>. The watchlist is <b>{% if not watchlist.active %}not {% endif %} active</b> {% include "includes/info_tooltip.html" with info="When active, a watchlist will be dynamically matched against new transient alerts. See the watchlist settings to make changes" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}.
+		The watchlist contains {{number_cones}} sources with a default association radius of <b>{{watchlist.radius}} arcsec</b>. The watchlist is <b>{% if not watchlist.active %}not {% endif %} active</b> {% include "includes/info_tooltip.html" with info="When active, a watchlist will be dynamically matched against new transient alerts. See the watchlist settings to make changes" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}. The watchlist is matched against new sources entering Lasair going forward.  {% if user.is_authenticated and user.id == watchlist.user.id and rematchAllowed %}Click 'Rerun Watchlist' to also match the watchlist against the entire history of Lasair sources {% include "includes/info_tooltip.html" with info="Up to a maximum watchlist size of "|add:maxCrossmatchSize|add:" sources" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}.{% endif %}
                 </small>
             </div>
 
@@ -64,6 +64,10 @@
 
             <div class="btn-group" >
 
+               {% if user.is_authenticated and user.id == watchlist.user.id and rematchAllowed %}
+                    <a class="btn btn-sm btn-tertiary border-white" href='{% url "watchlist_detail_run" watchlist.wl_id "run" %}' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="rematch watchlist against all Lasair sources">
+                        {% include "includes/icons/icon_run.html" %}<span class="align-middle d-none d-md-inline">Rerun Watchlist</span></a>
+                {% endif %}
 
                 {% if user.is_authenticated %}
                     <a class="btn btn-sm btn-tertiary border-white" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="copy this watchlist into My Watchlists list">

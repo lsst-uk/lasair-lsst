@@ -3,8 +3,8 @@ Using plotly to make two stacked plots of a lightcurve, one with flux
 the other magnitude. If a distance is provided (in Mpc), then absolute flux 
 and absolute magnitude are shown on the right axes.
 Different filters (ugrizy) have fifferent colors.
-Three types of flux/mag have different symbols and sizes -- 
-   diaSource, diaForcedSource, diaNondetectionLimit
+Two types of flux/mag have different symbols and sizes -- 
+   diaSource, diaForcedSource
 
 A legend can be made like this
 <p>
@@ -41,7 +41,7 @@ filterColor = {
 
 def flux2mag(flux):
     # Compute magnitude from flux
-    if flux > 0: return 31.4 - 2.5*math.log10(flux)
+    if flux and flux > 0: return 31.4 - 2.5*math.log10(flux)
     else:        return None
 
 def fluxerr2magerr(fluxerr, flux):
@@ -50,19 +50,28 @@ def fluxerr2magerr(fluxerr, flux):
     else:               return 1.086 * fluxerr / flux
 
 def plotList(alert, pointList, size, symbol, distanceMpc):
-    """ Plot one of the three types: 
-        diaSource, diaForcedSource, diaNondetectionLimit
+    """ Plot one of the two types: 
+        diaSource, diaForcedSource
     using all 6 colors for different filterNames
     """
+    if pointList == 'diaSources': fn = 'filtername'
+    else:                         fn = 'band'
+
     for filterName, color in filterColor.items():
         flux = []
         fluxerr = []
         fluxdays = []
         for s in alert[pointList]:
-            if s['filtername'] == filterName:
-                flux.append(s['psflux'])
+            if s[fn] == filterName:
+                if 'psflux' in s:
+                    flux.append(s['psflux'])
+                elif 'psfdiffflux' in s:
+                    flux.append(s['psfdiffflux'])
+
                 if 'psfluxerr' in s: 
                     fluxerr.append(s['psfluxerr'])
+                elif 'psfdifffluxerr' in s: 
+                    fluxerr.append(s['psfdifffluxerr'])
                 else:
                     fluxerr.append(0.0)    # HACK where is psfluxerr ???
                 fluxdays.append(s['midpointtai'])
@@ -156,6 +165,8 @@ def object_difference_lightcurve(alert):
 
     if 'sherlock' in alert and 'distance' in alert['sherlock']:
         distanceMpc = alert['sherlock']['distance']
+    else:
+        distanceMpc = None
 
     flux = []
     fluxerr = []
@@ -167,18 +178,11 @@ def object_difference_lightcurve(alert):
         fluxdays.append(s['midpointtai'])
 
     for s in alert['diaForcedSources']:
-        flux.append(s['psflux'])
-        if 'psfluxerr' in s:
-            fluxerr.append(s['psfluxerr'])
+        flux.append(s['psfdiffflux'])
+        if 'psfdifffluxerr' in s:
+            fluxerr.append(s['psfdifffluxerr'])
         else:
             fluxerr.append(0.0)         # HACK why no psfluxerr????
-        fluxdays.append(s['midpointtai'])
-
-    for s in alert['diaNondetectionLimits']:
-        s['psflux'] = s['dianoise']
-        s['psfluxErr'] = 0.0
-        flux.append(s['psflux'])
-        fluxerr.append(s['psfluxerr'])
         fluxdays.append(s['midpointtai'])
 
     fluxMin =  0
@@ -255,8 +259,7 @@ def object_difference_lightcurve(alert):
 
     # Now we can make the three plots, each with 6 colors
     plotList(alert, 'diaSources',            12, 'circle',          distanceMpc)
-    plotList(alert, 'diaForcedSources',       8, 'square',          distanceMpc)
-    plotList(alert, 'diaNondetectionLimits',  5, 'arrow-down-open', distanceMpc)
+    plotList(alert, 'diaForcedSources',       4, 'square',          distanceMpc)
 
     fig.update_layout(
         width =1000,

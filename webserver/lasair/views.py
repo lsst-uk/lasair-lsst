@@ -4,6 +4,7 @@ import time
 import math
 import string
 import json
+import os
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.models import User
 import src.date_nid as date_nid
@@ -14,6 +15,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
+from django.conf import settings as django_settings
 import settings
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from src import db_connect
@@ -33,18 +35,6 @@ def index(request):
     sherlock_classes = ['SN', 'NT', 'CV', 'AGN']
     base_colors = ['dc322f', '268bd2', '2aa198', 'b58900']
 
-    # query finds only mag<17 alerts with at least 2 in light curve, with age < 7
-#    query = """
-#    SELECT objects.diaObjectId,
-#       objects.ra, objects.decl,
-#       tainow()-objects.maxTai AS "last detected",
-#       sherlock_classifications.classification AS "predicted type"
-#    FROM objects, sherlock_classifications
-#    WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-#       AND objects.maxTai > tainow()-7
-#       AND objects.nSources > 1
-#       AND sherlock_classifications.classification in 
-#    """
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
@@ -58,11 +48,34 @@ def index(request):
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
     query += '(' + ','.join(S) + ')'
 
-    msl = db_connect.readonly()
-    cursor = msl.cursor(buffered=True, dictionary=True)
-    cursor.execute(query)
+#    FRONT_PAGE_CACHE = '/home/ubuntu/front_page_cache.json'
+#    FRONT_PAGE_STALE = 1800
 
-    table = cursor.fetchall()
+    table = None
+    try:
+        # if there is a young cache file, try to use it
+        age = time.time() - os.stat(django_settings.FRONT_PAGE_CACHE).st_mtime
+        if age < django_settings.FRONT_PAGE_STALE:
+            f = open(django_settings.FRONT_PAGE_CACHE, 'r')
+            table = json.loads(f.read())
+            f.close()
+    except:
+        pass
+
+    if table is None:
+        msl = db_connect.readonly()
+        cursor = msl.cursor(buffered=True, dictionary=True)
+        cursor.execute(query)
+
+        table = cursor.fetchall()
+        # try to write a cache file
+        try:
+            f = open(django_settings.FRONT_PAGE_CACHE, 'w')
+            f.write(json.dumps(table, indent=2))
+            f.close()
+        except:
+            pass
+
     # ADD SCHEMA
     schema = get_schema_dict("objects")
 

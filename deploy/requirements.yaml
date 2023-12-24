@@ -7,7 +7,7 @@ collections:
   #- name: openstack.cloud
   #  version: "<2.0"
   - name: community.general
-    version: ">=5.7"
+    version: ">=5.7,<6"
   - name: git+https://github.com/genghisken/gkansible.git
     type: git
     version: master

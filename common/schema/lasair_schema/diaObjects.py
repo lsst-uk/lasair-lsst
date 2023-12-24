@@ -1,1564 +1,696 @@
 schema = {
-  "name": "diaObjects",
+  "name": "DiaObjects",
   "fields": [
+    {
+      "name": "decl",
+      "type": "double",
+      "doc": "Mean Declination of DIASources in the diaObject"
+    },
     {
       "name": "diaObjectId",
       "type": "long",
-    },
-    {
-      "name": "ra",
-      "type": "double"
-    },
-    {
-      "name": "decl",
-      "type": "double"
-    },
-    {
-      "name": "raErr",
-      "type": "float"
-    },
-    {
-      "name": "declErr",
-      "type": "float"
-    },
-    {
-      "name": "ra_decl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "radecTai",
-      "type": "double"
-    },
-    {
-      "name": "pmRa",
-      "type": "float"
-    },
-    {
-      "name": "pmDecl",
-      "type": "float"
-    },
-    {
-      "name": "parallax",
-      "type": "float"
-    },
-    {
-      "name": "pmRaErr",
-      "type": "float"
-    },
-    {
-      "name": "pmDeclErr",
-      "type": "float"
-    },
-    {
-      "name": "parallaxErr",
-      "type": "float"
-    },
-    {
-      "name": "pmRa_pmDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "pmRa_parallax_Cov",
-      "type": "float"
-    },
-    {
-      "name": "pmDecl_parallax_Cov",
-      "type": "float"
-    },
-    {
-      "name": "pmParallaxLnL",
-      "type": "float"
-    },
-    {
-      "name": "pmParallaxChi2",
-      "type": "float"
-    },
-    {
-      "name": "pmParallaxNdata",
-      "type": "int"
-    },
-    {
-      "name": "uPSFluxMean",
-      "type": "float"
-    },
-    {
-      "name": "uPSFluxMeanErr",
-      "type": "float"
-    },
-    {
-      "name": "uPSFluxSigma",
-      "type": "float"
-    },
-    {
-      "name": "uPSFluxChi2",
-      "type": "float"
-    },
-    {
-      "name": "uPSFluxNdata",
-      "type": "int"
-    },
-    {
-      "name": "gPSFluxMean",
-      "type": "float"
-    },
-    {
-      "name": "gPSFluxMeanErr",
-      "type": "float"
-    },
-    {
-      "name": "gPSFluxSigma",
-      "type": "float"
+      "doc": "Unique id."
     },
     {
       "name": "gPSFluxChi2",
-      "type": "float"
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of gPSFlux around gPSFluxMean"
+    },
+    {
+      "name": "gPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
+    },
+    {
+      "name": "gPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "gPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "gPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+    },
+    {
+      "name": "gPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
+    },
+    {
+      "name": "gPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+    },
+    {
+      "name": "gPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "gPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "gPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
     },
     {
       "name": "gPSFluxNdata",
-      "type": "int"
+      "type": "double",
+      "doc": "The number of data points used to compute gPSFluxChi2"
     },
     {
-      "name": "rPSFluxMean",
-      "type": "float"
+      "name": "gPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
     },
     {
-      "name": "rPSFluxMeanErr",
-      "type": "float"
+      "name": "gPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
     },
     {
-      "name": "rPSFluxSigma",
-      "type": "float"
+      "name": "gPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
     },
     {
-      "name": "rPSFluxChi2",
-      "type": "float"
+      "name": "gPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
     },
     {
-      "name": "rPSFluxNdata",
-      "type": "int"
+      "name": "gPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
     },
     {
-      "name": "iPSFluxMean",
-      "type": "float"
+      "name": "gPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of gPSFlux"
     },
     {
-      "name": "iPSFluxMeanErr",
-      "type": "float"
+      "name": "gPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
     },
     {
-      "name": "iPSFluxSigma",
-      "type": "float"
+      "name": "gPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
+    },
+    {
+      "name": "gTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "gTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on gTOTFluxMean"
+    },
+    {
+      "name": "gTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
     },
     {
       "name": "iPSFluxChi2",
-      "type": "float"
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of iPSFlux around iPSFluxMean"
+    },
+    {
+      "name": "iPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
+    },
+    {
+      "name": "iPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "iPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "iPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+    },
+    {
+      "name": "iPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
+    },
+    {
+      "name": "iPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+    },
+    {
+      "name": "iPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "iPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "iPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
     },
     {
       "name": "iPSFluxNdata",
-      "type": "int"
+      "type": "double",
+      "doc": "The number of data points used to compute iPSFluxChi2"
     },
     {
-      "name": "zPSFluxMean",
-      "type": "float"
+      "name": "iPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
     },
     {
-      "name": "zPSFluxMeanErr",
-      "type": "float"
+      "name": "iPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
     },
     {
-      "name": "zPSFluxSigma",
-      "type": "float"
+      "name": "iPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
     },
     {
-      "name": "zPSFluxChi2",
-      "type": "float"
+      "name": "iPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
     },
     {
-      "name": "zPSFluxNdata",
-      "type": "int"
+      "name": "iPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
     },
     {
-      "name": "yPSFluxMean",
-      "type": "float"
+      "name": "iPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of iPSFlux"
     },
     {
-      "name": "yPSFluxMeanErr",
-      "type": "float"
+      "name": "iPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
     },
     {
-      "name": "yPSFluxSigma",
-      "type": "float"
+      "name": "iPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
+    },
+    {
+      "name": "iTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "iTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on iTOTFluxMean"
+    },
+    {
+      "name": "iTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "nDiaSources",
+      "type": "long",
+      "doc": "Number of diaSources associated with this diaObject"
+    },
+    {
+      "name": "pixelId",
+      "type": "double",
+      "doc": "HtmIndex20 of ra, decl coordinate"
+    },
+    {
+      "name": "rPSFluxChi2",
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of rPSFlux around rPSFluxMean"
+    },
+    {
+      "name": "rPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
+    },
+    {
+      "name": "rPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "rPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "rPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+    },
+    {
+      "name": "rPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+    },
+    {
+      "name": "rPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxNdata",
+      "type": "double",
+      "doc": "The number of data points used to compute rPSFluxChi2"
+    },
+    {
+      "name": "rPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of rPSFlux"
+    },
+    {
+      "name": "rPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
+    },
+    {
+      "name": "rPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
+    },
+    {
+      "name": "rTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "rTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on rTOTFluxMean"
+    },
+    {
+      "name": "rTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "ra",
+      "type": "double",
+      "doc": "Mean Right Ascension of DIASources in the diaObject"
+    },
+    {
+      "name": "radecTai",
+      "type": "double",
+      "doc": "Not used in DP0.2"
+    },
+    {
+      "name": "uPSFluxChi2",
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of uPSFlux around uPSFluxMean"
+    },
+    {
+      "name": "uPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
+    },
+    {
+      "name": "uPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "uPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "uPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+    },
+    {
+      "name": "uPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+    },
+    {
+      "name": "uPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxNdata",
+      "type": "double",
+      "doc": "The number of data points used to compute uPSFluxChi2"
+    },
+    {
+      "name": "uPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of uPSFlux"
+    },
+    {
+      "name": "uPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
+    },
+    {
+      "name": "uPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
+    },
+    {
+      "name": "uTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+    },
+    {
+      "name": "uTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on uTOTFluxMean"
+    },
+    {
+      "name": "uTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
     },
     {
       "name": "yPSFluxChi2",
-      "type": "float"
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of yPSFlux around yPSFluxMean"
+    },
+    {
+      "name": "yPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
+    },
+    {
+      "name": "yPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "yPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+    },
+    {
+      "name": "yPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+    },
+    {
+      "name": "yPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
+    },
+    {
+      "name": "yPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+    },
+    {
+      "name": "yPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "yPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+    },
+    {
+      "name": "yPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
     },
     {
       "name": "yPSFluxNdata",
-      "type": "int"
+      "type": "double",
+      "doc": "The number of data points used to compute yPSFluxChi2"
     },
     {
-      "name": "uFPFluxMean",
-      "type": "float"
+      "name": "yPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
     },
     {
-      "name": "uFPFluxMeanErr",
-      "type": "float"
+      "name": "yPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
     },
     {
-      "name": "uFPFluxSigma",
-      "type": "float"
+      "name": "yPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
     },
     {
-      "name": "gFPFluxMean",
-      "type": "float"
+      "name": "yPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
     },
     {
-      "name": "gFPFluxMeanErr",
-      "type": "float"
+      "name": "yPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
     },
     {
-      "name": "gFPFluxSigma",
-      "type": "float"
+      "name": "yPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of yPSFlux"
     },
     {
-      "name": "rFPFluxMean",
-      "type": "float"
+      "name": "yPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
     },
     {
-      "name": "rFPFluxMeanErr",
-      "type": "float"
+      "name": "yPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
     },
     {
-      "name": "rFPFluxSigma",
-      "type": "float"
+      "name": "yTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
     },
     {
-      "name": "iFPFluxMean",
-      "type": "float"
+      "name": "yTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on yTOTFluxMean"
     },
     {
-      "name": "iFPFluxMeanErr",
-      "type": "float"
+      "name": "yTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
     },
     {
-      "name": "iFPFluxSigma",
-      "type": "float"
+      "name": "zPSFluxChi2",
+      "type": "double",
+      "doc": "Chi^2 statistic for the scatter of zPSFlux around zPSFluxMean"
     },
     {
-      "name": "zFPFluxMean",
-      "type": "float"
+      "name": "zPSFluxErrMean",
+      "type": "double",
+      "doc": "Mean of the diaSource PSF flux errors"
     },
     {
-      "name": "zFPFluxMeanErr",
-      "type": "float"
+      "name": "zPSFluxLinearIntercept",
+      "type": "double",
+      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
     },
     {
-      "name": "zFPFluxSigma",
-      "type": "float"
+      "name": "zPSFluxLinearSlope",
+      "type": "double",
+      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
     },
     {
-      "name": "yFPFluxMean",
-      "type": "float"
+      "name": "zPSFluxMAD",
+      "type": "double",
+      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
     },
     {
-      "name": "yFPFluxMeanErr",
-      "type": "float"
+      "name": "zPSFluxMax",
+      "type": "double",
+      "doc": "Maximum diaSource PSF flux"
     },
     {
-      "name": "yFPFluxSigma",
-      "type": "float"
+      "name": "zPSFluxMaxSlope",
+      "type": "double",
+      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
     },
     {
-      "name": "uLcPeriodic01",
-      "type": "float"
+      "name": "zPSFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic02",
-      "type": "float"
+      "name": "zPSFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on the weighted mean of diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic03",
-      "type": "float"
+      "name": "zPSFluxMin",
+      "type": "double",
+      "doc": "Minimum diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic04",
-      "type": "float"
+      "name": "zPSFluxNdata",
+      "type": "double",
+      "doc": "The number of data points used to compute zPSFluxChi2"
     },
     {
-      "name": "uLcPeriodic05",
-      "type": "float"
+      "name": "zPSFluxPercentile05",
+      "type": "double",
+      "doc": "5th percentile diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic06",
-      "type": "float"
+      "name": "zPSFluxPercentile25",
+      "type": "double",
+      "doc": "10th percentile diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic07",
-      "type": "float"
+      "name": "zPSFluxPercentile50",
+      "type": "double",
+      "doc": "Median diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic08",
-      "type": "float"
+      "name": "zPSFluxPercentile75",
+      "type": "double",
+      "doc": "75th percentile diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic09",
-      "type": "float"
+      "name": "zPSFluxPercentile95",
+      "type": "double",
+      "doc": "95th percentile diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic10",
-      "type": "float"
+      "name": "zPSFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the distribution of zPSFlux"
     },
     {
-      "name": "uLcPeriodic11",
-      "type": "float"
+      "name": "zPSFluxSkew",
+      "type": "double",
+      "doc": "Skew of diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic12",
-      "type": "float"
+      "name": "zPSFluxStetsonJ",
+      "type": "double",
+      "doc": "StetsonJ statistic of diaSource PSF flux"
     },
     {
-      "name": "uLcPeriodic13",
-      "type": "float"
+      "name": "zTOTFluxMean",
+      "type": "double",
+      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
     },
     {
-      "name": "uLcPeriodic14",
-      "type": "float"
+      "name": "zTOTFluxMeanErr",
+      "type": "double",
+      "doc": "Standard error on zTOTFluxMean"
     },
     {
-      "name": "uLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "uLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "gLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "rLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "iLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "zLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic21",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic22",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic23",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic24",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic25",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic26",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic27",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic28",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic29",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic30",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic31",
-      "type": "float"
-    },
-    {
-      "name": "yLcPeriodic32",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "uLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "gLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "rLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "iLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "zLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic01",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic02",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic03",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic04",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic05",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic06",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic07",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic08",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic09",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic10",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic11",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic12",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic13",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic14",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic15",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic16",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic17",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic18",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic19",
-      "type": "float"
-    },
-    {
-      "name": "yLcNonPeriodic20",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj1",
-      "type": "long"
-    },
-    {
-      "name": "nearbyObj1Dist",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj1LnP",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj2",
-      "type": "long"
-    },
-    {
-      "name": "nearbyObj2Dist",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj2LnP",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj3",
-      "type": "long"
-    },
-    {
-      "name": "nearbyObj3Dist",
-      "type": "float"
-    },
-    {
-      "name": "nearbyObj3LnP",
-      "type": "float"
-    },
-    {
-      "name": "flags",
-      "type": "long"
+      "name": "zTOTFluxSigma",
+      "type": "double",
+      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
     }
   ],
-  "indexes": [
-    "PRIMARY KEY (diaObjectId, radecTai)"
-  ]
+  "indexes": ["PRIMARY KEY (diaObjectId, radecTai)"]
 }

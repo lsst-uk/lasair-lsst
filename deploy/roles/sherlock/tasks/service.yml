@@ -12,6 +12,13 @@
     src:  service_settings.yaml.j2
     dest: /opt/lasair/sherlock_service_settings.yaml
 
+- name: Link Sherlock settings file
+  become: true
+  file:
+    src: "{{ ansible_env.HOME }}/{{ git_name }}/pipeline/sherlock/sherlock_settings.yaml"
+    dest:  /opt/lasair/sherlock_settings.yaml
+    state: link
+
 - name: "Install apt packages"
   become: true
   apt:
@@ -27,19 +34,19 @@
 - name: "Install pip packages"
   pip:
     name:
-      - flask-restful
+      - flask
       - uwsgi
       - numpy
 
 - name: "Install pip packages"
   pip:
     name:
-      - qub-sherlock==2.2.0
+      - qub-sherlock==2.3.1
 
-- name: "Copy main.py"
+- name: "Copy app.py"
   get_url:
-    url: "https://raw.githubusercontent.com/lsst-uk/{{ git_name}}/{{ lasair_version }}/services/sherlock/main.py"
-    dest: /opt/lasair/main.py
+    url: "https://raw.githubusercontent.com/lsst-uk/{{ git_name}}/{{ lasair_version }}/services/sherlock/app.py"
+    dest: /opt/lasair/app.py
     mode: 0644
 
 - name: "Create uwsgi ini file"

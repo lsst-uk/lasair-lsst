@@ -1,441 +1,341 @@
 schema = {
-  "name": "diaSources",
+  "name": "DiaSources",
   "fields": [
     {
-      "name": "diaSourceId",
-      "type": "long"
-    },
-    {
-      "name": "ccdVisitId",
-      "type": "long"
-    },
-    {
-      "name": "diaObjectId",
-      "type": "long"
-    },
-    {
-      "name": "ssObjectId",
-      "type": "long"
-    },
-    {
-      "name": "parentDiaSourceId",
-      "type": "long"
-    },
-    {
-      "name": "midPointTai",
-      "type": "double"
-    },
-    {
-      "name": "filterName",
-      "type": "string"
-    },
-    {
-      "name": "programId",
-      "type": "int"
-    },
-    {
-      "name": "ra",
-      "type": "double"
-    },
-    {
-      "name": "decl",
-      "type": "double"
-    },
-    {
-      "name": "raErr",
-      "type": "float"
-    },
-    {
-      "name": "declErr",
-      "type": "float"
-    },
-    {
-      "name": "ra_decl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "x",
-      "type": "float"
-    },
-    {
-      "name": "y",
-      "type": "float"
-    },
-    {
-      "name": "xErr",
-      "type": "float"
-    },
-    {
-      "name": "yErr",
-      "type": "float"
-    },
-    {
-      "name": "x_y_Cov",
-      "type": "float"
-    },
-    {
       "name": "apFlux",
-      "type": "float"
+      "type": "double",
+      "doc": "Flux within 12.0-pixel aperture"
     },
     {
       "name": "apFluxErr",
-      "type": "float"
+      "type": "double",
+      "doc": "Flux uncertainty within 12.0-pixel aperture"
     },
     {
-      "name": "snr",
-      "type": "float"
+      "name": "apFlux_flag",
+      "type": "boolean",
+      "doc": "General Failure Flag"
     },
     {
-      "name": "psFlux",
-      "type": "float"
+      "name": "apFlux_flag_apertureTruncated",
+      "type": "boolean",
+      "doc": "Aperture did not fit within measurement image"
     },
     {
-      "name": "psFluxErr",
-      "type": "float"
+      "name": "bboxSize",
+      "type": "long",
+      "doc": "Bounding box of diaSource footprint"
     },
     {
-      "name": "psRa",
-      "type": "double"
+      "name": "ccdVisitId",
+      "type": "long",
+      "doc": "Unique ID of CCD and visit where this source was detected and measured. Primary Key of the CcdVisit Table."
     },
     {
-      "name": "psDecl",
-      "type": "double"
+      "name": "centroid_flag",
+      "type": "boolean",
+      "doc": "General failure flag, set if anything went wrong"
     },
     {
-      "name": "psRaErr",
-      "type": "float"
+      "name": "centroid_neg_flag",
+      "type": "boolean",
+      "doc": "Failure flag for negative, set if anything went wrong"
     },
     {
-      "name": "psDeclErr",
-      "type": "float"
+      "name": "centroid_pos_flag",
+      "type": "boolean",
+      "doc": "Failure flag for positive, set if anything went wrong"
     },
     {
-      "name": "psFlux_psRa_Cov",
-      "type": "float"
+      "name": "coord_dec",
+      "type": "double",
+      "doc": "Fiducial ICRS Declination of centroid used for database indexing"
     },
     {
-      "name": "psFlux_psDecl_Cov",
-      "type": "float"
+      "name": "coord_ra",
+      "type": "double",
+      "doc": "Fiducial ICRS Right Ascension of centroid used for database indexing"
     },
     {
-      "name": "psRa_psDecl_Cov",
-      "type": "float"
+      "name": "decl",
+      "type": "double",
+      "doc": "Position in ra/dec"
     },
     {
-      "name": "psLnL",
-      "type": "float"
+      "name": "diaObjectId",
+      "type": "long",
+      "doc": "Unique DiaObject ID. Primary Key of the DIA Object Table"
     },
     {
-      "name": "psChi2",
-      "type": "float"
-    },
-    {
-      "name": "psNdata",
-      "type": "int"
-    },
-    {
-      "name": "trailFlux",
-      "type": "float"
-    },
-    {
-      "name": "trailRa",
-      "type": "double"
-    },
-    {
-      "name": "trailDecl",
-      "type": "double"
-    },
-    {
-      "name": "trailLength",
-      "type": "float"
-    },
-    {
-      "name": "trailAngle",
-      "type": "float"
-    },
-    {
-      "name": "trailFluxErr",
-      "type": "float"
-    },
-    {
-      "name": "trailRaErr",
-      "type": "float"
-    },
-    {
-      "name": "trailDeclErr",
-      "type": "float"
-    },
-    {
-      "name": "trailLengthErr",
-      "type": "float"
-    },
-    {
-      "name": "trailAngleErr",
-      "type": "float"
-    },
-    {
-      "name": "trailFlux_trailRa_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailFlux_trailDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailFlux_trailLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailFlux_trailAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailRa_trailDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailRa_trailLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailRa_trailAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailDecl_trailLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailDecl_trailAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailLength_trailAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "trailLnL",
-      "type": "float"
-    },
-    {
-      "name": "trailChi2",
-      "type": "float"
-    },
-    {
-      "name": "trailNdata",
-      "type": "int"
-    },
-    {
-      "name": "dipMeanFlux",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiff",
-      "type": "float"
-    },
-    {
-      "name": "dipRa",
-      "type": "double"
-    },
-    {
-      "name": "dipDecl",
-      "type": "double"
-    },
-    {
-      "name": "dipLength",
-      "type": "float"
+      "name": "diaSourceId",
+      "type": "long",
+      "doc": "Unique ID"
     },
     {
       "name": "dipAngle",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFluxErr",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiffErr",
-      "type": "float"
-    },
-    {
-      "name": "dipRaErr",
-      "type": "float"
-    },
-    {
-      "name": "dipDeclErr",
-      "type": "float"
-    },
-    {
-      "name": "dipLengthErr",
-      "type": "float"
-    },
-    {
-      "name": "dipAngleErr",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFlux_dipFluxDiff_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFlux_dipRa_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFlux_dipDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFlux_dipLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipMeanFlux_dipAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiff_dipRa_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiff_dipDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiff_dipLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipFluxDiff_dipAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipRa_dipDecl_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipRa_dipLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipRa_dipAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipDecl_dipLength_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipDecl_dipAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipLength_dipAngle_Cov",
-      "type": "float"
-    },
-    {
-      "name": "dipLnL",
-      "type": "float"
+      "type": "double",
+      "doc": "Dipole orientation"
     },
     {
       "name": "dipChi2",
-      "type": "float"
+      "type": "double",
+      "doc": "Chi2 per degree of freedom of dipole fit"
     },
     {
-      "name": "dipNdata",
-      "type": "int"
+      "name": "dipFluxDiff",
+      "type": "double",
+      "doc": "Raw flux counts, positive lobe"
     },
     {
-      "name": "totFlux",
-      "type": "float"
+      "name": "dipFluxDiffErr",
+      "type": "double",
+      "doc": "Raw flux uncertainty counts, positive lobe"
     },
     {
-      "name": "totFluxErr",
-      "type": "float"
+      "name": "dipLength",
+      "type": "double",
+      "doc": "Pixel separation between positive and negative lobes of dipole"
     },
     {
-      "name": "diffFlux",
-      "type": "float"
+      "name": "dipMeanFlux",
+      "type": "double",
+      "doc": "Raw flux counts, positive lobe"
     },
     {
-      "name": "diffFluxErr",
-      "type": "float"
+      "name": "dipMeanFluxErr",
+      "type": "double",
+      "doc": "Raw flux uncertainty counts, positive lobe"
     },
     {
-      "name": "fpBkgd",
-      "type": "float"
+      "name": "filterName",
+      "type": "string",
+      "doc": "Band used to take this observation"
     },
     {
-      "name": "fpBkgdErr",
-      "type": "float"
+      "name": "forced_PsfFlux_flag",
+      "type": "boolean",
+      "doc": "Forced PSF flux general failure flag."
+    },
+    {
+      "name": "forced_PsfFlux_flag_edge",
+      "type": "boolean",
+      "doc": "Forced PSF flux object was too close to the edge of the image to use the full PSF model."
+    },
+    {
+      "name": "forced_PsfFlux_flag_noGoodPixels",
+      "type": "boolean",
+      "doc": "Forced PSF flux not enough non-rejected pixels in data to attempt the fit."
+    },
+    {
+      "name": "isDipole",
+      "type": "boolean",
+      "doc": "Flag indicating diaSource is classified as a dipole"
     },
     {
       "name": "ixx",
-      "type": "float"
-    },
-    {
-      "name": "iyy",
-      "type": "float"
-    },
-    {
-      "name": "ixy",
-      "type": "float"
-    },
-    {
-      "name": "ixxErr",
-      "type": "float"
-    },
-    {
-      "name": "iyyErr",
-      "type": "float"
-    },
-    {
-      "name": "ixyErr",
-      "type": "float"
-    },
-    {
-      "name": "ixx_iyy_Cov",
-      "type": "float"
-    },
-    {
-      "name": "ixx_ixy_Cov",
-      "type": "float"
-    },
-    {
-      "name": "iyy_ixy_Cov",
-      "type": "float"
+      "type": "double",
+      "doc": "Elliptical Gaussian adaptive moments"
     },
     {
       "name": "ixxPSF",
-      "type": "float"
+      "type": "double",
+      "doc": "Adaptive moments of the PSF model at the object position"
     },
     {
-      "name": "iyyPSF",
-      "type": "float"
+      "name": "ixy",
+      "type": "double",
+      "doc": "Elliptical Gaussian adaptive moments"
     },
     {
       "name": "ixyPSF",
-      "type": "float"
+      "type": "double",
+      "doc": "Adaptive moments of the PSF model at the object position"
     },
     {
-      "name": "extendedness",
-      "type": "float"
+      "name": "iyy",
+      "type": "double",
+      "doc": "Elliptical Gaussian adaptive moments"
     },
     {
-      "name": "spuriousness",
-      "type": "float"
+      "name": "iyyPSF",
+      "type": "double",
+      "doc": "Adaptive moments of the PSF model at the object position"
     },
     {
-      "name": "flags",
-      "type": "long"
+      "name": "midPointTai",
+      "type": "double",
+      "doc": "Effective mid-exposure time for this diaSource."
     },
-        {
-      "name": "htm16",
-      "type": "bigint",
-      "doc": "Hierarchical Triangular Mesh level 16",
+    {
+      "name": "parentDiaSourceId",
+      "type": "long",
+      "doc": "Unique ID of parent source"
+    },
+    {
+      "name": "pixelFlags",
+      "type": "boolean",
+      "doc": "General failure flag, set if anything went wrong"
+    },
+    {
+      "name": "pixelFlags_bad",
+      "type": "boolean",
+      "doc": "Bad pixel in the Source footprint"
+    },
+    {
+      "name": "pixelFlags_cr",
+      "type": "boolean",
+      "doc": "Cosmic ray in the Source footprint"
+    },
+    {
+      "name": "pixelFlags_crCenter",
+      "type": "boolean",
+      "doc": "Cosmic ray in the Source center"
+    },
+    {
+      "name": "pixelFlags_edge",
+      "type": "boolean",
+      "doc": "Source is outside usable exposure region (masked EDGE or NO_DATA)"
+    },
+    {
+      "name": "pixelFlags_interpolated",
+      "type": "boolean",
+      "doc": "Interpolated pixel in the Source footprint"
+    },
+    {
+      "name": "pixelFlags_interpolatedCenter",
+      "type": "boolean",
+      "doc": "Interpolated pixel in the Source center"
+    },
+    {
+      "name": "pixelFlags_offimage",
+      "type": "boolean",
+      "doc": "Source center is off image"
+    },
+    {
+      "name": "pixelFlags_saturated",
+      "type": "boolean",
+      "doc": "Saturated pixel in the Source footprint"
+    },
+    {
+      "name": "pixelFlags_saturatedCenter",
+      "type": "boolean",
+      "doc": "Saturated pixel in the Source center"
+    },
+    {
+      "name": "pixelFlags_suspect",
+      "type": "boolean",
+      "doc": "Sources footprint includes suspect pixels"
+    },
+    {
+      "name": "pixelFlags_suspectCenter",
+      "type": "boolean",
+      "doc": "Sources center is close to suspect pixels"
+    },
+    {
+      "name": "pixelId",
+      "type": "long",
+      "doc": "Position in ra/dec"
+    },
+    {
+      "name": "psFlux",
+      "type": "double",
+      "doc": "Flux derived from linear least-squares fit of PSF model"
+    },
+    {
+      "name": "psFluxErr",
+      "type": "double",
+      "doc": "Flux uncertainty derived from linear least-squares fit of PSF model"
+    },
+    {
+      "name": "psfFlux_flag",
+      "type": "boolean",
+      "doc": "Failure to derive linear least-squares fit of psf model forced on the calexp"
+    },
+    {
+      "name": "psfFlux_flag_edge",
+      "type": "boolean",
+      "doc": "Object was too close to the edge of the image to use the full PSF model"
+    },
+    {
+      "name": "psfFlux_flag_noGoodPixels",
+      "type": "boolean",
+      "doc": "Not enough non-rejected pixels in data to attempt the fit"
+    },
+    {
+      "name": "ra",
+      "type": "double",
+      "doc": "Position in ra/dec"
+    },
+    {
+      "name": "shape_flag",
+      "type": "boolean",
+      "doc": "General Failure Flag"
+    },
+    {
+      "name": "shape_flag_maxIter",
+      "type": "boolean",
+      "doc": "Too many iterations in adaptive moments"
+    },
+    {
+      "name": "shape_flag_psf",
+      "type": "boolean",
+      "doc": "Failure in measuring PSF model shape"
+    },
+    {
+      "name": "shape_flag_shift",
+      "type": "boolean",
+      "doc": "Centroid shifted by more than the maximum allowed amount"
+    },
+    {
+      "name": "shape_flag_unweighted",
+      "type": "boolean",
+      "doc": "Weighted moments converged to an invalid value; using unweighted moments"
+    },
+    {
+      "name": "shape_flag_unweightedBad",
+      "type": "boolean",
+      "doc": "Both weighted and unweighted moments were invalid"
+    },
+    {
+      "name": "snr",
+      "type": "double",
+      "doc": "Ratio of apFlux/apFluxErr"
+    },
+    {
+      "name": "ssObjectId",
+      "type": "long",
+      "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to 0"
+    },
+    {
+      "name": "totFlux",
+      "type": "double",
+      "doc": "Forced PSF flux measured on the direct image."
+    },
+    {
+      "name": "totFluxErr",
+      "type": "double",
+      "doc": "Forced PSF flux uncertainty measured on the direct image."
+    },
+    {
+      "name": "x",
+      "type": "double",
+      "doc": "Unweighted first moment centroid, overall centroid"
+    },
+    {
+      "name": "xErr",
+      "type": "float",
+      "doc": "1-sigma uncertainty on x position"
+    },
+    {
+      "name": "y",
+      "type": "double",
+      "doc": "Unweighted first moment centroid, overall centroid"
+    },
+    {
+      "name": "yErr",
+      "type": "float",
+      "doc": "1-sigma uncertainty on y position"
     }
   ],
-  "indexes": [
-    "PRIMARY KEY (diaObjectId, midPointTai, diaSourceId)"
-  ]
+  "indexes": ["PRIMARY KEY (diaObjectId, midPointTai, diaSourceId)"]
 }

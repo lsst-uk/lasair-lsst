@@ -1,4 +1,5 @@
 import math
+from .util import getAllFluxTimeBand
 from features.FeatureGroup import FeatureGroup
 
 class fluxJump(FeatureGroup):
@@ -10,12 +11,7 @@ class fluxJump(FeatureGroup):
 
     def run(self):
         days = 1 # go back a day from last diaSource
-        sources = self.alert['diaForcedSourcesList'] + self.alert['diaSourcesList']
-        sources = sorted(sources, key=lambda source: source['midPointTai'])
-    
-        tobs = [s['midPointTai']    for s in sources]
-        fobs = [s['psFlux']         for s in sources]
-    
+        (fobs, tobs, band) = getAllFluxTimeBand(self.alert)
         max_tobs  = tobs[-1]
         max_flux = 0
     

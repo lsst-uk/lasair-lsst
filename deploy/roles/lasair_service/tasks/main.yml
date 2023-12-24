@@ -17,15 +17,22 @@
   pip:
       executable: pip3
       name:
-        - gkhtm
-        - gkutils
         - docopt
         - numpy
-        - mocpy
         - requests
         - mysql-connector-python
+
+- name: Install more python packages
+  become: yes
+  pip:
+      executable: pip3
+      name:
+        - gkhtm
+        - gkutils
+        - mocpy
         - fink-client
         - lasair
+        - hmpty
 
 - name: Make sure the repo is up to date
   git: 

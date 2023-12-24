@@ -2,14 +2,21 @@ FROM ubuntu:20.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
+# Python
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  python3 \
+  python3-dev \
+  python3-pip 
+
+# Required for Ingest
+RUN pip3 install \
+  cassandra-driver
+
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
   g++ \
-  python3 \
-  python3-dev \
-  python3-yaml \
-  python3-pip 
+  python3-yaml
 RUN pip3 install \
   numpy  \
   scipy
@@ -20,18 +27,22 @@ RUN pip3 install \
 # Required for tests
 RUN pip3 install \
   xmlrunner \
-  cryptography
+  cryptography \
+  flask
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig
+  swig 
 
 # Required for filter
 RUN pip3 install \
   mocpy \
   mysql-connector-python \
   ephem \
-  gkhtm
+  gkhtm \
+  gkdbutils \
+  cassandra-driver \
+  fastavro

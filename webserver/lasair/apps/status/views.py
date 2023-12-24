@@ -53,7 +53,7 @@ def status(request, nid):
     except:
         status = {}
 
-    if status and 'today_filter' in status:
+    if status and 'today_filter' in status and 'today_filter_ss' in status:
         status['today_singleton'] = \
             status['today_filter'] - status['today_filter_out'] - status['today_filter_ss']
 

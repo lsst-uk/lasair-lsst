@@ -31,9 +31,8 @@
 - name: Configure and mount CephFS
   become: true
   mount:
-    boot: false
     fstype: ceph
-    opts: "secretfile=/etc/ceph/ceph.secret,name={{ os.share_user }}"
+    opts: "secretfile=/etc/ceph/ceph.secret,name={{ os.share_user }},nofail"
     path: /mnt/cephfs
     src: "{{ ceph.exports }}"
     state: mounted

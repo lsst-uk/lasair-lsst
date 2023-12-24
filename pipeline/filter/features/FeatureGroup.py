@@ -37,6 +37,8 @@ class FeatureGroup:
             groupClass = getattr(groupModule, group)
             groupInst = groupClass(alert, verbose)
             dict = groupInst.run()
+            if not dict:
+                return None
             if verbose: 
                 print('%s: %s' % (group, str(dict)))
             output.update(dict)
