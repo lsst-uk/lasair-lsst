@@ -114,7 +114,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbSettings=dbSettings
         )
 
-    message = f"{n_hits} ZTF objects have been associated with the {n_cones} sources in this watchlist"
+    message = f"{n_hits} LSST objects have been associated with the {n_cones} sources in this watchlist"
     print(message)
     return n_hits, message
 
