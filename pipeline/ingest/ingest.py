@@ -317,7 +317,7 @@ def run_ingest(args):
         # every so often commit, flush, and update status
         if nalert >= 250:
             end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
-            nalert = ndiaSource = 0
+            nalert = ndiaSource = nforcedSource = 0
             # check for lockfile
             if not os.path.isfile(settings.LOCKFILE):
                 log.info('Lockfile not present')

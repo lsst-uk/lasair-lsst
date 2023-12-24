@@ -175,7 +175,7 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
 
     # now write the moc files
     for i in range(len(moclist)):
-        moclist[i].write(watchlist_dir_new + 'moc%03d.fits'%i)
+        moclist[i].save(watchlist_dir_new + 'moc%03d.fits'%i, "fits")
     logf.write('Watchlist "%s" with %d cones rebuilt in %.2f seconds\n' 
             % (name, len(ralist), time.time() - t))
 
