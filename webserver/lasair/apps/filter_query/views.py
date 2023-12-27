@@ -422,7 +422,7 @@ def filter_query_log(request, topic):
     ```
     """
     try:
-        data = open(settings.KAFKA_STREAMS + '/' + topic, 'r').read()
+        data = open(settings.BLOB_STORE_ROOT + '/streams/' + topic, 'r').read()
     except:
         messages.error(request, f'Cannot find log file for {topic}.')
         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))

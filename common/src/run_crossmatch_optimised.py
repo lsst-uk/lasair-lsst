@@ -68,11 +68,11 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             log=emptyLogger(),
             dbConn=dbConn,
             tableName="objects",
-            columns="objectId",
+            columns="diaObjectId",
             ra=raList,
             dec=decList,
-            raCol="ramean",
-            decCol="decmean",
+            raCol="ra",
+            decCol="decl",
             radiusArcsec=radius,
             separations=True,
             distinct=False,
@@ -95,7 +95,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
                     "cone_id": c,
                     "arcsec": m["cmSepArcsec"],
                     "name": n,
-                    "objectId": m["objectId"]
+                    "diaObjectId": m["diaObjectId"]
                 }
                 wlMatches.append(keepDict)
 
@@ -114,7 +114,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbSettings=dbSettings
         )
 
-    message = f"{n_hits} ZTF objects have been associated with the {n_cones} sources in this watchlist"
+    message = f"{n_hits} LSST objects have been associated with the {n_cones} sources in this watchlist"
     print(message)
     return n_hits, message
 

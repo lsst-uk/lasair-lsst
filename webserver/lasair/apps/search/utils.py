@@ -24,7 +24,7 @@ def conesearch_impl(cone):
 
     if 'objectIds' in d:
         data = {'cone': cone, 'hitlist': d['objectIds'],
-                'message': 'Found ZTF object names'}
+                'message': 'Found LSST object names'}
         return data
 
     if 'TNSname' in d:
@@ -93,7 +93,7 @@ def readcone(cone):
             return {'TNSprefix': t[0:2], 'TNSname': t[2:]}
         if t[0:2] == '20':
             return {'TNSprefix': '', 'TNSname': t}
-        if t[0:3] == 'ZTF':
+        if len(t) == 19:
             return {'objectIds': tok}
 
 # if odd number of tokens, must end with radius in arcsec
