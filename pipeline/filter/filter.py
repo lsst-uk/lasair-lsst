@@ -40,7 +40,7 @@ def sigterm_handler(signum, frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-def run_filter(args):
+def run_filter(args, timers):
     if args['--topic_in']:
         topic_in = args['--topic_in']
     else:
@@ -59,6 +59,7 @@ def run_filter(args):
     log = lasairLogging.getLogger("filter")
     log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (topic_in, group_id, maxalert))
 
+    timers['ftotal'].on()
     print('------------------')
     ##### clear out the local database
     os.system('date')
@@ -92,7 +93,9 @@ def run_filter(args):
         log.error('ERROR cannot connect to kafka', e)
         return
 
+    timers['ffeatures'].on()
     rc = kafka_consume(consumer, maxalert)
+    timers['ffeatures'].off()
 
     # rc is the return code from ingestion, number of alerts received
     if rc < 0:
@@ -108,6 +111,7 @@ def run_filter(args):
         sys.exit(0)
     
     ##### run the watchlists
+    timers['fwatchlist'].on()
     log.info('WATCHLIST start %s' % datetime.utcnow().strftime("%H:%M:%S"))
     sys.stdout.flush()
     t = time.time()
@@ -127,9 +131,11 @@ def run_filter(args):
             log.error("ERROR in filter/insert_watchlist_hits")
             sys.exit(0)
     
+    timers['fwatchlist'].off()
     log.info('WATCHLIST %.1f seconds' % (time.time() - t))
     
     ##### run the areas
+    timers['fwatchmap'].on()
     log.info('AREA start %s' % datetime.utcnow().strftime("%H:%M:%S"))
     t = time.time()
     try:
@@ -147,9 +153,11 @@ def run_filter(args):
             log.error("ERROR in filter/insert_area_hits")
             sys.exit(0)
     log.info('AREA %.1f seconds' % (time.time() - t))
+    timers['fwatchmap'].off()
     sys.stdout.flush()
     
     ##### run the user queries
+    timers['ffilters'].on()
     print('QUERIES start %s' % datetime.utcnow().strftime("%H:%M:%S"))
     sys.stdout.flush()
     t = time.time()
@@ -166,6 +174,7 @@ def run_filter(args):
         sys.exit(0)
     log.info('QUERIES %.1f seconds' % (time.time() - t))
     sys.stdout.flush()
+    timers['ffilters'].off()
     
     ##### run the annotation queries
     print('ANNOTATION QUERIES start %s' % datetime.utcnow().strftime("%H:%M:%S"))
@@ -178,6 +187,7 @@ def run_filter(args):
     log.info('ANNOTATION QUERIES %.1f seconds' % (time.time() - t))
     
     ##### build CSV file with local database
+    timers['ftransfer'].on()
     t = time.time()
     log.info('SEND to ARCHIVE')
     sys.stdout.flush()
@@ -214,6 +224,7 @@ def run_filter(args):
         else:
             log.info('%s ingested to main db' % table)
 
+    timers['ftransfer'].off()
     log.info('Transfer to main database %.1f seconds' % (time.time() - t))
     if commit:
         consumer.commit()
@@ -225,6 +236,7 @@ def run_filter(args):
         time.sleep(600)
         sys.exit(1)
 
+    timers['ftotal'].off()
     sys.stdout.flush()
     
     ms = manage_status.manage_status(settings.SYSTEM_STATUS)
@@ -237,6 +249,8 @@ def run_filter(args):
         'min_delay': '%.1f' % d['since'],  # hours since most recent alert
         'nid': nid},
         nid)
+    for name,td in timers.items():
+        td.add2ms(ms, nid)
 
     if rc > 0:  # minutes since telescope got it
 
@@ -270,10 +284,14 @@ def run_filter(args):
 if __name__ == '__main__':
     lasairLogging.basicConfig(stream=sys.stdout)
     log = lasairLogging.getLogger("filter")
+    
+    timers = {}
+    for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
+        timers[name] = manage_status.timer(name)
 
     args = docopt(__doc__)
     # rc=1: got some alerts
     # rc=0: got no alerts
 
-    rc = run_filter(args)
+    rc = run_filter(args, timers)
     sys.exit(rc)
