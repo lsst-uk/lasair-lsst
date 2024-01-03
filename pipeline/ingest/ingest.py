@@ -98,9 +98,9 @@ def insert_cassandra(alert, cassandra_session):
     if len(alert['forcedSourceOnDiaObjectsList']) > 0:
         executeLoad(cassandra_session, 'ForcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
 
-    return
+    return len(diaSourcesList)
 
-def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session):
+def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session, timers):
     """handle_alert.
     Filter to apply to each alert.
 
@@ -131,9 +131,11 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
     diaObjectId = diaObject['diaObjectId']
 
     # store the fits images
+    timers['icutout'].on()
     if image_store:
         if store_images(lsst_alert, image_store, diaSourceId, imjd, diaObjectId) == None:
             log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
+    timers['icutout'].off()
 
     alert = {
         'diaObject':                 diaObject,
@@ -146,12 +148,15 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
 
     # Call on Cassandra
     try:
+        timers['icassandra'].on()
         ndiaSource = insert_cassandra(alert, cassandra_session)
+        timers['icassandra'].off()
     except Exception as e:
         log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
         return 0  # ingest batch failed
 
     # produce to kafka
+    timers['ikafka'].on()
     if producer is not None:
         try:
             s = json.dumps(alert)
@@ -161,10 +166,11 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
             log.error("ERROR:", e)
             sys.stdout.flush()
             return None   # ingest failed
+    timers['ikafka'].off()
 
     return (len(diaSourcesList), len(forcedSourceOnDiaObjectsList))
 
-def run_ingest(args):
+def run_ingest(args, timers):
     """run.
     """
     global sigterm_raised
@@ -279,6 +285,7 @@ def run_ingest(args):
     # put status on Lasair web page
     ms = manage_status.manage_status(settings.SYSTEM_STATUS)
 
+    timers['itotal'].on()
     while ntotalalert < maxalert:
         if sigterm_raised:
             # clean shutdown - this should stop the consumer and commit offsets
@@ -290,7 +297,7 @@ def run_ingest(args):
 
         # no messages available
         if msg is None:
-            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
+            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
             nalert = ndiaSource = 0
             log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
             sys.stdout.flush()
@@ -307,7 +314,7 @@ def run_ingest(args):
 
         # Apply filter to each alert
         (idiaSource,iforcedSource) = \
-                handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session)
+                handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session, timers)
 
         nalert += 1
         ntotalalert += 1
@@ -316,16 +323,17 @@ def run_ingest(args):
 
         # every so often commit, flush, and update status
         if nalert >= 250:
-            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
+            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
             nalert = ndiaSource = nforcedSource = 0
             # check for lockfile
             if not os.path.isfile(settings.LOCKFILE):
                 log.info('Lockfile not present')
                 stop = True
+    timers['itotal'].off()
 
     # if we exit this loop, clean up
     log.info('Shutting down')
-    end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
+    end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
 
     # shut down kafka consumer
     consumer.close()
@@ -338,7 +346,7 @@ def run_ingest(args):
     if ntotalalert > 0: return 1
     else:               return 0
 
-def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource):
+def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers):
     global log
     now = datetime.now()
     date = now.strftime("%Y-%m-%d %H:%M:%S")
@@ -354,6 +362,8 @@ def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource):
     # update the status page
     nid  = date_nid.nid_now()
     ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
+    for name,td in timers.items():
+        td.add2ms(ms, nid)
 
 if __name__ == "__main__":
     lasairLogging.basicConfig(stream=sys.stdout)
@@ -361,8 +371,13 @@ if __name__ == "__main__":
 
     signal.signal(signal.SIGTERM, sigterm_handler)
 
+    nid  = date_nid.nid_now()
+    timers = {}
+    for name in ['icutout', 'icassandra', 'ikafka', 'itotal']:
+        timers[name] = manage_status.timer(name)
+
     args = docopt(__doc__)
-    rc = run_ingest(args)
+    rc = run_ingest(args, timers)
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     sys.exit(rc)

@@ -8,6 +8,7 @@ There is a "file_id" to determine which file we are working with
 import datetime
 import json
 import time
+import socket
 import os, sys
 SLEEPTIME = 0.1
 
@@ -122,3 +123,26 @@ class manage_status():
             else:             status[key]  = value
 
         self.write_unlock(status, file_id)
+
+class timer():
+    def __init__(self, nameroot):
+        try:
+            # assume a hostname like lasair-lsst-dev-ingest-0 and append the 0
+            hostnum = socket.gethostname().split('-')[-1]
+        except:
+            hostnum = '0'
+        self.name = nameroot + '_' + hostnum
+        self.start = time.perf_counter()
+        self.elapsed = 0.0
+
+    def on(self):
+        # start the clock
+        self.start = time.perf_counter()
+
+    def off(self):
+        # stop the clock
+        delta = time.perf_counter() - self.start
+        self.elapsed += delta
+
+    def add2ms(self, ms, nid):
+        ms.add({self.name:self.elapsed}, nid)
