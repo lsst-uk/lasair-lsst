@@ -6,11 +6,17 @@ Data files are in `/mnt/cephfs/lasair/system_status/status_<nid>.json`
 
 Unit test is `tests/unit/common/src/test_manage_status.py`
 
+The symbol * in the below means the node number: 0,1,2,3 for the ingest or filter cluster
+
 This is where it is used:
 
 - `pipeline/ingest/ingest.py` **add**
     - `today_alert`: Number of alerts seen by the ingest module today
     - `today_diaSource`: Number of diaSources put in Cassandra today
+    - `icutout_*`: Time spend today storing cutouts in this node
+    - `icassandra_*`: Time spend today storing Rubin data packets in this node
+    - `ikafka_*`: Time spend today pushing kafka in this node
+    - `itotal_*`: Total time spent today in this ingest node
 
 - `pipeline/filter/consume_alerts.py` **add**
     - `today_filter`: Number of alerts seen by the filter module today
@@ -21,6 +27,12 @@ This is where it is used:
     - `today_database`: Number of main database objects updated since midnight 
     - `total_count`: Number of objects in local filter database
     - `min_delay`: Hours since most recent alert
+    - `ffeatures_*`: Time spent today computing features in this node
+    - `fwatchlist_*`: Time spent today computing watchlists in this node
+    - `fwatchmap_*`: Time spent today computing watchmaps in this node
+    - `ffilters_*`: Time spent today computing user filters in this node
+    - `ftransfer_*`: Time spent today transferring to main database in this node
+    - `ftotal_*`: Total time spent today in this filter node
 
 - `services/externalBrokers/TNS/poll_tns.py` **set**
     - `countTNS`: Number of records in TNS cache
