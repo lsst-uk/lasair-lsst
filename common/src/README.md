@@ -39,3 +39,43 @@ This is where it is used:
 
 - `utility/countAnnotations.py` **set**
     - `countAnnotations`: Number of annotations in Lasair
+
+Example output, 2 ingest nodes, 2 filter nodes, 2000 alerts each
+```
+{
+    "nid": 2559,
+    "update_time": "2024-01-04T12:16:08",
+    "today_alert":      4000,
+    "today_diaSource":  5106,
+    "today_filter":     4000,
+    "today_filter_out": 1424,
+    "today_ztf":          -1,
+    "today_database":  20622,
+    "total_count":        -1,
+    "min_delay":      "-1.0",
+
+    "icutout_0":      0.0026,
+    "icassandra_0": 110.26,
+    "ikafka_0":      10.54,
+    "itotal_0":      139.8,
+
+    "icutout_1":       0.0019,
+    "icassandra_1":   101.97,
+    "ikafka_1":         7.446,
+    "itotal_1":       121.2,
+
+    "ffeatures_0":     19.40,
+    "fwatchlist_0":     0.380,
+    "fwatchmap_0":      0.052,
+    "ffilters_0":       0.163,
+    "ftransfer_0":      0.0800,
+    "ftotal_0":        25.24,
+
+    "ffeatures_1":     20.86,
+    "fwatchlist_1":     0.369,
+    "fwatchmap_1":      0.0082,
+    "ffilters_1":       0.0112,
+    "ftransfer_1":      0.0829,
+    "ftotal_1":        26.56
+}
+```
