@@ -146,3 +146,4 @@ class timer():
 
     def add2ms(self, ms, nid):
         ms.add({self.name:self.elapsed}, nid)
+        self.elapsed = 0.0
