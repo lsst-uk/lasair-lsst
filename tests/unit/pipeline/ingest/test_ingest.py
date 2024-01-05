@@ -36,17 +36,17 @@ class IngestTest(unittest.TestCase):
         # load up a test alert
         with open('alert_dp02.bin', 'rb') as f:
             lsst_alert = pickle.load(f)
-            ##print(lsst_alert)
         alert = {
             'diaObject':                 lsst_alert['DiaObject'],
             'diaSourcesList':            lsst_alert['DiaSourceList'],
             'forcedSourceOnDiaObjectsList':      lsst_alert['ForcedSourceOnDiaObjectList'],
         }
-        with unittest.mock.patch('gkdbutils.ingesters.cassandra.executeLoad') as mock_executeLoad:
+        with unittest.mock.patch('ingest.executeLoad') as mock_executeLoad:
             mock_executeLoad.return_value = None
-            cassandra_session = None
+            cassandra_session = True
             ingest.insert_cassandra(alert, cassandra_session)
-            print (mock_executeLoad.call_count)     
+            # executeLoad should get called twice, once for diaObject and once for forcedSourceOnDiaObjectsList
+            self.assertEqual(mock_executeLoad.call_count, 2)     
 
 if __name__ == '__main__':
     import xmlrunner 
