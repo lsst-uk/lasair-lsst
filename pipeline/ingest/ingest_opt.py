@@ -74,6 +74,11 @@ def store_images(message, store, diaSourceId, imjd, diaObjectId):
         return None # failure of batch
 
 def insert_cassandra(alert, cassandra_session):
+    result = insert_cassandra_multi([alert], cassandra_session)
+    if result:
+        return result
+
+def insert_cassandra_multi(alerts, cassandra_session):
     """insert_casssandra.
     Creates an insert for cassandra
     a query for inserting it.
@@ -81,7 +86,7 @@ def insert_cassandra(alert, cassandra_session):
     Uses async load and returns a list of future objects.
 
     Args:
-        alert:
+        alerts:
     """
     global log
 
@@ -91,21 +96,30 @@ def insert_cassandra(alert, cassandra_session):
 
     futures = []
 
-    futures += executeLoadAsync(cassandra_session, 'DiaObjects', [alert['diaObject']])
+    data = []
+    for alert in alerts:
+        data.append(alert['diaObject'])
+
+    futures += executeLoadAsync(cassandra_session, 'DiaObjects', data)
     # Note that although we are inserting them into cassandra, we are NOT using
     # HTM indexing inside Cassandra. Hence this is a redundant column.
 
     # Now add the htmid16 value into each dict.
 
-    diaSourcesList = alert['diaSourcesList']
+    diaSourcesList = []
+    for alert in alerts:
+        diaSourcesList += alert['diaSourcesList']
 #    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourcesList])
 #    for i in range(len(diaSourcesList)):
 #        diaSourcesList[i]['htm16'] = htm16s[i]
     if len(diaSourcesList) > 0:
         futures += executeLoadAsync(cassandra_session, 'DiaSources', diaSourcesList)
 
-    if len(alert['forcedSourceOnDiaObjectsList']) > 0:
-        futures += executeLoadAsync(cassandra_session, 'ForcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
+    forcedSourceOnDiaObjectsList = []
+    for alert in alerts:
+        forcedSourceOnDiaObjectsList += alert['forcedSourceOnDiaObjectsList']
+    if len(forcedSourceOnDiaObjectsList) > 0:
+        futures += executeLoadAsync(cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
 
     return futures
 
@@ -130,6 +144,8 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
     image_futures = []
     cass_futures = []
     results = []
+
+    # deal with images first
     for lsst_alert in lsst_alerts:
 
         # Build a new alert packet
@@ -158,24 +174,31 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
             else:
                 image_futures += image_result
 
+        results.append((len(diaSourcesList), len(forcedSourceOnDiaObjectsList)))
+
+    # build the alerts
+    alerts = []
+    for lsst_alert in lsst_alerts:
         alert = {
             'diaObject':                 diaObject,
             'diaSourcesList':            diaSourcesList,
             'forcedSourceOnDiaObjectsList':      forcedSourceOnDiaObjectsList,
         }
+        alerts.append(alert)
 
         # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,
         # but the new C++ bulk code is 100 times faster than doing it one at a time.
 
-        # Call on Cassandra
-        try:
-            cass_result = insert_cassandra(alert, cassandra_session)
-            if cass_result:
-                cass_futures += cass_result
-        except Exception as e:
-            log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
-            return 0  # ingest batch failed
+    # Call on Cassandra
+    try:
+        cass_result = insert_cassandra_multi(alerts, cassandra_session)
+        if cass_result:
+            cass_futures += cass_result
+    except Exception as e:
+        log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
+        return 0  # ingest batch failed
 
+    for alert in alerts:
         # produce to kafka
         if producer is not None:
             try:
@@ -186,8 +209,6 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
                 log.error("ERROR:", e)
                 sys.stdout.flush()
                 return None   # ingest failed
-
-        results.append((len(diaSourcesList), len(forcedSourceOnDiaObjectsList)))
 
     # Wait for image store futures to complete
     for future in image_futures:

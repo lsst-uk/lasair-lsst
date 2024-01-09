@@ -52,11 +52,11 @@ class IngestOptTest(unittest.TestCase):
         # executeLoad should get called three times, once for diaObject and once for each list
         self.assertEqual(mock_executeLoadAsync.call_count, 3)     
 
-    @patch('ingest_opt.insert_cassandra')
+    @patch('ingest_opt.insert_cassandra_multi')
     @patch('ingest_opt.store_images')
-    def test_handle_alert(self, mock_store_images, mock_insert_cassandra):
+    def test_handle_alert(self, mock_store_images, mock_insert_cassandra_multi):
         mock_store_images.return_value = [ unittest.mock.MagicMock() ]
-        mock_insert_cassandra.return_value = [ unittest.mock.MagicMock() ]
+        mock_insert_cassandra_multi.return_value = [ unittest.mock.MagicMock() ]
         image_store = True
         mock_producer = unittest.mock.MagicMock()
         topic_out = None
@@ -66,8 +66,8 @@ class IngestOptTest(unittest.TestCase):
         self.assertEqual(result, (2, 2))
         # store_images should get called once
         mock_store_images.assert_called_once()
-        # insert_cassandra should get called once
-        mock_insert_cassandra.assert_called_once()
+        # insert_cassandra_multi should get called once
+        mock_insert_cassandra_multi.assert_called_once()
         # producer.produce should get called once
         mock_producer.produce.assert_called_once()
     
