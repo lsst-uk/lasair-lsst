@@ -11,6 +11,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 # Required for Ingest
 RUN pip3 install \
   cassandra-driver
+  gkdbutils \
+  fastavro
 
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
