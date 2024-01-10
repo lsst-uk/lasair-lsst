@@ -347,6 +347,12 @@ def run_ingest(args):
 
         # no messages available
         if msg is None:
+            # ensure we process any partial alert batch
+            results = handle_alerts(alerts, image_store, producer, topic_out, cassandra_session)
+            for (idiaSource,iforcedSource) in results:
+                ndiaSource += idiaSource
+                nforcedSource += iforcedSource
+            alerts = []
             end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
             nalert = ndiaSource = 0
             log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
