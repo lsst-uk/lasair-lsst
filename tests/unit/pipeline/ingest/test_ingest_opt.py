@@ -24,9 +24,9 @@ class IngestOptTest(unittest.TestCase):
 
     # check that the sigterm handler sets sigterm raised correctly
     def test_sigterm_handler(self):
-        self.assertFalse(ingest_opt.sigterm_raised)
-        subprocess.run(['pkill', '-f', 'python3 test_ingest.py'])
-        self.assertTrue(ingest_opt.sigterm_raised)
+        self.assertFalse(ingest.sigterm_raised)
+        subprocess.run(['pkill', '-f', 'python3 test_ingest_opt.py'])
+        self.assertTrue(ingest.sigterm_raised)
 
     # test using the image store 
     def test_store_images(self):
