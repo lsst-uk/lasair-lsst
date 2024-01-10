@@ -391,6 +391,13 @@ def run_ingest(args):
 
     # if we exit this loop, clean up
     log.info('Shutting down')
+
+    # ensure any remaining alerts get processed
+    results = handle_alerts(alerts, image_store, producer, topic_out, cassandra_session)
+    for (idiaSource,iforcedSource) in results:
+        ndiaSource += idiaSource
+        nforcedSource += iforcedSource
+
     end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource)
 
     # shut down kafka consumer
