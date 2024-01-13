@@ -127,8 +127,8 @@ if __name__ == "__main__":
     L = lasair.lasair_client(args['--token'], endpoint='https://lasair-lsst-dev.lsst.ac.uk/api')
     ra = 61.893163
     dec = -30.001845
-    c = L.cone(ra, dec, radius=240.0, requestType='all')
-    print(c)
+#    c = L.cone(ra, dec, radius=240.0, requestType='all')
+#    print(c)
 
     msl = db_connect.remote()
     user_id = get_user_id(msl, username)
@@ -136,9 +136,9 @@ if __name__ == "__main__":
     diaObjectId = get_diaObjectId(msl)
     print('using diaObjectId=%s' % str(diaObjectId))
 
-#    make_annotator(msl, topic, args['--user'], annactive, user_id)
-#    make_filter(msl, topic, filtactive, user_id)
-#    make_annotation(L, topic, diaObjectId)
+    make_annotator(msl, topic, args['--user'], annactive, user_id)
+    make_filter(msl, topic, filtactive, user_id)
+    make_annotation(L, topic, diaObjectId)
 
 #    delete_filter(msl, topic)
 #    delete_annotator(msl, topic)
