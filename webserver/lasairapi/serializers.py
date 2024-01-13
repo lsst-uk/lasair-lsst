@@ -19,7 +19,7 @@ import settings as lasair_settings
 import sys
 sys.path.append('../common')
 
-CAT_ID_RA_DEC_COLS['objects'] = [['objectId', 'ramean', 'decmean'], 1018]
+CAT_ID_RA_DEC_COLS['objects'] = [['diaObjectId', 'ra', 'decl'], 1018]
 
 REQUEST_TYPE_CHOICES = (
     ('count', 'Count'),
@@ -64,12 +64,12 @@ class ConeSerializer(serializers.Serializer):
         objectList = []
         if len(results) > 0:
             if requestType == "nearest":
-                obj = results[0][1]['objectId']
+                obj = results[0][1]['diaObjectId']
                 separation = results[0][0]
                 info = {"object": obj, "separation": separation}
             elif requestType == "all":
                 for row in results:
-                    objectList.append({"object": row[1]["objectId"], "separation": row[0]})
+                    objectList.append({"object": row[1]["diaObjectId"], "separation": row[0]})
                 info = objectList
             elif requestType == "count":
                 info = {'count': len(results)}

@@ -26,7 +26,7 @@ import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 sys.path.append('../common')
-from src import topic_name
+from src.topic_name import topic_name
 
 
 @csrf_exempt
