@@ -1,5 +1,5 @@
 from lasair.query_builder import check_query, build_query
-from src import db_connect
+from src import db_connect, topic_name
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from lasair.utils import datetime_converter
 import settings
@@ -117,20 +117,6 @@ def run_filter(
                        'limit': limit, 'offset': offset,
                        "schema": tableSchema,
                        'sortTable': sortTable})
-
-
-def topic_name(userid, name):
-    """generate a kafka topic name based on userid and query name.
-
-    **Key Arguments:**
-
-        - `userid` -- the users unique ID
-        - `name` -- the name given to the filter
-
-    """
-    name = ''.join(e for e in name if e.isalnum() or e == '_' or e == '-' or e == '.')
-    return 'lasair_' + '%d' % userid + name
-
 
 def check_query_zero_limit(real_sql):
     """*use a limit of zero to test the validity of the query*
