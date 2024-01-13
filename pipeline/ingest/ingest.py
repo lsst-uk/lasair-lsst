@@ -284,6 +284,9 @@ def run_ingest(args, timers):
 
     # put status on Lasair web page
     ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+    timers = {}
+    for name in ['icutout', 'icassandra', 'ikafka', 'itotal']:
+        timers[name] = manage_status.timer(name)
 
     timers['itotal'].on()
     while ntotalalert < maxalert:
@@ -372,12 +375,8 @@ if __name__ == "__main__":
     signal.signal(signal.SIGTERM, sigterm_handler)
 
     nid  = date_nid.nid_now()
-    timers = {}
-    for name in ['icutout', 'icassandra', 'ikafka', 'itotal']:
-        timers[name] = manage_status.timer(name)
-
     args = docopt(__doc__)
-    rc = run_ingest(args, timers)
+    rc = run_ingest(args)
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     sys.exit(rc)

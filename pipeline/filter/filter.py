@@ -40,7 +40,7 @@ def sigterm_handler(signum, frame):
 
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-def run_filter(args, timers):
+def run_filter(args):
     if args['--topic_in']:
         topic_in = args['--topic_in']
     else:
@@ -58,6 +58,12 @@ def run_filter(args, timers):
 
     log = lasairLogging.getLogger("filter")
     log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (topic_in, group_id, maxalert))
+
+    timers = {}
+    for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
+        timers[name] = manage_status.timer(name)
+
+    args = docopt(__doc__)
 
     timers['ftotal'].on()
     print('------------------')
@@ -284,14 +290,10 @@ def run_filter(args, timers):
 if __name__ == '__main__':
     lasairLogging.basicConfig(stream=sys.stdout)
     log = lasairLogging.getLogger("filter")
-    
-    timers = {}
-    for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
-        timers[name] = manage_status.timer(name)
-
     args = docopt(__doc__)
+    
     # rc=1: got some alerts
     # rc=0: got no alerts
 
-    rc = run_filter(args, timers)
+    rc = run_filter(args)
     sys.exit(rc)
