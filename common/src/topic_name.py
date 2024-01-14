@@ -8,5 +8,5 @@ def topic_name(userid, name):
 
     """
     name = ''.join(e for e in name if e.isalnum() or e == '_' or e == '-' or e == '.')
-    return 'lasair_' + '%d' % userid + name
+    return 'lasair_' + str(userid) + name
 
