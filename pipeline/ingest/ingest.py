@@ -170,7 +170,7 @@ def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session
 
     return (len(diaSourcesList), len(forcedSourceOnDiaObjectsList))
 
-def run_ingest(args, timers):
+def run_ingest(args):
     """run.
     """
     global sigterm_raised
