@@ -11,10 +11,10 @@ may be called to get all the recent fast annotations
 Uses query_list and possibly annotation_list and runs all the queries against 
 local, or those involving annotator against main databaase
 
-(4) query_for_object(query, objectId):
-If doing fast annotations, convert a given query with specific objectId
+(4) query_for_object(query, diaObjectId):
+If doing fast annotations, convert a given query with specific diaObjectId
 
-(5) run_query(query, msl, annotator=None, objectId=None):
+(5) run_query(query, msl, annotator=None, diaObjectId=None):
 Run a specific query and return query_results
 
 (6) dispose_query_results(query, query_results):
@@ -79,7 +79,7 @@ def fetch_queries():
 def run_annotation_queries(query_list):
     """run_annotation_queries.
     Pulls the recent content from the kafka topic 'ztf_annotations' 
-    Each message has an annotator/topic name, and the objectId that was annotated.
+    Each message has an annotator/topic name, and the diaObjectId that was annotated.
     Queries that have that annotator should run against that object
     """
     annotation_list = []
@@ -89,7 +89,7 @@ def run_annotation_queries(query_list):
         'default.topic.config': {'auto.offset.reset': 'earliest'}
     }
     streamReader = Consumer(conf)
-    topic = 'ztf_annotations'
+    topic = settings.ANNOTATION_TOPIC
     streamReader.subscribe([topic])
     while 1:
         msg = streamReader.poll(timeout=5)
@@ -100,7 +100,7 @@ def run_annotation_queries(query_list):
         except:
             continue
     streamReader.close()
-    #print('got ', annotation_list)
+    print('got ', annotation_list)
     run_queries(query_list, annotation_list)
 
 def run_queries(query_list, annotation_list=None):
@@ -127,7 +127,8 @@ def run_queries(query_list, annotation_list=None):
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, msl_remote, ann['annotator'], ann['objectId'])
+                query_results = run_query(query, msl_remote, ann['annotator'], ann['diaObjectId'])
+                print('results:', query_results)
                 n += dispose_query_results(query, query_results)
 
         t = time.time() - t
@@ -135,7 +136,7 @@ def run_queries(query_list, annotation_list=None):
             print('   %s got %d in %.1f seconds' % (query['topic_name'], n, t))
             sys.stdout.flush()
 
-def query_for_object(query, objectId):
+def query_for_object(query, diaObjectId):
     """ modifies an existing query to add a new constraint for a specific object.
     We already know this query comes from multiple tables: objects and annotators,
     so we know there is an existing WHERE clause. Can add the new constraint to the end,
@@ -143,18 +144,18 @@ def query_for_object(query, objectId):
 
     Args:
         query: the original query, as generated from the Lasair query builder
-        objectId: the object that is the new constraint
+        diaObjectId: the object that is the new constraint
     """
     tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
-    query = tok[0] + (' AND objects.objectId="%s" ' % objectId)
+    query = tok[0] + (' AND objects.diaObjectId="%s" ' % diaObjectId)
     if len(tok) == 2: # has order clause, add it back
         query += ' ORDER BY ' + tok[1]
     return query
 
-def run_query(query, msl, annotator=None, objectId=None):
+def run_query(query, msl, annotator=None, diaObjectId=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
-    if annotator and objectId, checks if the query involves the annotator, 
+    if annotator and diaObjectId, checks if the query involves the annotator, 
         and if so, runs the query for the given object on main database
 
     Args:
@@ -173,7 +174,7 @@ def run_query(query, msl, annotator=None, objectId=None):
         if not annotator in query['tables']:
             return []
         # run the query against main for this specific object that has been annotated
-        sqlquery_real = query_for_object(sqlquery_real, objectId)
+        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=10 FOR %s LIMIT %d' % (sqlquery_real, limit))
@@ -274,10 +275,10 @@ def dispose_email(allrecords, last_email, query):
         out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
         # gather all records that have accumulated since last email
         if out_time > last_email:
-            if 'objectId' in out:
-                objectId = out['objectId']
-                message      += objectId + '\n'
-                message_html += '<a href="%s/object/%s/">%s</a><br/>' % (settings.LASAIR_URL, objectId, objectId)
+            if 'diaObjectId' in out:
+                diaObjectId = out['diaObjectId']
+                message      += str(diaObjectId) + '\n'
+                message_html += '<a href="%s/object/%s/">%s</a><br/>' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
                 jsonout = json.dumps(out, default=datetime_converter)
                 message += jsonout + '\n'

@@ -1,7 +1,7 @@
 import context
-import os, sys, json
+import os, sys, json, time
 import unittest
-from manage_status import manage_status
+from manage_status import manage_status, timer
 
 class CommonManageStatusTest(unittest.TestCase):
     def test_manage_status(self):
@@ -30,6 +30,24 @@ class CommonManageStatusTest(unittest.TestCase):
         self.assertEqual(status['orange'], 8)
         self.assertEqual(status['apple'],  2)
         self.assertEqual(status['pear'],  14)
+
+        td = timer('mango')
+        time.sleep(1)
+
+        td.on()
+        time.sleep(1)
+        td.off()
+
+        time.sleep(1)
+
+        td.on()
+        time.sleep(1)
+        td.off()
+
+        td.add2ms(ms, 6)
+        status = ms.read(6)
+        print(td.name, status[td.name])
+        self.assertTrue(abs(status[td.name] - 2) < 0.01)
 
         # delete the play area
         os.system('rm -r play')
