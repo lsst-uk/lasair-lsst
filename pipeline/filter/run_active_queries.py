@@ -127,7 +127,8 @@ def run_queries(query_list, annotation_list=None):
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, msl_remote, ann['annotator'], ann['objectId'])
+                query_results = run_query(query, msl_remote, ann['annotator'], ann['diaObjectId'])
+                print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 n += dispose_query_results(query, query_results)
 
         t = time.time() - t
@@ -135,7 +136,7 @@ def run_queries(query_list, annotation_list=None):
             print('   %s got %d in %.1f seconds' % (query['topic_name'], n, t))
             sys.stdout.flush()
 
-def query_for_object(query, objectId):
+def query_for_object(query, diaObjectId):
     """ modifies an existing query to add a new constraint for a specific object.
     We already know this query comes from multiple tables: objects and annotators,
     so we know there is an existing WHERE clause. Can add the new constraint to the end,
@@ -146,12 +147,12 @@ def query_for_object(query, objectId):
         objectId: the object that is the new constraint
     """
     tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
-    query = tok[0] + (' AND objects.objectId="%s" ' % objectId)
+    query = tok[0] + (' AND objects.diaObjectId=%s ' % str(diaObjectId))
     if len(tok) == 2: # has order clause, add it back
         query += ' ORDER BY ' + tok[1]
     return query
 
-def run_query(query, msl, annotator=None, objectId=None):
+def run_query(query, msl, annotator=None, diaObjectId=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
     if annotator and objectId, checks if the query involves the annotator, 
@@ -173,7 +174,7 @@ def run_query(query, msl, annotator=None, objectId=None):
         if not annotator in query['tables']:
             return []
         # run the query against main for this specific object that has been annotated
-        sqlquery_real = query_for_object(sqlquery_real, objectId)
+        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=10 FOR %s LIMIT %d' % (sqlquery_real, limit))
@@ -210,7 +211,7 @@ def dispose_query_results(query, query_results):
 
     if active == 1:
         # send results by email if 24 hurs has passed, returns time of last email send
-        last_email = dispose_email(allrecords, last_email, query)
+        last_email = dispose_email(allrecords, last_email, query, force=True)
 
     if active == 2:
         # send results by kafka on given topic
@@ -254,16 +255,17 @@ def fetch_digest(topic_name):
     last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
     return digest,last_entry,last_email
 
-def dispose_email(allrecords, last_email, query):
+def dispose_email(allrecords, last_email, query, force=False):
     """ Send out email notifications
     """
     utcnow = datetime.datetime.utcnow()
-    delta = (utcnow - last_email)
-    delta = delta.days + delta.seconds/86400.0
-    # send a message at most every 24 hours
-    # delta is number of days since last email went out
-    if delta < 1.0:
-        return last_email
+    if not force:
+        delta = (utcnow - last_email)
+        delta = delta.days + delta.seconds/86400.0
+        # send a message at most every 24 hours
+        # delta is number of days since last email went out
+        if delta < 1.0:
+            return last_email
     print('   --- send email to %s' % query['email'])
     topic = query['topic_name']
     sys.stdout.flush()
@@ -273,11 +275,11 @@ def dispose_email(allrecords, last_email, query):
     for out in allrecords: 
         out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
         # gather all records that have accumulated since last email
-        if out_time > last_email:
-            if 'objectId' in out:
-                objectId = out['objectId']
-                message      += objectId + '\n'
-                message_html += '<a href="%s/object/%s/">%s</a><br/>' % (settings.LASAIR_URL, objectId, objectId)
+        if force or out_time > last_email:
+            if 'diaObjectId' in out:
+                diaObjectId = str(out['diaObjectId'])
+                message      += diaObjectId + '\n'
+                message_html += '<a href="%s/objects/%s/">%s</a><br/>' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
                 jsonout = json.dumps(out, default=datetime_converter)
                 message += jsonout + '\n'

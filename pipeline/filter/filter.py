@@ -171,10 +171,11 @@ def run_filter(args):
     print('ANNOTATION QUERIES start %s' % datetime.utcnow().strftime("%H:%M:%S"))
     sys.stdout.flush()
     t = time.time()
-    try:
+    if 1:
+#    try:
         run_active_queries.run_annotation_queries(query_list)
-    except Exception as e:
-        log.error("WARNING in filter/run_active_queries.run_annotation_queries")
+#    except Exception as e:
+#        log.error("WARNING in filter/run_active_queries.run_annotation_queries")
     log.info('ANNOTATION QUERIES %.1f seconds' % (time.time() - t))
     
     ##### build CSV file with local database
