@@ -180,9 +180,9 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
     alerts = []
     for lsst_alert in lsst_alerts:
         alert = {
-            'diaObject':                 diaObject,
-            'diaSourcesList':            diaSourcesList,
-            'forcedSourceOnDiaObjectsList':      forcedSourceOnDiaObjectsList,
+            'diaObject': lsst_alert['DiaObject'],
+            'diaSourcesList': lsst_alert['DiaSourceList'],
+            'forcedSourceOnDiaObjectsList': lsst_alert['ForcedSourceOnDiaObjectList'],
         }
         alerts.append(alert)
 
