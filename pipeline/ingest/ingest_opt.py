@@ -190,13 +190,14 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
         # but the new C++ bulk code is 100 times faster than doing it one at a time.
 
     # Call on Cassandra
-    try:
-        cass_result = insert_cassandra_multi(alerts, cassandra_session)
-        if cass_result:
-            cass_futures += cass_result
-    except Exception as e:
-        log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
-        return 0  # ingest batch failed
+    if len(alerts) > 0:
+        try:
+            cass_result = insert_cassandra_multi(alerts, cassandra_session)
+            if cass_result:
+                cass_futures += cass_result
+        except Exception as e:
+            log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
+            return 0  # ingest batch failed
 
     for alert in alerts:
         # produce to kafka
