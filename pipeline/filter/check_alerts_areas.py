@@ -86,7 +86,7 @@ def check_alerts_against_areas(alertlist, arealist):
         hits += check_alerts_against_area(alertlist, area)
     return hits
 
-def fetch_alerts(msl):
+def fetch_alerts(msl, jd=None, limit=None, offset=None):
     """ fetch_alerts.
     Get all the alerts from the local cache to check againstr watchlist
 
@@ -96,6 +96,10 @@ def fetch_alerts(msl):
     cursor = msl.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
+    if jd:
+        query += ' WHERE jd>%f ' % jd
+    if limit:
+        query += ' LIMIT %d OFFSET %d' % (limit, offset)
     cursor.execute(query)
     objlist = []
     ralist = []
