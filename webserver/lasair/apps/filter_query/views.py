@@ -1,4 +1,4 @@
-from .utils import add_filter_query_metadata, run_filter, topic_name, check_query_zero_limit, delete_stream_file, topic_refresh
+from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
 from src import date_nid, db_connect
 from django.shortcuts import render
@@ -26,6 +26,7 @@ import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 sys.path.append('../common')
+from src.topic_name import topic_name
 
 
 @csrf_exempt
