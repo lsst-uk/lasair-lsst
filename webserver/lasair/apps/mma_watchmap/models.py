@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+import sys
+from ..watchmap.models import Watchmap
 
 class MmaWatchmap(Watchmap):
     """MmaWatchmap. Gravy waves etc. Inherits from Watchmap.
@@ -17,9 +19,9 @@ class MmaWatchmap(Watchmap):
     # time at which mataches are started to be made, not date_expire below
     date_active  = models.DateTimeField(editable=False, blank=True, null=True)
 
-    area10 = models.Float()  # sq deg in 10% of skymap
-    area50 = models.Float()  # sq deg in 50% of skymap
-    area90 = models.Float()  # sq deg in 90% of skymap
+    area10 = models.FloatField()  # sq deg in 10% of skymap
+    area50 = models.FloatField()  # sq deg in 50% of skymap
+    area90 = models.FloatField()  # sq deg in 90% of skymap
 
     # URL of FITS file
     fits         = models.CharField(max_length=256, blank=True, null=True)
