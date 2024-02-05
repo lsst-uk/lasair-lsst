@@ -122,7 +122,7 @@ def insert_cassandra_multi(alerts, cassandra_session):
     if len(forcedSourceOnDiaObjectsList) > 0:
         cass_futures += executeLoadAsync(cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
 
-    return futures
+    return cass_futures
 
 def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session):
     """Handle a single alert"""
