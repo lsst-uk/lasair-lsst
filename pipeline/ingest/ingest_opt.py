@@ -40,6 +40,7 @@ import lasairLogging
 stop = False
 log = None
 sigterm_raised = False
+futures = []
 
 def sigterm_handler(signum, frame):
     global sigterm_raised
@@ -56,7 +57,7 @@ def store_images(message, store, diaSourceId, imjd, diaObjectId):
     futures to wait for (which may be empty if not using cassandra)."""
     global log
     try:
-        futures = []
+        image_futures = []
         for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
             if not cutoutType in message: 
                 continue
@@ -65,10 +66,10 @@ def store_images(message, store, diaSourceId, imjd, diaObjectId):
             # store may be cutouts or cephfs
             if settings.USE_CUTOUTCASS:
                 result = store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                futures.append(result)
+                image_futures.append(result)
             else:
                 store.putObject(cutoutId, imjd, content)
-        return futures
+        return image_futures
     except Exception as e:
         log.error('ERROR in ingest/ingest: ', e)
         return None # failure of batch
@@ -94,13 +95,13 @@ def insert_cassandra_multi(alerts, cassandra_session):
     if not cassandra_session:
         return None   # failure of batch
 
-    futures = []
+    cass_futures = []
 
     data = []
     for alert in alerts:
         data.append(alert['diaObject'])
 
-    futures += executeLoadAsync(cassandra_session, 'DiaObjects', data)
+    cass_futures += executeLoadAsync(cassandra_session, 'DiaObjects', data)
     # Note that although we are inserting them into cassandra, we are NOT using
     # HTM indexing inside Cassandra. Hence this is a redundant column.
 
@@ -113,13 +114,13 @@ def insert_cassandra_multi(alerts, cassandra_session):
 #    for i in range(len(diaSourcesList)):
 #        diaSourcesList[i]['htm16'] = htm16s[i]
     if len(diaSourcesList) > 0:
-        futures += executeLoadAsync(cassandra_session, 'DiaSources', diaSourcesList)
+        cass_futures += executeLoadAsync(cassandra_session, 'DiaSources', diaSourcesList)
 
     forcedSourceOnDiaObjectsList = []
     for alert in alerts:
         forcedSourceOnDiaObjectsList += alert['forcedSourceOnDiaObjectsList']
     if len(forcedSourceOnDiaObjectsList) > 0:
-        futures += executeLoadAsync(cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
+        cass_futures += executeLoadAsync(cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
 
     return futures
 
@@ -140,9 +141,7 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
         topic_out:
     """
     global log
-
-    image_futures = []
-    cass_futures = []
+    global futures
     results = []
 
     # deal with images first
@@ -172,7 +171,7 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
             if image_result == None:
                 log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
             else:
-                image_futures += image_result
+                futures += image_result
 
         results.append((len(diaSourcesList), len(forcedSourceOnDiaObjectsList)))
 
@@ -194,7 +193,7 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
         try:
             cass_result = insert_cassandra_multi(alerts, cassandra_session)
             if cass_result:
-                cass_futures += cass_result
+                futures += cass_result
         except Exception as e:
             log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
             return 0  # ingest batch failed
@@ -210,14 +209,6 @@ def handle_alerts(lsst_alerts, image_store, producer, topic_out, cassandra_sessi
                 log.error("ERROR:", e)
                 sys.stdout.flush()
                 return None   # ingest failed
-
-    # Wait for image store futures to complete
-    for future in image_futures:
-        future.result()
-
-    # Wait for cassandra futures to complete
-    for future in cass_futures:
-        future.result()
 
     return results
 
@@ -414,6 +405,12 @@ def run_ingest(args):
 
 def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource):
     global log
+    global futures
+
+    for future in futures:
+        future.result()
+    futures = []
+
     now = datetime.now()
     date = now.strftime("%Y-%m-%d %H:%M:%S")
     log.info('%s %d alerts %d diaSource %d forcedSource' % (date, nalert, ndiaSource, nforcedSource))
