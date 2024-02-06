@@ -318,12 +318,12 @@ class Ingester():
             alerts.append(lsst_alert)
         return alerts
 
-    def run_ingest(self):
+    def run(self):
         """run."""
         log = self.log
     
         # TODO: put this in a config file?
-        batch_size = 250
+        batch_size = 100
         mini_batch_size = 10
 
         # setup connections to Kafka, Cassandra, etc.
@@ -338,7 +338,7 @@ class Ingester():
         # put status on Lasair web page
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
     
-        while ntotalalert < maxalert:
+        while ntotalalert < self.maxalert:
             if self.sigterm_raised:
                 # clean shutdown - this should stop the consumer and commit offsets
                 log.info("Stopping ingest")
@@ -383,9 +383,7 @@ class Ingester():
         if ntotalalert > 0: return 1
         else:               return 0
 
-
-if __name__ == "__main__":
-    args = docopt(__doc__)
+def run_ingest(args):
     if args['--topic_in']:
         topic_in = args['--topic_in']
     elif args['--nid']:
@@ -395,24 +393,26 @@ if __name__ == "__main__":
     else:
         # get all alerts from every nid
         topic_in = '^ztf_.*_programid1$'
-
     if args['--topic_out']:
         topic_out = args['--topic_out']
     else:
         topic_out = 'ztf_ingest'
-    
     if args['--group_id']:
         group_id = args['--group_id']
     else:
         group_id = settings.KAFKA_GROUPID
-    
     if args['--maxalert']:
         maxalert = int(args['--maxalert'])
     else:
         maxalert = sys.maxsize  # largest possible integer
 
+
     ingester = Ingester(topic_in, topic_out, group_id, maxalert)
-    rc = ingester.run_ingest()
+    return ingester.run()
+
+if __name__ == "__main__":
+    args = docopt(__doc__)
+    rc = run_ingest(args)
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     sys.exit(rc)
