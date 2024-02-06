@@ -3,7 +3,7 @@
 
 
 {% block title %}
-    Watchmaps
+    Multi Messenger Watchmaps
 {% endblock title %}
 {% block content %}
 
@@ -21,7 +21,7 @@
                                 <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
                                     {% include "includes/icons/icon_watchmap.html" %}
                                 </div>
-                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Watchmaps</h2>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Multi Messenger Watchmaps</h2>
                             </div>
 
                             <div class="col-1 float-end d-none d-sm-inline">
@@ -44,7 +44,7 @@
                         </div>
                         <div class="col-12 px-4">
                             <small class="text-gray-500">
-                                A watchmap is based on a region file (MOC format) which defines a specific portion of the sky. Each transient falling within that region of the sky is flagged as <em>matched</em> against that watchmap.
+                                A multi-messenger watchmap is based on a region file (MOC format) which defines a specific portion of the sky. Each transient falling within that region of the sky is flagged as <em>matched</em> against that watchmap.
                             </small>
                         </div>
                     </div>
@@ -55,12 +55,12 @@
 
         {% if user.is_authenticated %}
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_watchmap_table.html" with type="my" position="auto" %}
+                {% include "includes/widgets/widget_mma_watchmap_table.html" with type="my" position="auto" %}
             </div>
         {% endif %}
 
         <div class="col-12 mb-4">
-            {% include "includes/widgets/widget_watchmap_table.html" with type="public" position="auto" %}
+            {% include "includes/widgets/widget_mma_watchmap_table.html" with type="public" position="auto" %}
         </div>
 
     </div>
@@ -77,7 +77,7 @@
     <script>
         {% if form.errors %}
             $(document).ready(function(){
-                $("#createWatchmapForm").modal('show');
+                $("#createMmaWatchmapForm").modal('show');
             });
         {% endif %}
     </script>

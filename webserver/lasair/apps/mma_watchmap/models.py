@@ -1,9 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 import sys
-from ..watchmap.models import Watchmap
+from ..watchmap.models import abstractWatchmap
 
-class MmaWatchmap(Watchmap):
+class MmaWatchmap(abstractWatchmap):
     """MmaWatchmap. Gravy waves etc. Inherits from Watchmap.
     """
 
