@@ -1,3 +1,3 @@
 USE_CUTOUTCASS = True 
-SCHEMA = ../../../../common/schema/dp02.avsc
+SCHEMA = '../../../../common/schema/dp02.avsc'
 
