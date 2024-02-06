@@ -17,6 +17,7 @@ pipeline {
                 dir('tests/unit/pipeline/ingest') {
                     sh 'python3 test_ingest.py'
                     sh 'python3 test_ingest_opt.py'
+                    sh 'python3 test_ingest_refactor.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
