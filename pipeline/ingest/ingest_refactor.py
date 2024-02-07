@@ -133,6 +133,7 @@ class Ingester():
             producer_conf = {
                 'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
                 'client.id': 'client-1',
+                'message.max.bytes': 10000000
             }
             self.producer = Producer(producer_conf)
             log.info('Producing to   %s' % settings.KAFKA_SERVER)
