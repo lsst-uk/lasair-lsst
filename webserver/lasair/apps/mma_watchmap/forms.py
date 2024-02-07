@@ -17,17 +17,14 @@ class MmaWatchmapForm(forms.ModelForm):
     class Meta:
         model = MmaWatchmap
         widgets = {
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': True}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchmap.', 'required': True}),
             'public': forms.CheckboxInput(),
             'active': forms.CheckboxInput()
         }
-        fields = ['name', 'description', 'active', 'public', 'watchmap_file']
+        fields = ['active', 'public', 'watchmap_file']
 
     def clean(self):
         cleaned_data = super(MmaWatchmapForm, self).clean()
 
-        name = self.cleaned_data.get('name')
         if self.request:
             action = self.request.POST.get('action')
 
@@ -46,17 +43,14 @@ class UpdateMmaWatchmapForm(forms.ModelForm):
     class Meta:
         model = MmaWatchmap
         widgets = {
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': True}),
-            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'A detailed description of your watchmap.', 'required': True}),
             'public': forms.CheckboxInput(),
             'active': forms.CheckboxInput()
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['active', 'public']
 
     def clean(self):
         cleaned_data = super(UpdateMmaWatchmapForm, self).clean()
 
-        name = self.cleaned_data.get('name')
         if self.request:
             action = self.request.POST.get('action')
 
@@ -90,11 +84,9 @@ class DuplicateMmaWatchmapForm(forms.ModelForm):
         model = MmaWatchmap
         widgets = {
             'active': forms.CheckboxInput(),
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': True}),
-            'description': forms.Textarea(attrs={'rows': 4, 'placeholder': 'A detailed description of your watchmap.', 'required': True}),
             'public': forms.CheckboxInput(),
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['active', 'public']
 
     def clean_active(self):
         return 1 if self.cleaned_data['active'] else 0
@@ -104,7 +96,6 @@ class DuplicateMmaWatchmapForm(forms.ModelForm):
 
     def clean(self):
         cleaned_data = super(DuplicateMmaWatchmapForm, self).clean()
-        name = self.cleaned_data.get('name')
         if self.request:
             action = self.request.POST.get('action')
 

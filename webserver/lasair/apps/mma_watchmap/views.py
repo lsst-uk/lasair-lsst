@@ -53,8 +53,8 @@ def mma_watchmap_index(request):
         if form.is_valid():
             # GET WATCHMAP PARAMETERS
             t = time.time()
-            name = request.POST.get('name')
-            description = request.POST.get('description')
+#            name = request.POST.get('name')
+#            description = request.POST.get('description')
 
             if request.POST.get('public'):
                 public = True
@@ -79,8 +79,8 @@ def mma_watchmap_index(request):
                 png_string = bytes2string(png_bytes)
                 expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
-                wm = MmaWatchmap(user=request.user, name=name, description=description,
-                    moc=fits_string, mocimage=png_string, active=active, public=public, date_expire=expire)
+                wm = MmaWatchmap(moc10=fits_string, 
+                        mocimage=png_string, active=active, public=public, date_expire=expire)
                 wm.save()
                 mma_watchmapname = form.cleaned_data.get('name')
                 messages.success(request, f"The '{mma_watchmapname}' mma_watchmap has been successfully created")
@@ -88,21 +88,12 @@ def mma_watchmap_index(request):
     else:
         form = MmaWatchmapForm(request=request)
 
-    # PUBLIC WATCHMAPS
-    publicMmaWatchmaps = MmaWatchmap.objects.filter(public__gte=1)
-    publicMmaWatchmaps = add_mma_watchmap_metadata(publicMmaWatchmaps, remove_duplicates=True)
-
-    # USER WATCHMAPS
-    if request.user.is_authenticated:
-        myMmaWatchmaps = MmaWatchmap.objects.filter(user=request.user)
-        myMmaWatchmaps = add_mma_watchmap_metadata(myMmaWatchmaps)
-    else:
-        myMmaWatchmaps = None
+    myMmaWatchmaps = []
+    publicMmaWatchmaps = MmaWatchmap.objects.all()
 
     return render(request, 'mma_watchmap/mma_watchmap_index.html',
                   {'myMmaWatchmaps': myMmaWatchmaps,
                    'publicMmaWatchmaps': publicMmaWatchmaps,
-                   'authenticated': request.user.is_authenticated,
                    'form': form})
 
 
@@ -131,14 +122,6 @@ def mma_watchmap_detail(request, mw_id):
     mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
 
     resultCap = 1000
-
-    # IS USER ALLOWED TO SEE THIS RESOURCE?
-    is_owner = (request.user.is_authenticated) and (request.user.id == mma_watchmap.user.id)
-    is_public = (mma_watchmap.public and mma_watchmap.public > 0)
-    is_visible = is_owner or is_public
-    if not is_visible:
-        messages.error(request, "This mma_watchmap is private and not visible to you")
-        return render(request, 'error.html')
 
     if request.method == 'POST':
         form = UpdateMmaWatchmapForm(request.POST, instance=mma_watchmap, request=request)
@@ -174,9 +157,6 @@ def mma_watchmap_detail(request, mw_id):
             description = request.POST.get('description')
             newWm = mma_watchmap
             newWm.pk = None
-            newWm.user = request.user
-            newWm.name = request.POST.get('name')
-            newWm.description = request.POST.get('description')
             if request.POST.get('active'):
                 newWm.active = True
             else:
@@ -294,8 +274,7 @@ def mma_watchmap_create(request):
                 png_bytes = make_image_of_MOC(fits_bytes, request=request)
                 png_string = bytes2string(png_bytes)
 
-                wm = MmaWatchmap(user=request.user, name=name, description=description,
-                              moc=fits_string, mocimage=png_string, active=active, public=public)
+                wm = MmaWatchmap(moc10=fits_string, mocimage=png_string, active=active, public=public)
                 wm.save()
                 mma_watchmapname = form.cleaned_data.get('name')
                 messages.success(request, f"The '{mma_watchmapname}' mma_watchmap has been successfully created")
@@ -323,14 +302,7 @@ def mma_watchmap_download(request, mw_id):
     mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
 
     # IS USER ALLOWED TO SEE THIS RESOURCE?
-    is_owner = (request.user.is_authenticated) and (request.user.id == mma_watchmap.user.id)
-    is_public = (mma_watchmap.public > 0)
-    is_visible = is_owner or is_public
-    if not is_visible:
-        return render(request, 'error.html', {
-            'message': "This mma_watchmap is private and not visible to you"})
-
-    moc = string2bytes(mma_watchmap.moc)
+    moc10 = string2bytes(mma_watchmap.moc10)
 
     filename = slugify(mma_watchmap.name) + '.fits'
     tmpfilename = tempfile.NamedTemporaryFile().name + '.fits'
@@ -368,11 +340,6 @@ def mma_watchmap_delete(request, mw_id):
     mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
     name = mma_watchmap.name
 
-    # DELETE WATCHMAP
-    if request.method == 'POST' and request.user.is_authenticated and mma_watchmap.user.id == request.user.id and request.POST.get('action') == "delete":
-        mma_watchmap.delete()
-        messages.success(request, f'The "{name}" mma_watchmap has been successfully deleted')
-    else:
-        messages.error(request, f'You must be the owner to delete this mma_watchmap')
+    messages.error(request, f'You must be the owner to delete this mma_watchmap')
 
     return redirect('mma_watchmap_index')

@@ -1,20 +1,34 @@
 from django.db import models
 from django.contrib.auth.models import User
 import sys
-from ..watchmap.models import abstractWatchmap
 
-class MmaWatchmap(abstractWatchmap):
-    """MmaWatchmap. Gravy waves etc. Inherits from Watchmap.
+class MmaWatchmap(models.Model):
+    """MmaWatchmap. Gravy waves etc. 
     """
 
     # ID for all the MmaWatchmaps
     mw_id = models.AutoField(primary_key=True)
 
     # date as reported by LigoVirgo++
+    event_tai    = models.FloatField()
     event_date   = models.DateTimeField(editable=False, blank=True, null=True)
 
-    # the skymap of a given event gets upgrades
-    version      = models.CharField(max_length=16, blank=True, null=True)
+    moc10 = models.TextField(blank=True, null=True)
+    moc50 = models.TextField(blank=True, null=True)
+    moc90 = models.TextField(blank=True, null=True)
+    mocimage = models.TextField(blank=True, null=True)
+    active = models.BooleanField(blank=True, null=True)
+    public = models.BooleanField(blank=True, null=True)
+    date_created  = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
+    date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
+
+    # (eg namespace is LVK, IceCube, Fermi, etc)
+    # Each should cite a place to find ut what the params are
+    # The otherId is their identifier, and there is version. 
+    # So our full ident is namespace:otherId:version
+    namespace    = models.CharField(max_length=16,  blank=True, null=True)
+    otherId      = models.CharField(max_length=256, blank=True, null=True)
+    version      = models.CharField(max_length=256, blank=True, null=True)
 
     # time at which mataches are started to be made, not date_expire below
     date_active  = models.DateTimeField(editable=False, blank=True, null=True)
@@ -25,15 +39,6 @@ class MmaWatchmap(abstractWatchmap):
 
     # URL of FITS file
     fits         = models.CharField(max_length=256, blank=True, null=True)
-
-    ### ##########
-    # Below depends on what kind of MMA event we are handling 
-
-    # (eg namespace is LVK, IceCube, Fermi, etc)
-    # Each should cite a place to find ut what the params are
-    # The otherId is their identifier. So our ident is namespace:otherId
-    namespace    = models.CharField(max_length=16, blank=True, null=True)
-    otherId      = models.CharField(max_length=256, blank=True, null=True)
 
     # finding out about this namespace, meaning of params, etc
     more_info    = models.CharField(max_length=1024, blank=True, null=True)
