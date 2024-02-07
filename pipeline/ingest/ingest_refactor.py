@@ -126,7 +126,7 @@ class Ingester():
             except Exception as e:
                 log.warn("ERROR in ingest/setup: Cannot connect to Cassandra", e)
                 self.cassandra_session = None
-                #TODO: are we OK with continuing or should we re-raise the exception?
+                raise e
 
         # set up kafka producer
         if self.producer is None:
@@ -323,9 +323,8 @@ class Ingester():
         """run."""
         log = self.log
     
-        # TODO: put this in a config file?
-        batch_size = 100
-        mini_batch_size = 10
+        batch_size = getattr(settings, INGEST_BATCH_SIZE, 100)
+        mini_batch_size = getattr(settings, INGEST_MINI_BATCH_SIZE, 10)
 
         # setup connections to Kafka, Cassandra, etc.
         self.setup()
