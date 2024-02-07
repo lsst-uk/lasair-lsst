@@ -180,9 +180,7 @@ class Ingester():
     def _insert_cassandra(self, alert):
         """Inset a single alert into cassandra.
         Returns a list of future objects."""
-        result = self._insert_cassandra_multi([alert])
-        if result:
-            return result
+        return self._insert_cassandra_multi([alert])
 
     def _insert_cassandra_multi(self, alerts):
         """Insert a list of alerts into casssandra."""
@@ -323,8 +321,8 @@ class Ingester():
         """run."""
         log = self.log
     
-        batch_size = getattr(settings, INGEST_BATCH_SIZE, 100)
-        mini_batch_size = getattr(settings, INGEST_MINI_BATCH_SIZE, 10)
+        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 100)
+        mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
         self.setup()
@@ -338,9 +336,14 @@ class Ingester():
         # put status on Lasair web page
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
     
-        while ntotalalert < self.maxalert:
+        n_remaining = self.maxalert
+        while n_remaining > 0:
+            n_remaining = self.maxalert - ntotalalert
+            if n_remaining < mini_batch_size:
+                mini_batch_size = n_remaining
+
+            # clean shutdown - this should stop the consumer and commit offsets
             if self.sigterm_raised:
-                # clean shutdown - this should stop the consumer and commit offsets
                 log.info("Stopping ingest")
                 break
 
