@@ -24,7 +24,7 @@ from datetime import datetime
 from docopt import docopt
 from multiprocessing import Process, Manager
 
-from ingest_refactor import run_ingest
+from ingest import run_ingest
 
 sys.path.append('../../common')
 import settings
