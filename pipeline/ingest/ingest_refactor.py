@@ -386,7 +386,7 @@ class Ingester():
         if ntotalalert > 0: return 1
         else:               return 0
 
-def run_ingest(args):
+def run_ingest(args, log=None):
     if args['--topic_in']:
         topic_in = args['--topic_in']
     elif args['--nid']:
@@ -409,8 +409,7 @@ def run_ingest(args):
     else:
         maxalert = sys.maxsize  # largest possible integer
 
-
-    ingester = Ingester(topic_in, topic_out, group_id, maxalert)
+    ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
     return ingester.run()
 
 if __name__ == "__main__":

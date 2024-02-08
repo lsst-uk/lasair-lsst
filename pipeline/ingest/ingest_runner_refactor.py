@@ -24,7 +24,6 @@ from datetime import datetime
 from docopt import docopt
 from multiprocessing import Process, Manager
 
-log = None
 from ingest_refactor import run_ingest
 
 sys.path.append('../../common')
@@ -33,16 +32,16 @@ import settings
 sys.path.append('../../common/src')
 import date_nid, slack_webhook, lasairLogging
 
-# Set up the logger
-lasairLogging.basicConfig(
-    filename='/home/ubuntu/logs/ingest.log',
-    #webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
-    merge=True
-)
-log = lasairLogging.getLogger("ingest_runner")
-
-# Our processes
-process_list = []
+def setup_procs(n, nprocess, args):
+    # Set up the logger
+    lasairLogging.basicConfig(
+        filename = f"/home/ubuntu/logs/ingest-{n}.log",
+    #    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
+    log = lasairLogging.getLogger("ingest_runner")
+    log.info(f"Starting ingest runner process {n} of {nprocess}")
+    run_ingest(args, log=log)
 
 # Deal with arguments
 args = docopt(__doc__)
@@ -50,23 +49,17 @@ args = docopt(__doc__)
 # The nprocess argument is used in this module
 if args['--nprocess']:
     nprocess = int(args['--nprocess'])
-    #log.error('Sorry the multiprocessing option doesnt work yet')
-    #sys.exit()
 else:
     nprocess = 1
-log.info('ingest_runner with %d processes' % nprocess)
+print('ingest_runner with %d processes' % nprocess)
 
 # Start up the processes
 process_list = []
-manager = Manager()
-t = time.time()
-log.info('Starting processes')
-for t in range(nprocess):
-    p = Process(target=run_ingest, args=(args,))
+for i in range(nprocess):
+    p = Process(target=setup_procs, args=(i+1, nprocess, args))
     process_list.append(p)
     p.start()
 
-log.info('Wait for processes to exit')
 for p in process_list:
     p.join()
-log.info('All done, ingest_runner exiting')
+print('ingest_runner exiting')
