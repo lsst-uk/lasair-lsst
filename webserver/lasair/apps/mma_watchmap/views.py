@@ -46,56 +46,12 @@ def mma_watchmap_index(request):
     ]
     ```           
     """
-    # SUBMISSION OF NEW WATCHMAP
-    if request.method == "POST":
-        form = MmaWatchmapForm(request.POST, request.FILES, request=request)
-
-        if form.is_valid():
-            # GET WATCHMAP PARAMETERS
-            t = time.time()
-#            name = request.POST.get('name')
-#            description = request.POST.get('description')
-
-            if request.POST.get('public'):
-                public = True
-            else:
-                public = False
-            if request.POST.get('active'):
-                active = True
-            else:
-                active = False
-
-            if 'mma_watchmap_file' in request.FILES:
-                fits_stream = (request.FILES['mma_watchmap_file'])
-                fits_message = bad_fits.bad_moc_stream(fits_stream)
-                fits_stream.seek(0)
-                if fits_message is not None:
-                    messages.error(request, f'Bad FITS file: {fits_message}')
-                    return render(request, 'error.html')
-
-                fits_bytes = fits_stream.read()
-                fits_string = bytes2string(fits_bytes)
-                png_bytes = make_image_of_MOC(fits_bytes, request=request)
-                png_string = bytes2string(png_bytes)
-                expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
-
-                wm = MmaWatchmap(moc10=fits_string, 
-                        mocimage=png_string, active=active, public=public, date_expire=expire)
-                wm.save()
-                mma_watchmapname = form.cleaned_data.get('name')
-                messages.success(request, f"The '{mma_watchmapname}' mma_watchmap has been successfully created")
-                return redirect(f'mma_watchmap_detail', wm.pk)
-    else:
-        form = MmaWatchmapForm(request=request)
-
     myMmaWatchmaps = []
     publicMmaWatchmaps = MmaWatchmap.objects.all()
 
     return render(request, 'mma_watchmap/mma_watchmap_index.html',
                   {'myMmaWatchmaps': myMmaWatchmaps,
-                   'publicMmaWatchmaps': publicMmaWatchmaps,
-                   'form': form})
-
+                   'publicMmaWatchmaps': publicMmaWatchmaps})
 
 def mma_watchmap_detail(request, mw_id):
     """*return the resulting matches of a mma_watchmap*
@@ -123,65 +79,11 @@ def mma_watchmap_detail(request, mw_id):
 
     resultCap = 1000
 
-    if request.method == 'POST':
-        form = UpdateMmaWatchmapForm(request.POST, instance=mma_watchmap, request=request)
-        duplicateForm = DuplicateMmaWatchmapForm(request.POST, instance=mma_watchmap, request=request)
-
-        action = request.POST.get('action')
-
-    if request.method == 'POST' and is_owner and action == 'save':
-
-        if action == "save":
-            if form.is_valid():
-                # UPDATING SETTINGS?
-                if 'name' in request.POST:
-                    mma_watchmap.name = request.POST.get('name')
-                    mma_watchmap.description = request.POST.get('description')
-                    if request.POST.get('active'):
-                        mma_watchmap.active = 1
-                    else:
-                        mma_watchmap.active = 0
-
-                    if request.POST.get('public'):
-                        mma_watchmap.public = 1
-                    else:
-                        mma_watchmap.public = 0
-                    mma_watchmap.date_expire = \
-                        datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
-                    mma_watchmap.save()
-                    messages.success(request, f'Your mma_watchmap has been successfully updated')
-    elif request.method == 'POST' and action == "copy":
-        if duplicateForm.is_valid():
-            oldName = copy.deepcopy(mma_watchmap.name)
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-            newWm = mma_watchmap
-            newWm.pk = None
-            if request.POST.get('active'):
-                newWm.active = True
-            else:
-                newWm.active = False
-
-            if request.POST.get('public'):
-                newWm.public = True
-            else:
-                newWm.public = False
-            newWm.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
-            newWm.save()
-            wm = newWm
-            mw_id = wm.pk
-            messages.success(request, f'You have successfully copied the "{oldName}" mma_watchmap to My MmaWatchmaps. The results table is initially empty, but should start to fill as new transient detections are found within the map area.')
-            return redirect(f'mma_watchmap_detail', mw_id)
-    else:
-        form = UpdateMmaWatchmapForm(instance=mma_watchmap, request=request)
-        duplicateForm = DuplicateMmaWatchmapForm(instance=mma_watchmap, request=request)
-
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
 o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, tainow()-o.maxTai as "last detected (days ago)"
-FROM area_hits as h, objects AS o
+FROM mma_area_hits as h, objects AS o
 WHERE h.mw_id={mw_id}
 AND o.diaObjectId=h.diaObjectId
 limit {resultCap}
@@ -193,14 +95,6 @@ limit {resultCap}
 
     if count == resultCap:
         limit = resultCap
-        # countQuery = f"""
-        # SELECT count(*) as count
-        # FROM area_hits as h, objects AS o
-        # WHERE h.mw_id={mw_id}
-        # AND o.objectId=h.objectId
-        # """
-        # cursor.execute(countQuery)
-        # count = cursor.fetchone()["count"]
 
         if settings.DEBUG:
             apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
@@ -223,63 +117,7 @@ limit {resultCap}
         'table': table,
         'count': count,
         'schema': schema,
-        'form': form,
-        'duplicateForm': duplicateForm,
         'limit': limit})
-
-
-@login_required
-def mma_watchmap_create(request):
-    """*create a new MmaWatchmap*
-
-    **Key Arguments:**
-
-    - `request` -- the original request
-
-    **Usage:**
-
-    ```python
-    urlpatterns = [
-        ...
-        path('mma_watchmaps/create/', views.mma_watchmap_create, name='mma_watchmap_create'),
-        ...
-    ]
-    ```           
-    """
-    # SUBMISSION OF NEW WATCHMAP
-    if request.method == "POST":
-        form = MmaWatchmapForm(request.POST, request.FILES, request=request)
-        if not form.is_valid():
-            messages.error(request, f'{form.errors}')
-            return redirect(f'mma_watchmap_index')
-
-        if form.is_valid():
-            # GET WATCHMAP PARAMETERS
-            t = time.time()
-            name = request.POST.get('name')
-            description = request.POST.get('description')
-
-            if request.POST.get('public'):
-                public = True
-            else:
-                public = False
-            if request.POST.get('active'):
-                active = True
-            else:
-                active = False
-
-            if 'mma_watchmap_file' in request.FILES:
-                fits_bytes = (request.FILES['mma_watchmap_file']).read()
-                fits_string = bytes2string(fits_bytes)
-                png_bytes = make_image_of_MOC(fits_bytes, request=request)
-                png_string = bytes2string(png_bytes)
-
-                wm = MmaWatchmap(moc10=fits_string, mocimage=png_string, active=active, public=public)
-                wm.save()
-                mma_watchmapname = form.cleaned_data.get('name')
-                messages.success(request, f"The '{mma_watchmapname}' mma_watchmap has been successfully created")
-                return redirect(f'mma_watchmap_detail', wm.pk)
-
 
 def mma_watchmap_download(request, mw_id):
     """*download the original mma_watchmap file used to create the MmaWatchmap*

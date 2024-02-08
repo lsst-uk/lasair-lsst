@@ -1,0 +1,89 @@
+{% load static %}
+
+
+<div class="card border-0 shadow h-100">
+
+
+
+    <div class="card-body">
+
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in MMA watchmap">{{count}}</span>
+
+        <div class="row d-flex   justify-content-start">
+
+            <div class="col-12 mb-3 d-flex align-items-center   justify-content-start">
+
+                <div class="icon-shape icon-shape-tertiary rounded me-2">
+                    {% include "includes/icons/icon_watchmap.html" %}
+                </div>
+
+
+
+                <div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">'{{ mma_watchmap.otherId }}' MMA Watchmap Associations{% if mma_watchmap.public %}
+                    <span class="icon icon-md mx-2 text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md mx-2 text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+                <div class="h5 fw-extrabold mb-0 ms-2 d-sm-none">'{{ mma_watchmap.otherId }}' Watchmap Associations{% if mma_watchmap.public %}
+                    <span class="icon icon-md mx-2 text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
+                        {% include "includes/icons/icon_padlock_open.html" %}
+                    </span>
+
+                {% else %}
+                    <span class="icon icon-md mx-2 text-gray-400" data-bs-toggle="tooltip" data-bs-title="private list">
+                        {% include "includes/icons/icon_padlock_closed.html" %}
+                    </span>
+
+                {% endif %}</div>
+
+
+
+
+            </div>
+
+            <div class="col-12 px-4">
+                <small class="text-gray-500">
+                    The watchmap is <b>{% if not mma_watchmap.active %}not {% endif %} active.</b>{% include "includes/info_tooltip.html" with info="When active, a mma_watchmap will be dynamically matched against new transient alerts. See the mma_watchmap settings to make changes" position="auto" link=docroot|add:"/core_functions/watchmaps.html" %}
+                </small>
+            </div>
+
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <img src="data:image/png;base64,{{ mma_watchmap.mocimage }}" class="w-50 img-fluid thumbnail " style="clip-path: inset(10px 10px 10px 10px);" alt="mma_watchmap image"
+            >
+        </div>
+
+        <div class="d-flex justify-content-end mt-3">
+
+            <nobr>
+
+                <div class="btn-group" >
+
+                <button class="btn btn-sm btn-dark dropdown-toggle border-white " type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    {% include "includes/icons/icon_export.html" %}
+                    <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                    <li><a class="dropdown-item export" href="{% url 'mma_watchmap_download' mma_watchmap.mw_id %}">Original MOC file</a></li>
+                </ul>
+            </div>
+        </div>
+
+    </nobr>
+
+</div>
+
+</div>
+</div>
+
+
+
+
+{% include "includes/widgets/widget_mma_watchmap_duplicate_form.html" %}
