@@ -1,0 +1,25 @@
+<div class="card border-0 shadow h-100">
+    <div class="card-body">
+        <div class="row d-flex align-items-start">
+            <div class="col-2 col-md-1 text-xl-center mb-3  justify-content-xl-start">
+                <div class="icon-shape icon-shape-secondary rounded me-sm-0 ">
+                </div>
+            </div>
+            <div class="col-10 col-xl-11 pe-xl-2 ps-xl-5">
+                <div >
+                    <h2 class="h6 text-gray-400 mb-0 ps-3">RSP Portal</h2>
+		    <small class="fw-normal text-gray-500 ps-3">Search the DP0.2 data release</small>
+                </div>
+            </div>	
+            <div class="col-12 col-xl-10 pe-xl-5 ps-sm-4">
+                <small class="text-gray-500">
+		    <div><a href="https://rsp.lsst.ac.uk/portal/app/?__action=table.search&request=%7B%22startIdx%22%3A0%2C%22serviceUrl%22%3A%22https%3A%2F%2Frsp.lsst.ac.uk%2Fapi%2Ftap%22%2C%22QUERY%22%3A%22SELECT%20*%20FROM%20dp02_dc2_catalogs.DiaObject%20AS%20diaobj%20WHERE%20diaobj.diaObjectId%3D%27{{ data.diaObjectId }}%27%22%2C%22MAXREC%22%3A50000%2C%22META_INFO%22%3A%7B%22title%22%3A%22dp02_dc2_catalogs.DiaObject%20-%20rsp.lsst.ac.uk%2Fapi%22%2C%22tbl_id%22%3A%22tbl_id-c80-33%22%2C%22serviceLabel%22%3A%22LSST%20DP0.2%20DC2%22%7D%2C%22tbl_id%22%3A%22tbl_id-c80-33%22%2C%22id%22%3A%22AsyncTapQuery%22%2C%22pageSize%22%3A100%7D&options=%7B%22backgroundable%22%3Atrue%2C%22showFilters%22%3Atrue%2C%22showInfoButton%22%3Atrue%2C%22pageSize%22%3A100%7D">Search DiaObject</a></div>
+		    <div><a href="https://rsp.lsst.ac.uk/portal/app/?__action=table.search&request=%7B%22startIdx%22%3A0%2C%22serviceUrl%22%3A%22https%3A%2F%2Frsp.lsst.ac.uk%2Fapi%2Ftap%22%2C%22QUERY%22%3A%22SELECT%20*%20FROM%20dp02_dc2_catalogs.DiaSource%20AS%20diasrc%20WHERE%20diasrc.diaObjectId%3D%27{{ data.diaObjectId }}%27%22%2C%22MAXREC%22%3A50000%2C%22META_INFO%22%3A%7B%22title%22%3A%22dp02_dc2_catalogs.DiaSource%20-%20rsp.lsst.ac.uk%2Fapi%22%2C%22tbl_id%22%3A%22tbl_id-c83-22%22%2C%22serviceLabel%22%3A%22LSST%20DP0.2%20DC2%22%7D%2C%22tbl_id%22%3A%22tbl_id-c83-22%22%2C%22id%22%3A%22AsyncTapQuery%22%2C%22pageSize%22%3A100%7D&options=%7B%22backgroundable%22%3Atrue%2C%22showFilters%22%3Atrue%2C%22showInfoButton%22%3Atrue%2C%22pageSize%22%3A100%7D">Search DiaSources</a></div>
+		    <div><a href="https://rsp.lsst.ac.uk/portal/app/?__action=table.search&request=%7B%22startIdx%22%3A0%2C%22serviceUrl%22%3A%22https%3A%2F%2Frsp.lsst.ac.uk%2Fapi%2Ftap%22%2C%22QUERY%22%3A%22SELECT%20*%20%20FROM%20dp02_dc2_catalogs.Object%20%20WHERE%20CONTAINS(POINT(%27ICRS%27%2C%20coord_ra%2C%20coord_dec)%2CCIRCLE(%27ICRS%27%2C%20{{ data.objectData.ra }}%2C%20{{ data.objectData.decl }}%2C%200.0002777777777777778))%3D1%22%2C%22MAXREC%22%3A50000%2C%22META_INFO%22%3A%7B%22title%22%3A%22dp02_dc2_catalogs.Object%20-%20rsp.lsst.ac.uk%2Fapi%22%2C%22tbl_id%22%3A%22tbl_id-c84-40%22%2C%22tbl_pref_key%22%3A%22dp02_dc2_catalogs-dp02_dc2_catalogs.Object%22%2C%22serviceLabel%22%3A%22LSST%20DP0.2%20DC2%22%7D%2C%22tbl_id%22%3A%22tbl_id-c84-40%22%2C%22id%22%3A%22AsyncTapQuery%22%2C%22pageSize%22%3A100%7D&options=%7B%22backgroundable%22%3Atrue%2C%22showFilters%22%3Atrue%2C%22showInfoButton%22%3Atrue%2C%22pageSize%22%3A100%7D">Search Object within 1 arcsec</a></div>
+		    <div><a href="https://rsp.lsst.ac.uk/portal/app/?__action=table.search&request=%7B%22startIdx%22%3A0%2C%22serviceUrl%22%3A%22https%3A%2F%2Frsp.lsst.ac.uk%2Fapi%2Ftap%22%2C%22QUERY%22%3A%22SELECT%20*%20%20FROM%20dp02_dc2_catalogs.Source%20%20WHERE%20CONTAINS(POINT(%27ICRS%27%2C%20coord_ra%2C%20coord_dec)%2CCIRCLE(%27ICRS%27%2C%20{{ data.objectData.ra }}%2C%20{{ data.objectData.decl }}%2C%200.0002777777777777778))%3D1%22%2C%22MAXREC%22%3A50000%2C%22META_INFO%22%3A%7B%22title%22%3A%22dp02_dc2_catalogs.Source%20-%20rsp.lsst.ac.uk%2Fapi%22%2C%22tbl_id%22%3A%22tbl_id-c84-76%22%2C%22tbl_pref_key%22%3A%22dp02_dc2_catalogs-dp02_dc2_catalogs.Source%22%2C%22serviceLabel%22%3A%22LSST%20DP0.2%20DC2%22%7D%2C%22tbl_id%22%3A%22tbl_id-c84-76%22%2C%22id%22%3A%22AsyncTapQuery%22%2C%22pageSize%22%3A100%7D&options=%7B%22backgroundable%22%3Atrue%2C%22showFilters%22%3Atrue%2C%22showInfoButton%22%3Atrue%2C%22pageSize%22%3A100%7D">Search Sources within 1 arcsec</a></div>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
