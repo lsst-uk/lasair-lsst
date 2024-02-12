@@ -117,7 +117,7 @@ def decsex(de):
 
 
 def objjson(diaObjectId, full=False):
-    """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`)
+    """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`, `annotations`)
 
     **Usage:**
 
@@ -261,11 +261,19 @@ def objjson(diaObjectId, full=False):
     objectData["peakMag"] = f"{peakMag['apflux'].values[0]:.2f}±{peakMag['apfluxerr'].values[0]:.2f}"
     objectData["peakFilter"] = peakMag['filtername'].values[0]
 
+    # annotations
+    annotations = []
+    query = 'SELECT annotationID, topic, version, timestamp, classification, explanation, classdict, url from annotations WHERE diaObjectId = %s' % diaObjectId
+    cursor.execute(query)
+    for row in cursor:
+        annotations.append(row)
+
     data = {'diaObjectId': diaObjectId,
             'objectData': objectData,
             'diaSources': diaSources,
             'diaForcedSources': diaForcedSources,
             'sherlock': sherlock,
+            'annotations': annotations,
             'image_urls': image_urls,
             'TNS': TNS, 'message': message}
     return data
