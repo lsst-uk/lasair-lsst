@@ -11,26 +11,26 @@
                     <h2 class="h6 text-gray-400 mb-1 ps-2 ps-lg-0">Annotations{% include "includes/info_tooltip.html" with info="Annotators are codes that run on the Lasair transient stream, compute some value added feature(s) for the transients and inject these values back into the stream for other users to use in their filters" position="auto" link=docroot|add:"/concepts/annotations.html" %}</h2>
                 </div>
             </div>
-            <table>
+            <table class="table table-flush">
                 <thead class="thead-light">
                     <tr>
-                        <th>Annotator</th>
-                        <th>Timestamp</th>
-                        <th>Annotation</th>
-                        <th>Explanation</th>
-                        <th>JSON Data</th>
-                        <th>Link</th>
+                        <th style="text-transform: none">Annotator</th>
+                        <th style="text-transform: none">Timestamp</th>
+                        <th style="text-transform: none">Annotation</th>
+                        <th style="text-transform: none">Explanation</th>
+                        <th style="text-transform: none">JSON Data</th>
+                        <th style="text-transform: none">Link</th>
                     </tr>
                 </thead>
                 <tbody>
                 {% for annotation in data.annotations %}
                     <tr>
                         <td>{{ annotation.topic }} {{ annotation.version }}</td>
-                        <td class="mb-1">{{ annotation.timestamp }}</td>
-                        <td class="mb-1">{{ annotation.classification }}</td>
-                        <td class="mb-1">{{ annotation.explanation }}</td>
-                        <td class="mb-1"><a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{ annotation.classdict }}</code></pre>'>JSON data</a></td>
-                        <td class="mb-1"><a href="{{ annotation.url }}">{{ annotation.url|truncatechars:12 }}</a></td>
+                        <td>{{ annotation.timestamp }}</td>
+                        <td>{{ annotation.classification }}</td>
+                        <td>{{ annotation.explanation }}</td>
+                        <td><a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{ annotation.classdict }}</code></pre>'>JSON data</a></td>
+                        <td><a href="{{ annotation.url }}">{{ annotation.url|truncatechars:12 }}</a></td>
                     </tr>
                 {% endfor %}
                 </tbody>
