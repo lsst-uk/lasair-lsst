@@ -267,6 +267,8 @@ def objjson(diaObjectId, full=False):
     cursor.execute(query)
     for row in cursor:
         annotations.append(row)
+    for a in annotations:
+        a['timestamp'] = a['timestamp'].strftime("%Y-%m-%d %H:%M:%S")
 
     data = {'diaObjectId': diaObjectId,
             'objectData': objectData,
