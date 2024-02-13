@@ -178,7 +178,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
         sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
-    sqlquery_real = ('SET STATEMENT max_statement_time=10 FOR %s LIMIT %d' % (sqlquery_real, limit))
+    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' % (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
 
     cursor = msl.cursor(buffered=True, dictionary=True)
     n = 0
