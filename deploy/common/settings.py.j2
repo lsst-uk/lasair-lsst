@@ -69,6 +69,9 @@ LOCAL_DB_HOST           = 'localhost'
 LOCAL_DB_USER           = 'ztf'
 LOCAL_DB_PASS           = '{{ settings.local_db_password }}'
 
+# Timeout when running active filters
+MAX_STATEMENT_TIME      = 20
+
 # Cassandra NoSQL database
 ##########################
 # Cassandra headnode
