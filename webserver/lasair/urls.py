@@ -42,6 +42,7 @@ urlpatterns = [
     path('', include('lasair.apps.status.urls')),
     path('', include('lasair.apps.watchlist.urls')),
     path('', include('lasair.apps.watchmap.urls')),
+    path('', include('lasair.apps.mma_watchmap.urls')),
     path('', include('users.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
 ]

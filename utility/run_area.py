@@ -24,14 +24,20 @@ def run_area(msl, ar_id):
     area = {'ar_id':ar_id, 'moc':moc}
     print('Found MOC for area %d' % ar_id)
 
-    alertlist = fetch_alerts(msl)
-    print('Found %d alerts' % len(alertlist['obj']))
+    # runs out of memory with the whole database
+    npage = 1000000
+    for ipage in range(100):
+        alertlist = fetch_alerts(msl, limit=npage, offset=ipage*npage)
+        nalert = len(alertlist['obj'])
+        print('Found %d alerts' % nalert)
+        if nalert == 0:
+            break
 
-    hits = check_alerts_against_area(alertlist, area)
-    print('Found %d hits' % len(hits))
+        hits = check_alerts_against_area(alertlist, area)
+        print('Found %d hits' % len(hits))
     
-    insert_area_hits(msl, hits)
-    print('Inserted into database')
+        insert_area_hits(msl, hits)
+        print('Inserted into database')
 
 if __name__ == "__main__":
     lasairLogging.basicConfig(stream=sys.stdout)

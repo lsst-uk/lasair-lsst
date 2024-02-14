@@ -1,0 +1,92 @@
+
+{% load humanize %}
+{% load widget_tweaks %}
+
+<div class="modal fade" id="createWatchmapForm" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header border-0">
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body px-md-5">
+                <h2 class="h4 text-center">Create New Watchmap</h2>
+                <p class="text-center"><small class="text-gray-500">
+                    A Watchmap is a region of the sky defined by a Multi-Order Coverage (MOC) Map. This region is presumably of specific interest to you. Use a Watchmap to be alerted of transient events found within this region of the sky. Your Watchmap will appear in the </em>My Watchlmaps</em> of the Watchmap index.
+            </small></p>
+
+        <div class="d-flex justify-content-center">
+            <a href="{{docroot}}/core_functions/watchmaps.html" target="_blank" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2">
+                <img src="{{ ASSETS_ROOT }}/img/icons/Read-the-docs.png" class="image-fluid image-xs me-1">
+                Watchmap Docs
+            </a>
+        </div>
+
+        <form enctype="multipart/form-data" method="post" class="mt-0 mb-3">
+
+            {% csrf_token %}
+
+            <div class="form-group mb-4">
+                <label for="name">Watchmap Name</label>
+                <div class="input-group">
+                    {{ form.name|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.name.errors }}</span>
+
+            </div>
+
+            <div class="form-group mb-4">
+                <label for="description">Description</label>
+                <div class="input-group">
+                    {{ form.description|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.description.errors }}</span>
+            </div>
+
+            <div class="form-group">
+                <label for="watchmap_file">Upload the MOC Map file</label>
+                <small class="text-gray-500"></small>
+
+                <div class="input-group mt-3 mb-3">
+                    {{ form.watchmap_file|add_class:"form-control" }}
+                </div>
+                <span class="text-error">{{ form.watchmap_file.errors }}</span>
+
+            </div>
+
+            <div class="form-group mb-4">
+                <div class="form-check form-switch">
+                    <label for="active">active</label>
+                    {{ form.active|add_class:"form-check-input" }}
+                    <small class="d-flex align-items-center text-gray-500">Dynamically match incoming alerts against watchmap</small>
+                </div>
+                <span class="text-error">{{ form.active.errors }}</span>
+            </div>
+
+            <div class="form-group mb-4">
+                <div class="form-check form-switch">
+                    <label for="public">public</label>
+                    {{ form.public|add_class:"form-check-input" }}
+                    <small class="d-flex align-items-center text-gray-500">Submit watchmap to the public gallery</small>
+                </div>
+
+                <span class="text-error">{{ form.public.errors }}</span>
+            </div>
+
+
+
+            <small class="text-danger">{{ form.non_field_errors }}</small>
+            <div class="d-grid">
+
+                <button type="submit" name="action" value="save" class="btn btn-gray-800">Create</button>
+            </div>
+        </form>
+
+    </div>
+</div>
+</div>
+</div>
+
+
+
+
+
