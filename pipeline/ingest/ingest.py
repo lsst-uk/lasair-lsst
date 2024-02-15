@@ -24,7 +24,7 @@ from datetime import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
 from gkhtm import _gkhtm as htmCircle
 from cassandra.cluster import Cluster
-from gkdbutils.ingesters.cassandra import executeLoadAsync
+from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
 import os, time, json, io, fastavro, signal
 
 sys.path.append('../../common')
@@ -92,6 +92,7 @@ class Ingester():
         self.consumer = consumer
         self.pschema = None
         self.cluster = None
+        self.timers = {}
 
         # if we weren't given a log to use then create a default one
         if log:
@@ -110,6 +111,10 @@ class Ingester():
     def setup(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
+
+        # set up timers
+        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
+            self.timers[name] = manage_status.timer(name)
 
         # set up image store in Cassandra or shared file system
         if self.image_store is None:
@@ -164,6 +169,8 @@ class Ingester():
         with open(settings.SCHEMA) as f:
             schema = json.loads(f.read())
             self.pschema = fastavro.parse_schema(schema)
+
+    # end of class Ingester
     
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop."""
@@ -240,7 +247,9 @@ class Ingester():
                     # objectID
                     diaObjectId = diaObject['diaObjectId']
                     # store the fits images
+                    self.timers['icutout'].on()
                     image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
+                    self.timers['icutout'].off()
                     self.futures += image_futures
                 except IndexError:
                     # This will happen if the list of sources is empty
@@ -257,12 +266,15 @@ class Ingester():
         # Call on Cassandra
         if len(alerts) > 0:
             try:
+                self.timers['icassandra'].on()
                 self._insert_cassandra_multi(alerts)
+                self.timers['icassandra'].off()
             except Exception as e:
                 log.error('ERROR in ingest/handle_alerts: Cassandra insert failed' + str(e))
                 raise e
 
         # produce to kafka
+        self.timers['ikafka'].on()
         for alert in alerts:
             if self.producer is not None:
                 try:
@@ -272,6 +284,7 @@ class Ingester():
                     log.error("ERROR in ingest/handle_alerts: Kafka production failed for %s" % self.topic_out)
                     log.error("ERROR:", e)
                     raise e
+        self.timers['ikafka'].off()
 
         return (nDiaSources, nForcedSources)
 
@@ -279,8 +292,10 @@ class Ingester():
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
+        self.timers['ifuture'].on()
         for future in self.futures:
             future.result()
+        self.timers['ifuture'].off()
         self.futures = []
 
         # if this is not flushed, it will run out of memory
@@ -293,6 +308,8 @@ class Ingester():
         # update the status page
         nid  = date_nid.nid_now()
         ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
+        for name,td in self.timers.items():
+            td.add2ms(ms, nid)
 
         log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nalert, ndiaSource, nforcedSource))
         sys.stdout.flush()
@@ -335,6 +352,7 @@ class Ingester():
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
     
         n_remaining = self.maxalert
+        self.timers['itotal'].on()
         while n_remaining > 0:
             n_remaining = self.maxalert - ntotalalert
             if n_remaining < mini_batch_size:
@@ -368,6 +386,8 @@ class Ingester():
                 self._end_batch(ms, nalert, ndiaSource, nforcedSource)
                 nalert = ndiaSource = nforcedSource = 0
     
+        self.timers['itotal'].off()
+
         # if we exit this loop, clean up
         log.info('Shutting down')
     
