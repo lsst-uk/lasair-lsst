@@ -8,7 +8,7 @@ import signal
 import subprocess
 #import pickle
 import context
-import ingest as ingest
+import ingest_opt as ingest
 
 
 test_alert = {
@@ -24,10 +24,9 @@ class IngestOptTest(unittest.TestCase):
 
     # check that the sigterm handler sets sigterm raised correctly
     def test_sigterm_handler(self):
-        ingester = ingest.Ingester('', '', '', 1)
-        self.assertFalse(ingester.sigterm_raised)
-        subprocess.run(['pkill', '-f', 'python3 test_ingest.py'])
-        self.assertTrue(ingester.sigterm_raised)
+        self.assertFalse(ingest.sigterm_raised)
+        subprocess.run(['pkill', '-f', 'python3 test_ingest_opt.py'])
+        self.assertTrue(ingest.sigterm_raised)
 
     # test using the image store 
     def test_store_images(self):
@@ -35,65 +34,49 @@ class IngestOptTest(unittest.TestCase):
         diaSourceId = test_alert['DiaSource']['diaSourceId']
         diaObjectId = test_alert['DiaObject']['diaObjectId']
         imjd = int(test_alert['DiaSource']['midPointTai'])
-        imageStore = ingest.ImageStore(image_store=mock_image_store)
-        result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        result = ingest.store_images(test_alert, mock_image_store, diaSourceId, imjd, diaObjectId)
+        # check we returned something other than None
+        self.assertIsNotNone(result)
         # check we called putCutoutAsync twice
         self.assertEqual(mock_image_store.putCutoutAsync.call_count, 2)
 
-    @patch('ingest.ImageStore')
-    @patch('ingest.Cluster')
-    @patch('ingest.Producer')
-    @patch('ingest.Consumer')
-    def test_setup(self,
-            mock_consumer,
-            mock_producer,
-            mock_cluster,
-            mock_image_store):
-        ingester = ingest.Ingester('', '', '', 1)
-        ingester.setup()
-        self.assertEqual(mock_image_store.call_count, 1)     
-        self.assertEqual(mock_cluster.call_count, 1)     
-        self.assertEqual(mock_cluster.return_value.connect.call_count, 1)     
-        self.assertEqual(mock_cluster.return_value.connect.return_value.set_keyspace.call_count, 1)     
-        self.assertEqual(mock_producer.call_count, 1)     
-        self.assertEqual(mock_consumer.call_count, 1)     
-        self.assertEqual(mock_consumer.return_value.subscribe.call_count, 1)     
-
-    @patch('ingest.executeLoadAsync')
+    @patch('ingest_opt.executeLoadAsync')
     def test_insert_cassandra(self, mock_executeLoadAsync):
         alert = {
             'diaObject':                 test_alert['DiaObject'],
             'diaSourcesList':            test_alert['DiaSourceList'],
             'forcedSourceOnDiaObjectsList':      test_alert['ForcedSourceOnDiaObjectList'],
         }
-        ingester = ingest.Ingester('', '', '', 1, cassandra_session=True)
-        ingester._insert_cassandra(alert)
+        cassandra_session = True
+        ingest.insert_cassandra(alert, cassandra_session)
         # executeLoad should get called three times, once for diaObject and once for each list
         self.assertEqual(mock_executeLoadAsync.call_count, 3)     
 
-    @patch('ingest.Ingester._insert_cassandra_multi')
-    def test_handle_alert(self, mock_insert_cassandra_multi):
+    @patch('ingest_opt.insert_cassandra_multi')
+    @patch('ingest_opt.store_images')
+    def test_handle_alert(self, mock_store_images, mock_insert_cassandra_multi):
+        mock_store_images.return_value = [ unittest.mock.MagicMock() ]
         mock_insert_cassandra_multi.return_value = [ unittest.mock.MagicMock() ]
-        mock_image_store = unittest.mock.MagicMock() 
+        image_store = True
         mock_producer = unittest.mock.MagicMock()
-        ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer)
-        result = ingester._handle_alert(test_alert)
+        topic_out = None
+        cassandra_session = None
+        result = ingest.handle_alert(test_alert, image_store, mock_producer, topic_out, cassandra_session)
         # check the return values
         self.assertEqual(result, (2, 2))
         # store_images should get called once
-        mock_image_store.store_images.assert_called_once()
+        mock_store_images.assert_called_once()
         # insert_cassandra_multi should get called once
         mock_insert_cassandra_multi.assert_called_once()
         # producer.produce should get called once
         mock_producer.produce.assert_called_once()
     
-    def test_end_batch(self):
-        mock_log = unittest.mock.MagicMock()
+    @patch('ingest_opt.log')
+    def test_end_batch(self, mock_log):
         mock_consumer = unittest.mock.MagicMock()
         mock_producer = unittest.mock.MagicMock()
         mock_ms = unittest.mock.MagicMock()
-        ingester = ingest.Ingester('', '', '', 1, log=mock_log, producer=mock_producer, consumer=mock_consumer)
-        ingester._end_batch(mock_ms, 1, 2, 2)
+        ingest.end_batch(mock_consumer, mock_producer, mock_ms, 1, 2, 2)
         # log message should get sent
         mock_log.info.assert_called_once()
         # producer should get flushed

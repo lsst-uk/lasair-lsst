@@ -24,7 +24,7 @@ from datetime import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
 from gkhtm import _gkhtm as htmCircle
 from cassandra.cluster import Cluster
-from gkdbutils.ingesters.cassandra import executeLoad
+from gkdbutils.ingesters.cassandra import executeLoadAsync
 import os, time, json, io, fastavro, signal
 
 sys.path.append('../../common')
@@ -33,155 +33,358 @@ import settings
 sys.path.append('../../common/src')
 import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
-import lasairLogging
+import logging, lasairLogging
 
-stop = False
-log = None
-sigterm_raised = False
+class ImageStore():
+    """Class to wrap the cassandra and file system image stores and give them a
+    common interface."""
 
-def sigterm_handler(signum, frame):
-    global sigterm_raised
-    sigterm_raised = True
-    #print("Caught SIGTERM")
-
-signal.signal(signal.SIGTERM, sigterm_handler)
-
-def now():
-    # current UTC as string
-    return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
-
-def store_images(message, store, diaSourceId, imjd, diaObjectId):
-    global log
-    try:
-        for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
-            if not cutoutType in message: 
-                continue
-            content = message[cutoutType]
-            cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-            # store may be cutouts or cephfs
-            if settings.USE_CUTOUTCASS:
-                store.putCutout(cutoutId, imjd, diaObjectId, content)
-            else:
-                store.putObject(cutoutId, imjd, content)
-        return True
-    except Exception as e:
-        log.error('ERROR in ingest/ingest: ', e)
-        return None # failure of batch
-
-def insert_cassandra(alert, cassandra_session):
-    """insert_casssandra.
-    Creates an insert for cassandra
-    a query for inserting it.
-
-    Args:
-        alert:
-    """
-    global log
-
-    # if this is not set, then we are not doing cassandra
-    if not cassandra_session:
-        return None   # failure of batch
-
-    executeLoad(cassandra_session, 'DiaObjects', [alert['diaObject']])
-    # Note that although we are inserting them into cassandra, we are NOT using
-    # HTM indexing inside Cassandra. Hence this is a redundant column.
-
-    # Now add the htmid16 value into each dict.
-
-    diaSourcesList = alert['diaSourcesList']
-#    htm16s = htmCircle.htmIDBulk(16, [[x['ra'],x['decl']] for x in diaSourcesList])
-#    for i in range(len(diaSourcesList)):
-#        diaSourcesList[i]['htm16'] = htm16s[i]
-    if len(diaSourcesList) > 0:
-        executeLoad(cassandra_session, 'DiaSources', diaSourcesList)
-
-    if len(alert['forcedSourceOnDiaObjectsList']) > 0:
-        executeLoad(cassandra_session, 'ForcedSourceOnDiaObjects', alert['forcedSourceOnDiaObjectsList'])
-
-    return len(diaSourcesList)
-
-def handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session, timers):
-    """handle_alert.
-    Filter to apply to each alert.
-
-    Args:
-        lsst_alert:
-        image_store:
-        producer:
-        topic_out:
-    """
-    global log
-
-    # Build a new alert packet
-    diaObject                 = lsst_alert['DiaObject']
-    forcedSourceOnDiaObjectsList      = lsst_alert['ForcedSourceOnDiaObjectList']
-    diaSourcesList            = lsst_alert['DiaSourceList']
-    diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)
-
-    if len(diaSourcesList) > 0:
-        lastSource = diaSourcesList[0]
-
-        # ID for the latest detection, this is what the cutouts belong to
-        diaSourceId = lastSource['diaSourceId']
-
-        # MJD for storing images
-        imjd = int(lastSource['midPointTai'])
-
-    # objectID
-    diaObjectId = diaObject['diaObjectId']
-
-    # store the fits images
-    timers['icutout'].on()
-    if image_store:
-        if store_images(lsst_alert, image_store, diaSourceId, imjd, diaObjectId) == None:
-            log.error('ERROR: in ingest/ingest: Failed to put cutouts in file system')
-    timers['icutout'].off()
-
-    alert = {
-        'diaObject':                 diaObject,
-        'diaSourcesList':            diaSourcesList,
-        'forcedSourceOnDiaObjectsList':      forcedSourceOnDiaObjectsList,
-    }
-
-    # Add the htm16 IDs in bulk. Could have done it above as we iterate through the diaSource,
-    # but the new C++ bulk code is 100 times faster than doing it one at a time.
-
-    # Call on Cassandra
-    try:
-        timers['icassandra'].on()
-        ndiaSource = insert_cassandra(alert, cassandra_session)
-        timers['icassandra'].off()
-    except Exception as e:
-        log.error('ERROR in ingest/ingest: Cassandra insert failed' + str(e))
-        return 0  # ingest batch failed
-
-    # produce to kafka
-    timers['ikafka'].on()
-    if producer is not None:
+    def __init__(self, log=None, image_store=None):
+        if image_store is not None:
+            # passing in an image_store instead of getting one is mostly to enable testing
+            self.image_store = image_store
+            return
+        self.log = log
+        fitsdir = getattr(settings, 'IMAGEFITS', None)
+        if settings.USE_CUTOUTCASS:
+            self.image_store = cutoutStore.cutoutStore()
+            if self.image_store.session == None:
+                self.image_store = None
+        elif fitsdir and len(fitsdir) > 0:
+            print(fitsdir)
+            self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
+        else:
+            log.warn('ERROR in ingest: Cannot store cutouts. USE_CUTOUTCASS=%s' % settings.USE_CUTOUTCASS)
+    
+    def store_images(self, message, diaSourceId, imjd, diaObjectId):
+        futures = []
         try:
-            s = json.dumps(alert)
-            producer.produce(topic_out, json.dumps(alert))
+            for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                if not cutoutType in message: 
+                    continue
+                content = message[cutoutType]
+                cutoutId = '%d_%s' % (diaSourceId, cutoutType)
+                # store may be cutouts or cephfs
+                if settings.USE_CUTOUTCASS:
+                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    futures.append(result)
+                else:
+                    self.image_store.putObject(cutoutId, imjd, content)
         except Exception as e:
-            log.error("ERROR in ingest/ingest: Kafka production failed for %s" % topic_out)
-            log.error("ERROR:", e)
-            sys.stdout.flush()
-            return None   # ingest failed
-    timers['ikafka'].off()
+            self.log.error('ERROR in ingest/store_images: ', e)
+            raise e
+        return futures
 
-    return (len(diaSourcesList), len(forcedSourceOnDiaObjectsList))
 
-def run_ingest(args):
-    """run.
-    """
-    global sigterm_raised
-    global log
+class Ingester():
+    # We split the setup between the constructor and setup method in order to allow for
+    # an ingester with custom connections to other components, e.g. for testing
 
-    # if logging wasn't set up in __main__ then do it here
-    if not log:
-        log = lasairLogging.getLogger("ingest")
+    def __init__(self, topic_in, topic_out, group_id, maxalert, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None):
+        self.topic_in = topic_in
+        self.topic_out = topic_out
+        self.group_id = group_id
+        self.maxalert = maxalert
+        self.log = log
+        self.image_store = image_store
+        self.cassandra_session=cassandra_session
+        self.producer = producer
+        self.consumer = consumer
+        self.pschema = None
+        self.cluster = None
 
-    signal.signal(signal.SIGTERM, sigterm_handler)
+        # if we weren't given a log to use then create a default one
+        if log:
+            self.log = log
+        else:
+            lasairLogging.basicConfig(stream=sys.stdout, level=logging.INFO)
+            self.log = lasairLogging.getLogger("ingest")
 
+        # catch SIGTERM so that we can finish processing cleanly
+        signal.signal(signal.SIGTERM, self._sigterm_handler)
+        self.sigterm_raised = False
+        
+        # list of future objects for in-flight cassandra requests
+        self.futures = []
+
+    def setup(self):
+        """Setup connections to Cassandra, Kafka, etc."""
+        log = self.log
+
+        # set up image store in Cassandra or shared file system
+        if self.image_store is None:
+            self.image_store = ImageStore()
+
+        # connect to cassandra cluster for alerts (not cutouts)
+        if self.cassandra_session is None:
+            try:
+                self.cluster = Cluster(settings.CASSANDRA_HEAD)
+                self.cassandra_session = self.cluster.connect()
+                self.cassandra_session.set_keyspace('lasair')
+            except Exception as e:
+                log.warn("ERROR in ingest/setup: Cannot connect to Cassandra", e)
+                self.cassandra_session = None
+                raise e
+
+        # set up kafka producer
+        if self.producer is None:
+            producer_conf = {
+                'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
+                'client.id': 'client-1',
+                'message.max.bytes': 10000000
+            }
+            self.producer = Producer(producer_conf)
+            log.info('Producing to   %s' % settings.KAFKA_SERVER)
+        
+        # set up kafka consumer
+        if self.consumer is None:
+            log.info('Consuming from %s' % settings.KAFKA_SERVER)
+            log.info('Topic_in       %s' % self.topic_in)
+            log.info('Topic_out      %s' % self.topic_out)
+            log.info('group_id       %s' % self.group_id)
+            log.info('maxalert       %d' % self.maxalert)
+
+            consumer_conf = {
+                'bootstrap.servers'   : '%s' % settings.KAFKA_SERVER,
+                'group.id'            : self.group_id,
+                'enable.auto.commit'  : False,
+                'default.topic.config': {'auto.offset.reset': 'earliest'},
+                # wait twice wait time before forgetting me
+                'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
+            }
+    
+            try:
+                self.consumer = Consumer(consumer_conf)
+                self.consumer.subscribe([self.topic_in])
+            except Exception as e:
+                log.error('ERROR in ingest/setup: Cannot connect to Kafka', e)
+                raise e
+
+        # read the schema
+        with open(settings.SCHEMA) as f:
+            schema = json.loads(f.read())
+            self.pschema = fastavro.parse_schema(schema)
+    
+    def _sigterm_handler(self, signum, frame):
+        """Handle SIGTERM by raising a flag that can be checked during the poll/process loop."""
+        self.sigterm_raised = True
+        self.log.debug("caught SIGTERM")
+
+    @classmethod
+    def _now(cls):
+        """current UTC as string"""
+        return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
+    def _insert_cassandra(self, alert):
+        """Inset a single alert into cassandra.
+        Returns a list of future objects."""
+        return self._insert_cassandra_multi([alert])
+
+    def _insert_cassandra_multi(self, alerts):
+        """Insert a list of alerts into casssandra."""
+        log = self.log
+        if not self.cassandra_session:
+            # if this is not set, then we are not doing cassandra
+            log.debug("cassandra_session not set, skipping")
+            return None
+        diaObjects = []
+        diaSourcesList = []
+        forcedSourceOnDiaObjectsList = []
+        for alert in alerts:
+            diaObjects.append(alert['diaObject'])
+            diaSourcesList += alert['diaSourcesList']
+            forcedSourceOnDiaObjectsList += alert['forcedSourceOnDiaObjectsList']
+        self.futures += executeLoadAsync(self.cassandra_session, 'DiaObjects', diaObjects)
+        if len(diaSourcesList) > 0:
+            self.futures += executeLoadAsync(self.cassandra_session, 'DiaSources', diaSourcesList)
+        if len(forcedSourceOnDiaObjectsList) > 0:
+            self.futures += executeLoadAsync(self.cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
+
+    def _handle_alert(self, lsst_alert):
+        """Handle a single alert"""
+        return self._handle_alerts([lsst_alert])
+
+    def _handle_alerts(self, lsst_alerts):
+        """Handle a list of alerts.
+        Store cutout images, write information to cassandra, and produce a kafka message.
+
+        Args:
+            lsst_alert:
+            image_store:
+            producer:
+            topic_out:
+
+        Returns: (number of diaSoucres, number of forced sources)
+        """
+        log = self.log
+        nDiaSources = 0
+        nForcedSources = 0
+
+        alerts = []
+        for lsst_alert in lsst_alerts:
+            diaObject = lsst_alert['DiaObject']
+            diaSourcesList = lsst_alert['DiaSourceList']
+            forcedSourceOnDiaObjectsList = lsst_alert['ForcedSourceOnDiaObjectList']
+            nDiaSources += len(diaSourcesList)
+            nForcedSources += len(forcedSourceOnDiaObjectsList)
+
+            # deal with images
+            if self.image_store:
+                try:
+                    # get the MJD for the latest detection
+                    lastSource = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)[0]
+                    # ID for the latest detection, this is what the cutouts belong to
+                    diaSourceId = lastSource['diaSourceId']
+                    # MJD for storing images
+                    imjd = int(lastSource['midPointTai'])
+                    # objectID
+                    diaObjectId = diaObject['diaObjectId']
+                    # store the fits images
+                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
+                    self.futures += image_futures
+                except IndexError:
+                    # This will happen if the list of sources is empty
+                    log.debug("No latest detection so not storing cutouts")
+
+            # build the outgoing alerts
+            alert = {
+                'diaObject': diaObject,
+                'diaSourcesList': diaSourcesList,
+                'forcedSourceOnDiaObjectsList': forcedSourceOnDiaObjectsList,
+            }
+            alerts.append(alert)
+
+        # Call on Cassandra
+        if len(alerts) > 0:
+            try:
+                self._insert_cassandra_multi(alerts)
+            except Exception as e:
+                log.error('ERROR in ingest/handle_alerts: Cassandra insert failed' + str(e))
+                raise e
+
+        # produce to kafka
+        for alert in alerts:
+            if self.producer is not None:
+                try:
+                    s = json.dumps(alert)
+                    self.producer.produce(self.topic_out, json.dumps(alert))
+                except Exception as e:
+                    log.error("ERROR in ingest/handle_alerts: Kafka production failed for %s" % self.topic_out)
+                    log.error("ERROR:", e)
+                    raise e
+
+        return (nDiaSources, nForcedSources)
+
+    def _end_batch(self, ms, nalert, ndiaSource, nforcedSource):
+        log = self.log
+
+        # wait for any in-flight cassandra requests to complete
+        for future in self.futures:
+            future.result()
+        self.futures = []
+
+        # if this is not flushed, it will run out of memory
+        if self.producer is not None:
+            self.producer.flush()
+
+        # commit the alerts we have read
+        self.consumer.commit()
+
+        # update the status page
+        nid  = date_nid.nid_now()
+        ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
+
+        log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nalert, ndiaSource, nforcedSource))
+        sys.stdout.flush()
+
+    def _poll(self, n):
+        """Poll for n alerts."""
+        alerts = []
+        while len(alerts) < n:
+            if self.sigterm_raised:
+                # clean shutdown - this should stop the consumer and commit offsets
+                log.debug("Stopping polling for alerts")
+                break
+            msg = self.consumer.poll(timeout=5)
+            # no more messages available
+            if msg is None:
+                break
+            # read the avro contents
+            bytes_io = io.BytesIO(msg.value())
+            lsst_alert = fastavro.schemaless_reader(bytes_io, self.pschema)
+            alerts.append(lsst_alert)
+        return alerts
+
+    def run(self):
+        """run."""
+        log = self.log
+    
+        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 100)
+        mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
+
+        # setup connections to Kafka, Cassandra, etc.
+        self.setup()
+    
+        nalert = 0        # number not yet send to manage_status
+        ndiaSource = 0    # number not yet send to manage_status
+        nforcedSource = 0    # number not yet send to manage_status
+        ntotalalert = 0   # number since this program started
+        log.info('INGEST starts %s' % self._now())
+    
+        # put status on Lasair web page
+        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+    
+        n_remaining = self.maxalert
+        while n_remaining > 0:
+            n_remaining = self.maxalert - ntotalalert
+            if n_remaining < mini_batch_size:
+                mini_batch_size = n_remaining
+
+            # clean shutdown - this should stop the consumer and commit offsets
+            if self.sigterm_raised:
+                log.info("Stopping ingest")
+                break
+
+            # poll for alerts
+            alerts = self._poll(mini_batch_size)
+            n = len(alerts)
+            nalert += n
+            ntotalalert += n
+
+            # process alerts
+            (idiaSource,iforcedSource) = self._handle_alerts(alerts)
+            ndiaSource += idiaSource
+            nforcedSource += iforcedSource
+           
+            # partial alert batch case
+            if n < mini_batch_size:
+                self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+                nalert = ndiaSource = nforcedSource = 0
+                log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
+                time.sleep(settings.WAIT_TIME)
+    
+            # every so often commit, flush, and update status
+            if nalert >= batch_size:
+                self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+                nalert = ndiaSource = nforcedSource = 0
+    
+        # if we exit this loop, clean up
+        log.info('Shutting down')
+    
+        self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+    
+        # shut down kafka consumer
+        self.consumer.close()
+    
+        # shut down the cassandra cluster
+        if self.cassandra_session:
+            self.cluster.shutdown()
+    
+        # did we get any alerts
+        if ntotalalert > 0: return 1
+        else:               return 0
+
+def run_ingest(args, log=None):
     if args['--topic_in']:
         topic_in = args['--topic_in']
     elif args['--nid']:
@@ -191,190 +394,23 @@ def run_ingest(args):
     else:
         # get all alerts from every nid
         topic_in = '^ztf_.*_programid1$'
-
     if args['--topic_out']:
         topic_out = args['--topic_out']
     else:
         topic_out = 'ztf_ingest'
-    
     if args['--group_id']:
         group_id = args['--group_id']
     else:
         group_id = settings.KAFKA_GROUPID
-    
     if args['--maxalert']:
         maxalert = int(args['--maxalert'])
     else:
         maxalert = sys.maxsize  # largest possible integer
-    
-    try:
-        fitsdir = settings.IMAGEFITS
-    except:
-        fitsdir = None
 
-    # check for lockfile
-    if not os.path.isfile(settings.LOCKFILE):
-        log.info('Lockfile not present')
-        return  0
-
-    # set up image store in Cassandra or shared file system
-    if settings.USE_CUTOUTCASS:
-        image_store = cutoutStore.cutoutStore()
-        if image_store.session == None:
-            image_store = None
-    elif fitsdir and len(fitsdir) > 0:
-        image_store  = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
-    else:
-        log.error('ERROR in ingest/ingestBatch: Cannot store cutouts. USE_CUTOUTCASS=%s' % settings.USE_CUTOUTCASS)
-        sys.stdout.flush()
-        image_store = None
-
-    # connect to cassandra cluster for alerts (not cutouts)
-    try:
-        cluster = Cluster(settings.CASSANDRA_HEAD)
-        cassandra_session = cluster.connect()
-        cassandra_session.set_keyspace('lasair')
-    except Exception as e:
-        log.error("ERROR in ingest/ingestBatch: Cannot connect to Cassandra", e)
-        sys.stdout.flush()
-        cassandra_session = None
-
-    f = open(settings.SCHEMA)
-    schema = json.loads(f.read())
-    pschema = fastavro.parse_schema(schema)
-
-    # set up kafka consumer
-    log.info('Consuming from %s' % settings.KAFKA_SERVER)
-    log.info('Topic_in       %s' % topic_in)
-    log.info('Topic_out      %s' % topic_out)
-    log.info('group_id       %s' % group_id)
-    log.info('maxalert       %d' % maxalert)
-
-    consumer_conf = {
-        'bootstrap.servers'   : '%s' % settings.KAFKA_SERVER,
-        'group.id'            : group_id,
-        'enable.auto.commit'  : False,
-        'default.topic.config': {'auto.offset.reset': 'earliest'},
-
-        # wait twice wait time before forgetting me
-        'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
-    }
-
-    try:
-        consumer = Consumer(consumer_conf)
-    except Exception as e:
-        log.error('ERROR in ingest/ingestBatch: Cannot connect to Kafka', e)
-        sys.stdout.flush()
-        return 1
-    consumer.subscribe([topic_in])
-
-    # set up kafka producer
-    producer_conf = {
-        'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
-        'client.id': 'client-1',
-    }
-    producer = Producer(producer_conf)
-    log.info('Producing to   %s' % settings.KAFKA_SERVER)
-
-    nalert = 0        # number not yet send to manage_status
-    ndiaSource = 0    # number not yet send to manage_status
-    nforcedSource = 0    # number not yet send to manage_status
-    ntotalalert = 0   # number since this program started
-    log.info('INGEST starts %s' % now())
-
-    # put status on Lasair web page
-    ms = manage_status.manage_status(settings.SYSTEM_STATUS)
-    timers = {}
-    for name in ['icutout', 'icassandra', 'ikafka', 'itotal']:
-        timers[name] = manage_status.timer(name)
-
-    timers['itotal'].on()
-    while ntotalalert < maxalert:
-        if sigterm_raised:
-            # clean shutdown - this should stop the consumer and commit offsets
-            log.info("Stopping ingest")
-            sys.stdout.flush()
-            break
-
-        msg = consumer.poll(timeout=5)
-
-        # no messages available
-        if msg is None:
-            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
-            nalert = ndiaSource = 0
-            log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
-            sys.stdout.flush()
-            time.sleep(settings.WAIT_TIME)
-            continue
-
-        # read the avro contents
-#        try:
-        bytes_io = io.BytesIO(msg.value())
-        lsst_alert = fastavro.schemaless_reader(bytes_io, pschema)
-#        except:
-#            log.error('ERROR in ingest/ingest: ', msg.value())
-#            break
-
-        # Apply filter to each alert
-        (idiaSource,iforcedSource) = \
-                handle_alert(lsst_alert, image_store, producer, topic_out, cassandra_session, timers)
-
-        nalert += 1
-        ntotalalert += 1
-        ndiaSource += idiaSource
-        nforcedSource += iforcedSource
-
-        # every so often commit, flush, and update status
-        if nalert >= 250:
-            end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
-            nalert = ndiaSource = nforcedSource = 0
-            # check for lockfile
-            if not os.path.isfile(settings.LOCKFILE):
-                log.info('Lockfile not present')
-                stop = True
-    timers['itotal'].off()
-
-    # if we exit this loop, clean up
-    log.info('Shutting down')
-    end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers)
-
-    # shut down kafka consumer
-    consumer.close()
-
-    # shut down the cassandra cluster
-    if cassandra_session:
-        cluster.shutdown()
-
-    # did we get any alerts
-    if ntotalalert > 0: return 1
-    else:               return 0
-
-def end_batch(consumer, producer, ms, nalert, ndiaSource, nforcedSource, timers):
-    global log
-    now = datetime.now()
-    date = now.strftime("%Y-%m-%d %H:%M:%S")
-    log.info('%s %d alerts %d diaSource %d forcedSource' % (date, nalert, ndiaSource, nforcedSource))
-    # if this is not flushed, it will run out of memory
-    if producer is not None:
-        producer.flush()
-
-    # commit the alerts we have read
-    consumer.commit()
-    sys.stdout.flush()
-
-    # update the status page
-    nid  = date_nid.nid_now()
-    ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
-    for name,td in timers.items():
-        td.add2ms(ms, nid)
+    ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
+    return ingester.run()
 
 if __name__ == "__main__":
-    lasairLogging.basicConfig(stream=sys.stdout)
-    log = lasairLogging.getLogger("ingest")
-
-    signal.signal(signal.SIGTERM, sigterm_handler)
-
-    nid  = date_nid.nid_now()
     args = docopt(__doc__)
     rc = run_ingest(args)
     # rc=1, got alerts, more to come
