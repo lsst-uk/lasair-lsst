@@ -93,6 +93,9 @@ class Ingester():
         self.pschema = None
         self.cluster = None
         self.timers = {}
+        # set up timers
+        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
+            self.timers[name] = manage_status.timer(name)
 
         # if we weren't given a log to use then create a default one
         if log:
@@ -111,10 +114,6 @@ class Ingester():
     def setup(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
-
-        # set up timers
-        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
-            self.timers[name] = manage_status.timer(name)
 
         # set up image store in Cassandra or shared file system
         if self.image_store is None:
