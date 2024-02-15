@@ -1,5 +1,3 @@
-# temporary version to test optimisations - will go away when merged
-
 """
 Ingestion code for Lasair. Takes a stream of AVRO, splits it into
 FITS cutouts to Ceph, Lightcurves to Cassandra, and JSON versions of 
