@@ -1,6 +1,3 @@
-# tests for optimised ingest
-# this is termporary and will go away once optised version is merged
-
 import unittest, unittest.mock
 from unittest.mock import patch
 
@@ -20,7 +17,7 @@ test_alert = {
     'cutoutTemplate': b'bar',
 }
 
-class IngestOptTest(unittest.TestCase):
+class IngestTest(unittest.TestCase):
 
     # check that the sigterm handler sets sigterm raised correctly
     def test_sigterm_handler(self):
@@ -92,8 +89,8 @@ class IngestOptTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_producer = unittest.mock.MagicMock()
         mock_ms = unittest.mock.MagicMock()
-        ingester = ingest.Ingester('', '', '', 1, log=mock_log, producer=mock_producer, consumer=mock_consumer)
-        ingester._end_batch(mock_ms, 1, 2, 2)
+        ingester = ingest.Ingester('', '', '', 1, log=mock_log, producer=mock_producer, consumer=mock_consumer, ms=mock_ms)
+        ingester._end_batch(1, 2, 2)
         # log message should get sent
         mock_log.info.assert_called_once()
         # producer should get flushed
@@ -101,7 +98,7 @@ class IngestOptTest(unittest.TestCase):
         # consumer offsets should get committed
         mock_consumer.commit.assert_called_once()
         # status page should get updated
-        #mock_ms.add.assert_called_once()  # not true any more
+        self.assertEqual(mock_ms.add.call_count, 1+len(ingester.timers))
 
 
 if __name__ == '__main__':

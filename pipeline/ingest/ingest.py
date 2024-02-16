@@ -80,7 +80,7 @@ class Ingester():
     # We split the setup between the constructor and setup method in order to allow for
     # an ingester with custom connections to other components, e.g. for testing
 
-    def __init__(self, topic_in, topic_out, group_id, maxalert, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None):
+    def __init__(self, topic_in, topic_out, group_id, maxalert, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
         self.topic_in = topic_in
         self.topic_out = topic_out
         self.group_id = group_id
@@ -93,6 +93,7 @@ class Ingester():
         self.pschema = None
         self.cluster = None
         self.timers = {}
+        
         # set up timers
         for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
             self.timers[name] = manage_status.timer(name)
@@ -104,6 +105,12 @@ class Ingester():
             lasairLogging.basicConfig(stream=sys.stdout, level=logging.INFO)
             self.log = lasairLogging.getLogger("ingest")
 
+        # put status on Lasair web page
+        if ms:
+            self.ms = ms
+        else:
+            self.ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+    
         # catch SIGTERM so that we can finish processing cleanly
         signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
@@ -287,7 +294,7 @@ class Ingester():
 
         return (nDiaSources, nForcedSources)
 
-    def _end_batch(self, ms, nalert, ndiaSource, nforcedSource):
+    def _end_batch(self, nalert, ndiaSource, nforcedSource):
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
@@ -306,9 +313,9 @@ class Ingester():
 
         # update the status page
         nid  = date_nid.nid_now()
-        ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
+        self.ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
         for name,td in self.timers.items():
-            td.add2ms(ms, nid)
+            td.add2ms(self.ms, nid)
 
         log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nalert, ndiaSource, nforcedSource))
         sys.stdout.flush()
@@ -347,9 +354,6 @@ class Ingester():
         ntotalalert = 0   # number since this program started
         log.info('INGEST starts %s' % self._now())
     
-        # put status on Lasair web page
-        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
-    
         n_remaining = self.maxalert
         self.timers['itotal'].on()
         while n_remaining > 0:
@@ -375,14 +379,14 @@ class Ingester():
            
             # partial alert batch case
             if n < mini_batch_size:
-                self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+                self._end_batch(nalert, ndiaSource, nforcedSource)
                 nalert = ndiaSource = nforcedSource = 0
                 log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
                 time.sleep(settings.WAIT_TIME)
     
             # every so often commit, flush, and update status
             if nalert >= batch_size:
-                self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+                self._end_batch(nalert, ndiaSource, nforcedSource)
                 nalert = ndiaSource = nforcedSource = 0
     
         self.timers['itotal'].off()
@@ -390,7 +394,7 @@ class Ingester():
         # if we exit this loop, clean up
         log.info('Shutting down')
     
-        self._end_batch(ms, nalert, ndiaSource, nforcedSource)
+        self._end_batch(nalert, ndiaSource, nforcedSource)
     
         # shut down kafka consumer
         self.consumer.close()
