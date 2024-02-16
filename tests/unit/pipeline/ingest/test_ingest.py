@@ -21,7 +21,7 @@ class IngestTest(unittest.TestCase):
 
     # check that the sigterm handler sets sigterm raised correctly
     def test_sigterm_handler(self):
-        ingester = ingest.Ingester('', '', '', 1)
+        ingester = ingest.Ingester('', '', '', 1, ms=True)
         self.assertFalse(ingester.sigterm_raised)
         subprocess.run(['pkill', '-f', 'python3 test_ingest.py'])
         self.assertTrue(ingester.sigterm_raised)
@@ -46,7 +46,7 @@ class IngestTest(unittest.TestCase):
             mock_producer,
             mock_cluster,
             mock_image_store):
-        ingester = ingest.Ingester('', '', '', 1)
+        ingester = ingest.Ingester('', '', '', 1, ms=True)
         ingester.setup()
         self.assertEqual(mock_image_store.call_count, 1)     
         self.assertEqual(mock_cluster.call_count, 1)     
@@ -63,7 +63,7 @@ class IngestTest(unittest.TestCase):
             'diaSourcesList':            test_alert['DiaSourceList'],
             'forcedSourceOnDiaObjectsList':      test_alert['ForcedSourceOnDiaObjectList'],
         }
-        ingester = ingest.Ingester('', '', '', 1, cassandra_session=True)
+        ingester = ingest.Ingester('', '', '', 1, cassandra_session=True, ms=True)
         ingester._insert_cassandra(alert)
         # executeLoad should get called three times, once for diaObject and once for each list
         self.assertEqual(mock_executeLoadAsync.call_count, 3)     
@@ -73,7 +73,7 @@ class IngestTest(unittest.TestCase):
         mock_insert_cassandra_multi.return_value = [ unittest.mock.MagicMock() ]
         mock_image_store = unittest.mock.MagicMock() 
         mock_producer = unittest.mock.MagicMock()
-        ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer)
+        ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer, ms=True)
         result = ingester._handle_alert(test_alert)
         # check the return values
         self.assertEqual(result, (2, 2))
