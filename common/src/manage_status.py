@@ -58,7 +58,7 @@ class manage_status():
             status = json.loads(f.read())
             f.close()
         except:
-            status = None
+            status = {}
         return status
 
     def write_unlock(self, status, file_id):
