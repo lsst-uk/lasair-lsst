@@ -54,8 +54,11 @@ class manage_status():
 
         # return contents
         f = open(lock_file)
-        status = json.loads(f.read())
-        f.close()
+        try:
+            status = json.loads(f.read())
+            f.close()
+        except:
+            status = None
         return status
 
     def write_unlock(self, status, file_id):
