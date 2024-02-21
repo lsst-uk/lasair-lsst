@@ -39,14 +39,10 @@ def object_difference_lightcurve(
         unforcedDF.loc[(unforcedDF['filtername'] == filterName), "marker_color"] = filterColor
         unforcedDF.loc[(unforcedDF['filtername'] == filterName), "bcolor"] = filterColor
 
-#    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_symbol"] = "circle-open"
-#    unforcedDF.loc[((unforcedDF['candid'] > 0) & (unforcedDF['isdiffpos'].isin([1, 't']))), "marker_symbol"] = "circle"
-#    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_size"] = 10
     unforcedDF["marker_symbol"] = "circle"
     unforcedDF["marker_size"]   = 10
 
     # SORT BY COLUMN NAME
-#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
     discovery = unforcedDF.head(1)
 
     # GENERATE THE DATASETS
@@ -55,13 +51,6 @@ def object_difference_lightcurve(
     for filterName in filterNames:
         BandData = unforcedDF.loc[(unforcedDF['filtername'] == filterName)]
         BandData["name"] = filterName + "-band flux detection"
-#        BandDetections = BandData.loc[(BandData['candid'] > 0)]
-#        BandNonDetections = BandData.loc[~(BandData['candid'] > 0)]
-#        BandNonDetections["name"] = filt + "-band limiting mag"
-#        BandDetectionsPos = BandDetections.loc[(BandDetections['isdiffpos'].isin([1, 't']))]
-#        BandDetectionsNeg = BandDetections.loc[~(BandDetections['isdiffpos'].isin([1, 't']))]
-#        BandDetectionsPos["name"] = filt + "-band detection"
-
         allDataSets.append(BandData)
 
     # START TO PLOT
@@ -247,7 +236,6 @@ def object_difference_lightcurve_forcedphot(
     forcedDF["marker_symbol"] = "circle"
     forcedDF["marker_size"] = 10
 
-#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
     discovery = unforcedDF.head(1)
 
     # GENERATE THE DATASETS
@@ -256,14 +244,6 @@ def object_difference_lightcurve_forcedphot(
         BandDetections = forcedDF.loc[(forcedDF['filtername'] == filterName)]
         BandDetections["name"] = filterName + "-band detection"
         allDataSets.append(BandDetections)
-
-#    f = open('/home/ubuntu/qq.json', 'w')   ##################
-#    f.write(BandDetections.to_string())
-#    f.write('\n-----------\n')
-#    f.write(discovery.to_string())
-#    f.write(json.dumps(objectData, indent=2))
-#    f.close()
-
 
     # START TO PLOT
     from plotly.subplots import make_subplots
@@ -415,12 +395,11 @@ def get_default_axis_ranges(
     - `unforcedDF` -- unforced photometry dataframe    
     """
 
-#    mjdMin = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].min()
-#    mjdMax = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].max()
     mjdMin = unforcedDF["midpointtai"].min()
     mjdMax = unforcedDF["midpointtai"].max()
 
     if forcedDF is not None:
+# question: Whats going on here
 #        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
 #        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
         mjdMin2 = forcedDF["midpointtai"].min()
@@ -432,7 +411,6 @@ def get_default_axis_ranges(
             mjdMax = mjdMax2
 
     # SORT BY COLUMN NAME
-#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
     discovery = unforcedDF.head(1)
     if mjdMin > discovery["midpointtai"].min():
         mjdMin = discovery["midpointtai"].min()
@@ -487,19 +465,6 @@ def get_default_axis_ranges(
 
     return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax
 
-def flux2mag(row):
-    # Compute magnitude from flux
-    flux = row['nanojansky']
-    if flux and flux > 0: return 31.4 - 2.5*math.log10(flux)
-    else:        return None
-
-def fluxerr2magerr(row):
-    flux = row['nanojansky']
-    fluxerr = row['nanojanskyerr']
-    # Compute dmag from dflux using derivative of above
-    if abs(flux) < 1.0: return 0.0
-    else:               return 1.086 * fluxerr / flux
-
 def convert_objectdata_to_dataframes(
         objectData):
     """*return a forced photometry and unforce photometry dataframe from the objectdata*
@@ -521,7 +486,7 @@ def convert_objectdata_to_dataframes(
                              ascending=[True], inplace=True)
         # REMOVE NAN VALUES (MAGIC NUMBER -99999)
 
-# don't know how to do this for LSST
+# question: don't know how to do this for LSST 
 #        mask = ((forcedDF['procstatus'].astype(int) == 0) & \
 #                (forcedDF['scisigpix'].astype(float) < 25) & \
 #                (forcedDF['sciinpseeing'].astype(float) < 4))
@@ -529,7 +494,7 @@ def convert_objectdata_to_dataframes(
 
         # CONVERT TO μJy
 
-# Don't know whats going on here
+# question: whats going on here
 #        forcedDF["microjansky"] = forcedDF['forcediffimflux'] \
 #                / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
 #        forcedDF["microjanskyerr"] = forcedDF['forcediffimfluxunc'] \
@@ -559,7 +524,7 @@ def convert_objectdata_to_dataframes(
 # Standard naming
         unforcedDF["nanojansky"] = unforcedDF['psflux']
         unforcedDF["nanojanskyerr"] = unforcedDF['psfluxerr']
-# Convert from flux to mag
+# Convert from flux nJ to mag
         unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
 
