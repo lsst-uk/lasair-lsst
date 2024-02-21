@@ -1,9 +1,12 @@
 import pandas as pd
 from astropy.time import Time
 import plotly.graph_objects as go
-import math
+import math, json
 import numpy as np
 
+filterNames  = ['u', 'g', 'r', 'i', 'z', 'y']
+filterColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
+filterFids   = [1, 2]
 
 def object_difference_lightcurve(
     objectData
@@ -31,35 +34,35 @@ def object_difference_lightcurve(
     unforcedDF["marker_opacity"] = 0.6
     unforcedDF["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
-    unforcedDF.loc[(unforcedDF['fid'] == 1), "marker_color"] = "#859900"
-    unforcedDF.loc[(unforcedDF['fid'] == 1), "bcolor"] = "#606e03"
-    unforcedDF.loc[(unforcedDF['fid'] == 2), "marker_color"] = "#dc322f"
-    unforcedDF.loc[(unforcedDF['fid'] == 2), "bcolor"] = "#b01f1c"
-    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_symbol"] = "circle-open"
-    unforcedDF.loc[((unforcedDF['candid'] > 0) & (unforcedDF['isdiffpos'].isin([1, 't']))), "marker_symbol"] = "circle"
-    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_size"] = 10
+
+    for filterColor,filterName in zip(filterColors, filterNames):
+        unforcedDF.loc[(unforcedDF['filtername'] == filterName), "marker_color"] = filterColor
+        unforcedDF.loc[(unforcedDF['filtername'] == filterName), "bcolor"] = filterColor
+
+#    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_symbol"] = "circle-open"
+#    unforcedDF.loc[((unforcedDF['candid'] > 0) & (unforcedDF['isdiffpos'].isin([1, 't']))), "marker_symbol"] = "circle"
+#    unforcedDF.loc[(unforcedDF['candid'] > 0), "marker_size"] = 10
+    unforcedDF["marker_symbol"] = "circle"
+    unforcedDF["marker_size"]   = 10
 
     # SORT BY COLUMN NAME
-    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
+#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
+    discovery = unforcedDF.head(1)
 
     # GENERATE THE DATASETS
-    gBandData = unforcedDF.loc[(unforcedDF['fid'] == 1)]
-    rBandData = unforcedDF.loc[(unforcedDF['fid'] == 2)]
-    rBandDetections = rBandData.loc[(rBandData['candid'] > 0)]
-    rBandNonDetections = rBandData.loc[~(rBandData['candid'] > 0)]
-    rBandNonDetections["name"] = "r-band limiting mag"
-    gBandDetections = gBandData.loc[(gBandData['candid'] > 0)]
-    gBandNonDetections = gBandData.loc[~(gBandData['candid'] > 0)]
-    gBandNonDetections["name"] = "g-band limiting mag"
-    rBandDetectionsPos = rBandDetections.loc[(rBandDetections['isdiffpos'].isin([1, 't']))]
-    rBandDetectionsNeg = rBandDetections.loc[~(rBandDetections['isdiffpos'].isin([1, 't']))]
-    gBandDetectionsPos = gBandDetections.loc[(gBandDetections['isdiffpos'].isin([1, 't']))]
-    gBandDetectionsNeg = gBandDetections.loc[~(gBandDetections['isdiffpos'].isin([1, 't']))]
-    rBandDetectionsPos["name"] = "r-band detection"
-    rBandDetectionsNeg["name"] = "r-band neg. flux detection"
-    gBandDetectionsPos["name"] = "g-band detection"
-    gBandDetectionsNeg["name"] = "g-band neg. flux detection"
-    allDataSets = [rBandNonDetections, rBandDetectionsPos, rBandDetectionsNeg, gBandNonDetections, gBandDetectionsPos, gBandDetectionsNeg]
+    allDataSets = []
+
+    for filterName in filterNames:
+        BandData = unforcedDF.loc[(unforcedDF['filtername'] == filterName)]
+        BandData["name"] = filterName + "-band flux detection"
+#        BandDetections = BandData.loc[(BandData['candid'] > 0)]
+#        BandNonDetections = BandData.loc[~(BandData['candid'] > 0)]
+#        BandNonDetections["name"] = filt + "-band limiting mag"
+#        BandDetectionsPos = BandDetections.loc[(BandDetections['isdiffpos'].isin([1, 't']))]
+#        BandDetectionsNeg = BandDetections.loc[~(BandDetections['isdiffpos'].isin([1, 't']))]
+#        BandDetectionsPos["name"] = filt + "-band detection"
+
+        allDataSets.append(BandData)
 
     # START TO PLOT
     from plotly.subplots import make_subplots
@@ -68,12 +71,8 @@ def object_difference_lightcurve(
 
     for data in allDataSets:
         if len(data.index):
-            if data['candid'].values[0] > 0:
-                dataType = "Diff Mag"
-                error_y = {'type': 'data', 'array': data["sigmapsf"]}
-            else:
-                error_y = None
-                dataType = "Limiting Mag"
+            dataType = "Diff Mag"
+            error_y = {'type': 'data', 'array': data["sigmapsf"]}
             fig.add_trace(
 
                 go.Scatter(
@@ -110,9 +109,18 @@ def object_difference_lightcurve(
     # DETERMINE SENSIBLE X-AXIS LIMITS
     mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(forcedDF, unforcedDF)
 
-    fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=14, showline=True, linewidth=1.5, linecolor='#1F2937',
+    if forcedDF is None:
+        title = "MJD"
+        tickfont_size = 14
+        title_font_size = 1
+    else:
+        title = ""
+        tickfont_size = 11
+        title_font_size = 16
+
+    fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=tickfont_size, showline=True, linewidth=1.5, linecolor='#1F2937',
                      gridcolor='#F0F0F0', gridwidth=1,
-                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title="MJD", title_font_size=16)
+                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title=title, title_font_size=title_font_size)
     fig.update_layout(xaxis2={'range': [utcMin, utcMax],
                               'showgrid': False,
                               'anchor': 'y',
@@ -149,15 +157,19 @@ def object_difference_lightcurve(
     fig.update_layout(
         plot_bgcolor='white',
         paper_bgcolor='white',
-        height=650,
+        height=550,
         margin_t=0,
+        margin_b=0,
         margin_r=1,
         legend=dict(
-            orientation="h",
+            orientation="v",
             yanchor="top",
-            y=-0.2,
+            y=1.0,
             xanchor="left",
-            x=0
+            x=0,
+            bgcolor="#E6E5E5",
+            borderwidth=4,
+            bordercolor="#E6E5E5",
         ),
         hoverlabel=dict(
             font_color="white",
@@ -179,12 +191,20 @@ def object_difference_lightcurve(
         textposition="middle right"
     ))
 
+    fig.update_layout(
+        title=dict(text="Standard Photometry Magnitudes", font=dict(size=20), y=0.85,
+                   x=0.5,
+                   xanchor='center',
+                   yanchor='top',
+                   font_color="#657b83",)
+    )
+
     htmlLightcurve = fig.to_html(
         config={
             'displayModeBar': False,
             'displaylogo': False,
             'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
-            'toImageButtonOptions': {'filename': objectData["objectId"] + "_lasair_lc"},
+            'toImageButtonOptions': {'filename': objectData["diaObjectId"] + "_lasair_lc"},
             'responsive': True
         })
 
@@ -220,21 +240,30 @@ def object_difference_lightcurve_forcedphot(
     forcedDF["marker_opacity"] = 0.6
     forcedDF["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
-    forcedDF.loc[(forcedDF['fid'] == 1), "marker_color"] = "#859900"
-    forcedDF.loc[(forcedDF['fid'] == 1), "bcolor"] = "#606e03"
-    forcedDF.loc[(forcedDF['fid'] == 2), "marker_color"] = "#dc322f"
-    forcedDF.loc[(forcedDF['fid'] == 2), "bcolor"] = "#b01f1c"
+    for filterColor,filterName in zip(filterColors, filterNames):
+        forcedDF.loc[(forcedDF['filtername'] == filterName), "marker_color"] = filterColor
+        forcedDF.loc[(forcedDF['filtername'] == filterName), "bcolor"] = filterColor
+
     forcedDF["marker_symbol"] = "circle"
     forcedDF["marker_size"] = 10
 
-    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
+#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
+    discovery = unforcedDF.head(1)
 
     # GENERATE THE DATASETS
-    gBandDetections = forcedDF.loc[(forcedDF['fid'] == 1)]
-    rBandDetections = forcedDF.loc[(forcedDF['fid'] == 2)]
-    gBandDetections["name"] = "g-band detection"
-    rBandDetections["name"] = "r-band detection"
-    allDataSets = [gBandDetections, rBandDetections]
+    allDataSets = []
+    for filterName in filterNames:
+        BandDetections = forcedDF.loc[(forcedDF['filtername'] == filterName)]
+        BandDetections["name"] = filterName + "-band detection"
+        allDataSets.append(BandDetections)
+
+#    f = open('/home/ubuntu/qq.json', 'w')   ##################
+#    f.write(BandDetections.to_string())
+#    f.write('\n-----------\n')
+#    f.write(discovery.to_string())
+#    f.write(json.dumps(objectData, indent=2))
+#    f.close()
+
 
     # START TO PLOT
     from plotly.subplots import make_subplots
@@ -244,18 +273,18 @@ def object_difference_lightcurve_forcedphot(
     for data in allDataSets:
         if len(data.index):
             dataType = "Diff Flux"
-            error_y = {'type': 'data', 'array': data["microjanskyerr"]}
+            error_y = {'type': 'data', 'array': data["nanojanskyerr"]}
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["mjd"],
-                    y=data["microjansky"],
-                    customdata=np.stack((data['utc'], data['microjansky'], data['microjanskyerr']), axis=-1),
+                    x=data["midpointtai"],
+                    y=data["nanojansky"],
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
                     error_y_color=data["bcolor"].values[0],
                     mode='markers',
-                    showlegend=False,
+                    showlegend=True,
                     marker_size=data["marker_size"].values[0],
                     marker_color=data["marker_color"].values[0],
                     marker_symbol=data["marker_symbol"].values[0],
@@ -274,7 +303,7 @@ def object_difference_lightcurve_forcedphot(
 
             fig.add_traces(
                 go.Scatter(x=data["utc"],
-                           y=data["microjansky"],
+                           y=data["nanojansky"],
                            showlegend=False,
                            opacity=0,
                            hoverinfo='skip',
@@ -285,14 +314,14 @@ def object_difference_lightcurve_forcedphot(
 
     fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=14, showline=True, linewidth=1.5, linecolor='#1F2937',
                      gridcolor='#F0F0F0', gridwidth=1,
-                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title_font_size=16)
+                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title="MJD", title_font_size=16)
     fig.update_layout(xaxis2={'range': [utcMin, utcMax],
                               'showgrid': False,
                               'anchor': 'y',
                               'overlaying': 'x',
                               'side': 'top',
                               'tickangle': -55,
-                              'tickfont_size': 14,
+                              'tickfont_size': 11,
                               'showline': True,
                               'linewidth': 1.5,
                               'linecolor': '#1F2937'})
@@ -321,16 +350,19 @@ def object_difference_lightcurve_forcedphot(
     fig.update_layout(
         plot_bgcolor='white',
         paper_bgcolor='white',
-        height=650,
+        height=550,
         margin_t=0,
         margin_b=0,
         margin_r=1,
         legend=dict(
-            orientation="h",
+            orientation="v",
             yanchor="top",
-            y=-0.3,
+            y=1.0,
             xanchor="left",
-            x=0
+            x=0,
+            bgcolor="#E6E5E5",
+            borderwidth=4,
+            bordercolor="#E6E5E5",
         ),
         hoverlabel=dict(
             font_color="white",
@@ -352,12 +384,20 @@ def object_difference_lightcurve_forcedphot(
         textposition="middle right"
     ))
 
+    fig.update_layout(
+        title=dict(text="Forced Photometry Flux", font=dict(size=20), y=0.87,
+                   x=0.5,
+                   xanchor='center',
+                   yanchor='top',
+                   font_color="#657b83",)
+    )
+
     htmlLightcurve = fig.to_html(
         config={
             'displayModeBar': False,
             'displaylogo': False,
             'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
-            'toImageButtonOptions': {'filename': objectData["objectId"] + "_lasair_lc"},
+            'toImageButtonOptions': {'filename': objectData["diaObjectId"] + "_lasair_lc"},
             'responsive': True
         })
 
@@ -375,12 +415,16 @@ def get_default_axis_ranges(
     - `unforcedDF` -- unforced photometry dataframe    
     """
 
-    mjdMin = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].min()
-    mjdMax = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].max()
+#    mjdMin = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].min()
+#    mjdMax = unforcedDF.loc[(unforcedDF['candid'] > 0), "mjd"].max()
+    mjdMin = unforcedDF["midpointtai"].min()
+    mjdMax = unforcedDF["midpointtai"].max()
 
     if forcedDF is not None:
-        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
-        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
+#        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
+#        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
+        mjdMin2 = forcedDF["midpointtai"].min()
+        mjdMax2 = forcedDF["midpointtai"].max()
 
         if mjdMin2 < mjdMin:
             mjdMin = mjdMin2
@@ -388,9 +432,10 @@ def get_default_axis_ranges(
             mjdMax = mjdMax2
 
     # SORT BY COLUMN NAME
-    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
-    if mjdMin > discovery["mjd"].min():
-        mjdMin = discovery["mjd"].min()
+#    discovery = unforcedDF.loc[(unforcedDF['candid'] > 0)].head(1)
+    discovery = unforcedDF.head(1)
+    if mjdMin > discovery["midpointtai"].min():
+        mjdMin = discovery["midpointtai"].min()
 
     mjdRange = mjdMax - mjdMin
     if mjdRange < 5:
@@ -403,9 +448,13 @@ def get_default_axis_ranges(
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
     if forcedDF is not None:
-        fluxMax = forcedDF.loc[((forcedDF['mjd'] > mjdMin) & (forcedDF['mjd'] < mjdMax)), "microjansky"] + forcedDF.loc[((forcedDF['mjd'] > mjdMin) & (forcedDF['mjd'] < mjdMax)), "microjanskyerr"]
+        fluxMax = forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
+                (forcedDF['midpointtai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
+                (forcedDF['midpointtai'] < mjdMax)), "nanojanskyerr"]
         fluxMax = fluxMax.max()
-        fluxMin = forcedDF.loc[((forcedDF['mjd'] > mjdMin) & (forcedDF['mjd'] < mjdMax)), "microjansky"] - forcedDF.loc[((forcedDF['mjd'] > mjdMin) & (forcedDF['mjd'] < mjdMax)), "microjanskyerr"]
+        fluxMin = forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
+                (forcedDF['midpointtai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
+                (forcedDF['midpointtai'] < mjdMax)), "nanojanskyerr"]
         fluxMin = fluxMin.min()
 
         yrange = fluxMax - fluxMin
@@ -438,6 +487,18 @@ def get_default_axis_ranges(
 
     return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax
 
+def flux2mag(row):
+    # Compute magnitude from flux
+    flux = row['nanojansky']
+    if flux and flux > 0: return 31.4 - 2.5*math.log10(flux)
+    else:        return None
+
+def fluxerr2magerr(row):
+    flux = row['nanojansky']
+    fluxerr = row['nanojanskyerr']
+    # Compute dmag from dflux using derivative of above
+    if abs(flux) < 1.0: return 0.0
+    else:               return 1.086 * fluxerr / flux
 
 def convert_objectdata_to_dataframes(
         objectData):
@@ -450,41 +511,67 @@ def convert_objectdata_to_dataframes(
     forcedDF, unforcedDF = None, None
 
     # CREATE DATA FRAME FOR LC
-    if len(objectData["forcedphot"]):
-        forcedDF = pd.DataFrame(objectData["forcedphot"])
-        mjds = Time(forcedDF['mjd'], format='mjd')
+    if len(objectData["diaForcedSources"]):
+        forcedDF = pd.DataFrame(objectData["diaForcedSources"])
+        mjds = Time(forcedDF['midpointtai'], format='mjd')
         forcedDF['utc'] = mjds.iso
         forcedDF['utc'] = pd.to_datetime(forcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
         # SORT BY COLUMN NAME
-        forcedDF.sort_values(['mjd'],
+        forcedDF.sort_values(['midpointtai'],
                              ascending=[True], inplace=True)
         # REMOVE NAN VALUES (MAGIC NUMBER -99999)
-        mask = ((forcedDF['procstatus'].astype(int) == 0) & (forcedDF['scisigpix'].astype(float) < 25) & (forcedDF['sciinpseeing'].astype(float) < 4))
-        forcedDF = forcedDF.loc[mask]
+
+# don't know how to do this for LSST
+#        mask = ((forcedDF['procstatus'].astype(int) == 0) & \
+#                (forcedDF['scisigpix'].astype(float) < 25) & \
+#                (forcedDF['sciinpseeing'].astype(float) < 4))
+#        forcedDF = forcedDF.loc[mask]
 
         # CONVERT TO μJy
-        forcedDF["microjansky"] = forcedDF['forcediffimflux'] / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
-        forcedDF["microjanskyerr"] = forcedDF['forcediffimfluxunc'] / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
+
+# Don't know whats going on here
+#        forcedDF["microjansky"] = forcedDF['forcediffimflux'] \
+#                / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
+#        forcedDF["microjanskyerr"] = forcedDF['forcediffimfluxunc'] \
+#                / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
+
+
+# Standard naming
+        forcedDF["filtername"] = forcedDF['band']
+        forcedDF["nanojansky"] = forcedDF['psfdiffflux']
+        forcedDF["nanojanskyerr"] = forcedDF['psfdifffluxerr']
+
+# Convert from flux nJ to mag
+        forcedDF["magpsf"]   = 31.4 - 2.5*np.log10(forcedDF["nanojansky"])
+        forcedDF["sigmapsf"] = 1.086 * forcedDF["nanojanskyerr"] / forcedDF["nanojansky"]
 
     if forcedDF is not None and len(forcedDF.index) == 0:
         forcedDF = None
 
     # NORMAL UNFORCED PHOTO
-    if len(objectData["candidates"]):
-        unforcedDF = pd.DataFrame(objectData["candidates"])
-        mjds2 = Time(unforcedDF['mjd'], format='mjd')
+    if len(objectData["diaSources"]):
+        unforcedDF = pd.DataFrame(objectData["diaSources"])
+        mjds2 = Time(unforcedDF['midpointtai'], format='mjd')
         unforcedDF['utc'] = mjds2.iso
         unforcedDF['utc'] = pd.to_datetime(unforcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        unforcedDF.sort_values(['mjd'],
+        unforcedDF.sort_values(['midpointtai'],
                                ascending=[True], inplace=True)
+# Standard naming
+        unforcedDF["nanojansky"] = unforcedDF['psflux']
+        unforcedDF["nanojanskyerr"] = unforcedDF['psfluxerr']
+# Convert from flux to mag
+        unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
+        unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
 
     # MATCH THE FORCED AND UNFORCED TABLES
     if forcedDF is not None:
-        mergedDF = pd.merge(unforcedDF, forcedDF[['microjansky', 'microjanskyerr', 'jd', 'fid']], how='left', on=['jd', 'fid'])
+        mergedDF = pd.merge(unforcedDF, \
+            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointtai', 'filtername']], \
+            how='left', on=['midpointtai', 'filtername'])
     else:
         mergedDF = unforcedDF
-        mergedDF['microjansky'] = np.nan
-        mergedDF['microjanskyerr'] = np.nan
+        mergedDF['nanojansky'] = np.nan
+        mergedDF['nanojanskyerr'] = np.nan
     mergedDF = mergedDF.replace({np.nan: None})
     mergedDF.sort_values(['mjd'], ascending=[False], inplace=True)
 

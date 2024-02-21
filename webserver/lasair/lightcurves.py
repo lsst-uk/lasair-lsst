@@ -37,7 +37,7 @@ class lightcurve_fetcher():
         for diaSource in ret:
             diaSources.append(diaSource)
 
-        query = "SELECT midPointTai, band, psfFlux, psfDiffFlux "
+        query = "SELECT midPointTai, band, psfFlux, psfDiffFlux, psfDiffFluxErr "
         query += "from ForcedSourceOnDiaObjects where diaObjectId = %s" % diaObjectId
         ret = self.session.execute(query)
         diaForcedSources = []
