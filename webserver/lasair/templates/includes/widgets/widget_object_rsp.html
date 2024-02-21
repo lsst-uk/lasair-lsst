@@ -17,17 +17,17 @@
             <div class="col-12 col-xl-10 pe-xl-5 ps-sm-4">
                 <small class="text-gray-500">
 		    <div>
-                        Search the <a href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaObject WHERE diaObjectId={{ data.diaObjectId }}&execute=true">DiaObject</a> table.</div>
+                        Search the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaObject WHERE diaObjectId={{ data.diaObjectId }}&execute=true">DiaObject</a> table.</div>
 		    <div>
                         Search DiaSource table
-                            <a href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">all fields</a> |
-                            <a href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT midPointTai,psFlux,psFluxErr,filterName,diaSourceId,diaObjectId FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">lightcurve</a>.
+                            <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">all fields</a> |
+                            <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT midPointTai,psFlux,psFluxErr,filterName,diaSourceId,diaObjectId FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">lightcurve</a>.
                     </div>
 		    <div>
-                        Cone search on the <a href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Object&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=2s">Object</a> table.
+                        Cone search on the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Object&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=2s">Object</a> table.
                     </div>
 		    <div>
-                        Cone search on the <a href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Source&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=1s">Source</a> table.
+                        Cone search on the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Source&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=1s">Source</a> table.
                     </div>
                 </small>
             </div>
