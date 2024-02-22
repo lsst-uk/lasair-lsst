@@ -1,4 +1,7 @@
 """
+THIS CODE NO LONGER USED
+Here to scavenge in case we decide to use any of it features in the future
+
 Using plotly to make two stacked plots of a lightcurve, one with flux 
 the other magnitude. If a distance is provided (in Mpc), then absolute flux 
 and absolute magnitude are shown on the right axes.

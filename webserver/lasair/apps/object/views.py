@@ -70,9 +70,3 @@ def object_detail(request, diaObjectId):
         'fplightcurveHtml': fplightcurveHtml,
         'lcData': lcData
     })
-#    return render(request, 'object/object_detail.html', {
-#        'data': data,
-#        'json_data': json.dumps(data2),
-#        'authenticated': request.user.is_authenticated,
-#        'lightcurveHtml': object_difference_lightcurve(data)
-#    })
