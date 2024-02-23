@@ -1,0 +1,37 @@
+<div class="card border-0 shadow h-100">
+    <div class="card-body">
+        <div class="row d-flex align-items-start">
+            <div class="col-2 col-md-1 text-xl-center mb-3  justify-content-xl-start">
+                <div class="icon-shape icon-shape-secondary rounded me-sm-0 ">
+                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor"  stroke-linecap="round" stroke-linejoin="round" stroke-width="1" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                        <path d="m50 57.332c-0.28906 0-0.57812-0.0625-0.84766-0.1875l-40-18.668c-0.70312-0.32812-1.1523-1.0352-1.1523-1.8125 0-0.77734 0.44922-1.4844 1.1523-1.8125l40-18.664c0.53516-0.25 1.1562-0.25 1.6914 0l40 18.664c0.70312 0.32813 1.1523 1.0352 1.1523 1.8125 0 0.77734-0.44922 1.4844-1.1523 1.8125l-40 18.668c-0.26562 0.125-0.55469 0.1875-0.84375 0.1875zm-35.27-20.668 35.27 16.461 35.27-16.461-35.27-16.457zm36.117 33.816 40-18.664c1-0.46875 1.4336-1.6562 0.96875-2.6602-0.46875-1-1.6523-1.4336-2.6562-0.96484l-39.16 18.27-39.152-18.273c-1-0.46484-2.1914-0.035156-2.6562 0.96484-0.46875 1.0039-0.035156 2.1914 0.96875 2.6602l40 18.664c0.26953 0.125 0.55859 0.1875 0.84766 0.1875 0.28125 0.003907 0.57031-0.058593 0.83984-0.18359zm0 13.332 40-18.664c1-0.46875 1.4336-1.6562 0.96875-2.6602-0.46875-1-1.6523-1.4375-2.6562-0.96484l-39.16 18.27-39.152-18.273c-1-0.46484-2.1914-0.035156-2.6562 0.96484-0.46875 1.0039-0.035156 2.1914 0.96875 2.6602l40 18.664c0.26172 0.12891 0.55078 0.19141 0.83984 0.19141s0.57812-0.0625 0.84766-0.1875z"/>
+                    </svg>
+                </div>
+            </div>
+            <div class="col-10 col-xl-11 pe-xl-2 ps-xl-5">
+                <div >
+                    <h2 class="h6 text-gray-400 mb-0 ps-3">RSP Portal</h2>
+		    <small class="fw-normal text-gray-500 ps-3">Search the DP0.2 data release</small>
+                </div>
+            </div>	
+            <div class="col-12 col-xl-10 pe-xl-5 ps-sm-4">
+                <small class="text-gray-500">
+		    <div>
+                        Search the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaObject WHERE diaObjectId={{ data.diaObjectId }}&execute=true">DiaObject</a> table.</div>
+		    <div>
+                        Search DiaSource table
+                            <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">all fields</a> |
+                            <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT midPointTai,psFlux,psFluxErr,filterName,diaSourceId,diaObjectId FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">lightcurve</a>.
+                    </div>
+		    <div>
+                        Cone search on the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Object&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=2s">Object</a> table.
+                    </div>
+		    <div>
+                        Cone search on the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Source&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=1s">Source</a> table.
+                    </div>
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+

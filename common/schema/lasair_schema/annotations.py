@@ -56,6 +56,7 @@ schema = {
   ],
   "indexes": [
     "PRIMARY KEY    (annotationID)",
-    "UNIQUE KEY     one_per_object (diaObjectId, topic)"
+    "UNIQUE KEY     one_per_object (diaObjectId, topic)",
+    "KEY topic_idx (topic)"
   ]
 }

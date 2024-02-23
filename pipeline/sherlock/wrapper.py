@@ -272,6 +272,7 @@ def produce(conf, log, alerts):
     # set up Kafka
     settings = {
         'bootstrap.servers': conf['broker'],
+        'message.max.bytes': 10000000,
     }
     p = Producer(settings, logger=log)
 

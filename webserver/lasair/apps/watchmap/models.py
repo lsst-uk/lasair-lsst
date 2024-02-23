@@ -1,11 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Watchmap(models.Model):
     """Watchmap.
     """
-
     ar_id = models.AutoField(primary_key=True)
     user = models.ForeignKey(User, models.DO_NOTHING, db_column='user', blank=True, null=True)
     name = models.CharField(max_length=256, blank=True, null=True)
@@ -19,9 +17,6 @@ class Watchmap(models.Model):
     date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
 
     class Meta:
-        """Meta.
-        """
-
         managed = True
         db_table = 'areas'
 

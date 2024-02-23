@@ -8,10 +8,6 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-dev \
   python3-pip 
 
-# Required for Ingest
-RUN pip3 install \
-  cassandra-driver
-
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
@@ -36,6 +32,12 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   wget \
   sudo \
   swig 
+
+# Required for Ingest
+RUN pip3 install \
+  cassandra-driver \
+  gkdbutils \
+  fastavro
 
 # Required for filter
 RUN pip3 install \

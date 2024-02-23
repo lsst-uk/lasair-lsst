@@ -19,7 +19,7 @@ import settings as lasair_settings
 import sys
 sys.path.append('../common')
 
-CAT_ID_RA_DEC_COLS['objects'] = [['objectId', 'ramean', 'decmean'], 1018]
+CAT_ID_RA_DEC_COLS['objects'] = [['diaObjectId', 'ra', 'decl'], 1018]
 
 REQUEST_TYPE_CHOICES = (
     ('count', 'Count'),
@@ -64,12 +64,12 @@ class ConeSerializer(serializers.Serializer):
         objectList = []
         if len(results) > 0:
             if requestType == "nearest":
-                obj = results[0][1]['objectId']
+                obj = results[0][1]['diaObjectId']
                 separation = results[0][0]
                 info = {"object": obj, "separation": separation}
             elif requestType == "all":
                 for row in results:
-                    objectList.append({"object": row[1]["objectId"], "separation": row[0]})
+                    objectList.append({"object": row[1]["diaObjectId"], "separation": row[0]})
                 info = objectList
             elif requestType == "count":
                 info = {'count': len(results)}
@@ -80,13 +80,13 @@ class ConeSerializer(serializers.Serializer):
 
 
 class ObjectsSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(required=True)
+    diaObjectIds = serializers.CharField(required=True)
 
     def save(self):
-        objectIds = self.validated_data['objectIds']
+        diaObjectIds = self.validated_data['objectIds']
 
         olist = []
-        for tok in objectIds.split(','):
+        for tok in diaObjectIds.split(','):
             olist.append(tok.strip())
 #        olist = olist[:10] # restrict to 10
 
@@ -97,19 +97,19 @@ class ObjectsSerializer(serializers.Serializer):
             userId = request.user
 
         result = []
-        for objectId in olist:
-            result.append(objjson(objectId))
+        for diaObjectId in olist:
+            result.append(objjson(diaObjectId))
         return result
 
 
 class SherlockObjectsSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(required=True)
+    diaObjectIds = serializers.CharField(required=True)
     lite = serializers.BooleanField()
 
     def save(self):
-        objectIds = None
+        diaObjectIds = None
         lite = False
-        objectIds = self.validated_data['objectIds']
+        diaObjectIds = self.validated_data['objectIds']
 
         if 'lite' in self.validated_data:
             lite = self.validated_data['lite']
@@ -124,14 +124,14 @@ class SherlockObjectsSerializer(serializers.Serializer):
             return {"error": "This Lasair cluster does not have a Sherlock service"}
 
         datadict = {}
-#        url = 'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, objectIds)
+#        url = 'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, diaObjectIds)
 #        if lite: url += '?lite=true'
 #        url += '?lite=true'
 #        r = requests.get(url)
 
         data = {'lite': lite}
         r = requests.post(
-            'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, objectIds),
+            'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, diaObjectIds),
             headers={"Content-Type": "application/json"},
             data=json.dumps(data)
         )
@@ -309,12 +309,12 @@ class StreamsSerializer(serializers.Serializer):
 
 
 class LightcurvesSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(max_length=16384, required=True)
+    diaObjectIds = serializers.CharField(max_length=16384, required=True)
 
     def save(self):
-        objectIds = self.validated_data['objectIds']
+        diaObjectIds = self.validated_data['objectIds']
         olist = []
-        for tok in objectIds.split(','):
+        for tok in diaObjectIds.split(','):
             olist.append(tok.strip())
 
         # Get the authenticated user, if it exists.
@@ -327,9 +327,9 @@ class LightcurvesSerializer(serializers.Serializer):
         LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
 
         lightcurves = []
-        for objectId in olist:
-            candidates = LF.fetch(objectId)
-            lightcurves.append({'objectId':objectId, 'candidates':candidates})
+        for diaObjectId in olist:
+            candidates = LF.fetch(diaObjectId)
+            lightcurves.append({'diaObjectId':diaObjectId, 'candidates':candidates})
 
         LF.close()
         return lightcurves
@@ -346,7 +346,7 @@ class AnnotateSerializer(serializers.Serializer):
 
     def save(self):
         topic = self.validated_data['topic']
-        objectId = self.validated_data['objectId']
+        diaObjectId = self.validated_data['objectId']
         classification = self.validated_data['classification']
         version = self.validated_data['version']
         explanation = self.validated_data['explanation']
@@ -385,30 +385,30 @@ class AnnotateSerializer(serializers.Serializer):
 
         # form the insert query
         query = 'REPLACE INTO annotations ('
-        query += 'objectId, topic, version, classification, explanation, classdict, url'
+        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
         query += ') VALUES ('
         query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (objectId, topic, version, classification, explanation, classdict, url)
+        query = query % (diaObjectId, topic, version, classification, explanation, classdict, url)
 
         try:
             cursor = msl.cursor(dictionary=True)
             cursor.execute(query)
             cursor.close()
             msl.commit()
-        except mysql.connector.Error as e:
+        except Exception as e:
             return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
 
         if active < 2:
             return {'status': 'success', 'query': query}
 
         # when active=2, we push a kafka message to make sure queries are run immediately
-        message = {'objectId': objectId, 'annotator': topic}
+        message = {'diaObjectId': diaObjectId, 'annotator': topic}
         conf = {
             'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
             'client.id': 'client-1',
         }
         producer = Producer(conf)
-        topicout = lasair_settings.ANNOTATION_TOPIC_OUT
+        topicout = lasair_settings.ANNOTATION_TOPIC
         try:
             s = json.dumps(message)
             producer.produce(topicout, s)

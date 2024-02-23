@@ -9,5 +9,6 @@ CREATE TABLE IF NOT EXISTS annotations(
 `classdict` JSON,
 `url` text DEFAULT NULL,
 PRIMARY KEY    (annotationID),
-UNIQUE KEY     one_per_object (diaObjectId, topic)
+UNIQUE KEY     one_per_object (diaObjectId, topic),
+KEY topic_idx (topic)
 )

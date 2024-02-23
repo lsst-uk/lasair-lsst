@@ -32,14 +32,15 @@
                 {% include "includes/widgets/widget_object_tns.html" %}
             </div>
 
-            <div class="col-12 mb-4">
+            <div class="col-12 col-xl-6 mb-4">
                 {% include "includes/widgets/widget_object_sherlock.html" %}
             </div>
 
-
-
-
-
+            {% if user.is_authenticated %}
+            <div class="col-12 col-xl-6 mb-4">
+                {% include "includes/widgets/widget_object_rsp.html" %}
+            </div>
+            {% endif %}
 
             <div class="col-12 mb-4">
                 {% include "includes/widgets/widget_object_lightcurve.html" %}
@@ -58,6 +59,12 @@
             <div class="col-12 mb-4">
                 {% include "includes/widgets/widget_object_external_links.html" %}
             </div>
+
+            {% if data.annotations|length > 0 %}
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_object_annotations.html" %}
+            </div>
+            {% endif %}
 
             <div class="col-12 mb-4">
                 {% include "includes/widgets/widget_object_detection_table.html" %}
