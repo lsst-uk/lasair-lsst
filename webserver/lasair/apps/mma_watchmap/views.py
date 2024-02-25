@@ -65,7 +65,8 @@ def mma_watchmap_index(request):
                 'mocimage': mw.mocimage, 
                 'area90':mw.area90, 
                 'gwtype':gwtype, 
-                'date_created':mw.date_created}
+                'event_date':mw.event_date
+                }
         # get the latest version for each otherId
         if mw.otherId in d:
             if mw.version > d[mw.otherId]['version']:
