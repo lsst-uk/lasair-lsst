@@ -18,6 +18,8 @@ class MmaWatchmap(models.Model):
     moc90 = models.TextField(blank=True, null=True)
     mocimage = models.TextField(blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
+
+# next three not used and can be deleted
     public = models.BooleanField(blank=True, null=True)
     date_created  = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
     date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
@@ -30,7 +32,7 @@ class MmaWatchmap(models.Model):
     otherId      = models.CharField(max_length=256, blank=True, null=True)
     version      = models.CharField(max_length=256, blank=True, null=True)
 
-    # time at which mataches are started to be made, not date_expire below
+# next not used and can be deleted
     date_active  = models.DateTimeField(editable=False, blank=True, null=True)
 
     area10 = models.FloatField()  # sq deg in 10% of skymap

@@ -46,12 +46,34 @@ def mma_watchmap_index(request):
     ]
     ```           
     """
-    myMmaWatchmaps = []
-    publicMmaWatchmaps = MmaWatchmap.objects.all()
+    mmaWatchmaps = MmaWatchmap.objects.all()
+    d = {}
+    for mw in list(mmaWatchmaps):
+        c = mw.params['classification']
 
-    return render(request, 'mma_watchmap/mma_watchmap_index.html',
-                  {'myMmaWatchmaps': myMmaWatchmaps,
-                   'publicMmaWatchmaps': publicMmaWatchmaps})
+        # get the type with the largest probability
+        max = 0.0
+        for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
+            if c[type] > max:
+                max = c[type]
+                gwtype = type
+
+        # build data packet
+        new = {'mw_id':mw.mw_id, 
+                'otherId': mw.otherId, 
+                'version': mw.version, 
+                'mocimage': mw.mocimage, 
+                'area90':mw.area90, 
+                'gwtype':gwtype, 
+                'date_created':mw.date_created}
+        # get the latest version for each otherId
+        if mw.otherId in d:
+            if mw.version > d[mw.otherId]['version']:
+                d[mw.otherId] = new
+        else:
+            d[mw.otherId] = new
+
+    return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': d.values()})
 
 def mma_watchmap_detail(request, mw_id):
     """*return the resulting matches of a mma_watchmap*

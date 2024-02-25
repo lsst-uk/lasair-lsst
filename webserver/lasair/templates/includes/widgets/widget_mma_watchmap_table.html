@@ -52,16 +52,19 @@
                 <thead class="thead-light">
 
                         <tr>
-                            <th>OtherId</th>
-                            <th>Count</th>
+                            <th>ID-version</th>
+                            <th>Image</th>
+                            <th>Area90</th>
+                            <th>GWtype</th>
                             <th>Created</th>
                         </tr></thead>
                         <tbody>
-                            {% for mma_watchmap in publicMmaWatchmaps %}
+                            {% for mma_watchmap in mmaWatchmaps %}
                                 <tr><td class="align-middle">
-                                    <b><a href="{% url 'mma_watchmap_detail' mma_watchmap.mw_id %}">{{ mma_watchmap.otherId }}</a></b></td>
-                                    <td><img alt="Image placeholder" src="data:image/png;base64,{{ mma_watchmap.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ mma_watchmap.user }}</td>
-                                    <td>{{mma_watchmap.count|intcomma}}</td>
+						<b><a href="{% url 'mma_watchmap_detail' mma_watchmap.mw_id %}">{{ mma_watchmap.otherId }}</a></b></td>
+                                    <td><img alt="Image placeholder" src="data:image/png;base64,{{ mma_watchmap.mocimage }}" width=150></td>
+                                    <td>{{mma_watchmap.area90}}</td>
+                                    <td>{{mma_watchmap.gwtype}}</td>
                                     <td data-type="date" data-format="YYYY-MMM-DD hh:mm:ss">{{mma_watchmap.date_created|date:"Y-m-d"}} {{mma_watchmap.date_created|time:"H:i:s"}}</td>
                                 </tr>
                             {% endfor %}
