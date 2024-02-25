@@ -3,10 +3,16 @@ from mocpy import MOC, WCS
 import astropy.units as u
 import matplotlib.pyplot as plt
 from yaml import CLoader as Loader, CDumper as Dumper
+from datetime import datetime, timedelta
 sys.path.append('../../../common')
 from src import db_connect
 
 ningested = 0
+
+def mjd2date(mjd):
+    date = datetime.strptime("1858/11/17", "%Y/%m/%d")
+    date += timedelta(mjd)
+    return date
 
 def bytes2string(bytes):
     base64_bytes   = base64.b64encode(bytes)
@@ -80,8 +86,7 @@ def makeMmaWatchmap(dir, eventId, version):
     params['location'] = loc
 
     event_tai  = data['HEADER']['MJD-OBS']
-#    event_date = data['HEADER']['DATE-OBS']
-    event_date = '2024-02-08T12:59:57'
+    event_date = mjd2date(event_tai)
 
     date_active = event_date   #### HACK
     area10 = data['EXTRA']['area10']
@@ -142,14 +147,19 @@ def handle_event(dir, eventId):
                 try:
                     makeMmaWatchmap(dir, eventId, version)
                     print('ok')
-#                    setDone(dir, eventId, version)
+                    setDone(dir, eventId, version)
                 except Exception as e:
                     print(traceback.format_exc())
 
 ############
+import sys
 dir = '/mnt/cephfs/lasair/mma/gw/'
-for file in os.listdir(dir):
-    if file.startswith('S') or file.startswith('M'):
-        eventId = file
-        handle_event(dir, eventId)
+if len(sys.argv) > 1:
+    eventId = sys.argv[1]
+    handle_event(dir, eventId)
+else:
+    for file in sorted(os.listdir(dir)):
+        if file.startswith('S') or file.startswith('M'):
+            eventId = file
+            handle_event(dir, eventId)
 print(ningested, 'event versions ingested')
