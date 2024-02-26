@@ -25,18 +25,18 @@
 
 - name: Create tables
   community.mysql.mysql_query:
-    query: "{{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }}"
+    query: "{{ lookup('file', '../common/schema/lasair_sql/' + item, split_lines=false) }}"
     login_host: 127.0.0.1
     login_user: "{{ mysql_db_user }}"
     login_password: "{{ mysql_db_password }}"
     login_db: "{{ mysql_db_name }}"
     single_transaction: yes
   with_items:
-    - "/common/schema/lasair_sql/objects.sql"
-    - "/common/schema/lasair_sql/sherlock_classifications.sql"
-    - "/common/schema/lasair_sql/crossmatch_tns.sql"
-    - "/common/schema/lasair_sql/area_hits.sql"
-    - "/common/schema/lasair_sql/watchlist_hits.sql"
-    - "/common/schema/lasair_sql/annotations.sql"
+    - "objects.sql"
+    - "sherlock_classifications.sql"
+    - "crossmatch_tns.sql"
+    - "area_hits.sql"
+    - "watchlist_hits.sql"
+    - "annotations.sql"
     #- "/common/schema/lasair_sql/ssObjects.sql"
 
