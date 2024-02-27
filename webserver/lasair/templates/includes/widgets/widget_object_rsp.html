@@ -17,7 +17,8 @@
             <div class="col-12 col-xl-10 pe-xl-5 ps-sm-4">
                 <small class="text-gray-500">
 		    <div>
-                        Search the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaObject WHERE diaObjectId={{ data.diaObjectId }}&execute=true">DiaObject</a> table.</div>
+                        Search the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaObject WHERE diaObjectId={{ data.diaObjectId }}&execute=true">DiaObject</a> table.
+		    </div>
 		    <div>
                         Search DiaSource table
                             <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&adql=SELECT * FROM dp02_dc2_catalogs.DiaSource WHERE diaObjectId={{ data.diaObjectId }}">all fields</a> |
@@ -29,6 +30,9 @@
 		    <div>
                         Cone search on the <a target="_blank" href="https://rsp.lsst.ac.uk/portal/app/?api=tap&service=https://rsp.lsst.ac.uk/api/tap&schema=dp02_dc2_catalogs&table=dp02_dc2_catalogs.Source&ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&sr=1s">Source</a> table.
                     </div>
+		    <div>
+                        Search the <a target="_blank" href="https://data.lsst.cloud/portal/app/?api=tap&service=https://data.lsst.cloud/api/tap&schema=ivoa&table=ivoa.ObsCore&worldPt={{ data.objectData.ra }};{{ data.objectData.decl }};EQ_J2000&obsCoreSubType=lsst.deepCoadd_calexp">deepCoadd</a> images.
+		    </div>
                 </small>
             </div>
         </div>
