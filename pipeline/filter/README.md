@@ -3,47 +3,35 @@ Takes a Kafka stream of annotated JSON events, ingests them into a local MySQL,
 finds coincidences with watchlists, runs query/filters on them, 
 then pushes the local MySQL to the global relational database, via CSV files.
 
-* filter_log.py
+* runner.py
 Runs the filter.py regularly, in a screen for continuous ingestion
 
-* filter.py
-The master script that does the following things in order
+* start_batch.py
+Sets up the local database and Kafka consumer ready for a new batch
 
-  * refresh.py
-First clean out the local database.
+* run_batch.py
+Runs all the things below
 
   * consume_alerts.py
 Runs the Kafka consumer, can be multi-process. For each alert, 
-it pushes the objects and sherlock_crossmaxtches to the local database
+it calls features.py for lightcurve features, then pushes the 
+objects and sherlock_crossmatches to the local database
 
-  * insert_query.py
+    * features.py
 Computes object features and builds the INSERT query
 
-  * mag.py
-Used by insert_query for apparent magnitudes.
-
-  * check_alerts_watchlists.py
+  * watchlists.py
 Check a batch of alerts against the cached watchlist files, and ingests the
 resulting watchlist_hits int the local database
 
-  * run_active_queries.py and query_utilities.py
-Together these two fetch and runs the users active queries and produces Kafka for them
+  * filters.py
+Fetch and run the users active queries and produces Kafka for them
+
+* end_batch.py
+Writes statistics, sends local database to main
 
   * output_csv.sql
 Builds CSV files from the local database, to be scp'ed to the master (lasair-db)
 and ingested there.
 
-* make_watchlist_files.py
-This needs to run in a crontab so that any changes to the watchlists
-by users will rebuild the cached files
 
-* date_nid.py
-Utility method to deal with "night ID", which is number of days since 1/1/2017.
-
-* settings.py
-This one is not in Github, as it has passwords. Local and Master database connections, 
-also the Kafka setup, the watchlist setup, etc.
-
-* setup_mysql.sh
-This one is about how to set up the MySQL for the first time, it has 
-the CREATE TABLE commands that are actually ove in ../utility/schema
