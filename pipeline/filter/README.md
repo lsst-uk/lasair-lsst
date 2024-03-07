@@ -22,7 +22,11 @@ Computes object features and builds the INSERT query
 
   * watchlists.py
 Check a batch of alerts against the cached watchlist files, and ingests the
-resulting watchlist_hits int the local database
+resulting watchlist_hits into the local database
+
+  * watchmaps.py
+Check a batch of alerts against the cached watchmap files, and ingests the
+resulting watchmap_hits into the local database
 
   * filters.py
 Fetch and run the users active queries and produces Kafka for them
