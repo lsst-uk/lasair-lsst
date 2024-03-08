@@ -18,6 +18,7 @@ from confluent_kafka import Consumer, Producer, KafkaError, KafkaException
 from fakeSherlock import transient_classifier
 from pkg_resources import get_distribution
 from random import randrange
+from math import asin
 
 # use custom info_ log level so we can print info messages for wrapper without having to do so for sherlock
 logging.INFO_ = 25
@@ -28,7 +29,7 @@ sherlock_version = get_distribution("qub-sherlock").version
 def randomise(log, alerts):
     for alert in alerts:
         rand_ra = randrange(0, 360000000) / 1000000
-        rand_dec = randrange(-80000000, 80000000) / 1000000
+        rand_dec = round(math.asin(random.uniform(-1, 1)) * 180/math.pi, 6)
         if alert.get('diaObject'):
             alert['diaObject']['ra'] = rand_ra
             alert['diaObject']['decl'] = rand_dec
