@@ -27,10 +27,17 @@ sherlock_version = get_distribution("qub-sherlock").version
 
 def randomise(log, alerts):
     for alert in alerts:
+        rand_ra = randrange(0, 360000000) / 1000000
+        rand_dec = randrange(-80000000, 80000000) / 1000000
         if alert.get('diaObject'):
-            alert['diaObject']['ra'] = randrange(0, 360000000) / 1000000
-            alert['diaObject']['decl'] = randrange(-80000000, 80000000) / 1000000
-
+            alert['diaObject']['ra'] = rand_ra
+            alert['diaObject']['decl'] = rand_dec
+        for source in alert.get('diaSourcesList'):
+            source['ra'] = rand_ra
+            source['decl'] = rand_dec
+        for source in alert.get('forcedSourceOnDiaObjectsList'):
+            source['ra'] = rand_ra
+            source['decl'] = rand_dec
 
 def consume(conf, log, alerts, consumer):
     "fetch a batch of alerts from kafka, return number of alerts consumed"
