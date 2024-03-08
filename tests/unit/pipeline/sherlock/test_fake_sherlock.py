@@ -4,7 +4,7 @@ from fakeSherlock import transient_classifier
 
 # some test values to use
 ra = [ 100.001923, 100.004056, 100.004534, 100.0069223, 100.008056, 100.009034, 100.000186]
-dec = [ 18.134226, -10.018633, -21.73562, 18.134226, -10.018633, -21.73562, 18.134226 ]
+dec = [ 18.162226, 10.273649, 18.162388, 18.387237, -10.162002, 21.127438, 18.982293 ]
 names = [ "yan", "tan", "tethera", "methera", "pip", "sethera", "lethera" ]
 expected_classifications = {
     "yan": ['AGN', "This is a fake classification."],
@@ -19,30 +19,51 @@ expected_crossmatches_by_name = {
     "lethera": {
         "transient_object_id": "lethera",
         "association_type": "ORPHAN",
+        "z": None,
+        "photoZ": None,
+        "distance": None,
     },
     "yan": {
         "transient_object_id": "yan",
         "association_type": "AGN",
+        "z": None,
+        "photoZ": None,
+        "distance": None,
     },
     "tan": {
         "transient_object_id": "tan",
         "association_type": "CV",
+        "z": None,
+        "photoZ": None,
+        "distance": None,
     },
     "tethera": {
         "transient_object_id": "tethera",
         "association_type": "NT",
+        "z": 0.007,
+        "photoZ": 0.0438,
+        "distance": 708.6,
     },
     "methera": {
         "transient_object_id": "methera",
         "association_type": "SN",
+        "z": None,
+        "photoZ": None,
+        "distance": 14.6,
     },
     "pip": {
         "transient_object_id": "pip",
         "association_type": "VS",
+        "z": None,
+        "photoZ": None,
+        "distance": None,
     },
     "sethera": {
         "transient_object_id": "sethera",
         "association_type": "BS",
+        "z": None,
+        "photoZ": None,
+        "distance": None,
     },
 }
 
@@ -71,6 +92,7 @@ class FakeSherlockTest(unittest.TestCase):
         for cm in crossmatches:
             name = cm["transient_object_id"]
             cm_by_name[name] = cm
+            #self.assertEqual(cm, expected_crossmatches_by_name[name])
         self.assertEqual(cm_by_name, expected_crossmatches_by_name)
  
 
