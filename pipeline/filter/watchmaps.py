@@ -9,6 +9,8 @@ import os, sys
 import math
 from mocpy import MOC
 import astropy.units as u
+sys.path.append('../../common')
+import settings
 sys.path.append('../../common/src')
 import lasairLogging
 
@@ -150,6 +152,21 @@ def insert_area_hits(msl, hits):
        print('ERROR in filter/check_alerts_areas cannot insert areas_hits: %s' % str(err))
        sys.stdout.flush()
     msl.commit()
+
+def watchmaps(batch):
+    try:
+        hits = get_area_hits(batch.local_database, settings.AREA_MOCS)
+    except Exception as e:
+        batch.log.error("ERROR in filter/get_area_hits" + str(e))
+        return None
+
+    if len(hits) > 0:
+        try:
+            insert_area_hits(batch.local_database, hits)
+        except Exception as e:
+            log.error("ERROR in filter/insert_area_hits" + str(e))
+            return None
+    return len(hits)
 
 if __name__ == "__main__":
     import sys

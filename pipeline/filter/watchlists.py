@@ -259,6 +259,22 @@ def insert_watchlist_hits(msl, hits):
         log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
     msl.commit()
 
+def watchlists(batch):
+    try:
+        hits = get_watchlist_hits(batch.local_database, \
+            settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
+    except Exception as e:
+        batch.log.error("ERROR in filter/get_watchlist_hits")
+        return None
+
+    if len(hits) > 0:
+        try:
+            insert_watchlist_hits(msl_local, hits)
+        except Exception as e:
+            log.error("ERROR in filter/insert_watchlist_hits")
+            return None
+    return len(hits)
+
 if __name__ == "__main__":
     sys.path.append('../../common/src')
     import db_connect, lasairLogging

@@ -1,9 +1,7 @@
 """ Computes features of the light curve and builds and object record
 """
 from __future__ import print_function
-import json
-import sys
-import math
+import json, sys, math
 import numpy as np
 import ephem
 sys.path.append('../../common/schema/lasair_schema')

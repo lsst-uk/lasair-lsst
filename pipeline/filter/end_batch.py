@@ -1,16 +1,11 @@
-import datetime
-import math
-import time
-import json
-import urllib.parse
-import urllib
-import requests
-import sys
+import os, sys, datetime, math, time, json, tempfile
+import requests, urllib, urllib.parse
+
 sys.path.append('../../common')
 import settings
-sys.path.append('../../common/src')
-import lasairLogging, db_connect
 
+sys.path.append('../../common/src')
+import date_nid, lasairLogging, db_connect, manage_status
 
 def batch_statistics():
     """since_midnight.
@@ -100,6 +95,89 @@ def grafana_today():
 
     return today_candidates_ztf
 
+def transfer_to_main(batch):
+    cmd = 'sudo rm /data/mysql/*.txt'
+    os.system(cmd)
+
+    cmd = 'mysql --user=ztf --database=ztf --password=%s < output_csv.sql'
+    cmd = cmd % settings.LOCAL_DB_PASS
+    if os.system(cmd) != 0:
+        log.error('ERROR in filter/filter: cannot build CSV from local database')
+        return None
+
+    tablelist = [
+        'objects', 
+        'sherlock_classifications', 
+        'watchlist_hits', 
+        'area_hits'
+    ]
+
+    commit = True
+    for table in tablelist:
+        sql  = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
+        sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
+        sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
+
+        tmpfilename = tempfile.NamedTemporaryFile().name + '.sql'
+        f = open(tmpfilename, 'w')
+        f.write(sql)
+        f.close()
+
+        cmd =  "mysql --user=%s --database=ztf --password=%s --port=%s --host=%s < %s"
+        cmd = cmd % (settings.DB_USER_READWRITE, \
+                     settings.DB_PASS_READWRITE, \
+                     settings.DB_PORT, \
+                     settings.DB_HOST, tmpfilename)
+        if os.system(cmd) != 0:
+            batch.log.error('ERROR in filter/end_batch: cannot push %s local to main database' % table)
+            commit = False
+        else:
+            batch.log.info('%s ingested to main db' % table)
+
+    if commit:
+        batch.consumer.commit()
+        batch.consumer.close()
+        batch.log.info('Kafka committed for this batch')
+    else:
+        batch.consumer.close()
+
+    return commit
+
+def write_stats(batch, nalerts):
+    ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+    nid = date_nid.nid_now()
+    d = batch_statistics()
+    ms.set({
+        'today_ztf':grafana_today(),
+        'today_database':d['count'],
+        'total_count': d['total_count'],
+        'min_delay': '%.1f' % d['since'],  # hours since most recent alert
+        'nid': nid},
+        nid)
+    for name,td in batch.timers.items():
+        td.add2ms(ms, nid)
+
+    if nalerts > 0:
+        min_str = "{:d}".format(int(d['min_delay']*60))
+        avg_str = "{:d}".format(int(d['avg_delay']*60))
+        max_str = "{:d}".format(int(d['max_delay']*60))
+    else:
+        min_str = "NaN"
+        avg_str = "NaN"
+        max_str = "NaN"
+    #t = int(1000*time.time())
+    s  = '#HELP lasair_alert_batch_lag Lasair alert batch lag stats\n'
+    s += '#TYPE gauge\n'
+    s += 'lasair_alert_batch_lag{type="min"} %s\n' % min_str
+    s += 'lasair_alert_batch_lag{type="avg"} %s\n' % avg_str
+    s += 'lasair_alert_batch_lag{type="max"} %s\n' % max_str
+    try:
+        filename = '/var/lib/prometheus/node-exporter/lasair.prom'
+        f = open(filename, 'w')
+        f.write(s)
+        f.close()
+    except:
+        batch.log.error("ERROR in filter/filter: Cannot open promethus %s" % filename)
 
 if __name__ == "__main__":
     lasairLogging.basicConfig(stream=sys.stdout)

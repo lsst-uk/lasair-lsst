@@ -20,7 +20,7 @@ Options:
 
 import os, sys, time, signal
 from docopt import docopt
-from filter import run_filter
+from run_batch import run_batch
 
 sys.path.append('../../common')
 import settings
@@ -62,9 +62,9 @@ while not stop:
         continue
     log.info('------------- Filter_runner at %s' % now())
 
-    retcode = run_filter(args)
+    nalerts = run_batch(args)
 
-    if retcode == 0:   # process got no alerts, so sleep a few minutes
+    if nalerts == 0:   # process got no alerts, so sleep a few minutes
         log.info('Waiting for more alerts ....')
         time.sleep(settings.WAIT_TIME)
 

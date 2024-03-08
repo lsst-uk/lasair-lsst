@@ -7,7 +7,7 @@ gets all the queries from the database
 (2) run_annotation_queries(query_list): 
 may be called to get all the recent fast annotations 
 
-(3) run_queries(query_list, annotation_list=None):
+(3) run_queries(batch, query_list, annotation_list=None):
 Uses query_list and possibly annotation_list and runs all the queries against 
 local, or those involving annotator against main databaase
 
@@ -35,18 +35,14 @@ Deal with the query results
 
 """
 
-import os, sys
-sys.path.append('../../common')
-import time
-import json
-import settings
-from src import db_connect
+import os, sys, time, json, datetime, smtplib
 from confluent_kafka import Consumer, Producer, KafkaError
-import datetime
-import smtplib
-#from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+sys.path.append('../../common')
+import settings
+from src import db_connect
 
 def fetch_queries():
     """fetch_queries.
@@ -76,58 +72,28 @@ def fetch_queries():
         query_list.append(query_dict)
     return query_list
 
-def run_annotation_queries(query_list):
-    """run_annotation_queries.
-    Pulls the recent content from the kafka topic 'ztf_annotations' 
-    Each message has an annotator/topic name, and the diaObjectId that was annotated.
-    Queries that have that annotator should run against that object
-    """
-    annotation_list = []
-    conf = {
-        'bootstrap.servers':   settings.KAFKA_SERVER,
-        'group.id':            settings.ANNOTATION_GROUP_ID,
-        'default.topic.config': {'auto.offset.reset': 'earliest'}
-    }
-    streamReader = Consumer(conf)
-    topic = settings.ANNOTATION_TOPIC
-    streamReader.subscribe([topic])
-    while 1:
-        msg = streamReader.poll(timeout=5)
-        if msg == None: break
-        try:
-            ann = json.loads(msg.value())
-            annotation_list.append(ann)
-        except:
-            continue
-    streamReader.close()
-    print('got ', annotation_list)
-    run_queries(query_list, annotation_list)
-
-def run_queries(query_list, annotation_list=None):
+def run_queries(batch, query_list, annotation_list=None):
     """
     When annotation_list is None, it runs all the queries against the local database
     When not None, runs some queires agains a specific object, using the main database
     """
-    try:
-        msl_local = db_connect.local()
-    except:
-        print('ERROR in filter/run_active_queries: cannot connect to local database')
-        sys.stdout.flush()
 
+    ntotal = 0
     for query in query_list:
         n = 0
         t = time.time()
 
         # normal case of streaming queries
         if annotation_list == None:  
-            query_results = run_query(query, msl_local)
+            query_results = run_query(query, batch.local_database)
             n += dispose_query_results(query, query_results)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, msl_remote, ann['annotator'], ann['diaObjectId'])
+                query_results = run_query(query, batch.local_database, \
+                        ann['annotator'], ann['diaObjectId'])
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
                 n += dispose_query_results(query, query_results)
@@ -136,6 +102,8 @@ def run_queries(query_list, annotation_list=None):
         if n > 0:
             print('   %s got %d in %.1f seconds' % (query['topic_name'], n, t))
             sys.stdout.flush()
+        ntotal += n
+    return ntotal
 
 def query_for_object(query, diaObjectId):
     """ modifies an existing query to add a new constraint for a specific object.
@@ -288,7 +256,7 @@ def dispose_email(allrecords, last_email, query, force=False):
         send_email(query['email'], topic, message, message_html)
         return utcnow
     except Exception as e:
-        print('ERROR in filter/run_active_queries: Cannot send email!')
+        print('ERROR in filter/run_active_queries: Cannot send email!' + str(e))
         print(e)
         sys.stdout.flush()
         return last_email
@@ -352,12 +320,59 @@ def kafka_ack(err, msg):
     if err is not None:
         print("Failed to deliver message: %s: %s" % (str(msg), str(err)))
 
+def filters(batch):
+    try:
+        query_list = fetch_queries()
+    except Exception as e:
+        batch.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        return None
+
+    try:
+        ntotal = run_queries(batch, query_list)
+        return ntotal
+    except Exception as e:
+        batch.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
+        return None
+
+def fast_anotation_filters(batch):
+    """run_annotation_queries.
+    Pulls the recent content from the kafka topic 'ztf_annotations' 
+    Each message has an annotator/topic name, and the diaObjectId that was annotated.
+    Queries that have that annotator should run against that object
+    """
+    try:
+        query_list = fetch_queries()
+    except Exception as e:
+        batch.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        return None
+
+    annotation_list = []
+    conf = {
+        'bootstrap.servers':   settings.KAFKA_SERVER,
+        'group.id':            settings.ANNOTATION_GROUP_ID,
+        'default.topic.config': {'auto.offset.reset': 'earliest'}
+    }
+    streamReader = Consumer(conf)
+    topic = settings.ANNOTATION_TOPIC
+    streamReader.subscribe([topic])
+    while 1:
+        msg = streamReader.poll(timeout=5)
+        if msg == None: break
+        try:
+            ann = json.loads(msg.value())
+            annotation_list.append(ann)
+        except:
+            continue
+    streamReader.close()
+    ntotal = run_queries(batch, query_list, annotation_list)
+    return ntotal
+
 if __name__ == "__main__":
     from src import slack_webhook
-    print('--------- RUN ACTIVE QUERIES -----------')
+    print('--------- RUN ACTIVE FILTERS -----------')
     sys.stdout.flush()
     t = time.time()
     query_list = fetch_queries()
-    run_queries(query_list)
+    run_queries(batch, query_list)
     print('Active queries done in %.1f seconds' % (time.time() - t))
     sys.stdout.flush()
