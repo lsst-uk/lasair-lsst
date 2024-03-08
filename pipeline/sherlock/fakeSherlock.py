@@ -29,7 +29,7 @@ class transient_classifier():
             name = self.name[i]
             ra= self.ra[i]
             dec = self.dec[i]
-            idx = int(ra % 0.01 * 1000)
+            idx = int((ra % 0.01) * 700)
             at = associatationTypes.get(idx, 'ORPHAN')
             classifications[name] = [at, "This is a fake classification."]
             crossmatches.append({ "association_type": at, "transient_object_id": name })

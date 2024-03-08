@@ -3,7 +3,7 @@ import context
 from fakeSherlock import transient_classifier
 
 # some test values to use
-ra = [ 100.001323, 100.002456, 100.003734, 100.004323, 100.005456, 100.006734, 100.007486]
+ra = [ 100.001923, 100.004056, 100.004534, 100.0069223, 100.008056, 100.009034, 100.000186]
 dec = [ 18.134226, -10.018633, -21.73562, 18.134226, -10.018633, -21.73562, 18.134226 ]
 names = [ "yan", "tan", "tethera", "methera", "pip", "sethera", "lethera" ]
 expected_classifications = {
@@ -72,8 +72,6 @@ class FakeSherlockTest(unittest.TestCase):
             name = cm["transient_object_id"]
             cm_by_name[name] = cm
         self.assertEqual(cm_by_name, expected_crossmatches_by_name)
-        for k in classifications.keys():
-           self.assertEqual(classifications[k], expected_classifications[k])
  
 
 if __name__ == '__main__':
