@@ -27,7 +27,7 @@ except:
     pass
 
 
-def read_watchlist_cache_files(cache_dir):
+def read_watchlist_cache_files(batch, cache_dir):
     """read_watchlist_cache_files.
     This function reads all the files in the cache directories and keeps them in memory
     in a list called "watchlistlist". Each watchlist is a dictionary:
@@ -43,12 +43,7 @@ def read_watchlist_cache_files(cache_dir):
     try:
         dir_list = os.listdir(cache_dir)
     except:
-        s = 'ERROR in filter/check_alerts_watchlists: cannot read watchlist cache directory'
-        try:   # unit test comes here without setting up the log
-            log = lasairLogging.getLogger("filter")
-            log.error(s)
-        except:
-            print(s)
+        batch.log.error('ERROR in filter/check_alerts_watchlists: cannot read watchlist cache directory')
 
     for wl_dir in dir_list:
         # every directory in the cache should be of the form wl_<nn> 
@@ -102,7 +97,7 @@ def read_watchlist_cache_files(cache_dir):
         watchlistlist.append(watchlist)
     return watchlistlist
 
-def check_alerts_against_moc(alertlist, wl_id, moc, cones):
+def check_alerts_against_moc(batch, alertlist, wl_id, moc, cones):
     """check_alerts_against_moc.
     For a given moc, check the alerts in the batch 
 
@@ -126,8 +121,7 @@ def check_alerts_against_moc(alertlist, wl_id, moc, cones):
     try:
         result = moc.contains(alertralist*u.deg, alertdelist*u.deg)
     except Exception as e:
-        log = lasairLogging.getLogger("filter")
-        log.error('ERROR in filter/check_alerts_against_moc: ' + str(e))
+        batch.log.error('ERROR in filter/check_alerts_against_moc: ' + str(e))
         return []
 
     hits = []
@@ -156,7 +150,7 @@ def check_alerts_against_moc(alertlist, wl_id, moc, cones):
 
     return hits
 
-def check_alerts_against_watchlist(alertlist, watchlist, chk):
+def check_alerts_against_watchlist(batch, alertlist, watchlist, chk):
     """ check_alerts_against_watchlist.
     This function goes through all the watchlists looking for hits
 
@@ -178,10 +172,10 @@ def check_alerts_against_watchlist(alertlist, watchlist, chk):
             'radius'  :cones['radius']  [ichunk*chk:(ichunk+1)*chk],
             'names'   :cones['names']   [ichunk*chk:(ichunk+1)*chk],
         }
-        hits += check_alerts_against_moc(alertlist, wl_id, moclist[ichunk], coneschunk)
+        hits += check_alerts_against_moc(batch, alertlist, wl_id, moclist[ichunk], coneschunk)
     return hits
 
-def check_alerts_against_watchlists(alertlist, watchlistlist, chunk_size):
+def check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size):
     """check_alerts_against_watchlists.
     check the batch of alerts agains all the watchlists
 
@@ -193,17 +187,17 @@ def check_alerts_against_watchlists(alertlist, watchlistlist, chunk_size):
     hits = []
     for watchlist in watchlistlist:
 #        print(watchlist['wl_id'])
-        hits += check_alerts_against_watchlist(alertlist, watchlist, chunk_size)
+        hits += check_alerts_against_watchlist(batch, alertlist, watchlist, chunk_size)
     return hits
 
-def fetch_alerts(msl):
+def fetch_alerts(batch):
     """fetch_alerts:
     Get all the alerts from the local cache to check againstr watchlist
 
     Args:
-        msl:
+        batch:
     """
-    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     cursor.execute(query)
@@ -216,34 +210,34 @@ def fetch_alerts(msl):
         delist.append (row['decl'])
     return {"obj":objlist, "ra":ralist, "de":delist}
 
-def get_watchlist_hits(msl, cache_dir, chunk_size):
+def get_watchlist_hits(batch, cache_dir, chunk_size):
     """get_watchlist_hits:
     Get all the alerts, then run against the watchlists, return the hits
 
     Args:
-        msl:
+        batch:
         cache_dir:
         chunk_size:
     """
     # read in the cache files
-    watchlistlist = read_watchlist_cache_files(cache_dir)
+    watchlistlist = read_watchlist_cache_files(batch, cache_dir)
 
     # get the alert positions from the database
-    alertlist = fetch_alerts(msl)
+    alertlist = fetch_alerts(batch)
 
     # check the list against the watchlists
-    hits = check_alerts_against_watchlists(alertlist, watchlistlist, chunk_size)
+    hits = check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size)
     return hits
 
-def insert_watchlist_hits(msl, hits):
+def insert_watchlist_hits(batch, hits):
     """insert_watchlist_hits:
     Build and execute the insertion query to get the hits into the database
 
     Args:
-        msl:
+        batch:
         hits:
     """
-    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
     list = []
@@ -255,23 +249,22 @@ def insert_watchlist_hits(msl, hits):
        cursor.execute(query)
        cursor.close()
     except mysql.connector.Error as err:
-        log = lasairLogging.getLogger("filter")
-        log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
-    msl.commit()
+        batch.log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
+    batch.local_database.commit()
 
 def watchlists(batch):
     try:
-        hits = get_watchlist_hits(batch.local_database, \
+        hits = get_watchlist_hits(batch, \
             settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
     except Exception as e:
-        batch.log.error("ERROR in filter/get_watchlist_hits")
+        batch.log.error("ERROR in filter/get_watchlist_hits" + str(e))
         return None
 
     if len(hits) > 0:
         try:
-            insert_watchlist_hits(msl_local, hits)
+            insert_watchlist_hits(batch, hits)
         except Exception as e:
-            log.error("ERROR in filter/insert_watchlist_hits")
+            batch.log.error("ERROR in filter/insert_watchlist_hits" + str(e))
             return None
     return len(hits)
 
@@ -285,7 +278,7 @@ if __name__ == "__main__":
     msl_local = db_connect.local()
 
     # can run the watchlist process without the rest of the filter code
-    hits = get_watchlist_hits(msl_local, settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
+    hits = get_watchlist_hits(batch, settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
     if hits:
         for hit in hits:
             log.info(hit)

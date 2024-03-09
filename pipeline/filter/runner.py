@@ -52,7 +52,7 @@ lasairLogging.basicConfig(
 )
 log = lasairLogging.getLogger("filter_runner")
 
-args = docopt(__doc__)
+#args = docopt(__doc__)
 
 while not stop:
     # check for lockfile
@@ -62,7 +62,7 @@ while not stop:
         continue
     log.info('------------- Filter_runner at %s' % now())
 
-    nalerts = run_batch(args)
+    nalerts = run_batch()
 
     if nalerts == 0:   # process got no alerts, so sleep a few minutes
         log.info('Waiting for more alerts ....')

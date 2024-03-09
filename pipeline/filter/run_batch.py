@@ -21,7 +21,7 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 def run_batch():
     batch = start_batch.Batch()
 
-    print('clear local caches')
+    ('Starting batch', now())
     batch.truncate_local_database()
 
     batch.timers['ftotal'].on()
@@ -37,7 +37,7 @@ def run_batch():
     
     if nalerts > 0:
         ##### run the watchlists
-        log.info('WATCHLIST start %s' % now())
+        batch.log.info('WATCHLIST start %s' % now())
         batch.timers['fwatchlist'].on()
         nhits = watchlists.watchlists(batch)
         batch.timers['fwatchlist'].off()
@@ -47,7 +47,7 @@ def run_batch():
             batch.log.error("ERROR in filter/watchlists")
     
         ##### run the watchmaps
-        log.info('WATCHMAP start %s' % now())
+        batch.log.info('WATCHMAP start %s' % now())
         batch.timers['fwatchmap'].on()
         nhits = watchmaps.watchmaps(batch)
         batch.timers['fwatchmap'].off()
@@ -78,10 +78,10 @@ def run_batch():
         batch.timers['ftransfer'].on()
         commit = end_batch.transfer_to_main(batch)
         batch.timers['ftransfer'].off()
-        log.info('Batch ended')
+        batch.log.info('Batch ended')
 
         if not commit:
-            log.info('Transfer to main failed, no commit')
+            batch.log.info('Transfer to main failed, no commit')
             time.sleep(600)
             return 0
 

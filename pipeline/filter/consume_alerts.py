@@ -49,28 +49,27 @@ sherlock_attributes = [
     "summary",
 ]
 
-def execute_query(query, msl):
+def execute_query(batch, query):
     """ execute_query: run a query and close it, and compalin to slack if failure
     Args:
+        batch:
         query:
-        msl:
     """
     try:
-        cursor = msl.cursor(buffered=True)
+        cursor = batch.local_database.cursor(buffered=True)
         cursor.execute(query)
         cursor.close()
-        msl.commit()
+        batch.local_database.commit()
     except Exception as e:
-        log = lasairLogging.getLogger("filter")
-        log.error('ERROR filter/consume_alerts: object Database insert diaSource failed: %s' % str(e))
-        log.info(query)
+        batch.log.error('ERROR filter/consume_alerts: object Database insert diaSource failed: %s' % str(e))
+        batch.log.info(query)
         raise
 
-def handle_alert(alert, msl):
+def handle_alert(batch, alert):
     """alert_filter: handle a single alert
     Args:
+        batch:
         alert:
-        msl:
     """
     # Filter to apply to each alert.
     diaObjectId = alert['diaObject']['diaObjectId']
@@ -84,7 +83,7 @@ def handle_alert(alert, msl):
     query = make_features.create_insert_query(alert)
     if not query:
         return 0
-    execute_query(query, msl)
+    execute_query(batch, query)
 
     # now ingest the sherlock_classifications
     if 'annotations' in alert:
@@ -101,7 +100,7 @@ def handle_alert(alert, msl):
 #                f = open('data/%s_sherlock.json'%diaObjectId, 'w')
 #                f.write(query)
 #                f.close()
-                execute_query(query, msl)
+                execute_query(batch, query)
     return 1
 
 def consume_alerts(batch):
@@ -110,8 +109,6 @@ def consume_alerts(batch):
             consumer: confluent_kafka Consumer
             maxalert: how many to consume
     """
-    log = lasairLogging.getLogger("filter")
-
     nalert_in = nalert_out = 0
     startt = time.time()
 
@@ -132,7 +129,7 @@ def consume_alerts(batch):
         # Apply filter to each alert
         alert = json.loads(msg.value())
         nalert_in += 1
-        d = handle_alert(alert, batch.local_database)
+        d = handle_alert(batch, alert)
         nalert_out += d
 
         if nalert_in%1000 == 0:
@@ -141,8 +138,8 @@ def consume_alerts(batch):
             sys.stdout.flush()
             # refresh the database every 1000 alerts
             # make sure everything is committed
-            msl.close()
-            msl = db_connect.local()
+            batch.local_database.close()
+            batch.local_database = db_connect.local()
 
     batch.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 

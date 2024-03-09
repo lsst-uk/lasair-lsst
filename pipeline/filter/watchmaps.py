@@ -14,7 +14,7 @@ import settings
 sys.path.append('../../common/src')
 import lasairLogging
 
-def read_area_cache_files(cache_dir):
+def read_area_cache_files(batch, cache_dir):
     """
     read_area_cache_files
     This function reads all the files in the cache directories and keeps them in memory
@@ -43,7 +43,7 @@ def read_area_cache_files(cache_dir):
         arealist.append(area)
     return arealist
 
-def check_alerts_against_area(alertlist, area):
+def check_alerts_against_area(batch, alertlist, area):
     """ check_alerts_against_area.
     For a given moc, check the alerts in the batch 
 
@@ -60,8 +60,7 @@ def check_alerts_against_area(alertlist, area):
     try:
         result = area['moc'].contains(alertralist*u.deg, alertdelist*u.deg)
     except Exception as e:
-        log = lasairLogging.getLogger("filter")
-        log.error("ERROR in filter/get_area_hits ar_id=%d: %s" % (area['ar_id'], str(e)))
+        batch.log.error("ERROR in filter/get_area_hits ar_id=%d: %s" % (area['ar_id'], str(e)))
         return []
 
     hits = []
@@ -74,7 +73,7 @@ def check_alerts_against_area(alertlist, area):
                     })
     return hits
 
-def check_alerts_against_areas(alertlist, arealist):
+def check_alerts_against_areas(batch, alertlist, arealist):
     """ check_alerts_against_areas.
     check the batch of alerts agains all the areas
 
@@ -85,17 +84,17 @@ def check_alerts_against_areas(alertlist, arealist):
     hits = []
     for area in arealist:
         ar_id = area['ar_id']
-        hits += check_alerts_against_area(alertlist, area)
+        hits += check_alerts_against_area(batch, alertlist, area)
     return hits
 
-def fetch_alerts(msl, jd=None, limit=None, offset=None):
+def fetch_alerts(batch, jd=None, limit=None, offset=None):
     """ fetch_alerts.
     Get all the alerts from the local cache to check againstr watchlist
 
     Args:
-        msl:
+        batch:
     """
-    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     if jd:
@@ -112,33 +111,33 @@ def fetch_alerts(msl, jd=None, limit=None, offset=None):
         delist.append (row['decl'])
     return {"obj":objlist, "ra":ralist, "de":delist}
 
-def get_area_hits(msl, cache_dir):
+def get_area_hits(batch, cache_dir):
     """ get_area_hits.
     Get all the alerts, then run against the arealist, return the hits
 
     Args:
-        msl:
+        batch:
         cache_dir:
     """
     # read in the cache files
-    arealist = read_area_cache_files(cache_dir)
+    arealist = read_area_cache_files(batch, cache_dir)
 
     # get the alert positions from the database
-    alertlist = fetch_alerts(msl)
+    alertlist = fetch_alerts(batch)
 
     # check the list against the watchlists
-    hits = check_alerts_against_areas(alertlist, arealist)
+    hits = check_alerts_against_areas(batch, alertlist, arealist)
     return hits
 
-def insert_area_hits(msl, hits):
+def insert_area_hits(batch, hits):
     """ insert_area_hits.
     Build and execute the insertion query to get the hits into the database
 
     Args:
-        msl:
+        batch:
         hits:
     """
-    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into area_hits (ar_id, diaObjectId) VALUES\n"
     list = []
@@ -151,18 +150,18 @@ def insert_area_hits(msl, hits):
     except mysql.connector.Error as err:
        print('ERROR in filter/check_alerts_areas cannot insert areas_hits: %s' % str(err))
        sys.stdout.flush()
-    msl.commit()
+    batch.local_database.commit()
 
 def watchmaps(batch):
     try:
-        hits = get_area_hits(batch.local_database, settings.AREA_MOCS)
+        hits = get_area_hits(batch, settings.AREA_MOCS)
     except Exception as e:
         batch.log.error("ERROR in filter/get_area_hits" + str(e))
         return None
 
     if len(hits) > 0:
         try:
-            insert_area_hits(batch.local_database, hits)
+            insert_area_hits(batch, hits)
         except Exception as e:
             log.error("ERROR in filter/insert_area_hits" + str(e))
             return None
@@ -181,7 +180,7 @@ if __name__ == "__main__":
     msl_local = db_connect.local()
 
     # can run the area process without the rest of the filter code 
-    hits = get_area_hits(msl_local, settings.AREA_MOCS)
+    hits = get_area_hits(batch, settings.AREA_MOCS)
     if hits:
         for hit in hits: print(hit)
         insert_area_hits(msl_local, hits)
