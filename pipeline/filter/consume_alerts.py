@@ -1,7 +1,7 @@
 """Consumes stream for ingesting to database
 """
 from __future__ import print_function
-import os, sys, argparse, time, json, signal
+import os, sys, argparse, time, json
 import make_features
 
 sys.path.append('../../common')
@@ -10,15 +10,6 @@ import settings
 sys.path.append('../../common/src')
 import lasairLogging, db_connect, date_nid
 from manage_status import manage_status
-
-# If we catch a SIGTERM, set a flag
-sigterm_raised = False
-
-def sigterm_handler(signum, frame):
-    global sigterm_raised
-    sigterm_raised = True
-
-signal.signal(signal.SIGTERM, sigterm_handler)
 
 sherlock_attributes = [
     "classification",

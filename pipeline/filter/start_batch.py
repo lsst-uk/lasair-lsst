@@ -21,7 +21,6 @@ Options:
 import sys
 import confluent_kafka
 from docopt import docopt
-import signal
 
 sys.path.append('../../common')
 import settings
