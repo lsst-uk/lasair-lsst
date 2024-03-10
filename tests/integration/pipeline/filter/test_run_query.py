@@ -68,7 +68,7 @@ class RunQueryTest(TestCase):
         query = f"SELECT * FROM { table } WWWWWWWWWWWWWWWWWWWWHERE id=1"
         querydict['real_sql'] = query
         # patch out the send email function
-        with mock.patch('run_active_queries.send_email') as mock_email:
+        with mock.patch('filters.send_email') as mock_email:
             query_results = run_query(querydict, RunQueryTest.msl)
             args = mock_email.call_args[0]
             email_body = args[2]
@@ -79,7 +79,7 @@ class RunQueryTest(TestCase):
         query = f"SET STATEMENT max_statement_time=2 FOR SELECT SLEEP(4)"
         querydict['real_sql'] = query
         # patch out the send email function
-        with mock.patch('run_active_queries.send_email') as mock_email:
+        with mock.patch('filters.send_email') as mock_email:
             query_results = run_query(querydict, RunQueryTest.msl)
             args = mock_email.call_args[0]
             email_body = args[2]
