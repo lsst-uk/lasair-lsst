@@ -197,7 +197,7 @@ def fetch_alerts(batch):
     Args:
         batch:
     """
-    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
+    cursor = batch.database.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     cursor.execute(query)
@@ -237,7 +237,7 @@ def insert_watchlist_hits(batch, hits):
         batch:
         hits:
     """
-    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
+    cursor = batch.database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
     list = []
@@ -250,7 +250,7 @@ def insert_watchlist_hits(batch, hits):
        cursor.close()
     except mysql.connector.Error as err:
         batch.log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
-    batch.local_database.commit()
+    batch.database.commit()
 
 def watchlists(batch):
     try:

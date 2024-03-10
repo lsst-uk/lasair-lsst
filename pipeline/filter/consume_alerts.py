@@ -56,10 +56,10 @@ def execute_query(batch, query):
         query:
     """
     try:
-        cursor = batch.local_database.cursor(buffered=True)
+        cursor = batch.database.cursor(buffered=True)
         cursor.execute(query)
         cursor.close()
-        batch.local_database.commit()
+        batch.database.commit()
     except Exception as e:
         batch.log.error('ERROR filter/consume_alerts: object Database insert diaSource failed: %s' % str(e))
         batch.log.info(query)
@@ -138,8 +138,8 @@ def consume_alerts(batch):
             sys.stdout.flush()
             # refresh the database every 1000 alerts
             # make sure everything is committed
-            batch.local_database.close()
-            batch.local_database = db_connect.local()
+            batch.database.close()
+            batch.database = db_connect.local()
 
     batch.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 

@@ -58,13 +58,13 @@ class Batch():
             self.timers[name] = manage_status.timer(name)
 
         try:
-            self.local_database = db_connect.local()
-        except:
-            self.log.error('ERROR in filter/refresh: cannot clear local database')
-            sys.stdout.flush()
+            self.database = db_connect.local()
+        except Exception as e:
+            self.log.error('ERROR in run_batch: cannot connect to local database' + str(e))
+        return
 
     def truncate_local_database(self):
-        cursor = self.local_database.cursor(buffered=True, dictionary=True)
+        cursor = self.database.cursor(buffered=True, dictionary=True)
         cursor.execute('TRUNCATE TABLE objects')
         cursor.execute('TRUNCATE TABLE sherlock_classifications')
         cursor.execute('TRUNCATE TABLE watchlist_hits')

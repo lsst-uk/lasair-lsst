@@ -1,6 +1,6 @@
 """
-check_alerts_areas.py
-This code checks a batch of alerts against the cached area files, The files are kept 
+watchmaps.py
+This code checks a batch of alerts against the cached watchmap files, The files are kept 
 in a file named ar_<nn>.fits where nn is the area id from the database. 
 The "moc<nnn>.fits" files are
 "Multi-Order Coverage maps", https://cds-astro.github.io/mocpy/. 
@@ -14,18 +14,51 @@ import settings
 sys.path.append('../../common/src')
 import lasairLogging
 
-def read_area_cache_files(batch, cache_dir):
+def watchmaps(batch):
+    try:
+        hits = get_watchmap_hits(batch, settings.AREA_MOCS)
+    except Exception as e:
+        batch.log.error("ERROR in filter/get_watchmap_hits" + str(e))
+        return None
+
+    if len(hits) > 0:
+        try:
+            insert_watchmap_hits(batch, hits)
+        except Exception as e:
+            log.error("ERROR in filter/insert_watchmap_hits" + str(e))
+            return None
+    return len(hits)
+
+def get_watchmap_hits(batch, cache_dir):
+    """ get_watchmap_hits.
+    Get all the alerts, then run against the watchmaplist, return the hits
+
+    Args:
+        batch:
+        cache_dir:
     """
-    read_area_cache_files
+    # read in the cache files
+    watchmaplist = read_watchmap_cache_files(batch, cache_dir)
+
+    # get the alert positions from the database
+    alertlist = fetch_alerts(batch)
+
+    # check the list against the watchlists
+    hits = check_alerts_against_watchmaps(batch, alertlist, watchmaplist)
+    return hits
+
+def read_watchmap_cache_files(batch, cache_dir):
+    """
+    read_watchmap_cache_files
     This function reads all the files in the cache directories and keeps them in memory
-    in a list called "arealist". Each area is a dictionary:
+    in a list called "watchmaplist". Each watchmap is a dictionary:
         ar_id: the id from tha database
         moc  : the ingestred moc
 
     Args:
         cache_dir:
     """
-    arealist = []
+    watchmaplist = []
     for ar_file in os.listdir(cache_dir):
         # every file in the cache should be of the form ar_<nn>.fits
         # where nn is the area id
@@ -39,17 +72,17 @@ def read_area_cache_files(batch, cache_dir):
             moc = MOC.from_fits(gfile)
         except:
             continue
-        area = {'ar_id':ar_id, 'moc':moc}
-        arealist.append(area)
-    return arealist
+        watchmap = {'ar_id':ar_id, 'moc':moc}
+        watchmaplist.append(watchmap)
+    return watchmaplist
 
-def check_alerts_against_area(batch, alertlist, area):
-    """ check_alerts_against_area.
+def check_alerts_against_watchmap(batch, alertlist, watchmap):
+    """ check_alerts_against_watchmap.
     For a given moc, check the alerts in the batch 
 
     Args:
         alertlist:
-        area:
+        watchmap:
     """
     # alert positions
     alertobjlist = alertlist['obj']
@@ -58,9 +91,9 @@ def check_alerts_against_area(batch, alertlist, area):
 
     # here is the crossmatch
     try:
-        result = area['moc'].contains(alertralist*u.deg, alertdelist*u.deg)
+        result = watchmap['moc'].contains(alertralist*u.deg, alertdelist*u.deg)
     except Exception as e:
-        batch.log.error("ERROR in filter/get_area_hits ar_id=%d: %s" % (area['ar_id'], str(e)))
+        batch.log.error("ERROR in filter/get_watchmap_hits ar_id=%d: %s" % (watchmap['ar_id'], str(e)))
         return []
 
     hits = []
@@ -68,23 +101,23 @@ def check_alerts_against_area(batch, alertlist, area):
     for ialert in range(len(alertralist)):
         if(result[ialert]):
             hits.append({
-                        'ar_id'   :area['ar_id'], 
+                        'ar_id'   :watchmap['ar_id'], 
                         'diaObjectId':alertobjlist[ialert]
                     })
     return hits
 
-def check_alerts_against_areas(batch, alertlist, arealist):
-    """ check_alerts_against_areas.
-    check the batch of alerts agains all the areas
+def check_alerts_against_watchmaps(batch, alertlist, watchmaplist):
+    """ check_alerts_against_watchmaps.
+    check the batch of alerts agains all the watchmaps
 
     Args:
         alertlist:
-        arealist:
+        watchmaplist:
     """
     hits = []
-    for area in arealist:
-        ar_id = area['ar_id']
-        hits += check_alerts_against_area(batch, alertlist, area)
+    for watchmap in watchmaplist:
+        ar_id = watchmap['ar_id']
+        hits += check_alerts_against_watchmap(batch, alertlist, watchmap)
     return hits
 
 def fetch_alerts(batch, jd=None, limit=None, offset=None):
@@ -94,7 +127,7 @@ def fetch_alerts(batch, jd=None, limit=None, offset=None):
     Args:
         batch:
     """
-    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
+    cursor = batch.database.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     if jd:
@@ -111,33 +144,15 @@ def fetch_alerts(batch, jd=None, limit=None, offset=None):
         delist.append (row['decl'])
     return {"obj":objlist, "ra":ralist, "de":delist}
 
-def get_area_hits(batch, cache_dir):
-    """ get_area_hits.
-    Get all the alerts, then run against the arealist, return the hits
-
-    Args:
-        batch:
-        cache_dir:
-    """
-    # read in the cache files
-    arealist = read_area_cache_files(batch, cache_dir)
-
-    # get the alert positions from the database
-    alertlist = fetch_alerts(batch)
-
-    # check the list against the watchlists
-    hits = check_alerts_against_areas(batch, alertlist, arealist)
-    return hits
-
-def insert_area_hits(batch, hits):
-    """ insert_area_hits.
+def insert_watchmap_hits(batch, hits):
+    """ insert_watchmap_hits.
     Build and execute the insertion query to get the hits into the database
 
     Args:
         batch:
         hits:
     """
-    cursor = batch.local_database.cursor(buffered=True, dictionary=True)
+    cursor = batch.database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into area_hits (ar_id, diaObjectId) VALUES\n"
     list = []
@@ -148,39 +163,7 @@ def insert_area_hits(batch, hits):
        cursor.execute(query)
        cursor.close()
     except mysql.connector.Error as err:
-       print('ERROR in filter/check_alerts_areas cannot insert areas_hits: %s' % str(err))
+       print('ERROR in filter/check_alerts_watchmaps cannot insert watchmaps_hits: %s' % str(err))
        sys.stdout.flush()
-    batch.local_database.commit()
+    batch.database.commit()
 
-def watchmaps(batch):
-    try:
-        hits = get_area_hits(batch, settings.AREA_MOCS)
-    except Exception as e:
-        batch.log.error("ERROR in filter/get_area_hits" + str(e))
-        return None
-
-    if len(hits) > 0:
-        try:
-            insert_area_hits(batch, hits)
-        except Exception as e:
-            log.error("ERROR in filter/insert_area_hits" + str(e))
-            return None
-    return len(hits)
-
-if __name__ == "__main__":
-    import sys
-    sys.path.append('../../common')
-    import settings
-    sys.path.append('../../common/src')
-    import db_connect, lasairLogging
-
-    lasairLogging.basicConfig(stream=sys.stdout)
-    log = lasairLogging.getLogger("filter")
-
-    msl_local = db_connect.local()
-
-    # can run the area process without the rest of the filter code 
-    hits = get_area_hits(batch, settings.AREA_MOCS)
-    if hits:
-        for hit in hits: print(hit)
-        insert_area_hits(msl_local, hits)

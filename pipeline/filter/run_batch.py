@@ -21,11 +21,9 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 def run_batch():
     batch = start_batch.Batch()
 
-    ('Starting batch', now())
+    print('Starting batch', now())
     batch.truncate_local_database()
-
     batch.timers['ftotal'].on()
-    
     batch.log.info('FILTER start %s' % now())
     batch.log.info("Topic is %s" % batch.topic_in)
 

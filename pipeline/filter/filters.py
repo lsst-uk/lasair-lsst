@@ -85,14 +85,14 @@ def run_queries(batch, query_list, annotation_list=None):
 
         # normal case of streaming queries
         if annotation_list == None:  
-            query_results = run_query(query, batch.local_database)
+            query_results = run_query(query, batch.database)
             n += dispose_query_results(query, query_results)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, batch.local_database, \
+                query_results = run_query(query, batch.database, \
                         ann['annotator'], ann['diaObjectId'])
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
