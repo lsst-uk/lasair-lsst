@@ -10,12 +10,11 @@ from mysql.connector.errors import *
 sys.path.append('../../../../common')
 import settings
 sys.path.append('../../../../pipeline/filter')
-from run_active_queries import run_query
+from filters import run_query
 
 config = {
         'user':     'ztf',
         'password': 'password456',
-#        'password': '123password',
         'host':     'localhost',
         'db':       'ztf',
         'port':     3306,
