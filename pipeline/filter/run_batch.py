@@ -1,8 +1,15 @@
+""" Main code for running a batch of alerts.
+    called by runner.py during production
+- fetch a batch of alerts from kafka and compute features
+- run the watchlist code and insert the hits
+- run the watchmap code and insert the hits
+- run the active filters and produce kafka
+- transfer to main - build a CSV file of each table -- and output the statistics
+"""
 import os, sys, time
 from datetime import datetime
 import start_batch, end_batch
 import consume_alerts, watchlists, watchmaps, filters
-import signal
 
 sys.path.append('../../common')
 import settings
@@ -13,12 +20,8 @@ from docopt import docopt
 def now():
     return datetime.utcnow().strftime("%H:%M:%S")
 
-def sigterm_handler(signum, frame):
-    pass
-
-signal.signal(signal.SIGTERM, sigterm_handler)
-
 def run_batch():
+    # The Batch class holds the command line arguments and the database connector
     batch = start_batch.Batch()
 
     print('Starting batch', now())
@@ -83,6 +86,7 @@ def run_batch():
             time.sleep(600)
             return 0
 
+    ##### Transfer to main database and write stats for the batch
     batch.timers['ftotal'].off()
     end_batch.write_stats(batch, nalerts)
     batch.log.info('%d alerts processed' % nalerts)

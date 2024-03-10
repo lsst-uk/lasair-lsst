@@ -1,11 +1,5 @@
 """
-Filter code for Lasair.
-    fetch a batch of alerts from kafka
-    run the watchlist code and insert the hits
-    run the active user queries and produce kafka
-    build a CSV file of three tables with the batch:
-      objects, sherlock_classifications, watchlist_hits, area_hits
-    send data to main db with mysql --host
+Start_batch. Read the command line arguments, connects to the database
 
 Usage:
     filter.py [--maxalert=MAX]
@@ -52,10 +46,12 @@ class Batch():
         self.log = lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
     
+    #### set up the timers
         self.timers = {}
         for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
             self.timers[name] = manage_status.timer(name)
 
+    #### set up the link to the local database
         try:
             self.database = db_connect.local()
         except Exception as e:
@@ -63,6 +59,8 @@ class Batch():
         return
 
     def truncate_local_database(self):
+        """ Truncate all the tables in the local database
+        """
         cursor = self.database.cursor(buffered=True, dictionary=True)
         cursor.execute('TRUNCATE TABLE objects')
         cursor.execute('TRUNCATE TABLE sherlock_classifications')
@@ -70,6 +68,9 @@ class Batch():
         cursor.execute('TRUNCATE TABLE area_hits')
 
     def make_kafka_consumer(self):
+        """ Make a kafka consumer
+            we want it stored here so it can be committed by end_batch
+        """
         conf = {
             'bootstrap.servers'   : '%s' % settings.KAFKA_SERVER,
             'enable.auto.commit'  : False,   # require explicit commit!

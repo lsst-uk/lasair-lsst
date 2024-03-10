@@ -26,6 +26,66 @@ try:
 except:
     pass
 
+def watchlists(batch):
+    """ Run the active watchlists for the batch
+    Calls get_watchlist_hits, then insert_watchlist_hits
+    """
+    try:
+        hits = get_watchlist_hits(batch, \
+            settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
+    except Exception as e:
+        batch.log.error("ERROR in filter/get_watchlist_hits" + str(e))
+        return None
+
+    if len(hits) > 0:
+        try:
+            insert_watchlist_hits(batch, hits)
+        except Exception as e:
+            batch.log.error("ERROR in filter/insert_watchlist_hits" + str(e))
+            return None
+    return len(hits)
+
+def get_watchlist_hits(batch, cache_dir, chunk_size):
+    """get_watchlist_hits:
+    Get all the alerts, then run against the watchlists, return the hits
+
+    Args:
+        batch:
+        cache_dir:
+        chunk_size:
+    """
+    # read in the cache files
+    watchlistlist = read_watchlist_cache_files(batch, cache_dir)
+
+    # get the alert positions from the database
+    alertlist = fetch_alerts(batch)
+
+    # check the list against the watchlists
+    hits = check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size)
+    return hits
+
+def insert_watchlist_hits(batch, hits):
+    """insert_watchlist_hits:
+    Build and execute the insertion query to get the hits into the database
+
+    Args:
+        batch:
+        hits:
+    """
+    cursor = batch.database.cursor(buffered=True, dictionary=True)
+
+    query = "REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
+    list = []
+    for hit in hits:
+        list.append('(%d,%d,"%s",%.3f,"%s")' %  \
+            (hit['wl_id'], hit['cone_id'], hit['diaObjectId'], hit['arcsec'], hit['name']))
+    query += ',\n'.join(list)
+    try:
+       cursor.execute(query)
+       cursor.close()
+    except mysql.connector.Error as err:
+        batch.log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
+    batch.database.commit()
 
 def read_watchlist_cache_files(batch, cache_dir):
     """read_watchlist_cache_files.
@@ -210,76 +270,3 @@ def fetch_alerts(batch):
         delist.append (row['decl'])
     return {"obj":objlist, "ra":ralist, "de":delist}
 
-def get_watchlist_hits(batch, cache_dir, chunk_size):
-    """get_watchlist_hits:
-    Get all the alerts, then run against the watchlists, return the hits
-
-    Args:
-        batch:
-        cache_dir:
-        chunk_size:
-    """
-    # read in the cache files
-    watchlistlist = read_watchlist_cache_files(batch, cache_dir)
-
-    # get the alert positions from the database
-    alertlist = fetch_alerts(batch)
-
-    # check the list against the watchlists
-    hits = check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size)
-    return hits
-
-def insert_watchlist_hits(batch, hits):
-    """insert_watchlist_hits:
-    Build and execute the insertion query to get the hits into the database
-
-    Args:
-        batch:
-        hits:
-    """
-    cursor = batch.database.cursor(buffered=True, dictionary=True)
-
-    query = "REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
-    list = []
-    for hit in hits:
-        list.append('(%d,%d,"%s",%.3f,"%s")' %  \
-            (hit['wl_id'], hit['cone_id'], hit['diaObjectId'], hit['arcsec'], hit['name']))
-    query += ',\n'.join(list)
-    try:
-       cursor.execute(query)
-       cursor.close()
-    except mysql.connector.Error as err:
-        batch.log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
-    batch.database.commit()
-
-def watchlists(batch):
-    try:
-        hits = get_watchlist_hits(batch, \
-            settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
-    except Exception as e:
-        batch.log.error("ERROR in filter/get_watchlist_hits" + str(e))
-        return None
-
-    if len(hits) > 0:
-        try:
-            insert_watchlist_hits(batch, hits)
-        except Exception as e:
-            batch.log.error("ERROR in filter/insert_watchlist_hits" + str(e))
-            return None
-    return len(hits)
-
-if __name__ == "__main__":
-    sys.path.append('../../common/src')
-    import db_connect, lasairLogging
-
-    lasairLogging.basicConfig(stream=sys.stdout)
-    log = lasairLogging.getLogger("ingest_runner")
-
-    msl_local = db_connect.local()
-
-    # can run the watchlist process without the rest of the filter code
-    hits = get_watchlist_hits(batch, settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
-    if hits:
-        for hit in hits:
-            log.info(hit)
-        insert_watchlist_hits(msl_local, hits)
