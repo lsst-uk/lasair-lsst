@@ -8,16 +8,21 @@ import json
 from time import sleep
 import context
 sys.path.append('../../../../common/src')
+import lasairLogging
 sys.path.append('../../../../services')
 import my_cmd
 
 from services.make_watchlist_files import rebuild_cache
-from pipeline.filter.check_alerts_watchlists import check_alerts_against_watchlists
-from pipeline.filter.check_alerts_watchlists import read_watchlist_cache_files
+from pipeline.filter.watchlists import check_alerts_against_watchlists
+from pipeline.filter.watchlists import read_watchlist_cache_files
 
 cache_dir = 'watchlist_cache/'
 chunk_size = 50000
 wl_id = 42
+
+class Batch():
+    def __init__(self):
+        self.log = lasairLogging.getLogger("filter")
 
 def test_cache():
     cone_ids = []
@@ -58,9 +63,10 @@ def test_alerts():
     alertlist = {"obj":alert_objlist, "ra":alert_ralist, "de":alert_delist}
 
     print('reading cache files')
-    watchlistlist = read_watchlist_cache_files(cache_dir)
+    batch = Batch()
+    watchlistlist = read_watchlist_cache_files(batch, cache_dir)
     print('checking alerts')
-    hits = check_alerts_against_watchlists(alertlist, watchlistlist, chunk_size)
+    hits = check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size)
     return hits
 
 class FilterWatchlistTest(TestCase):
