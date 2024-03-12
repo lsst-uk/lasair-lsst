@@ -59,7 +59,7 @@ class Filter:
 
     def __init__(self,
                  topic_in: str = 'ztf_sherlock',
-                 group_id: str = settings.KAFKA_GROUP,
+                 group_id: str = settings.KAFKA_GROUPID,
                  maxalert: str = settings.KAFKA_MAXALERTS):
         self.topic_in = topic_in
         self.group_id = group_id
