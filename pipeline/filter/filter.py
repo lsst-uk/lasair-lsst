@@ -28,8 +28,10 @@ from docopt import docopt
 sys.path.append('../../common')
 import settings
 sys.path.append('../../common/src')
-import date_nid, db_connect, manage_status, lasairLogging
-from src import db_connect
+import date_nid
+import db_connect
+import manage_status
+import lasairLogging
 from features.FeatureGroup import FeatureGroup
 import filters
 import watchlists
