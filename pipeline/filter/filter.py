@@ -42,17 +42,6 @@ def now():
     return datetime.utcnow().strftime("%H:%M:%S")
 
 
-sigterm_raised = False
-
-
-def sigterm_handler(signum, frame):
-    global sigterm_raised
-    sigterm_raised = True
-
-
-signal.signal(signal.SIGTERM, sigterm_handler)
-
-
 class Filter:
     """Filter orchestrates the filter pipeline stage
     """
@@ -68,6 +57,10 @@ class Filter:
         self.log = lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
 
+        # catch SIGTERM so that we can finish processing cleanly
+        signal.signal(signal.SIGTERM, self._sigterm_handler)
+        self.sigterm_raised = False
+
         # set up the Kafka consumer now
         self.consumer = self.make_kafka_consumer()
 
@@ -77,6 +70,11 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
         return
+
+    def _sigterm_handler(self, signum, frame):
+        """Handle SIGTERM by raising a flag that can be checked during the poll/process loop."""
+        self.sigterm_raised = True
+        self.log.debug("caught SIGTERM")
 
     def execute_query(self, query):
         """ execute_query: run a query and close it, and compalin to slack if failure
