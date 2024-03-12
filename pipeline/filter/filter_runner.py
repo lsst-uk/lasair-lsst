@@ -2,8 +2,7 @@
 Filter process runner. Sends args to its child and logs the outputs.
 It will run continously, running batch after batch. Each batch is a run of the 
 child program filter.py.
-The runner needs a lockfile -- usually as ~ubuntu/lockfile. If not present
-the runner continues, but looking for a lockfile every few minutes.
+
 A SIGTERM is handled and passed to the child process, which finishes the batch
 and exits cleanly. The SIGTERM also cause this runner process to exit,
 which is different from the lockfile check.
@@ -15,34 +14,35 @@ Usage:
 Options:
     --maxalert=MAX     Number of alerts to process, default is infinite
     --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use, or
+    --topic_in=TIN     Kafka topic to use
 """
 
 import os, sys, time, signal
 from docopt import docopt
-from run_batch import run_batch
-
 sys.path.append('../../common')
 import settings
 from datetime import datetime
-
-from subprocess import Popen, PIPE, STDOUT
 sys.path.append('../../common/src')
-import slack_webhook, lasairLogging, manage_status
+import slack_webhook, lasairLogging
+import filter
 
 # if this is True, the runner stops when it can and exits
 stop = False
+
 
 def sigterm_handler(signum, frame):
     global stop
     print('Stopping by SIGTERM')
     stop = True
 
+
 signal.signal(signal.SIGTERM, sigterm_handler)
+
 
 def now():
     # current UTC as string
     return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
+
 
 # Set up the logger
 lasairLogging.basicConfig(
@@ -52,20 +52,20 @@ lasairLogging.basicConfig(
 )
 log = lasairLogging.getLogger("filter_runner")
 
-#args = docopt(__doc__)
+# Deal with arguments
+# It's fine to use None as a default here as Filter will use sensible defaults if necessary
+args = docopt(__doc__)
+topic_in = args.get('--topic_in')
+group_id = args.get('--group_id')
+maxalert = args.get('--maxalert')
 
 while not stop:
-    # check for lockfile
-    if not os.path.isfile(settings.LOCKFILE):
-        log.info('Lockfile not present, waiting')
-        time.sleep(settings.WAIT_TIME)
-        continue
-    log.info('------------- Filter_runner at %s' % now())
+    log.info('------------- filter_runner running batch at %s' % now())
 
-    nalerts = run_batch()
-
+    fltr = filter.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+    nalerts = fltr.run_batch()
     if nalerts == 0:   # process got no alerts, so sleep a few minutes
         log.info('Waiting for more alerts ....')
         time.sleep(settings.WAIT_TIME)
 
-log.info('Exiting')
+log.info('Exiting filter runner')
