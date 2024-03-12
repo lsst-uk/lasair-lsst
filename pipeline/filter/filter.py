@@ -22,6 +22,7 @@ import math
 import requests
 import urllib
 import urllib.parse
+import numbers
 import confluent_kafka
 from datetime import datetime
 from docopt import docopt
@@ -199,11 +200,11 @@ class Filter:
         query = 'REPLACE INTO objects SET '
         for key, value in lasair_features.items():
             if not value:
-                query_list.append(key + '= NULL')
-            elif math.isnan(value):
-                query_list.append(key + '= NULL')
+                query_list.append(key + '=NULL')
+            elif isinstance(value, numbers.Number) and math.isnan(value):
+                query_list.append(key + '=NULL')
             elif isinstance(value, str):
-                query_list.append(key + '= "' + str(value) + '"')
+                query_list.append(key + '="' + str(value) + '"')
             else:
                 query_list.append(key + '=' + str(value))
         query += ',\n'.join(query_list)
