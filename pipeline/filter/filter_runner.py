@@ -63,6 +63,7 @@ while not stop:
     log.info('------------- filter_runner running batch at %s' % now())
 
     fltr = filter.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+    fltr.setup()
     nalerts = fltr.run_batch()
     if nalerts == 0:   # process got no alerts, so sleep a few minutes
         log.info('Waiting for more alerts ....')

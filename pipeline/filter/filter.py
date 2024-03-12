@@ -54,12 +54,19 @@ class Filter:
         self.group_id = group_id
         self.maxalert = int(maxalert)
 
+        self.consumer = None
+        self.database = None
+
         self.log = lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
 
         # catch SIGTERM so that we can finish processing cleanly
         signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
+
+    def setup(self):
+        """Set up connections to Kafka, database, etc. We do this separately from __init__ mostly to
+        facilitate testing."""
 
         # set up the Kafka consumer now
         self.consumer = self.make_kafka_consumer()
@@ -544,6 +551,7 @@ if __name__ == "__main__":
     group_id = args.get('--group_id')
     maxalert = args.get('--maxalert')
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+    fltr.setup()
     nalerts = fltr.run_batch()
     if nalerts == 0:   # process got no alerts, so sleep a few minutes
         fltr.log.info('Waiting for more alerts ....')
