@@ -43,7 +43,7 @@ def now():
 
 
 class Filter:
-    """Filter orchestrates the filter pipeline stage
+    """Filter orchestrates the filter pipeline stage.
     """
 
     def __init__(self,
@@ -79,12 +79,13 @@ class Filter:
         return
 
     def _sigterm_handler(self, signum, frame):
-        """Handle SIGTERM by raising a flag that can be checked during the poll/process loop."""
+        """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
+        """
         self.sigterm_raised = True
         self.log.debug("caught SIGTERM")
 
     def execute_query(self, query):
-        """ execute_query: run a query and close it, and compalin to slack if failure
+        """ execute_query: run a query and close it, and compalin to slack if failure.
         """
         try:
             cursor = self.database.cursor(buffered=True)
@@ -97,16 +98,15 @@ class Filter:
             raise
 
     def truncate_local_database(self):
-        """ Truncate all the tables in the local database
+        """ Truncate all the tables in the local database.
         """
-        cursor = self.database.cursor(buffered=True, dictionary=True)
-        cursor.execute('TRUNCATE TABLE objects')
-        cursor.execute('TRUNCATE TABLE sherlock_classifications')
-        cursor.execute('TRUNCATE TABLE watchlist_hits')
-        cursor.execute('TRUNCATE TABLE area_hits')
+        self.execute_query('TRUNCATE TABLE objects')
+        self.execute_query('TRUNCATE TABLE sherlock_classifications')
+        self.execute_query('TRUNCATE TABLE watchlist_hits')
+        self.execute_query('TRUNCATE TABLE area_hits')
 
     def make_kafka_consumer(self):
-        """ Make a kafka consumer
+        """ Make a kafka consumer.
         """
         conf = {
             'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
@@ -210,7 +210,7 @@ class Filter:
         return query
 
     def handle_alert(self, alert):
-        """alert_filter: handle a single alert
+        """alert_filter: handle a single alert.
         """
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
@@ -239,7 +239,8 @@ class Filter:
         return 1
 
     def consume_alerts(self):
-        """Consume a batch of alerts from Kafka"""
+        """Consume a batch of alerts from Kafka.
+        """
         global sigterm_raised
         nalert_in = nalert_out = 0
         startt = time.time()
@@ -285,7 +286,7 @@ class Filter:
         return nalert_out
 
     def transfer_to_main(self):
-        """ Transfer the local database to the main database
+        """ Transfer the local database to the main database.
         """
         cmd = 'sudo rm /data/mysql/*.txt'
         os.system(cmd)
@@ -336,7 +337,7 @@ class Filter:
         return commit
 
     def write_stats(self, timers, nalerts):
-        """ Write the statistics to lasair status and to grafana
+        """ Write the statistics to lasair status and to prometheus.
         """
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
         nid = date_nid.nid_now()
@@ -371,12 +372,11 @@ class Filter:
             f.write(s)
             f.close()
         except:
-            self.log.error("ERROR in filter/write_stats: Cannot open promethus %s" % filename)
+            self.log.error("ERROR in filter/write_stats: Cannot open promethus export file %s" % filename)
 
     @staticmethod
     def batch_statistics():
-        """since_midnight.
-        How many objects updated since last midnight
+        """How many objects updated since last midnight.
         """
         tainow = (time.time() / 86400 + 40587)
         midnight = math.floor(tainow - 0.5) + 0.5
@@ -439,8 +439,7 @@ class Filter:
 
     @staticmethod
     def grafana_today():
-        """since_midnight.
-        How many objects reported today from ZTF
+        """How many objects reported today from ZTF.
         """
         g = datetime.datetime.utcnow()
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
@@ -464,7 +463,9 @@ class Filter:
         return today_candidates_ztf
 
     def run_batch(self):
-        """Top level method that processes an alert batch:
+        """Top level method that processes an alert batch.
+
+        Does the following:
          - Consume alerts from Kafka
          - Run watchlists
          - Run watchmaps
