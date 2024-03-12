@@ -329,10 +329,7 @@ class Filter:
 
         if commit:
             self.consumer.commit()
-            self.consumer.close()
             self.log.info('Kafka committed for this batch')
-        else:
-            self.consumer.close()
 
         return commit
 
