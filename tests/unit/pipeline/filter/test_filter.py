@@ -12,7 +12,7 @@ class FilterTest(unittest.TestCase):
     def test_sigterm_handler(self):
         fltr = filter.Filter(group_id='filter_test', maxalert=0)
         self.assertFalse(fltr.sigterm_raised)
-        subprocess.run(['pkill', '-f', 'python3 test_ingest.py'])
+        subprocess.run(['pkill', '-f', 'python3 test_filter.py'])
         self.assertTrue(fltr.sigterm_raised)
         
 
