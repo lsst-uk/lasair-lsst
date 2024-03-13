@@ -26,8 +26,10 @@ import numbers
 import confluent_kafka
 from datetime import datetime
 from docopt import docopt
+
 sys.path.append('../../common')
 import settings
+
 sys.path.append('../../common/src')
 import date_nid
 import db_connect
@@ -293,13 +295,24 @@ class Filter:
     def transfer_to_main(self):
         """ Transfer the local database to the main database.
         """
-        cmd = 'sudo rm /data/mysql/*.txt'
+        cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        # TODO: why are we doing this using the CLI?
-        cmd = 'mysql --user=ztf --database=ztf --password=%s < output_csv.sql'
-        cmd = cmd % settings.LOCAL_DB_PASS
-        if os.system(cmd) != 0:
+        output_csv = [
+            "SELECT * FROM objects INTO OUTFILE '/data/mysql/objects.txt'"
+            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
+            "SELECT * FROM sherlock_classifications INTO OUTFILE '/data/mysql/sherlock_classifications.txt'"
+            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
+            "SELECT * FROM watchlist_hits INTO OUTFILE '/data/mysql/watchlist_hits.txt'"
+            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
+            "SELECT * FROM area_hits INTO OUTFILE '/data/mysql/area_hits.txt'"
+            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';"
+        ]
+
+        try:
+            for query in output_csv:
+                self.execute_query(query)
+        except:
             self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
             return None
 
@@ -310,27 +323,28 @@ class Filter:
             'area_hits'
         ]
 
+        try:
+            main_database = db_connect.remote()
+        except Exception as e:
+            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
+            return None
+
         commit = True
         for table in tablelist:
             sql = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
             sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
-            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
+            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
 
-            tmpfilename = tempfile.NamedTemporaryFile().name + '.sql'
-            f = open(tmpfilename, 'w')
-            f.write(sql)
-            f.close()
-
-            cmd = "mysql --user=%s --database=ztf --password=%s --port=%s --host=%s < %s"
-            cmd = cmd % (settings.DB_USER_READWRITE, \
-                         settings.DB_PASS_READWRITE, \
-                         settings.DB_PORT, \
-                         settings.DB_HOST, tmpfilename)
-            if os.system(cmd) != 0:
-                self.log.error('ERROR in filter/end_batch: cannot push %s local to main database' % table)
-                commit = False
-            else:
+            try:
+                cursor = main_database.cursor(buffered=True)
+                cursor.execute(sql)
+                cursor.close()
+                main_database.commit()
                 self.log.info('%s ingested to main db' % table)
+            except Exception as e:
+                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s'
+                               % (table, str(e)))
+                commit = False
 
         if commit:
             self.consumer.commit()
@@ -533,7 +547,7 @@ class Filter:
             else:
                 self.log.error("ERROR in filter/fast_annotation_filters")
 
-            # build CSV file with local database
+            # build CSV file with local database and transfer to main
             timers['ftransfer'].on()
             commit = self.transfer_to_main()
             timers['ftransfer'].off()
@@ -543,7 +557,7 @@ class Filter:
                 time.sleep(600)
                 return 0
 
-        # Transfer to main database and write stats for the batch
+        # Write stats for the batch
         timers['ftotal'].off()
         self.write_stats(timers, nalerts)
         self.log.info('%d alerts processed' % nalerts)
@@ -558,6 +572,6 @@ if __name__ == "__main__":
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
-        if n_alerts == 0:   # process got no alerts, so sleep a few minutes
+        if n_alerts == 0:  # process got no alerts, so sleep a few minutes
             fltr.log.info('Waiting for more alerts ....')
             time.sleep(settings.WAIT_TIME)
