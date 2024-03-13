@@ -3,15 +3,11 @@
 """
 import os, sys
 import unittest.main
-from unittest import TestCase, expectedFailure
-import json
-from time import sleep
+from unittest import TestCase
 import context
 sys.path.append('../../../../common/src')
 import lasairLogging
 sys.path.append('../../../../services')
-import my_cmd
-
 from services.make_watchlist_files import rebuild_cache
 from pipeline.filter.watchlists import check_alerts_against_watchlists
 from pipeline.filter.watchlists import read_watchlist_cache_files
@@ -20,9 +16,11 @@ cache_dir = 'watchlist_cache/'
 chunk_size = 50000
 wl_id = 42
 
+
 class Batch():
     def __init__(self):
         self.log = lasairLogging.getLogger("filter")
+
 
 def test_cache():
     cone_ids = []
@@ -48,6 +46,7 @@ def test_cache():
     max_depth = 13
     rebuild_cache(wl_id, wl_name, cones, max_depth, cache_dir, chunk_size)
 
+
 def test_alerts():
     alert_ralist = []
     alert_delist = []
@@ -69,6 +68,7 @@ def test_alerts():
     hits = check_alerts_against_watchlists(batch, alertlist, watchlistlist, chunk_size)
     return hits
 
+
 class FilterWatchlistTest(TestCase):
 
     @classmethod
@@ -89,6 +89,7 @@ class FilterWatchlistTest(TestCase):
         print('test alerts')
         hits = test_alerts()
         self.assertEqual(len(hits), 49)
+
 
 if __name__ == '__main__':
     import xmlrunner

@@ -1,5 +1,5 @@
 """
-The filter module. Usually run as a service using filter_runner, but can also be run from the command line.
+The core filter module. Usually run as a service using filter_runner, but can also be run from the command line.
 
 Usage:
     ingest.py [--maxalert=MAX]

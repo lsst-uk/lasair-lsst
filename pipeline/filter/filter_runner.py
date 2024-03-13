@@ -1,7 +1,7 @@
 """
 Filter process runner. Sends args to its child and logs the outputs.
 It will run continously, running batch after batch. Each batch is a run of the 
-child program filter.py.
+child program filtercore.py.
 
 A SIGTERM is handled and passed to the child process, which finishes the batch
 and exits cleanly. The SIGTERM also cause this runner process to exit,
@@ -24,7 +24,7 @@ import settings
 from datetime import datetime
 sys.path.append('../../common/src')
 import slack_webhook, lasairLogging
-import filter
+import filtercore
 
 # if this is True, the runner stops when it can and exits
 stop = False
@@ -59,7 +59,7 @@ topic_in = args.get('--topic_in', 'ztf_sherlock')
 group_id = args.get('--group_id', settings.KAFKA_GROUPID)
 maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
 
-fltr = filter.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
 
 while not stop:
     log.info('------------- filter_runner running batch at %s' % now())
