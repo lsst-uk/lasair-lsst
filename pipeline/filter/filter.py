@@ -222,7 +222,7 @@ class Filter:
             return 0
 
         # build the insert query for this object.
-        # if not wanted, returns None
+        # if not wanted, returns 0
         query = Filter.create_insert_query(alert)
         if not query:
             return 0
@@ -243,12 +243,12 @@ class Filter:
     def consume_alerts(self):
         """Consume a batch of alerts from Kafka.
         """
-        global sigterm_raised
         nalert_in = nalert_out = 0
         startt = time.time()
+        errors = 0
 
         while nalert_in < self.maxalert:
-            if sigterm_raised:
+            if self.sigterm_raised:
                 # clean shutdown - stop the consumer
                 self.log.info("Caught SIGTERM, aborting.")
                 break
@@ -259,6 +259,9 @@ class Filter:
                 break
             if msg.error():
                 self.log.error("ERROR polling Kafka: " + str(msg.error()))
+                errors += 1
+                if errors > 100:
+                    break
                 continue
             if msg.value() is None:
                 continue

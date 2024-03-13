@@ -17,6 +17,8 @@ class FilterTest(unittest.TestCase):
         self.assertTrue(fltr.sigterm_raised)
 
     def test_insert_sherlock(self):
+        """Test that the method for constructing the sherlock classification insert query from a sherlock annotation
+        gives the expected output."""
         test_ann = {
             "classification": "VS",
             "description": "This is a description",
@@ -69,6 +71,8 @@ class FilterTest(unittest.TestCase):
 
     @patch('filter.FeatureGroup')
     def test_insert_query(self, mock_FeatureGroup):
+        """Test that the method for constructing the object table insert gives the expected output given a dict of
+        features."""
         mock_FeatureGroup.run_all.return_value = {
             "strFeature": "A string", "floatFeature": 0.123, "nanFeature": float("nan"), "missingFeature": None}
         expected_results = [
@@ -84,6 +88,99 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(len(result.split(',')), len(expected_results))
         for item in result.split(','):
             self.assertIn(item, expected_results)
+
+    def test_handle_alert_no_sources(self):
+        """Test that the handle_alert method returns 0 for an alert with no sources."""
+        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+                      'diaSourcesList': []}
+        fltr = filter.Filter(group_id='filter_test', maxalert=0)
+        result = fltr.handle_alert(test_alert)
+        self.assertEqual(result, 0)
+
+    @patch('filter.Filter.create_insert_query')
+    @patch('filter.Filter.execute_query')
+    def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
+        """Test that handle_alert method returns 1 for an alert with sources."""
+        mock_create_insert_query.return_value = "QUERY"
+        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+                      'diaSourcesList': ['']}
+        fltr = filter.Filter(group_id='filter_test', maxalert=0)
+        result = fltr.handle_alert(test_alert)
+        self.assertEqual(result, 1)
+        mock_create_insert_query.assert_called_once()
+        mock_execute_query.assert_called_once()
+
+    @patch('filter.Filter.create_insert_sherlock')
+    @patch('filter.Filter.create_insert_query')
+    @patch('filter.Filter.execute_query')
+    def test_handle_alert_sherlock(self, mock_execute_query, mock_create_insert_query, mock_create_insert_sherlock):
+        """Test that handle_alert method works with a sherlock annotation."""
+        mock_create_insert_query.return_value = "QUERY"
+        mock_create_insert_sherlock.return_value = "SHERLOCK"
+        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+                      'diaSourcesList': [''],
+                      'annotations': {'sherlock': [{}]}}
+        fltr = filter.Filter(group_id='filter_test', maxalert=0)
+        result = fltr.handle_alert(test_alert)
+        self.assertEqual(result, 1)
+        mock_create_insert_query.assert_called_once()
+        mock_create_insert_sherlock.assert_called_once()
+        mock_execute_query.assert_has_calls(
+            [unittest.mock.call("QUERY"), unittest.mock.call("SHERLOCK")], any_order=True)
+
+    @patch('filter.manage_status')
+    def test_consume_alerts_sigterm(self, mock_manage_status):
+        """Test that consume alerts stops when sigterm raised"""
+        mock_consumer = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value = None
+        fltr = filter.Filter(group_id='filter_test', maxalert=1)
+        fltr.consumer = mock_consumer
+        fltr.sigterm_raised = True
+        result = fltr.consume_alerts()
+        self.assertEqual(result, 0)
+        mock_consumer.poll.assert_not_called()
+
+    @patch('filter.manage_status')
+    def test_consume_alerts_none(self, mock_manage_status):
+        """Test that consume alerts returns 0 when poll returns None"""
+        mock_consumer = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value = None
+        fltr = filter.Filter(group_id='filter_test', maxalert=1)
+        fltr.consumer = mock_consumer
+        result = fltr.consume_alerts()
+        self.assertEqual(result, 0)
+        mock_consumer.poll.assert_called_once()
+
+    @patch('filter.manage_status')
+    def test_consume_alerts_error(self, mock_manage_status):
+        """Test consume alerts when poll returns error"""
+        mock_consumer = unittest.mock.MagicMock()
+        mock_log = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value.error.return_value = "test error"
+        fltr = filter.Filter(group_id='filter_test', maxalert=1)
+        fltr.consumer = mock_consumer
+        fltr.log = mock_log
+        result = fltr.consume_alerts()
+        self.assertEqual(result, 0)
+        self.assertEqual(mock_consumer.poll.call_count, 101)
+
+    @patch('filter.Filter.handle_alert')
+    @patch('filter.manage_status')
+    def test_consume_alerts(self, mock_manage_status, mock_handle_alert):
+        """Test consume alerts"""
+        mock_consumer = unittest.mock.MagicMock()
+        mock_log = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value.error.return_value = None
+        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123}}'
+        mock_handle_alert.return_value = 1
+        fltr = filter.Filter(group_id='filter_test', maxalert=1)
+        fltr.consumer = mock_consumer
+        fltr.log = mock_log
+        result = fltr.consume_alerts()
+        self.assertEqual(result, 1)
+        mock_consumer.poll.assert_called_once()
+        mock_manage_status.assert_called_once()
+        mock_manage_status.return_value.add.assert_called_once()
 
 
 if __name__ == '__main__':
