@@ -20,10 +20,9 @@ from mocpy import MOC
 import astropy.units as u
 sys.path.append('../../common')
 import settings
-from filtercore import Filter
 
 
-def watchlists(fltr: Filter):
+def watchlists(fltr):
     """ Run the active watchlists for the batch.
     Calls get_watchlist_hits, then insert_watchlist_hits.
     Returns number of hits or None on error.
@@ -43,7 +42,7 @@ def watchlists(fltr: Filter):
     return len(hits)
 
 
-def get_watchlist_hits(fltr: Filter, cache_dir, chunk_size):
+def get_watchlist_hits(fltr, cache_dir, chunk_size):
     """get_watchlist_hits:
     Get all the alerts, then run against the watchlists, return the hits
 
@@ -63,7 +62,7 @@ def get_watchlist_hits(fltr: Filter, cache_dir, chunk_size):
     return hits
 
 
-def insert_watchlist_hits(fltr: Filter, hits):
+def insert_watchlist_hits(fltr, hits):
     """insert_watchlist_hits:
     Build and execute the insertion query to get the hits into the database
 
@@ -87,7 +86,7 @@ def insert_watchlist_hits(fltr: Filter, hits):
     fltr.database.commit()
 
 
-def read_watchlist_cache_files(fltr: Filter, cache_dir):
+def read_watchlist_cache_files(fltr, cache_dir):
     """read_watchlist_cache_files.
     This function reads all the files in the cache directories and keeps them in memory
     in a list called "watchlistlist". Each watchlist is a dictionary:
@@ -159,7 +158,7 @@ def read_watchlist_cache_files(fltr: Filter, cache_dir):
     return watchlistlist
 
 
-def check_alerts_against_moc(fltr: Filter, alertlist, wl_id, moc, cones):
+def check_alerts_against_moc(fltr, alertlist, wl_id, moc, cones):
     """check_alerts_against_moc.
     For a given moc, check the alerts in the batch 
 
@@ -214,7 +213,7 @@ def check_alerts_against_moc(fltr: Filter, alertlist, wl_id, moc, cones):
     return hits
 
 
-def check_alerts_against_watchlist(fltr: Filter, alertlist, watchlist, chk):
+def check_alerts_against_watchlist(fltr, alertlist, watchlist, chk):
     """ check_alerts_against_watchlist.
     This function goes through all the watchlists looking for hits
 
