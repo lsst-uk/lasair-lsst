@@ -69,7 +69,7 @@ class FilterTest(unittest.TestCase):
         for item in result.split(','):
             self.assertIn(item, expected_results)
 
-    @patch('filter.FeatureGroup')
+    @patch('filtercore.FeatureGroup')
     def test_insert_query(self, mock_FeatureGroup):
         """Test that the method for constructing the object table insert gives the expected output given a dict of
         features."""
@@ -97,8 +97,8 @@ class FilterTest(unittest.TestCase):
         result = fltr.handle_alert(test_alert)
         self.assertEqual(result, 0)
 
-    @patch('filter.Filter.create_insert_query')
-    @patch('filter.Filter.execute_query')
+    @patch('filtercore.Filter.create_insert_query')
+    @patch('filtercore.Filter.execute_query')
     def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
         """Test that handle_alert method returns 1 for an alert with sources."""
         mock_create_insert_query.return_value = "QUERY"
@@ -110,9 +110,9 @@ class FilterTest(unittest.TestCase):
         mock_create_insert_query.assert_called_once()
         mock_execute_query.assert_called_once()
 
-    @patch('filter.Filter.create_insert_sherlock')
-    @patch('filter.Filter.create_insert_query')
-    @patch('filter.Filter.execute_query')
+    @patch('filtercore.Filter.create_insert_sherlock')
+    @patch('filtercore.Filter.create_insert_query')
+    @patch('filtercore.Filter.execute_query')
     def test_handle_alert_sherlock(self, mock_execute_query, mock_create_insert_query, mock_create_insert_sherlock):
         """Test that handle_alert method works with a sherlock annotation."""
         mock_create_insert_query.return_value = "QUERY"
@@ -128,7 +128,7 @@ class FilterTest(unittest.TestCase):
         mock_execute_query.assert_has_calls(
             [unittest.mock.call("QUERY"), unittest.mock.call("SHERLOCK")], any_order=True)
 
-    @patch('filter.manage_status')
+    @patch('filtercore.manage_status')
     def test_consume_alerts_sigterm(self, mock_manage_status):
         """Test that consume alerts stops when sigterm raised"""
         mock_consumer = unittest.mock.MagicMock()
@@ -140,7 +140,7 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, 0)
         mock_consumer.poll.assert_not_called()
 
-    @patch('filter.manage_status')
+    @patch('filtercore.manage_status')
     def test_consume_alerts_none(self, mock_manage_status):
         """Test that consume alerts returns 0 when poll returns None"""
         mock_consumer = unittest.mock.MagicMock()
@@ -151,7 +151,7 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, 0)
         mock_consumer.poll.assert_called_once()
 
-    @patch('filter.manage_status')
+    @patch('filtercore.manage_status')
     def test_consume_alerts_error(self, mock_manage_status):
         """Test consume alerts when poll returns error"""
         mock_consumer = unittest.mock.MagicMock()
@@ -164,8 +164,8 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, 0)
         self.assertEqual(mock_consumer.poll.call_count, 101)
 
-    @patch('filter.Filter.handle_alert')
-    @patch('filter.manage_status')
+    @patch('filtercore.Filter.handle_alert')
+    @patch('filtercore.manage_status')
     def test_consume_alerts(self, mock_manage_status, mock_handle_alert):
         """Test consume alerts"""
         mock_consumer = unittest.mock.MagicMock()
@@ -182,7 +182,7 @@ class FilterTest(unittest.TestCase):
         mock_manage_status.assert_called_once()
         mock_manage_status.return_value.add.assert_called_once()
 
-    @patch('filter.Filter.execute_query')
+    @patch('filtercore.Filter.execute_query')
     def test_tansfer_to_main_local_error(self, mock_execute_query):
         """Test that an error when building the CSV causes transfer_to_main to return None"""
         mock_log = unittest.mock.MagicMock()
@@ -193,8 +193,8 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, None)
         mock_log.error.assert_called_once()
 
-    @patch('filter.Filter.execute_query')
-    @patch('filter.db_connect.remote')
+    @patch('filtercore.Filter.execute_query')
+    @patch('filtercore.db_connect.remote')
     def test_tansfer_to_main_remote_connect_error(self, mock_db_connect_remote, mock_execute_query):
         """Test that an error connecting to main db causes transfer_to_main to return None"""
         mock_log = unittest.mock.MagicMock()
@@ -207,8 +207,8 @@ class FilterTest(unittest.TestCase):
         mock_log.error.assert_called_once()
         mock_db_connect_remote.assert_called_once()
 
-    @patch('filter.Filter.execute_query')
-    @patch('filter.db_connect.remote')
+    @patch('filtercore.Filter.execute_query')
+    @patch('filtercore.db_connect.remote')
     def test_tansfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_execute_query):
         """Test that an error writing to main db causes transfer_to_main to return False"""
         mock_log = unittest.mock.MagicMock()
@@ -221,8 +221,8 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, False)
         self.assertEqual(mock_log.error.call_count, 4)
 
-    @patch('filter.Filter.execute_query')
-    @patch('filter.db_connect.remote')
+    @patch('filtercore.Filter.execute_query')
+    @patch('filtercore.db_connect.remote')
     def test_tansfer_to_main(self, mock_db_connect_remote, mock_execute_query):
         """Test transfer to main normal flow"""
         mock_log = unittest.mock.MagicMock()
