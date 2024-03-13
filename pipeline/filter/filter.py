@@ -66,18 +66,19 @@ class Filter:
         self.sigterm_raised = False
 
     def setup(self):
-        """Set up connections to Kafka, database, etc. We do this separately from __init__ mostly to
-        facilitate testing."""
+        """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
+        times. We do this separately from __init__ mostly to facilitate testing."""
 
         # set up the Kafka consumer now
-        self.consumer = self.make_kafka_consumer()
+        if not self.consumer:
+            self.consumer = self.make_kafka_consumer()
 
         # set up the link to the local database
-        try:
-            self.database = db_connect.local()
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
-        return
+        if not self.database or not self.database.is_connected():
+            try:
+                self.database = db_connect.local()
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -85,7 +86,7 @@ class Filter:
         self.sigterm_raised = True
         self.log.debug("caught SIGTERM")
 
-    def execute_query(self, query):
+    def execute_query(self, query: str):
         """ execute_query: run a query and close it, and compalin to slack if failure.
         """
         try:
@@ -128,7 +129,7 @@ class Filter:
             self.log.error('ERROR cannot connect to kafka', e)
 
     @staticmethod
-    def create_insert_sherlock(ann):
+    def create_insert_sherlock(ann: dict):
         """create_insert_sherlock.
         Makes the insert query for the sherlock classification
 
@@ -182,7 +183,7 @@ class Filter:
         return query
 
     @staticmethod
-    def create_insert_query(alert):
+    def create_insert_query(alert: dict):
         """create_insert_query.
         Creates an insert sql statement for building the object and
         a query for inserting it.
@@ -210,7 +211,7 @@ class Filter:
         query += ',\n'.join(query_list)
         return query
 
-    def handle_alert(self, alert):
+    def handle_alert(self, alert: dict):
         """alert_filter: handle a single alert.
         """
         # Filter to apply to each alert.
@@ -334,7 +335,7 @@ class Filter:
 
         return commit
 
-    def write_stats(self, timers, nalerts):
+    def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
         """
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
@@ -472,6 +473,8 @@ class Filter:
          - Build CSV file
          - Transfer to main database"""
 
+        self.setup()
+
         # set up the timers
         timers = {}
         for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
@@ -550,8 +553,8 @@ if __name__ == "__main__":
     group_id = args.get('--group_id')
     maxalert = args.get('--maxalert')
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
-    fltr.setup()
-    nalerts = fltr.run_batch()
-    if nalerts == 0:   # process got no alerts, so sleep a few minutes
-        fltr.log.info('Waiting for more alerts ....')
-        time.sleep(settings.WAIT_TIME)
+    while not fltr.sigterm_raised:
+        n_alerts = fltr.run_batch()
+        if n_alerts == 0:   # process got no alerts, so sleep a few minutes
+            fltr.log.info('Waiting for more alerts ....')
+            time.sleep(settings.WAIT_TIME)
