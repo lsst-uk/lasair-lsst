@@ -7,9 +7,9 @@ Usage:
               [--topic_in=TIN]
 
 Options:
-    --maxalert=MAX     Number of alerts to process, default is infinite
-    --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use
+    --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
+    --topic_in=TIN     Kafka topic to use, default is ztf_sherlock
 """
 
 import os
@@ -19,6 +19,8 @@ import signal
 import json
 import tempfile
 import math
+from typing import Union
+
 import requests
 import urllib
 import urllib.parse
@@ -52,7 +54,7 @@ class Filter:
     def __init__(self,
                  topic_in: str = 'ztf_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
-                 maxalert: str = settings.KAFKA_MAXALERTS):
+                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS):
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
@@ -169,7 +171,7 @@ class Filter:
         ]
         sets = {}
         for key in attrs:
-            sets[key] = 0
+            sets[key] = 'NULL'
         for key, value in ann.items():
             if key in attrs and value:
                 sets[key] = value
@@ -345,6 +347,8 @@ class Filter:
                 self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s'
                                % (table, str(e)))
                 commit = False
+
+        main_database.close()
 
         if commit:
             self.consumer.commit()
@@ -566,9 +570,9 @@ class Filter:
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    topic_in = args.get('--topic_in')
-    group_id = args.get('--group_id')
-    maxalert = args.get('--maxalert')
+    topic_in = args.get('--topic_in', 'ztf_sherlock')
+    group_id = args.get('--group_id', settings.KAFKA_GROUPID)
+    maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()

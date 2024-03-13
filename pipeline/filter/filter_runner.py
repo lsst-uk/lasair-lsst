@@ -12,9 +12,9 @@ Usage:
               [--topic_in=TIN]
 
 Options:
-    --maxalert=MAX     Number of alerts to process, default is infinite
-    --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use
+    --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
+    --topic_in=TIN     Kafka topic to use, default is ztf_sherlock
 """
 
 import os, sys, time, signal
@@ -55,9 +55,9 @@ log = lasairLogging.getLogger("filter_runner")
 # Deal with arguments
 # It's fine to use None as a default here as Filter will use sensible defaults if necessary
 args = docopt(__doc__)
-topic_in = args.get('--topic_in')
-group_id = args.get('--group_id')
-maxalert = args.get('--maxalert')
+topic_in = args.get('--topic_in', 'ztf_sherlock')
+group_id = args.get('--group_id', settings.KAFKA_GROUPID)
+maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
 
 fltr = filter.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
 
