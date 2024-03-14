@@ -44,6 +44,7 @@ sys.path.append('../../common')
 import settings
 from src import db_connect
 
+
 def fetch_queries():
     """fetch_queries.
     Get all the stored queries from the main database
@@ -52,7 +53,7 @@ def fetch_queries():
     msl_remote = db_connect.remote()
 
     # Fetch all the stored queries from the main database
-    cursor   = msl_remote.cursor(buffered=True, dictionary=True)
+    cursor = msl_remote.cursor(buffered=True, dictionary=True)
     query = 'SELECT mq_id, user, name, email, tables, active, real_sql, topic_name '
     query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND active > 0'
     cursor.execute(query)
@@ -72,7 +73,8 @@ def fetch_queries():
         query_list.append(query_dict)
     return query_list
 
-def run_queries(batch, query_list, annotation_list=None):
+
+def run_queries(fltr, query_list, annotation_list=None):
     """
     When annotation_list is None, it runs all the queries against the local database
     When not None, runs some queires agains a specific object, using the main database
@@ -84,16 +86,16 @@ def run_queries(batch, query_list, annotation_list=None):
         t = time.time()
 
         # normal case of streaming queries
-        if annotation_list == None:  
-            query_results = run_query(query, batch.database)
+        if annotation_list is None:
+            query_results = run_query(query, fltr.database)
             n += dispose_query_results(query, query_results)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, batch.database, \
-                        ann['annotator'], ann['diaObjectId'])
+                query_results = run_query(query, fltr.database, \
+                                          ann['annotator'], ann['diaObjectId'])
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
                 n += dispose_query_results(query, query_results)
@@ -104,6 +106,7 @@ def run_queries(batch, query_list, annotation_list=None):
             sys.stdout.flush()
         ntotal += n
     return ntotal
+
 
 def query_for_object(query, diaObjectId):
     """ modifies an existing query to add a new constraint for a specific object.
@@ -121,6 +124,7 @@ def query_for_object(query, diaObjectId):
         query += ' ORDER BY ' + tok[1]
     return query
 
+
 def run_query(query, msl, annotator=None, diaObjectId=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
@@ -130,7 +134,8 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
     Args:
         query:
         msl:
-        annotation_list:
+        diaObjectId:
+        annotator:
     """
     active = query['active']
     email = query['email']
@@ -157,7 +162,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
         for record in cursor:
             recorddict = dict(record)
             recorddict['UTC'] = utc
-            #print(recorddict)
+            # print(recorddict)
             query_results.append(recorddict)
             n += 1
     except Exception as e:
@@ -168,6 +173,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
         return []
 
     return query_results
+
 
 def dispose_query_results(query, query_results):
     """ Send out the query results by email or kafka, and ipdate the digest file
@@ -190,6 +196,7 @@ def dispose_query_results(query, query_results):
     write_digest(allrecords, query['topic_name'], utcnow, last_email)
     return len(query_results)
 
+
 def write_digest(allrecords, topic_name, last_entry, last_email):
     # update the digest file
     last_email_text = last_email.strftime("%Y-%m-%d %H:%M:%S")
@@ -206,6 +213,7 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
     os.chmod(filename, 0O666)
     f.write(digestdict_text)
     f.close()
+
 
 def fetch_digest(topic_name):
     filename = settings.KAFKA_STREAMS +'/'+ topic_name
@@ -224,6 +232,7 @@ def fetch_digest(topic_name):
     last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
     return digest,last_entry,last_email
 
+
 def dispose_email(allrecords, last_email, query, force=False):
     """ Send out email notifications
     """
@@ -239,7 +248,7 @@ def dispose_email(allrecords, last_email, query, force=False):
     topic = query['topic_name']
     sys.stdout.flush()
     query_url = '/query/%d/' % (query['mq_id'])
-    message      = 'Your active query with Lasair on topic %s\n' % topic
+    message = 'Your active query with Lasair on topic %s\n' % topic
     message_html = 'Your active query with Lasair on <a href=%s>%s</a><br/>' % (query_url, topic)
     for out in allrecords: 
         out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
@@ -261,6 +270,7 @@ def dispose_email(allrecords, last_email, query, force=False):
         sys.stdout.flush()
         return last_email
 
+
 def send_email(email, topic, message, message_html=''):
     """send_email.
 
@@ -268,6 +278,7 @@ def send_email(email, topic, message, message_html=''):
         email:
         topic:
         message:
+        message_html:
     """
     msg = MIMEMultipart('alternative')
 
@@ -281,6 +292,7 @@ def send_email(email, topic, message, message_html=''):
     s = smtplib.SMTP('localhost')
     s.sendmail(settings.LASAIR_EMAIL, email, msg.as_string())
     s.quit()
+
 
 def dispose_kafka(query_results, topic):
     """ Send out query results by kafka to the given topic.
@@ -306,6 +318,7 @@ def dispose_kafka(query_results, topic):
         print(rtxt)
         sys.stdout.flush()
 
+
 def datetime_converter(o):
     """datetime_converter.
 
@@ -316,25 +329,28 @@ def datetime_converter(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
 
+
 def kafka_ack(err, msg):
     if err is not None:
         print("Failed to deliver message: %s: %s" % (str(msg), str(err)))
 
-def filters(batch):
+
+def filters(fltr):
     try:
         query_list = fetch_queries()
     except Exception as e:
-        batch.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
     try:
-        ntotal = run_queries(batch, query_list)
+        ntotal = run_queries(fltr, query_list)
         return ntotal
     except Exception as e:
-        batch.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
+        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
         return None
 
-def fast_anotation_filters(batch):
+
+def fast_anotation_filters(fltr):
     """run_annotation_queries.
     Pulls the recent content from the kafka topic 'ztf_annotations' 
     Each message has an annotator/topic name, and the diaObjectId that was annotated.
@@ -343,7 +359,7 @@ def fast_anotation_filters(batch):
     try:
         query_list = fetch_queries()
     except Exception as e:
-        batch.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
     annotation_list = []
@@ -364,15 +380,16 @@ def fast_anotation_filters(batch):
         except:
             continue
     streamReader.close()
-    ntotal = run_queries(batch, query_list, annotation_list)
+    ntotal = run_queries(fltr, query_list, annotation_list)
     return ntotal
 
-if __name__ == "__main__":
-    from src import slack_webhook
-    print('--------- RUN ACTIVE FILTERS -----------')
-    sys.stdout.flush()
-    t = time.time()
-    query_list = fetch_queries()
-    run_queries(batch, query_list)
-    print('Active queries done in %.1f seconds' % (time.time() - t))
-    sys.stdout.flush()
+
+# if __name__ == "__main__":
+#     from src import slack_webhook
+#     print('--------- RUN ACTIVE FILTERS -----------')
+#     sys.stdout.flush()
+#     t = time.time()
+#     query_list = fetch_queries()
+#     run_queries(batch, query_list)
+#     print('Active queries done in %.1f seconds' % (time.time() - t))
+#     sys.stdout.flush()

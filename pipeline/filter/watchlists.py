@@ -30,14 +30,14 @@ def watchlists(fltr):
     try:
         hits = get_watchlist_hits(fltr, settings.WATCHLIST_MOCS, settings.WATCHLIST_CHUNK)
     except Exception as e:
-        fltr.log.error("ERROR in filter/get_watchlist_hits" + str(e))
+        fltr.log.error("ERROR in watchlists/get_watchlist_hits" + str(e))
         return None
 
     if len(hits) > 0:
         try:
             insert_watchlist_hits(fltr, hits)
         except Exception as e:
-            fltr.log.error("ERROR in filter/insert_watchlist_hits" + str(e))
+            fltr.log.error("ERROR in watchlists/insert_watchlist_hits" + str(e))
             return None
     return len(hits)
 
@@ -70,20 +70,17 @@ def insert_watchlist_hits(fltr, hits):
         fltr:
         hits:
     """
-    cursor = fltr.database.cursor(buffered=True, dictionary=True)
-
     query = "REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
     list = []
     for hit in hits:
         list.append('(%d,%d,"%s",%.3f,"%s")' %  \
             (hit['wl_id'], hit['cone_id'], hit['diaObjectId'], hit['arcsec'], hit['name']))
     query += ',\n'.join(list)
+
     try:
-       cursor.execute(query)
-       cursor.close()
-    except mysql.connector.Error as err:
-        fltr.log.error('ERROR in filter/check_alerts_watchlists: insert watchlist_hit failed: %s' % str(err))
-    fltr.database.commit()
+        fltr.execute_query(query)
+    except Exception as err:
+        fltr.log.error('ERROR in watchlists/insert_watchlist_hits: insert watchlist_hit failed: %s' % str(err))
 
 
 def read_watchlist_cache_files(fltr, cache_dir):
@@ -102,14 +99,17 @@ def read_watchlist_cache_files(fltr, cache_dir):
     watchlistlist = []
     try:
         dir_list = os.listdir(cache_dir)
-    except:
-        fltr.log.error('ERROR in filter/check_alerts_watchlists: cannot read watchlist cache directory')
+    except Exception as err:
+        fltr.log.error('ERROR in watchlists/read_watchlist_cache_files: cannot read watchlist cache directory: %s' % str(err))
+        return None
 
     for wl_dir in dir_list:
         # every directory in the cache should be of the form wl_<nn> 
         # where nn is the watchlist id
-        try:     wl_id = int(wl_dir[3:])
-        except:  continue
+        try:
+            wl_id = int(wl_dir[3:])
+        except ValueError:
+            continue
 
         # id of the watchlist
         watchlist = {'wl_id':wl_id}
@@ -183,7 +183,7 @@ def check_alerts_against_moc(fltr, alertlist, wl_id, moc, cones):
     try:
         result = moc.contains(alertralist*u.deg, alertdelist*u.deg)
     except Exception as e:
-        fltr.log.error('ERROR in filter/check_alerts_against_moc: ' + str(e))
+        fltr.log.error('ERROR in watchlists/check_alerts_against_moc: ' + str(e))
         return []
 
     hits = []
@@ -192,8 +192,8 @@ def check_alerts_against_moc(fltr, alertlist, wl_id, moc, cones):
         if(result[ialert]):
             # when there is a hit, we need to know *which* cone contains the alert
             diaObjectId = alertobjlist[ialert]
-            ra       = alertralist[ialert]
-            de       = alertdelist[ialert]
+            ra = alertralist[ialert]
+            de = alertdelist[ialert]
             for iw in range(len(watchralist)):
                 # don't forget the loxodrome
                 dra = (ra - watchralist[iw])*math.cos(de*math.pi/180)
@@ -246,12 +246,11 @@ def check_alerts_against_watchlists(fltr, alertlist, watchlistlist, chunk_size):
 
     Args:
         alertlist:
-        wl_id:
+        watchlistlist:
         chunk_size:
     """
     hits = []
     for watchlist in watchlistlist:
-#        print(watchlist['wl_id'])
         hits += check_alerts_against_watchlist(fltr, alertlist, watchlist, chunk_size)
     return hits
 

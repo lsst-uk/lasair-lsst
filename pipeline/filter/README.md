@@ -6,7 +6,7 @@ then pushes the local MySQL to the global relational database, via CSV files.
 * `filter_runner.py`
 Runs the filter.py regularly, intended primarily to be invoked by the filter service
 
-* `filter.py`
+* `filtercore.py`
 Manages the local database connection and Kafka consumer and generally orchestrates the batch process
 
 * `watchlists.py`
