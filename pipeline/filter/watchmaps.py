@@ -106,9 +106,9 @@ def check_alerts_against_watchmap(fltr, alertlist, watchmap):
 
     # here is the crossmatch
     try:
-        result = watchmap['moc'].contains(alertralist*u.deg, alertdelist*u.deg)
+        result = watchmap['moc'].contains(alertralist * u.deg, alertdelist * u.deg)
     except Exception as e:
-        fltr.log.error("ERROR in filter/get_watchmap_hits ar_id=%d: %s" % (watchmap['ar_id'], str(e)))
+        fltr.log.error("ERROR in watchmaps/check_alerts_against_watchmap ar_id=%d: %s" % (watchmap['ar_id'], str(e)))
         return []
 
     hits = []
@@ -160,9 +160,9 @@ def fetch_alerts(fltr, jd=None, limit=None, offset=None):
     delist = []
     for row in cursor:
         objlist.append(row['diaObjectId'])
-        ralist.append (row['ra'])
-        delist.append (row['decl'])
-    return {"obj":objlist, "ra":ralist, "de":delist}
+        ralist.append(row['ra'])
+        delist.append(row['decl'])
+    return {"obj": objlist, "ra": ralist, "de": delist}
 
 
 def insert_watchmap_hits(fltr, hits):
