@@ -49,7 +49,7 @@ def get_watchmap_hits(fltr, cache_dir):
     return hits
 
 
-def read_watchmap_cache_files(cache_dir):
+def read_watchmap_cache_files(fltr, cache_dir):
     """
     read_watchmap_cache_files
     This function reads all the files in the cache directories and keeps them in memory
@@ -58,23 +58,34 @@ def read_watchmap_cache_files(cache_dir):
         moc  : the ingestred moc
 
     Args:
+        fltr:
         cache_dir:
     """
     watchmaplist = []
-    for ar_file in os.listdir(cache_dir):
+
+    try:
+        dir_list = os.listdir(cache_dir)
+    except Exception as err:
+        fltr.log.error('ERROR in watchlists/read_watchmap_cache_files: cannot read watchmap cache directory: %s' % str(err))
+        return None
+
+    for ar_file in dir_list:
         # every file in the cache should be of the form ar_<nn>.fits
         # where nn is the area id
         tok = ar_file.split('.')
-        if tok[1] != 'fits': continue
-        try:     ar_id = int(tok[0][3:])
-        except:  continue
+        if tok[1] != 'fits':
+            continue
+        try:
+            ar_id = int(tok[0][3:])
+        except ValueError:
+            continue
 
         gfile = cache_dir + '/' + ar_file
         try:
             moc = MOC.from_fits(gfile)
         except:
             continue
-        watchmap = {'ar_id':ar_id, 'moc':moc}
+        watchmap = {'ar_id': ar_id, 'moc': moc}
         watchmaplist.append(watchmap)
     return watchmaplist
 
