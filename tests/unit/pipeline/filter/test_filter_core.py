@@ -9,8 +9,8 @@ import re
 
 class FilterTest(unittest.TestCase):
 
-    # check that the sigterm handler sets sigterm raised correctly
     def test_sigterm_handler(self):
+        """Test that the sigterm handler sets sigterm raised correctly"""
         fltr = Filter(group_id='filter_test', maxalert=0)
         self.assertFalse(fltr.sigterm_raised)
         subprocess.run(['pkill', '-f', 'python3 test_filter_core.py'])
