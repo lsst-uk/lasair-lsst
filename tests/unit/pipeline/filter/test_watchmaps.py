@@ -25,7 +25,8 @@ class WatchmapsTest(unittest.TestCase):
         mock_fltr = unittest.mock.MagicMock()
         result = watchmaps.read_watchmap_cache_files(mock_fltr, "./sample_areas")
         self.assertEqual(len(result), 1)
-        self.assertIsInstance(result[0], MOC)
+        self.assertEqual(result[0]['ar_id'], 1)
+        self.assertIsInstance(result[0]['moc'], MOC)
 
 
 if __name__ == '__main__':
