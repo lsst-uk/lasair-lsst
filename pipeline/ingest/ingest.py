@@ -40,11 +40,11 @@ class ImageStore:
     common interface."""
 
     def __init__(self, log=None, image_store=None):
+        self.log = log
         if image_store is not None:
             # passing in an image_store instead of getting one is mostly to enable testing
             self.image_store = image_store
             return
-        self.log = log
         fitsdir = getattr(settings, 'IMAGEFITS', None)
         use_cutoutcass = getattr(settings, 'USE_CUTOUTCASS', False)
         if use_cutoutcass:
@@ -54,7 +54,7 @@ class ImageStore:
         elif fitsdir and len(fitsdir) > 0:
             self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
         else:
-            log.warn('ERROR in ingest: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
+            log.warn('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
                      (use_cutoutcass, fitsdir))
             self.image_store = None
 
@@ -73,8 +73,10 @@ class ImageStore:
                         futures.append(result)
                     else:
                         self.image_store.putObject(cutoutId, imjd, content)
+            else:
+                self.log.warn('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
-            self.log.error('ERROR in ingest/store_images: ', e)
+            self.log.error('ERROR in ingest/store_images: %s' % e)
             raise e
         return futures
 

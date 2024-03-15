@@ -63,7 +63,34 @@ class IngestTest(unittest.TestCase):
         imageStore = ingest.ImageStore(image_store=mock_image_store)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         # check we called putCutoutAsync twice
+        self.assertEqual(len(result), 2)
         self.assertEqual(mock_image_store.putCutoutAsync.call_count, 2)
+
+    def test_store_images_no_store(self):
+        """Test that the image store warns and returns empty list if attempting to use it when image_store is None"""
+        diaSourceId = test_alert['DiaSource']['diaSourceId']
+        diaObjectId = test_alert['DiaObject']['diaObjectId']
+        imjd = int(test_alert['DiaSource']['midPointTai'])
+        mock_log = unittest.mock.MagicMock()
+        ingest.settings.USE_CUTOUTCASS = False
+        ingest.settings.IMAGEFITS = None
+        imageStore = ingest.ImageStore(log=mock_log)
+        result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        self.assertEqual(len(result), 0)
+        mock_log.warn.assert_called_with('WARNING: attempted to store images, but no image store set up')
+
+    def test_store_images_error(self):
+        """Test that using the image store raises an exception on error"""
+        diaSourceId = test_alert['DiaSource']['diaSourceId']
+        diaObjectId = test_alert['DiaObject']['diaObjectId']
+        imjd = int(test_alert['DiaSource']['midPointTai'])
+        mock_image_store = unittest.mock.MagicMock()
+        mock_log = unittest.mock.MagicMock()
+        ingest.settings.USE_CUTOUTCASS = True
+        mock_image_store.putCutoutAsync.side_effect = Exception('test error')
+        imageStore = ingest.ImageStore(log=mock_log, image_store=mock_image_store)
+        self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, imjd, diaObjectId)
+        mock_log.error.assert_called_with('ERROR in ingest/store_images: test error')
 
     @patch('ingest.ImageStore')
     @patch('ingest.Cluster')
