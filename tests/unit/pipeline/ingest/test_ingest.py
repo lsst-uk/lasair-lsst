@@ -22,7 +22,7 @@ class IngestTest(unittest.TestCase):
     def test_sigterm_handler(self):
         ingester = ingest.Ingester('', '', '', 1, ms=True)
         self.assertFalse(ingester.sigterm_raised)
-        subprocess.run(['pkill', '-f', 'python3 test_ingest.py'])
+        subprocess.run(['pkill', '-f', 'coverage run test_ingest.py'])
         self.assertTrue(ingester.sigterm_raised)
 
     # test using the image store 
