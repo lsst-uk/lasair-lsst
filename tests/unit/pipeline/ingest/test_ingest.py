@@ -18,7 +18,7 @@ test_alert = {
 
 class IngestTest(unittest.TestCase):
 
-    def test_sigterm_handler(self, settings):
+    def test_sigterm_handler(self):
         """Check that the sigterm handler sets sigterm raised correctly"""
         ingester = ingest.Ingester('', '', '', 1, ms=True)
         self.assertFalse(ingester.sigterm_raised)
@@ -59,6 +59,7 @@ class IngestTest(unittest.TestCase):
         diaSourceId = test_alert['DiaSource']['diaSourceId']
         diaObjectId = test_alert['DiaObject']['diaObjectId']
         imjd = int(test_alert['DiaSource']['midPointTai'])
+        ingest.settings.USE_CUTOUTCASS = True
         imageStore = ingest.ImageStore(image_store=mock_image_store)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         # check we called putCutoutAsync twice

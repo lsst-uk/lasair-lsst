@@ -61,17 +61,18 @@ class ImageStore:
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
         futures = []
         try:
-            for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
-                if not cutoutType in message: 
-                    continue
-                content = message[cutoutType]
-                cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                # store may be cutouts or cephfs
-                if settings.USE_CUTOUTCASS:
-                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append(result)
-                else:
-                    self.image_store.putObject(cutoutId, imjd, content)
+            if self.image_store:
+                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                    if not cutoutType in message:
+                        continue
+                    content = message[cutoutType]
+                    cutoutId = '%d_%s' % (diaSourceId, cutoutType)
+                    # store may be cutouts or cephfs
+                    if getattr(settings, 'USE_CUTOUTCASS', False):
+                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                        futures.append(result)
+                    else:
+                        self.image_store.putObject(cutoutId, imjd, content)
         except Exception as e:
             self.log.error('ERROR in ingest/store_images: ', e)
             raise e
