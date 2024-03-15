@@ -25,6 +25,7 @@ RUN pip3 install \
   xmlrunner \
   cryptography \
   flask \
+  psutil \
   coverage
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \

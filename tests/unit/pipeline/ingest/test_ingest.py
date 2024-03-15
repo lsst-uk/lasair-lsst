@@ -1,9 +1,7 @@
 import unittest, unittest.mock
 from unittest.mock import patch
-
-import signal
+import psutil
 import subprocess
-#import pickle
 import context
 import ingest as ingest
 
@@ -16,6 +14,7 @@ test_alert = {
     'cutoutTemplate': b'bar',
 }
 
+
 class IngestTest(unittest.TestCase):
 
     # check that the sigterm handler sets sigterm raised correctly
@@ -24,7 +23,7 @@ class IngestTest(unittest.TestCase):
         self.assertFalse(ingester.sigterm_raised)
         # we really need a better way of doing this
         # subprocess.run(['pkill', '-f', 'coverage run -a --data-file=../../.coverage test_ingest.py'])
-        subprocess.run(['pkill', 'coverage'])
+        psutil.Process().terminate()
         self.assertTrue(ingester.sigterm_raised)
 
     # test using the image store 
