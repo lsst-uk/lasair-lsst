@@ -15,7 +15,7 @@ pipeline {
                     sh 'python3 test_bad_fits.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
-                    sh 'python3 test_ingest.py'
+                    sh 'coverage run test_ingest.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
