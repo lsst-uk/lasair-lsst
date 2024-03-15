@@ -10,25 +10,25 @@ pipeline {
         stage('Unit Tests') {
             steps {
                 dir('tests/unit/common/src') {
-                    sh 'python3 test_manage_status.py'
-                    sh 'python3 test_logging.py'
-                    sh 'python3 test_bad_fits.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_manage_status.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_logging.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_bad_fits.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
-                    sh 'python3 test_sherlock_wrapper.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_wrapper.py'
                 }
                 dir('tests/unit/pipeline/filter') {
-                    sh 'python3 test_watchlist.py'
-                    sh 'python3 test_feature_groups.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchlist.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
                 }
                 dir('tests/unit/services/annotations/') {
-                    sh 'python3 kafka_test.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" kafka_test.py'
                 }
                 dir('tests/unit/services/sherlock/') {
-                    sh 'python3 test_sherlock.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock.py'
                 }
                 dir('tests/unit/') {
                     sh 'coverage xml'
