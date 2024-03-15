@@ -15,7 +15,7 @@ pipeline {
                     sh 'python3 test_bad_fits.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
-                    sh 'coverage run -a --data-file=../../.coverage test_ingest.py'
+                    sh 'coverage run -a --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
