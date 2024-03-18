@@ -37,11 +37,12 @@ import date_nid
 import db_connect
 import manage_status
 import lasairLogging
-from features.FeatureGroup import FeatureGroup
 import filters
 import watchlists
 import watchmaps
 
+sys.path.append('../../common/schema/lasair_schema')
+from features.FeatureGroup import FeatureGroup
 
 def now():
     return datetime.utcnow().strftime("%H:%M:%S")
@@ -130,7 +131,7 @@ class Filter:
             consumer.subscribe([self.topic_in])
             return consumer
         except Exception as e:
-            self.log.error('ERROR cannot connect to kafka', e)
+            self.log.error('ERROR cannot connect to kafka' + str(e))
 
     @staticmethod
     def create_insert_sherlock(ann: dict):
@@ -171,7 +172,7 @@ class Filter:
         ]
         sets = {}
         for key in attrs:
-            sets[key] = 'NULL'
+            sets[key] = None
         for key, value in ann.items():
             if key in attrs and value:
                 sets[key] = value
@@ -181,9 +182,11 @@ class Filter:
         query_list = []
         query = 'REPLACE INTO sherlock_classifications SET '
         for key, value in sets.items():
-            query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
+            if value is None:
+                query_list.append(key + '=NULL')
+            else:
+                query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
         query += ',\n'.join(query_list)
-        query = query.replace('None', 'NULL')
         return query
 
     @staticmethod
@@ -285,7 +288,7 @@ class Filter:
 
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
-        ms = manage_status(settings.SYSTEM_STATUS)
+        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
         nid = date_nid.nid_now()
         ms.add({
             'today_filter': nalert_in,
@@ -300,24 +303,6 @@ class Filter:
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        output_csv = [
-            "SELECT * FROM objects INTO OUTFILE '/data/mysql/objects.txt'"
-            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
-            "SELECT * FROM sherlock_classifications INTO OUTFILE '/data/mysql/sherlock_classifications.txt'"
-            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
-            "SELECT * FROM watchlist_hits INTO OUTFILE '/data/mysql/watchlist_hits.txt'"
-            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';",
-            "SELECT * FROM area_hits INTO OUTFILE '/data/mysql/area_hits.txt'"
-            "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';"
-        ]
-
-        try:
-            for query in output_csv:
-                self.execute_query(query)
-        except:
-            self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
-            return None
-
         tablelist = [
             'objects',
             'sherlock_classifications',
@@ -325,28 +310,48 @@ class Filter:
             'area_hits'
         ]
 
+        # Make a CSV file for each local table
+        for table in tablelist:
+            query = """
+                SELECT * FROM %s INTO OUTFILE '/data/mysql/%s.txt'
+                FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';
+            """ % (table, table)
+
+            try:
+                self.execute_query(query)
+            except:
+                self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
+                return None
+
+        # Connect to the main database
         try:
             main_database = db_connect.remote()
         except Exception as e:
             self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
             return None
 
+        # Transmit the CSV files to the main database and ingest them
+        # This is done with mysql command line rather than the client
+        # because the LOAD DATA LOCAL INFILE, which very efficient, is also very sensitive 
+        # and it says 'file request rejected due to restrictions on access' if doner through client
         commit = True
         for table in tablelist:
-            sql = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
+            sql  = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
             sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
-            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
+            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
 
-            try:
-                cursor = main_database.cursor(buffered=True)
-                cursor.execute(sql)
-                cursor.close()
-                main_database.commit()
-                self.log.info('%s ingested to main db' % table)
-            except Exception as e:
-                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s'
-                               % (table, str(e)))
+            tmpfilename = tempfile.NamedTemporaryFile().name + '.sql'
+            f = open(tmpfilename, 'w')
+            f.write(sql)
+            f.close()
+
+            cmd =  "mysql --user=%s --database=ztf --password=%s --port=%s --host=%s < %s"
+            cmd = cmd % (settings.DB_USER_READWRITE, settings.DB_PASS_READWRITE, settings.DB_PORT, settings.DB_HOST, tmpfilename)
+            if os.system(cmd) != 0:
+                self.log.error('ERROR in filter/filter: cannot push %s local to main database' % table)
                 commit = False
+            else:
+                self.log.info('%s ingested to main db' % table)
 
         main_database.close()
 
@@ -461,7 +466,7 @@ class Filter:
     def grafana_today():
         """How many objects reported today from ZTF.
         """
-        g = datetime.datetime.utcnow()
+        g = datetime.utcnow()
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
         url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
         urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
@@ -564,15 +569,24 @@ class Filter:
         # Write stats for the batch
         timers['ftotal'].off()
         self.write_stats(timers, nalerts)
-        self.log.info('%d alerts processed' % nalerts)
+        self.log.info('%d alerts processed\n' % nalerts)
         return nalerts
 
 
 if __name__ == "__main__":
+    lasairLogging.basicConfig(stream=sys.stdout)
     args = docopt(__doc__)
-    topic_in = args.get('--topic_in', 'ztf_sherlock')
-    group_id = args.get('--group_id', settings.KAFKA_GROUPID)
-    maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
+
+    topic_in = args['--topic_in']
+    if not topic_in: topic_in = 'ztf_sherlock'
+
+    group_id = args['--group_id']
+    if not group_id: group_id = settings.KAFKA_GROUPID
+
+    maxalert = int(args['--maxalert'])
+    if not maxalert: maxalert = settings.KAFKA_MAXALERTS
+    maxalert = int(maxalert)
+
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()

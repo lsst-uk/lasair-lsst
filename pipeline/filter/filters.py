@@ -186,7 +186,7 @@ def dispose_query_results(query, query_results):
 
     if active == 1:
         # send results by email if 24 hurs has passed, returns time of last email send
-        last_email = dispose_email(allrecords, last_email, query, force=True)
+        last_email = dispose_email(allrecords, last_email, query)
 
     if active == 2:
         # send results by kafka on given topic

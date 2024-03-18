@@ -39,7 +39,7 @@ def get_watchmap_hits(fltr, cache_dir):
         cache_dir:
     """
     # read in the cache files
-    watchmaplist = read_watchmap_cache_files(cache_dir)
+    watchmaplist = read_watchmap_cache_files(fltr, cache_dir)
 
     # get the alert positions from the database
     alertlist = fetch_alerts(fltr)
