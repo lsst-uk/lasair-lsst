@@ -32,30 +32,30 @@ class FilterTest(unittest.TestCase):
         expected_results = [
             "classification='VS'",
             "diaObjectId='ZTF18aaujzlh'",
-            "association_type='NULL'",
-            "catalogue_table_name='NULL'",
+            "association_type=NULL",
+            "catalogue_table_name=NULL",
             "catalogue_object_id='1237655465380610133'",
-            "catalogue_object_type='NULL'",
+            "catalogue_object_type=NULL",
             "raDeg='191.5944036793479'",
             "decDeg='62.93254720807615'",
-            "separationArcsec='NULL'",
-            "northSeparationArcsec='NULL'",
-            "eastSeparationArcsec='NULL'",
-            "physical_separation_kpc='NULL'",
-            "direct_distance='NULL'",
-            "distance='NULL'",
-            "z='NULL'",
-            "photoZ='NULL'",
-            "photoZErr='NULL'",
-            "Mag='NULL'",
-            "MagFilter='NULL'",
-            "MagErr='NULL'",
-            "classificationReliability='NULL'",
-            "major_axis_arcsec='NULL'",
-            "annotator='NULL'",
-            "additional_output='NULL'",
+            "separationArcsec=NULL",
+            "northSeparationArcsec=NULL",
+            "eastSeparationArcsec=NULL",
+            "physical_separation_kpc=NULL",
+            "direct_distance=NULL",
+            "distance=NULL",
+            "z=NULL",
+            "photoZ=NULL",
+            "photoZErr=NULL",
+            "Mag=NULL",
+            "MagFilter=NULL",
+            "MagErr=NULL",
+            "classificationReliability=NULL",
+            "major_axis_arcsec=NULL",
+            "annotator=NULL",
+            "additional_output=NULL",
             "description='This is a description'",
-            "summary='NULL'"
+            "summary=NULL"
             ]
         result = Filter.create_insert_sherlock(test_ann)
         result = re.sub("\n",'', result)
@@ -165,7 +165,7 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(mock_consumer.poll.call_count, 101)
 
     @patch('filtercore.Filter.handle_alert')
-    @patch('filtercore.manage_status')
+    @patch('filtercore.manage_status.manage_status')
     def test_consume_alerts(self, mock_manage_status, mock_handle_alert):
         """Test consume alerts"""
         mock_consumer = unittest.mock.MagicMock()
