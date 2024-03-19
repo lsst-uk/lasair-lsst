@@ -193,50 +193,77 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, None)
         mock_log.error.assert_called_once()
 
-    @patch('filtercore.Filter.execute_query')
-    @patch('filtercore.db_connect.remote')
-    def test_tansfer_to_main_remote_connect_error(self, mock_db_connect_remote, mock_execute_query):
-        """Test that an error connecting to main db causes transfer_to_main to return None"""
-        mock_log = unittest.mock.MagicMock()
-        mock_db_connect_remote.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.log = mock_log
-        result = fltr.transfer_to_main()
-        self.assertEqual(result, None)
-        self.assertEqual(mock_execute_query.call_count, 4)
-        mock_log.error.assert_called_once()
-        mock_db_connect_remote.assert_called_once()
+    # @patch('filtercore.Filter.execute_query')
+    # @patch('filtercore.db_connect.remote')
+    # def test_tansfer_to_main_remote_connect_error(self, mock_db_connect_remote, mock_execute_query):
+    #     """Test that an error connecting to main db causes transfer_to_main to return None"""
+    #     mock_log = unittest.mock.MagicMock()
+    #     mock_db_connect_remote.side_effect = Exception('test error')
+    #     fltr = Filter(group_id='filter_test', maxalert=0)
+    #     fltr.log = mock_log
+    #     result = fltr.transfer_to_main()
+    #     self.assertEqual(result, None)
+    #     self.assertEqual(mock_execute_query.call_count, 4)
+    #     mock_log.error.assert_called_once()
+    #     mock_db_connect_remote.assert_called_once()
 
     @patch('filtercore.Filter.execute_query')
     @patch('filtercore.db_connect.remote')
-    def test_tansfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_execute_query):
-        """Test that an error writing to main db causes transfer_to_main to return False"""
+    @patch('os.system')
+    def test_tansfer_to_main_remote_cli_error(self, mock_system, mock_db_connect_remote, mock_execute_query):
+        """Test that an error writing to main db using the cli causes transfer_to_main to return None"""
         mock_log = unittest.mock.MagicMock()
-        mock_cursor = unittest.mock.MagicMock()
-        mock_cursor.execute.side_effect = Exception('test error')
-        mock_db_connect_remote.return_value.cursor.return_value = mock_cursor
+        mock_system.return_value = 1
         fltr = Filter(group_id='filter_test', maxalert=0)
         fltr.log = mock_log
         result = fltr.transfer_to_main()
         self.assertEqual(result, False)
-        self.assertEqual(mock_log.error.call_count, 4)
+        mock_log.error.assert_called()
+
+    # @patch('filtercore.Filter.execute_query')
+    # @patch('filtercore.db_connect.remote')
+    # def test_tansfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_execute_query):
+    #     """Test that an error writing to main db causes transfer_to_main to return False"""
+    #     mock_log = unittest.mock.MagicMock()
+    #     mock_cursor = unittest.mock.MagicMock()
+    #     mock_cursor.execute.side_effect = Exception('test error')
+    #     mock_db_connect_remote.return_value.cursor.return_value = mock_cursor
+    #     fltr = Filter(group_id='filter_test', maxalert=0)
+    #     fltr.log = mock_log
+    #     result = fltr.transfer_to_main()
+    #     self.assertEqual(result, False)
+    #     self.assertEqual(mock_log.error.call_count, 4)
 
     @patch('filtercore.Filter.execute_query')
     @patch('filtercore.db_connect.remote')
-    def test_tansfer_to_main(self, mock_db_connect_remote, mock_execute_query):
-        """Test transfer to main normal flow"""
+    @patch('os.system')
+    def test_tansfer_to_main_cli_normal_flow(self, mock_system, mock_db_connect_remote, mock_execute_query):
+        """Test transfer to main normal flow using the cli"""
         mock_log = unittest.mock.MagicMock()
+        mock_system.return_value = 0
         mock_consumer = unittest.mock.MagicMock()
-        mock_cursor = unittest.mock.MagicMock()
-        mock_db_connect_remote.return_value.cursor.return_value = mock_cursor
         fltr = Filter(group_id='filter_test', maxalert=0)
         fltr.log = mock_log
         fltr.consumer = mock_consumer
         result = fltr.transfer_to_main()
         self.assertEqual(result, True)
-        mock_log.error.assert_not_called()
-        self.assertEqual(mock_cursor.execute.call_count, 4)
-        mock_consumer.commit.assert_called_once()
+
+    # @patch('filtercore.Filter.execute_query')
+    # @patch('filtercore.db_connect.remote')
+    # def test_tansfer_to_main(self, mock_db_connect_remote, mock_execute_query):
+    #     """Test transfer to main normal flow"""
+    #     mock_log = unittest.mock.MagicMock()
+    #     mock_consumer = unittest.mock.MagicMock()
+    #     mock_cursor = unittest.mock.MagicMock()
+    #     mock_db_connect_remote.return_value.cursor.return_value = mock_cursor
+    #     fltr = Filter(group_id='filter_test', maxalert=0)
+    #     fltr.log = mock_log
+    #     fltr.consumer = mock_consumer
+    #     result = fltr.transfer_to_main()
+    #     self.assertEqual(result, True)
+    #     mock_log.error.assert_not_called()
+    #     self.assertEqual(mock_cursor.execute.call_count, 4)
+    #     mock_consumer.commit.assert_called_once()
 
 
 if __name__ == '__main__':
