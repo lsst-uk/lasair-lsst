@@ -105,6 +105,7 @@ schema = {
   "indexes": [
     "id int(10) unsigned NOT NULL AUTO_INCREMENT",
     "PRIMARY KEY (`id`)",
-    "KEY `idx_htm16` (`htm16`)"
+    "KEY `idx_htm16` (`htm16`)",
+    "KEY tns_name_idx (tns_name)"
   ]
 }

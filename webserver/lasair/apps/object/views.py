@@ -16,7 +16,7 @@ import os
 import sys
 from astropy.time import Time
 from lasair.utils import mjd_now, ecliptic, rasex, decsex, objjson
-from .utils import object_difference_lightcurve
+from .utils import object_difference_lightcurve, object_difference_lightcurve_forcedphot
 sys.path.append('../common')
 
 
@@ -55,9 +55,18 @@ def object_detail(request, diaObjectId):
     if 'sherlock' in data2:
         data2.pop('sherlock')
 
+    lightcurveHtml, mergedDF = object_difference_lightcurve(data)
+    fplightcurveHtml, mergedDF = object_difference_lightcurve_forcedphot(data)
+    if mergedDF is not None:
+        lcData = mergedDF.to_dict('records')
+    else:
+        lcData = data["candidates"]
+
     return render(request, 'object/object_detail.html', {
         'data': data,
         'json_data': json.dumps(data2),
         'authenticated': request.user.is_authenticated,
-        'lightcurveHtml': object_difference_lightcurve(data)
+        'lightcurveHtml': lightcurveHtml,
+        'fplightcurveHtml': fplightcurveHtml,
+        'lcData': lcData
     })

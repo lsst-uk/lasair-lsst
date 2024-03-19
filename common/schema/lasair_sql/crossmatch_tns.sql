@@ -20,5 +20,6 @@ CREATE TABLE IF NOT EXISTS crossmatch_tns(
 `lasairmodified_date` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 id int(10) unsigned NOT NULL AUTO_INCREMENT,
 PRIMARY KEY (`id`),
-KEY `idx_htm16` (`htm16`)
+KEY `idx_htm16` (`htm16`),
+KEY tns_name_idx (tns_name)
 )

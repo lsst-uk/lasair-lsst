@@ -40,6 +40,10 @@
 
 
         <div class="w-100 ps-1 pe-1 pb-2">{{ lightcurveHtml|safe }}</div>
+	{% if fplightcurveHtml %}
+            <div class="w-100 ps-1 pe-1 pb-2">{{ fplightcurveHtml|safe }}</div>
+
+        {% endif %}
         <div class="d-flex justify-content-end ms-2">
             <small class="text-gray-500">
                 Learn how to <a href="https://plotly.com/chart-studio-help/zoom-pan-hover-controls/">interact with this plot.</a>

@@ -6,7 +6,8 @@ domain: lsst.ac.uk
 lasair_name: foo
 
 # Git tag to deploy
-lasair_version: main
+# Deprecated - now derived from the current git branch
+##lasair_version: main
 
 # Git repository
 git_name: lasair-lsst

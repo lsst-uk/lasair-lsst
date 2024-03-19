@@ -21,7 +21,10 @@ pipeline {
                     sh 'python3 test_sherlock_wrapper.py'
                 }
                 dir('tests/unit/pipeline/filter') {
+//                    sh 'python3 test_filter_core.py'
                     sh 'python3 test_watchlist.py'
+                    sh 'python3 test_watchlists.py'
+                    sh 'python3 test_watchmaps.py'
                     sh 'python3 test_feature_groups.py'
                 }
                 dir('tests/unit/services/annotations/') {

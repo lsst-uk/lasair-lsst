@@ -322,6 +322,7 @@ class Ingester():
 
     def _poll(self, n):
         """Poll for n alerts."""
+        log = self.log
         alerts = []
         while len(alerts) < n:
             if self.sigterm_raised:
@@ -331,6 +332,9 @@ class Ingester():
             msg = self.consumer.poll(timeout=5)
             # no more messages available
             if msg is None:
+                break
+            if msg.error():
+                log.error('ERROR in ingest/poll: ' +  str(msg.error()))
                 break
             # read the avro contents
             bytes_io = io.BytesIO(msg.value())
