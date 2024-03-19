@@ -299,6 +299,7 @@ class Filter:
 
     def transfer_to_main(self):
         """ Transfer the local database to the main database.
+        TODO: why does this return None for some failures and False for others?
         """
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
