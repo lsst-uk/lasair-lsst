@@ -323,23 +323,26 @@ class Filter:
                 self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
                 return None
 
-        # Connect to the main database
-        try:
-            main_database = db_connect.remote()
-        except Exception as e:
-            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
-            return None
-
         # Transmit the CSV files to the main database and ingest them
         # This is done with mysql command line rather than the client
         # because the LOAD DATA LOCAL INFILE, which very efficient, is also very sensitive 
         # and it says 'file request rejected due to restrictions on access' if doner through client
+        # Below we have method 1 and method 2
+
+        # Connect to the main database for use in method 2
+#        try:
+#            main_database = db_connect.remote()
+#        except Exception as e:
+#            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
+#            return None
+
         commit = True
         for table in tablelist:
             sql  = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
             sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
             sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
 
+# method 1 with command line
             tmpfilename = tempfile.NamedTemporaryFile().name + '.sql'
             f = open(tmpfilename, 'w')
             f.write(sql)
@@ -353,7 +356,17 @@ class Filter:
             else:
                 self.log.info('%s ingested to main db' % table)
 
-        main_database.close()
+# method 2 with client
+#            try:
+#                cursor = main_database.cursor(buffered=True)
+#                cursor.execute(sql)
+#                cursor.close()
+#                main_database.commit()
+#                self.log.info('%s ingested to main db' % table)
+#            except Exception as e:
+#                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s'
+#                               % (table, str(e)))
+#        main_database.close()
 
         if commit:
             self.consumer.commit()
