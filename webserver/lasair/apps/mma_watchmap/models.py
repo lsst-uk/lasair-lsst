@@ -18,11 +18,11 @@ class MmaWatchmap(models.Model):
     moc90 = models.TextField(blank=True, null=True)
     mocimage = models.TextField(blank=True, null=True)
     active = models.BooleanField(blank=True, null=True)
-
-# next three not used and can be deleted
     public = models.BooleanField(blank=True, null=True)
-    date_created  = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
-    date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
+
+    area10 = models.FloatField()  # sq deg in 10% of skymap
+    area50 = models.FloatField()  # sq deg in 50% of skymap
+    area90 = models.FloatField()  # sq deg in 90% of skymap
 
     # (eg namespace is LVK, IceCube, Fermi, etc)
     # Each should cite a place to find ut what the params are
@@ -31,20 +31,7 @@ class MmaWatchmap(models.Model):
     namespace    = models.CharField(max_length=16,  blank=True, null=True)
     otherId      = models.CharField(max_length=256, blank=True, null=True)
     version      = models.CharField(max_length=256, blank=True, null=True)
-
-# next not used and can be deleted
-    date_active  = models.DateTimeField(editable=False, blank=True, null=True)
-
-    area10 = models.FloatField()  # sq deg in 10% of skymap
-    area50 = models.FloatField()  # sq deg in 50% of skymap
-    area90 = models.FloatField()  # sq deg in 90% of skymap
-
-    # URL of FITS file
-    fits         = models.CharField(max_length=256, blank=True, null=True)
-
-    # finding out about this namespace, meaning of params, etc
     more_info    = models.CharField(max_length=1024, blank=True, null=True)
-
     # their parameters ....
     params       = models.JSONField()
 
