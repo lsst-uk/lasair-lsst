@@ -1,9 +1,9 @@
 import context
-import db_connect
+import objectStore
 import unittest
 
 
-class DBConnectTest(unittest.TestCase):
+class ObjectStoreTest(unittest.TestCase):
     """Placeholder"""
 
 
