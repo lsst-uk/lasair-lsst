@@ -299,7 +299,6 @@ class Filter:
 
     def transfer_to_main(self):
         """ Transfer the local database to the main database.
-        TODO: why does this return None for some failures and False for others?
         """
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
@@ -322,14 +321,14 @@ class Filter:
                 self.execute_query(query)
             except:
                 self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
-                return None
+                return False
 
         # Transmit the CSV files to the main database and ingest them
         try:
             main_database = db_connect.remote(allow_infile=True)
         except Exception as e:
             self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
-            return None
+            return False
 
         commit = True
         for table in tablelist:
@@ -344,8 +343,9 @@ class Filter:
                 main_database.commit()
                 self.log.info('%s ingested to main db' % table)
             except Exception as e:
-                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s'
-                               % (table, str(e)))
+                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table, str(e)))
+                commit = False
+                break
         main_database.close()
 
         if commit:
