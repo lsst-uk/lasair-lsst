@@ -29,8 +29,25 @@ pipeline {
                 dir('tests/unit/pipeline/filter') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
                 }
+                dir('tests/unit/services/') {
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotations_dump.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_check_expire.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_crossmatch_tns_dump.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_get_annotations.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_get_crossmatch_tns.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_make_area_files.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_make_watchlist_files.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_my_cmd.py'
+                    sh 'coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_mysql_backup.py'
+                }
                 dir('tests/unit/services/annotations/') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" kafka_test.py'
+                }
+                dir('tests/unit/services/externalBrokers/') {
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_alerce.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_fink.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_gw.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_TNS.py'
                 }
                 dir('tests/unit/services/sherlock/') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock.py'
@@ -45,7 +62,9 @@ pipeline {
                     junit 'tests/unit/pipeline/ingest/test-reports/*.xml'
                     junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
+                    junit 'tests/unit/services/test-reports/*.xml'
                     junit 'tests/unit/services/annotations/test-reports/*.xml'
+                    junit 'tests/unit/services/externalBrokers/test-reports/*.xml'
                     junit 'tests/unit/services/sherlock/test-reports/*.xml'
                     cobertura coberturaReportFile: 'tests/unit/coverage.xml'
                 }
