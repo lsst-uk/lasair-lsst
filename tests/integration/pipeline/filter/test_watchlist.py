@@ -1,5 +1,8 @@
 """
-    Test watchlist infrastucture
+    Test watchlist infrastucture.
+
+    Tests the integration between the watchlist cache building service and the watchlist pipeline module
+    by building a watchlist cache using rebuild_cache and reading it back using read_watchlist_cache_files.
 """
 import os, sys
 import unittest.main
@@ -28,7 +31,7 @@ def test_cache():
     alert_ralist = []
     alert_delist = []
 
-    for line in open('watchlist_sample.csv').readlines():
+    for line in open('../../../unit/pipeline/filter/watchlist_sample.csv').readlines():
         if line[0] == '#': continue
         tok = line.strip().split(',')
         if len(tok) == 5:   # cone
@@ -48,7 +51,7 @@ def test_alerts():
     alert_delist = []
     alert_objlist = []
 
-    for line in open('watchlist_sample.csv').readlines():
+    for line in open('../../../unit/pipeline/filter/watchlist_sample.csv').readlines():
         if line[0] == '#': continue
         tok = line.strip().split(',')
         if len(tok) == 3:   # cone

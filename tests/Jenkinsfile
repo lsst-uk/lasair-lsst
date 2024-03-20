@@ -27,7 +27,6 @@ pipeline {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_wrapper.py'
                 }
                 dir('tests/unit/pipeline/filter') {
-                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchlist.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
                 }
                 dir('tests/unit/services/annotations/') {
@@ -62,6 +61,7 @@ pipeline {
                 }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'
+                    sh 'python3 test_watchlist.py'
                 }
                 dir('tests/integration/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
