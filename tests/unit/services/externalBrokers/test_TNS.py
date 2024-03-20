@@ -6,7 +6,7 @@ from TNS import tns_runner
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class TNSTest(unittest.TestCase):
     """Placeholder"""
 
 

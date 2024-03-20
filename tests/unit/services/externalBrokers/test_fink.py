@@ -4,7 +4,7 @@ import context
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class FinkTest(unittest.TestCase):
     """Placeholder"""
 
 

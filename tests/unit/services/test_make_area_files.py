@@ -3,7 +3,7 @@ import make_area_files
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class MakeAreaFilesTest(unittest.TestCase):
     """Placeholder"""
 
 

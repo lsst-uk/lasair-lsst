@@ -3,7 +3,7 @@ import make_watchlist_files
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class MakeWatchlistFilesTest(unittest.TestCase):
     """Placeholder"""
 
 

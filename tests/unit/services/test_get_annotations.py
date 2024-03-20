@@ -3,7 +3,7 @@ import context
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class GetAnnotationsTest(unittest.TestCase):
     """Placeholder"""
 
 

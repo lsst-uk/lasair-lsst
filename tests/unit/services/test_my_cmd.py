@@ -3,7 +3,7 @@ import my_cmd
 import unittest
 
 
-class AnnotationsDumpTest(unittest.TestCase):
+class MyCmdTest(unittest.TestCase):
     """Placeholder"""
 
 
