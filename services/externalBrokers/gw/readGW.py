@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 sys.path.append('../../../common')
 from src import db_connect
 
-ningested = 0
-
 def mjd2date(mjd):
     date = datetime.strptime("1858/11/17", "%Y/%m/%d")
     date += timedelta(mjd)
@@ -64,8 +62,7 @@ def setDone(dir, eventId, version):
     datadir = '%s/%s/%s' % (dir, eventId, version)
     os.system('touch ' + flag) 
 
-def makeMmaWatchmap(dir, eventId, version):
-    global ningested
+def handleMmaWatchmap(dir, eventId, version):
     datadir = '%s/%s/%s' % (dir, eventId, version)
     f = open(datadir + '/meta.yaml')
     data = yaml.load(f, Loader=Loader)
@@ -93,6 +90,12 @@ def makeMmaWatchmap(dir, eventId, version):
     area50 = data['EXTRA']['area50']
     area90 = data['EXTRA']['area90']
 
+    # decide if we want it
+    if area90 > 500:
+        return '90% area > 500'
+    if loc['distmean'] > 200:
+        return 'distance > 200 Mpc'
+
     jparams = json.dumps(params)
 
     moc10 = read_moc(datadir, '10')
@@ -117,43 +120,49 @@ def makeMmaWatchmap(dir, eventId, version):
     INSERT INTO mma_areas (
         event_tai, event_date, 
         moc10, moc50, moc90, mocimage, 
-        active, public, namespace, otherId, version,
-        date_active, area10, area50, area90, fits, more_info, params
+        namespace, otherId, version, more_info,
+        area10, area50, area90, params
     ) VALUES (
         %f, "%s", 
         "%s", "%s", "%s", "%s",
-        %d, %d, "%s", "%s", "%s",
-        "%s", %f, %f, %f, "%s", "%s", '%s'
+        "%s", "%s", "%s","%s",
+        %f, %f, %f, '%s'
     ) """
 
     query = query % ( \
         event_tai, event_date, 
         b64moc10, b64moc50, b64moc90, b64mocimage,  \
-        active, public, namespace, otherId, version, \
-        date_active, area10, area50, area90, fits, more_info, jparams \
+        namespace, otherId, version, more_info, \
+        area10, area50, area90, jparams \
     )
 
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
     msl.commit()
-    ningested += 1
+    return ''
 
 def handle_event(dir, eventId):
+    ningested = 0
     for version in os.listdir(dir+'/'+eventId):
         if version.startswith('20'):
             if not getDone(dir, eventId, version):
-                print(eventId, version)
                 try:
-                    makeMmaWatchmap(dir, eventId, version)
-                    print('ok')
+                    message = handleMmaWatchmap(dir, eventId, version)
+                    if len(message) == 0:
+                        ningested += 1
+                        print(eventId, version, 'ingested')
+                    else:
+                        print(eventId, version, 'not ingested', message)
                     setDone(dir, eventId, version)
                 except Exception as e:
                     print(traceback.format_exc())
+    return ningested
 
 ############
 import sys
 dir = '/mnt/cephfs/lasair/mma/gw/'
+ningested = 0
 if len(sys.argv) > 1:
     eventId = sys.argv[1]
     handle_event(dir, eventId)
@@ -161,5 +170,5 @@ else:
     for file in sorted(os.listdir(dir)):
         if file.startswith('S') or file.startswith('M'):
             eventId = file
-            handle_event(dir, eventId)
+            ningested += handle_event(dir, eventId)
 print(ningested, 'event versions ingested')
