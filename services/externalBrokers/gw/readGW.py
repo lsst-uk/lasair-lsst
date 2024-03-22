@@ -1,11 +1,11 @@
-import os, sys, json, io, yaml, base64, traceback
+import os, sys, json, io, yaml, base64, traceback, time
 from mocpy import MOC, WCS
 import astropy.units as u
 import matplotlib.pyplot as plt
 from yaml import CLoader as Loader, CDumper as Dumper
 from datetime import datetime, timedelta
 sys.path.append('../../../common')
-from src import db_connect
+from src import db_connect, skymaps
 
 def mjd2date(mjd):
     date = datetime.strptime("1858/11/17", "%Y/%m/%d")
@@ -135,10 +135,24 @@ def handleMmaWatchmap(database, dir, eventId, version):
 
     cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
+    cursor.close()
     database.commit()
     return ''
 
-def handle_event(database, dir, eventId):
+def run_last_skymap(database, minmjd, maxmjd):
+    cursor = database.cursor(buffered=True, dictionary=True)
+    query = 'SELECT max(mw_id) AS mw_id FROM mma_areas'
+    cursor.execute (query)
+    for row in cursor:
+        mw_id = row['mw_id']
+
+    print('Inserted mw_id=', mw_id)
+    gw = skymaps.fetch_skymap_by_id(database, mw_id)
+    skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd)
+    if len(skymaphits['diaObjectId']) > 0:
+        skymaps.insert_skymap_hits(database, gw, skymaphits)
+
+def handle_event(database, dir, eventId, minmjd, maxmjd):
     ningested = 0
     for version in os.listdir(dir+'/'+eventId):
         if version.startswith('20'):
@@ -148,6 +162,7 @@ def handle_event(database, dir, eventId):
                     if len(message) == 0:
                         ningested += 1
                         print(eventId, version, 'ingested')
+                        run_last_skymap(database, minmjd, maxmjd)
                     else:
                         print(eventId, version, 'not ingested', message)
                     setDone(dir, eventId, version)
@@ -155,10 +170,15 @@ def handle_event(database, dir, eventId):
                     print(traceback.format_exc())
     return ningested
 
+def mjdnow():
+    return time.time()/86400 + 40587.0;
+
 ############
 import sys
 dir = '/mnt/cephfs/lasair/mma/gw/'
 database = db_connect.remote()
+maxmjd = mjdnow()
+minmjd = maxmjd - 21
 
 ningested = 0
 if len(sys.argv) > 1:
@@ -168,5 +188,5 @@ else:
     for file in sorted(os.listdir(dir)):
         if file.startswith('S') or file.startswith('M'):
             eventId = file
-            ningested += handle_event(database, dir, eventId)
+            ningested += handle_event(database, dir, eventId, minmjd, maxmjd)
 print(ningested, 'event versions ingested')

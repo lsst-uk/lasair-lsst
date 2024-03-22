@@ -16,7 +16,6 @@ sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
 CONVERT_Z_TO_DISTANCE = 4348
-EXPIRE_DAYS           =   21  # three weeks
 
 def mocfilename(gw):
     filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/90.moc' % (gw['otherId'], gw['version'])
@@ -27,6 +26,19 @@ def mapfilename(gw):
     filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/map.fits' % (gw['otherId'], gw['version'])
 #    print('map file = ', filename)
     return filename
+
+def fetch_gw(database, mw_id):
+    cursor = database.cursor(buffered=True, dictionary=True)
+    query = 'SELECT mw_id, event_tai, otherId, version FROM mma_areas '
+    query += 'WHERE mw_id = %d' % mw_id
+    try:
+        cursor.execute(query)
+        for row in cursor:
+            return row
+        cursor.close()
+    except Exception as e:
+        print('ERROR in fetch_gw cannot query database: %s' % str(e))
+        return None
 
 def fetch_alerts(database, gw, mjdmin=None, mjdmax=None):
     """ fetch_alerts_sherlock.
@@ -161,13 +173,10 @@ def insert_skymap_hits(database, gw, skymaphits):
         print('ERROR in insert_skymap_hits cannot insert: %s' % str(e))
         print(query)
 
-def mjdnow():
-    return time.time()/86400 + 40587.0;
-
-def fetch_active_skymaps(database, mjdnow):
+def fetch_skymaps_by_mjd(database, mjdmin, mjdmax):
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, event_tai, otherId, version FROM mma_areas '
-    query += 'WHERE event_tai > %f' % (mjdnow - EXPIRE_DAYS)
+    query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
+    query += 'WHERE event_tai BETWEEN %f AND %f' % (mjdmin, mjdmax)
     result = []
     try:
         cursor.execute(query)
@@ -179,20 +188,16 @@ def fetch_active_skymaps(database, mjdnow):
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
         return None
 
-if __name__=="__main__":
-    database = db_connect.remote()
-
-    lasairLogging.basicConfig(stream=sys.stdout)
-    log = lasairLogging.getLogger("mma_watchmap")
-
-    active_gw = fetch_active_skymaps(database, mjdnow())
-    print('found %d active skymaps' % len(active_gw))
-    for gw in active_gw:
-        print('\n', gw['otherId'], gw['version'])
-
-        mjdmin = 100
-        mjdmax = 1000000
-        skymaphits = get_skymap_hits(database, gw, mjdmin, mjdmax)
-
-        if len(skymaphits['diaObjectId']) > 0:
-            insert_skymap_hits(database, gw, skymaphits)
+def fetch_skymap_by_id(database, mw_id):
+    cursor = database.cursor(buffered=True, dictionary=True)
+    query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
+    query += 'WHERE mw_id=%d' % mw_id
+    try:
+        cursor.execute(query)
+        for row in cursor:
+            return(row)
+        cursor.close()
+        return result
+    except Exception as e:
+        print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
+        return None
