@@ -16,7 +16,7 @@ sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
 CONVERT_Z_TO_DISTANCE = 4348
-EXPIRE_DAYS           = 25  # three weeks
+EXPIRE_DAYS           =   21  # three weeks
 
 def mocfilename(gw):
     filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/90.moc' % (gw['otherId'], gw['version'])

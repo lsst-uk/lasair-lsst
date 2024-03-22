@@ -62,7 +62,7 @@ def setDone(dir, eventId, version):
     datadir = '%s/%s/%s' % (dir, eventId, version)
     os.system('touch ' + flag) 
 
-def handleMmaWatchmap(dir, eventId, version):
+def handleMmaWatchmap(database, dir, eventId, version):
     datadir = '%s/%s/%s' % (dir, eventId, version)
     f = open(datadir + '/meta.yaml')
     data = yaml.load(f, Loader=Loader)
@@ -118,37 +118,33 @@ def handleMmaWatchmap(dir, eventId, version):
 
     query = """
     INSERT INTO mma_areas (
-        event_tai, event_date, 
-        moc10, moc50, moc90, mocimage, 
+        event_tai, event_date, mocimage, 
         namespace, otherId, version, more_info,
         area10, area50, area90, params
     ) VALUES (
-        %f, "%s", 
-        "%s", "%s", "%s", "%s",
+        %f, "%s", "%s",
         "%s", "%s", "%s","%s",
         %f, %f, %f, '%s'
     ) """
 
     query = query % ( \
-        event_tai, event_date, 
-        b64moc10, b64moc50, b64moc90, b64mocimage,  \
+        event_tai, event_date, b64mocimage,  \
         namespace, otherId, version, more_info, \
         area10, area50, area90, jparams \
     )
 
-    msl = db_connect.remote()
-    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
-    msl.commit()
+    database.commit()
     return ''
 
-def handle_event(dir, eventId):
+def handle_event(database, dir, eventId):
     ningested = 0
     for version in os.listdir(dir+'/'+eventId):
         if version.startswith('20'):
             if not getDone(dir, eventId, version):
                 try:
-                    message = handleMmaWatchmap(dir, eventId, version)
+                    message = handleMmaWatchmap(database, dir, eventId, version)
                     if len(message) == 0:
                         ningested += 1
                         print(eventId, version, 'ingested')
@@ -162,6 +158,8 @@ def handle_event(dir, eventId):
 ############
 import sys
 dir = '/mnt/cephfs/lasair/mma/gw/'
+database = db_connect.remote()
+
 ningested = 0
 if len(sys.argv) > 1:
     eventId = sys.argv[1]
@@ -170,5 +168,5 @@ else:
     for file in sorted(os.listdir(dir)):
         if file.startswith('S') or file.startswith('M'):
             eventId = file
-            ningested += handle_event(dir, eventId)
+            ningested += handle_event(database, dir, eventId)
 print(ningested, 'event versions ingested')
