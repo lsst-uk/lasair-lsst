@@ -5,24 +5,24 @@ import math
 import string
 import json
 import os
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
+import re
+import sys
+
+sys.path.append('../common')
+import settings as lasair_settings
+from src import db_connect
 import src.date_nid as date_nid
 
+from django.conf import settings
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.models import User
 from django.db.models import Q
 from django.db import connection
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render, get_object_or_404, redirect
-from django.conf import settings as django_settings
-import settings
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
-from src import db_connect
-import re
-import sys
-
-sys.path.append('../common')
 
 
 def index(request):
@@ -54,9 +54,9 @@ def index(request):
     table = None
     try:
         # if there is a young cache file, try to use it
-        age = time.time() - os.stat(django_settings.FRONT_PAGE_CACHE).st_mtime
-        if age < django_settings.FRONT_PAGE_STALE:
-            f = open(django_settings.FRONT_PAGE_CACHE, 'r')
+        age = time.time() - os.stat(settings.FRONT_PAGE_CACHE).st_mtime
+        if age < settings.FRONT_PAGE_STALE:
+            f = open(settings.FRONT_PAGE_CACHE, 'r')
             table = json.loads(f.read())
             f.close()
     except:
@@ -70,7 +70,7 @@ def index(request):
         table = cursor.fetchall()
         # try to write a cache file
         try:
-            f = open(django_settings.FRONT_PAGE_CACHE, 'w')
+            f = open(settings.FRONT_PAGE_CACHE, 'w')
             f.write(json.dumps(table, indent=2))
             f.close()
         except:
@@ -150,7 +150,7 @@ def index(request):
         news = ''
 
     context = {
-        'web_domain': settings.WEB_DOMAIN,
+        'web_domain': lasair_settings.WEB_DOMAIN,
         'alerts': str(alerts),
         'colors': str(colors),
         'news': news,

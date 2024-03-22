@@ -22,15 +22,14 @@ from lasair.apps.db_schema.utils import get_schema_dict
 from src import db_connect
 import copy
 import sys
-from .forms import MmaWatchmapForm, UpdateMmaWatchmapForm, DuplicateMmaWatchmapForm
-from .utils import make_image_of_MOC, add_mma_watchmap_metadata
+from .utils import make_image_of_MOC
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
 from src import bad_fits
 
 @csrf_exempt
 def mma_watchmap_index(request):
-    """*return a list of public and user owned mma_watchmaps*
+    """*return a list of mma_watchmaps*
 
     **Key Arguments:**
 
@@ -141,66 +140,3 @@ limit {resultCap}
         'count': count,
         'schema': schema,
         'limit': limit})
-
-def mma_watchmap_download(request, mw_id):
-    """*download the original mma_watchmap file used to create the MmaWatchmap*
-
-    **Key Arguments:**
-
-    - `request` -- the original request
-    - `mw_id` -- UUID of the MmaWatchmap
-
-    **Usage:**
-
-    ```python
-    urlpatterns = [
-        ...
-         path('mma_watchmaps/<int:mw_id>/file/', views.mma_watchmap_download, name='mma_watchmap_download'),
-        ...
-    ]
-    ```           
-    """
-    mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
-
-    # IS USER ALLOWED TO SEE THIS RESOURCE?
-    moc10 = string2bytes(mma_watchmap.moc10)
-
-    filename = slugify(mma_watchmap.name) + '.fits'
-    tmpfilename = tempfile.NamedTemporaryFile().name + '.fits'
-    f = open(tmpfilename, 'wb')
-    f.write(moc)
-    f.close()
-
-    r = HttpResponse(moc)
-    r['Content-Type'] = "application/fits"
-    r['Content-Disposition'] = 'attachment; filename="%s"' % filename
-    return r
-
-
-@login_required
-def mma_watchmap_delete(request, mw_id):
-    """*delete a mma_watchmap
-
-    **Key Arguments:**
-
-    - `request` -- the original request
-    - `mw_id` -- the mma_watchmap UUID
-
-    **Usage:**
-
-    ```python
-    urlpatterns = [
-        ...
-        path('mma_watchmaps/<int:mw_id>/delete/', views.mma_watchmap_delete, name='mma_watchmap_delete'),
-        ...
-    ]
-    ```
-    """
-    msl = db_connect.readonly()
-    cursor = msl.cursor(buffered=True, dictionary=True)
-    mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
-    name = mma_watchmap.name
-
-    messages.error(request, f'You must be the owner to delete this mma_watchmap')
-
-    return redirect('mma_watchmap_index')

@@ -13,12 +13,7 @@ class MmaWatchmap(models.Model):
     event_tai    = models.FloatField()
     event_date   = models.DateTimeField(editable=False, blank=True, null=True)
 
-    moc10 = models.TextField(blank=True, null=True)
-    moc50 = models.TextField(blank=True, null=True)
-    moc90 = models.TextField(blank=True, null=True)
     mocimage = models.TextField(blank=True, null=True)
-    active = models.BooleanField(blank=True, null=True)
-    public = models.BooleanField(blank=True, null=True)
 
     area10 = models.FloatField()  # sq deg in 10% of skymap
     area50 = models.FloatField()  # sq deg in 50% of skymap
