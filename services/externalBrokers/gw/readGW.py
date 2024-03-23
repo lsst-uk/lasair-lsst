@@ -170,14 +170,11 @@ def handle_event(database, dir, eventId, minmjd, maxmjd):
                     print(traceback.format_exc())
     return ningested
 
-def mjdnow():
-    return time.time()/86400 + 40587.0;
-
 ############
 import sys
 dir = '/mnt/cephfs/lasair/mma/gw/'
 database = db_connect.remote()
-maxmjd = mjdnow()
+maxmjd = skymaps.mjdnow()
 minmjd = maxmjd - 21
 
 ningested = 0

@@ -19,15 +19,12 @@ sys.path.append('../../../common/src')
 import skymaps
 import db_connect
 
-def mjdnow():
-    return time.time()/86400 + 40587.0;
-
 if __name__=="__main__":
     args = docopt(__doc__)
     database = db_connect.remote()
 
     if args['--maxmjd']: mjdmax = float(args['--mjdmax'])
-    else:                maxmjd = mjdnow()
+    else:                maxmjd = skymaps.mjdnow()
     
     if args['--minmjd']: minmjd = float(args['--minmjd'])
     else:                minmjd = maxmjd - 21 # three weeks

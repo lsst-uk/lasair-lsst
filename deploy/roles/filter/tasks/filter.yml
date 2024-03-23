@@ -23,6 +23,7 @@
         - mocpy
         - docopt
         - scipy
+        - skytag
 
 #- name: Create csvfiles directory
 #  file:

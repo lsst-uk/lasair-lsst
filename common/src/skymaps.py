@@ -17,6 +17,9 @@ import db_connect, lasairLogging
 
 CONVERT_Z_TO_DISTANCE = 4348
 
+def mjdnow():
+    return time.time()/86400 + 40587.0;
+
 def mocfilename(gw):
     filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/90.moc' % (gw['otherId'], gw['version'])
 #    print('moc file = ', filename)
@@ -98,10 +101,10 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
     alertdelist       = alertlist['de']
     alertdistancelist = alertlist['distance']
 
-    if mjdmin and mjdmax:
-        print('found %d alerts between MJD %f and %f' % (len(alertobjlist), mjdmin, mjdmax))
-    else:
-        print('found %d alerts ' % len(alertobjlist))
+#    if mjdmin and mjdmax:
+#        print('found %d alerts between MJD %f and %f' % (len(alertobjlist), mjdmin, mjdmax))
+#    else:
+#        print('found %d alerts ' % len(alertobjlist))
 
     # here is the crossmatch
     result = moc.contains_lonlat(alertralist * u.deg, alertdelist * u.deg)

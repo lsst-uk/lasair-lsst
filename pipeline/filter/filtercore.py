@@ -40,6 +40,7 @@ import lasairLogging
 import filters
 import watchlists
 import watchmaps
+import mmagw
 
 sys.path.append('../../common/schema/lasair_schema')
 from features.FeatureGroup import FeatureGroup
@@ -496,7 +497,8 @@ class Filter:
 
         # set up the timers
         timers = {}
-        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', 'ffilters', 'ftransfer', 'ftotal']:
+        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', \
+                'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
             timers[name] = manage_status.timer(name)
 
         self.truncate_local_database()
@@ -530,6 +532,16 @@ class Filter:
                 self.log.info('WATCHMAPS got %d' % nhits)
             else:
                 self.log.error("ERROR in filter/watchmaps")
+
+            # run the MMA/GW events
+            self.log.info('MMA/GW start %s' % now())
+            timers['fmmagw'].on()
+            nhits = mmagw.mmagw(self)
+            timers['fmmagw'].off()
+            if nhits is not None:
+                self.log.info('MMA/GW got %d' % nhits)
+            else:
+                self.log.error("ERROR in filter/mmagw")
 
             # run the user filters
             self.log.info('Filters start %s' % now())
