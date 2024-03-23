@@ -12,6 +12,8 @@ import db_connect, skymaps
 def mmagw(fltr):
     maxmjd = skymaps.mjdnow()
     minmjd = maxmjd - 21 # three weeks
+
+    # must use main database, since GW alert may have been inserted since sunset
     main_database = db_connect.remote()
 
     try:
@@ -22,5 +24,6 @@ def mmagw(fltr):
 
     for gw in skymaplist:
         skymaphits = skymaps.get_skymap_hits(fltr.database, gw, minmjd, maxmjd)
+
         if len(skymaphits['diaObjectId']) > 0:
             skymaps.insert_skymap_hits(fltr.database, gw, skymaphits)

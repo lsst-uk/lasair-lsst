@@ -1,11 +1,12 @@
 """
-watchmaps.py
-This code checks a batch of alerts against the cached watchmap files, The files are kept 
-in a file named ar_<nn>.fits where nn is the area id from the database. 
-The "moc<nnn>.fits" files are
-"Multi-Order Coverage maps", https://cds-astro.github.io/mocpy/. 
+skymaps.py
+This code checks a batch of alerts against the cached mma_watchmap files, 
+The skymap- and 3 MOC files are kept in the CephFS.
 """
-import os, sys, time, math
+import os
+import sys 
+import time
+import math
 from mocpy import MOC
 import astropy.units as u
 from skytag.commonutils import prob_at_location
@@ -15,43 +16,29 @@ import settings
 sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
-CONVERT_Z_TO_DISTANCE = 4348
+# This is c/H, speed of light over Hubble constant
+CONVERT_Z_TO_DISTANCE = 4271
 
 def mjdnow():
+    """ Current MJD 
+    """
     return time.time()/86400 + 40587.0;
 
 def mocfilename(gw):
-    filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/90.moc' % (gw['otherId'], gw['version'])
-#    print('moc file = ', filename)
+    """ Where to find the 90% MOC for a given skymap and version
+    """
+    filename = '%s/%s/%s/90.moc' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
     return filename
 
 def mapfilename(gw):
-    filename = '/mnt/cephfs/lasair/mma/gw/%s/%s/map.fits' % (gw['otherId'], gw['version'])
-#    print('map file = ', filename)
+    """ Where to find the skymap file for a given skymap and version
+    """
+    filename = '%s/%s/%s/map.fits' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
     return filename
 
-def fetch_gw(database, mw_id):
-    cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, event_tai, otherId, version FROM mma_areas '
-    query += 'WHERE mw_id = %d' % mw_id
-    try:
-        cursor.execute(query)
-        for row in cursor:
-            return row
-        cursor.close()
-    except Exception as e:
-        print('ERROR in fetch_gw cannot query database: %s' % str(e))
-        return None
-
 def fetch_alerts(database, gw, mjdmin=None, mjdmax=None):
-    """ fetch_alerts_sherlock.
-    Get all the alerts from the local cache to check againstr watchlist
-
-    Args:
-        gw:
-        offset:
-        limit:
-        mjdmax:
+    """ Fetch optical alerts and sherlock to check against skymaps
+        between two times
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
@@ -70,25 +57,22 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None):
         objlist.append(row['diaObjectId'])
         ralist.append(row['ra'])
         delist.append(row['decl'])
-        if row['distance']:
-            distancelist.append(row['distance'])
-        elif row['z']:
-            distancelist.append(row['z'] * CONVERT_Z_TO_DISTANCE)
-        elif row['photoz']:
-            distancelist.append(row['photoz'] * CONVERT_Z_TO_DISTANCE)
-        else:
-            distancelist.append(None)
 
-    return {"obj": objlist, "ra":ralist, "de":delist, \
-            "distance":distancelist}
+        # The sherlock may have distance in Mpc, z, and/or photoZ
+        # distance is best, else z, else photoZ
+
+        if row['distance']:   d = row['distance']
+        elif row['z']:        d = row['z']      * CONVERT_Z_TO_DISTANCE
+        elif row['photoz']:   d = row['photoz'] * CONVERT_Z_TO_DISTANCE
+        else:                 d = None
+
+        distancelist.append(d)
+
+    return {"obj": objlist, "ra":ralist, "de":delist, "distance":distancelist}
 
 def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
-    """ get_watchmap_hits.
-    Get all the alerts, then run against the watchmaplist, return the hits
-
-    Args:
-        gw:
-        cache_dir:
+    """ Get all the alerts that match a given skymap, 
+        then run against the watchmaplist, return the hits
     """
     moc = MOC.from_fits(mocfilename(gw))
 
@@ -121,12 +105,18 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
             mocdelist      .append(alertralist[ialert])
             mocdistancelist.append(alertdistancelist[ialert])
 
+    # skyprob is the contour of the skymap on which the given point lies
+    # gw_disttuples are pairs of (mean,stddev) on the diatance
+    # the code is at https://skytag.readthedocs.io/
     skyprob, gw_disttuples = prob_at_location(
         ra =mocralist,
         dec=mocdelist,
         mapPath=mapfilename(gw),
         distance=True
     )
+
+    # Use the distance of the optical event, if we have it, to get the
+    # number of sigma away from the GW mean distance
     distsigma = []
     for i in range(len(mocobjlist)):
         (gw_distance, gw_diststddev) = gw_disttuples[i]
@@ -145,13 +135,9 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
     return skymaphits
 
 def insert_skymap_hits(database, gw, skymaphits):
-    """ insert_watchmap_hits.
+    """ Insert skymap hits into the database
     Build and execute the insertion query to get the hits into the database
-
-    Args:
-        gw:
-        hits:
-    """
+    """"
     cursor = database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into mma_area_hits (mw_id, diaObjectId, skyprob, distsigma) VALUES\n"
@@ -192,6 +178,8 @@ def fetch_skymaps_by_mjd(database, mjdmin, mjdmax):
         return None
 
 def fetch_skymap_by_id(database, mw_id):
+    """ Fetches the GW information for a given ID
+    """
     cursor = database.cursor(buffered=True, dictionary=True)
     query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
     query += 'WHERE mw_id=%d' % mw_id
