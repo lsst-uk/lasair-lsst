@@ -36,7 +36,7 @@ def mapfilename(gw):
     filename = '%s/%s/%s/map.fits' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
     return filename
 
-def fetch_alerts(database, gw, mjdmin=None, mjdmax=None):
+def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """ Fetch optical alerts and sherlock to check against skymaps
         between two times
     """
@@ -67,17 +67,19 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None):
         else:                 d = None
 
         distancelist.append(d)
+    if verbose:
+        print('fetch_alerts: mjd %s to %s, found %d' % (str(mjdmin), str(mjdmax), len(objlist)))
 
     return {"obj": objlist, "ra":ralist, "de":delist, "distance":distancelist}
 
-def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
+def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """ Get all the alerts that match a given skymap, 
         then run against the watchmaplist, return the hits
     """
     moc = MOC.from_fits(mocfilename(gw))
 
     # get the alert positions from the database
-    alertlist = fetch_alerts(database, gw, mjdmin, mjdmax)
+    alertlist = fetch_alerts(database, gw, mjdmin, mjdmax, verbose)
 
     # alert positions
     alertobjlist      = alertlist['obj']
@@ -132,12 +134,14 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None):
         'skyprob'    : skyprob, 
         'distsigma'  : distsigma,
     }
+    if verbose:
+        print('get_skymap_hits: got %d' % len(skymaphits['diaObjectId']))
     return skymaphits
 
 def insert_skymap_hits(database, gw, skymaphits):
     """ Insert skymap hits into the database
     Build and execute the insertion query to get the hits into the database
-    """"
+    """
     cursor = database.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into mma_area_hits (mw_id, diaObjectId, skyprob, distsigma) VALUES\n"
@@ -146,7 +150,6 @@ def insert_skymap_hits(database, gw, skymaphits):
     did  = skymaphits['diaObjectId']
     sky  = skymaphits['skyprob']
     dist = skymaphits['distsigma']
-    print('inserting %d skymap hits' % len(did))
     for (diaObjectId, skyprob, distsigma) in zip(did, sky, dist):
         if distsigma: distsigma = '%.2f'%distsigma
         else:         distsigma = 'NULL'
@@ -161,6 +164,7 @@ def insert_skymap_hits(database, gw, skymaphits):
     except Exception as e:
         print('ERROR in insert_skymap_hits cannot insert: %s' % str(e))
         print(query)
+    return len(did)
 
 def fetch_skymaps_by_mjd(database, mjdmin, mjdmax):
     cursor = database.cursor(buffered=True, dictionary=True)
@@ -192,3 +196,16 @@ def fetch_skymap_by_id(database, mw_id):
     except Exception as e:
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
         return None
+
+def delete_hits(database, mw_id):
+    """ Delete all hits from this skymap
+    """
+    cursor = database.cursor(buffered=True, dictionary=True)
+    query = 'SELECT count(*) as ndeleted FROM mma_area_hits WHERE mw_id=%d' % mw_id
+    cursor.execute(query)
+    for row in cursor:
+        ndeleted = row['ndeleted']
+
+    query = 'DELETE FROM mma_area_hits WHERE mw_id=%d' % mw_id
+    cursor.execute(query)
+    return ndeleted

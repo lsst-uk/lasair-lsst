@@ -96,7 +96,6 @@ WATCHLIST_MOCS         = '/mnt/cephfs/lasair/watchlists'
 ANNOTATIONS_DUMP       = '/mnt/cephfs/lasair/annotations'
 CROSSMATCH_TNS_DUMP    = '/mnt/cephfs/lasair/crossmatch_tns'
 MYSQL_BACKUP_DIR       = '/mnt/cephfs/lasair/mysql_backup'
-GW_DIRECTORY           = '/mnt/cephfs/lasair/mma/gw/'
 
 # Fast annotations
 ##################
@@ -145,6 +144,10 @@ TNS_API_KEY            = '{{ settings.tns_api_key }}'
 
 # This one needs to be set BY HAND after the watchlist __TNS__  is created
 TNS_WATCHLIST_ID       = 1
+
+# Gravitational wave events are active for this many days after the event
+GW_DIRECTORY           = '/mnt/cephfs/lasair/mma/gw/'
+GW_ACTIVE_DAYS         = 21
 
 # Alerce streams
 ALERCE_KAFKA           = '{{ settings.alerce_server }}'

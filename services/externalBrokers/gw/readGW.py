@@ -212,7 +212,7 @@ if __name__ == "__main__":
     dir = settings.GW_DIRECTORY  #  '/mnt/cephfs/lasair/mma/gw/'
     database = db_connect.remote()
     maxmjd = skymaps.mjdnow()
-    minmjd = maxmjd - 21
+    minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     ningested = 0
     if len(sys.argv) > 1:

@@ -11,7 +11,7 @@ import db_connect, skymaps
 
 def mmagw(fltr):
     maxmjd = skymaps.mjdnow()
-    minmjd = maxmjd - 21 # three weeks
+    minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     # must use main database, since GW alert may have been inserted since sunset
     main_database = db_connect.remote()
