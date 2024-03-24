@@ -166,7 +166,7 @@ def insert_skymap_hits(database, gw, skymaphits):
         print(query)
     return len(did)
 
-def fetch_skymaps_by_mjd(database, mjdmin, mjdmax):
+def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
     cursor = database.cursor(buffered=True, dictionary=True)
     query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
     query += 'WHERE event_tai BETWEEN %f AND %f' % (mjdmin, mjdmax)
@@ -176,6 +176,8 @@ def fetch_skymaps_by_mjd(database, mjdmin, mjdmax):
         for row in cursor:
             result.append(row)
         cursor.close()
+        if verbose:
+            print('fetch_skymaps_by_mjd: found %d' % len(result))
         return result
     except Exception as e:
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
