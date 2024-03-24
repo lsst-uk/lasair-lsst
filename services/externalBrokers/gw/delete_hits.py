@@ -27,7 +27,7 @@ if __name__=="__main__":
     else:                maxmjd = skymaps.mjdnow()
     
     if args['--minmjd']: minmjd = float(args['--minmjd'])
-    else:                minmjd = maxmjd - 21 # three weeks
+    else:                minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     if args['--mw_id']:
         mw_id = int(args['--mw_id'])

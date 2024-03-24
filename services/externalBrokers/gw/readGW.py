@@ -1,11 +1,20 @@
 """
 Checks the directory of GW alerts for those we haven't seen before
 then tries to insert it into the database
+
+Usage:
+    readGW.py [--minmjd=minmjd]
+              [--maxmjd=maxmjd]
+
+Options:
+    --minmjd=minmjd    Choose all skymaps older than this MJD
+    --maxmjd=maxmjd    Choose all skymaps younger than this MJD
 """
 import os, sys
 import json
 import io
 import yaml
+from yaml import CLoader as Loader
 import base64
 import traceback
 import time
@@ -208,11 +217,18 @@ if __name__ == "__main__":
     """ Intended to run in a cron to harvest GW alerts that appear in the directory
     """
     import sys
+    from docopt import docopt
+    args = docopt(__doc__)
+#    print(args)
+
+    if args['--maxmjd']: maxmjd = float(args['--maxmjd'])
+    else:                maxmjd = skymaps.mjdnow()
+
+    if args['--minmjd']: minmjd = float(args['--minmjd'])
+    else:                minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     dir = settings.GW_DIRECTORY  #  '/mnt/cephfs/lasair/mma/gw/'
     database = db_connect.remote()
-    maxmjd = skymaps.mjdnow()
-    minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     ningested = 0
     if len(sys.argv) > 1:
