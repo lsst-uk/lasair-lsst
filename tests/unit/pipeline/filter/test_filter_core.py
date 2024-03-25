@@ -1,7 +1,7 @@
 import unittest, unittest.mock
 from unittest.mock import patch
 
-import subprocess
+import psutil
 import context
 from filtercore import Filter
 import re
@@ -13,7 +13,7 @@ class FilterTest(unittest.TestCase):
         """Test that the sigterm handler sets sigterm raised correctly"""
         fltr = Filter(group_id='filter_test', maxalert=0)
         self.assertFalse(fltr.sigterm_raised)
-        subprocess.run(['pkill', '-f', 'python3 test_filter_core.py'])
+        psutil.Process().terminate()
         self.assertTrue(fltr.sigterm_raised)
 
     def test_insert_sherlock(self):
