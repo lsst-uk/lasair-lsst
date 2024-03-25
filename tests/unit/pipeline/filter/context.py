@@ -3,6 +3,9 @@
 
 import os
 import sys
+
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../..')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../common')))
-
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../common/src')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../common/schema/lasair_schema')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter')))
