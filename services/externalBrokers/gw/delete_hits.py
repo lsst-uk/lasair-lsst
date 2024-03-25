@@ -39,5 +39,5 @@ if __name__=="__main__":
     print('found %d active skymaps' % len(skymaplist))
 
     for mw_id in skymaplist:
-        ndeleted = skymaps.delete_hits(database, mw_id)
+        ndeleted = skymaps.delete_skymap_hits(database, mw_id)
         print('mw_id %d, deleted %d' % (mw_id, ndeleted))

@@ -28,68 +28,6 @@ sys.path.append('../../../common')
 import settings
 from src import db_connect, skymaps
 
-def mjd2date(mjd):
-    date = datetime.strptime("1858/11/17", "%Y/%m/%d")
-    date += timedelta(mjd)
-    return date
-
-def bytes2string(bytes):
-    base64_bytes   = base64.b64encode(bytes)
-    str = base64_bytes.decode('utf-8')
-    return str
-
-def string2bytes(str):
-    base64_bytes  = str.encode('utf-8')
-    bytes = base64.decodebytes(base64_bytes)
-    return bytes
-
-def read_moc(datadir, name):
-    f = open(datadir + '/%s.moc' % name, 'rb')
-    bytes = f.read()
-    f.close()
-    return bytes
-
-def make_moc(mocbytes):
-    inbuf = io.BytesIO(mocbytes)
-    moc = MOC.from_fits(inbuf)
-    return moc
-
-def make_image(moc10, moc50, moc90):
-    """ Makes an image of a skymap by laying down three mocs
-        returning the resut as bytes that can be base64 encoded and put in the database
-    """
-    moc10 = make_moc(moc10)
-    moc50 = make_moc(moc50)
-    moc90 = make_moc(moc90)
-    notmoc = moc10.complement()
-    fig = plt.figure(111, figsize=(8, 5))
-    with WCS(fig, fov=360 * u.deg, projection="AIT") as wcs:
-        ax = fig.add_subplot(1, 1, 1, projection=wcs)
-        notmoc.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="lightgray", linewidth=None)
-        moc90.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="red",   linewidth=None)
-        moc50.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="orange",linewidth=None)
-        moc10.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="cyan",  linewidth=None)
-
-    plt.grid(color="black", linestyle="dotted")
-    outbuf = io.BytesIO()
-    plt.savefig(outbuf, format='png', bbox_inches='tight', pad_inches=-0.85, dpi=200)
-    bytes = outbuf.getvalue()
-    outbuf.close()
-    return bytes
-
-def getDone(dir, otherId, version):
-    """ Return True if an empty file 'done' is found in otherId/version directory
-    """
-    flag = '%s/%s/%s/done' % (dir, otherId, version)
-    return os.path.isfile(flag)
-
-def setDone(dir, otherId, version):
-    """ Create an empty file 'done' is found in otherId/version directory
-    """
-    flag = '%s/%s/%s/done' % (dir, otherId, version)
-    datadir = '%s/%s/%s' % (dir, otherId, version)
-    os.system('touch ' + flag) 
-
 def insert_gw_alert(database, dir, otherId, version):
     """ Deals with a given skymap
     """
@@ -212,6 +150,68 @@ def handle_event(database, dir, otherId, minmjd, maxmjd):
                 # Set done flag so we dont come back
                 setDone(dir, otherId, version)
     return ningested
+
+def mjd2date(mjd):
+    date = datetime.strptime("1858/11/17", "%Y/%m/%d")
+    date += timedelta(mjd)
+    return date
+
+def bytes2string(bytes):
+    base64_bytes   = base64.b64encode(bytes)
+    str = base64_bytes.decode('utf-8')
+    return str
+
+def string2bytes(str):
+    base64_bytes  = str.encode('utf-8')
+    bytes = base64.decodebytes(base64_bytes)
+    return bytes
+
+def read_moc(datadir, name):
+    f = open(datadir + '/%s.moc' % name, 'rb')
+    bytes = f.read()
+    f.close()
+    return bytes
+
+def make_moc(mocbytes):
+    inbuf = io.BytesIO(mocbytes)
+    moc = MOC.from_fits(inbuf)
+    return moc
+
+def make_image(moc10, moc50, moc90):
+    """ Makes an image of a skymap by laying down three mocs
+        returning the resut as bytes that can be base64 encoded and put in the database
+    """
+    moc10 = make_moc(moc10)
+    moc50 = make_moc(moc50)
+    moc90 = make_moc(moc90)
+    notmoc = moc10.complement()
+    fig = plt.figure(111, figsize=(8, 5))
+    with WCS(fig, fov=360 * u.deg, projection="AIT") as wcs:
+        ax = fig.add_subplot(1, 1, 1, projection=wcs)
+        notmoc.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="lightgray", linewidth=None)
+        moc90.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="red",   linewidth=None)
+        moc50.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="orange",linewidth=None)
+        moc10.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="cyan",  linewidth=None)
+
+    plt.grid(color="black", linestyle="dotted")
+    outbuf = io.BytesIO()
+    plt.savefig(outbuf, format='png', bbox_inches='tight', pad_inches=-0.85, dpi=200)
+    bytes = outbuf.getvalue()
+    outbuf.close()
+    return bytes
+
+def getDone(dir, otherId, version):
+    """ Return True if an empty file 'done' is found in otherId/version directory
+    """
+    flag = '%s/%s/%s/done' % (dir, otherId, version)
+    return os.path.isfile(flag)
+
+def setDone(dir, otherId, version):
+    """ Create an empty file 'done' is found in otherId/version directory
+    """
+    flag = '%s/%s/%s/done' % (dir, otherId, version)
+    datadir = '%s/%s/%s' % (dir, otherId, version)
+    os.system('touch ' + flag) 
 
 if __name__ == "__main__":
     """ Intended to run in a cron to harvest GW alerts that appear in the directory
