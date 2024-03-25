@@ -67,7 +67,7 @@ class Filter:
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
 
         # catch SIGTERM so that we can finish processing cleanly
-        signal.signal(signal.SIGTERM, self._sigterm_handler)
+        self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
 
     def setup(self):
@@ -90,6 +90,9 @@ class Filter:
         """
         self.sigterm_raised = True
         self.log.debug("caught SIGTERM")
+        # if we have already set a non-default handler then call that too
+        if self.prv_sigterm_handler is not signal.SIG_DFL and not None:
+            self.prv_sigterm_handler(signum, frame)
 
     def execute_query(self, query: str):
         """ execute_query: run a query and close it, and compalin to slack if failure.
