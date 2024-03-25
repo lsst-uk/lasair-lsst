@@ -61,6 +61,7 @@ def run(args, log):
                 time.sleep(settings.WAIT_TIME)
         except Exception as e:
             log.critical('Unrecoverable error in filter batch: ' + str(e))
+            break
 
     log.info('Exiting filter runner')
 
