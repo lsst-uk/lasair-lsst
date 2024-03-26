@@ -19,7 +19,8 @@ from docopt import docopt
 from multiprocessing import Process
 
 sys.path.append('../../common/src')
-import slack_webhook, lasairLogging
+import slack_webhook
+import lasairLogging
 import wrapper
 
 

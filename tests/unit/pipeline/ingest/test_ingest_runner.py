@@ -24,7 +24,7 @@ class RunnerTest(unittest.TestCase):
     @patch('ingest.Ingester')
     @patch('ingest_runner.lasairLogging')
     def test_run_ingest_exception(self, mock_logging, mock_ingester):
-        """Test that run_ingest works"""
+        """Test handling of exception on run"""
         mock_ingester.return_value.run.return_value = 3
         mock_ingester.return_value.run.side_effect = Exception('Test error')
         ingest_runner.setup_proc(1, 1, {})
