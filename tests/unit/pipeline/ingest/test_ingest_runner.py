@@ -4,11 +4,9 @@
 import unittest
 import unittest.mock
 from unittest.mock import patch
-import psutil
 import context
 import ingest_runner
 import ingest
-import lasairLogging
 
 
 class RunnerTest(unittest.TestCase):
