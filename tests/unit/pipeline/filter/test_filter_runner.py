@@ -1,11 +1,10 @@
-"""Unit tests for the watchmaps module
+"""Unit tests for filter runner
 """
 
 import unittest
 import unittest.mock
 from unittest.mock import patch
 import psutil
-import time
 import context
 import filter_runner
 

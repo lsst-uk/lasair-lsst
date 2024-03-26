@@ -19,10 +19,9 @@ Options:
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
 """
-import os,sys, time
-from datetime import datetime
+import sys
 from docopt import docopt
-from multiprocessing import Process, Manager
+from multiprocessing import Process
 
 from ingest import run_ingest
 
@@ -32,16 +31,22 @@ import settings
 sys.path.append('../../common/src')
 import date_nid, slack_webhook, lasairLogging
 
-def setup_procs(n, nprocess, args):
+
+def setup_proc(n, nprocess, args):
     # Set up the logger
     lasairLogging.basicConfig(
-        filename = f"/home/ubuntu/logs/ingest-{n}.log",
-    #    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        filename=f"/home/ubuntu/logs/ingest-{n}.log",
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
         merge=True
     )
     log = lasairLogging.getLogger("ingest_runner")
     log.info(f"Starting ingest runner process {n} of {nprocess}")
-    run_ingest(args, log=log)
+    try:
+        nalerts = run_ingest(args, log=log)
+        log.debug(f'Ingested {nalerts} alerts')
+    except Exception as e:
+        log.critical('Unrecoverable error in filter batch: ' + str(e))
+
 
 # Deal with arguments
 args = docopt(__doc__)
@@ -56,7 +61,7 @@ print('ingest_runner with %d processes' % nprocess)
 # Start up the processes
 process_list = []
 for i in range(nprocess):
-    p = Process(target=setup_procs, args=(i+1, nprocess, args))
+    p = Process(target=setup_proc, args=(i+1, nprocess, args))
     process_list.append(p)
     p.start()
 

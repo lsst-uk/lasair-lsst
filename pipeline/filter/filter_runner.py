@@ -56,6 +56,7 @@ def run(args, log):
         log.info('------------- filter_runner running batch')
         try:
             nalerts = fltr.run_batch()
+            log.debug(f'Filter batch processed {nalerts} alerts')
             if nalerts == 0:   # process got no alerts, so sleep a few minutes
                 log.info('Waiting for more alerts ....')
                 time.sleep(settings.WAIT_TIME)

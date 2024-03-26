@@ -345,7 +345,7 @@ class Ingester:
         return alerts
 
     def run(self):
-        """run."""
+        """Run ingester. Return the total number of alerts ingested."""
         log = self.log
     
         batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 100)
@@ -408,12 +408,8 @@ class Ingester:
         # shut down the cassandra cluster
         if self.cassandra_session:
             self.cluster.shutdown()
-    
-        # did we get any alerts
-        if ntotalalert > 0:
-            return 1
-        else:
-            return 0
+
+        return ntotalalert
 
 
 def run_ingest(args, log=None):
