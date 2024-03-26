@@ -26,6 +26,7 @@ pipeline {
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_wrapper.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_runner.py'
                 }
                 dir('tests/unit/pipeline/filter') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
