@@ -1,3 +1,6 @@
+"""Old version of wrapper runner. Deprecated in favor of new version that works in
+the same way as ingest."""
+
 import sys
 sys.path.append('../../common/src')
 import json

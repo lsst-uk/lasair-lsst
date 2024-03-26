@@ -29,7 +29,7 @@ sys.path.append('../../common')
 import settings
 
 sys.path.append('../../common/src')
-import date_nid, slack_webhook, lasairLogging
+import slack_webhook, lasairLogging
 
 
 def setup_proc(n, nprocess, args):
@@ -46,7 +46,7 @@ def setup_proc(n, nprocess, args):
         log.debug(f'Ingested {nalerts} alerts')
     except Exception as e:
         log.exception('Exception')
-        log.critical('Unrecoverable error in filter batch: ' + str(e))
+        log.critical('Unrecoverable error in ingest: ' + str(e))
 
 
 if __name__ == '__main__':
@@ -54,11 +54,7 @@ if __name__ == '__main__':
     # Deal with arguments
     args = docopt(__doc__)
 
-    # The nprocess argument is used in this module
-    if args['--nprocess']:
-        nprocess = int(args['--nprocess'])
-    else:
-        nprocess = 1
+    nprocess = int(args.get('--nprocess', 1))
     print('ingest_runner with %d processes' % nprocess)
 
     # Start up the processes
