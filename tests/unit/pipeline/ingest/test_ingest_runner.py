@@ -7,15 +7,16 @@ from unittest.mock import patch
 import psutil
 import context
 import ingest_runner
+import ingest
+import lasairLogging
 
 
 class RunnerTest(unittest.TestCase):
 
-    @patch('ingest_runner.ingest.Ingester.run')
+    @patch('ingest.Ingester.run')
     @patch('ingest_runner.lasairLogging')
     def test_run_ingest(self, mock_logging, mock_run):
         """Test that run_ingest works"""
-        mock_log = unittest.mock.MagicMock()
         mock_run.return_value = 1
         ingest_runner.setup_proc(1, 1, {'--maxbatch': 2})
 

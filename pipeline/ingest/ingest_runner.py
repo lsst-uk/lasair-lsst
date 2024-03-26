@@ -48,23 +48,26 @@ def setup_proc(n, nprocess, args):
         log.critical('Unrecoverable error in filter batch: ' + str(e))
 
 
-# Deal with arguments
-args = docopt(__doc__)
 
-# The nprocess argument is used in this module
-if args['--nprocess']:
-    nprocess = int(args['--nprocess'])
-else:
-    nprocess = 1
-print('ingest_runner with %d processes' % nprocess)
+if __name__ == '__main__':
 
-# Start up the processes
-process_list = []
-for i in range(nprocess):
-    p = Process(target=setup_proc, args=(i+1, nprocess, args))
-    process_list.append(p)
-    p.start()
+    # Deal with arguments
+    args = docopt(__doc__)
 
-for p in process_list:
-    p.join()
-print('ingest_runner exiting')
+    # The nprocess argument is used in this module
+    if args['--nprocess']:
+        nprocess = int(args['--nprocess'])
+    else:
+        nprocess = 1
+    print('ingest_runner with %d processes' % nprocess)
+
+    # Start up the processes
+    process_list = []
+    for i in range(nprocess):
+        p = Process(target=setup_proc, args=(i+1, nprocess, args))
+        process_list.append(p)
+        p.start()
+
+    for p in process_list:
+        p.join()
+    print('ingest_runner exiting')
