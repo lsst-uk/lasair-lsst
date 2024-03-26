@@ -40,7 +40,7 @@ class RunnerTest(unittest.TestCase):
         mock_log = unittest.mock.MagicMock()
         mock_run_batch.side_effect = Exception('Test error')
         filter_runner.run({'--maxbatch': 1}, mock_log)
-        mock_log.exeption.assert_called()
+        mock_log.exception.assert_called()
         mock_log.critical.assert_called_with('Unrecoverable error in filter batch: Test error')
         mock_log.info.assert_called_with('Exiting filter runner')
 
