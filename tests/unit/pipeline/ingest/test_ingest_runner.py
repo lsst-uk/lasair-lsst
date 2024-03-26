@@ -29,7 +29,7 @@ class RunnerTest(unittest.TestCase):
         mock_ingester.return_value.run.side_effect = Exception('Test error')
         ingest_runner.setup_proc(1, 1, {})
         mock_logging.getLogger.return_value.exception.assert_called()
-        mock_logging.getLogger.return_value.critical.assert_called_with('Unrecoverable error in filter batch: Test error')
+        mock_logging.getLogger.return_value.critical.assert_called_with('Unrecoverable error in ingest: Test error')
 
 
 if __name__ == '__main__':
