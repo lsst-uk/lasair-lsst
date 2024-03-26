@@ -61,6 +61,7 @@ def run(args, log):
                 log.info('Waiting for more alerts ....')
                 time.sleep(settings.WAIT_TIME)
         except Exception as e:
+            log.exception('Exception')
             log.critical('Unrecoverable error in filter batch: ' + str(e))
             break
 

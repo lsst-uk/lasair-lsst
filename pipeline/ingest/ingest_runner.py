@@ -45,8 +45,8 @@ def setup_proc(n, nprocess, args):
         nalerts = run_ingest(args, log=log)
         log.debug(f'Ingested {nalerts} alerts')
     except Exception as e:
+        log.exception('Exception')
         log.critical('Unrecoverable error in filter batch: ' + str(e))
-
 
 
 if __name__ == '__main__':
