@@ -10,7 +10,7 @@ Usage:
     ingest.py [--maxalert=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
-              [--maxalert=MAX]
+              [--maxbatch=MAX]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
