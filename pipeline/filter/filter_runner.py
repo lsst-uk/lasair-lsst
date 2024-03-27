@@ -15,7 +15,7 @@ Usage:
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use, default is ztf_sherlock
+    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
 """
 
@@ -41,10 +41,10 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 
 
 def run(args, log):
-    topic_in = args.get('--topic_in', 'ztf_sherlock')
-    group_id = args.get('--group_id', settings.KAFKA_GROUPID)
-    maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
-    maxbatch = int(args.get('--maxbatch', -1))
+    topic_in = args.get('--topic_in')
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxalert = args.get('--maxalert') or settings.KAFKA_MAXALERTS
+    maxbatch = int(args.get('--maxbatch') or -1)
 
     fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
 

@@ -9,7 +9,7 @@ Usage:
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use, default is ztf_sherlock
+    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
 """
 
 import os
@@ -573,15 +573,9 @@ if __name__ == "__main__":
     lasairLogging.basicConfig(stream=sys.stdout)
     args = docopt(__doc__)
 
-    topic_in = args['--topic_in']
-    if not topic_in: topic_in = 'ztf_sherlock'
-
-    group_id = args['--group_id']
-    if not group_id: group_id = settings.KAFKA_GROUPID
-
-    maxalert = int(args['--maxalert'])
-    if not maxalert: maxalert = settings.KAFKA_MAXALERTS
-    maxalert = int(maxalert)
+    topic_in = args.get('--topic_in') or  'ztf_sherlock'
+    group_id = args.get('--group_id') or  settings.KAFKA_GROUPID
+    maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
     while not fltr.sigterm_raised:

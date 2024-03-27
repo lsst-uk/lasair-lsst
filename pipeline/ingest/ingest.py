@@ -422,9 +422,9 @@ def run_ingest(args, log=None):
     else:
         # get all alerts from every nid
         topic_in = '^ztf_.*_programid1$'
-    topic_out = args.get('--topic_out', 'ztf_ingest')
-    group_id = args.get('--group_id', settings.KAFKA_GROUPID)
-    maxalert = int(args.get('--maxalert', sys.maxsize))  # largest possible integer
+    topic_out = args.get('--topic_out') or 'ztf_ingest'
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
 
     ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
     return ingester.run()

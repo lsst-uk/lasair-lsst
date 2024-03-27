@@ -24,7 +24,7 @@
   file:
     path: "{{ ansible_env.HOME }}/logs"
     state: directory
-    
+
 - name: "Deploy Sherlock config"
   template:
     src:  sherlock_settings.yaml.j2
