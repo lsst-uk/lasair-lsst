@@ -10,18 +10,19 @@ Usage:
     ingest.py [--maxalert=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
+              [--maxbatch=MAX]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use, default is ztf_sherlock
+    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --maxbatch=MAX     Maximum number of batches to process, default is unlimited
 """
 
-import os, sys, time, signal
+import sys, time, signal
 from docopt import docopt
 sys.path.append('../../common')
 import settings
-from datetime import datetime
 sys.path.append('../../common/src')
 import slack_webhook, lasairLogging
 import filtercore
@@ -39,33 +40,44 @@ def sigterm_handler(signum, frame):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 
-def now():
-    # current UTC as string
-    return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
+def run(args, log):
+    topic_in = args.get('--topic_in')
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxalert = args.get('--maxalert') or settings.KAFKA_MAXALERTS
+    maxbatch = int(args.get('--maxbatch') or -1)
+
+    fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+
+    batch = 0
+    while not stop:
+        if batch == maxbatch:
+            break
+        batch += 1
+        log.info('------------- filter_runner running batch')
+        try:
+            nalerts = fltr.run_batch()
+            log.debug(f'Filter batch processed {nalerts} alerts')
+            if nalerts == 0:   # process got no alerts, so sleep a few minutes
+                log.info('Waiting for more alerts ....')
+                time.sleep(settings.WAIT_TIME)
+        except Exception as e:
+            log.exception('Exception')
+            log.critical('Unrecoverable error in filter batch: ' + str(e))
+            break
+
+    log.info('Exiting filter runner')
 
 
-# Set up the logger
-lasairLogging.basicConfig(
-    filename='/home/ubuntu/logs/filter.log',
-    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
-    merge=True
-)
-log = lasairLogging.getLogger("filter_runner")
+if __name__ == '__main__':
 
-# Deal with arguments
-# It's fine to use None as a default here as Filter will use sensible defaults if necessary
-args = docopt(__doc__)
-topic_in = args.get('--topic_in', 'ztf_sherlock')
-group_id = args.get('--group_id', settings.KAFKA_GROUPID)
-maxalert = args.get('--maxalert', settings.KAFKA_MAXALERTS)
+    # Set up the logger
+    lasairLogging.basicConfig(
+        filename='/home/ubuntu/logs/filter.log',
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
+    log = lasairLogging.getLogger("filter_runner")
 
-fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
-
-while not stop:
-    log.info('------------- filter_runner running batch at %s' % now())
-    nalerts = fltr.run_batch()
-    if nalerts == 0:   # process got no alerts, so sleep a few minutes
-        log.info('Waiting for more alerts ....')
-        time.sleep(settings.WAIT_TIME)
-
-log.info('Exiting filter runner')
+    # Deal with arguments
+    args = docopt(__doc__)
+    run(args, log)

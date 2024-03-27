@@ -22,13 +22,16 @@ pipeline {
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest_runner.py'
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_wrapper.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock_runner.py'
                 }
                 dir('tests/unit/pipeline/filter') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filter_core.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filter_runner.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchlists.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchmaps.py'
                 }
