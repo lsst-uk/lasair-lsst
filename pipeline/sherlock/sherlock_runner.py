@@ -9,8 +9,8 @@ Usage:
               [--config=FILE]
 
 Options:
-    --nprocess=nprocess  Number of processes (default: 1)
-    --config=FILE        Configuration file (default: wrapper_runner.json)
+    --nprocess=nprocess  Number of processes [default: 1]
+    --config=FILE        Configuration file [default: wrapper_runner.json]
 """
 import sys
 import json
@@ -57,10 +57,10 @@ if __name__ == '__main__':
     # Deal with arguments
     args = docopt(__doc__)
 
-    nprocess = int(args.get('--nprocess', 1))
+    nprocess = int(args.get('--nprocess'))
     print('sherlock_runner with %d processes' % nprocess)
 
-    conffile = args.get('--config', 'wrapper_runner.json')
+    conffile = args.get('--config')
 
     # Start up the processes
     process_list = []
