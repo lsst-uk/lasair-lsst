@@ -22,10 +22,9 @@ import sys
 from docopt import docopt
 from datetime import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
-from gkhtm import _gkhtm as htmCircle
 from cassandra.cluster import Cluster
 from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
-import os, time, json, io, fastavro, signal
+import time, json, io, fastavro, signal
 
 sys.path.append('../../common')
 import settings
@@ -35,48 +34,54 @@ import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
-class ImageStore():
+
+class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
     common interface."""
 
     def __init__(self, log=None, image_store=None):
+        self.log = log
         if image_store is not None:
             # passing in an image_store instead of getting one is mostly to enable testing
             self.image_store = image_store
             return
-        self.log = log
         fitsdir = getattr(settings, 'IMAGEFITS', None)
-        if settings.USE_CUTOUTCASS:
+        use_cutoutcass = getattr(settings, 'USE_CUTOUTCASS', False)
+        if use_cutoutcass:
             self.image_store = cutoutStore.cutoutStore()
-            if self.image_store.session == None:
+            if self.image_store.session is None:
                 self.image_store = None
         elif fitsdir and len(fitsdir) > 0:
-            print(fitsdir)
             self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
         else:
-            log.warn('ERROR in ingest: Cannot store cutouts. USE_CUTOUTCASS=%s' % settings.USE_CUTOUTCASS)
-    
+            log.warn('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
+                     (use_cutoutcass, fitsdir))
+            self.image_store = None
+
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
         futures = []
         try:
-            for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
-                if not cutoutType in message: 
-                    continue
-                content = message[cutoutType]
-                cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                # store may be cutouts or cephfs
-                if settings.USE_CUTOUTCASS:
-                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append(result)
-                else:
-                    self.image_store.putObject(cutoutId, imjd, content)
+            if self.image_store:
+                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                    if not cutoutType in message:
+                        continue
+                    content = message[cutoutType]
+                    cutoutId = '%d_%s' % (diaSourceId, cutoutType)
+                    # store may be cutouts or cephfs
+                    if getattr(settings, 'USE_CUTOUTCASS', False):
+                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                        futures.append(result)
+                    else:
+                        self.image_store.putObject(cutoutId, imjd, content)
+            else:
+                self.log.warn('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
-            self.log.error('ERROR in ingest/store_images: ', e)
+            self.log.error('ERROR in ingest/store_images: %s' % e)
             raise e
         return futures
 
 
-class Ingester():
+class Ingester:
     # We split the setup between the constructor and setup method in order to allow for
     # an ingester with custom connections to other components, e.g. for testing
 
@@ -156,9 +161,9 @@ class Ingester():
             log.info('maxalert       %d' % self.maxalert)
 
             consumer_conf = {
-                'bootstrap.servers'   : '%s' % settings.KAFKA_SERVER,
-                'group.id'            : self.group_id,
-                'enable.auto.commit'  : False,
+                'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
+                'group.id': self.group_id,
+                'enable.auto.commit': False,
                 'default.topic.config': {'auto.offset.reset': 'earliest'},
                 # wait twice wait time before forgetting me
                 'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
@@ -222,10 +227,7 @@ class Ingester():
         Store cutout images, write information to cassandra, and produce a kafka message.
 
         Args:
-            lsst_alert:
-            image_store:
-            producer:
-            topic_out:
+            lsst_alerts:
 
         Returns: (number of diaSoucres, number of forced sources)
         """
@@ -312,7 +314,7 @@ class Ingester():
         self.consumer.commit()
 
         # update the status page
-        nid  = date_nid.nid_now()
+        nid = date_nid.nid_now()
         self.ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
         for name,td in self.timers.items():
             td.add2ms(self.ms, nid)
@@ -343,7 +345,7 @@ class Ingester():
         return alerts
 
     def run(self):
-        """run."""
+        """Run ingester. Return the total number of alerts ingested."""
         log = self.log
     
         batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 100)
@@ -406,36 +408,27 @@ class Ingester():
         # shut down the cassandra cluster
         if self.cassandra_session:
             self.cluster.shutdown()
-    
-        # did we get any alerts
-        if ntotalalert > 0: return 1
-        else:               return 0
+
+        return ntotalalert
+
 
 def run_ingest(args, log=None):
-    if args['--topic_in']:
+    if args.get('--topic_in'):
         topic_in = args['--topic_in']
-    elif args['--nid']:
+    elif args.get('--nid'):
         nid = int(args['--nid'])
         date = date_nid.nid_to_date(nid)
-        topic_in  = 'ztf_' + date + '_programid1'
+        topic_in = 'ztf_' + date + '_programid1'
     else:
         # get all alerts from every nid
         topic_in = '^ztf_.*_programid1$'
-    if args['--topic_out']:
-        topic_out = args['--topic_out']
-    else:
-        topic_out = 'ztf_ingest'
-    if args['--group_id']:
-        group_id = args['--group_id']
-    else:
-        group_id = settings.KAFKA_GROUPID
-    if args['--maxalert']:
-        maxalert = int(args['--maxalert'])
-    else:
-        maxalert = sys.maxsize  # largest possible integer
+    topic_out = args.get('--topic_out') or 'ztf_ingest'
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
 
     ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
     return ingester.run()
+
 
 if __name__ == "__main__":
     args = docopt(__doc__)

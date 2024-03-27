@@ -1,6 +1,8 @@
+"""Old version of wrapper runner. Deprecated in favor of new version that works in
+the same way as ingest."""
+
 import sys
 sys.path.append('../../common/src')
-import logging
 import json
 import yaml
 from multiprocessing import Process, connection
@@ -25,10 +27,9 @@ if __name__ == '__main__':
     conf = {}
     with open(wrapper_conf_file, "r") as f:
         cfg = yaml.safe_load(f)
-        for key,value in cfg.items():
+        for key, value in cfg.items():
             conf[key] = value
 
-    logformat = f"%(asctime)s:%(levelname)s:%(processName)s:%(funcName)s:%(message)s"
     lasairLogging.basicConfig(
         filename='/home/ubuntu/wrapper.log',
         webhook=slack_webhook.SlackWebhook(url=slack_url),
