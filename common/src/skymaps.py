@@ -10,6 +10,7 @@ import math
 from mocpy import MOC
 import astropy.units as u
 from skytag.commonutils import prob_at_location
+from gkutils.commonutils import redshiftToDistance
 
 sys.path.append('../../../common')
 import settings
@@ -17,7 +18,8 @@ sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
 # This is c/H, speed of light over Hubble constant
-CONVERT_Z_TO_DISTANCE = 4271
+# CONVERT_Z_TO_DISTANCE = 4271
+# Replaced by Kens code redshiftToDistance
 
 def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """ Get all the alerts that match a given skymap, 
@@ -54,14 +56,15 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
             mocdelist      .append(alertralist[ialert])
             mocdistancelist.append(alertdistancelist[ialert])
 
-    # skyprob is the contour of the skymap on which the given point lies
+    # contour is the contour of the skymap on which the given point lies
     # gw_disttuples are pairs of (mean,stddev) on the diatance
     # the code is at https://skytag.readthedocs.io/
-    skyprob, gw_disttuples = prob_at_location(
+    contour, gw_disttuples, probdens = prob_at_location(
         ra =mocralist,
         dec=mocdelist,
         mapPath=mapfilename(gw),
-        distance=True
+        distance=True,
+        probdensity=True
     )
 
     # Use the distance of the optical event, if we have it, to get the
@@ -78,8 +81,9 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
-        'skyprob'    : skyprob, 
+        'contour'    : contour, 
         'distsigma'  : distsigma,
+        'probdens'   : probdens,
     }
     if verbose:
         print('get_skymap_hits: got %d' % len(skymaphits['diaObjectId']))
@@ -111,8 +115,8 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
         # distance is best, else z, else photoZ
 
         if row['distance']:   d = row['distance']
-        elif row['z']:        d = row['z']      * CONVERT_Z_TO_DISTANCE
-        elif row['photoz']:   d = row['photoz'] * CONVERT_Z_TO_DISTANCE
+        elif row['z']:        d = redshiftToDistance(row['z'])['dl_mpc']
+        elif row['photoz']:   d = redshiftToDistance(row['photoz'])['dl_mpc']
         else:                 d = None
 
         distancelist.append(d)
@@ -160,16 +164,17 @@ def insert_skymap_hits(database, gw, skymaphits):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, skyprob, distsigma) VALUES\n"
+    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distsigmaprobdens) VALUES\n"
     hitlist = []
     mw_id = gw['mw_id']
     did  = skymaphits['diaObjectId']
-    sky  = skymaphits['skyprob']
+    sky  = skymaphits['contour']
     dist = skymaphits['distsigma']
-    for (diaObjectId, skyprob, distsigma) in zip(did, sky, dist):
+    prob = skymaphits['probdens']
+    for (diaObjectId, contour, distsigma, probdens) in zip(did, sky, dist, prob):
         if distsigma: distsigma = '%.2f'%distsigma
         else:         distsigma = 'NULL'
-        hitlist.append('(%d,%d,%.4f,%s)' %  (mw_id, diaObjectId, skyprob, distsigma))
+        hitlist.append('(%d,%d,%.4f,%s)' %  (mw_id, diaObjectId, contour, distsigma, probdens))
 
     query += ',\n'.join(hitlist)
 

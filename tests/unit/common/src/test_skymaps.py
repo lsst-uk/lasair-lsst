@@ -12,15 +12,20 @@ from mocpy import MOC
 sys.path.append('../../../../common/src')
 import skymaps
 
+# inputs to the test_get_skymap_hits
 objlist = ['a12', 'a13', 'a14', 'a15']
 ralist  = [188.0, 190.0, 190.0, 194.0]
 delist  = [-9.0,  -15.0, -11.0, -19.0]
+
+# outputs should match these
 distance =[None, 20.348, None, 34.784]
 inmoc90 = [False, False, True, True]
 
 class SkymapTest(unittest.TestCase):
     @mock.patch('skymaps.fetch_alerts')
     def test_get_skymap_hits(self, fetch_alerts_mock):
+        """Runs the skymap code with the ralist/declist and the bayestar map
+        The results should match up with distance and inmoc90 """
 
         fetch_alerts_mock.return_value = {
                 "obj": objlist, 
@@ -29,7 +34,9 @@ class SkymapTest(unittest.TestCase):
                 "distance":distance
                 }
 
+        # a database connection is not needed because the alerts are listed above
         database = None
+
         gw = {'mw_id': 1, 
             'event_tai':60000, 
             'area90':500, 
