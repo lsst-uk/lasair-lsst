@@ -18,7 +18,7 @@ ralist  = [188.0, 190.0, 190.0, 194.0]
 delist  = [-9.0,  -15.0, -11.0, -19.0]
 
 # output is only from the last one
-'a15', contour=66, distsigma ~= 0, probdens=85
+# diaObjectId='a15', contour=66, distsigma ~= 0, probdens=85
 
 class SkymapTest(unittest.TestCase):
     @mock.patch('skymaps.fetch_alerts')
