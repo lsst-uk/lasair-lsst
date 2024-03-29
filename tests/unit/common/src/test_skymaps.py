@@ -44,12 +44,17 @@ class SkymapTest(unittest.TestCase):
             'version':'.',           # fetch from test cache
             'params':None,
             }
-        skymaphits = skymaps.get_skymap_hits(database, gw)
+        skymaphits = skymaps.get_skymap_hits(database, gw, verbose=True)
         print(skymaphits)
-        # should be 2 in the skymaphits from the 4 input
-        #   skymaphits['diaObjectId'] should be ['a14', 'a15'], 
-        #   skymaphits['distsigma'] should be   [None, approx zero]}
+        # should be 1 in the skymaphits from the 4 input
+        self.assertTrue(len(skymaphits['diaObjectId']) == 1)
+        contour   = skymaphits['contour'][0]
+        distsigma = skymaphits['distsigma'][0]
+        probdens  = skymaphits['probdens'][0]
 
+        self.assertTrue(abs(contour-66.31) < 0.1)
+        self.assertTrue(distsigma < 0.01)
+        self.assertTrue(abs(probdens-85.06) < 0.1)
 
 if __name__ == '__main__':
     import xmlrunner

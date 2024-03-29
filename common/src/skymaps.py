@@ -36,13 +36,13 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     alertdelist       = alertlist['de']
     alertdistancelist = alertlist['distance']
 
-#    if mjdmin and mjdmax:
-#        print('found %d alerts between MJD %f and %f' % (len(alertobjlist), mjdmin, mjdmax))
-#    else:
-#        print('found %d alerts ' % len(alertobjlist))
+    if verbose:
+        print('found %d alerts ' % len(alertobjlist))
 
     # here is the crossmatch
     result = moc.contains_lonlat(alertralist * u.deg, alertdelist * u.deg)
+    if verbose:
+        print('in MOC:', result)
 
     mocralist = []
     mocdelist = []
@@ -53,9 +53,11 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
         if result[ialert]:
             mocobjlist     .append(alertobjlist[ialert])
             mocralist      .append(alertralist[ialert])
-            mocdelist      .append(alertralist[ialert])
+            mocdelist      .append(alertdelist[ialert])
             mocdistancelist.append(alertdistancelist[ialert])
 
+    if verbose:
+        print(mocralist, mocdelist, mocdistancelist)
     # contour is the contour of the skymap on which the given point lies
     # gw_disttuples are pairs of (mean,stddev) on the diatance
     # the code is at https://skytag.readthedocs.io/
