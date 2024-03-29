@@ -73,8 +73,6 @@ class ImageStore:
                         futures.append(result)
                     else:
                         self.image_store.putObject(cutoutId, imjd, content)
-            else:
-                self.log.warn('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
             self.log.error('ERROR in ingest/store_images: %s' % e)
             raise e
@@ -129,7 +127,7 @@ class Ingester:
 
         # set up image store in Cassandra or shared file system
         if self.image_store is None:
-            self.image_store = ImageStore()
+            self.image_store = ImageStore(log=log)
 
         # connect to cassandra cluster for alerts (not cutouts)
         if self.cassandra_session is None:
