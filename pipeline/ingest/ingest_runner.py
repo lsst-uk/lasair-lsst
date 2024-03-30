@@ -54,7 +54,10 @@ if __name__ == '__main__':
     # Deal with arguments
     args = docopt(__doc__)
 
-    nprocess = int(args.get('--nprocess', 1))
+    if '--nprocess' in args and args['--nprocess']:
+        nprocess = int(args['--nprocess'])
+    else:
+        nprocess = 1
     print('ingest_runner with %d processes' % nprocess)
 
     # Start up the processes
