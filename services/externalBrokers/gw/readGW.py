@@ -65,8 +65,8 @@ def insert_gw_alert(database, dir, otherId, version):
     # decide if we want it
     # If this function returns a string, it is a reason why the event was rejected
     # THIS IS JUST A PLACEHOLDER
-    if area90 > 500:
-        return '90% area > 500'
+    if area90 > 1000:
+        return '90% area > 1000'
     if loc['distmean'] > 200:
         return 'distance > 200 Mpc'
 
@@ -106,7 +106,7 @@ def insert_gw_alert(database, dir, otherId, version):
     # If this function returns a string, it is a reason why the event was rejected
     return ''
 
-def insert_optical_transients(database, minmjd, maxmjd):
+def insert_optical_transients(database, minmjd, maxmjd, verbose=False):
     """ Fetch the optical alerts in the time interval 
     for the last-inserted GW alert.
     Which is presumably the one with the max mw_id
@@ -118,11 +118,11 @@ def insert_optical_transients(database, minmjd, maxmjd):
         mw_id = row['mw_id']
 
     gw = skymaps.fetch_skymap_by_id(database, mw_id)
-    skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd)
+    skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd, verbose)
     if len(skymaphits['diaObjectId']) > 0:
         skymaps.insert_skymap_hits(database, gw, skymaphits)
 
-def handle_event(database, dir, otherId, minmjd, maxmjd):
+def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
     ningested = 0
     for version in os.listdir(dir+'/'+otherId):
         if version.startswith('20'):
@@ -143,7 +143,7 @@ def handle_event(database, dir, otherId, minmjd, maxmjd):
                 ningested += 1
                 print(otherId, version, 'ingested')
                 try:
-                    insert_optical_transients(database, minmjd, maxmjd)
+                    insert_optical_transients(database, minmjd, maxmjd, verbose)
                 except Exception as e:
                     print('Error making previous alerts' + str(e))
 
@@ -230,13 +230,10 @@ if __name__ == "__main__":
     dir = settings.GW_DIRECTORY  #  '/mnt/cephfs/lasair/mma/gw/'
     database = db_connect.remote()
 
+    verbose = True
     ningested = 0
-    if len(sys.argv) > 1:
-        otherId = sys.argv[1]
-        handle_event(dir, otherId)
-    else:
-        for file in sorted(os.listdir(dir)):
-            if file.startswith('S') or file.startswith('M'):
-                otherId = file
-                ningested += handle_event(database, dir, otherId, minmjd, maxmjd)
+    for file in sorted(os.listdir(dir)):
+        if file.startswith('S') or file.startswith('M'):
+            otherId = file
+            ningested += handle_event(database, dir, otherId, minmjd, maxmjd, verbose)
     print(ningested, 'event versions ingested')
