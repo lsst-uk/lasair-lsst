@@ -41,7 +41,7 @@ def mmagw(fltr, minmjd=None, maxmjd=None, verbose=False):
             skymaps.insert_skymap_hits(fltr.database, gw, skymaphits, verbose)
         totalnhits += nhits
 
-    return nhits
+    return totalnhits
 
 if __name__ == "__main__":
     class mockFilter:
