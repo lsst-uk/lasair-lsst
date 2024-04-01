@@ -142,10 +142,11 @@ def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
 
                 ningested += 1
                 print(otherId, version, 'ingested')
-                try:
+                if 1:
+#                try:
                     insert_optical_transients(database, minmjd, maxmjd, verbose)
-                except Exception as e:
-                    print('Error making previous alerts' + str(e))
+#                except Exception as e:
+#                    print('Error making previous alerts' + str(e))
 
                 # Set done flag so we dont come back
                 setDone(dir, otherId, version)

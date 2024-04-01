@@ -41,8 +41,6 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
     # here is the crossmatch
     result = moc.contains_lonlat(alertralist * u.deg, alertdelist * u.deg)
-    if verbose:
-        print('in MOC:', result)
 
     mocralist = []
     mocdelist = []
@@ -56,8 +54,8 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
             mocdelist      .append(alertdelist[ialert])
             mocdistancelist.append(alertdistancelist[ialert])
 
-    if verbose:
-        print(mocralist, mocdelist, mocdistancelist)
+#    if verbose:
+#        print(mocralist, mocdelist, mocdistancelist)
     # contour is the contour of the skymap on which the given point lies
     # gw_disttuples are pairs of (mean,stddev) on the diatance
     # the code is at https://skytag.readthedocs.io/
@@ -166,7 +164,7 @@ def insert_skymap_hits(database, gw, skymaphits):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distsigmaprobdens) VALUES\n"
+    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distsigma, probdens) VALUES\n"
     hitlist = []
     mw_id = gw['mw_id']
     did  = skymaphits['diaObjectId']
@@ -176,7 +174,7 @@ def insert_skymap_hits(database, gw, skymaphits):
     for (diaObjectId, contour, distsigma, probdens) in zip(did, sky, dist, prob):
         if distsigma: distsigma = '%.2f'%distsigma
         else:         distsigma = 'NULL'
-        hitlist.append('(%d,%d,%.4f,%s)' %  (mw_id, diaObjectId, contour, distsigma, probdens))
+        hitlist.append('(%d,%d,%.4f,%s,%.4f)' %  (mw_id, diaObjectId, contour, distsigma, probdens))
 
     query += ',\n'.join(hitlist)
 
