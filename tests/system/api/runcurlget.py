@@ -1,8 +1,7 @@
 import json
-import requests
 import os
 import sys
-sys.path.append('../../common')
+sys.path.append('../../../common')
 
 try:
     import settings
@@ -20,18 +19,22 @@ def curlgettest(input, method, case):
 
 
 def curltest(input, method, case):
+    try:
+        os.remove(out_file)
+    except FileNotFoundError:
+        pass
     arglist = []
     for k, v in input.items():
         arglist.append('%s=%s' % (k, v))
-    cmd = "curl -o %s " % out_file
+    cmd = "curl -fs -o %s " % out_file
     cmd += "--header 'Authorization: Token %s' " % token
     cmd += "--data '%s' " % '&'.join(arglist)
     cmd += "%s/%s/" % (url, method)
     print('** curl test of %s:%s' % (method, case))
     print(cmd)
     os.system(cmd)
-    computed = open(out_file).read()
     try:
+        computed = open(out_file).read()
         json.loads(computed)
         print('---> test succeeded\n\n')
     except:
