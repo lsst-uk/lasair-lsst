@@ -1,0 +1,106 @@
+{% load customtags %}
+
+<div class="card border-0 shadow h-100 p-3">
+
+
+    {% if header %}
+        <div class="card-header border-0 pb-1">
+            <div class="row d-flex">
+                <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                    <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                        {% include "includes/icons/icon_object_list.html" %}
+                    </div>
+                    <h2 class="h3 fw-extrabold mb-0 ps-2">{{header}}</h2>
+
+                </div>
+
+                {%if table|length > 0 and export_name %}
+                    <div class="col-1 float-end d-none d-sm-inline">
+                        <span class="float-end">
+
+                            <button class="btn btn-sm btn-dark dropdown-toggle border-white " type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                                {% include "includes/icons/icon_export.html" %}
+                                <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                            </button>
+                            <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                {%if table|length > 0%}
+                                    <li><a class="dropdown-item export" data-table="filter-results" href="#" data-type="csv" data-filename="{{export_name|replace:' |_'}}">CSV</a></li>
+                                    <li><a class="dropdown-item export" data-table="filter-results" href="#" data-type="json" data-filename="{{export_name|replace:' |_'}}">JSON</a></li>
+                                {% endif %}
+                            </ul>
+                        </span>
+                    </div>
+                {% endif %}
+
+                <div class="col-12 px-4">
+
+                    {% if table|length > 0 %}
+                        <small class="text-gray-500">
+                            {% if desc %}
+                                {{desc}}
+                            {% endif %}
+                        </small>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+
+    {% endif %}
+
+
+    <div class="card-body pt-0">
+
+        {% if table|length > 0 %}
+
+
+            <div class="table-responsive p-1 pt-0">
+
+	        {% if sortTable is None or sortTable != False %}
+                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
+                {%else%}
+                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
+                {% endif %}
+                <thead class="thead-light">
+                    <tr>
+                        {% for key in table.0.keys %}
+                            {% if key == "UTC" %}
+                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
+                            {%else%}
+                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
+                            {% endif %}
+                        {% endfor %}
+                    </tr></thead>
+                <tbody>
+                    {% for object in table %}
+
+                        <tr>
+                            {% for key in object.keys %}
+
+                                {% if key == "diaObjectId" %}
+                                    <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
+                                {% elif 'last detected' in key %}
+                                    <td>{{object|keyvalue:key|floatformat:1 }}</td>
+
+                                {%else%}
+				   <td>{{ object|keyvalue:key }}</td>
+                                {% endif %}
+
+                            {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            </div>
+
+        {% else %}
+            {% include "includes/widgets/widget_zero_matches_card.html" with info=zerotext %}
+        {% endif %}
+
+    </div>
+</div>
+

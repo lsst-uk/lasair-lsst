@@ -104,11 +104,12 @@ def mma_watchmap_detail(request, mw_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, tainow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.rPSFlux, o.gPSFlux, h.contour, h.probdens, h.distsigma, tainow()-o.maxTai as "last detected (days ago)"
 FROM mma_area_hits as h, objects AS o
 WHERE h.mw_id={mw_id}
 AND o.diaObjectId=h.diaObjectId
-limit {resultCap}
+ORDER BY h.contour
+LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
