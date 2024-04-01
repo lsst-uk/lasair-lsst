@@ -6,11 +6,12 @@ sys.path.append('../../../common')
 try:
     import settings
     token = settings.token
+    url = f"https://{settings.LASAIR_URL}/api"
 except:
     token = '4b762569bb349bd8d60f1bc7da3f39dbfaefff9a'
+    url = 'https://lasair-lsst.lsst.ac.uk/api'
 
 out_file = 'tmp.json'
-url = 'https://lasair-iris.roe.ac.uk/api'
 
 
 def curlgettest(input, method, case):
