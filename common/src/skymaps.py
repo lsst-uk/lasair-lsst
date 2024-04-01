@@ -59,7 +59,7 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     # contour is the contour of the skymap on which the given point lies
     # gw_disttuples are pairs of (mean,stddev) on the diatance
     # the code is at https://skytag.readthedocs.io/
-    contour, gw_disttuples, probdens = prob_at_location(
+    contour, gw_disttuples, probdens2 = prob_at_location(
         ra =mocralist,
         dec=mocdelist,
         mapPath=mapfilename(gw),
@@ -69,21 +69,22 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
     # Use the distance of the optical event, if we have it, to get the
     # number of sigma away from the GW mean distance
-    distsigma = []
+    probdens3 = []
     for i in range(len(mocobjlist)):
         (gw_distance, gw_diststddev) = gw_disttuples[i]
         if mocdistancelist[i]:
             ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
             if math.isinf(ds): ds = 100
-            distsigma.append(ds)
+            p3 = math.exp(-0.5*ds*ds) * probdens2[i]
+            probdens3.append(p3)
         else:
-            distsigma.append(None)
+            probdens3.append(None)
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
         'contour'    : contour, 
-        'distsigma'  : distsigma,
-        'probdens'   : probdens,
+        'probdens2'  : probdens2,
+        'probdens3'  : probdens3,
     }
     if verbose:
         print('get_skymap_hits: got %d' % len(skymaphits['diaObjectId']))
@@ -164,17 +165,17 @@ def insert_skymap_hits(database, gw, skymaphits):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distsigma, probdens) VALUES\n"
+    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, probdens2, probdens3) VALUES\n"
     hitlist = []
     mw_id = gw['mw_id']
     did  = skymaphits['diaObjectId']
     sky  = skymaphits['contour']
-    dist = skymaphits['distsigma']
-    prob = skymaphits['probdens']
-    for (diaObjectId, contour, distsigma, probdens) in zip(did, sky, dist, prob):
-        if distsigma: distsigma = '%.2f'%distsigma
-        else:         distsigma = 'NULL'
-        hitlist.append('(%d,%d,%.4f,%s,%.4f)' %  (mw_id, diaObjectId, contour, distsigma, probdens))
+    p2 = skymaphits['probdens2']
+    p3 = skymaphits['probdens3']
+    for (diaObjectId, contour, probdens2, probdens3) in zip(did, sky, p2, p3):
+        if probdens3: probdens3 = '%.2f'%probdens3
+        else:         probdens3 = 'NULL'
+        hitlist.append('(%d,%d,%.4f,%.4f,%s)' %  (mw_id, diaObjectId, contour, probdens2, probdens3))
 
     query += ',\n'.join(hitlist)
 

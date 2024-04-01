@@ -18,14 +18,14 @@ schema = {
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"
     },
     {
-      "name": "probdens",
+      "name": "probdens2",
       "type": "float",
-      "doc": "2D probability density, per steradian"
+      "doc": "2D probability density, RA/Dec skymap"
     },
     {
-      "name": "distsigma",
+      "name": "probdens3",
       "type": "float",
-      "doc": "number of std dev of alert from GW distance estimate"
+      "doc": "3D probability density, RA/Dec/Distance skymap"
     }
   ],
   "indexes": [
