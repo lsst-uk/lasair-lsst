@@ -19,10 +19,9 @@ Options:
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
 """
-import os,sys, time
-from datetime import datetime
+import sys
 from docopt import docopt
-from multiprocessing import Process, Manager
+from multiprocessing import Process
 
 from ingest import run_ingest
 
@@ -30,36 +29,44 @@ sys.path.append('../../common')
 import settings
 
 sys.path.append('../../common/src')
-import date_nid, slack_webhook, lasairLogging
+import slack_webhook, lasairLogging
 
-def setup_procs(n, nprocess, args):
+
+def setup_proc(n, nprocess, args):
     # Set up the logger
     lasairLogging.basicConfig(
-        filename = f"/home/ubuntu/logs/ingest-{n}.log",
-    #    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        filename=f"/home/ubuntu/logs/ingest-{n}.log",
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
         merge=True
     )
     log = lasairLogging.getLogger("ingest_runner")
     log.info(f"Starting ingest runner process {n} of {nprocess}")
-    run_ingest(args, log=log)
+    try:
+        nalerts = run_ingest(args, log=log)
+        log.debug(f'Ingested {nalerts} alerts')
+    except Exception as e:
+        log.exception('Exception')
+        log.critical('Unrecoverable error in ingest: ' + str(e))
 
-# Deal with arguments
-args = docopt(__doc__)
 
-# The nprocess argument is used in this module
-if args['--nprocess']:
-    nprocess = int(args['--nprocess'])
-else:
-    nprocess = 1
-print('ingest_runner with %d processes' % nprocess)
+if __name__ == '__main__':
 
-# Start up the processes
-process_list = []
-for i in range(nprocess):
-    p = Process(target=setup_procs, args=(i+1, nprocess, args))
-    process_list.append(p)
-    p.start()
+    # Deal with arguments
+    args = docopt(__doc__)
 
-for p in process_list:
-    p.join()
-print('ingest_runner exiting')
+    if '--nprocess' in args and args['--nprocess']:
+        nprocess = int(args['--nprocess'])
+    else:
+        nprocess = 1
+    print('ingest_runner with %d processes' % nprocess)
+
+    # Start up the processes
+    process_list = []
+    for i in range(nprocess):
+        p = Process(target=setup_proc, args=(i+1, nprocess, args))
+        process_list.append(p)
+        p.start()
+
+    for p in process_list:
+        p.join()
+    print('ingest_runner exiting')

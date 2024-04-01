@@ -13,9 +13,14 @@ schema = {
       "doc": "MMA area identifier"
     },
     {
-      "name": "skyprob",
+      "name": "contour",
       "type": "float",
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"
+    },
+    {
+      "name": "probdens",
+      "type": "float",
+      "doc": "2D probability density, per steradian"
     },
     {
       "name": "distsigma",
