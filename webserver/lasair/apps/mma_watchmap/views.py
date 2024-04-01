@@ -101,20 +101,19 @@ def mma_watchmap_detail(request, mw_id):
 
     resultCap = 1000
 
-    # GRAB ALL WATCHMAP MATCHES
+    # GRAB P2 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.rPSFlux, o.gPSFlux, h.contour, h.probdens, h.distsigma, tainow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.rPSFlux, o.gPSFlux, h.probdens2, tainow()-o.maxTai as "last detected (days ago)"
 FROM mma_area_hits as h, objects AS o
-WHERE h.mw_id={mw_id}
-AND o.diaObjectId=h.diaObjectId
-ORDER BY h.contour
-LIMIT {resultCap}
+WHERE h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
+AND h.probdens3 is NULL
+ORDER BY h.probdens2 DESC LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
-    table = cursor.fetchall()
-    count = len(table)
+    table2 = cursor.fetchall()
+    count = len(table2)
 
     if count == resultCap:
         limit = resultCap
@@ -130,14 +129,48 @@ LIMIT {resultCap}
     # ADD SCHEMA
     schema = get_schema_dict("objects")
 
-    if len(table):
-        for k in table[0].keys():
+    if len(table2):
+        for k in table2[0].keys():
+            if k not in schema:
+                schema[k] = "custom column"
+
+    # GRAB P3 WATCHMAP MATCHES
+    query_hit = f"""
+SELECT
+o.diaObjectId, o.rPSFlux, o.gPSFlux, h.probdens3, tainow()-o.maxTai as "last detected (days ago)"
+FROM mma_area_hits as h, objects AS o
+WHERE h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
+AND h.probdens3 is not NULL
+ORDER BY h.probdens3 DESC LIMIT {resultCap}
+"""
+
+    cursor.execute(query_hit)
+    table3 = cursor.fetchall()
+    count = len(table3)
+
+    if count == resultCap:
+        limit = resultCap
+
+        if settings.DEBUG:
+            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+        else:
+            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+        messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this mma_watchmap. But don't worry! You can access all results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
+    else:
+        limit = False
+
+    # ADD SCHEMA
+    schema = get_schema_dict("objects")
+
+    if len(table3):
+        for k in table2[0].keys():
             if k not in schema:
                 schema[k] = "custom column"
 
     return render(request, 'mma_watchmap/mma_watchmap_detail.html', {
         'mma_watchmap': mma_watchmap,
-        'table': table,
+        'table2': table2,
+        'table3': table3,
         'count': count,
         'schema': schema,
         'limit': limit})
