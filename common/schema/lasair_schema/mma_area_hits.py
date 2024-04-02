@@ -18,6 +18,11 @@ schema = {
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"
     },
     {
+      "name": "distance",
+      "type": "float",
+      "doc": "Distance (Mpc) to host galaxy"
+    },
+    {
       "name": "probdens2",
       "type": "float",
       "doc": "2D probability density, RA/Dec skymap"

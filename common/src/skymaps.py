@@ -70,6 +70,7 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     # Use the distance of the optical event, if we have it, to get the
     # number of sigma away from the GW mean distance
     probdens3 = []
+    distance = []
     for i in range(len(mocobjlist)):
         (gw_distance, gw_diststddev) = gw_disttuples[i]
         if mocdistancelist[i]:
@@ -77,12 +78,15 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
             if math.isinf(ds): ds = 100
             p3 = math.exp(-0.5*ds*ds) * probdens2[i]
             probdens3.append(p3)
+            distance.append(mocdistancelist[i])
         else:
             probdens3.append(None)
+            distance.append(None)
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
         'contour'    : contour, 
+        'distance'   : distance, 
         'probdens2'  : probdens2,
         'probdens3'  : probdens3,
     }
@@ -165,17 +169,22 @@ def insert_skymap_hits(database, gw, skymaphits):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, probdens2, probdens3) VALUES\n"
+    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distance, probdens2, probdens3) VALUES\n"
     hitlist = []
     mw_id = gw['mw_id']
-    did  = skymaphits['diaObjectId']
-    sky  = skymaphits['contour']
-    p2 = skymaphits['probdens2']
-    p3 = skymaphits['probdens3']
-    for (diaObjectId, contour, probdens2, probdens3) in zip(did, sky, p2, p3):
+
+    did = skymaphits['diaObjectId']
+    sky = skymaphits['contour']
+    dist= skymaphits['distance']
+    p2 =  skymaphits['probdens2']
+    p3 =  skymaphits['probdens3']
+    for (diaObjectId, contour, distance, probdens2, probdens3) in zip(did, sky, dist, p2, p3):
         if probdens3: probdens3 = '%.2f'%probdens3
         else:         probdens3 = 'NULL'
-        hitlist.append('(%d,%d,%.4f,%.4f,%s)' %  (mw_id, diaObjectId, contour, probdens2, probdens3))
+        if distance:  distance = '%.2f'%distance
+        else:         distance = 'NULL'
+        hitlist.append('(%d,%d,%.4f,%s,%.4f,%s)' % \
+            (mw_id, diaObjectId, contour, distance, probdens2, probdens3))
 
     query += ',\n'.join(hitlist)
 
