@@ -137,7 +137,7 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     # GRAB P3 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.rPSFlux, o.gPSFlux, h.probdens3, tainow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.rPSFlux, o.gPSFlux, h.distance, h.probdens3, tainow()-o.maxTai as "last detected (days ago)"
 FROM mma_area_hits as h, objects AS o
 WHERE h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
 AND h.probdens3 is not NULL

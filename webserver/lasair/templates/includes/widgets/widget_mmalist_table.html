@@ -33,15 +33,8 @@
                 {% endif %}
 
                 <div class="col-12 px-4">
-
-                    {% if table|length > 0 %}
                         <small class="text-gray-500">
-                            {% if desc %}
-                                {{desc}}
-                            {% endif %}
-                        </small>
-                    {% endif %}
-                </div>
+	
             </div>
         </div>
 
@@ -50,6 +43,13 @@
 
 
     <div class="card-body pt-0">
+        <div class="col-12 px-4">
+                <small class="text-gray-500">
+	This table shows LSST alerts after the GW alert time that are in the 90% contour 
+	of the skymap and do NOT have an associated host galaxy in Sherlock. 
+	They are ordered by 2D skymap probability density.
+                </small>
+        </div>
 
         {% if table2|length > 0 %}
             <div class="table-responsive p-1 pt-0">
@@ -102,6 +102,13 @@
 </div>
 <div class="card border-0 shadow h-100 p-3">
     <div class="card-body pt-0">
+        <div class="col-12 px-4">
+                <small class="text-gray-500">
+	This table shows LSST alerts after the GW alert time that are in the 90% contour 
+	of the skymap and have an associated host galaxy in Sherlock, with distance or 
+	redshift estimate.  They are ordered by 3D skymap probablity density.
+                </small>
+	</div>
 
         {% if table3|length > 0 %}
             <div class="table-responsive p-1 pt-0">
