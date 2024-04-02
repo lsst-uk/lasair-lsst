@@ -30,7 +30,7 @@ def curltest(input, method, case):
     arglist = []
     for k, v in input.items():
         arglist.append('%s=%s' % (k, v))
-    cmd = "curl -fs -o %s " % out_file
+    cmd = "curl --no-progress-meter -f -o %s " % out_file
     cmd += "--header 'Authorization: Token %s' " % token
     cmd += "--data '%s' " % '&'.join(arglist)
     cmd += "%s/%s/" % (url, method)
@@ -46,18 +46,22 @@ def curltest(input, method, case):
 
 
 def gettest(input, method, case):
+    try:
+        os.remove(out_file)
+    except FileNotFoundError:
+        pass
     arglist = []
     for k, v in input.items():
         arglist.append('%s=%s' % (k, v))
-    cmd = "wget -q -O %s " % out_file
+    cmd = "curl --no-progress-meter -f -o %s " % out_file
     cmd += "'%s/%s/?" % (url, method)
     cmd += "%s" % '&'.join(arglist)
     cmd += "&token=%s&format=json'" % token
     print('** get test of %s:%s' % (method, case))
     print(cmd)
     os.system(cmd)
-    computed = open(out_file).read()
     try:
+        computed = open(out_file).read()
         json.loads(computed)
         print('---> test succeeded\n\n')
     except:
