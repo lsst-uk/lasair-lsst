@@ -2,8 +2,20 @@
 
 ---
 
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get current git branch
+      ansible.builtin.command: git branch --show-current
+      register: git_tag
+  tags: always
+
 - hosts: all
   gather_facts: true
+  tasks:
+    - name: Set Lasair version
+      ansible.builtin.set_fact:
+        lasair_version: "{{ hostvars['localhost']['git_tag'].stdout }}"
   tags: always
 
 - hosts: all
