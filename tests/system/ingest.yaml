@@ -1,0 +1,43 @@
+# Ingest stage of pipeline test
+
+---
+
+- hosts: ingest, kafka
+  gather_facts: true
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+    - name: Ping hosts
+      ping:
+      tags: ping
+
+- hosts: ingest
+  gather_facts: false
+  tasks:
+    - name: ingest service running
+      ansible.builtin.assert:
+        that: ansible_facts.services['lasair-ingest.service'].state == "running"
+        fail_msg: Ingest service not running
+        success_msg: Ingest service running
+        quiet: true
+
+- hosts: kafka
+  gather_facts: false
+  tasks:
+    - name: kafka server listening on port 9092
+      wait_for:
+        port: 9092
+        timeout: 1
+          
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../../deploy/settings.yaml
+  vars:
+    kafka_settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
+  tasks:
+    - name: set kafka test str
+      set_fact: kafka_test_str="{{ lookup('community.general.random_string', special=false) }}"
+    - name: test kafka produce
+      shell: "echo {{ kafka_test_str }} | kafkacat -q -b {{ groups['kafka'][0] }}:9092 -t ingest_test -P -p 0"
+

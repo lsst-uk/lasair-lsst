@@ -1,0 +1,12 @@
+# Filter stage of pipeline test
+
+---
+
+# Gather facts
+- hosts: filter
+  gather_facts: true
+  tags: always
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+

@@ -1,0 +1,12 @@
+# Sherlock stage of pipeline test
+
+---
+
+# Gather facts
+- hosts: sherlock
+  gather_facts: true
+  tags: always
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
