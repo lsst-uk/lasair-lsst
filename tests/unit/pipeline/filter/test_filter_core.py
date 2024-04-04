@@ -203,7 +203,7 @@ class FilterTest(unittest.TestCase):
         fltr.log = mock_log
         result = fltr.transfer_to_main()
         self.assertEqual(result, False)
-        self.assertEqual(mock_execute_query.call_count, 4)
+        self.assertEqual(mock_execute_query.call_count, 5)
         mock_log.error.assert_called_once()
         mock_db_connect_remote.assert_called_once()
 
@@ -262,7 +262,7 @@ class FilterTest(unittest.TestCase):
         result = fltr.transfer_to_main()
         self.assertEqual(result, True)
         mock_log.error.assert_not_called()
-        self.assertEqual(mock_cursor.execute.call_count, 4)
+        self.assertEqual(mock_cursor.execute.call_count, 5)
         mock_consumer.commit.assert_called_once()
 
 
