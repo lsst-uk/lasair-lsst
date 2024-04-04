@@ -311,7 +311,8 @@ class Filter:
             'objects',
             'sherlock_classifications',
             'watchlist_hits',
-            'area_hits'
+            'area_hits',
+            'mma_area_hits',
         ]
 
         # Make a CSV file for each local table
