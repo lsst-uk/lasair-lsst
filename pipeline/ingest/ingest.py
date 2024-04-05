@@ -54,7 +54,7 @@ class ImageStore:
         elif fitsdir and len(fitsdir) > 0:
             self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
         else:
-            log.warn('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
+            log.warning('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
                      (use_cutoutcass, fitsdir))
             self.image_store = None
 
@@ -74,7 +74,7 @@ class ImageStore:
                     else:
                         self.image_store.putObject(cutoutId, imjd, content)
             else:
-                self.log.warn('WARNING: attempted to store images, but no image store set up')
+                self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
             self.log.error('ERROR in ingest/store_images: %s' % e)
             raise e
@@ -129,7 +129,7 @@ class Ingester:
 
         # set up image store in Cassandra or shared file system
         if self.image_store is None:
-            self.image_store = ImageStore()
+            self.image_store = ImageStore(log=self.log)
 
         # connect to cassandra cluster for alerts (not cutouts)
         if self.cassandra_session is None:
@@ -138,7 +138,7 @@ class Ingester:
                 self.cassandra_session = self.cluster.connect()
                 self.cassandra_session.set_keyspace('lasair')
             except Exception as e:
-                log.warn("ERROR in ingest/setup: Cannot connect to Cassandra", e)
+                log.warning("ERROR in ingest/setup: Cannot connect to Cassandra", e)
                 self.cassandra_session = None
                 raise e
 
@@ -432,7 +432,9 @@ def run_ingest(args, log=None):
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    rc = run_ingest(args)
+    logging.basicConfig(level=logging.INFO)
+    log = logging.getLogger("ingest")
+    rc = run_ingest(args, log)
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     sys.exit(rc)
