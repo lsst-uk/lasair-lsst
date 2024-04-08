@@ -5,26 +5,26 @@
 - hosts: ingest, kafka
   gather_facts: true
   tasks:
-    - name: Populate service facts
-      ansible.builtin.service_facts:
-    - name: Ping hosts
-      ping:
-      tags: ping
+#    - name: Populate service facts
+#      ansible.builtin.service_facts:
+#    - name: Ping hosts
+#      ping:
+#      tags: ping
 
-- hosts: ingest
-  gather_facts: false
-  tasks:
-    - name: ingest service running
-      ansible.builtin.assert:
-        that: ansible_facts.services['lasair-ingest.service'].state == "running"
-        fail_msg: Ingest service not running
-        success_msg: Ingest service running
-        quiet: true
+# - hosts: ingest
+#  gather_facts: false
+#  tasks:
+#    - name: ingest service running
+#      ansible.builtin.assert:
+#        that: ansible_facts.services['lasair-ingest.service'].state == "running"
+#        fail_msg: Ingest service not running
+#        success_msg: Ingest service running
+#        quiet: true
 
 - hosts: kafka
   gather_facts: false
   tasks:
-    - name: kafka server listening on port 9092
+    - name: Check kafka server is listening on port 9092
       wait_for:
         port: 9092
         timeout: 1
@@ -36,8 +36,22 @@
   vars:
     kafka_settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
   tasks:
-    - name: set kafka test str
-      set_fact: kafka_test_str="{{ lookup('community.general.random_string', special=false) }}"
-    - name: test kafka produce
-      shell: "echo {{ kafka_test_str }} | kafkacat -q -b {{ groups['kafka'][0] }}:9092 -t ingest_test -P -p 0"
+    - name: Delete ingest_test topic
+      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t ingest_test"
+    - name: Delete sherlock_test topic
+      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t sherlock_test"
+    - name: Pause for 10 seconds
+      ansible.builtin.pause:
+        seconds: 10
+    - name: Send test alerts
+      ansible.builtin.shell: "python3 json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/dp02/1998903343203755338.json ingest_test"
+      loop: "{{ range(groups['ingest'] | length) | list }}"
+
+- hosts: ingest
+  gather_facts: false
+  tasks:
+    - name: Run ingest
+      ansible.builtin.shell:
+        chdir: lasair-lsst/pipeline/ingest
+        cmd: "python3 ingest.py --maxalert=1 --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test"
 
