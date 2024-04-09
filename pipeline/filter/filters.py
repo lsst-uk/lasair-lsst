@@ -87,15 +87,15 @@ def run_queries(fltr, query_list, annotation_list=None):
 
         # normal case of streaming queries
         if annotation_list is None:
-            query_results = run_query(query, fltr)
+            query_results = run_query(query, fltr.database, fltr=fltr)
             n += dispose_query_results(query, query_results, fltr)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
-                msl_remote = db_connect.remote()
-                query_results = run_query(query, fltr,
-                                          ann['annotator'], ann['diaObjectId'])
+                # msl_remote = db_connect.remote()
+                query_results = run_query(query, fltr.database,
+                                          ann['annotator'], ann['diaObjectId'], fltr=fltr)
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
                 n += dispose_query_results(query, query_results, fltr)
@@ -125,7 +125,7 @@ def query_for_object(query, diaObjectId):
     return query
 
 
-def run_query(query, fltr, annotator=None, diaObjectId=None):
+def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
     if annotator and diaObjectId, checks if the query involves the annotator, 
@@ -133,6 +133,7 @@ def run_query(query, fltr, annotator=None, diaObjectId=None):
 
     Args:
         query:
+        msl:
         fltr:
         diaObjectId:
         annotator:
@@ -141,8 +142,6 @@ def run_query(query, fltr, annotator=None, diaObjectId=None):
     email = query['email']
     topic = query['topic_name']
     limit = 1000
-
-    msl = fltr.database
 
     sqlquery_real = query['real_sql']
     if annotator:
@@ -173,30 +172,30 @@ def run_query(query, fltr, annotator=None, diaObjectId=None):
                  "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
         print(error)
         print(sqlquery_real)
-        if fltr.send_email:
+        if not fltr or fltr.send_email:
             send_email(email, topic, error)
         return []
 
     return query_results
 
 
-def dispose_query_results(query, query_results, fltr):
+def dispose_query_results(query, query_results, fltr=None):
     """ Send out the query results by email or kafka, and ipdate the digest file
     """
     if len(query_results) == 0:
         return 0
     active = query['active']
-    digest,last_entry,last_email = fetch_digest(query['topic_name'])
+    digest, last_entry, last_email = fetch_digest(query['topic_name'])
     allrecords = (query_results + digest)[:10000]
 
     if active == 1:
         # send results by email if 24 hours has passed, returns time of last email send
-        if fltr.send_email:
+        if not fltr or fltr.send_email:
             last_email = dispose_email(allrecords, last_email, query)
 
     if active == 2:
         # send results by kafka on given topic
-        if fltr.send_kafka:
+        if not fltr or fltr.send_kafka:
             dispose_kafka(query_results, query['topic_name'])
 
     utcnow = datetime.datetime.utcnow()
