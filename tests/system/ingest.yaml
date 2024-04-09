@@ -38,8 +38,10 @@
   tasks:
     - name: Delete ingest_test topic
       ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t ingest_test"
+      ignore_errors: true
     - name: Delete sherlock_test topic
       ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t sherlock_test"
+      ignore_errors: true
     - name: Pause for 10 seconds
       ansible.builtin.pause:
         seconds: 10
@@ -49,9 +51,14 @@
 
 - hosts: ingest
   gather_facts: false
+  serial: 1
   tasks:
     - name: Run ingest
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/ingest
         cmd: "python3 ingest.py --maxalert=1 --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test"
+      register: ingest_result
+    - name: Result
+      ansible.builtin.debug:
+        var: ingest_result
 
