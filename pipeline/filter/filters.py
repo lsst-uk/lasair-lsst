@@ -94,7 +94,7 @@ def run_queries(fltr, query_list, annotation_list=None):
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, fltr.database,
+                query_results = run_query(query, fltr,
                                           ann['annotator'], ann['diaObjectId'])
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
