@@ -5,11 +5,19 @@ Usage:
     ingest.py [--maxalert=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
+              [--local_db=NAME]
+              [--send_email=BOOL]
+              [--send_kafka=BOOL]
+              [--transfer=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --local_db=NAME    Name of local database to use [default: ztf]
+    --send_email=BOOL  Send email [default: True]
+    --send_kafka=BOOL  Send kafka [default: True]
+    --transfer=BOOL    Transfer results to main [default: True]
 """
 
 import os
@@ -55,10 +63,18 @@ class Filter:
     def __init__(self,
                  topic_in: str = 'ztf_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
-                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS):
+                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 local_db: str = None,
+                 send_email: bool = True,
+                 send_kafka: bool = True,
+                 transfer: bool = True):
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
+        self.local_db = local_db or 'ztf'
+        self.send_email = send_email
+        self.send_kafka = send_kafka
+        self.transfer = transfer
 
         self.consumer = None
         self.database = None
@@ -81,7 +97,7 @@ class Filter:
         # set up the link to the local database
         if not self.database or not self.database.is_connected():
             try:
-                self.database = db_connect.local()
+                self.database = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
@@ -553,14 +569,15 @@ class Filter:
                 self.log.error("ERROR in filter/fast_annotation_filters")
 
             # build CSV file with local database and transfer to main
-            timers['ftransfer'].on()
-            commit = self.transfer_to_main()
-            timers['ftransfer'].off()
-            self.log.info('Batch ended')
-            if not commit:
-                self.log.info('Transfer to main failed, no commit')
-                time.sleep(600)
-                return 0
+            if self.transfer:
+                timers['ftransfer'].on()
+                commit = self.transfer_to_main()
+                timers['ftransfer'].off()
+                self.log.info('Batch ended')
+                if not commit:
+                    self.log.info('Transfer to main failed, no commit')
+                    time.sleep(600)
+                    return 0
 
         # Write stats for the batch
         timers['ftotal'].off()
@@ -573,11 +590,16 @@ if __name__ == "__main__":
     lasairLogging.basicConfig(stream=sys.stdout)
     args = docopt(__doc__)
 
-    topic_in = args.get('--topic_in') or  'ztf_sherlock'
-    group_id = args.get('--group_id') or  settings.KAFKA_GROUPID
+    topic_in = args.get('--topic_in') or 'ztf_sherlock'
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
+    local_db = args.get('--local_db')
+    send_email = bool(args.get('--send_email'))
+    send_kafka = bool(args.get('--send_kafka'))
+    transfer = bool(args.get('--transfer'))
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer)
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
         if n_alerts == 0:  # process got no alerts, so sleep a few minutes
