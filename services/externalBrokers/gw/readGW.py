@@ -100,56 +100,45 @@ def insert_gw_alert(database, dir, otherId, version):
 
     cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
+    last_mw_id = cursor.lastrowid
     cursor.close()
     database.commit()
 
-    # If this function returns a string, it is a reason why the event was rejected
-    return ''
-
-def insert_optical_transients(database, minmjd, maxmjd, verbose=False):
-    """ Fetch the optical alerts in the time interval 
-    for the last-inserted GW alert.
-    Which is presumably the one with the max mw_id
-    """
-    cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT max(mw_id) AS mw_id FROM mma_areas'
-    cursor.execute (query)
-    for row in cursor:
-        mw_id = row['mw_id']
-
-    gw = skymaps.fetch_skymap_by_id(database, mw_id)
+    gw = {'otherId': otherId,
+          'version': version,
+          'mw_id'  : last_mw_id,
+        }
     skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd, verbose)
-    if len(skymaphits['diaObjectId']) > 0:
+    nhits = len(skymaphits['diaObjectId'])
+    if nhits > 0:
         skymaps.insert_skymap_hits(database, gw, skymaphits)
 
+    return ''
+
 def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
+    nhits = 0
     ningested = 0
     for version in os.listdir(dir+'/'+otherId):
         if version.startswith('20'):
 
             # Only look at GW alets whe havent seen before
             if not getDone(dir, otherId, version):
-                try:
-                    message = insert_gw_alert(database, dir, otherId, version)
-                except Exception as e:
-                    print('Error inserting gw alert in database' + str(e))
-
-                # message says why it was rejected
-                if len(message) > 0:
-                    print(otherId, version, 'not ingested', message)
-                    setDone(dir, otherId, version)
-                    continue
-
-                ningested += 1
-                print(otherId, version, 'ingested')
-                if 1:
-#                try:
-                    insert_optical_transients(database, minmjd, maxmjd, verbose)
-#                except Exception as e:
-#                    print('Error making previous alerts' + str(e))
-
                 # Set done flag so we dont come back
                 setDone(dir, otherId, version)
+
+                if 1:
+#                try:
+                    message = insert_gw_alert(database, dir, otherId, version)
+#                except Exception as e:
+#                    print('Error inserting gw alert in database' + str(e))
+
+                # message says why it was rejected
+                if len(message) == 0:
+                    ningested += 1
+                    print(otherId, version, 'ingested')
+                else:
+                    print(otherId, version, 'not ingested')
+
     return ningested
 
 def mjd2date(mjd):
