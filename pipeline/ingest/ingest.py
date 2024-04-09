@@ -437,5 +437,6 @@ if __name__ == "__main__":
     rc = run_ingest(args, log)
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
-    sys.exit(rc)
+    print(f"Ingested {rc} total alerts")
+    sys.exit(0)
 
