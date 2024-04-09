@@ -1,12 +1,25 @@
 # Sherlock stage of pipeline test
+# Assumes that ingest stage has already run and therefore sherlock_test topic is populated with alerts
 
 ---
 
 # Gather facts
-- hosts: sherlock
-  gather_facts: true
-  tags: always
-  tasks:
-    - name: Populate service facts
-      ansible.builtin.service_facts:
+#- hosts: sherlock
+#  gather_facts: true
+#  tags: always
+#  tasks:
+#    - name: Populate service facts
+#      ansible.builtin.service_facts:
 
+- hosts: sherlock
+  gather_facts: false
+  serial: 1
+  tasks:
+    - name: Run sherlock
+      ansible.builtin.shell:
+        chdir: lasair-lsst/pipeline/sherlock
+        cmd: "python3 wrapper.py -b {{ groups['kafka'][0] }}:9092 -g sherlock_test_1 -e -i sherlock_test -o filter_test -n 1 -m 1 -s sherlock_settings.yaml"
+      register: sherlock_result
+    - name: Result
+      ansible.builtin.debug:
+        var: sherlock_result
