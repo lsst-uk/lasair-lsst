@@ -33,6 +33,7 @@
         - fink-client
         - lasair
         - hmpty
+        - skytag
 
 - name: Make sure the repo is up to date
   git: 

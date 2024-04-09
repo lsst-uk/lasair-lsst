@@ -1,26 +1,29 @@
 import sys
-sys.path.append('../common')
-from src import objectStore, cutoutStore
-from django.shortcuts import get_object_or_404
-from django.http import HttpResponse, HttpResponseRedirect
-from django.template.context_processors import csrf
-from django.http import JsonResponse
-import dateutil.parser as dp
-from datetime import datetime, timedelta
 import os
 import time
 import json
 import math
 import ephem
 import json
-import pandas as pd
 import base64
+
+sys.path.append('../common')
+from src import objectStore, cutoutStore
 from src import db_connect
+import settings as lasair_settings
+
+from django.shortcuts import get_object_or_404
+from django.http import HttpResponse, HttpResponseRedirect
+from django.template.context_processors import csrf
+from django.http import JsonResponse
+#from django.conf import settings as django_settings
+
+import dateutil.parser as dp
+from datetime import datetime, timedelta
 from datetime import date
+import pandas as pd
 from lasair.lightcurves import lightcurve_fetcher
 from astropy.time import Time
-import settings
-
 
 def datetime_converter(o):
     """convert date to string
@@ -164,7 +167,7 @@ def objjson(diaObjectId, full=False):
     TNS = {}
     query = 'SELECT * '
     query += 'FROM crossmatch_tns JOIN watchlist_hits ON crossmatch_tns.tns_name = watchlist_hits.name '
-    query += 'WHERE watchlist_hits.wl_id=%d AND watchlist_hits.diaObjectId=%s' % (settings.TNS_WATCHLIST_ID, diaObjectId)
+    query += 'WHERE watchlist_hits.wl_id=%d AND watchlist_hits.diaObjectId=%s' % (lasair_settings.TNS_WATCHLIST_ID, diaObjectId)
 
     def ordinal_suffix(day):
         if 3 < day < 21 or 23 < day < 31:
@@ -186,14 +189,15 @@ def objjson(diaObjectId, full=False):
             elif v:
                 TNS[k] = v
 
-    LF = lightcurve_fetcher(cassandra_hosts=settings.CASSANDRA_HEAD)
+    LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
     (diaSources, diaForcedSources) = LF.fetch(diaObjectId, full=full)
     LF.close()
 
     count_all_diaSources = len(diaSources)
     count_all_diaForcedSources = len(diaForcedSources)
-    if not settings.USE_CUTOUTCASS:
-        image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+    # HACK HACK
+#    if not lasair_settings.USE_CUTOUTCASS:
+#        image_store = objectStore.objectStore(suffix='fits', fileroot=lasair_settings.IMAGEFITS)
     image_urls = {}
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
@@ -211,17 +215,18 @@ def objjson(diaObjectId, full=False):
         diaSource['image_urls'] = {}
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            if settings.USE_CUTOUTCASS:
-                url = 'https://%s/fits/%d/%s' % (settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
-            else:
-                filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
-                if os.path.exists(filename):
-                    url = filename.replace(
-                        '/mnt/cephfs/lasair', f'https://{settings.LASAIR_URL}/lasair/static')
-                else:
-                    url = None
-            if url:
-                diaSource['image_urls'][cutoutType] = url
+# HACK HACK
+#        if lasair_settings.USE_CUTOUTCASS:
+#                url = 'https://%s/fits/%d/%s' % (lasair_settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
+#            else:
+#                filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
+#                if os.path.exists(filename):
+#                    url = filename.replace(
+#                        '/mnt/cephfs/lasair', f'https://{lasair_settings.LASAIR_URL}/lasair/static')
+#                else:
+#                    url = None
+#            if url:
+#                diaSource['image_urls'][cutoutType] = url
 
     if count_all_diaSources == 0:
         return None
@@ -328,14 +333,14 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    if settings.USE_CUTOUTCASS:
+    if lasair_settings.USE_CUTOUTCASS:
         osc = cutoutStore.cutoutStore()
         try:
             fitsdata = osc.getCutout(candid_cutoutType, imjd)
         except:
             fitsdata = ''
     else:
-        image_store = objectStore.objectStore(suffix='fits', fileroot=settings.IMAGEFITS)
+        image_store = objectStore.objectStore(suffix='fits', fileroot=lasair_settings.IMAGEFITS)
         try:
             fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
         except:

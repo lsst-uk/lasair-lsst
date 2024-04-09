@@ -12,12 +12,12 @@ Usage:
               [--topic_out=TOUT]
 
 Options:
-    --maxalert=MAX     Number of alerts to process, default is infinite
-    --nprocess=nprocess  Number of processes
-    --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use, or
-    --nid=NID          ZTF night number to use (default today)
-    --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --maxalert=MAX       Number of alerts to process, default is infinite
+    --nprocess=nprocess  Number of processes [default: 1]
+    --group_id=GID       Group ID for kafka, default is from settings
+    --topic_in=TIN       Kafka topic to use, or
+    --nid=NID            ZTF night number to use (default today)
+    --topic_out=TOUT     Kafka topic for output [default:ztf_sherlock]
 """
 import sys
 from docopt import docopt
@@ -54,7 +54,7 @@ if __name__ == '__main__':
     # Deal with arguments
     args = docopt(__doc__)
 
-    nprocess = int(args.get('--nprocess', 1))
+    nprocess = int(args['--nprocess'])
     print('ingest_runner with %d processes' % nprocess)
 
     # Start up the processes

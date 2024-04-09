@@ -21,25 +21,9 @@
             </div>
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this watchmap so far." table=table header="MMA Watchmap Results"  desc="A list of objects located within the '"|add:mma_watchmap.otherId|add:"' mma_watchmap"  export_name=mma_watchmap.otherId|add:"_watchmap_results"%}
+                {% include "includes/widgets/widget_mmalist_table.html" with zerotext="Zero objects have been matched against this watchmap so far." table=table desc="A list of objects located within the '"|add:mma_watchmap.otherId|add:"' mma_watchmap"  export_name=mma_watchmap.otherId|add:"_watchmap_results"%}
             </div>
         </div>
     </div>
 
-
 {% endblock %}
-
-{% block javascripts %}
-    <script>
-        {% if form.errors %}
-            $(document).ready(function(){
-                $("#editWatchmapForm").modal('show');
-            });
-        {% endif %}
-        {% if duplicateForm.errors %}
-            $(document).ready(function(){
-                $("#duplicateWatchmapForm").modal('show');
-            });
-        {% endif %}
-    </script>
-{% endblock javascripts %}

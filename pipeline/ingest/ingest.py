@@ -129,7 +129,7 @@ class Ingester:
 
         # set up image store in Cassandra or shared file system
         if self.image_store is None:
-            self.image_store = ImageStore()
+            self.image_store = ImageStore(log=log)
 
         # connect to cassandra cluster for alerts (not cutouts)
         if self.cassandra_session is None:

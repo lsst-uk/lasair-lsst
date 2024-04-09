@@ -6,46 +6,6 @@ from src import db_connect
 import astropy.units as u
 from django.shortcuts import render
 
-
-def add_mma_watchmap_metadata(
-        mma_watchlists,
-        remove_duplicates=False):
-    """*add extra metadata to the mma_watchlists and return a list of mma_watchlist dictionaries*
-
-    **Key Arguments:**
-
-    - `mma_watchlists` -- a list of mma_watchlist objects
-    - `remove_duplicates` -- remove duplicate mma_watchlists. Default *False*
-
-    **Usage:**
-
-    ```python
-    mma_watchlistDicts = add_mma_watchmap_metadata(mma_watchlists)
-    ```           
-    """
-
-    msl = db_connect.readonly()
-    cursor = msl.cursor(buffered=True, dictionary=True)
-
-    updatedWatchlists = []
-    mocFiles = []
-    for wlDict, wl in zip(mma_watchlists.values(), mma_watchlists):
-        if wlDict["moc"] not in mocFiles or not remove_duplicates:
-            # ADD LIST COUNT
-            # wlDict['count'] = WatchlistCone.objects.filter(wl_id=wlDict['wl_id']).count()
-
-            # ADD LIST USER
-            wlDict['user'] = f"{wl.user.first_name} {wl.user.last_name}"
-            wlDict['profile_image'] = wl.user.profile.image_b64
-            updatedWatchlists.append(wlDict)
-            mocFiles.append(wlDict["moc"])
-
-            cursor.execute(f'SELECT count(*) AS count FROM area_hits WHERE ar_id={wlDict["ar_id"]}')
-            for row in cursor:
-                wlDict['count'] = row['count']
-    return updatedWatchlists
-
-
 def make_image_of_MOC(fits_bytes, request):
     """*generate a skyplot of the MOC file*
 

@@ -50,3 +50,7 @@ RUN pip3 install \
   gkdbutils \
   cassandra-driver \
   fastavro
+
+# required for MMA
+RUN pip3 install \
+  skytag
