@@ -6,7 +6,6 @@ import numpy as np
 
 filterNames  = ['u', 'g', 'r', 'i', 'z', 'y']
 filterColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
-filterFids   = [1, 2]
 
 def object_difference_lightcurve(
     objectData
@@ -321,7 +320,7 @@ def object_difference_lightcurve_forcedphot(
         zerolinecolor='rgba(60, 60, 60, 0.8)',
         mirror=True,
         ticks='inside',
-        title="Difference Flux (μJy)",
+        title="Difference Flux (nanoJy)",
         title_font_size=16,
         secondary_y=False
     )
@@ -484,22 +483,6 @@ def convert_objectdata_to_dataframes(
         # SORT BY COLUMN NAME
         forcedDF.sort_values(['midpointtai'],
                              ascending=[True], inplace=True)
-        # REMOVE NAN VALUES (MAGIC NUMBER -99999)
-
-# question: don't know how to do this for LSST 
-#        mask = ((forcedDF['procstatus'].astype(int) == 0) & \
-#                (forcedDF['scisigpix'].astype(float) < 25) & \
-#                (forcedDF['sciinpseeing'].astype(float) < 4))
-#        forcedDF = forcedDF.loc[mask]
-
-        # CONVERT TO μJy
-
-# question: whats going on here
-#        forcedDF["microjansky"] = forcedDF['forcediffimflux'] \
-#                / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
-#        forcedDF["microjanskyerr"] = forcedDF['forcediffimfluxunc'] \
-#                / (np.power(10, 0.4 * (forcedDF['magzpsci'] - 23.9)))
-
 
 # Standard naming
         forcedDF["filtername"] = forcedDF['band']

@@ -1,0 +1,60 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+
+
+{% block title %}
+    Multi Messenger Watchmaps
+{% endblock title %}
+{% block content %}
+
+
+    <div class="container">
+
+        <div class="row mt-4">
+            <div class="col-12  mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <div class="row d-flex">
+
+
+                            <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                                <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                                    {% include "includes/icons/icon_watchmap.html" %}
+                                </div>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Multi Messenger Watchmaps</h2>
+                            </div>
+
+                        <div class="col-12 px-4">
+                            <small class="text-gray-500">
+                                A multi-messenger watchmap is based on a region file (MOC format) which defines a specific portion of the sky. Each transient falling within that region of the sky is flagged as <em>matched</em> against that watchmap.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="col-12 mb-4">
+            {% include "includes/widgets/widget_mma_watchmap_table.html" with type="public" position="auto" %}
+        </div>
+
+    </div>
+    </div>
+    </div>
+
+
+
+{% endblock %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+    <script>
+        {% if form.errors %}
+            $(document).ready(function(){
+                $("#createMmaWatchmapForm").modal('show');
+            });
+        {% endif %}
+    </script>
+{% endblock javascripts %}

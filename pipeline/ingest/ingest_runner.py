@@ -12,61 +12,58 @@ Usage:
               [--topic_out=TOUT]
 
 Options:
-    --maxalert=MAX     Number of alerts to process, default is infinite
-    --nprocess=nprocess  Number of processes
-    --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use, or
-    --nid=NID          ZTF night number to use (default today)
-    --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --maxalert=MAX       Number of alerts to process, default is infinite
+    --nprocess=nprocess  Number of processes [default: 1]
+    --group_id=GID       Group ID for kafka, default is from settings
+    --topic_in=TIN       Kafka topic to use, or
+    --nid=NID            ZTF night number to use (default today)
+    --topic_out=TOUT     Kafka topic for output [default:ztf_sherlock]
 """
-import os,sys, time
-from datetime import datetime
+import sys
 from docopt import docopt
-from multiprocessing import Process, Manager
+from multiprocessing import Process
 
-log = None
 from ingest import run_ingest
 
 sys.path.append('../../common')
 import settings
 
 sys.path.append('../../common/src')
-import date_nid, slack_webhook, lasairLogging
+import slack_webhook, lasairLogging
 
-# Set up the logger
-lasairLogging.basicConfig(
-    filename='/home/ubuntu/logs/ingest.log',
-    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
-    merge=True
-)
-log = lasairLogging.getLogger("ingest_runner")
 
-# Our processes
-process_list = []
+def setup_proc(n, nprocess, args):
+    # Set up the logger
+    lasairLogging.basicConfig(
+        filename=f"/home/ubuntu/logs/ingest-{n}.log",
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
+    log = lasairLogging.getLogger("ingest_runner")
+    log.info(f"Starting ingest runner process {n} of {nprocess}")
+    try:
+        nalerts = run_ingest(args, log=log)
+        log.debug(f'Ingested {nalerts} alerts')
+    except Exception as e:
+        log.exception('Exception')
+        log.critical('Unrecoverable error in ingest: ' + str(e))
 
-# Deal with arguments
-args = docopt(__doc__)
 
-# The nprocess argument is used in this module
-if args['--nprocess']:
+if __name__ == '__main__':
+
+    # Deal with arguments
+    args = docopt(__doc__)
+
     nprocess = int(args['--nprocess'])
-    log.error('Sorry the multiprocessing option doesnt work yet')
-    sys.exit()
-else:
-    nprocess = 1
-log.info('ingest_runner with %d processes' % nprocess)
+    print('ingest_runner with %d processes' % nprocess)
 
-# Start up the processes
-process_list = []
-manager = Manager()
-t = time.time()
-log.info('Starting processes')
-for t in range(nprocess):
-    p = Process(target=run_ingest, args=(args,))
-    process_list.append(p)
-    p.start()
+    # Start up the processes
+    process_list = []
+    for i in range(nprocess):
+        p = Process(target=setup_proc, args=(i+1, nprocess, args))
+        process_list.append(p)
+        p.start()
 
-log.info('Wait for processes to exit')
-for p in process_list:
-    p.join()
-log.info('All done, ingest_runner exiting')
+    for p in process_list:
+        p.join()
+    print('ingest_runner exiting')

@@ -7,14 +7,14 @@ gets all the queries from the database
 (2) run_annotation_queries(query_list): 
 may be called to get all the recent fast annotations 
 
-(3) run_queries(query_list, annotation_list=None):
+(3) run_queries(batch, query_list, annotation_list=None):
 Uses query_list and possibly annotation_list and runs all the queries against 
 local, or those involving annotator against main databaase
 
-(4) query_for_object(query, objectId):
-If doing fast annotations, convert a given query with specific objectId
+(4) query_for_object(query, diaObjectId):
+If doing fast annotations, convert a given query with specific diaObjectId
 
-(5) run_query(query, msl, annotator=None, objectId=None):
+(5) run_query(query, msl, annotator=None, diaObjectId=None):
 Run a specific query and return query_results
 
 (6) dispose_query_results(query, query_results):
@@ -35,18 +35,15 @@ Deal with the query results
 
 """
 
-import os, sys
-sys.path.append('../../common')
-import time
-import json
-import settings
-from src import db_connect
+import os, sys, time, json, datetime, smtplib
 from confluent_kafka import Consumer, Producer, KafkaError
-import datetime
-import smtplib
-#from email.message import EmailMessage
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+
+sys.path.append('../../common')
+import settings
+from src import db_connect
+
 
 def fetch_queries():
     """fetch_queries.
@@ -56,7 +53,7 @@ def fetch_queries():
     msl_remote = db_connect.remote()
 
     # Fetch all the stored queries from the main database
-    cursor   = msl_remote.cursor(buffered=True, dictionary=True)
+    cursor = msl_remote.cursor(buffered=True, dictionary=True)
     query = 'SELECT mq_id, user, name, email, tables, active, real_sql, topic_name '
     query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND active > 0'
     cursor.execute(query)
@@ -76,66 +73,42 @@ def fetch_queries():
         query_list.append(query_dict)
     return query_list
 
-def run_annotation_queries(query_list):
-    """run_annotation_queries.
-    Pulls the recent content from the kafka topic 'ztf_annotations' 
-    Each message has an annotator/topic name, and the objectId that was annotated.
-    Queries that have that annotator should run against that object
-    """
-    annotation_list = []
-    conf = {
-        'bootstrap.servers':   settings.KAFKA_SERVER,
-        'group.id':            settings.ANNOTATION_GROUP_ID,
-        'default.topic.config': {'auto.offset.reset': 'earliest'}
-    }
-    streamReader = Consumer(conf)
-    topic = 'ztf_annotations'
-    streamReader.subscribe([topic])
-    while 1:
-        msg = streamReader.poll(timeout=5)
-        if msg == None: break
-        try:
-            ann = json.loads(msg.value())
-            annotation_list.append(ann)
-        except:
-            continue
-    streamReader.close()
-    #print('got ', annotation_list)
-    run_queries(query_list, annotation_list)
 
-def run_queries(query_list, annotation_list=None):
+def run_queries(fltr, query_list, annotation_list=None):
     """
     When annotation_list is None, it runs all the queries against the local database
     When not None, runs some queires agains a specific object, using the main database
     """
-    try:
-        msl_local = db_connect.local()
-    except:
-        print('ERROR in filter/run_active_queries: cannot connect to local database')
-        sys.stdout.flush()
 
+    ntotal = 0
     for query in query_list:
         n = 0
         t = time.time()
 
         # normal case of streaming queries
-        if annotation_list == None:  
-            query_results = run_query(query, msl_local)
+        if annotation_list is None:
+            query_results = run_query(query, fltr.database)
             n += dispose_query_results(query, query_results)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
                 msl_remote = db_connect.remote()
-                query_results = run_query(query, msl_remote, ann['annotator'], ann['objectId'])
+                query_results = run_query(query, fltr.database, \
+                                          ann['annotator'], ann['diaObjectId'])
+                print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
+                print('results:', query_results)
                 n += dispose_query_results(query, query_results)
 
         t = time.time() - t
         if n > 0:
             print('   %s got %d in %.1f seconds' % (query['topic_name'], n, t))
             sys.stdout.flush()
+        ntotal += n
+    return ntotal
 
-def query_for_object(query, objectId):
+
+def query_for_object(query, diaObjectId):
     """ modifies an existing query to add a new constraint for a specific object.
     We already know this query comes from multiple tables: objects and annotators,
     so we know there is an existing WHERE clause. Can add the new constraint to the end,
@@ -143,24 +116,26 @@ def query_for_object(query, objectId):
 
     Args:
         query: the original query, as generated from the Lasair query builder
-        objectId: the object that is the new constraint
+        diaObjectId: the object that is the new constraint
     """
     tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
-    query = tok[0] + (' AND objects.objectId="%s" ' % objectId)
+    query = tok[0] + (' AND objects.diaObjectId=%s ' % str(diaObjectId))
     if len(tok) == 2: # has order clause, add it back
         query += ' ORDER BY ' + tok[1]
     return query
 
-def run_query(query, msl, annotator=None, objectId=None):
+
+def run_query(query, msl, annotator=None, diaObjectId=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
-    if annotator and objectId, checks if the query involves the annotator, 
+    if annotator and diaObjectId, checks if the query involves the annotator, 
         and if so, runs the query for the given object on main database
 
     Args:
         query:
         msl:
-        annotation_list:
+        diaObjectId:
+        annotator:
     """
     active = query['active']
     email = query['email']
@@ -173,10 +148,10 @@ def run_query(query, msl, annotator=None, objectId=None):
         if not annotator in query['tables']:
             return []
         # run the query against main for this specific object that has been annotated
-        sqlquery_real = query_for_object(sqlquery_real, objectId)
+        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
-    sqlquery_real = ('SET STATEMENT max_statement_time=10 FOR %s LIMIT %d' % (sqlquery_real, limit))
+    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' % (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
 
     cursor = msl.cursor(buffered=True, dictionary=True)
     n = 0
@@ -187,7 +162,7 @@ def run_query(query, msl, annotator=None, objectId=None):
         for record in cursor:
             recorddict = dict(record)
             recorddict['UTC'] = utc
-            #print(recorddict)
+            # print(recorddict)
             query_results.append(recorddict)
             n += 1
     except Exception as e:
@@ -198,6 +173,7 @@ def run_query(query, msl, annotator=None, objectId=None):
         return []
 
     return query_results
+
 
 def dispose_query_results(query, query_results):
     """ Send out the query results by email or kafka, and ipdate the digest file
@@ -220,6 +196,7 @@ def dispose_query_results(query, query_results):
     write_digest(allrecords, query['topic_name'], utcnow, last_email)
     return len(query_results)
 
+
 def write_digest(allrecords, topic_name, last_entry, last_email):
     # update the digest file
     last_email_text = last_email.strftime("%Y-%m-%d %H:%M:%S")
@@ -236,6 +213,7 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
     os.chmod(filename, 0O666)
     f.write(digestdict_text)
     f.close()
+
 
 def fetch_digest(topic_name):
     filename = settings.KAFKA_STREAMS +'/'+ topic_name
@@ -254,30 +232,32 @@ def fetch_digest(topic_name):
     last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
     return digest,last_entry,last_email
 
-def dispose_email(allrecords, last_email, query):
+
+def dispose_email(allrecords, last_email, query, force=False):
     """ Send out email notifications
     """
     utcnow = datetime.datetime.utcnow()
-    delta = (utcnow - last_email)
-    delta = delta.days + delta.seconds/86400.0
-    # send a message at most every 24 hours
-    # delta is number of days since last email went out
-    if delta < 1.0:
-        return last_email
+    if not force:
+        delta = (utcnow - last_email)
+        delta = delta.days + delta.seconds/86400.0
+        # send a message at most every 24 hours
+        # delta is number of days since last email went out
+        if delta < 1.0:
+            return last_email
     print('   --- send email to %s' % query['email'])
     topic = query['topic_name']
     sys.stdout.flush()
     query_url = '/query/%d/' % (query['mq_id'])
-    message      = 'Your active query with Lasair on topic %s\n' % topic
+    message = 'Your active query with Lasair on topic %s\n' % topic
     message_html = 'Your active query with Lasair on <a href=%s>%s</a><br/>' % (query_url, topic)
     for out in allrecords: 
         out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
         # gather all records that have accumulated since last email
-        if out_time > last_email:
-            if 'objectId' in out:
-                objectId = out['objectId']
-                message      += objectId + '\n'
-                message_html += '<a href="%s/object/%s/">%s</a><br/>' % (settings.LASAIR_URL, objectId, objectId)
+        if force or out_time > last_email:
+            if 'diaObjectId' in out:
+                diaObjectId = str(out['diaObjectId'])
+                message      += diaObjectId + '\n'
+                message_html += '<a href="%s/objects/%s/">%s</a><br/>' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
                 jsonout = json.dumps(out, default=datetime_converter)
                 message += jsonout + '\n'
@@ -285,10 +265,11 @@ def dispose_email(allrecords, last_email, query):
         send_email(query['email'], topic, message, message_html)
         return utcnow
     except Exception as e:
-        print('ERROR in filter/run_active_queries: Cannot send email!')
+        print('ERROR in filter/run_active_queries: Cannot send email!' + str(e))
         print(e)
         sys.stdout.flush()
         return last_email
+
 
 def send_email(email, topic, message, message_html=''):
     """send_email.
@@ -297,6 +278,7 @@ def send_email(email, topic, message, message_html=''):
         email:
         topic:
         message:
+        message_html:
     """
     msg = MIMEMultipart('alternative')
 
@@ -310,6 +292,7 @@ def send_email(email, topic, message, message_html=''):
     s = smtplib.SMTP('localhost')
     s.sendmail(settings.LASAIR_EMAIL, email, msg.as_string())
     s.quit()
+
 
 def dispose_kafka(query_results, topic):
     """ Send out query results by kafka to the given topic.
@@ -335,6 +318,7 @@ def dispose_kafka(query_results, topic):
         print(rtxt)
         sys.stdout.flush()
 
+
 def datetime_converter(o):
     """datetime_converter.
 
@@ -345,16 +329,67 @@ def datetime_converter(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
 
+
 def kafka_ack(err, msg):
     if err is not None:
         print("Failed to deliver message: %s: %s" % (str(msg), str(err)))
 
-if __name__ == "__main__":
-    from src import slack_webhook
-    print('--------- RUN ACTIVE QUERIES -----------')
-    sys.stdout.flush()
-    t = time.time()
-    query_list = fetch_queries()
-    run_queries(query_list)
-    print('Active queries done in %.1f seconds' % (time.time() - t))
-    sys.stdout.flush()
+
+def filters(fltr):
+    try:
+        query_list = fetch_queries()
+    except Exception as e:
+        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        return None
+
+    try:
+        ntotal = run_queries(fltr, query_list)
+        return ntotal
+    except Exception as e:
+        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
+        return None
+
+
+def fast_anotation_filters(fltr):
+    """run_annotation_queries.
+    Pulls the recent content from the kafka topic 'ztf_annotations' 
+    Each message has an annotator/topic name, and the diaObjectId that was annotated.
+    Queries that have that annotator should run against that object
+    """
+    try:
+        query_list = fetch_queries()
+    except Exception as e:
+        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        return None
+
+    annotation_list = []
+    conf = {
+        'bootstrap.servers':   settings.KAFKA_SERVER,
+        'group.id':            settings.ANNOTATION_GROUP_ID,
+        'default.topic.config': {'auto.offset.reset': 'earliest'}
+    }
+    streamReader = Consumer(conf)
+    topic = settings.ANNOTATION_TOPIC
+    streamReader.subscribe([topic])
+    while 1:
+        msg = streamReader.poll(timeout=5)
+        if msg == None: break
+        try:
+            ann = json.loads(msg.value())
+            annotation_list.append(ann)
+        except:
+            continue
+    streamReader.close()
+    ntotal = run_queries(fltr, query_list, annotation_list)
+    return ntotal
+
+
+# if __name__ == "__main__":
+#     from src import slack_webhook
+#     print('--------- RUN ACTIVE FILTERS -----------')
+#     sys.stdout.flush()
+#     t = time.time()
+#     query_list = fetch_queries()
+#     run_queries(batch, query_list)
+#     print('Active queries done in %.1f seconds' % (time.time() - t))
+#     sys.stdout.flush()

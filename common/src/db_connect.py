@@ -13,7 +13,7 @@ def readonly():
     }
     return mysql.connector.connect(**config)
 
-def remote():
+def remote(allow_infile=False):
     config = {
         'user'    : settings.DB_USER_READWRITE,
         'password': settings.DB_PASS_READWRITE,
@@ -21,6 +21,8 @@ def remote():
         'port'    : settings.DB_PORT,
         'database': 'ztf'
     }
+    if allow_infile:
+        config['allow_local_infile'] = True
     return mysql.connector.connect(**config)
 
 def local():

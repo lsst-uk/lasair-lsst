@@ -8,10 +8,6 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-dev \
   python3-pip 
 
-# Required for Ingest
-RUN pip3 install \
-  cassandra-driver
-
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
@@ -28,7 +24,9 @@ RUN pip3 install \
 RUN pip3 install \
   xmlrunner \
   cryptography \
-  flask
+  flask \
+  psutil \
+  coverage
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
@@ -36,6 +34,12 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   wget \
   sudo \
   swig 
+
+# Required for Ingest
+RUN pip3 install \
+  cassandra-driver \
+  gkdbutils \
+  fastavro
 
 # Required for filter
 RUN pip3 install \
@@ -46,3 +50,7 @@ RUN pip3 install \
   gkdbutils \
   cassandra-driver \
   fastavro
+
+# required for MMA
+RUN pip3 install \
+  skytag

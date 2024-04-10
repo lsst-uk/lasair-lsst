@@ -2,6 +2,12 @@
 Dummy settings file for tests
 """
 
-
-pass
-
+MAX_STATEMENT_TIME      = 20
+KAFKA_GROUPID = "blah"
+KAFKA_MAXALERTS = 1
+SYSTEM_STATUS = None
+DB_USER_READWRITE = ''
+DB_PASS_READWRITE = ''
+DB_PORT = 8888
+DB_HOST = ''
+SLACK_URL = ''

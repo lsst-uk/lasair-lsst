@@ -20,6 +20,11 @@
     dest: "{{ ansible_env.HOME }}/{{ git_name }}"
     version: "{{ lasair_version }}"
 
+- name: Creates directory for logs
+  file:
+    path: "{{ ansible_env.HOME }}/logs"
+    state: directory
+
 - name: "Deploy Sherlock config"
   template:
     src:  sherlock_settings.yaml.j2

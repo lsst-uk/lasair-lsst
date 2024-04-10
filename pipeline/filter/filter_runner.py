@@ -1,9 +1,8 @@
 """
 Filter process runner. Sends args to its child and logs the outputs.
 It will run continously, running batch after batch. Each batch is a run of the 
-child program filter.py.
-The runner needs a lockfile -- usually as ~ubuntu/lockfile. If not present
-the runner continues, but looking for a lockfile every few minutes.
+child program filtercore.py.
+
 A SIGTERM is handled and passed to the child process, which finishes the batch
 and exits cleanly. The SIGTERM also cause this runner process to exit,
 which is different from the lockfile check.
@@ -11,61 +10,74 @@ Usage:
     ingest.py [--maxalert=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
+              [--maxbatch=MAX]
 
 Options:
-    --maxalert=MAX     Number of alerts to process, default is infinite
-    --group_id=GID     Group ID for kafka, default is from settings
-    --topic_in=TIN     Kafka topic to use, or
+    --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
+    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --maxbatch=MAX     Maximum number of batches to process, default is unlimited
 """
 
-import os, sys, time, signal
+import sys, time, signal
 from docopt import docopt
-from filter import run_filter
-
 sys.path.append('../../common')
 import settings
-from datetime import datetime
-
-from subprocess import Popen, PIPE, STDOUT
 sys.path.append('../../common/src')
 import slack_webhook, lasairLogging
+import filtercore
 
 # if this is True, the runner stops when it can and exits
 stop = False
+
 
 def sigterm_handler(signum, frame):
     global stop
     print('Stopping by SIGTERM')
     stop = True
 
+
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-def now():
-    # current UTC as string
-    return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
 
-# Set up the logger
-lasairLogging.basicConfig(
-    filename='/home/ubuntu/logs/filter.log',
-    webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
-    merge=True
-)
-log = lasairLogging.getLogger("filter_runner")
+def run(args, log):
+    topic_in = args.get('--topic_in')
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxalert = args.get('--maxalert') or settings.KAFKA_MAXALERTS
+    maxbatch = int(args.get('--maxbatch') or -1)
 
-args = docopt(__doc__)
+    fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
 
-while not stop:
-    # check for lockfile
-    if not os.path.isfile(settings.LOCKFILE):
-        log.info('Lockfile not present, waiting')
-        time.sleep(settings.WAIT_TIME)
-        continue
-    log.info('------------- Filter_runner at %s' % now())
-    
-    retcode = run_filter(args)
+    batch = 0
+    while not stop:
+        if batch == maxbatch:
+            break
+        batch += 1
+        log.info('------------- filter_runner running batch')
+        try:
+            nalerts = fltr.run_batch()
+            log.debug(f'Filter batch processed {nalerts} alerts')
+            if nalerts == 0:   # process got no alerts, so sleep a few minutes
+                log.info('Waiting for more alerts ....')
+                time.sleep(settings.WAIT_TIME)
+        except Exception as e:
+            log.exception('Exception')
+            log.critical('Unrecoverable error in filter batch: ' + str(e))
+            break
 
-    if retcode == 0:   # process got no alerts, so sleep a few minutes
-        log.info('Waiting for more alerts ....')
-        time.sleep(settings.WAIT_TIME)
+    log.info('Exiting filter runner')
 
-log.info('Exiting')
+
+if __name__ == '__main__':
+
+    # Set up the logger
+    lasairLogging.basicConfig(
+        filename='/home/ubuntu/logs/filter.log',
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        merge=True
+    )
+    log = lasairLogging.getLogger("filter_runner")
+
+    # Deal with arguments
+    args = docopt(__doc__)
+    run(args, log)
