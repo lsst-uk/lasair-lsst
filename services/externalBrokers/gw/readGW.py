@@ -64,11 +64,19 @@ def insert_gw_alert(database, dir, otherId, version):
 
     # decide if we want it
     # If this function returns a string, it is a reason why the event was rejected
-    # THIS IS JUST A PLACEHOLDER
-    if area90 > 1000:
-        return '90% area > 1000'
-    if loc['distmean'] > 200:
-        return 'distance > 200 Mpc'
+    # Keep the BNS and NSBH, only keep BBH if small area
+    # First find the most likely classification
+    percent = 0
+    gwclass = ''
+    for k,v in params['classification'].items():
+        if v>percent:
+            percent = v
+            gwclass = k
+
+    if      gwclass != 'BNS' and \
+            gwclass != 'NSBH' and \
+            area90 > settings.GW_BBH_MAX_AREA:
+        return 'Classification = %s and area90 = %s' % (gwclass, str(area90))
 
     # Deal with the 3 MOCs
     moc10 = read_moc(datadir, '10')
@@ -126,18 +134,17 @@ def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
                 # Set done flag so we dont come back
                 setDone(dir, otherId, version)
 
-                if 1:
-#                try:
+                try:
                     message = insert_gw_alert(database, dir, otherId, version)
-#                except Exception as e:
-#                    print('Error inserting gw alert in database' + str(e))
+                except Exception as e:
+                    print('Error inserting gw alert in database' + str(e))
 
                 # message says why it was rejected
                 if len(message) == 0:
                     ningested += 1
                     print(otherId, version, 'ingested')
                 else:
-                    print(otherId, version, 'not ingested')
+                    print(otherId, version, 'not ingested:', message)
 
     return ningested
 
