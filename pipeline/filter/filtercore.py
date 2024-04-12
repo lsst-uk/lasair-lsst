@@ -3,21 +3,25 @@ The core filter module. Usually run as a service using filter_runner, but can al
 
 Usage:
     ingest.py [--maxalert=MAX]
+              [--maxbatch=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
               [--local_db=NAME]
               [--send_email=BOOL]
               [--send_kafka=BOOL]
               [--transfer=BOOL]
+              [--stats=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
     --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
     --transfer=BOOL    Transfer results to main [default: True]
+    --stats=BOOL       Write stats [default: False]
 """
 
 import os
@@ -45,6 +49,7 @@ import date_nid
 import db_connect
 import manage_status
 import lasairLogging
+import logging
 import filters
 import watchlists
 import watchmaps
@@ -67,7 +72,9 @@ class Filter:
                  local_db: str = None,
                  send_email: bool = True,
                  send_kafka: bool = True,
-                 transfer: bool = True):
+                 transfer: bool = True,
+                 stats: bool = True,
+                 log=None):
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
@@ -75,11 +82,12 @@ class Filter:
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
+        self.stats = stats
 
         self.consumer = None
         self.database = None
 
-        self.log = lasairLogging.getLogger("filter")
+        self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
 
         # catch SIGTERM so that we can finish processing cleanly
@@ -307,12 +315,13 @@ class Filter:
 
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
-        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
-        nid = date_nid.nid_now()
-        ms.add({
-            'today_filter': nalert_in,
-            'today_filter_out': nalert_out,
-        }, nid)
+        if self.stats:
+            ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+            nid = date_nid.nid_now()
+            ms.add({
+                'today_filter': nalert_in,
+                'today_filter_out': nalert_out,
+            }, nid)
 
         return nalert_out
 
@@ -376,6 +385,9 @@ class Filter:
     def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
         """
+        if not stats:
+            return
+
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
         nid = date_nid.nid_now()
         d = Filter.batch_statistics()
@@ -587,21 +599,30 @@ class Filter:
 
 
 if __name__ == "__main__":
-    lasairLogging.basicConfig(stream=sys.stdout)
+    #lasairLogging.basicConfig(stream=sys.stdout)
+    logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger()
     args = docopt(__doc__)
 
     topic_in = args.get('--topic_in') or 'ztf_sherlock'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
+    maxbatch = int(args.get('--maxbatch') or -1)
     local_db = args.get('--local_db')
-    send_email = bool(args.get('--send_email'))
-    send_kafka = bool(args.get('--send_kafka'))
-    transfer = bool(args.get('--transfer'))
+    send_email = args.get('--send_email') in ['True', 'true', 'Yes', 'yes']
+    send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
+    transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
+    stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer)
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
+    n_batch = 0
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
+        n_batch += 1
+        if n_batch == maxbatch:
+            log.info(f"Exiting after {n_batch} batches")
+            sys.exit(0)
         if n_alerts == 0:  # process got no alerts, so sleep a few minutes
-            fltr.log.info('Waiting for more alerts ....')
+            log.info('Waiting for more alerts ....')
             time.sleep(settings.WAIT_TIME)
