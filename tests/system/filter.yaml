@@ -2,11 +2,15 @@
 
 ---
 
-# Gather facts
 - hosts: filter
-  gather_facts: true
-  tags: always
+  gather_facts: false
+  serial: 1
   tasks:
-    - name: Populate service facts
-      ansible.builtin.service_facts:
-
+    - name: Run filter
+      ansible.builtin.shell:
+        chdir: lasair-lsst/pipeline/filter
+        cmd: "python3 filtercore.py -b {{ groups['kafka'][0] }}:9092 --group_id=filter_test_1 --topic_in=filter_test --local_db=filter_test --send_email=false --send_kafka=false --transfer=false"
+      register: filter_result
+    - name: Result
+      ansible.builtin.debug:
+        var: filter_result
