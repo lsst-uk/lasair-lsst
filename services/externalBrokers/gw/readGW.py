@@ -18,9 +18,12 @@ from yaml import CLoader as Loader
 import base64
 import traceback
 import time
+import numpy as np
 
 from mocpy import MOC, WCS
 import astropy.units as u
+import astropy_healpix as ah
+from astropy.table import QTable
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 
@@ -84,6 +87,12 @@ def insert_gw_alert(database, dir, otherId, version):
     moc90 = read_moc(datadir, '90')
     mocimage = make_image(moc10, moc50, moc90)
 
+    # get most probable point
+    skymap_filename = datadir + '/map.fits'
+    (raprob, deprob) = get_ra_dec(skymap_filename)
+    loc['RA'] = raprob
+    loc['Dec'] = deprob
+
     # What kind of MMA event is this
     namespace = 'LVK'
     more_info = 'This is a gravitational wave event from LIGO-Virgo-Kagra'
@@ -122,6 +131,17 @@ def insert_gw_alert(database, dir, otherId, version):
         skymaps.insert_skymap_hits(database, gw, skymaphits)
 
     return ''
+
+def get_ra_dec(skymap_filename):
+    skymap = QTable.read(skymap_filename)
+    i = np.argmax(skymap['PROBDENSITY'])
+    uniq = skymap[i]['UNIQ']
+
+    level, ipix = ah.uniq_to_level_ipix(uniq)
+    nside = ah.level_to_nside(level)
+
+    ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
+    return (ra.deg, dec.deg)
 
 def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
     nhits = 0
