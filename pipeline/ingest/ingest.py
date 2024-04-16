@@ -244,7 +244,7 @@ class Ingester:
             nForcedSources += len(forcedSourceOnDiaObjectsList)
 
             # deal with images
-            if self.image_store:
+            if self.image_store.image_store:
                 try:
                     # get the MJD for the latest detection
                     lastSource = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)[0]
