@@ -104,15 +104,26 @@ def mma_watchmap_detail(request, mw_id):
     # GRAB P2 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.rPSFlux, o.gPSFlux, h.probdens2, tainow()-o.maxTai as "last detected (days ago)"
-FROM mma_area_hits as h, objects AS o
-WHERE h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
+o.diaObjectId, o.ra, o.decl, o.rPSFluxMax, o.gPSFluxMax,
+h.probdens2,
+tainow()-o.maxTai as "last detected (days ago)",
+o.minTai - m.event_tai as "t_GW"
+FROM mma_area_hits as h, objects AS o, mma_areas AS m
+WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
 AND h.probdens3 is NULL
 ORDER BY h.probdens2 DESC LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
     table2 = cursor.fetchall()
+
+    maxprobdens2 = table2[0]['probdens2']
+    for i in range(len(table2)):
+        table2[i]['probdens2'] /= maxprobdens2
+        if table2[i]['probdens2'] < 0.005:
+            table2 = table2[:i]
+            break
+
     count = len(table2)
 
     if count == resultCap:
@@ -137,9 +148,14 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     # GRAB P3 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.rPSFlux, o.gPSFlux, h.distance, h.probdens3, tainow()-o.maxTai as "last detected (days ago)"
-FROM mma_area_hits as h, objects AS o
-WHERE h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
+o.diaObjectId, o.ra, o.decl, o.rPSFluxMax, o.gPSFluxMax,
+h.probdens3,
+tainow()-o.maxTai as "last detected (days ago)",
+o.minTai - m.event_tai as "t_GW",
+s.distance, s.z, s.photoZ, s.photoZerr
+FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
+WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
+AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
 AND h.probdens3 is not NULL
 ORDER BY h.probdens3 DESC LIMIT {resultCap}
 """
@@ -147,6 +163,13 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
     count = len(table3)
+
+    maxprobdens3 = table3[0]['probdens3']
+    for i in range(len(table3)):
+        table3[i]['probdens3'] /= maxprobdens3
+        if table3[i]['probdens3'] < 0.005:
+            table3 = table3[:i]
+            break
 
     if count == resultCap:
         limit = resultCap

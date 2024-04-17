@@ -16,7 +16,7 @@
         </div>
 
         <div class="d-flex justify-content-center">
-            <div id='aladin-lite-div' style='width: 600px; height: 600px;'></div>
+            <div id='aladin-lite-div' style='width: 800px; height: 600px;'></div>
         </div>
 
         <div class="d-flex justify-content-end mt-3">
@@ -33,7 +33,8 @@
 </div>
 
 <script type="text/javascript">
-let aladin;
+var aladin;
+var circle_size = 0.4;
 var url = 'https://lasair-lsst-dev.lsst.ac.uk/lasair/static/mmagw/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
 A.init.then(() => {
     aladin = A.aladin('#aladin-lite-div',
@@ -46,11 +47,16 @@ A.init.then(() => {
     var moc10 = A.MOCFromURL(url+'10.moc', {color: '#00babb', lineWidth: 6});
     aladin.addMOC(moc10);
 
-    var cat = A.catalog({name: 'Some markers', sourceSize: 18});
-    aladin.addCatalog(cat);
-    cat.addSources([A.marker(165, 11,
-        {popupTitle: 'Pluto', popupDesc: 'Some people think Pluto is a real planet'})]);
-    cat.addSources([A.marker(166, 12,
-        {popupTitle: 'Mudpie', popupDesc: 'This is a mud pie'})]);
+    var cat2 = A.graphicOverlay({color:'lightgray', lineWidth: 6});
+    aladin.addOverlay(cat2);
+    {% for object in table2 %}
+        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens2 }}*circle_size));
+    {% endfor %}
+
+    var cat3 = A.graphicOverlay({color:'yellow', lineWidth:9});
+    aladin.addOverlay(cat3);
+    {% for object in table3 %}
+        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens3 }}*circle_size));
+    {% endfor %}
 });
 </script>
