@@ -16,7 +16,8 @@
         </div>
 
         <div class="d-flex justify-content-center">
-            <div id='aladin-lite-div' style='width: 800px; height: 600px;'></div>
+		<div id='aladin-lite-div' style='width: 800px; height: 600px;'></div><br/>
+		<div id="info"></div>
         </div>
 
         <div class="d-flex justify-content-end mt-3">
@@ -40,23 +41,52 @@ A.init.then(() => {
     aladin = A.aladin('#aladin-lite-div',
         {target: '{{ mma_watchmap.params.location.RA }} {{ mma_watchmap.params.location.Dec }}', fov: 20,
         projection: 'AIT', survey: 'P/Mellinger/color'});
+    aladin.setFrame('J2000d');
+
     var moc90 = A.MOCFromURL(url+'90.moc', {color: '#ce4257', lineWidth: 6});
     aladin.addMOC(moc90);
+
     var moc50 = A.MOCFromURL(url+'50.moc', {color: '#f0a202', lineWidth: 6});
     aladin.addMOC(moc50);
+
     var moc10 = A.MOCFromURL(url+'10.moc', {color: '#00babb', lineWidth: 6});
     aladin.addMOC(moc10);
 
     var cat2 = A.graphicOverlay({color:'lightgray', lineWidth: 6});
     aladin.addOverlay(cat2);
-    {% for object in table2 %}
-        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens2 }}*circle_size));
-    {% endfor %}
-
     var cat3 = A.graphicOverlay({color:'yellow', lineWidth:9});
     aladin.addOverlay(cat3);
-    {% for object in table3 %}
-        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens3 }}*circle_size));
+    var cand = [];
+
+    {% for object in table2 %}
+        pd = {{ object.probdens2 }}*circle_size;
+	cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': pd, 'diaObjectId':{{ object.diaObjectId }}});
+        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, pd));
     {% endfor %}
+
+    {% for object in table3 %}
+        pd = {{ object.probdens3 }}*circle_size;
+	cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':pd, 'diaObjectId':{{ object.diaObjectId }}});
+        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, pd));
+    {% endfor %}
+
+    aladin.on('click', function(data) {
+        ra  = data.ra;
+        dec = data.dec;
+        ifound = -1;
+        $('#info').html('RA=' + data.ra + ' Dec=' + data.dec);
+        for (let i = 0; i < cand.length; i++) {
+	    if ((Math.abs(ra  - cand[i]['ra'] ) < cand[i]['probdens']*circle_size)
+            && (Math.abs(dec - cand[i]['dec']) < cand[i]['probdens']*circle_size)) {
+	        ifound = i;
+                break;
+	    }
+	}
+        if(ifound >= 0){
+            $('#info').html('diaObjectId=' + cand[ifound]['diaObjectId']);
+	} else {
+            $('#info').html('RA=' + data.ra + ' Dec=' + data.dec);
+	}
+    });
 });
 </script>
