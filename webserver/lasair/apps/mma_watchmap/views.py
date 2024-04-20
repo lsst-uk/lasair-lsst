@@ -5,6 +5,7 @@ import tempfile
 import io
 import time
 import json
+import math
 import datetime
 import matplotlib.pyplot as plt
 import astropy.units as u
@@ -75,6 +76,13 @@ def mma_watchmap_index(request):
 
     return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': d.values()})
 
+def chop(x):
+    if isinstance(x, float): 
+        return '%.2f' % x
+    if not x:
+        return ''
+    return x
+
 def mma_watchmap_detail(request, mw_id):
     """*return the resulting matches of a mma_watchmap*
 
@@ -99,15 +107,17 @@ def mma_watchmap_detail(request, mw_id):
     cursor = msl.cursor(buffered=True, dictionary=True)
     mma_watchmap = get_object_or_404(MmaWatchmap, mw_id=mw_id)
 
-    resultCap = 1000
+    resultCap = 100
 
     # GRAB P2 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra, o.decl, o.rPSFluxMax, o.gPSFluxMax,
-h.probdens2,
-tainow()-o.maxTai as "last detected (days ago)",
-o.minTai - m.event_tai as "t_GW"
+o.diaObjectId, 
+h.probdens2, h.contour, 
+tainow()-o.maxTai as "last detected",
+o.minTai - m.event_tai as "t_GW",
+o.rPSFluxMax, o.gPSFluxMax,
+o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
 AND h.probdens3 is NULL
@@ -123,8 +133,30 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
         if table2[i]['probdens2'] < 0.005:
             table2 = table2[:i]
             break
+    newtable2 = []
+    for r2 in table2:
+        r = {'diaObjectId' : r2['diaObjectId'],
+            'probdens'     : chop(r2['probdens2']),
+            'contour'      : r2['contour'],
+            'last detected': r2['last detected'],
+            't_GW'         : chop(r2['t_GW']),
+            }
+        if r2['gPSFluxMax'] and r2['gPSFluxMax'] > 0:
+            r['mag_g'] = chop(23.9 - 2.5*math.log10(r2['gPSFluxMax']))
+        else:
+            r['mag_g'] = ''
+
+        if r2['rPSFluxMax'] and r2['rPSFluxMax'] > 0:
+            r['mag_r'] = chop(23.9 - 2.5*math.log10(r2['rPSFluxMax']))
+        else:
+            r['mag_r'] = ''
+
+        r['ra']   = r2['ra']
+        r['decl'] = r2['decl']
+        newtable2.append(r)
 
     count = len(table2)
+    schema2 = ['probdens', 'contour', 'last detected', 't_GW', 'mag_g', 'mag_r', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
@@ -138,21 +170,23 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
         limit = False
 
     # ADD SCHEMA
-    schema = get_schema_dict("objects")
+#    schema = get_schema_dict("objects")
 
-    if len(table2):
-        for k in table2[0].keys():
-            if k not in schema:
-                schema[k] = "custom column"
+#    if len(table2):
+#        for k in table2[0].keys():
+#            if k not in schema:
+#                schema[k] = "custom column"
 
     # GRAB P3 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra, o.decl, o.rPSFluxMax, o.gPSFluxMax,
-h.probdens3,
-tainow()-o.maxTai as "last detected (days ago)",
+o.diaObjectId, 
+h.probdens3, h.contour, h.distance as dist,
+tainow()-o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
-s.distance, s.z, s.photoZ, s.photoZerr
+s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
+o.rPSFluxMax, o.gPSFluxMax,
+o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
 AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
@@ -162,7 +196,6 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
 
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
-    count = len(table3)
 
     maxprobdens3 = table3[0]['probdens3']
     for i in range(len(table3)):
@@ -170,6 +203,50 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
         if table3[i]['probdens3'] < 0.005:
             table3 = table3[:i]
             break
+    newtable3 = []
+    for r3 in table3:
+        r = {'diaObjectId' : r3['diaObjectId'],
+             'probdens'    : chop(r3['probdens3']),
+            'contour'      : r3['contour'],
+            'last detected': r3['last detected'],
+            't_GW'         : chop(r3['t_GW']),
+            'Sherlock'     : r3['classification'],
+            }
+
+        if r3['gPSFluxMax'] and r3['gPSFluxMax'] > 0:
+            m = 23.9 - 2.5*math.log10(r3['gPSFluxMax'])
+            r['mag_g'] = chop(m)
+            r['M_g']   = chop(m - 25 - 5*math.log10(r3['dist']))
+        else:
+            r['mag_g'] = ''
+            r['M_g']   = ''
+
+        if r3['rPSFluxMax'] and r3['rPSFluxMax'] > 0:
+            m = 23.9 - 2.5*math.log10(r3['rPSFluxMax'])
+            r['mag_r'] = chop(m)
+            r['M_r']   = chop(m - 25 - 5*math.log10(r3['dist']))
+        else:
+            r['mag_r'] = ''
+            r['M_r']   = ''
+
+        if r3['z']:
+            r['z']     = r3['z']
+            r['zerr']  = 0.0
+            r['zflag'] = 'specz'
+        elif r3['photoZ']:
+            r['z']     = r3['photoZ']
+            r['zerr']  = r3['photoZerr']
+            r['zflag'] = 'photz'
+        else:
+            r['z']     = ''
+            r['zerr']  = ''
+            r['zflag'] = 'no_z'
+
+        r['ra']   = r3['ra']
+        r['decl'] = r3['decl']
+        newtable3.append(r)
+
+    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'mag_g','M_g', 'mag_r', 'M_r', 'z', 'zerr', 'zflag', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
@@ -182,18 +259,9 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
     else:
         limit = False
 
-    # ADD SCHEMA
-    schema = get_schema_dict("objects")
-
-    if len(table3):
-        for k in table2[0].keys():
-            if k not in schema:
-                schema[k] = "custom column"
-
     return render(request, 'mma_watchmap/mma_watchmap_detail.html', {
         'mma_watchmap': mma_watchmap,
-        'table2': table2,
-        'table3': table3,
+        'table2': newtable2, 'schema2': schema2,
+        'table3': newtable3, 'schema3': schema3,
         'count': count,
-        'schema': schema,
         'limit': limit})

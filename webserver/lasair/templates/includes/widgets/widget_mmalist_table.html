@@ -51,7 +51,7 @@
                 <small class="text-gray-500">
 	This table shows LSST alerts after the GW alert time that are in the 90% contour 
 	of the skymap and have an associated host galaxy in Sherlock, with distance or 
-	redshift estimate.  They are ordered by 3D skymap probablity density.
+	redshift estimate.  They are ordered by 3D skymap probablity density, and shown with white circles above.
                 </small>
 	</div>
 
@@ -67,11 +67,7 @@
                 <thead class="thead-light">
                     <tr>
                         {% for key in table3.0.keys %}
-                            {% if key == "UTC" %}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
-                            {%else%}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
-                            {% endif %}
+			    <th>{{ key }}</th>
                         {% endfor %}
                     </tr></thead>
                 <tbody>
@@ -116,7 +112,7 @@
                 <small class="text-gray-500">
 	This table shows LSST alerts after the GW alert time that are in the 90% contour 
 	of the skymap and do NOT have an associated host galaxy in Sherlock. 
-	They are ordered by 2D skymap probability density.
+	They are ordered by 2D skymap probability density, and shown with green circles above.
                 </small>
         </div>
 
@@ -130,11 +126,7 @@
                 <thead class="thead-light">
                     <tr>
                         {% for key in table2.0.keys %}
-                            {% if key == "UTC" %}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
-                            {%else%}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
-                            {% endif %}
+			    <th>{{ key }}</th>
                         {% endfor %}
                     </tr></thead>
                 <tbody>

@@ -16,9 +16,9 @@
         </div>
 
         <div class="d-flex justify-content-center">
-		<div id='aladin-lite-div' style='width: 800px; height: 600px;'></div><br/>
-		<div id="info"></div>
+        <div id='aladin-lite-div' style='width: 800px; height: 600px;'></div>
         </div>
+        <div id="info" style='position:absolute; left:0'></div>
 
         <div class="d-flex justify-content-end mt-3">
             <nobr>
@@ -52,22 +52,20 @@ A.init.then(() => {
     var moc10 = A.MOCFromURL(url+'10.moc', {color: '#00babb', lineWidth: 6});
     aladin.addMOC(moc10);
 
-    var cat2 = A.graphicOverlay({color:'lightgray', lineWidth: 6});
+    var cat2 = A.graphicOverlay({color:'lightgreen', lineWidth: 6});
     aladin.addOverlay(cat2);
-    var cat3 = A.graphicOverlay({color:'yellow', lineWidth:9});
+    var cat3 = A.graphicOverlay({color:'white', lineWidth:10});
     aladin.addOverlay(cat3);
     var cand = [];
 
     {% for object in table2 %}
-        pd = {{ object.probdens2 }}*circle_size;
-	cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': pd, 'diaObjectId':{{ object.diaObjectId }}});
-        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, pd));
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': {{ object.probdens }}*circle_size, 'diaObjectId':{{ object.diaObjectId }}});
+        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
     {% endfor %}
 
     {% for object in table3 %}
-        pd = {{ object.probdens3 }}*circle_size;
-	cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':pd, 'diaObjectId':{{ object.diaObjectId }}});
-        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, pd));
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':{{ object.probdens }}*circle_size, 'diaObjectId':{{ object.diaObjectId }}});
+        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
     {% endfor %}
 
     aladin.on('click', function(data) {
@@ -76,17 +74,17 @@ A.init.then(() => {
         ifound = -1;
         $('#info').html('RA=' + data.ra + ' Dec=' + data.dec);
         for (let i = 0; i < cand.length; i++) {
-	    if ((Math.abs(ra  - cand[i]['ra'] ) < cand[i]['probdens']*circle_size)
+        if ((Math.abs(ra  - cand[i]['ra'] ) < cand[i]['probdens']*circle_size)
             && (Math.abs(dec - cand[i]['dec']) < cand[i]['probdens']*circle_size)) {
-	        ifound = i;
+            ifound = i;
                 break;
-	    }
-	}
-        if(ifound >= 0){
-            $('#info').html('diaObjectId=' + cand[ifound]['diaObjectId']);
-	} else {
-            $('#info').html('RA=' + data.ra + ' Dec=' + data.dec);
-	}
+        }
+    }
+    if(ifound >= 0){
+        $('#info').html('<h2>You clicked on <a href=https://lasair-lsst-dev.lsst.ac.uk/objects/' + cand[ifound]['diaObjectId'] + '>' + cand[ifound]['diaObjectId'] + '</h2>');
+    } else {
+        $('#info').html('<h2> You clicked at RA=' + data.ra.toFixed(3) + ' Dec=' + data.dec.toFixed(3));
+    }
     });
 });
 </script>
