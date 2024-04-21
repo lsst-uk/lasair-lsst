@@ -171,6 +171,7 @@
     - makemigrations filter_query
     - makemigrations watchlist
     - makemigrations watchmap
+    - makemigrations mma_watchmap
     - makemigrations users
     - migrate
     - collectstatic --noinput

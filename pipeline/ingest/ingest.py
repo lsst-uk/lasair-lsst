@@ -73,8 +73,8 @@ class ImageStore:
                         futures.append(result)
                     else:
                         self.image_store.putObject(cutoutId, imjd, content)
-            else:
-                self.log.warn('WARNING: attempted to store images, but no image store set up')
+#            else:
+#                self.log.warn('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
             self.log.error('ERROR in ingest/store_images: %s' % e)
             raise e
