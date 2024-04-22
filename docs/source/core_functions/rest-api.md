@@ -285,9 +285,16 @@ and the return is something like:
     },
     ]
 ```
+
+## Sherlock Methods
+
+These methods allow you to run a Sherlock crossmatch at a given sky position, or at the position of known objects. This is a recomputation of the Sherlock crossmatch, not just a database lookup. You might want to do this if you are interested in the full record rather than only the top crossmatch, or if a more recent version of Sherlock is now available than the one used when the alert was produced. If you just want to look up the sherlock classification in the database then you should use `query` instead as it will be much faster. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=sherlock).
+
 ### <a name="sherlockobjects"></a>/api/sherlock/objects/
 
-This method returns Sherlock information for a collection of named objects, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. The arguments are:
+This method returns Sherlock information for a collection of named objects, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. 
+
+The arguments are:
 
 *   `objectIds`: a comma-separated list of objectIds, maximum number is 10
 *   `lite`: Set to 'true' to get the lite information only
@@ -305,7 +312,7 @@ Python Example with list of objects: This code requires the `lasair` library.
 import lasair
 token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 L = lasair.lasair_client(token)
-c = L.sherlock_objects(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
+c = L.sherlock_objects(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'], lite=False)
 print(c)
 ```
 and the return is something like:
@@ -329,7 +336,9 @@ and the return is something like:
 ```
 ### <a name="sherlockposition"></a>/api/sherlock/position/
 
-This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. It is meant as an illustration of what Sherlock can do. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=sherlock). The arguments are:
+This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches.
+
+The arguments are:
 
 *   `ra`: Right ascension of a point in the sky in degrees
 *   `dec`: Declination of a point in the sky in degrees
@@ -351,7 +360,7 @@ Python Example: This code requires the `lasair` library.
 import lasair
 token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 L = lasair.lasair_client(token)
-c = L.sherlock_position(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
+c = L.sherlock_position(16.851866, 34.53307, lite=False)
 print(c)
 ```
 and the return is something like:
