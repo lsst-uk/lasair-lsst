@@ -89,6 +89,11 @@
       cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < area_hits.sql
       chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
 
+- name: Create mma_area_hits table
+  shell:
+      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < mma_area_hits.sql
+      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
+
 - name: Create watchlist_hits table
   shell:
       cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < watchlist_hits.sql

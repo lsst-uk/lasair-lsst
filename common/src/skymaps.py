@@ -145,7 +145,7 @@ def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
         return result
     except Exception as e:
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
-        return None
+        return []
 
 def fetch_skymap_by_id(database, mw_id):
     """ Fetches the GW information for a given ID
