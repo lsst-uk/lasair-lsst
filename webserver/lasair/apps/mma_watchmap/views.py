@@ -114,7 +114,7 @@ def mma_watchmap_detail(request, mw_id):
 SELECT
 o.diaObjectId, 
 h.probdens2, h.contour, 
-tainow()-o.maxTai as "last detected",
+o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
 o.rPSFluxMax, o.gPSFluxMax,
 o.ra, o.decl
@@ -142,12 +142,12 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
             't_GW'         : chop(r2['t_GW']),
             }
         if r2['gPSFluxMax'] and r2['gPSFluxMax'] > 0:
-            r['mag_g'] = chop(23.9 - 2.5*math.log10(r2['gPSFluxMax']))
+            r['mag_g'] = chop(31.4 - 2.5*math.log10(r2['gPSFluxMax']))
         else:
             r['mag_g'] = ''
 
         if r2['rPSFluxMax'] and r2['rPSFluxMax'] > 0:
-            r['mag_r'] = chop(23.9 - 2.5*math.log10(r2['rPSFluxMax']))
+            r['mag_r'] = chop(31.4 - 2.5*math.log10(r2['rPSFluxMax']))
         else:
             r['mag_r'] = ''
 
@@ -182,7 +182,7 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
 SELECT
 o.diaObjectId, 
 h.probdens3, h.contour, h.distance as dist,
-tainow()-o.maxTai as "last detected",
+o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
 o.rPSFluxMax, o.gPSFluxMax,
