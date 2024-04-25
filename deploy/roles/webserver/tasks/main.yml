@@ -193,6 +193,12 @@
     dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/fits"
     state: link
 
+- name: Create symlink for GW MOCS
+  file:
+    src: /mnt/cephfs/lasair/mma/gw
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/mmagw"
+    state: link
+
 - name: Create Django superuser
   shell:
     chdir: "{{ ansible_env.HOME }}/{{ git_name }}/webserver"
