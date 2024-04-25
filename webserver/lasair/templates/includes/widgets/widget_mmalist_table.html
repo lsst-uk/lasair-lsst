@@ -42,12 +42,77 @@
     {% endif %}
 
 
+
+
+
+<div class="card border-0 shadow h-100 p-3">
+    <div class="card-body pt-0">
+        <div class="col-12 px-4">
+                <small class="text-gray-500">
+	This table shows LSST alerts after the GW alert time that are in the 90% contour 
+	of the skymap and have an associated host galaxy in Sherlock, with distance or 
+	redshift estimate.  They are ordered by 3D skymap probablity density, and shown with white circles above.
+                </small>
+	</div>
+
+
+
+        {% if table3|length > 0 %}
+            <div class="table-responsive p-1 pt-0">
+	        {% if sortTable is None or sortTable != False %}
+                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
+                {%else%}
+                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
+                {% endif %}
+                <thead class="thead-light">
+                    <tr>
+                        {% for key in table3.0.keys %}
+			    <th>{{ key }}</th>
+                        {% endfor %}
+                    </tr></thead>
+                <tbody>
+                    {% for object in table3 %}
+
+                        <tr>
+                            {% for key in object.keys %}
+
+                                {% if key == "diaObjectId" %}
+                                    <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
+                                {% elif 'last detected' in key %}
+                                    <td>{{object|keyvalue:key|floatformat:1 }}</td>
+
+                                {%else%}
+				   <td>{{ object|keyvalue:key }}</td>
+                                {% endif %}
+
+                            {% endfor %}
+
+                            </tr>
+
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            </div>
+
+        {% else %}
+            {% include "includes/widgets/widget_zero_matches_card.html" with info=zerotext %}
+        {% endif %}
+
+    </div>
+
+
+
+
+
+</script>
     <div class="card-body pt-0">
         <div class="col-12 px-4">
                 <small class="text-gray-500">
 	This table shows LSST alerts after the GW alert time that are in the 90% contour 
 	of the skymap and do NOT have an associated host galaxy in Sherlock. 
-	They are ordered by 2D skymap probability density.
+	They are ordered by 2D skymap probability density, and shown with green circles above.
                 </small>
         </div>
 
@@ -61,11 +126,7 @@
                 <thead class="thead-light">
                     <tr>
                         {% for key in table2.0.keys %}
-                            {% if key == "UTC" %}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
-                            {%else%}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
-                            {% endif %}
+			    <th>{{ key }}</th>
                         {% endfor %}
                     </tr></thead>
                 <tbody>
@@ -100,63 +161,4 @@
 
     </div>
 </div>
-<div class="card border-0 shadow h-100 p-3">
-    <div class="card-body pt-0">
-        <div class="col-12 px-4">
-                <small class="text-gray-500">
-	This table shows LSST alerts after the GW alert time that are in the 90% contour 
-	of the skymap and have an associated host galaxy in Sherlock, with distance or 
-	redshift estimate.  They are ordered by 3D skymap probablity density.
-                </small>
-	</div>
-
-        {% if table3|length > 0 %}
-            <div class="table-responsive p-1 pt-0">
-	        {% if sortTable is None or sortTable != False %}
-                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
-                {%else%}
-                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
-                {% endif %}
-                <thead class="thead-light">
-                    <tr>
-                        {% for key in table3.0.keys %}
-                            {% if key == "UTC" %}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
-                            {%else%}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
-                            {% endif %}
-                        {% endfor %}
-                    </tr></thead>
-                <tbody>
-                    {% for object in table3 %}
-
-                        <tr>
-                            {% for key in object.keys %}
-
-                                {% if key == "diaObjectId" %}
-                                    <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
-                                {% elif 'last detected' in key %}
-                                    <td>{{object|keyvalue:key|floatformat:1 }}</td>
-
-                                {%else%}
-				   <td>{{ object|keyvalue:key }}</td>
-                                {% endif %}
-
-                            {% endfor %}
-
-                            </tr>
-
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-
-            </div>
-
-        {% else %}
-            {% include "includes/widgets/widget_zero_matches_card.html" with info=zerotext %}
-        {% endif %}
-
-    </div>
 </div>
-
