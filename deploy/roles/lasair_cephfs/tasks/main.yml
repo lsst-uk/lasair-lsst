@@ -48,6 +48,8 @@
     - lasair
     - lasair/areas
     - lasair/fits
+    - lasair/mma
+    - lasair/mma/gw
     - lasair/services_log
     - lasair/streams
     - lasair/system_status
