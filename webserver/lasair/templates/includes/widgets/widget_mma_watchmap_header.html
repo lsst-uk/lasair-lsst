@@ -36,7 +36,7 @@
 <script type="text/javascript">
 var aladin;
 var circle_size = 0.4;
-var url = 'https://lasair-lsst-dev.lsst.ac.uk/lasair/static/mmagw/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
+var url = 'https://{{ lasair_url }}/lasair/static/mmagw/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
 A.init.then(() => {
     aladin = A.aladin('#aladin-lite-div',
         {target: '{{ mma_watchmap.params.location.RA }} {{ mma_watchmap.params.location.Dec }}', fov: 20,
