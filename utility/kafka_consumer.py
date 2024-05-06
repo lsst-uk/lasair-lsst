@@ -1,6 +1,16 @@
 import sys, json, argparse
 from confluent_kafka import Consumer, KafkaError
+from confluent_kafka import DeserializingConsumer
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroDeserializer
 import json
+
+def print_msg(message):
+    """ prints the readable stuff, without the cutouts. Purely for debugging
+    """
+    message_text = {k: message[k] for k in message
+        if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
+    print(json.dumps(message_text, indent=2))
 
 parser = argparse.ArgumentParser(description=__doc__)
 # must provide broker name, examples
@@ -18,18 +28,31 @@ parser.add_argument('--group_id',  type=str, default='LASAIR1', help='group id t
 # print one and exit, or count all to end of group_id
 parser.add_argument('--print_one', action="store_true", default=None, help='Prints one and exits')
 
+# utilise schema registry
+parser.add_argument('--schema_reg', type=str, default=None, help='Fetches with schema registry')
+# example https://usdf-alert-schemas-dev.slac.stanford.edu
+
 q = vars(parser.parse_args())
 if not q.get('broker'):
     print('Must set kafka broker with --broker option')
     sys.exit()
 print(q)
+sr = q.get('schema_reg')
+if sr:
+    print('using schema_reg', sr)
 
 conf = {
     'bootstrap.servers':   q.get('broker'),
     'group.id':            q.get('group_id'),
     'default.topic.config': {'auto.offset.reset': 'smallest'}
 }
-streamReader = Consumer(conf)
+if sr:
+    sr_client = SchemaRegistryClient({"url": sr})
+    deserializer = AvroDeserializer(sr_client)
+    conf['value.deserializer'] = deserializer
+    streamReader = DeserializingConsumer(conf)
+else:
+    streamReader = Consumer(conf)
 
 if not q.get('topic'):
     # the topics that this server has
@@ -42,9 +65,14 @@ else:
     streamReader.subscribe([topic])
     while 1:
         msg = streamReader.poll(timeout=5)
-        if msg == None: break
+        if msg.error():
+            print('ERROR in ingest/poll: ' +  str(msg.error()))
+            break
+        if msg == None: 
+            break
         if q['print_one']:
-            print(msg.value())
+#            print(msg.value())
+            print_msg(msg.value())
             sys.exit()
         nalert += 1
         if nalert%1000 == 0: print(nalert)
