@@ -217,15 +217,28 @@ class Ingester:
         diaObjects = []
         diaSourcesList = []
         diaForcedSourcesList = []
+        diaNondetectionLimitsList = []
+        ssObjects = []
         for alert in alerts:
-            diaObjects.append(alert['diaObject'])
+            if alert['diaObject']:
+                diaObjects.append(alert['diaObject'])
             diaSourcesList += alert['diaSourcesList']
             diaForcedSourcesList += alert['diaForcedSourcesList']
-        self.futures += executeLoadAsync(self.cassandra_session, 'DiaObjects', diaObjects)
+            diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
+            if alert['ssObject']:
+                ssObjects += alert['ssObject']
+
+        #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
+
+        self.futures += executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects)
         if len(diaSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'DiaSources', diaSourcesList)
+            self.futures += executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList)
         if len(diaForcedSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'ForcedSourceOnDiaObjects', diaForcedSourcesList)
+            self.futures += executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList)
+        if len(diaNondetectionLimitsList) > 0:
+            self.futures += executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList)
+        if len(ssObjects) > 0:
+            self.futures += executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects)
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
@@ -255,7 +268,11 @@ class Ingester:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
 
             diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
+            if not diaForcedSourcesList: diaForcedSourcesList = []
+
             diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
+            if not diaNondetectionLimitsList: diaNondetectionLimitsList = []
+
             ssObject = lsst_alert['ssObject']
 
             nDiaSources += len(diaSourcesList)
@@ -360,6 +377,7 @@ class Ingester:
                 log.error('ERROR in ingest/poll: ' +  str(msg.error()))
                 break
             lsst_alert = msg.value()
+            #print(lsst_alert['alertId'])
             alerts.append(lsst_alert)
         return alerts
 
