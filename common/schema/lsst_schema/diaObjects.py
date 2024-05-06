@@ -334,5 +334,5 @@ schema = {
       "type": "long"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, radecMjdTai)"]
+  "indexes": []
 }

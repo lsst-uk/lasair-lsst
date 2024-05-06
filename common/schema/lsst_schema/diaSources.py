@@ -418,5 +418,5 @@ schema = {
       "type": "string"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, diaSourceId)"]
+  "indexes": []
 }
