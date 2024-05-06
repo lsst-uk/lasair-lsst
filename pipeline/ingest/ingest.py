@@ -19,9 +19,14 @@ Options:
 """
 
 import sys
+import json
 from docopt import docopt
 from datetime import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
+from confluent_kafka import DeserializingConsumer
+from confluent_kafka.schema_registry import SchemaRegistryClient
+from confluent_kafka.schema_registry.avro import AvroDeserializer
+
 from cassandra.cluster import Cluster
 from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
 import time, json, io, fastavro, signal
@@ -34,6 +39,12 @@ import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
+def print_msg(message):
+    """ prints the readable stuff, without the cutouts. Purely for debugging
+    """
+    message_text = {k: message[k] for k in message
+        if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
+    print(json.dumps(message_text, indent=2))
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
@@ -160,6 +171,8 @@ class Ingester:
             log.info('group_id       %s' % self.group_id)
             log.info('maxalert       %d' % self.maxalert)
 
+            sr_client = SchemaRegistryClient({"url": settings.SCHEMA_REG_URL})
+            deserializer = AvroDeserializer(sr_client)
             consumer_conf = {
                 'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
                 'group.id': self.group_id,
@@ -167,19 +180,15 @@ class Ingester:
                 'default.topic.config': {'auto.offset.reset': 'earliest'},
                 # wait twice wait time before forgetting me
                 'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
+                "value.deserializer": deserializer,
             }
     
             try:
-                self.consumer = Consumer(consumer_conf)
+                self.consumer = DeserializingConsumer(consumer_conf)
                 self.consumer.subscribe([self.topic_in])
             except Exception as e:
                 log.error('ERROR in ingest/setup: Cannot connect to Kafka', e)
                 raise e
-
-        # read the schema
-        with open(settings.SCHEMA) as f:
-            schema = json.loads(f.read())
-            self.pschema = fastavro.parse_schema(schema)
 
     # end of class Ingester
     
@@ -207,16 +216,16 @@ class Ingester:
             return None
         diaObjects = []
         diaSourcesList = []
-        forcedSourceOnDiaObjectsList = []
+        diaForcedSourcesList = []
         for alert in alerts:
             diaObjects.append(alert['diaObject'])
             diaSourcesList += alert['diaSourcesList']
-            forcedSourceOnDiaObjectsList += alert['forcedSourceOnDiaObjectsList']
+            diaForcedSourcesList += alert['diaForcedSourcesList']
         self.futures += executeLoadAsync(self.cassandra_session, 'DiaObjects', diaObjects)
         if len(diaSourcesList) > 0:
             self.futures += executeLoadAsync(self.cassandra_session, 'DiaSources', diaSourcesList)
-        if len(forcedSourceOnDiaObjectsList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'ForcedSourceOnDiaObjects', forcedSourceOnDiaObjectsList)
+        if len(diaForcedSourcesList) > 0:
+            self.futures += executeLoadAsync(self.cassandra_session, 'ForcedSourceOnDiaObjects', diaForcedSourcesList)
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
@@ -237,21 +246,30 @@ class Ingester:
 
         alerts = []
         for lsst_alert in lsst_alerts:
-            diaObject = lsst_alert['DiaObject']
-            diaSourcesList = lsst_alert['DiaSourceList']
-            forcedSourceOnDiaObjectsList = lsst_alert['ForcedSourceOnDiaObjectList']
+#            print_msg(lsst_alert)
+
+            diaObject = lsst_alert['diaObject']
+
+            diaSourcesList = [lsst_alert['diaSource']]
+            if lsst_alert['prvDiaSources']:
+                diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
+
+            diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
+            diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
+            ssObject = lsst_alert['ssObject']
+
             nDiaSources += len(diaSourcesList)
-            nForcedSources += len(forcedSourceOnDiaObjectsList)
+            nForcedSources += len(diaForcedSourcesList)
 
             # deal with images
             if self.image_store:
                 try:
                     # get the MJD for the latest detection
-                    lastSource = sorted(diaSourcesList, key=lambda x: x['midPointTai'], reverse=True)[0]
+                    lastSource = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)[0]
                     # ID for the latest detection, this is what the cutouts belong to
                     diaSourceId = lastSource['diaSourceId']
                     # MJD for storing images
-                    imjd = int(lastSource['midPointTai'])
+                    imjd = int(lastSource['midpointMjdTai'])
                     # objectID
                     diaObjectId = diaObject['diaObjectId']
                     # store the fits images
@@ -267,7 +285,10 @@ class Ingester:
             alert = {
                 'diaObject': diaObject,
                 'diaSourcesList': diaSourcesList,
-                'forcedSourceOnDiaObjectsList': forcedSourceOnDiaObjectsList,
+                'diaForcedSourcesList': diaForcedSourcesList,
+                'diaNondetectionLimitsList': diaNondetectionLimitsList,
+                'ssObject': ssObject,
+
             }
             alerts.append(alert)
 
@@ -338,9 +359,7 @@ class Ingester:
             if msg.error():
                 log.error('ERROR in ingest/poll: ' +  str(msg.error()))
                 break
-            # read the avro contents
-            bytes_io = io.BytesIO(msg.value())
-            lsst_alert = fastavro.schemaless_reader(bytes_io, self.pschema)
+            lsst_alert = msg.value()
             alerts.append(lsst_alert)
         return alerts
 
@@ -415,13 +434,9 @@ class Ingester:
 def run_ingest(args, log=None):
     if args.get('--topic_in'):
         topic_in = args['--topic_in']
-    elif args.get('--nid'):
-        nid = int(args['--nid'])
-        date = date_nid.nid_to_date(nid)
-        topic_in = 'ztf_' + date + '_programid1'
     else:
-        # get all alerts from every nid
-        topic_in = '^ztf_.*_programid1$'
+        topic_in = 'alerts-simulated'
+
     topic_out = args.get('--topic_out') or 'ztf_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer

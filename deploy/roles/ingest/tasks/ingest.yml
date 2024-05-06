@@ -15,6 +15,7 @@
   pip:
     name:
       - confluent-kafka
+      - confluent_kafka[schemaregistry,avro]
       - fastavro
       - gkhtm
       - cassandra-driver
