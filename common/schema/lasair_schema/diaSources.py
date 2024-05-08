@@ -34,7 +34,7 @@ schema = {
       "type": "float"
     },
     {
-      "name": "dec",
+      "name": "decl",
       "type": "double"
     },
     {

@@ -278,6 +278,13 @@ class Ingester:
             nDiaSources += len(diaSourcesList)
             nForcedSources += len(diaForcedSourcesList)
 
+            # change dec to decl so MySQL doesnt get confused
+            diaObject['decl'] = diaObject['dec']
+            del diaObject['dec']
+            for diaSource in diaSourcesList:
+                diaSource['decl'] = diaSource['dec']
+                del diaSource['dec']
+
             # deal with images
             if self.image_store:
                 try:
