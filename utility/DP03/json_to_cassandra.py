@@ -17,8 +17,8 @@ def insert_cassandra(obj, cassandra_session):
     if not cassandra_session:
         return None   # failure of batch
 
-    ssObjectId =  obj['SSObjectId']
     executeLoad(cassandra_session, 'SSObjects', [obj['SSObject']])
+    executeLoad(cassandra_session, 'MPCORBs', [obj['MPCORB']])
 
     # will be list of real detections, each has a non-null candid
     diaSourceList = obj['DiaSourceList']

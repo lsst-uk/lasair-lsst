@@ -28,7 +28,7 @@ schema = {
     },
     {
       "name": "ssObjectReassocTime",
-      "type": "double",
+      "type": "timestamp",
       "doc": "Time when this diaSource was reassociated from diaObject to ssObject (if such reassociation happens, otherwise NULL)."
     },
     {

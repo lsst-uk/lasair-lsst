@@ -93,12 +93,12 @@ schema = {
     },
     {
       "name": "arcStart",
-      "type": "double",
+      "type": "timestamp",
       "doc": "MPCORB: Year of first observation (for multi-opposition objects)"
     },
     {
       "name": "arcEnd",
-      "type": "double",
+      "type": "timestamp",
       "doc": "MPCORB: Year of last observation (for multi-opposition objects)"
     },
     {
