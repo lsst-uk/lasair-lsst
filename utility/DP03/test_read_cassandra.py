@@ -1,7 +1,7 @@
 import json
 import sys
-from cassandra.cluster import Cluster
-from cassandra.query import dict_factory
+from cassandra.cluster import Cluster, ConsistencyLevel
+from cassandra.query import dict_factory, SimpleStatement
 
 
 class lightcurve_fetcher_error(Exception):
@@ -26,14 +26,16 @@ class lightcurve_fetcher():
         obj = {}
 
         if full:
-            query = "SELECT * "
+            query = "SELECT *"
         else:
             query = "SELECT maxextendedness, minextendedness, numobs"
-        query += " FROM ssobjects WHERE ssobjectid = %s" % ssObjectId
-#        query += " ALLOW FILTERING"
+        query += " FROM ssobjects WHERE ssobjectid = %s;" % ssObjectId
         print('Query is:', query)
 
-        ret = self.session.execute(query)
+#        ret = self.session.execute(query)
+        ret = list(self.session.execute(SimpleStatement(query, 
+            consistency_level=ConsistencyLevel.ONE, fetch_size=None)))
+
         for ssObject in ret:
             obj = ssObject
 
@@ -42,8 +44,10 @@ class lightcurve_fetcher():
         else:
             query = "SELECT arcstart, arcend, epoch, incl, e, nobs "
             query += " from mpcorbs where ssObjectId = %s" % ssObjectId
-            query += " ALLOW FILTERING"
-        ret = self.session.execute(query)
+#        ret = self.session.execute(query)
+        ret = list(self.session.execute(SimpleStatement(query, 
+            consistency_level=ConsistencyLevel.ONE, fetch_size=None)))
+
         for mpcorb in ret:
             obj.update(mpcorb)
         return obj
@@ -69,8 +73,8 @@ class lightcurve_fetcher():
             query = "SELECT * "
         else:
             query = "SELECT diasourceid, phaseangle, predictedmagnitude "
-            query += " from sssources where ssobjectid = %s" % ssObjectId
-            query += " ALLOW FILTERING"
+        query += " from sssources where ssobjectid = %s" % ssObjectId
+        query += " ALLOW FILTERING"
         ret = self.session.execute(query)
         n = 0
         for ssSource in ret:
@@ -97,8 +101,10 @@ if __name__ == "__main__":
         print('Usage: test_read_cassandra.py ssObjectId')
         sys.exit()
 
-    obj = LF.fetchObject(ssObjectId, full=False)
+    full = False
+
+    obj = LF.fetchObject(ssObjectId, full=full)
     print('ssObject+MPCORB is:', json.dumps(obj, indent=2))
 
-    sources = LF.fetchSources(ssObjectId, full=False)
+    sources = LF.fetchSources(ssObjectId, full=full)
     print('set of ssSource+diaObject:', json.dumps(sources, indent=2))
