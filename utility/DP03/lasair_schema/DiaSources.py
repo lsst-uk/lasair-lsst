@@ -47,7 +47,7 @@ schema = {
       "doc": "Uncertainty of ra."
     },
     {
-      "name": "dec",
+      "name": "decl",
       "type": "double",
       "doc": "Dec-coordinate of the center of this diaSource."
     },

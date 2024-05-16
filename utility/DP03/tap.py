@@ -76,6 +76,13 @@ def getBatch(ssObjectList, fileOut):
     diaSources       = [dict(s) for s in getDiaSources(ssObjectIdList)]
     ssSources        = [dict(s) for s in getSSSources(ssObjectIdList)]
 
+#### Change to a Lasair/MySQL convention. 
+#    "dec" is a reserved word in MySQL, it would be a nest of error.
+#    so we use "decl"
+    for diaSource in diaSources:  ### HACK
+        diaSource['decl'] = diaSource['dec']
+        del diaSource['dec']
+
     print('%d/%d/%d objects/diasources/sssources' % \
             (len(ssObjectIdList), len(diaSources), len(ssSources)))
 
@@ -88,9 +95,9 @@ def getBatch(ssObjectList, fileOut):
         obj = {
             'SSObjectId'     : ssObjectId,
             'SSObject'       : dict(ssObject),
-            'MPCORB'          : dict(MPC[0]),
-            'DiaSourceList'   : [s for s in  diaSources if s['ssObjectId']==ssObjectId],
-            'SSSourceList':     [f for f in ssSources if f['ssObjectId']==ssObjectId],
+            'MPCORB'         : dict(MPC[0]),
+            'DiaSourceList'  : [s for s in  diaSources if s['ssObjectId']==ssObjectId],
+            'SSSourceList'   : [f for f in ssSources if f['ssObjectId']==ssObjectId],
         }
         # don't want objects with no detections
         if len(obj['SSSourceList']) > 0:

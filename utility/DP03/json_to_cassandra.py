@@ -34,11 +34,10 @@ def insert_cassandra(obj, cassandra_session):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 3:
+    if len(sys.argv) >= 2:
         datadir = sys.argv[1]
-        topic   = sys.argv[2]
     else:
-        print('Usage: json_to_cassandra.py <dataset> <topic>')
+        print('Usage: json_to_cassandra.py <dataset>')
         sys.exit()
 
     cluster = Cluster(settings.CASSANDRA_HEAD)
@@ -50,7 +49,6 @@ if __name__ == '__main__':
     print(datadir)
     for file in os.listdir(datadir):
         if not file.endswith('gz'): continue
-        print(file)
         
         del objList
         fin = gzip.open(datadir +'/'+ file, 'r')
@@ -63,16 +61,12 @@ if __name__ == '__main__':
         del json_str
 
         for obj in objList:
-#            print(len(obj['DiaSourceList']), len(obj['SSSourceList']))
-
             # there will never be an alert with no detections
             if len(obj['DiaSourceList']) < 1: continue
-
-            ssObjectId = str(obj['SSObjectId'])
 
             insert_cassandra(obj, cassandra_session)
             
             n +=1
             if n%100 == 0: 
                 print(n)
-    print('%d alerts pushed to topic %s' % (n, topic))
+    print('%d alerts pushed to cassandra ' % n)
