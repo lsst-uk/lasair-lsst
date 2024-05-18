@@ -97,5 +97,5 @@ schema = {
       "doc": "True (noiseless) declination of the simulated diaSource"
     }
   ],
-  "indexes": ["PRIMARY KEY (ssObjectId, midPointMjdTai)"]
+  "indexes": ["PRIMARY KEY (ssObjectId, diaSourceId)"]
 }

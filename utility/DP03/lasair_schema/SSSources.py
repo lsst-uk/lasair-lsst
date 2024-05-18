@@ -147,5 +147,5 @@ schema = {
       "doc": "Cartesian topocentric Z velocity (at the emit time)"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaSourceId)"]
+  "indexes": ["PRIMARY KEY (ssObjectId, diaSourceId)"]
 }

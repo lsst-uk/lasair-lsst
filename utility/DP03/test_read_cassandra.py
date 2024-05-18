@@ -32,9 +32,7 @@ class lightcurve_fetcher():
         query += " FROM ssobjects WHERE ssobjectid = %s;" % ssObjectId
         print('Query is:', query)
 
-#        ret = self.session.execute(query)
-        ret = list(self.session.execute(SimpleStatement(query, 
-            consistency_level=ConsistencyLevel.ONE, fetch_size=None)))
+        ret = self.session.execute(query)
 
         for ssObject in ret:
             obj = ssObject
@@ -43,10 +41,8 @@ class lightcurve_fetcher():
             query = "SELECT * "
         else:
             query = "SELECT arcstart, arcend, epoch, incl, e, nobs "
-            query += " from mpcorbs where ssObjectId = %s" % ssObjectId
-#        ret = self.session.execute(query)
-        ret = list(self.session.execute(SimpleStatement(query, 
-            consistency_level=ConsistencyLevel.ONE, fetch_size=None)))
+        query += " from mpcorbs where ssObjectId = %s" % ssObjectId
+        ret = self.session.execute(query)
 
         for mpcorb in ret:
             obj.update(mpcorb)
@@ -60,7 +56,6 @@ class lightcurve_fetcher():
         else:
             query = "SELECT diasourceid, midpointmjdtai, ra, decl, mag"
         query += " FROM diasources WHERE ssobjectid = %s" % ssObjectId
-#        query += " ALLOW FILTERING"
         print('Query is:', query)
 
         ret = self.session.execute(query)
@@ -74,7 +69,6 @@ class lightcurve_fetcher():
         else:
             query = "SELECT diasourceid, phaseangle, predictedmagnitude "
         query += " from sssources where ssobjectid = %s" % ssObjectId
-        query += " ALLOW FILTERING"
         ret = self.session.execute(query)
         n = 0
         for ssSource in ret:
@@ -96,12 +90,12 @@ if __name__ == "__main__":
     LF = lightcurve_fetcher(cassandra_hosts=['lasair-lsst-cassandranodes'])
 
     if len(sys.argv) > 1:
-        ssObjectId = sys.argv[1]
+        ssObjectId = int(sys.argv[1])
     else:
         print('Usage: test_read_cassandra.py ssObjectId')
         sys.exit()
 
-    full = False
+    full = True
 
     obj = LF.fetchObject(ssObjectId, full=full)
     print('ssObject+MPCORB is:', json.dumps(obj, indent=2))

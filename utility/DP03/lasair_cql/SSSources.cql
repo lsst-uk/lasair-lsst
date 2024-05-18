@@ -28,5 +28,5 @@ topocentricZ float,
 topocentricVX float,
 topocentricVY float,
 topocentricVZ float,
-PRIMARY KEY (diaSourceId)
+PRIMARY KEY (ssObjectId, diaSourceId)
 )

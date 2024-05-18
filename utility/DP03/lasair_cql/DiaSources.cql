@@ -18,5 +18,5 @@ magErr float,
 magTrueVband float,
 raTrue double,
 decTrue double,
-PRIMARY KEY (ssObjectId, midPointMjdTai)
+PRIMARY KEY (ssObjectId, diaSourceId)
 )
