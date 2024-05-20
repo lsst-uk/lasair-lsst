@@ -12,6 +12,11 @@ cp -R lsst_schema lasair_schema
 #### modify the schema
 - Change the lasair schema so the "indexes" has
 ```
+SSObjects: PRIMARY KEY (ssObjectId)
+MPCORBs:   PRIMARY KEY (ssObjectId)
+DiaSources:PRIMARY KEY (ssObjectId, diaSourceId)
+SSSources: PRIMARY KEY (ssObjectId, diaSourceId)
+
 "PRIMARY KEY (ssObjectId, midPointMjdTai)" or
 "PRIMARY KEY (ssObjectId)" or
 "PRIMARY KEY (ssSourceId)"
