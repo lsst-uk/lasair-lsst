@@ -20,7 +20,8 @@ A serious amateur telescope would have a 500 mm aperture, with a limiting magnit
 
 ## How can I ask a question to the Lasair team?
 
-Write to the help email: lasair-help at lists.lasair.roe.ac.uk.
+Post your question in the Lasair category on the [Vera C. Rubin Observatory LSST Community Forum](https://community.lsst.org/c/support/support-lasair/55) or 
+write to the help email: lasair-help at mlist.is.ed.ac.uk.
 
 ## How can I use my knowledge of SQL to use Lasair?
 
