@@ -1,0 +1,13 @@
+# End to end test of as much of the Lasair pipeline as possible
+
+---
+
+- name: Ingest
+  import_playbook: ingest.yaml
+
+- name: Sherlock
+  import_playbook: sherlock.yaml
+
+- name: Filter
+  import_playbook: filter.yaml
+

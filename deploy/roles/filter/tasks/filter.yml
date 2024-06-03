@@ -67,7 +67,7 @@
       - GRANT ALL PRIVILEGES ON {{ mysql_db_name }}.* TO '{{ mysql_db_user }}'@'localhost';
       - GRANT FILE ON *.* TO '{{ mysql_db_user }}'@'localhost';
       - DROP FUNCTION IF EXISTS jdnow;
-      - CREATE FUNCTION tainow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
+      - CREATE FUNCTION IF NOT EXISTS tainow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
       - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.tainow TO '{{ mysql_db_user }}'@'localhost';
     login_host: 127.0.0.1
     login_user: root
