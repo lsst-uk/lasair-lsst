@@ -1,0 +1,11 @@
+This runs as a daemon
+To stop it replace start with stop
+check /mnt/cephfs/lasair/mma/gw for new things
+
+downloadGWAlerts \
+/mnt/cephfs/lasair/mma/gw/config_gw.yaml start \
+--directory=/mnt/cephfs/lasair/mma/gw \
+--writeMOC \
+--writemeta \
+--contours=90,50,10 \
+--superevents
