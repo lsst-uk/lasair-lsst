@@ -8,4 +8,5 @@ downloadGWAlerts \
 --writeMOC \
 --writemeta \
 --contours=90,50,10 \
---superevents
+--superevents \
+--organise
