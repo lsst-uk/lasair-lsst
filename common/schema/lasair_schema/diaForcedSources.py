@@ -14,7 +14,7 @@ schema = {
       "type": "double"
     },
     {
-      "name": "dec",
+      "name": "decl",
       "type": "double"
     },
     {
