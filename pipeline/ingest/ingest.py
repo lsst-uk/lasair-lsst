@@ -284,6 +284,9 @@ class Ingester:
             for diaSource in diaSourcesList:
                 diaSource['decl'] = diaSource['dec']
                 del diaSource['dec']
+            for diaForcedSource in diaForcedSourcesList:
+                diaForcedSource['decl'] = diaForcedSource['dec']
+                del diaForcedSource['dec']
 
             # deal with images
             if self.image_store.image_store:
