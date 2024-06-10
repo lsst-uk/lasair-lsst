@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS diaObjects(
 diaObjectId bigint,
 ra double,
 raErr float,
-decl double,
+dec double,
 decErr float,
 ra_dec_Cov float,
 radecMjdTai double,
@@ -81,6 +81,5 @@ r_psfFluxErrMean float,
 i_psfFluxErrMean float,
 z_psfFluxErrMean float,
 y_psfFluxErrMean float,
-flags bigint,
 PRIMARY KEY (diaObjectId, radecMjdTai)
 )

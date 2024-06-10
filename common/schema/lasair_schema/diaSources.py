@@ -6,8 +6,12 @@ schema = {
       "type": "long"
     },
     {
-      "name": "ccdVisitId",
+      "name": "visit",
       "type": "long"
+    },
+    {
+      "name": "detector",
+      "type": "int"
     },
     {
       "name": "diaObjectId",
@@ -34,7 +38,7 @@ schema = {
       "type": "float"
     },
     {
-      "name": "decl",
+      "name": "dec",
       "type": "double"
     },
     {
@@ -66,12 +70,24 @@ schema = {
       "type": "float"
     },
     {
+      "name": "centroid_flag",
+      "type": "boolean"
+    },
+    {
       "name": "apFlux",
       "type": "float"
     },
     {
       "name": "apFluxErr",
       "type": "float"
+    },
+    {
+      "name": "apFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "apFlux_flag_apertureTruncated",
+      "type": "boolean"
     },
     {
       "name": "snr",
@@ -124,6 +140,18 @@ schema = {
     {
       "name": "psfNdata",
       "type": "int"
+    },
+    {
+      "name": "psfFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "psfFlux_flag_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "psfFlux_flag_noGoodPixels",
+      "type": "boolean"
     },
     {
       "name": "trailFlux",
@@ -216,6 +244,10 @@ schema = {
     {
       "name": "trailNdata",
       "type": "int"
+    },
+    {
+      "name": "trail_flag_edge",
+      "type": "boolean"
     },
     {
       "name": "dipoleMeanFlux",
@@ -338,6 +370,18 @@ schema = {
       "type": "int"
     },
     {
+      "name": "forced_PsfFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "forced_PsfFlux_flag_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "forced_PsfFlux_flag_noGoodPixels",
+      "type": "boolean"
+    },
+    {
       "name": "snapDiffFlux",
       "type": "float"
     },
@@ -402,6 +446,22 @@ schema = {
       "type": "float"
     },
     {
+      "name": "shape_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_no_pixels",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_not_contained",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_parent_source",
+      "type": "boolean"
+    },
+    {
       "name": "extendedness",
       "type": "float"
     },
@@ -410,12 +470,80 @@ schema = {
       "type": "float"
     },
     {
-      "name": "flags",
-      "type": "long"
-    },
-    {
       "name": "band",
       "type": "string"
+    },
+    {
+      "name": "pixelFlags",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_bad",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_cr",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_crCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_interpolated",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_interpolatedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_offimage",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_saturated",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_saturatedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_suspect",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_suspectCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_streak",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_streakCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injectedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected_template",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected_templateCenter",
+      "type": "boolean"
     }
   ],
   "indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, diaSourceId)"]

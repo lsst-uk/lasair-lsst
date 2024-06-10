@@ -1,7 +1,7 @@
 {
   "type": "record",
   "name": "alert",
-  "namespace": "lsst.v6_1",
+  "namespace": "lsst.v7_1",
   "fields": [
     {
       "name": "alertId",
@@ -18,8 +18,12 @@
             "type": "long"
           },
           {
-            "name": "ccdVisitId",
+            "name": "visit",
             "type": "long"
+          },
+          {
+            "name": "detector",
+            "type": "int"
           },
           {
             "name": "diaObjectId",
@@ -105,6 +109,13 @@
             ]
           },
           {
+            "name": "centroid_flag",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
             "name": "apFlux",
             "type": [
               "null",
@@ -116,6 +127,20 @@
             "type": [
               "null",
               "float"
+            ]
+          },
+          {
+            "name": "apFlux_flag",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "apFlux_flag_apertureTruncated",
+            "type": [
+              "null",
+              "boolean"
             ]
           },
           {
@@ -207,6 +232,27 @@
             "type": [
               "null",
               "int"
+            ]
+          },
+          {
+            "name": "psfFlux_flag",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "psfFlux_flag_edge",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "psfFlux_flag_noGoodPixels",
+            "type": [
+              "null",
+              "boolean"
             ]
           },
           {
@@ -368,6 +414,13 @@
             "type": [
               "null",
               "int"
+            ]
+          },
+          {
+            "name": "trail_flag_edge",
+            "type": [
+              "null",
+              "boolean"
             ]
           },
           {
@@ -581,6 +634,27 @@
             ]
           },
           {
+            "name": "forced_PsfFlux_flag",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "forced_PsfFlux_flag_edge",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "forced_PsfFlux_flag_noGoodPixels",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
             "name": "snapDiffFlux",
             "type": [
               "null",
@@ -693,6 +767,34 @@
             ]
           },
           {
+            "name": "shape_flag",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "shape_flag_no_pixels",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "shape_flag_not_contained",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "shape_flag_parent_source",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
             "name": "extendedness",
             "type": [
               "null",
@@ -707,14 +809,136 @@
             ]
           },
           {
-            "name": "flags",
-            "type": "long"
-          },
-          {
             "name": "band",
             "type": [
               "null",
               "string"
+            ]
+          },
+          {
+            "name": "pixelFlags",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_bad",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_cr",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_crCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_edge",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_interpolated",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_interpolatedCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_offimage",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_saturated",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_saturatedCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_suspect",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_suspectCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_streak",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_streakCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_injected",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_injectedCenter",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_injected_template",
+            "type": [
+              "null",
+              "boolean"
+            ]
+          },
+          {
+            "name": "pixelFlags_injected_templateCenter",
+            "type": [
+              "null",
+              "boolean"
             ]
           }
         ]
@@ -749,8 +973,20 @@
                 "type": "long"
               },
               {
-                "name": "ccdVisitId",
+                "name": "ra",
+                "type": "double"
+              },
+              {
+                "name": "dec",
+                "type": "double"
+              },
+              {
+                "name": "visit",
                 "type": "long"
+              },
+              {
+                "name": "detector",
+                "type": "int"
               },
               {
                 "name": "psfFlux",
@@ -764,27 +1000,6 @@
                 "type": [
                   "null",
                   "float"
-                ]
-              },
-              {
-                "name": "x",
-                "type": [
-                  "null",
-                  "float"
-                ]
-              },
-              {
-                "name": "y",
-                "type": [
-                  "null",
-                  "float"
-                ]
-              },
-              {
-                "name": "flags",
-                "type": [
-                  "null",
-                  "long"
                 ]
               },
               {
@@ -1406,10 +1621,6 @@
                 "null",
                 "float"
               ]
-            },
-            {
-              "name": "flags",
-              "type": "long"
             }
           ]
         }
@@ -1783,10 +1994,6 @@
                 "null",
                 "float"
               ]
-            },
-            {
-              "name": "flags",
-              "type": "long"
             }
           ]
         }

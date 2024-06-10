@@ -14,7 +14,7 @@ schema = {
       "type": "float"
     },
     {
-      "name": "decl",
+      "name": "dec",
       "type": "double"
     },
     {
@@ -328,10 +328,6 @@ schema = {
     {
       "name": "y_psfFluxErrMean",
       "type": "float"
-    },
-    {
-      "name": "flags",
-      "type": "long"
     }
   ],
   "indexes": ["PRIMARY KEY (diaObjectId, radecMjdTai)"]

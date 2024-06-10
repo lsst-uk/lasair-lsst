@@ -10,8 +10,20 @@ schema = {
       "type": "long"
     },
     {
-      "name": "ccdVisitId",
+      "name": "ra",
+      "type": "double"
+    },
+    {
+      "name": "dec",
+      "type": "double"
+    },
+    {
+      "name": "visit",
       "type": "long"
+    },
+    {
+      "name": "detector",
+      "type": "int"
     },
     {
       "name": "psfFlux",
@@ -20,18 +32,6 @@ schema = {
     {
       "name": "psfFluxErr",
       "type": "float"
-    },
-    {
-      "name": "x",
-      "type": "float"
-    },
-    {
-      "name": "y",
-      "type": "float"
-    },
-    {
-      "name": "flags",
-      "type": "long"
     },
     {
       "name": "midpointMjdTai",

@@ -51,6 +51,5 @@ y_H_y_G12_Cov float,
 y_Chi2 float,
 y_Ndata int,
 medianExtendedness float,
-flags bigint,
 PRIMARY KEY (ssObjectId)
 )

@@ -208,10 +208,6 @@ schema = {
     {
       "name": "medianExtendedness",
       "type": "float"
-    },
-    {
-      "name": "flags",
-      "type": "long"
     }
   ],
   "indexes": ["PRIMARY KEY (ssObjectId)"]
