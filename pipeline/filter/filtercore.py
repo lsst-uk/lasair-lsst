@@ -291,6 +291,7 @@ class Filter:
             # Here we get the next alert by kafka
             msg = self.consumer.poll(timeout=5)
             if msg is None:
+                print('message is null')
                 break
             if msg.error():
                 self.log.error("ERROR polling Kafka: " + str(msg.error()))
@@ -299,10 +300,12 @@ class Filter:
                     break
                 continue
             if msg.value() is None:
+                print('message value is null')
                 continue
             # Apply filter to each alert
             alert = json.loads(msg.value())
             nalert_in += 1
+#            print(json.dumps(alert, indent=2))  ##############
             d = self.handle_alert(alert)
             nalert_out += d
 
