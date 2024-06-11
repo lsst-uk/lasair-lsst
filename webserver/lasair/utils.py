@@ -202,7 +202,7 @@ def objjson(diaObjectId, full=False):
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
-        diaSource['mjd'] = mjd = float(diaSource['midpointtai'])
+        diaSource['mjd'] = mjd = float(diaSource['midpointmjdtai'])
         diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
@@ -251,20 +251,20 @@ def objjson(diaObjectId, full=False):
     objectData["discMjd"] = detections["mjd"].values[0]
     objectData["discUtc"] = detections["utc"].values[0]
     objectData["discMag"] = f"{detections['apflux'].values[0]:.2f}±{detections['apfluxerr'].values[0]:.2f}"
-    objectData["discFilter"] = detections['filtername'].values[0]
+    objectData["discFilter"] = detections['band'].values[0]
 
     # LATEST MAGS
     objectData["latestMjd"] = detections["mjd"].values[-1]
     objectData["latestUtc"] = detections["utc"].values[-1]
     objectData["latestMag"] = f"{detections['apflux'].values[-1]:.2f}±{detections['apfluxerr'].values[-1]:.2f}"
-    objectData["latestFilter"] = detections['filtername'].values[0]
+    objectData["latestFilter"] = detections['band'].values[0]
 
     # PEAK MAG
     peakMag = detections[detections['apflux'] == detections['apflux'].min()]
     objectData["peakMjd"] = peakMag["mjd"].values[0]
     objectData["peakUtc"] = peakMag["utc"].values[0]
     objectData["peakMag"] = f"{peakMag['apflux'].values[0]:.2f}±{peakMag['apfluxerr'].values[0]:.2f}"
-    objectData["peakFilter"] = peakMag['filtername'].values[0]
+    objectData["peakFilter"] = peakMag['band'].values[0]
 
     # annotations
     annotations = []
