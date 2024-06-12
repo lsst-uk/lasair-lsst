@@ -16,12 +16,12 @@ schema = {
 
     { "name": "g_psfFluxMean", "type": "float", 
         "doc": "Weighted mean point-source model magnitude for g filter" },
-    { "name": "g_psfluxMeanErr", "type": "float", 
+    { "name": "g_psfFluxMeanErr", "type": "float", 
         "doc": "Standard error of g_psfFluxMean" },
 
     { "name": "r_psfFluxMean", "type": "float", 
         "doc": "Weighted mean point-source model magnitude for r filter" },
-    { "name": "r_psfluxMeanErr", "type": "float", 
+    { "name": "r_psfFluxMeanErr", "type": "float", 
         "doc": "Standard error of r_psfFluxMean" },
 
 # Counting, max, min
