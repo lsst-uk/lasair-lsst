@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS diaForcedSources(
 diaForcedSourceId bigint,
 diaObjectId bigint,
 ra double,
-dec double,
+decl double,
 visit bigint,
 detector int,
 psfFlux float,

@@ -80,6 +80,8 @@ copy all in lsst_schema to lasair_schema then make changes:
 - ssObjects.py: 
 - `"indexes": ["PRIMARY KEY (ssObjectId)"]`
 
+Also change `dec` to `decl` in `diaForcedSources.py, diaObjects.py, diaSources.py`.
+
 #### Make CQL and SQL create table statements
 ```
 mkdir lasair_sql
