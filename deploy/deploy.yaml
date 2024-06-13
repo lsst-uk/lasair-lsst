@@ -47,6 +47,7 @@
   vars_files:
     - settings.yaml
   vars:
+    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
     internal_only: true
     source: public.alerts.ztf.uw.edu:9092
     start_mirrormaker: false # don't start mirrormaker automatically by default
