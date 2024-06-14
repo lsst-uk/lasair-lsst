@@ -64,23 +64,24 @@ cutoutDifference is null or bytes
 cutoutScience is null or bytes
 cutoutTemplate is null or bytes
 ```
-#### Add indexes in lasair_schema
-```
-mkdir lasair_schema
-```
-copy all in lsst_schema to lasair_schema then make changes:
-- diaForcedSources.py: 
-- `"indexes": ["PRIMARY KEY (diaObjectId,midPointMjdTai)"]`
-- diaNondetectionLimits.py: 
-- `"indexes": ["PRIMARY KEY (midpointMjdTai)"]`
-- diaObjects.py: 
-- `"indexes": ["PRIMARY KEY (diaObjectId, radecMjdTai)"]`
-- diaSources.py: 
-- `"indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, `diaSourceId)"]
-- ssObjects.py: 
-- `"indexes": ["PRIMARY KEY (ssObjectId)"]`
 
+#### Modify lasair_schema
+
+While the directory `lsst_schema` is automatically generated, the `lasair_schema` directory has handmade changes. Start with `mkdir lasair_schema`, then  copy all in `lsst_schema` to `lasair_schema` then make changes: Specifically:
+- Adding indexes for the Cassandra tables. 
+  - diaForcedSources.py: `"indexes": ["PRIMARY KEY (diaObjectId,midPointMjdTai)"]`
+  - diaNondetectionLimits.py: `"indexes": ["PRIMARY KEY (midpointMjdTai)"]`
+  - diaObjects.py: `"indexes": ["PRIMARY KEY (diaObjectId, radecMjdTai)"]`
+  - diaSources.py: `"indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, `diaSourceId)"]
+  - ssObjects.py: `"indexes": ["PRIMARY KEY (ssObjectId)"]`
+
+- Changing `dec` to `decl`
 Also change `dec` to `decl` in `diaForcedSources.py, diaObjects.py, diaSources.py`.
+
+- Adding features to the relational table `objects`
+  - Look at the new attributes in `lasair_schema/diaObjects.py` and decide if any should be added to the object schema. If so, edit `lasair_schema/objects.py`.
+  - Then create suitable `ALTER TABLE` commands and execute these on the main database and on all the local databases associated with filter nodes.
+  - You will also need to change the code in `pipeline/filter/features/diaObjectCopy.py` so that these are properly copied into the relational database.
 
 #### Make CQL and SQL create table statements
 ```
@@ -140,6 +141,6 @@ PRIMARY KEY (imjd, cutoutid)
 ```
 #### Put the new files in git
 ```
-git add alert-lsst.avsc lasair_cql lasair_sql lasair_schema/
+git add alert-lsst.avsc lsst_schema lasair_schema lasair_cql lasair_sql
 ```
 
