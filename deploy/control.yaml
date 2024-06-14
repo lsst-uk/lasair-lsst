@@ -137,7 +137,7 @@
         files:
           - mirror-compose.yml
         services:
-          - mirror
+          - mirrormaker
         state: present
         stopped: false
       when: command == "start"
@@ -148,7 +148,7 @@
         files:
           - mirror-compose.yml
         services:
-          - mirror
+          - mirrormaker
         state: present
         stopped: true
       when: command == "stop"

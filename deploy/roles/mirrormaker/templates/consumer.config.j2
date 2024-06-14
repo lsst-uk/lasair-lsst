@@ -1,7 +1,6 @@
 group.id={{ group_id }}
 client.id={{ client_id }}
 bootstrap.servers={{ source }}
-security.protocol=PLAINTEXT
 
 auto.offset.reset=earliest
 exclude.internal.topics=true
@@ -9,3 +8,15 @@ exclude.internal.topics=true
 partition.assignment.strategy=org.apache.kafka.clients.consumer.RoundRobinAssignor
 session.timeout.ms=120000
 request.timeout.ms=300000
+
+receive.buffer.bytes=1048576
+fetch.min.bytes=524288
+fetch.max.wait.ms=1000
+heartbeat.interval.ms=10000
+max.partition.fetch.bytes=4194304
+max.poll.records=1000
+
+security.protocol=SASL_PLAINTEXT
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username='{{ kafka_secret.upstream_username }}' password='{{ kafka_secret.upstream_password }}';
+sasl.mechanism=SCRAM-SHA-512
+
