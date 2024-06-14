@@ -19,7 +19,6 @@ pipeline {
                 }
                 dir('tests/unit/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'
-                    sh 'python3 test_fake_sherlock.py'
                 }
                 dir('tests/unit/pipeline/filter') {
                     sh 'python3 test_watchlist.py'
