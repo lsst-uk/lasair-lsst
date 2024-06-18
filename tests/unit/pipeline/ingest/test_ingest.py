@@ -197,6 +197,7 @@ class IngestTest(unittest.TestCase):
         # check result
 ###        self.assertEqual(result, [])
 
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')
