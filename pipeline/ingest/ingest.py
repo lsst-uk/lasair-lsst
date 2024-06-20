@@ -8,6 +8,7 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN | --nid=NID] 
               [--topic_out=TOUT]
+              [--pyinstrument=BOOL]
 
 Options:
     --nprocess=NP      Number of processes to use [default:1]
@@ -16,12 +17,14 @@ Options:
     --topic_in=TIN     Kafka topic to use, or
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --pyinstrument=BOOL  Write pyinstrument profile [default: False]
 """
 
 import sys
 import json
 from docopt import docopt
 from datetime import datetime
+from pyinstrument import Profiler
 from confluent_kafka import Consumer, Producer, KafkaError
 from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -315,7 +318,6 @@ class Ingester:
                 'diaForcedSourcesList': diaForcedSourcesList,
                 'diaNondetectionLimitsList': diaNondetectionLimitsList,
                 'ssObject': ssObject,
-
             }
             alerts.append(alert)
 
@@ -477,7 +479,17 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger("ingest")
+
+    pyinstrument = args.get('--pyinstrument') in ['True', 'true', 'Yes', 'yes']
+    if pyinstrument:
+        profiler = Profiler(interval=0.01)
+        profiler.start()
+
     rc = run_ingest(args, log)
+
+    if pyinstrument:
+        profiler.stop()
+        profiler.print()
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     print(f"Ingested {rc} total alerts")
