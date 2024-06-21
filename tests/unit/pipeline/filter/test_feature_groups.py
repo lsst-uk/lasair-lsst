@@ -78,7 +78,7 @@ class FeatureTest(TestCase):
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/1251244232409089132.json") as f:
+    with open("sample_alerts/231495076868522014.json") as f:
       alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
