@@ -102,7 +102,7 @@ class IngestTest(unittest.TestCase):
     @patch('ingest.ImageStore')
     @patch('ingest.Cluster')
     @patch('ingest.Producer')
-    @patch('ingest.Consumer')
+    @patch('ingest.DeserializingConsumer')
     def test_setup(self,
                    mock_consumer,
                    mock_producer,
@@ -165,37 +165,29 @@ class IngestTest(unittest.TestCase):
         # status page should get updated
         self.assertEqual(mock_ms.add.call_count, 1 + len(ingester.timers))
 
-###    @patch('ingest.fastavro')
-###    def test_poll(self, mock_avro):
-###        mock_log = unittest.mock.MagicMock()
-###        mock_consumer = unittest.mock.MagicMock()
-###        mock_consumer.poll.return_value.error.return_value = None
-###        mock_consumer.poll.return_value.value.return_value = b''
-###        mock_avro.schemaless_reader.return_value = "asdf"
-###        ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
-###        result = ingester._poll(1)
+    def test_poll(self):
+        mock_log = unittest.mock.MagicMock()
+        mock_consumer = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value.error.return_value = None
+        mock_consumer.poll.return_value.value.return_value = "some alerts here"
+        ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
+        result = ingester._poll(1)
         # log.error should not get called
-###        mock_log.error.assert_not_called()
-###     # schemaless reader should get called once
-###       mock_avro.schemaless_reader.assert_called_once()
+        mock_log.error.assert_not_called()
         # check result
-###        self.assertEqual(result, ["asdf"])
+        self.assertEqual(result, ["some alerts here"])
 
     # test that if consumer.poll returns error then we handle it correctly
-###    @patch('ingest.fastavro')
-###    def test_poll_error(self, mock_avro):
-###        mock_log = unittest.mock.MagicMock()
-###        mock_consumer = unittest.mock.MagicMock()
-###        mock_consumer.poll.return_value.error.return_value = True
-###        mock_avro.schemaless_reader.return_value = "asdf"
-###        ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
-###        result = ingester._poll(1)
+    def test_poll_error(self):
+        mock_log = unittest.mock.MagicMock()
+        mock_consumer = unittest.mock.MagicMock()
+        mock_consumer.poll.return_value.error.return_value = True
+        ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
+        result = ingester._poll(1)
         # log.error should get called
-###        mock_log.error.assert_called_once()
-###        # schemaless reader should not get called
-###        mock_avro.schemaless_reader.assert_not_called()
+        mock_log.error.assert_called_once()
         # check result
-###        self.assertEqual(result, [])
+        self.assertEqual(result, [])
 
 
 if __name__ == '__main__':
