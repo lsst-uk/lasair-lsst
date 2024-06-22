@@ -392,7 +392,7 @@ class Filter:
     def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
         """
-        if not stats:
+        if not self.stats:
             return
 
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
