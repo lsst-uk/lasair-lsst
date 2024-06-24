@@ -23,47 +23,17 @@ class manage_status():
 
     def read(self, file_id):
         status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
-        f = open(status_file)
-        status = json.loads(f.read())
-        f.close()
-        return status
-
-    def lock_read(self, file_id):
-        """ lock_read.
-            If status file not present, make an empty one
-            Waits for lock, then locks and returns the status
-            Must be quickly followed with write_unlock!
-            Args:
-                file_id: which file to use
-        """
-        status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
-        lock_file   = '%s_%s.lock' % (self.status_file_root, str(file_id))
-
-        if not os.path.exists(status_file) and not os.path.exists(lock_file):
-#            print('Status file not present!')
-            f = open(status_file, 'w')
-            f.write('{}')
-            f.close()
-        # rename as lock file while we modify values
-        while 1:
-            try:
-                os.rename(status_file, lock_file)
-                break
-            except:
-                time.sleep(SLEEPTIME)
-
-        # return contents
-        f = open(lock_file)
         try:
+            f = open(status_file)
             status = json.loads(f.read())
             f.close()
         except:
             status = {}
         return status
 
-    def write_unlock(self, status, file_id):
+    def write(self, status, file_id):
         """ write_status:
-            Writes the status file, then unlocks
+            Writes the status file
             Args:
                 status: dictionary of key-value pairs
                 file_id: which file to use
@@ -73,19 +43,11 @@ class manage_status():
         status['update_time'] = update_time
 
         status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
-        lock_file   = '%s_%s.lock' % (self.status_file_root, str(file_id))
 
-        # dump the status to the lock file
-        f = open(lock_file, 'w')
+        # dump the status
+        f = open(status_file, 'w')
         f.write(json.dumps(status))
         f.close()
-        # rename lock file as atatus file
-        while 1:
-            try:
-                os.rename(lock_file, status_file)
-                break
-            except:
-                time.sleep(SLEEPTIME)
 
     def tostr(self, file_id):
         """ __repr__:
@@ -107,10 +69,10 @@ class manage_status():
                 dictionary: set of key-value pairs
                 file_id: which file to use
         """
-        status = self.lock_read(file_id)
+        status = self.read(file_id)
         for key,value in dictionary.items():
             status[key] = value
-        self.write_unlock(status, file_id)
+        self.write(status, file_id)
 
     def add(self, dictionary, file_id):
         """ add
@@ -119,13 +81,13 @@ class manage_status():
                 dictionary: set of key-value pairs
                 file_id: if same as in status file, increment, else set
         """
-        status = self.lock_read(file_id)
+        status = self.read(file_id)
 
         for key,value in dictionary.items():
             if key in status: status[key] += value
             else:             status[key]  = value
 
-        self.write_unlock(status, file_id)
+        self.write(status, file_id)
 
 class timer():
     def __init__(self, nameroot):

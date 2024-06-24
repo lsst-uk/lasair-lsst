@@ -261,6 +261,7 @@ class Ingester:
         alerts = []
         for lsst_alert in lsst_alerts:
 #            print_msg(lsst_alert)
+#            sys.exit()
 
             diaObject = lsst_alert['diaObject']
 

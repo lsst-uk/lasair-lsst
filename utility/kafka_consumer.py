@@ -65,10 +65,10 @@ else:
     streamReader.subscribe([topic])
     while 1:
         msg = streamReader.poll(timeout=5)
+        if msg == None: 
+            break
         if msg.error():
             print('ERROR in ingest/poll: ' +  str(msg.error()))
-            break
-        if msg == None: 
             break
         if q['print_one']:
 #            print(msg.value())
