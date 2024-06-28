@@ -50,6 +50,7 @@ def setup_proc(n, nprocess, conffile):
     except Exception as e:
         log.exception('Exception')
         log.critical('Unrecoverable error in sherlock: ' + str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':

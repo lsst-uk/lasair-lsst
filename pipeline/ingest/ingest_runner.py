@@ -47,6 +47,7 @@ def setup_proc(n, nprocess, args):
     except Exception as e:
         log.exception('Exception')
         log.critical('Unrecoverable error in ingest: ' + str(e))
+        sys.exit(1)
 
 
 if __name__ == '__main__':
@@ -66,4 +67,5 @@ if __name__ == '__main__':
 
     for p in process_list:
         p.join()
+
     print('ingest_runner exiting')
