@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS DiaSources(
+diaSourceId bigint,
+ccdVisitId bigint,
+diaObjectId bigint,
+ssObjectId bigint,
+nameTrue ascii,
+ssObjectReassocTime ascii,
+midPointMjdTai double,
+ra double,
+raErr float,
+decl double,
+decErr float,
+ra_dec_Cov float,
+snr float,
+band ascii,
+mag float,
+magErr float,
+magTrueVband float,
+raTrue double,
+decTrue double,
+PRIMARY KEY (ssObjectId, diaSourceId)
+)
