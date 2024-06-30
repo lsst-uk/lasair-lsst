@@ -22,7 +22,6 @@ import sys
 import json
 from docopt import docopt
 from datetime import datetime
-#from pyinstrument import Profiler
 from confluent_kafka import Consumer, Producer, KafkaError
 from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -73,7 +72,8 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    self.image_store.putObject(cutoutId, imjd, content)
+                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    futures.append(result)
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
