@@ -87,7 +87,7 @@ class manage_status():
         os.remove(status_file)
         f = open(status_file, 'w')
         s = {key:status[key] for key in sorted(status.keys())}
-        f.write(json.dumps(s))
+        f.write(json.dumps(s, indent=2))
         f.close()
 
         # remove the lock file
