@@ -1,0 +1,1114 @@
+{
+  "name": "DP0.3",
+  "type": "record",
+  "fields": [
+    {
+      "name": "SSObject",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "SSObject",
+          "fields": [
+            {
+              "name": "ssObjectId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Unique identifier."
+            },
+            {
+              "name": "discoverySubmissionDate",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "The date the LSST first linked and submitted the discovery observations to the MPC. May be NULL if not an LSST discovery. The date format will follow general LSST conventions (MJD TAI, at the moment)."
+            },
+            {
+              "name": "firstObservationDate",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "The time of the first LSST observation of this object (could be precovered)"
+            },
+            {
+              "name": "arc",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Arc of LSST observations"
+            },
+            {
+              "name": "numObs",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "Number of LSST observations of this object"
+            },
+            {
+              "name": "MOID",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Minimum orbit intersection distance to Earth"
+            },
+            {
+              "name": "MOIDTrueAnomaly",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "True anomaly of the MOID point"
+            },
+            {
+              "name": "MOIDEclipticLongitude",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Ecliptic longitude of the MOID point"
+            },
+            {
+              "name": "MOIDDeltaV",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "DeltaV at the MOID point"
+            },
+            {
+              "name": "u_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (u band)"
+            },
+            {
+              "name": "u_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (u band)"
+            },
+            {
+              "name": "u_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (u band)"
+            },
+            {
+              "name": "u_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (u band)"
+            },
+            {
+              "name": "u_H_uG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (u band)"
+            },
+            {
+              "name": "u_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (u band)"
+            },
+            {
+              "name": "u_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (u band)"
+            },
+            {
+              "name": "g_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (g band)"
+            },
+            {
+              "name": "g_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (g band)"
+            },
+            {
+              "name": "g_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (g band)"
+            },
+            {
+              "name": "g_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (g band)"
+            },
+            {
+              "name": "g_H_gG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (g band)"
+            },
+            {
+              "name": "g_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (g band)"
+            },
+            {
+              "name": "g_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (g band)"
+            },
+            {
+              "name": "r_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (r band)"
+            },
+            {
+              "name": "r_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (r band)"
+            },
+            {
+              "name": "r_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (r band)"
+            },
+            {
+              "name": "r_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (r band)"
+            },
+            {
+              "name": "r_H_rG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (r band)"
+            },
+            {
+              "name": "r_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (r band)"
+            },
+            {
+              "name": "r_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (r band)"
+            },
+            {
+              "name": "i_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (i band)"
+            },
+            {
+              "name": "i_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (i band)"
+            },
+            {
+              "name": "i_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (i band)"
+            },
+            {
+              "name": "i_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (i band)"
+            },
+            {
+              "name": "i_H_iG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (i band)"
+            },
+            {
+              "name": "i_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (i band)"
+            },
+            {
+              "name": "i_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (i band)"
+            },
+            {
+              "name": "z_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (z band)"
+            },
+            {
+              "name": "z_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (z band)"
+            },
+            {
+              "name": "z_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (z band)"
+            },
+            {
+              "name": "z_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (z band)"
+            },
+            {
+              "name": "z_H_zG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (z band)"
+            },
+            {
+              "name": "z_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (z band)"
+            },
+            {
+              "name": "z_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (z band)"
+            },
+            {
+              "name": "y_H",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit absolute magnitude (y band)"
+            },
+            {
+              "name": "y_G12",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Best fit G12 slope parameter (y band)"
+            },
+            {
+              "name": "y_HErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of H (y band)"
+            },
+            {
+              "name": "y_G12Err",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of G12 (y band)"
+            },
+            {
+              "name": "y_H_yG12_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "H-G12 covariance (y band)"
+            },
+            {
+              "name": "y_Chi2",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Chi^2 statistic of the phase curve fit (y band)"
+            },
+            {
+              "name": "y_Ndata",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "The number of data points used to fit the phase curve (y band)"
+            },
+            {
+              "name": "maxExtendedness",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "maximum `extendedness` value from the DIASource"
+            },
+            {
+              "name": "minExtendedness",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "minimum `extendedness` value from the DIASource"
+            },
+            {
+              "name": "medianExtendedness",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "median `extendedness` value from the DIASource"
+            },
+            {
+              "name": "flags",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Flags, bitwise OR tbd."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "MPCORB",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "MPCORB",
+          "fields": [
+            {
+              "name": "mpcDesignation",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Number or provisional designation (in packed form)"
+            },
+            {
+              "name": "mpcNumber",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "MPC number (if the asteroid has been numbered; NULL otherwise). Provided for convenience."
+            },
+            {
+              "name": "ssObjectId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "LSST unique identifier (if observed by LSST)"
+            },
+            {
+              "name": "mpcH",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "MPCORB: Absolute magnitude, H"
+            },
+            {
+              "name": "mpcG",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "MPCORB: Slope parameter, G"
+            },
+            {
+              "name": "epoch",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Epoch (in MJD, .0 TT)"
+            },
+            {
+              "name": "tperi",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: MJD of pericentric passage"
+            },
+            {
+              "name": "peri",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Argument of perihelion, J2000.0 (degrees)"
+            },
+            {
+              "name": "node",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Longitude of the ascending node, J2000.0 (degrees)"
+            },
+            {
+              "name": "incl",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Inclination to the ecliptic, J2000.0 (degrees)"
+            },
+            {
+              "name": "e",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Orbital eccentricity"
+            },
+            {
+              "name": "n",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Mean daily motion (degrees per day)"
+            },
+            {
+              "name": "q",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "MPCORB: Perihelion distance (AU)"
+            },
+            {
+              "name": "uncertaintyParameter",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Uncertainty parameter, U"
+            },
+            {
+              "name": "reference",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Reference"
+            },
+            {
+              "name": "nobs",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "MPCORB: Number of observations"
+            },
+            {
+              "name": "nopp",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "MPCORB: Number of oppositions"
+            },
+            {
+              "name": "arc",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "MPCORB: Arc (days), for single-opposition objects"
+            },
+            {
+              "name": "arcStart",
+              "type": [
+                "null",
+                "timestamp"
+              ],
+              "doc": "MPCORB: Year of first observation (for multi-opposition objects)"
+            },
+            {
+              "name": "arcEnd",
+              "type": [
+                "null",
+                "timestamp"
+              ],
+              "doc": "MPCORB: Year of last observation (for multi-opposition objects)"
+            },
+            {
+              "name": "rms",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "MPCORB: r.m.s residual (\")"
+            },
+            {
+              "name": "pertsShort",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Coarse indicator of perturbers (blank if unperturbed one-opposition object)"
+            },
+            {
+              "name": "pertsLong",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Precise indicator of perturbers (blank if unperturbed one-opposition object)"
+            },
+            {
+              "name": "computer",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Computer name"
+            },
+            {
+              "name": "flags",
+              "type": [
+                "null",
+                "int"
+              ],
+              "doc": "MPCORB: 4-hexdigit flags. See https://minorplanetcenter.net//iau/info/MPOrbitFormat.html for details"
+            },
+            {
+              "name": "fullDesignation",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPCORB: Readable designation"
+            },
+            {
+              "name": "lastIncludedObservation",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "MPCORB: Date of last observation included in orbit solution"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DiaSource",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "DiaSource",
+          "fields": [
+            {
+              "name": "diaSourceId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Unique id."
+            },
+            {
+              "name": "ccdVisitId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Id of the ccdVisit where this diaSource was measured. Note that we are allowing a diaSource to belong to multiple amplifiers, but it may not span multiple ccds."
+            },
+            {
+              "name": "diaObjectId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Id of the diaObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
+            },
+            {
+              "name": "ssObjectId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
+            },
+            {
+              "name": "nameTrue",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "MPC or simulation designation of the moving object"
+            },
+            {
+              "name": "ssObjectReassocTime",
+              "type": [
+                "null",
+                "timestamp"
+              ],
+              "doc": "Time when this diaSource was reassociated from diaObject to ssObject (if such reassociation happens, otherwise NULL)."
+            },
+            {
+              "name": "midPointMjdTai",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Effective mid-exposure time for this diaSource."
+            },
+            {
+              "name": "ra",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "RA-coordinate of the center of this diaSource."
+            },
+            {
+              "name": "raErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of ra."
+            },
+            {
+              "name": "dec",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Dec-coordinate of the center of this diaSource."
+            },
+            {
+              "name": "decErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Uncertainty of dec."
+            },
+            {
+              "name": "ra_dec_Cov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Covariance between ra and dec."
+            },
+            {
+              "name": "snr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "The signal-to-noise ratio at which this source was detected in the difference image."
+            },
+            {
+              "name": "band",
+              "type": [
+                "null",
+                "string"
+              ],
+              "doc": "Name of the band used to take the exposure where this source was measured"
+            },
+            {
+              "name": "mag",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Magnitude. This is a placeholder and should be replaced by flux."
+            },
+            {
+              "name": "magErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Magnitude error. This is a placeholder and should be replaced by flux error."
+            },
+            {
+              "name": "magTrueVband",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "True (noiseless) V-band magnitude of the simulated diaSource"
+            },
+            {
+              "name": "raTrue",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "True (noiseless) right ascension of the simulated diaSource"
+            },
+            {
+              "name": "decTrue",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "True (noiseless) declination of the simulated diaSource"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "DiaSourceList",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": "DiaSource"
+        }
+      ]
+    },
+    {
+      "name": "SSSource",
+      "type": [
+        "null",
+        {
+          "type": "record",
+          "name": "SSSource",
+          "fields": [
+            {
+              "name": "ssObjectId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Unique identifier of the object."
+            },
+            {
+              "name": "diaSourceId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "Unique identifier of the observation"
+            },
+            {
+              "name": "mpcUniqueId",
+              "type": [
+                "null",
+                "long"
+              ],
+              "doc": "MPC unique identifier of the observation"
+            },
+            {
+              "name": "eclipticLambda",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Ecliptic longitude"
+            },
+            {
+              "name": "eclipticBeta",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Ecliptic latitude"
+            },
+            {
+              "name": "galacticL",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Galactic longitude"
+            },
+            {
+              "name": "galacticB",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Galactic latitute"
+            },
+            {
+              "name": "phaseAngle",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Phase angle"
+            },
+            {
+              "name": "heliocentricDist",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Heliocentric distance"
+            },
+            {
+              "name": "topocentricDist",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Topocentric distace"
+            },
+            {
+              "name": "predictedMagnitude",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Predicted magnitude"
+            },
+            {
+              "name": "predictedMagnitudeErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Prediction uncertainty (1-sigma)"
+            },
+            {
+              "name": "residualRa",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Residual R.A. vs. ephemeris"
+            },
+            {
+              "name": "residualDec",
+              "type": [
+                "null",
+                "double"
+              ],
+              "doc": "Residual Dec vs. ephemeris"
+            },
+            {
+              "name": "predictedRaErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Predicted R.A. uncertainty"
+            },
+            {
+              "name": "predictedDecErr",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Predicted Dec uncertainty"
+            },
+            {
+              "name": "predictedRaDecCov",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Predicted R.A./Dec covariance"
+            },
+            {
+              "name": "heliocentricX",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric X coordinate (at the emit time)"
+            },
+            {
+              "name": "heliocentricY",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric Y coordinate (at the emit time)"
+            },
+            {
+              "name": "heliocentricZ",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric Z coordinate (at the emit time)"
+            },
+            {
+              "name": "heliocentricVX",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric X velocity (at the emit time)"
+            },
+            {
+              "name": "heliocentricVY",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric Y velocity (at the emit time)"
+            },
+            {
+              "name": "heliocentricVZ",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian heliocentric Z velocity (at the emit time)"
+            },
+            {
+              "name": "topocentricX",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric X coordinate (at the emit time)"
+            },
+            {
+              "name": "topocentricY",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric Y coordinate (at the emit time)"
+            },
+            {
+              "name": "topocentricZ",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric Z coordinate (at the emit time)"
+            },
+            {
+              "name": "topocentricVX",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric X velocity (at the emit time)"
+            },
+            {
+              "name": "topocentricVY",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric Y velocity (at the emit time)"
+            },
+            {
+              "name": "topocentricVZ",
+              "type": [
+                "null",
+                "float"
+              ],
+              "doc": "Cartesian topocentric Z velocity (at the emit time)"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SSSourceList",
+      "type": [
+        "null",
+        {
+          "type": "array",
+          "items": "SSSource"
+        }
+      ]
+    }
+  ]
+}

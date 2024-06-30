@@ -59,12 +59,12 @@ A.init.then(() => {
     var cand = [];
 
     {% for object in table2 %}
-    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': {{ object.probdens }}*circle_size, 'diaObjectId':{{ object.diaObjectId }}});
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': {{ object.probdens }}*circle_size, 'diaObjectId':'{{ object.diaObjectId }}' });
         cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
     {% endfor %}
 
     {% for object in table3 %}
-    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':{{ object.probdens }}*circle_size, 'diaObjectId':{{ object.diaObjectId }}});
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':{{ object.probdens }}*circle_size, 'diaObjectId':'{{ object.diaObjectId }}' });
         cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
     {% endfor %}
 
@@ -81,7 +81,7 @@ A.init.then(() => {
         }
     }
     if(ifound >= 0){
-        $('#info').html('<h2>You clicked on <a href=https://lasair-lsst-dev.lsst.ac.uk/objects/' + cand[ifound]['diaObjectId'] + '>' + cand[ifound]['diaObjectId'] + '</h2>');
+		    $('#info').html('<h2>You clicked on <a href=https://{{ lasair_url }}/objects/' + cand[ifound]['diaObjectId'] + '>' + cand[ifound]['diaObjectId'] + '</h2>');
     } else {
         $('#info').html('<h2> You clicked at RA=' + data.ra.toFixed(3) + ' Dec=' + data.dec.toFixed(3));
     }
