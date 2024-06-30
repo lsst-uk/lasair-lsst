@@ -333,18 +333,15 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    if lasair_settings.USE_CUTOUTCASS:
-        osc = cutoutStore.cutoutStore()
-        try:
-            fitsdata = osc.getCutout(candid_cutoutType, imjd)
-        except:
-            fitsdata = ''
-    else:
-        image_store = objectStore.objectStore(suffix='fits', fileroot=lasair_settings.IMAGEFITS)
-        try:
-            fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
-        except:
-            fitsdata = ''
+    ff = open('/home/ubuntu/ff', 'a')
+    ff.write('%d\n' % imjd)
+    ff.write('%s\n' % candid_cutoutType)
+    ff.close()
+    osc = cutoutStore.cutoutStore()
+    try:
+        fitsdata = osc.getCutout(candid_cutoutType, imjd)
+    except:
+        fitsdata = ''
 
     response = HttpResponse(fitsdata, content_type='image/fits')
     response['Content-Disposition'] = 'attachment; filename="%s.fits"' % candid_cutoutType
