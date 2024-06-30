@@ -57,17 +57,11 @@ class ImageStore:
             # passing in an image_store instead of getting one is mostly to enable testing
             self.image_store = image_store
             return
-        fitsdir = getattr(settings, 'IMAGEFITS', None)
-        use_cutoutcass = getattr(settings, 'USE_CUTOUTCASS', False)
-        if use_cutoutcass:
-            self.image_store = cutoutStore.cutoutStore()
-            if self.image_store.session is None:
-                self.image_store = None
-        elif fitsdir and len(fitsdir) > 0:
-            self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
+        self.image_store = cutoutStore.cutoutStore()
+        if self.image_store.session is None:
+            self.image_store = None
         else:
-            log.warning('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
-                     (use_cutoutcass, fitsdir))
+            log.warning('WARNING: Cannot store cutouts')
             self.image_store = None
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
@@ -79,12 +73,7 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    # store may be cutouts or cephfs
-                    if getattr(settings, 'USE_CUTOUTCASS', False):
-                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                        futures.append(result)
-                    else:
-                        self.image_store.putObject(cutoutId, imjd, content)
+                    self.image_store.putObject(cutoutId, imjd, content)
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:

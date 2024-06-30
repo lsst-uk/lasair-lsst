@@ -32,41 +32,12 @@ class IngestTest(unittest.TestCase):
         psutil.Process().terminate()
         self.assertTrue(ingester.sigterm_raised)
 
-    def test_init_image_store_error(self):
-        """Test that image store setup gives a warning and sets image store to None if
-        neither settings.CUTOUTCASS nor IMAGEFITS is set"""
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = None
-        mock_log = unittest.mock.MagicMock()
-        imageStore = ingest.ImageStore(log=mock_log)
-        self.assertEqual(imageStore.image_store, None)
-        mock_log.warning.assert_called_once()
-
-    @patch('ingest.cutoutStore.cutoutStore')
-    def test_init_image_store_cass(self, mock_cutoutStore):
-        """Test that image store setup calls cutoutStore if settings.CUTOUTCASS is set"""
-        ingest.settings.USE_CUTOUTCASS = True
-        ingest.settings.IMAGEFITS = None
-        imageStore = ingest.ImageStore()
-        mock_cutoutStore.assert_called_once()
-        self.assertEqual(imageStore.image_store, mock_cutoutStore.return_value)
-
-    @patch('ingest.objectStore.objectStore')
-    def test_init_image_store_fits(self, mock_objectStore):
-        """Test that image store setup calls objectStore if settings.IMAGEFITS is set"""
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = '/tmp/testdir0987654321'
-        imageStore = ingest.ImageStore()
-        mock_objectStore.assert_called_once()
-        self.assertEqual(imageStore.image_store, mock_objectStore.return_value)
-
     def test_store_images(self):
         """Test using the image store"""
         mock_image_store = unittest.mock.MagicMock()
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
         imjd = int(test_alert['diaSource']['midpointMjdTai'])
-        ingest.settings.USE_CUTOUTCASS = True
         imageStore = ingest.ImageStore(image_store=mock_image_store)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         # check we called putCutoutAsync twice
@@ -79,8 +50,6 @@ class IngestTest(unittest.TestCase):
         diaObjectId = test_alert['diaObject']['diaObjectId']
         imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_log = unittest.mock.MagicMock()
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = None
         imageStore = ingest.ImageStore(log=mock_log)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         self.assertEqual(len(result), 0)
@@ -93,7 +62,6 @@ class IngestTest(unittest.TestCase):
         imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_image_store = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
-        ingest.settings.USE_CUTOUTCASS = True
         mock_image_store.putCutoutAsync.side_effect = Exception('test error')
         imageStore = ingest.ImageStore(log=mock_log, image_store=mock_image_store)
         self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, imjd, diaObjectId)
