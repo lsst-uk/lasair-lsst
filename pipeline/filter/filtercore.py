@@ -40,7 +40,6 @@ import numbers
 import confluent_kafka
 from datetime import datetime
 from docopt import docopt
-#from pyinstrument import Profiler
 
 sys.path.append('../../common')
 import settings
@@ -76,7 +75,6 @@ class Filter:
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
-#                 pyinstrument: bool = False,
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
@@ -631,22 +629,15 @@ if __name__ == "__main__":
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
-#    pyinstrument = args.get('--pyinstrument') in ['True', 'true', 'Yes', 'yes']
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
                   send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
     n_batch = 0
     while not fltr.sigterm_raised:
-#        if pyinstrument:
-#            profiler = Profiler(interval=0.01)
-#            profiler.start()
         n_alerts = fltr.run_batch()
         n_batch += 1
         if n_batch == maxbatch:
             log.info(f"Exiting after {n_batch} batches")
-#            if pyinstrument:
-#                profiler.stop()
-#                profiler.print()
             sys.exit(0)
         if n_alerts == 0:  # process got no alerts, so sleep a few minutes
             log.info('Waiting for more alerts ....')

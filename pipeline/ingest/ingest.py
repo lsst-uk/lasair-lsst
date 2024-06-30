@@ -467,17 +467,7 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger("ingest")
-
-#    pyinstrument = args.get('--pyinstrument') in ['True', 'true', 'Yes', 'yes']
-#    if pyinstrument:
-#        profiler = Profiler(interval=0.01)
-#        profiler.start()
-
     rc = run_ingest(args, log)
-
-#    if pyinstrument:
-#        profiler.stop()
-#        profiler.print()
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     print(f"Ingested {rc} total alerts")
