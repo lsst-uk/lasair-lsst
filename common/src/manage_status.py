@@ -11,6 +11,7 @@ import time
 import socket
 import os, sys
 import fcntl
+SLEEPTIME = 0.1
 
 class manage_status():
     """ manage_status.
@@ -85,7 +86,8 @@ class manage_status():
         # dump the status
         os.remove(status_file)
         f = open(status_file, 'w')
-        f.write(json.dumps(status))
+        s = {key:status[key] for key in sorted(status.keys())}
+        f.write(json.dumps(s))
         f.close()
 
         # remove the lock file
