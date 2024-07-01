@@ -49,12 +49,16 @@ class manage_status():
 
         # wait until the lock is released
         # but if we wait 100 times, just kill the lock and go ahead
+        # sometimes the lock file is already gone so just ignore
         for n in range(100):
             if not os.path.exists(lock_file):
                 break
             time.sleep(SLEEPTIME)
         else:
-            os.remove(lock_file)
+            try:
+                os.remove(lock_file)
+            except:
+                pass
     
         # lock the directory for me
         lock = open(lock_file, 'w')

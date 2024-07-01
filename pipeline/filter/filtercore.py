@@ -397,7 +397,7 @@ class Filter:
         nid = date_nid.nid_now()
         d = Filter.batch_statistics()
         ms.set({
-            'today_ztf': Filter.grafana_today(),
+            'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
             'min_delay': '%.1f' % d['since'],  # hours since most recent alert
@@ -493,27 +493,28 @@ class Filter:
 
     @staticmethod
     def grafana_today():
-        """How many objects reported today from ZTF.
+        """How many objects reported today from LSST.
         """
         g = datetime.utcnow()
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
-        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
-        urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
-                  '- sum(kafka_log_log_value{ name="LogStartOffset", night = "%s", program="MSIP" })' % (
-                      date, date)
+        # do not have this for LSST yet
+#        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
+#        urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
+#                  '- sum(kafka_log_log_value{ name="LogStartOffset", night = "%s", program="MSIP" })' % (
+#                      date, date)
 
-        try:
-            urlquote = url + urllib.parse.quote(urltail)
-            resultjson = requests.get(urlquote,
-                                      auth=(settings.GRAFANA_USERNAME, settings.GRAFANA_PASSWORD))
-            result = json.loads(resultjson.text)
-            alertsstr = result['data']['result'][0]['value'][1]
-            today_candidates_ztf = int(alertsstr) // 4
-        except Exception as e:
-            log = lasairLogging.getLogger("filter")
-            log.info('Cannot parse grafana: %s' % str(e))
-            today_candidates_ztf = -1
-
+#        try:
+#            urlquote = url + urllib.parse.quote(urltail)
+#            resultjson = requests.get(urlquote,
+#                                      auth=(settings.GRAFANA_USERNAME, settings.GRAFANA_PASSWORD))
+#            result = json.loads(resultjson.text)
+#            alertsstr = result['data']['result'][0]['value'][1]
+#            today_candidates_ztf = int(alertsstr) // 4
+#        except Exception as e:
+#            log = lasairLogging.getLogger("filter")
+#            log.info('Cannot parse grafana: %s' % str(e))
+#            today_candidates_ztf = -1
+        today_candidates_ztf = 0
         return today_candidates_ztf
 
     def run_batch(self):
