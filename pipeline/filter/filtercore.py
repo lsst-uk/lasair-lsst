@@ -3,13 +3,25 @@ The core filter module. Usually run as a service using filter_runner, but can al
 
 Usage:
     ingest.py [--maxalert=MAX]
+              [--maxbatch=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
+              [--local_db=NAME]
+              [--send_email=BOOL]
+              [--send_kafka=BOOL]
+              [--transfer=BOOL]
+              [--stats=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --local_db=NAME    Name of local database to use [default: ztf]
+    --send_email=BOOL  Send email [default: True]
+    --send_kafka=BOOL  Send kafka [default: True]
+    --transfer=BOOL    Transfer results to main [default: True]
+    --stats=BOOL       Write stats [default: True]
 """
 
 import os
@@ -37,6 +49,7 @@ import date_nid
 import db_connect
 import manage_status
 import lasairLogging
+import logging
 import filters
 import watchlists
 import watchmaps
@@ -56,15 +69,26 @@ class Filter:
     def __init__(self,
                  topic_in: str = 'ztf_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
-                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS):
+                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 local_db: str = None,
+                 send_email: bool = True,
+                 send_kafka: bool = True,
+                 transfer: bool = True,
+                 stats: bool = True,
+                 log=None):
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
+        self.local_db = local_db or 'ztf'
+        self.send_email = send_email
+        self.send_kafka = send_kafka
+        self.transfer = transfer
+        self.stats = stats
 
         self.consumer = None
         self.database = None
 
-        self.log = lasairLogging.getLogger("filter")
+        self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
 
         # catch SIGTERM so that we can finish processing cleanly
@@ -82,7 +106,7 @@ class Filter:
         # set up the link to the local database
         if not self.database or not self.database.is_connected():
             try:
-                self.database = db_connect.local()
+                self.database = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
@@ -267,6 +291,7 @@ class Filter:
             # Here we get the next alert by kafka
             msg = self.consumer.poll(timeout=5)
             if msg is None:
+                print('message is null')
                 break
             if msg.error():
                 self.log.error("ERROR polling Kafka: " + str(msg.error()))
@@ -275,10 +300,12 @@ class Filter:
                     break
                 continue
             if msg.value() is None:
+                print('message value is null')
                 continue
             # Apply filter to each alert
             alert = json.loads(msg.value())
             nalert_in += 1
+#            print(json.dumps(alert, indent=2))  ##############
             d = self.handle_alert(alert)
             nalert_out += d
 
@@ -292,12 +319,13 @@ class Filter:
 
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
-        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
-        nid = date_nid.nid_now()
-        ms.add({
-            'today_filter': nalert_in,
-            'today_filter_out': nalert_out,
-        }, nid)
+        if self.stats:
+            ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+            nid = date_nid.nid_now()
+            ms.add({
+                'today_filter': nalert_in,
+                'today_filter_out': nalert_out,
+            }, nid)
 
         return nalert_out
 
@@ -362,11 +390,14 @@ class Filter:
     def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
         """
+        if not self.stats:
+            return
+
         ms = manage_status.manage_status(settings.SYSTEM_STATUS)
         nid = date_nid.nid_now()
         d = Filter.batch_statistics()
         ms.set({
-            'today_ztf': Filter.grafana_today(),
+            'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
             'min_delay': '%.1f' % d['since'],  # hours since most recent alert
@@ -462,27 +493,28 @@ class Filter:
 
     @staticmethod
     def grafana_today():
-        """How many objects reported today from ZTF.
+        """How many objects reported today from LSST.
         """
         g = datetime.utcnow()
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
-        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
-        urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
-                  '- sum(kafka_log_log_value{ name="LogStartOffset", night = "%s", program="MSIP" })' % (
-                      date, date)
+        # do not have this for LSST yet
+#        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
+#        urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
+#                  '- sum(kafka_log_log_value{ name="LogStartOffset", night = "%s", program="MSIP" })' % (
+#                      date, date)
 
-        try:
-            urlquote = url + urllib.parse.quote(urltail)
-            resultjson = requests.get(urlquote,
-                                      auth=(settings.GRAFANA_USERNAME, settings.GRAFANA_PASSWORD))
-            result = json.loads(resultjson.text)
-            alertsstr = result['data']['result'][0]['value'][1]
-            today_candidates_ztf = int(alertsstr) // 4
-        except Exception as e:
-            log = lasairLogging.getLogger("filter")
-            log.info('Cannot parse grafana: %s' % str(e))
-            today_candidates_ztf = -1
-
+#        try:
+#            urlquote = url + urllib.parse.quote(urltail)
+#            resultjson = requests.get(urlquote,
+#                                      auth=(settings.GRAFANA_USERNAME, settings.GRAFANA_PASSWORD))
+#            result = json.loads(resultjson.text)
+#            alertsstr = result['data']['result'][0]['value'][1]
+#            today_candidates_ztf = int(alertsstr) // 4
+#        except Exception as e:
+#            log = lasairLogging.getLogger("filter")
+#            log.info('Cannot parse grafana: %s' % str(e))
+#            today_candidates_ztf = -1
+        today_candidates_ztf = 0
         return today_candidates_ztf
 
     def run_batch(self):
@@ -566,14 +598,15 @@ class Filter:
                 self.log.error("ERROR in filter/fast_annotation_filters")
 
             # build CSV file with local database and transfer to main
-            timers['ftransfer'].on()
-            commit = self.transfer_to_main()
-            timers['ftransfer'].off()
-            self.log.info('Batch ended')
-            if not commit:
-                self.log.info('Transfer to main failed, no commit')
-                time.sleep(600)
-                return 0
+            if self.transfer:
+                timers['ftransfer'].on()
+                commit = self.transfer_to_main()
+                timers['ftransfer'].off()
+                self.log.info('Batch ended')
+                if not commit:
+                    self.log.info('Transfer to main failed, no commit')
+                    time.sleep(600)
+                    return 0
 
         # Write stats for the batch
         timers['ftotal'].off()
@@ -583,16 +616,30 @@ class Filter:
 
 
 if __name__ == "__main__":
-    lasairLogging.basicConfig(stream=sys.stdout)
+    #lasairLogging.basicConfig(stream=sys.stdout)
+    logging.basicConfig(level=logging.DEBUG)
+    log = logging.getLogger()
     args = docopt(__doc__)
 
-    topic_in = args.get('--topic_in') or  'ztf_sherlock'
-    group_id = args.get('--group_id') or  settings.KAFKA_GROUPID
+    topic_in = args.get('--topic_in') or 'ztf_sherlock'
+    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
+    maxbatch = int(args.get('--maxbatch') or -1)
+    local_db = args.get('--local_db')
+    send_email = args.get('--send_email') in ['True', 'true', 'Yes', 'yes']
+    send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
+    transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
+    stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
+    n_batch = 0
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
+        n_batch += 1
+        if n_batch == maxbatch:
+            log.info(f"Exiting after {n_batch} batches")
+            sys.exit(0)
         if n_alerts == 0:  # process got no alerts, so sleep a few minutes
-            fltr.log.info('Waiting for more alerts ....')
+            log.info('Waiting for more alerts ....')
             time.sleep(settings.WAIT_TIME)

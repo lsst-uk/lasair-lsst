@@ -145,7 +145,7 @@
     - proxy
   tags: proxy
 
-- hosts: cassandranodes
+- hosts: cassandranodes,cutoutcass
   gather_facts: false
   become: yes
   tasks:

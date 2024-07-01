@@ -168,6 +168,11 @@ def fitBazinExpBB(alert, pexpit0, pbazin0, sigma):
         'bazinExpTemp': None, 'bazinExpRiseRate': None, 'bazinExpFallRate': None,
         'bazinExpTempErr': None, 'bazinExpRiseRateErr': None, 'bazinExpFallRateErr': None,
     }
+
+
+    return empty   ##### HACK TO SAVE TIME
+
+
     if len(alert['diaSourcesList']) < 4:
         return empty
     (Rsqe, dicte) = fit_expit(alert, pexpit0, sigma)

@@ -78,14 +78,17 @@ if __name__ == "__main__":
     import settings
     imjd = 57072
     cutoutId = '176805391051522611_cutoutTemplate'
+    imjd = 60487
+    cutoutId = '3068394670028488705_cutoutDifference'
+
 #    fp = open(cutoutId + '.fits', 'rb')
 #    cutoutBlob = fp.read(cutout)
 #    fp.close()
 
     osc = cutoutStore()
-#    osc.putCutout(cutoutId, imjd, cutoutBlob)
+#    osc.putCutout(cutoutId, cutoutBlob, imjd)
 
-    cutout = osc.getCutout(imjd, cutoutId)
+    cutout = osc.getCutout(cutoutId, imjd)
     if cutout:
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)

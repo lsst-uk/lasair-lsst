@@ -4,8 +4,8 @@ import plotly.graph_objects as go
 import math, json
 import numpy as np
 
-filterNames  = ['u', 'g', 'r', 'i', 'z', 'y']
-filterColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
+bands  = ['u', 'g', 'r', 'i', 'z', 'y']
+bandColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
 
 def object_difference_lightcurve(
     objectData
@@ -34,9 +34,9 @@ def object_difference_lightcurve(
     unforcedDF["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
 
-    for filterColor,filterName in zip(filterColors, filterNames):
-        unforcedDF.loc[(unforcedDF['filtername'] == filterName), "marker_color"] = filterColor
-        unforcedDF.loc[(unforcedDF['filtername'] == filterName), "bcolor"] = filterColor
+    for bandColor,band in zip(bandColors, bands):
+        unforcedDF.loc[(unforcedDF['band'] == band), "marker_color"] = bandColor
+        unforcedDF.loc[(unforcedDF['band'] == band), "bcolor"] = bandColor
 
     unforcedDF["marker_symbol"] = "circle"
     unforcedDF["marker_size"]   = 10
@@ -47,9 +47,9 @@ def object_difference_lightcurve(
     # GENERATE THE DATASETS
     allDataSets = []
 
-    for filterName in filterNames:
-        BandData = unforcedDF.loc[(unforcedDF['filtername'] == filterName)]
-        BandData["name"] = filterName + "-band flux detection"
+    for band in bands:
+        BandData = unforcedDF.loc[(unforcedDF['band'] == band)]
+        BandData["name"] = band + "-band flux detection"
         allDataSets.append(BandData)
 
     # START TO PLOT
@@ -228,9 +228,9 @@ def object_difference_lightcurve_forcedphot(
     forcedDF["marker_opacity"] = 0.6
     forcedDF["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
-    for filterColor,filterName in zip(filterColors, filterNames):
-        forcedDF.loc[(forcedDF['filtername'] == filterName), "marker_color"] = filterColor
-        forcedDF.loc[(forcedDF['filtername'] == filterName), "bcolor"] = filterColor
+    for bandColor,band in zip(bandColors, bands):
+        forcedDF.loc[(forcedDF['band'] == band), "marker_color"] = bandColor
+        forcedDF.loc[(forcedDF['band'] == band), "bcolor"] = bandColor
 
     forcedDF["marker_symbol"] = "circle"
     forcedDF["marker_size"] = 10
@@ -239,9 +239,9 @@ def object_difference_lightcurve_forcedphot(
 
     # GENERATE THE DATASETS
     allDataSets = []
-    for filterName in filterNames:
-        BandDetections = forcedDF.loc[(forcedDF['filtername'] == filterName)]
-        BandDetections["name"] = filterName + "-band detection"
+    for band in bands:
+        BandDetections = forcedDF.loc[(forcedDF['band'] == band)]
+        BandDetections["name"] = band + "-band detection"
         allDataSets.append(BandDetections)
 
     # START TO PLOT
@@ -256,7 +256,7 @@ def object_difference_lightcurve_forcedphot(
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["midpointtai"],
+                    x=data["midpointmjdtai"],
                     y=data["nanojansky"],
                     customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
                     error_y=error_y,
@@ -394,15 +394,15 @@ def get_default_axis_ranges(
     - `unforcedDF` -- unforced photometry dataframe    
     """
 
-    mjdMin = unforcedDF["midpointtai"].min()
-    mjdMax = unforcedDF["midpointtai"].max()
+    mjdMin = unforcedDF["midpointmjdtai"].min()
+    mjdMax = unforcedDF["midpointmjdtai"].max()
 
     if forcedDF is not None:
 # question: Whats going on here
 #        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
 #        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
-        mjdMin2 = forcedDF["midpointtai"].min()
-        mjdMax2 = forcedDF["midpointtai"].max()
+        mjdMin2 = forcedDF["midpointmjdtai"].min()
+        mjdMax2 = forcedDF["midpointmjdtai"].max()
 
         if mjdMin2 < mjdMin:
             mjdMin = mjdMin2
@@ -411,8 +411,8 @@ def get_default_axis_ranges(
 
     # SORT BY COLUMN NAME
     discovery = unforcedDF.head(1)
-    if mjdMin > discovery["midpointtai"].min():
-        mjdMin = discovery["midpointtai"].min()
+    if mjdMin > discovery["midpointmjdtai"].min():
+        mjdMin = discovery["midpointmjdtai"].min()
 
     mjdRange = mjdMax - mjdMin
     if mjdRange < 5:
@@ -425,13 +425,13 @@ def get_default_axis_ranges(
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
     if forcedDF is not None:
-        fluxMax = forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
-                (forcedDF['midpointtai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
-                (forcedDF['midpointtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMax = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
+                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
+                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
         fluxMax = fluxMax.max()
-        fluxMin = forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
-                (forcedDF['midpointtai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointtai'] > mjdMin) & \
-                (forcedDF['midpointtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMin = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
+                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
+                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
         fluxMin = fluxMin.min()
 
         yrange = fluxMax - fluxMin
@@ -477,17 +477,17 @@ def convert_objectdata_to_dataframes(
     # CREATE DATA FRAME FOR LC
     if len(objectData["diaForcedSources"]):
         forcedDF = pd.DataFrame(objectData["diaForcedSources"])
-        mjds = Time(forcedDF['midpointtai'], format='mjd')
+        mjds = Time(forcedDF['midpointmjdtai'], format='mjd')
         forcedDF['utc'] = mjds.iso
         forcedDF['utc'] = pd.to_datetime(forcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
         # SORT BY COLUMN NAME
-        forcedDF.sort_values(['midpointtai'],
+        forcedDF.sort_values(['midpointmjdtai'],
                              ascending=[True], inplace=True)
 
 # Standard naming
-        forcedDF["filtername"] = forcedDF['band']
-        forcedDF["nanojansky"] = forcedDF['psfdiffflux']
-        forcedDF["nanojanskyerr"] = forcedDF['psfdifffluxerr']
+        forcedDF["band"] = forcedDF['band']
+        forcedDF["nanojansky"] = forcedDF['psfflux']
+        forcedDF["nanojanskyerr"] = forcedDF['psffluxerr']
 
 # Convert from flux nJ to mag
         forcedDF["magpsf"]   = 31.4 - 2.5*np.log10(forcedDF["nanojansky"])
@@ -499,14 +499,14 @@ def convert_objectdata_to_dataframes(
     # NORMAL UNFORCED PHOTO
     if len(objectData["diaSources"]):
         unforcedDF = pd.DataFrame(objectData["diaSources"])
-        mjds2 = Time(unforcedDF['midpointtai'], format='mjd')
+        mjds2 = Time(unforcedDF['midpointmjdtai'], format='mjd')
         unforcedDF['utc'] = mjds2.iso
         unforcedDF['utc'] = pd.to_datetime(unforcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        unforcedDF.sort_values(['midpointtai'],
+        unforcedDF.sort_values(['midpointmjdtai'],
                                ascending=[True], inplace=True)
 # Standard naming
-        unforcedDF["nanojansky"] = unforcedDF['psflux']
-        unforcedDF["nanojanskyerr"] = unforcedDF['psfluxerr']
+        unforcedDF["nanojansky"] = unforcedDF['psfflux']
+        unforcedDF["nanojanskyerr"] = unforcedDF['psffluxerr']
 # Convert from flux nJ to mag
         unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
@@ -514,8 +514,8 @@ def convert_objectdata_to_dataframes(
     # MATCH THE FORCED AND UNFORCED TABLES
     if forcedDF is not None:
         mergedDF = pd.merge(unforcedDF, \
-            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointtai', 'filtername']], \
-            how='left', on=['midpointtai', 'filtername'])
+            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointmjdtai', 'band']], \
+            how='left', on=['midpointmjdtai', 'band'])
     else:
         mergedDF = unforcedDF
         mergedDF['nanojansky'] = np.nan

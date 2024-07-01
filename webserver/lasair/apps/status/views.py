@@ -65,7 +65,7 @@ def status(request, nid):
         'today_filter': ('Alerts received by Filter stage today', 'Database Alerts + Solar System Alerts'),
         'today_filter_out': ('Alerts sent to database today', ''),
         'today_filter_ss': ('Solar system detections today', ''),
-        'today_ztf': ('Alerts sent by ZTF today', ''),
+        'today_lsst': ('Alerts sent by LSST today', ''),
         'today_database': ('Updated objects in database today', ''),
         'total_count': ("Total objects in database", ''),
         'min_delay': ('Hours since most recent alert', ''),

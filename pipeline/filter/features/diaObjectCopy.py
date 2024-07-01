@@ -6,14 +6,10 @@ class diaObjectCopy(FeatureGroup):
     _features = [
         'diaObjectId',
         'ra', 'decl',
-        'gPSFluxMax',
-        'gPSFluxMean',
-        'gPSFluxMaxSlope',
-        'gPSFluxNdata',
-        'rPSFluxMax',
-        'rPSFluxMean',
-        'rPSFluxMaxSlope',
-        'rPSFluxNdata',
+        'g_psfFluxMean',
+        'g_psfFluxMeanErr',
+        'r_psfFluxMean',
+        'r_psfFluxMeanErr',
     ]
 
     def run(self):
@@ -30,10 +26,5 @@ class diaObjectCopy(FeatureGroup):
                 if self.verbose: print('diaObjectCopy: did not find %s' % f)
                 output[f] = None
 
-        # because of a mistake in the DP0.2 schema
-        if output['gPSFluxNdata']: output['gPSFluxNdata'] = int(output['gPSFluxNdata'])
-        else                     : output['gPSFluxNdata'] = None
-        if output['rPSFluxNdata']: output['rPSFluxNdata'] = int(output['rPSFluxNdata'])
-        else                     : output['rPSFluxNdata'] = None
         return output
 

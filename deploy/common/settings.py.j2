@@ -30,6 +30,11 @@ INTERNAL_KAFKA_PRODUCER= "{{ (groups['kafka'] | join(':9092,') ) }}:9092"
 # Group ID for public kafka, can be changed at will in an instantiated settings.py
 PUBLIC_GROUP_ID        = 'test124'
 
+# Schema registry
+#################
+SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
+SCHEMA         = "/home/ubuntu/lasair-lsst/common/schema/alert-lsst.avsc"
+
 # Pipeline runtime
 ##################
 # If not present, pipeline comonents will not start a new batch
@@ -43,9 +48,6 @@ WAIT_TIME              = 180
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
-
-# Avro Schema
-SCHEMA = '{{ ansible_env.HOME }}/{{ git_name }}/common/schema/dp02.avsc'
 
 # Relational database mysql/galera
 ##################################
@@ -82,7 +84,6 @@ CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
 # Cutouts in Cassandra
-USE_CUTOUTCASS          = True
 CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
 
 # Directories on share Cephfs

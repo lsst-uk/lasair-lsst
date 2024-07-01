@@ -117,7 +117,7 @@ o.diaObjectId,
 h.probdens2, h.contour, 
 o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
-o.rPSFluxMax, o.gPSFluxMax,
+o.rPSFlux, o.gPSFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
@@ -187,7 +187,7 @@ h.probdens3, h.contour, h.distance as dist,
 o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.rPSFluxMax, o.gPSFluxMax,
+o.rPSFlux, o.gPSFlux,
 o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 

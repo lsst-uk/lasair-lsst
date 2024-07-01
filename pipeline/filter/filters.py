@@ -87,18 +87,18 @@ def run_queries(fltr, query_list, annotation_list=None):
 
         # normal case of streaming queries
         if annotation_list is None:
-            query_results = run_query(query, fltr.database)
-            n += dispose_query_results(query, query_results)
+            query_results = run_query(query, fltr.database, fltr=fltr)
+            n += dispose_query_results(query, query_results, fltr)
 
         # immediate response to active=2 annotators
         else:
             for ann in annotation_list:  
-                msl_remote = db_connect.remote()
-                query_results = run_query(query, fltr.database, \
-                                          ann['annotator'], ann['diaObjectId'])
+                # msl_remote = db_connect.remote()
+                query_results = run_query(query, fltr.database,
+                                          ann['annotator'], ann['diaObjectId'], fltr=fltr)
                 print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
                 print('results:', query_results)
-                n += dispose_query_results(query, query_results)
+                n += dispose_query_results(query, query_results, fltr)
 
         t = time.time() - t
         if n > 0:
@@ -125,7 +125,7 @@ def query_for_object(query, diaObjectId):
     return query
 
 
-def run_query(query, msl, annotator=None, diaObjectId=None):
+def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     """run_query. Two cases here: 
     if annotator=None, runs the query against the local database
     if annotator and diaObjectId, checks if the query involves the annotator, 
@@ -134,6 +134,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
     Args:
         query:
         msl:
+        fltr:
         diaObjectId:
         annotator:
     """
@@ -145,13 +146,14 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
     sqlquery_real = query['real_sql']
     if annotator:
         # if the annotator does not appear in the query tables, then we don't need to run it
-        if not annotator in query['tables']:
+        if query['tables'] not in annotator:
             return []
         # run the query against main for this specific object that has been annotated
         sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
-    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' % (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
+    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
+                     (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
 
     cursor = msl.cursor(buffered=True, dictionary=True)
     n = 0
@@ -166,31 +168,36 @@ def run_query(query, msl, annotator=None, diaObjectId=None):
             query_results.append(recorddict)
             n += 1
     except Exception as e:
-        error = "%s UTC: Your streaming query %s didn't run, the error is: %s, please check it, and write to lasair-help@mlist.is.ed.ac.uk if you want help." % (utc, topic, str(e))
+
+        error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
+                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
         print(error)
         print(sqlquery_real)
-        send_email(email, topic, error)
+        if not fltr or fltr.send_email:
+            send_email(email, topic, error)
         return []
 
     return query_results
 
 
-def dispose_query_results(query, query_results):
+def dispose_query_results(query, query_results, fltr=None):
     """ Send out the query results by email or kafka, and ipdate the digest file
     """
     if len(query_results) == 0:
         return 0
     active = query['active']
-    digest,last_entry,last_email = fetch_digest(query['topic_name'])
+    digest, last_entry, last_email = fetch_digest(query['topic_name'])
     allrecords = (query_results + digest)[:10000]
 
     if active == 1:
-        # send results by email if 24 hurs has passed, returns time of last email send
-        last_email = dispose_email(allrecords, last_email, query)
+        # send results by email if 24 hours has passed, returns time of last email send
+        if not fltr or fltr.send_email:
+            last_email = dispose_email(allrecords, last_email, query)
 
     if active == 2:
         # send results by kafka on given topic
-        dispose_kafka(query_results, query['topic_name'])
+        if not fltr or fltr.send_kafka:
+            dispose_kafka(query_results, query['topic_name'])
 
     utcnow = datetime.datetime.utcnow()
     write_digest(allrecords, query['topic_name'], utcnow, last_email)
@@ -204,11 +211,11 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
     digest_dict = {
             'last_entry': last_entry_text, 
             'last_email': last_email_text, 
-            'digest':allrecords
+            'digest': allrecords
             }
     digestdict_text = json.dumps(digest_dict, indent=2, default=datetime_converter)
 
-    filename = settings.KAFKA_STREAMS +'/'+ topic_name
+    filename = settings.KAFKA_STREAMS + '/' + topic_name
     f = open(filename, 'w')
     os.chmod(filename, 0O666)
     f.write(digestdict_text)
@@ -216,11 +223,11 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
 
 
 def fetch_digest(topic_name):
-    filename = settings.KAFKA_STREAMS +'/'+ topic_name
+    filename = settings.KAFKA_STREAMS + '/' + topic_name
     try:
         digest_file = open(filename, 'r')
         digest_dict = json.loads(digest_file.read())
-        digest      = digest_dict['digest']
+        digest = digest_dict['digest']
         last_entry_text = digest_dict['last_entry']
         last_email_text = digest_dict['last_email']
         digest_file.close()
@@ -230,7 +237,7 @@ def fetch_digest(topic_name):
         last_email_text = "2017-01-01 00:00:00"
     last_entry = datetime.datetime.strptime(last_entry_text, "%Y-%m-%d %H:%M:%S")
     last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
-    return digest,last_entry,last_email
+    return digest, last_entry, last_email
 
 
 def dispose_email(allrecords, last_email, query, force=False):
@@ -256,7 +263,7 @@ def dispose_email(allrecords, last_email, query, force=False):
         if force or out_time > last_email:
             if 'diaObjectId' in out:
                 diaObjectId = str(out['diaObjectId'])
-                message      += diaObjectId + '\n'
+                message += diaObjectId + '\n'
                 message_html += '<a href="%s/objects/%s/">%s</a><br/>' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
                 jsonout = json.dumps(out, default=datetime_converter)
@@ -283,8 +290,8 @@ def send_email(email, topic, message, message_html=''):
     msg = MIMEMultipart('alternative')
 
     msg['Subject'] = 'Lasair query ' + topic
-    msg['From']    = settings.LASAIR_EMAIL
-    msg['To']      = email
+    msg['From'] = settings.LASAIR_EMAIL
+    msg['To'] = email
 
     msg.attach(MIMEText(message, 'plain'))
     if len(message_html) > 0:

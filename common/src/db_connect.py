@@ -3,6 +3,7 @@ sys.path.append('..')
 import settings
 import mysql.connector
 
+
 def readonly():
     config = {
         'user'    : settings.DB_USER_READONLY,
@@ -12,6 +13,7 @@ def readonly():
         'database': 'ztf'
     }
     return mysql.connector.connect(**config)
+
 
 def remote(allow_infile=False):
     config = {
@@ -25,11 +27,12 @@ def remote(allow_infile=False):
         config['allow_local_infile'] = True
     return mysql.connector.connect(**config)
 
-def local():
+
+def local(database='ztf'):
     config = {
         'user'    : settings.LOCAL_DB_USER,
         'password': settings.LOCAL_DB_PASS,
         'host'    : settings.LOCAL_DB_HOST,
-        'database': 'ztf'
+        'database': database
     }
     return mysql.connector.connect(**config)
