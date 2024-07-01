@@ -22,7 +22,6 @@ import sys
 import json
 from docopt import docopt
 from datetime import datetime
-#from pyinstrument import Profiler
 from confluent_kafka import Consumer, Producer, KafkaError
 from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -57,17 +56,11 @@ class ImageStore:
             # passing in an image_store instead of getting one is mostly to enable testing
             self.image_store = image_store
             return
-        fitsdir = getattr(settings, 'IMAGEFITS', None)
-        use_cutoutcass = getattr(settings, 'USE_CUTOUTCASS', False)
-        if use_cutoutcass:
-            self.image_store = cutoutStore.cutoutStore()
-            if self.image_store.session is None:
-                self.image_store = None
-        elif fitsdir and len(fitsdir) > 0:
-            self.image_store = objectStore.objectStore(suffix='fits', fileroot=fitsdir)
+        self.image_store = cutoutStore.cutoutStore()
+        if self.image_store.session is None:
+            self.image_store = None
         else:
-            log.warning('WARNING: Cannot store cutouts. USE_CUTOUTCASS=%s IMAGEFITS=%s' %
-                     (use_cutoutcass, fitsdir))
+            log.warning('WARNING: Cannot store cutouts')
             self.image_store = None
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
@@ -79,12 +72,8 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    # store may be cutouts or cephfs
-                    if getattr(settings, 'USE_CUTOUTCASS', False):
-                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                        futures.append(result)
-                    else:
-                        self.image_store.putObject(cutoutId, imjd, content)
+                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    futures.append(result)
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
@@ -261,6 +250,7 @@ class Ingester:
         alerts = []
         for lsst_alert in lsst_alerts:
 #            print_msg(lsst_alert)
+#            sys.exit()
 
             diaObject = lsst_alert['diaObject']
 
@@ -395,7 +385,7 @@ class Ingester:
         """Run ingester. Return the total number of alerts ingested."""
         log = self.log
     
-        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 100)
+        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 1000)
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
@@ -477,17 +467,7 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     logging.basicConfig(level=logging.INFO)
     log = logging.getLogger("ingest")
-
-#    pyinstrument = args.get('--pyinstrument') in ['True', 'true', 'Yes', 'yes']
-#    if pyinstrument:
-#        profiler = Profiler(interval=0.01)
-#        profiler.start()
-
     rc = run_ingest(args, log)
-
-#    if pyinstrument:
-#        profiler.stop()
-#        profiler.print()
     # rc=1, got alerts, more to come
     # rc=0, got no alerts
     print(f"Ingested {rc} total alerts")

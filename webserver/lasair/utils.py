@@ -195,9 +195,6 @@ def objjson(diaObjectId, full=False):
 
     count_all_diaSources = len(diaSources)
     count_all_diaForcedSources = len(diaForcedSources)
-    # HACK HACK
-#    if not lasair_settings.USE_CUTOUTCASS:
-#        image_store = objectStore.objectStore(suffix='fits', fileroot=lasair_settings.IMAGEFITS)
     image_urls = {}
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
@@ -215,18 +212,9 @@ def objjson(diaObjectId, full=False):
         diaSource['image_urls'] = {}
         for cutoutType in ['Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-# HACK HACK
-#        if lasair_settings.USE_CUTOUTCASS:
-#                url = 'https://%s/fits/%d/%s' % (lasair_settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
-#            else:
-#                filename = image_store.getFileName(diaSourceId_cutoutType, int(mjd))
-#                if os.path.exists(filename):
-#                    url = filename.replace(
-#                        '/mnt/cephfs/lasair', f'https://{lasair_settings.LASAIR_URL}/lasair/static')
-#                else:
-#                    url = None
-#            if url:
-#                diaSource['image_urls'][cutoutType] = url
+            url = 'https://%s/fits/%d/%s'
+            url = url % (lasair_settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
+            diaSource['image_urls'][cutoutType] = url
 
     if count_all_diaSources == 0:
         return None
@@ -333,18 +321,15 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    if lasair_settings.USE_CUTOUTCASS:
-        osc = cutoutStore.cutoutStore()
-        try:
-            fitsdata = osc.getCutout(candid_cutoutType, imjd)
-        except:
-            fitsdata = ''
-    else:
-        image_store = objectStore.objectStore(suffix='fits', fileroot=lasair_settings.IMAGEFITS)
-        try:
-            fitsdata = image_store.getFileObject(candid_cutoutType, imjd)
-        except:
-            fitsdata = ''
+    ff = open('/home/ubuntu/ff', 'a')
+    ff.write('%d\n' % imjd)
+    ff.write('%s\n' % candid_cutoutType)
+    ff.close()
+    osc = cutoutStore.cutoutStore()
+    try:
+        fitsdata = osc.getCutout(candid_cutoutType, imjd)
+    except:
+        fitsdata = ''
 
     response = HttpResponse(fitsdata, content_type='image/fits')
     response['Content-Disposition'] = 'attachment; filename="%s.fits"' % candid_cutoutType

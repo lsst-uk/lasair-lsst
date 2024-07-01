@@ -7,7 +7,7 @@ services:
         image:
             #atolmis/kafka
             #gpfrancis/lasairmm:2.4.0
-            "confluentinc/cp-kafka:7.4.0"
+            "confluentinc/cp-kafka:7.5.0"
         network_mode: host
         volumes:
             - /etc/mirror/producer.config:/etc/mirror/producer.config
@@ -25,5 +25,6 @@ services:
              "--producer.config",
              "/etc/mirror/producer.config",
              "--whitelist",
-             "^ztf_[0-9]{8}_programid1"
+             "^alerts-simulated"
+             #"^ztf_[0-9]{8}_programid1"
              ]

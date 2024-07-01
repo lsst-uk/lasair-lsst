@@ -43,13 +43,13 @@ messages = {
 'warning':
 """
 Dear %s,
-Your active Lasair %s will become inactive on %s without action from you, and there will be no further real-time matching of incoming alerts. This is to relieve pressure on the real-time pipeline. To keep your %s active for 180 days, go to %s then click "Settings", then "Save".  Questions to lasair-help@lists.roe.ac.uk -- The Lasair Team
+Your active Lasair %s will become inactive on %s without action from you, and there will be no further real-time matching of incoming alerts. This is to relieve pressure on the real-time pipeline. To keep your %s active for 180 days, go to %s then click "Settings", then "Save".  Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
 """,
 
 'expiration':
 """
 Dear %s,
-Your active Lasair %s has recently expired and thus become inactive, and there will be no further matching of incoming alerts. To make your %s active again for 180 days, go to %s then click "Settings", "Active" or "Streaming", then "Save". Questions to lasair-help@lists.roe.ac.uk -- The Lasair Team
+Your active Lasair %s has recently expired and thus become inactive, and there will be no further matching of incoming alerts. To make your %s active again for 180 days, go to %s then click "Settings", "Active" or "Streaming", then "Save". Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
 """,
 }
 

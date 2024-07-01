@@ -10,6 +10,7 @@ import json
 import time
 import socket
 import os, sys
+import fcntl
 SLEEPTIME = 0.1
 
 class manage_status():
@@ -24,7 +25,8 @@ class manage_status():
     def read(self, file_id):
         status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
         f = open(status_file)
-        status = json.loads(f.read())
+        s = f.read()
+        status = json.loads(s)
         f.close()
         return status
 
@@ -37,30 +39,36 @@ class manage_status():
                 file_id: which file to use
         """
         status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
-        lock_file   = '%s_%s.lock' % (self.status_file_root, str(file_id))
-
+        lock_file   = '%s.lock' % self.status_file_root
+    
         if not os.path.exists(status_file) and not os.path.exists(lock_file):
 #            print('Status file not present!')
             f = open(status_file, 'w')
             f.write('{}')
             f.close()
-        # rename as lock file while we modify values
-        while 1:
-            try:
-                os.rename(status_file, lock_file)
+
+        # wait until the lock is released
+        # but if we wait 100 times, just kill the lock and go ahead
+        for n in range(100):
+            if not os.path.exists(lock_file):
                 break
-            except:
-                time.sleep(SLEEPTIME)
+            time.sleep(SLEEPTIME)
+        else:
+            os.remove(lock_file)
+    
+        # lock the directory for me
+        lock = open(lock_file, 'w')
+        lock.close()
 
         # return contents
-        f = open(lock_file)
+        f = open(status_file)
         try:
             status = json.loads(f.read())
             f.close()
         except:
             status = {}
         return status
-
+    
     def write_unlock(self, status, file_id):
         """ write_status:
             Writes the status file, then unlocks
@@ -71,22 +79,20 @@ class manage_status():
         update_time = datetime.datetime.utcnow().isoformat()
         update_time = update_time.split('.')[0]
         status['update_time'] = update_time
-
+    
         status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
-        lock_file   = '%s_%s.lock' % (self.status_file_root, str(file_id))
-
-        # dump the status to the lock file
-        f = open(lock_file, 'w')
-        f.write(json.dumps(status))
+        lock_file   = '%s.lock' % self.status_file_root
+    
+        # dump the status
+        os.remove(status_file)
+        f = open(status_file, 'w')
+        s = {key:status[key] for key in sorted(status.keys())}
+        f.write(json.dumps(s, indent=2))
         f.close()
-        # rename lock file as atatus file
-        while 1:
-            try:
-                os.rename(lock_file, status_file)
-                break
-            except:
-                time.sleep(SLEEPTIME)
 
+        # remove the lock file
+        os.remove(lock_file)
+    
     def tostr(self, file_id):
         """ __repr__:
             Write out the status file
@@ -127,6 +133,7 @@ class manage_status():
 
         self.write_unlock(status, file_id)
 
+# A timing class built with manage_status
 class timer():
     def __init__(self, nameroot):
         try:
@@ -150,3 +157,37 @@ class timer():
     def add2ms(self, ms, nid):
         ms.add({self.name:self.elapsed}, nid)
         self.elapsed = 0.0
+
+if __name__ == "__main__":
+    def assertEqual(a,b):
+        assert(a==b)
+
+    os.system('mkdir play')
+    ms = manage_status('play/status')
+    ms.set({'banana':5, 'orange':6}, 6)
+    ms.add({'apple':12, 'pear':7},   6)
+    ms.add({'apple':12, 'pear':1},   6)
+
+    ms.add({'apple':1, 'pear':7},    7)
+    ms.add({'apple':1, 'pear':7},    7)
+    ms.set({'banana':5, 'orange':6}, 7)
+    ms.set({'banana':4, 'orange':7}, 7)
+    ms.set({'banana':3, 'orange':8}, 7)
+
+    status = ms.read(6)
+    print(status)
+    assertEqual(status['banana'], 5)
+    assertEqual(status['orange'], 6)
+    assertEqual(status['apple'], 24)
+    assertEqual(status['pear'],   8)
+
+    status = ms.read(7)
+    print(status)
+    assertEqual(status['banana'], 3)
+    assertEqual(status['orange'], 8)
+    assertEqual(status['apple'],  2)
+    assertEqual(status['pear'],  14)
+
+    # delete the play area
+    os.system('rm -r play')
+
