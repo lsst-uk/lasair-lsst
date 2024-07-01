@@ -232,6 +232,6 @@
     cassandra_cluster_name: "{{ lasair_name }}_cutout"
     git_branch: "{{ lasair_version }}"
   roles:
-    # todo
+    - lasair_cutoutcass
   tags: cutoutcass
 
