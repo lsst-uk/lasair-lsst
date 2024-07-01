@@ -36,7 +36,7 @@
     name:
       - flask
       - uwsgi
-      - numpy
+      - numpy==1.26.4
 
 - name: "Install pip packages"
   pip:
