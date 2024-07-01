@@ -36,13 +36,18 @@ class RunnerTest(unittest.TestCase):
 
     @patch('filter_runner.filtercore.Filter.run_batch')
     def test_batch_exception(self, mock_run_batch):
-        """Test that when run_batch returns 0 we wait for more alerts"""
+        """Test handling of exception on run"""
         mock_log = unittest.mock.MagicMock()
         mock_run_batch.side_effect = Exception('Test error')
-        filter_runner.run({'--maxbatch': 1}, mock_log)
+        # Check that sys.exit is called when an exception happens
+        with self.assertRaises(SystemExit) as cm:
+            filter_runner.run({'--maxbatch': 1}, mock_log)
+        # check that the exit code was not 0
+        self.assertNotEqual(cm.exception.code, 0)
+        # check the exception was the expected one
         mock_log.exception.assert_called()
+        # check the exception got logged
         mock_log.critical.assert_called_with('Unrecoverable error in filter batch: Test error')
-        mock_log.info.assert_called_with('Exiting filter runner')
 
 
 if __name__ == '__main__':
