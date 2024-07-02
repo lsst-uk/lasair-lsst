@@ -59,15 +59,24 @@ class cutoutStore():
         self.session.execute(sql, [cutoutId, blobData])
 
     def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob):
-        """putCutoutAsync. put in the blob with given identifier. Use async communication and return a future object.
+        """putCutoutAsync. put in the blob with given identifier. 
+        Also put data into cutoutsbyobject, but without the blob.
+        Use async communication and return a future object.
 
         Args:
             cutoutId:
             cutoutBlob:
         """
+        # first the blob keyed by imjd,cutoutId
         sql = f"insert into cutouts (cutoutId,imjd,objectId,cutoutimage) values (%s,{imjd},{objectId},%s)"
         blobData = bytearray(cutoutBlob)
-        return self.session.execute_async(sql, [cutoutId, blobData])
+        cutoutReturn = self.session.execute_async(sql, [cutoutId, blobData])
+
+        # then the cutoutId keyed by objectId
+        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId, objectId])
+
+        return cutoutReturn
 
     def close(self):
         self.cluster.shutdown()

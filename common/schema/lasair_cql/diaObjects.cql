@@ -81,5 +81,5 @@ r_psfFluxErrMean float,
 i_psfFluxErrMean float,
 z_psfFluxErrMean float,
 y_psfFluxErrMean float,
-PRIMARY KEY (diaObjectId, radecMjdTai)
+PRIMARY KEY diaObjectId
 )

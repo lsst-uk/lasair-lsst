@@ -67,6 +67,7 @@ def cql_create_table(schema):
         elif primtype == 'string':   s += ' ascii'
         elif primtype == 'char':     s += ' ascii'
         elif primtype == 'boolean':  s += ' boolean'
+        elif primtype == 'blob':     s += ' blob'
         else: print('ERROR unknown type ', primtype)
     
         if 'extra' in f:
