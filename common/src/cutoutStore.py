@@ -58,6 +58,10 @@ class cutoutStore():
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
+        # then the cutoutId keyed by objectId
+        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        cutoutsByObjectReturn = self.session.execute(sql, [cutoutId])
+
     def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob):
         """putCutoutAsync. put in the blob with given identifier. 
         Also put data into cutoutsbyobject, but without the blob.
@@ -74,7 +78,7 @@ class cutoutStore():
 
         # then the cutoutId keyed by objectId
         sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
-        cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId, objectId])
+        cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId])
 
         return cutoutReturn
 
