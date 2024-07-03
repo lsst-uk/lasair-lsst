@@ -2,13 +2,13 @@ schema = {
   "name": "cutoutsbyObject",
   "fields": [
     {
-      "name": "cutoutId",
-      "type": "char"
-    },
-    {
       "name": "objectId",
       "type": "bigint"
     },
+    {
+      "name": "cutoutId",
+      "type": "char"
+    },
   ],
-  "indexes": ["PRIMARY KEY (objectId)"]
+  "indexes": ["PRIMARY KEY (objectId, cutoutId)"]
 }
