@@ -65,8 +65,8 @@ class manage_status():
         lock.close()
 
         # return contents
-        f = open(status_file)
         try:
+            f = open(status_file)
             status = json.loads(f.read())
             f.close()
         except:
@@ -88,14 +88,20 @@ class manage_status():
         lock_file   = '%s.lock' % self.status_file_root
     
         # dump the status
-        os.remove(status_file)
+        try:
+            os.remove(status_file)
+        except:
+            pass
         f = open(status_file, 'w')
         s = {key:status[key] for key in sorted(status.keys())}
         f.write(json.dumps(s, indent=2))
         f.close()
 
         # remove the lock file
-        os.remove(lock_file)
+        try:
+            os.remove(lock_file)
+        except:
+            pass
     
     def tostr(self, file_id):
         """ __repr__:
