@@ -95,7 +95,10 @@ class manage_status():
         f.close()
 
         # remove the lock file
-        os.remove(lock_file)
+        try:
+            os.remove(lock_file)
+        except:
+            pass
     
     def tostr(self, file_id):
         """ __repr__:
