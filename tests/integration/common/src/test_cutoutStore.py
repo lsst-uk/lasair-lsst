@@ -31,6 +31,9 @@ CREATE TABLE IF NOT EXISTS cutouts (
    cutoutimage   blob,
   PRIMARY KEY (imjd, cutoutId)
  );
+"""
+
+create_table2 = """
 CREATE TABLE IF NOT EXISTS cutoutsbyobject(
     objectId bigint,
     cutoutId ascii,
@@ -49,6 +52,7 @@ class CassandraCutoutTest(TestCase):
         cls.session.execute(create_keyspace)
         cls.session.set_keyspace(keyspace)
         cls.session.execute(create_table)
+        cls.session.execute(create_table2)
         cls.osc = cutoutStore.cutoutStore(cls.session)
 
     @classmethod
