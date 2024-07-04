@@ -88,7 +88,10 @@ class manage_status():
         lock_file   = '%s.lock' % self.status_file_root
     
         # dump the status
-        os.remove(status_file)
+        try:
+            os.remove(status_file)
+        except:
+            pass
         f = open(status_file, 'w')
         s = {key:status[key] for key in sorted(status.keys())}
         f.write(json.dumps(s, indent=2))
