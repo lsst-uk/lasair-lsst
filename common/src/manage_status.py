@@ -65,8 +65,8 @@ class manage_status():
         lock.close()
 
         # return contents
-        f = open(status_file)
         try:
+            f = open(status_file)
             status = json.loads(f.read())
             f.close()
         except:
