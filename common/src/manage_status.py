@@ -8,11 +8,8 @@ There is a "file_id" to determine which file we are working with
 import datetime
 import json
 import time
-import socket
 import os, sys
 import fcntl
-from random import random
-from multiprocessing import Process
 
 ###############
 # acquire and release from Jiri Hnidek
