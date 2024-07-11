@@ -127,7 +127,7 @@ class manage_status():
         """ __repr__:
             Write out the status file
         """
-        status_file = '%s_%s.json' % (self.status_file_root, str(file_id))
+        status_file = '%s/status_%s.json' % (self.status_file_root, str(file_id))
         try:
             f = open(status_file)
             status = json.loads(f.read())
