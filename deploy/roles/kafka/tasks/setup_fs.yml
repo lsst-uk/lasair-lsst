@@ -36,4 +36,5 @@
   ansible.builtin.command: 
     cmd: "fallocate -l 10G {{ data_fs.path }}/delete_me"
     creates: "{{ data_fs.path }}/delete_me"
+  when: data_fs.dev is defined
 
