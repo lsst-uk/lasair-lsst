@@ -10,17 +10,16 @@ nproc  = 4
 niter  = 10
 deltaT = 1
 nid    = 7
-target = 'play'
 
 def func(iproc):
-    ms = manage_status(target)
+    ms = manage_status()
     for i in range(niter):
         time.sleep(deltaT*random())
         ms.add({'count':1},    nid)
 
 class CommonManageStatusTest(unittest.TestCase):
     def test_manage_status(self):
-        ms = manage_status(target)
+        ms = manage_status()
         ms.set({'banana':5, 'orange':6}, 6)
         ms.add({'apple':12, 'pear':7},   6)
         ms.add({'apple':12, 'pear':1},   6)
@@ -40,9 +39,11 @@ class CommonManageStatusTest(unittest.TestCase):
         for proc in procs:
             proc.join()
 
-        ms = manage_status(target)
+        ms = manage_status()
         status = ms.read(nid)
+#        print(status)
         self.assertTrue(status['count'] == nproc*niter)
+        ms.delete(nid)
 
     def test_timer(self):
         td = timer('mango')
@@ -58,18 +59,18 @@ class CommonManageStatusTest(unittest.TestCase):
         time.sleep(1)
         td.off()
 
-        ms = manage_status(target)
+        ms = manage_status()
         td.add2ms(ms, 6)
         status = ms.read(6)
-        print(td.name, status[td.name])
+#        print(td.name, status[td.name])
         self.assertTrue(abs(status[td.name] - 2) < 0.01)
 
         # delete the play area
-        os.system('rm -r play')
+        ms.delete(6)
 
 if __name__ == '__main__':
     import xmlrunner
-    os.system('mkdir %s' % target)
-    os.system('rm %s/*' % target)
+    ms = manage_status()
+    ms.delete()
     runner = xmlrunner.XMLTestRunner(output='test-reports')
     unittest.main(testRunner=runner)
