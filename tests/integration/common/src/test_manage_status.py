@@ -1,8 +1,10 @@
-import context
+#import context
 import os, sys, json, time
 import unittest
 from random import random
 from multiprocessing import Process
+sys.path.append('../../../../common')
+sys.path.append('../../../../common/src')
 from manage_status import manage_status, timer
 
 # multiprocessing test
