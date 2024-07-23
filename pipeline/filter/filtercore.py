@@ -400,7 +400,7 @@ class Filter:
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
-            'min_delay': '%.1f' % d['since'],  # hours since most recent alert
+            'min_delay': d['since'],  # hours since most recent alert
             'nid': nid},
             nid)
         for name, td in timers.items():

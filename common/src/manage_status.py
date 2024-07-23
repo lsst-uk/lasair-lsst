@@ -16,7 +16,6 @@ import sys
 import json
 import time
 sys.path.append('../../../common/src')
-import db_connect
 try:
     import db_connect
 except:
@@ -30,7 +29,6 @@ class manage_status():
             self.msl = msl
         else:
             self.msl = db_connect.remote()
-        print('MSL', self.msl)
         self.table = table
 
     def read(self, nid):
