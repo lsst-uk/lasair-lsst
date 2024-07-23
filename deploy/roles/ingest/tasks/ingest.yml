@@ -22,6 +22,7 @@
       - gkutils
       - gkdbutils
       - docopt
+      - mysql-connector-python
 
 - name: Make sure the repo is up to date
   git: 

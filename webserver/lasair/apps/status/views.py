@@ -46,12 +46,8 @@ def status(request, nid):
     ```           
     """
     web_domain = settings.WEB_DOMAIN
-    try:
-        filename = '%s_%d.json' % (settings.SYSTEM_STATUS, nid)
-        jsonstr = open(filename).read()
-        status = json.loads(jsonstr)
-    except:
-        status = {}
+    ms = manage_status.manage_status()
+    status = ms.read(nid)
 
     if status and 'today_filter' in status and 'today_filter_ss' in status:
         status['today_singleton'] = \
