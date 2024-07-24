@@ -15,7 +15,6 @@ pipeline {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_date_nid.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_db_connect.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_logging.py'
-                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_manage_status.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_objectStore.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch_optimised.py'
@@ -84,6 +83,7 @@ pipeline {
                 }
                 dir('tests/integration/common/src') {
                     sh 'python3 test_cutoutStore.py'
+                    sh 'python3 test_manage_status.py'
                 }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'

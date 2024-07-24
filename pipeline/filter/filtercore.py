@@ -320,7 +320,7 @@ class Filter:
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
         if self.stats:
-            ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+            ms = manage_status.manage_status()
             nid = date_nid.nid_now()
             ms.add({
                 'today_filter': nalert_in,
@@ -393,14 +393,14 @@ class Filter:
         if not self.stats:
             return
 
-        ms = manage_status.manage_status(settings.SYSTEM_STATUS)
+        ms = manage_status.manage_status()
         nid = date_nid.nid_now()
         d = Filter.batch_statistics()
         ms.set({
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
-            'min_delay': '%.1f' % d['since'],  # hours since most recent alert
+            'min_delay': d['since'],  # hours since most recent alert
             'nid': nid},
             nid)
         for name, td in timers.items():

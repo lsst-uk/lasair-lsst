@@ -281,7 +281,7 @@ if __name__ == '__main__':
     getTNSData(options, conn)
 
     countTNS = countTNSRow(conn)
-    ms = manage_status(settings.SYSTEM_STATUS)
+    ms = manage_status()
     nid = date_nid.nid_now()
     ms.set({'countTNS':countTNS}, nid)
 
