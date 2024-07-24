@@ -15,9 +15,9 @@ CREATE TABLE lasair_statistics (
 import sys
 import json
 import time
-sys.path.append('../../../common/src')
 try:
-    import db_connect
+    sys.path.append('../../../common/')
+    import src.db_connect as db_connect
 except:
     pass
 
