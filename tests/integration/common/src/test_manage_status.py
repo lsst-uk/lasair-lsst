@@ -34,7 +34,7 @@ class CommonManageStatusTest(unittest.TestCase):
         """Set up connection, ensure that the test table exists and create a test object."""
         cls.msl = mysql.connector.connect(**config)
         with cls.msl.cursor(buffered=True, dictionary=True) as cursor:
-            query = "CREATE TABLE test_lasair_statistics "
+            query = "CREATE TABLE IF NOT EXISTS test_lasair_statistics "
             query += "(nid int NOT NULL, name VARCHAR(32), value FLOAT DEFAULT 0, "
             query += "PRIMARY key (nid,name))"
             cursor.execute(query)
