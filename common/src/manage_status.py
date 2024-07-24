@@ -15,6 +15,7 @@ CREATE TABLE lasair_statistics (
 import sys
 import json
 import time
+import socket
 try:
     sys.path.append('../../../common/')
     import src.db_connect as db_connect
@@ -79,8 +80,9 @@ class timer():
             # assume a hostname like lasair-lsst-dev-ingest-0 and append the 0
             hostnum = socket.gethostname().split('-')[-1]
         except:
-            hostnum = '0'
+            hostnum = 'Z'
         self.name = nameroot + '_' + hostnum
+        print('timer name', self.name)
         self.start = time.perf_counter()
         self.elapsed = 0.0
 
