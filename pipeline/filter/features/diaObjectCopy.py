@@ -4,6 +4,7 @@ class diaObjectCopy(FeatureGroup):
     """Several features are simply copied from the diaObject that Rubin provides"""
 
     _features = [
+        'timestamp',
         'diaObjectId',
         'ra', 'decl',
         'g_psfFluxMean',
