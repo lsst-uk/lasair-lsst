@@ -33,6 +33,14 @@ CREATE TABLE IF NOT EXISTS cutouts (
  );
 """
 
+create_table2 = """
+CREATE TABLE IF NOT EXISTS cutoutsbyobject(
+    objectId bigint,
+    cutoutId ascii,
+    PRIMARY KEY (objectId, cutoutId)
+ );
+"""
+
 class CassandraCutoutTest(TestCase):
 
     @classmethod
@@ -44,12 +52,14 @@ class CassandraCutoutTest(TestCase):
         cls.session.execute(create_keyspace)
         cls.session.set_keyspace(keyspace)
         cls.session.execute(create_table)
+        cls.session.execute(create_table2)
         cls.osc = cutoutStore.cutoutStore(cls.session)
 
     @classmethod
     def tearDownClass(cls):
         """Get rid of the test table, keyspace, connection"""
         cls.session.execute("DROP TABLE cutouts")
+        cls.session.execute("DROP TABLE cutoutsbyobject")
         cls.session.execute("DROP KEYSPACE %s" % keyspace, timeout=300)
         cls.session.shutdown()
 

@@ -321,10 +321,6 @@ def string2bytes(str):
 
 def fits(request, imjd, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    ff = open('/home/ubuntu/ff', 'a')
-    ff.write('%d\n' % imjd)
-    ff.write('%s\n' % candid_cutoutType)
-    ff.close()
     osc = cutoutStore.cutoutStore()
     try:
         fitsdata = osc.getCutout(candid_cutoutType, imjd)

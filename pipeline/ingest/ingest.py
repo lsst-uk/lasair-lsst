@@ -59,9 +59,7 @@ class ImageStore:
         self.image_store = cutoutStore.cutoutStore()
         if self.image_store.session is None:
             self.image_store = None
-        else:
             log.warning('WARNING: Cannot store cutouts')
-            self.image_store = None
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
         futures = []

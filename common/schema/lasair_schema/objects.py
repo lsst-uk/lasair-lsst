@@ -79,9 +79,15 @@ schema = {
     { "name": "bazinExpFallRateErr", "type": "float", 
         "doc": "Error of bazinExpFallRate" },
     { "name": "bazinExpTempErr", "type": "float", 
-        "doc": "Error of bazinExpTemp"}
+        "doc": "Error of bazinExpTemp"},
 
-
+# timestamp for last modified
+    {
+      "name": "timestamp",
+      "type": "timestamp",
+      "extra": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+      "doc": "Time at which this object last modified"
+    },
   ],
   "indexes": [
     "PRIMARY KEY (diaObjectId)",
