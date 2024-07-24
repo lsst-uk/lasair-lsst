@@ -82,7 +82,6 @@ class timer():
         except:
             hostnum = 'Z'
         self.name = nameroot + '_' + hostnum
-        print('timer name', self.name)
         self.start = time.perf_counter()
         self.elapsed = 0.0
 
