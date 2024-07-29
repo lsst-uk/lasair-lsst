@@ -60,6 +60,15 @@ class CommonManageStatusTest(unittest.TestCase):
         self.assertTrue(status['apple']  == 24)
         self.assertTrue(status['pear']   == 8)
 
+    def test_delete(self):
+        """Test deleting an nid"""
+        msl = mysql.connector.connect(**config)
+        ms = manage_status(msl, 'test_lasair_statistics')
+        ms.set({'lemon':1, 'lime':2}, 7)
+        ms.delete(nid=7)
+        status = ms.read(7)
+        self.assertEqual(status, {})
+
     def test_multiprocessing(self):
         msl = mysql.connector.connect(**config)
         procs = []
