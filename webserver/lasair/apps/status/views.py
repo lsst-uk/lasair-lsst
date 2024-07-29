@@ -1,6 +1,7 @@
 import json
 from django.shortcuts import render
 import src.date_nid as date_nid
+import src.manage_status as manage_status
 import settings
 from astropy.time import Time
 import datetime
@@ -46,12 +47,8 @@ def status(request, nid):
     ```           
     """
     web_domain = settings.WEB_DOMAIN
-    try:
-        filename = '%s_%d.json' % (settings.SYSTEM_STATUS, nid)
-        jsonstr = open(filename).read()
-        status = json.loads(jsonstr)
-    except:
-        status = {}
+    ms = manage_status.manage_status()
+    status = ms.read(nid)
 
     if status and 'today_filter' in status and 'today_filter_ss' in status:
         status['today_singleton'] = \
@@ -74,7 +71,7 @@ def status(request, nid):
         'countTNS': ('Number in TNS database', ''),
         'today_singleton': ('Singletons today', '')
     }
-    statusOrder = ["total_count", "nid", "update_time", "today_ztf", "today_alert", "today_filter_out", "today_filter_ss", "today_filter", "today_candidate", "today_database", "min_delay", "countTNS"]
+    statusOrder = ["total_count", "nid", "update_time", "today_lsst", "today_alert", "today_filter_out", "today_filter_ss", "today_filter", "today_candidate", "today_database", "min_delay", "countTNS"]
 
     for k, v in statusSchema.items():
         if not k in status:
@@ -83,7 +80,7 @@ def status(request, nid):
     statusTable = []
 
     if status:
-        statusTable[:] = [(statusSchema[s][0], status[s], statusSchema[s][1]) for s in statusOrder]
+        statusTable[:] = [(statusSchema[s][0], status.get(s,0.0), statusSchema[s][1]) for s in statusOrder]
 
     date = date_nid.nid_to_date(nid)
 

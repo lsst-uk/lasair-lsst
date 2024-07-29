@@ -39,5 +39,6 @@
     - "watchlist_hits.sql"
     - "annotations.sql"
     - "mma_area_hits.sql"
+    - "lasair_statistics.sql"
     #- "/common/schema/lasair_sql/ssObjects.sql"
 
