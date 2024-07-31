@@ -84,6 +84,7 @@ pipeline {
                 }
                 dir('tests/integration/common/src') {
                     sh 'python3 test_cutoutStore.py'
+                    sh 'python3 test_manage_status.py'
                 }
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'

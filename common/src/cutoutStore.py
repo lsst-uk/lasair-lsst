@@ -58,16 +58,29 @@ class cutoutStore():
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
+        # then the cutoutId keyed by objectId
+        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        cutoutsByObjectReturn = self.session.execute(sql, [cutoutId])
+
     def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob):
-        """putCutoutAsync. put in the blob with given identifier. Use async communication and return a future object.
+        """putCutoutAsync. put in the blob with given identifier. 
+        Also put data into cutoutsbyobject, but without the blob.
+        Use async communication and return a future object.
 
         Args:
             cutoutId:
             cutoutBlob:
         """
+        # first the blob keyed by imjd,cutoutId
         sql = f"insert into cutouts (cutoutId,imjd,objectId,cutoutimage) values (%s,{imjd},{objectId},%s)"
         blobData = bytearray(cutoutBlob)
-        return self.session.execute_async(sql, [cutoutId, blobData])
+        cutoutReturn = self.session.execute_async(sql, [cutoutId, blobData])
+
+        # then the cutoutId keyed by objectId
+        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId])
+
+        return cutoutReturn
 
     def close(self):
         self.cluster.shutdown()
@@ -78,14 +91,17 @@ if __name__ == "__main__":
     import settings
     imjd = 57072
     cutoutId = '176805391051522611_cutoutTemplate'
+    imjd = 60487
+    cutoutId = '3068394670028488705_cutoutDifference'
+
 #    fp = open(cutoutId + '.fits', 'rb')
 #    cutoutBlob = fp.read(cutout)
 #    fp.close()
 
     osc = cutoutStore()
-#    osc.putCutout(cutoutId, imjd, cutoutBlob)
+#    osc.putCutout(cutoutId, cutoutBlob, imjd)
 
-    cutout = osc.getCutout(imjd, cutoutId)
+    cutout = osc.getCutout(cutoutId, imjd)
     if cutout:
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)

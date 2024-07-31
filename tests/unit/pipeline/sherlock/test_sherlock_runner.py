@@ -23,8 +23,14 @@ class RunnerTest(unittest.TestCase):
     def test_run_wrapper_exception(self, mock_logging, mock_wrapper):
         """Test handling of exception on run"""
         mock_wrapper.run.side_effect = Exception('Test error')
-        sherlock_runner.setup_proc(1, 1, 'test_config.json')
+        # Check that sys.exit is called when an exception happens
+        with self.assertRaises(SystemExit) as cm:
+            sherlock_runner.setup_proc(1, 1, 'test_config.json')
+        # check that the exit code was not 0
+        self.assertNotEqual(cm.exception.code, 0)
+        # check the exception was the expected one
         mock_logging.getLogger.return_value.exception.assert_called()
+        # check the exception got logged
         mock_logging.getLogger.return_value.critical.assert_called_with('Unrecoverable error in sherlock: Test error')
 
 

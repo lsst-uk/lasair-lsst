@@ -2,9 +2,21 @@
 
 ---
 
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get current git branch
+      ansible.builtin.command: git branch --show-current
+      register: git_tag
+  tags: always
+
 - hosts: all
   gather_facts: true
-#tags: facts
+  tasks:
+    - name: Set Lasair version
+      ansible.builtin.set_fact:
+        lasair_version: "{{ hostvars['localhost']['git_tag'].stdout }}"
+  tags: always
 
 - hosts: all
   gather_facts: false
@@ -259,4 +271,49 @@
         quiet: true
   tags: cephfs
 
+# Check pipeline services
+- hosts: ingest, sherlock, filter
+  gather_facts: false
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+  tags: ingest, sherlock, filter
 
+# ingest service
+- hosts: ingest
+  gather_facts: false
+  tasks:
+    - name: ingest service running
+      ansible.builtin.assert:
+        that: ansible_facts.services['lasair-ingest.service'].state == "running"
+        fail_msg: Ingest service not running
+        success_msg: Ingest service running
+        quiet: true
+  ignore_errors: true
+  tags: ingest
+
+# sherlock service
+- hosts: sherlock
+  gather_facts: false
+  tasks:
+    - name: sherlock service running
+      ansible.builtin.assert:
+        that: ansible_facts.services['lasair-sherlock.service'].state == "running"
+        fail_msg: Sherlock service not running
+        success_msg: Sherlock service running
+        quiet: true
+  ignore_errors: true
+  tags: sherlock
+
+# filter service
+- hosts: filter
+  gather_facts: false
+  tasks:
+    - name: filter service running
+      ansible.builtin.assert:
+        that: ansible_facts.services['lasair-filter.service'].state == "running"
+        fail_msg: Filter service not running
+        success_msg: Filter service running
+        quiet: true
+  ignore_errors: true
+  tags: filter

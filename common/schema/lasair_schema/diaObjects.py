@@ -1,696 +1,334 @@
 schema = {
-  "name": "DiaObjects",
+  "name": "diaObjects",
   "fields": [
     {
-      "name": "decl",
-      "type": "double",
-      "doc": "Mean Declination of DIASources in the diaObject"
-    },
-    {
       "name": "diaObjectId",
-      "type": "long",
-      "doc": "Unique id."
-    },
-    {
-      "name": "gPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of gPSFlux around gPSFluxMean"
-    },
-    {
-      "name": "gPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
-    },
-    {
-      "name": "gPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "gPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "gPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
-    },
-    {
-      "name": "gPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
-    },
-    {
-      "name": "gPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute gPSFluxChi2"
-    },
-    {
-      "name": "gPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of gPSFlux"
-    },
-    {
-      "name": "gPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
-    },
-    {
-      "name": "gPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
-    },
-    {
-      "name": "gTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
-    },
-    {
-      "name": "gTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on gTOTFluxMean"
-    },
-    {
-      "name": "gTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
-    },
-    {
-      "name": "iPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of iPSFlux around iPSFluxMean"
-    },
-    {
-      "name": "iPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
-    },
-    {
-      "name": "iPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "iPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "iPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
-    },
-    {
-      "name": "iPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
-    },
-    {
-      "name": "iPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute iPSFluxChi2"
-    },
-    {
-      "name": "iPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of iPSFlux"
-    },
-    {
-      "name": "iPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
-    },
-    {
-      "name": "iPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
-    },
-    {
-      "name": "iTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
-    },
-    {
-      "name": "iTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on iTOTFluxMean"
-    },
-    {
-      "name": "iTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
-    },
-    {
-      "name": "nDiaSources",
-      "type": "long",
-      "doc": "Number of diaSources associated with this diaObject"
-    },
-    {
-      "name": "pixelId",
-      "type": "double",
-      "doc": "HtmIndex20 of ra, decl coordinate"
-    },
-    {
-      "name": "rPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of rPSFlux around rPSFluxMean"
-    },
-    {
-      "name": "rPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
-    },
-    {
-      "name": "rPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "rPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
-    },
-    {
-      "name": "rPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
-    },
-    {
-      "name": "rPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
-    },
-    {
-      "name": "rPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute rPSFluxChi2"
-    },
-    {
-      "name": "rPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of rPSFlux"
-    },
-    {
-      "name": "rPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
-    },
-    {
-      "name": "rPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
-    },
-    {
-      "name": "rTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
-    },
-    {
-      "name": "rTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on rTOTFluxMean"
-    },
-    {
-      "name": "rTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "type": "long"
     },
     {
       "name": "ra",
-      "type": "double",
-      "doc": "Mean Right Ascension of DIASources in the diaObject"
+      "type": "double"
     },
     {
-      "name": "radecTai",
-      "type": "double",
-      "doc": "Not used in DP0.2"
+      "name": "raErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of uPSFlux around uPSFluxMean"
+      "name": "decl",
+      "type": "double"
     },
     {
-      "name": "uPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
+      "name": "decErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+      "name": "ra_dec_Cov",
+      "type": "float"
     },
     {
-      "name": "uPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+      "name": "radecMjdTai",
+      "type": "double"
     },
     {
-      "name": "uPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+      "name": "pmRa",
+      "type": "float"
     },
     {
-      "name": "uPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
+      "name": "pmRaErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+      "name": "pmDec",
+      "type": "float"
     },
     {
-      "name": "uPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
+      "name": "pmDecErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+      "name": "parallax",
+      "type": "float"
     },
     {
-      "name": "uPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
+      "name": "parallaxErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute uPSFluxChi2"
+      "name": "pmRa_pmDec_Cov",
+      "type": "float"
     },
     {
-      "name": "uPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
+      "name": "pmRa_parallax_Cov",
+      "type": "float"
     },
     {
-      "name": "uPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
+      "name": "pmDec_parallax_Cov",
+      "type": "float"
     },
     {
-      "name": "uPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
+      "name": "pmParallaxLnL",
+      "type": "float"
     },
     {
-      "name": "uPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
+      "name": "pmParallaxChi2",
+      "type": "float"
     },
     {
-      "name": "uPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
+      "name": "pmParallaxNdata",
+      "type": "int"
     },
     {
-      "name": "uPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of uPSFlux"
+      "name": "u_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "uPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
+      "name": "u_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "uPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
+      "name": "u_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "uTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "u_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "uTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on uTOTFluxMean"
+      "name": "u_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "uTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "u_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "yPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of yPSFlux around yPSFluxMean"
+      "name": "u_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
+      "name": "u_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+      "name": "g_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "yPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+      "name": "g_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+      "name": "g_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
+      "name": "g_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "yPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+      "name": "g_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "yPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
+      "name": "g_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "yPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+      "name": "g_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
+      "name": "g_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute yPSFluxChi2"
+      "name": "r_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "yPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
+      "name": "r_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
+      "name": "r_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
+      "name": "r_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "yPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
+      "name": "r_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "yPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
+      "name": "r_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "yPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of yPSFlux"
+      "name": "r_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
+      "name": "r_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
+      "name": "i_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "yTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "i_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "yTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on yTOTFluxMean"
+      "name": "i_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "yTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "i_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "zPSFluxChi2",
-      "type": "double",
-      "doc": "Chi^2 statistic for the scatter of zPSFlux around zPSFluxMean"
+      "name": "i_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "zPSFluxErrMean",
-      "type": "double",
-      "doc": "Mean of the diaSource PSF flux errors"
+      "name": "i_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "zPSFluxLinearIntercept",
-      "type": "double",
-      "doc": "y-intercept of a linear model fit to diaSource PSF flux vs time"
+      "name": "i_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "zPSFluxLinearSlope",
-      "type": "double",
-      "doc": "Slope of a linear model fit to diaSource PSF flux vs time"
+      "name": "i_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "zPSFluxMAD",
-      "type": "double",
-      "doc": "Median absolute deviation of diaSource PSF flux. Does not include scale factor for comparison to sigma"
+      "name": "z_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "zPSFluxMax",
-      "type": "double",
-      "doc": "Maximum diaSource PSF flux"
+      "name": "z_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "zPSFluxMaxSlope",
-      "type": "double",
-      "doc": "Maximum ratio of time ordered deltaFlux / deltaTime"
+      "name": "z_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "zPSFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of diaSource PSF flux"
+      "name": "z_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "zPSFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on the weighted mean of diaSource PSF flux"
+      "name": "z_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "zPSFluxMin",
-      "type": "double",
-      "doc": "Minimum diaSource PSF flux"
+      "name": "z_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "zPSFluxNdata",
-      "type": "double",
-      "doc": "The number of data points used to compute zPSFluxChi2"
+      "name": "z_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "zPSFluxPercentile05",
-      "type": "double",
-      "doc": "5th percentile diaSource PSF flux"
+      "name": "z_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "zPSFluxPercentile25",
-      "type": "double",
-      "doc": "10th percentile diaSource PSF flux"
+      "name": "y_psfFluxMean",
+      "type": "float"
     },
     {
-      "name": "zPSFluxPercentile50",
-      "type": "double",
-      "doc": "Median diaSource PSF flux"
+      "name": "y_psfFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "zPSFluxPercentile75",
-      "type": "double",
-      "doc": "75th percentile diaSource PSF flux"
+      "name": "y_psfFluxSigma",
+      "type": "float"
     },
     {
-      "name": "zPSFluxPercentile95",
-      "type": "double",
-      "doc": "95th percentile diaSource PSF flux"
+      "name": "y_psfFluxChi2",
+      "type": "float"
     },
     {
-      "name": "zPSFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the distribution of zPSFlux"
+      "name": "y_psfFluxNdata",
+      "type": "int"
     },
     {
-      "name": "zPSFluxSkew",
-      "type": "double",
-      "doc": "Skew of diaSource PSF flux"
+      "name": "y_fpFluxMean",
+      "type": "float"
     },
     {
-      "name": "zPSFluxStetsonJ",
-      "type": "double",
-      "doc": "StetsonJ statistic of diaSource PSF flux"
+      "name": "y_fpFluxMeanErr",
+      "type": "float"
     },
     {
-      "name": "zTOTFluxMean",
-      "type": "double",
-      "doc": "Weighted mean of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "y_fpFluxSigma",
+      "type": "float"
     },
     {
-      "name": "zTOTFluxMeanErr",
-      "type": "double",
-      "doc": "Standard error on zTOTFluxMean"
+      "name": "nearbyObj1",
+      "type": "long"
     },
     {
-      "name": "zTOTFluxSigma",
-      "type": "double",
-      "doc": "Standard deviation of the PSF flux forced photometered at the diaSource position on the calibrated image"
+      "name": "nearbyObj1Dist",
+      "type": "float"
+    },
+    {
+      "name": "nearbyObj1LnP",
+      "type": "float"
+    },
+    {
+      "name": "nearbyObj2",
+      "type": "long"
+    },
+    {
+      "name": "nearbyObj2Dist",
+      "type": "float"
+    },
+    {
+      "name": "nearbyObj2LnP",
+      "type": "float"
+    },
+    {
+      "name": "nearbyObj3",
+      "type": "long"
+    },
+    {
+      "name": "nearbyObj3Dist",
+      "type": "float"
+    },
+    {
+      "name": "nearbyObj3LnP",
+      "type": "float"
+    },
+    {
+      "name": "u_psfFluxErrMean",
+      "type": "float"
+    },
+    {
+      "name": "g_psfFluxErrMean",
+      "type": "float"
+    },
+    {
+      "name": "r_psfFluxErrMean",
+      "type": "float"
+    },
+    {
+      "name": "i_psfFluxErrMean",
+      "type": "float"
+    },
+    {
+      "name": "z_psfFluxErrMean",
+      "type": "float"
+    },
+    {
+      "name": "y_psfFluxErrMean",
+      "type": "float"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, radecTai)"]
+  "indexes": ["PRIMARY KEY (diaObjectId)"]
 }

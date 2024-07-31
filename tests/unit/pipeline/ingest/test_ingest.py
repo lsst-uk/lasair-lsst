@@ -6,15 +6,22 @@ import context
 import ingest as ingest
 
 test_alert = {
-    'DiaObject': {'diaObjectId': 1998903343203749723},
-    'DiaSource': {'diaSourceId': 181071530527032103, 'midPointTai': 57095.171263959775},
-    'DiaSourceList': [{'diaSourceId': 176546782480695886, 'midPointTai': 57070.34313563427},
-                      {'diaSourceId': 176891668354564641, 'midPointTai': 57072.3425344742}],
-    'ForcedSourceOnDiaObjectList': [{}, {}],
+    'diaObject': {'diaObjectId': 1998903343203749723, 'ra':123, 'dec':23},
+
+    # 3 diaSources
+    'diaSource': {'diaSourceId': 181071530527032103, 'midpointMjdTai': 57095.171263959775, 'ra':123, 'dec':23},
+    'prvDiaSources': [
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.34313563427, 'ra':123, 'dec':23},
+        {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.34253447427, 'ra':123, 'dec':23}],
+
+    # zero of these
+    'prvDiaForcedSources': [],
+    'prvDiaNondetectionLimits': [],
+    'ssObject': {},
+
     'cutoutDifference': b'foo',
     'cutoutTemplate': b'bar',
 }
-
 
 class IngestTest(unittest.TestCase):
 
@@ -25,41 +32,12 @@ class IngestTest(unittest.TestCase):
         psutil.Process().terminate()
         self.assertTrue(ingester.sigterm_raised)
 
-    def test_init_image_store_error(self):
-        """Test that image store setup gives a warning and sets image store to None if
-        neither settings.CUTOUTCASS nor IMAGEFITS is set"""
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = None
-        mock_log = unittest.mock.MagicMock()
-        imageStore = ingest.ImageStore(log=mock_log)
-        self.assertEqual(imageStore.image_store, None)
-        mock_log.warn.assert_called_once()
-
-    @patch('ingest.cutoutStore.cutoutStore')
-    def test_init_image_store_cass(self, mock_cutoutStore):
-        """Test that image store setup calls cutoutStore if settings.CUTOUTCASS is set"""
-        ingest.settings.USE_CUTOUTCASS = True
-        ingest.settings.IMAGEFITS = None
-        imageStore = ingest.ImageStore()
-        mock_cutoutStore.assert_called_once()
-        self.assertEqual(imageStore.image_store, mock_cutoutStore.return_value)
-
-    @patch('ingest.objectStore.objectStore')
-    def test_init_image_store_fits(self, mock_objectStore):
-        """Test that image store setup calls objectStore if settings.IMAGEFITS is set"""
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = '/tmp/testdir0987654321'
-        imageStore = ingest.ImageStore()
-        mock_objectStore.assert_called_once()
-        self.assertEqual(imageStore.image_store, mock_objectStore.return_value)
-
     def test_store_images(self):
         """Test using the image store"""
         mock_image_store = unittest.mock.MagicMock()
-        diaSourceId = test_alert['DiaSource']['diaSourceId']
-        diaObjectId = test_alert['DiaObject']['diaObjectId']
-        imjd = int(test_alert['DiaSource']['midPointTai'])
-        ingest.settings.USE_CUTOUTCASS = True
+        diaSourceId = test_alert['diaSource']['diaSourceId']
+        diaObjectId = test_alert['diaObject']['diaObjectId']
+        imjd = int(test_alert['diaSource']['midpointMjdTai'])
         imageStore = ingest.ImageStore(image_store=mock_image_store)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         # check we called putCutoutAsync twice
@@ -68,25 +46,22 @@ class IngestTest(unittest.TestCase):
 
     def test_store_images_no_store(self):
         """Test that the image store warns and returns empty list if attempting to use it when image_store is None"""
-        diaSourceId = test_alert['DiaSource']['diaSourceId']
-        diaObjectId = test_alert['DiaObject']['diaObjectId']
-        imjd = int(test_alert['DiaSource']['midPointTai'])
+        diaSourceId = test_alert['diaSource']['diaSourceId']
+        diaObjectId = test_alert['diaObject']['diaObjectId']
+        imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_log = unittest.mock.MagicMock()
-        ingest.settings.USE_CUTOUTCASS = False
-        ingest.settings.IMAGEFITS = None
         imageStore = ingest.ImageStore(log=mock_log)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
         self.assertEqual(len(result), 0)
-        mock_log.warn.assert_called_with('WARNING: attempted to store images, but no image store set up')
+        mock_log.warning.assert_called_with('WARNING: attempted to store images, but no image store set up')
 
     def test_store_images_error(self):
         """Test that using the image store raises an exception on error"""
-        diaSourceId = test_alert['DiaSource']['diaSourceId']
-        diaObjectId = test_alert['DiaObject']['diaObjectId']
-        imjd = int(test_alert['DiaSource']['midPointTai'])
+        diaSourceId = test_alert['diaSource']['diaSourceId']
+        diaObjectId = test_alert['diaObject']['diaObjectId']
+        imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_image_store = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
-        ingest.settings.USE_CUTOUTCASS = True
         mock_image_store.putCutoutAsync.side_effect = Exception('test error')
         imageStore = ingest.ImageStore(log=mock_log, image_store=mock_image_store)
         self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, imjd, diaObjectId)
@@ -95,7 +70,7 @@ class IngestTest(unittest.TestCase):
     @patch('ingest.ImageStore')
     @patch('ingest.Cluster')
     @patch('ingest.Producer')
-    @patch('ingest.Consumer')
+    @patch('ingest.DeserializingConsumer')
     def test_setup(self,
                    mock_consumer,
                    mock_producer,
@@ -114,14 +89,16 @@ class IngestTest(unittest.TestCase):
     @patch('ingest.executeLoadAsync')
     def test_insert_cassandra(self, mock_executeLoadAsync):
         alert = {
-            'diaObject': test_alert['DiaObject'],
-            'diaSourcesList': test_alert['DiaSourceList'],
-            'forcedSourceOnDiaObjectsList': test_alert['ForcedSourceOnDiaObjectList'],
+            'diaObject': test_alert['diaObject'],
+            'diaSourcesList': [test_alert['diaSource']] + test_alert['prvDiaSources'], # list concatenation
+            'diaForcedSourcesList': test_alert['prvDiaForcedSources'],
+            'diaNondetectionLimitsList': test_alert['prvDiaNondetectionLimits'],
+            'ssObject': test_alert['ssObject'],
         }
         ingester = ingest.Ingester('', '', '', 1, cassandra_session=True, ms=True)
         ingester._insert_cassandra(alert)
-        # executeLoad should get called three times, once for diaObject and once for each list
-        self.assertEqual(mock_executeLoadAsync.call_count, 3)
+        # executeLoad should get called three times, once for diaObject and once for each nonempty list
+        self.assertEqual(mock_executeLoadAsync.call_count, 2)
 
     @patch('ingest.Ingester._insert_cassandra_multi')
     def test_handle_alert(self, mock_insert_cassandra_multi):
@@ -131,7 +108,7 @@ class IngestTest(unittest.TestCase):
         ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer, ms=True)
         result = ingester._handle_alert(test_alert)
         # check the return values
-        self.assertEqual(result, (2, 2))
+        self.assertEqual(result, (3, 0))   # 3 diaSources and zero diaForcedSources
         # store_images should get called once
         mock_image_store.store_images.assert_called_once()
         # insert_cassandra_multi should get called once
@@ -156,35 +133,27 @@ class IngestTest(unittest.TestCase):
         # status page should get updated
         self.assertEqual(mock_ms.add.call_count, 1 + len(ingester.timers))
 
-    @patch('ingest.fastavro')
-    def test_poll(self, mock_avro):
+    def test_poll(self):
         mock_log = unittest.mock.MagicMock()
         mock_consumer = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = None
-        mock_consumer.poll.return_value.value.return_value = b''
-        mock_avro.schemaless_reader.return_value = "asdf"
+        mock_consumer.poll.return_value.value.return_value = "some alerts here"
         ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
         result = ingester._poll(1)
         # log.error should not get called
         mock_log.error.assert_not_called()
-        # schemaless reader should get called once
-        mock_avro.schemaless_reader.assert_called_once()
         # check result
-        self.assertEqual(result, ["asdf"])
+        self.assertEqual(result, ["some alerts here"])
 
     # test that if consumer.poll returns error then we handle it correctly
-    @patch('ingest.fastavro')
-    def test_poll_error(self, mock_avro):
+    def test_poll_error(self):
         mock_log = unittest.mock.MagicMock()
         mock_consumer = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = True
-        mock_avro.schemaless_reader.return_value = "asdf"
         ingester = ingest.Ingester('', '', '', 1, log=mock_log, consumer=mock_consumer, ms=True)
         result = ingester._poll(1)
         # log.error should get called
         mock_log.error.assert_called_once()
-        # schemaless reader should not get called
-        mock_avro.schemaless_reader.assert_not_called()
         # check result
         self.assertEqual(result, [])
 

@@ -12,7 +12,7 @@ import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
 from subprocess import Popen, PIPE
 from random import randrange
-from lasair import settings
+from lasair import settings as django_settings
 from django.utils.text import slugify
 from django.http import HttpResponse, FileResponse
 from django.contrib.auth.models import User
@@ -26,6 +26,7 @@ import sys
 from .utils import make_image_of_MOC
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
+import settings
 from src import bad_fits
 
 @csrf_exempt
@@ -116,7 +117,7 @@ o.diaObjectId,
 h.probdens2, h.contour, 
 o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
-o.rPSFluxMax, o.gPSFluxMax,
+o.rPSFlux, o.gPSFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
@@ -127,12 +128,13 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     cursor.execute(query_hit)
     table2 = cursor.fetchall()
 
-    maxprobdens2 = table2[0]['probdens2']
-    for i in range(len(table2)):
-        table2[i]['probdens2'] /= maxprobdens2
-        if table2[i]['probdens2'] < 0.005:
-            table2 = table2[:i]
-            break
+    if len(table2) > 0:
+        maxprobdens2 = table2[0]['probdens2']
+        for i in range(len(table2)):
+            table2[i]['probdens2'] /= maxprobdens2
+            if table2[i]['probdens2'] < 0.005:
+                table2 = table2[:i]
+                break
     newtable2 = []
     for r2 in table2:
         r = {'diaObjectId' : r2['diaObjectId'],
@@ -161,7 +163,7 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     if count == resultCap:
         limit = resultCap
 
-        if settings.DEBUG:
+        if django_settings.DEBUG:
             apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
             apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
@@ -185,7 +187,7 @@ h.probdens3, h.contour, h.distance as dist,
 o.maxTai as "last detected",
 o.minTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.rPSFluxMax, o.gPSFluxMax,
+o.rPSFlux, o.gPSFlux,
 o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
@@ -197,12 +199,13 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
 
-    maxprobdens3 = table3[0]['probdens3']
-    for i in range(len(table3)):
-        table3[i]['probdens3'] /= maxprobdens3
-        if table3[i]['probdens3'] < 0.005:
-            table3 = table3[:i]
-            break
+    if len(table3) > 0:
+        maxprobdens3 = table3[0]['probdens3']
+        for i in range(len(table3)):
+            table3[i]['probdens3'] /= maxprobdens3
+            if table3[i]['probdens3'] < 0.005:
+                table3 = table3[:i]
+                break
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId' : r3['diaObjectId'],
@@ -251,7 +254,7 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
     if count == resultCap:
         limit = resultCap
 
-        if settings.DEBUG:
+        if django_settings.DEBUG:
             apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
             apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
@@ -261,6 +264,7 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
 
     return render(request, 'mma_watchmap/mma_watchmap_detail.html', {
         'mma_watchmap': mma_watchmap,
+        'lasair_url'  : settings.LASAIR_URL,
         'table2': newtable2, 'schema2': schema2,
         'table3': newtable3, 'schema3': schema3,
         'count': count,

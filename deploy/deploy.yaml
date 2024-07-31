@@ -47,8 +47,10 @@
   vars_files:
     - settings.yaml
   vars:
+    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
     internal_only: true
-    source: public.alerts.ztf.uw.edu:9092
+    #source: public.alerts.ztf.uw.edu:9092
+    source: usdf-alert-stream-dev.lsst.cloud:9094
     start_mirrormaker: false # don't start mirrormaker automatically by default
   roles:
     - kafka
@@ -143,7 +145,7 @@
     - proxy
   tags: proxy
 
-- hosts: cassandranodes
+- hosts: cassandranodes,cutoutcass
   gather_facts: false
   become: yes
   tasks:
@@ -230,6 +232,6 @@
     cassandra_cluster_name: "{{ lasair_name }}_cutout"
     git_branch: "{{ lasair_version }}"
   roles:
-    # todo
+    - lasair_cutoutcass
   tags: cutoutcass
 

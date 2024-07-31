@@ -15,7 +15,7 @@ def main():
         countAnnotations = row['countAnnotations']
     cursor.close ()
 
-    ms = manage_status(settings.SYSTEM_STATUS)
+    ms = manage_status()
     nid = date_nid.nid_now()
     ms.set({'countAnnotations':countAnnotations}, nid)
 
