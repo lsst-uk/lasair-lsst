@@ -371,7 +371,7 @@
       when: command == "start"
   tags: cutoutcass
 
-- name: Cassandra non-seed nodes
+- name: Cutout Cassandra non-seed nodes
   hosts: "cutoutcass:!cutoutcass[0]{% if 'cutoutcass' in groups and groups['cutoutcass'] | length > 3 %} :!cutoutcass[2] {% endif %}"
   gather_facts: false
   become: true
