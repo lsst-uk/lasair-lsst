@@ -65,7 +65,7 @@ Turn it into schemaless avro packets and upload to the named Kafka topic, doe ex
 ```
 python3 json_to_kafka.py /mnt/cephfs/DP02/data_30.0100_30.0000 DP02
 ```
-Now you can tun ingestion and filter:
+Now you can tune ingestion and filter:
 ```
 ssh lasair-lsst-dev-ingest-0
 cd lasair-lsst/pipeline/ingest
