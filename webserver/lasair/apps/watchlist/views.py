@@ -11,6 +11,8 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
+from django.utils import timezone
+from datetime import timezone
 import src.run_crossmatch_optimised as run_crossmatch
 from django.conf import settings
 from django.contrib import messages
@@ -99,7 +101,7 @@ def watchlist_index(request):
                 except Exception as e:
                     messages.error(request, f'Bad line {len(cone_list)}: {line}\n{str(e)}')
 
-            expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+            expire = datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius, date_expire=expire)
             wl.save()
             cones = []
@@ -273,11 +275,11 @@ def watchlist_detail(request, wl_id, action=False):
     # GRAB ALL WATCHLIST MATCHES
     query_hit = f"""
 SELECT
-h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, jdnow()-o.maxTai as "last detected (days ago)"
-FROM watchlist_cones AS c
-NATURAL JOIN watchlist_hits as h
-NATURAL JOIN objects AS o
-WHERE c.wl_id={wl_id} limit {resultCap}
+h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, 
+o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, tainow()-o.maxTai as "last detected (days ago)"
+FROM watchlist_cones AS c, watchlist_hits as h, objects AS o
+WHERE c.cone_id=h.cone_id AND h.diaObjectId=o.diaObjectId AND
+c.wl_id={wl_id} limit 1000
 """
 
     cursor.execute(query_hit)
