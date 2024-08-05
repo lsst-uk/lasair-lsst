@@ -65,7 +65,7 @@ class ImageStore:
         futures = []
         try:
             if self.image_store:
-                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                for cutoutType in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']:
                     if not cutoutType in message:
                         continue
                     content = message[cutoutType]
