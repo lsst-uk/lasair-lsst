@@ -31,3 +31,10 @@
     state: mounted
   when: data_fs.dev is defined
 
+- name: "Create empty file"
+  become: true
+  ansible.builtin.command: 
+    cmd: "fallocate -l 10G {{ data_fs.path }}/delete_me"
+    creates: "{{ data_fs.path }}/delete_me"
+  when: data_fs.path is defined
+

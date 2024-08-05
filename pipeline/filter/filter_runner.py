@@ -63,7 +63,7 @@ def run(args, log):
         except Exception as e:
             log.exception('Exception')
             log.critical('Unrecoverable error in filter batch: ' + str(e))
-            break
+            sys.exit(1)
 
     log.info('Exiting filter runner')
 

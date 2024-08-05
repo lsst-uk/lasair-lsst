@@ -30,15 +30,15 @@ class lightcurve_fetcher():
         if full:
             query = "SELECT * "
         else:
-            query = "SELECT diaSourceId, midPointTai, ra, decl, filterName, nid, psFlux, psFluxErr "
+            query = "SELECT diaSourceId, midPointMjdTai, ra, decl, band, psfFlux, psfFluxErr "
         query += "from diaSources where diaObjectId = %s" % diaObjectId
         ret = self.session.execute(query)
         diaSources = []
         for diaSource in ret:
             diaSources.append(diaSource)
 
-        query = "SELECT midPointTai, band, psfFlux, psfFluxErr, psfDiffFlux, psfDiffFluxErr "
-        query += "from ForcedSourceOnDiaObjects where diaObjectId = %s" % diaObjectId
+        query = "SELECT midPointMjdTai, band, psfFlux, psfFluxErr "
+        query += "from diaForcedSources where diaObjectId = %s" % diaObjectId
         ret = self.session.execute(query)
         diaForcedSources = []
         for diaForcedSource in ret:

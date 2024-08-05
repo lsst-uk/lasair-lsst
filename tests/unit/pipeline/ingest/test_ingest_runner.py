@@ -25,8 +25,14 @@ class RunnerTest(unittest.TestCase):
         """Test handling of exception on run"""
         mock_ingester.return_value.run.return_value = 3
         mock_ingester.return_value.run.side_effect = Exception('Test error')
-        ingest_runner.setup_proc(1, 1, {})
+        # Check that sys.exit is called when an exception happens
+        with self.assertRaises(SystemExit) as cm:
+            ingest_runner.setup_proc(1, 1, {})
+        # check that the exit code was not 0
+        self.assertNotEqual(cm.exception.code, 0)
+        # check the exception was the expected one
         mock_logging.getLogger.return_value.exception.assert_called()
+        # check the exception got logged
         mock_logging.getLogger.return_value.critical.assert_called_with('Unrecoverable error in ingest: Test error')
 
 

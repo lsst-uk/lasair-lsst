@@ -137,7 +137,7 @@
         files:
           - mirror-compose.yml
         services:
-          - mirror
+          - mirrormaker
         state: present
         stopped: false
       when: command == "start"
@@ -148,7 +148,7 @@
         files:
           - mirror-compose.yml
         services:
-          - mirror
+          - mirrormaker
         state: present
         stopped: true
       when: command == "stop"
@@ -351,6 +351,54 @@
         state: stopped
       when: command == "stop"
   tags: cassandra
+
+##
+
+- name: Cutout Cassandra seed nodes
+  hosts: "cutoutcass[0]{% if 'cutoutcass' in groups and groups['cutoutcass'] | length > 3 %} :cutoutcass[2] {% endif %}" 
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Cutout Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+    - name: Wait for seed nodes
+      ansible.builtin.wait_for:
+        port: 9042
+        timeout: 60
+      when: command == "start"
+  tags: cutoutcass
+
+- name: Cutout Cassandra non-seed nodes
+  hosts: "cutoutcass:!cutoutcass[0]{% if 'cutoutcass' in groups and groups['cutoutcass'] | length > 3 %} :!cutoutcass[2] {% endif %}"
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Cutout Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: started 
+      when: command == "start"
+    - name: Stop Cassandra non-seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped 
+      when: command == "stop"
+  tags: cutoutcass
+
+- name: Cutout Cassandra seed nodes
+  hosts: "cutoutcass[0]{% if 'cutoutcass' in groups and groups['cutoutcass'] | length > 3 %} :cutoutcass[2] {% endif %}" 
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Stop Cutout Cassandra seeds
+      ansible.builtin.service:
+        name: cassandra
+        state: stopped
+      when: command == "stop"
+  tags: cutoutcass
 
 #- hosts: parallel_ssh
 #  gather_facts: false

@@ -1,341 +1,550 @@
 schema = {
-  "name": "DiaSources",
+  "name": "diaSources",
   "fields": [
     {
-      "name": "apFlux",
-      "type": "double",
-      "doc": "Flux within 12.0-pixel aperture"
+      "name": "diaSourceId",
+      "type": "long"
     },
     {
-      "name": "apFluxErr",
-      "type": "double",
-      "doc": "Flux uncertainty within 12.0-pixel aperture"
+      "name": "visit",
+      "type": "long"
     },
     {
-      "name": "apFlux_flag",
-      "type": "boolean",
-      "doc": "General Failure Flag"
-    },
-    {
-      "name": "apFlux_flag_apertureTruncated",
-      "type": "boolean",
-      "doc": "Aperture did not fit within measurement image"
-    },
-    {
-      "name": "bboxSize",
-      "type": "long",
-      "doc": "Bounding box of diaSource footprint"
-    },
-    {
-      "name": "ccdVisitId",
-      "type": "long",
-      "doc": "Unique ID of CCD and visit where this source was detected and measured. Primary Key of the CcdVisit Table."
-    },
-    {
-      "name": "centroid_flag",
-      "type": "boolean",
-      "doc": "General failure flag, set if anything went wrong"
-    },
-    {
-      "name": "centroid_neg_flag",
-      "type": "boolean",
-      "doc": "Failure flag for negative, set if anything went wrong"
-    },
-    {
-      "name": "centroid_pos_flag",
-      "type": "boolean",
-      "doc": "Failure flag for positive, set if anything went wrong"
-    },
-    {
-      "name": "coord_dec",
-      "type": "double",
-      "doc": "Fiducial ICRS Declination of centroid used for database indexing"
-    },
-    {
-      "name": "coord_ra",
-      "type": "double",
-      "doc": "Fiducial ICRS Right Ascension of centroid used for database indexing"
-    },
-    {
-      "name": "decl",
-      "type": "double",
-      "doc": "Position in ra/dec"
+      "name": "detector",
+      "type": "int"
     },
     {
       "name": "diaObjectId",
-      "type": "long",
-      "doc": "Unique DiaObject ID. Primary Key of the DIA Object Table"
-    },
-    {
-      "name": "diaSourceId",
-      "type": "long",
-      "doc": "Unique ID"
-    },
-    {
-      "name": "dipAngle",
-      "type": "double",
-      "doc": "Dipole orientation"
-    },
-    {
-      "name": "dipChi2",
-      "type": "double",
-      "doc": "Chi2 per degree of freedom of dipole fit"
-    },
-    {
-      "name": "dipFluxDiff",
-      "type": "double",
-      "doc": "Raw flux counts, positive lobe"
-    },
-    {
-      "name": "dipFluxDiffErr",
-      "type": "double",
-      "doc": "Raw flux uncertainty counts, positive lobe"
-    },
-    {
-      "name": "dipLength",
-      "type": "double",
-      "doc": "Pixel separation between positive and negative lobes of dipole"
-    },
-    {
-      "name": "dipMeanFlux",
-      "type": "double",
-      "doc": "Raw flux counts, positive lobe"
-    },
-    {
-      "name": "dipMeanFluxErr",
-      "type": "double",
-      "doc": "Raw flux uncertainty counts, positive lobe"
-    },
-    {
-      "name": "filterName",
-      "type": "string",
-      "doc": "Band used to take this observation"
-    },
-    {
-      "name": "forced_PsfFlux_flag",
-      "type": "boolean",
-      "doc": "Forced PSF flux general failure flag."
-    },
-    {
-      "name": "forced_PsfFlux_flag_edge",
-      "type": "boolean",
-      "doc": "Forced PSF flux object was too close to the edge of the image to use the full PSF model."
-    },
-    {
-      "name": "forced_PsfFlux_flag_noGoodPixels",
-      "type": "boolean",
-      "doc": "Forced PSF flux not enough non-rejected pixels in data to attempt the fit."
-    },
-    {
-      "name": "isDipole",
-      "type": "boolean",
-      "doc": "Flag indicating diaSource is classified as a dipole"
-    },
-    {
-      "name": "ixx",
-      "type": "double",
-      "doc": "Elliptical Gaussian adaptive moments"
-    },
-    {
-      "name": "ixxPSF",
-      "type": "double",
-      "doc": "Adaptive moments of the PSF model at the object position"
-    },
-    {
-      "name": "ixy",
-      "type": "double",
-      "doc": "Elliptical Gaussian adaptive moments"
-    },
-    {
-      "name": "ixyPSF",
-      "type": "double",
-      "doc": "Adaptive moments of the PSF model at the object position"
-    },
-    {
-      "name": "iyy",
-      "type": "double",
-      "doc": "Elliptical Gaussian adaptive moments"
-    },
-    {
-      "name": "iyyPSF",
-      "type": "double",
-      "doc": "Adaptive moments of the PSF model at the object position"
-    },
-    {
-      "name": "midPointTai",
-      "type": "double",
-      "doc": "Effective mid-exposure time for this diaSource."
-    },
-    {
-      "name": "parentDiaSourceId",
-      "type": "long",
-      "doc": "Unique ID of parent source"
-    },
-    {
-      "name": "pixelFlags",
-      "type": "boolean",
-      "doc": "General failure flag, set if anything went wrong"
-    },
-    {
-      "name": "pixelFlags_bad",
-      "type": "boolean",
-      "doc": "Bad pixel in the Source footprint"
-    },
-    {
-      "name": "pixelFlags_cr",
-      "type": "boolean",
-      "doc": "Cosmic ray in the Source footprint"
-    },
-    {
-      "name": "pixelFlags_crCenter",
-      "type": "boolean",
-      "doc": "Cosmic ray in the Source center"
-    },
-    {
-      "name": "pixelFlags_edge",
-      "type": "boolean",
-      "doc": "Source is outside usable exposure region (masked EDGE or NO_DATA)"
-    },
-    {
-      "name": "pixelFlags_interpolated",
-      "type": "boolean",
-      "doc": "Interpolated pixel in the Source footprint"
-    },
-    {
-      "name": "pixelFlags_interpolatedCenter",
-      "type": "boolean",
-      "doc": "Interpolated pixel in the Source center"
-    },
-    {
-      "name": "pixelFlags_offimage",
-      "type": "boolean",
-      "doc": "Source center is off image"
-    },
-    {
-      "name": "pixelFlags_saturated",
-      "type": "boolean",
-      "doc": "Saturated pixel in the Source footprint"
-    },
-    {
-      "name": "pixelFlags_saturatedCenter",
-      "type": "boolean",
-      "doc": "Saturated pixel in the Source center"
-    },
-    {
-      "name": "pixelFlags_suspect",
-      "type": "boolean",
-      "doc": "Sources footprint includes suspect pixels"
-    },
-    {
-      "name": "pixelFlags_suspectCenter",
-      "type": "boolean",
-      "doc": "Sources center is close to suspect pixels"
-    },
-    {
-      "name": "pixelId",
-      "type": "long",
-      "doc": "Position in ra/dec"
-    },
-    {
-      "name": "psFlux",
-      "type": "double",
-      "doc": "Flux derived from linear least-squares fit of PSF model"
-    },
-    {
-      "name": "psFluxErr",
-      "type": "double",
-      "doc": "Flux uncertainty derived from linear least-squares fit of PSF model"
-    },
-    {
-      "name": "psfFlux_flag",
-      "type": "boolean",
-      "doc": "Failure to derive linear least-squares fit of psf model forced on the calexp"
-    },
-    {
-      "name": "psfFlux_flag_edge",
-      "type": "boolean",
-      "doc": "Object was too close to the edge of the image to use the full PSF model"
-    },
-    {
-      "name": "psfFlux_flag_noGoodPixels",
-      "type": "boolean",
-      "doc": "Not enough non-rejected pixels in data to attempt the fit"
-    },
-    {
-      "name": "ra",
-      "type": "double",
-      "doc": "Position in ra/dec"
-    },
-    {
-      "name": "shape_flag",
-      "type": "boolean",
-      "doc": "General Failure Flag"
-    },
-    {
-      "name": "shape_flag_maxIter",
-      "type": "boolean",
-      "doc": "Too many iterations in adaptive moments"
-    },
-    {
-      "name": "shape_flag_psf",
-      "type": "boolean",
-      "doc": "Failure in measuring PSF model shape"
-    },
-    {
-      "name": "shape_flag_shift",
-      "type": "boolean",
-      "doc": "Centroid shifted by more than the maximum allowed amount"
-    },
-    {
-      "name": "shape_flag_unweighted",
-      "type": "boolean",
-      "doc": "Weighted moments converged to an invalid value; using unweighted moments"
-    },
-    {
-      "name": "shape_flag_unweightedBad",
-      "type": "boolean",
-      "doc": "Both weighted and unweighted moments were invalid"
-    },
-    {
-      "name": "snr",
-      "type": "double",
-      "doc": "Ratio of apFlux/apFluxErr"
+      "type": "long"
     },
     {
       "name": "ssObjectId",
-      "type": "long",
-      "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to 0"
+      "type": "long"
     },
     {
-      "name": "totFlux",
-      "type": "double",
-      "doc": "Forced PSF flux measured on the direct image."
+      "name": "parentDiaSourceId",
+      "type": "long"
     },
     {
-      "name": "totFluxErr",
-      "type": "double",
-      "doc": "Forced PSF flux uncertainty measured on the direct image."
+      "name": "midpointMjdTai",
+      "type": "double"
+    },
+    {
+      "name": "ra",
+      "type": "double"
+    },
+    {
+      "name": "raErr",
+      "type": "float"
+    },
+    {
+      "name": "decl",
+      "type": "double"
+    },
+    {
+      "name": "decErr",
+      "type": "float"
+    },
+    {
+      "name": "ra_dec_Cov",
+      "type": "float"
     },
     {
       "name": "x",
-      "type": "double",
-      "doc": "Unweighted first moment centroid, overall centroid"
+      "type": "float"
     },
     {
       "name": "xErr",
-      "type": "float",
-      "doc": "1-sigma uncertainty on x position"
+      "type": "float"
     },
     {
       "name": "y",
-      "type": "double",
-      "doc": "Unweighted first moment centroid, overall centroid"
+      "type": "float"
     },
     {
       "name": "yErr",
-      "type": "float",
-      "doc": "1-sigma uncertainty on y position"
+      "type": "float"
+    },
+    {
+      "name": "x_y_Cov",
+      "type": "float"
+    },
+    {
+      "name": "centroid_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "apFlux",
+      "type": "float"
+    },
+    {
+      "name": "apFluxErr",
+      "type": "float"
+    },
+    {
+      "name": "apFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "apFlux_flag_apertureTruncated",
+      "type": "boolean"
+    },
+    {
+      "name": "snr",
+      "type": "float"
+    },
+    {
+      "name": "psfFlux",
+      "type": "float"
+    },
+    {
+      "name": "psfFluxErr",
+      "type": "float"
+    },
+    {
+      "name": "psfRa",
+      "type": "double"
+    },
+    {
+      "name": "psfRaErr",
+      "type": "float"
+    },
+    {
+      "name": "psfDec",
+      "type": "double"
+    },
+    {
+      "name": "psfDecErr",
+      "type": "float"
+    },
+    {
+      "name": "psfFlux_psfRa_Cov",
+      "type": "float"
+    },
+    {
+      "name": "psfFlux_psfDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "psfRa_psfDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "psfLnL",
+      "type": "float"
+    },
+    {
+      "name": "psfChi2",
+      "type": "float"
+    },
+    {
+      "name": "psfNdata",
+      "type": "int"
+    },
+    {
+      "name": "psfFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "psfFlux_flag_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "psfFlux_flag_noGoodPixels",
+      "type": "boolean"
+    },
+    {
+      "name": "trailFlux",
+      "type": "float"
+    },
+    {
+      "name": "trailFluxErr",
+      "type": "float"
+    },
+    {
+      "name": "trailRa",
+      "type": "double"
+    },
+    {
+      "name": "trailRaErr",
+      "type": "float"
+    },
+    {
+      "name": "trailDec",
+      "type": "double"
+    },
+    {
+      "name": "trailDecErr",
+      "type": "float"
+    },
+    {
+      "name": "trailLength",
+      "type": "float"
+    },
+    {
+      "name": "trailLengthErr",
+      "type": "float"
+    },
+    {
+      "name": "trailAngle",
+      "type": "float"
+    },
+    {
+      "name": "trailAngleErr",
+      "type": "float"
+    },
+    {
+      "name": "trailFlux_trailRa_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailFlux_trailDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailFlux_trailLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailFlux_trailAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailRa_trailDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailRa_trailLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailRa_trailAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailDec_trailLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailDec_trailAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailLength_trailAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "trailLnL",
+      "type": "float"
+    },
+    {
+      "name": "trailChi2",
+      "type": "float"
+    },
+    {
+      "name": "trailNdata",
+      "type": "int"
+    },
+    {
+      "name": "trail_flag_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "dipoleMeanFlux",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFluxErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiff",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiffErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleRa",
+      "type": "double"
+    },
+    {
+      "name": "dipoleRaErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleDec",
+      "type": "double"
+    },
+    {
+      "name": "dipoleDecErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleLength",
+      "type": "float"
+    },
+    {
+      "name": "dipoleLengthErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleAngle",
+      "type": "float"
+    },
+    {
+      "name": "dipoleAngleErr",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFlux_dipoleFluxDiff_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFlux_dipoleRa_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFlux_dipoleDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFlux_dipoleLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleMeanFlux_dipoleAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiff_dipoleRa_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiff_dipoleDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiff_dipoleLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleFluxDiff_dipoleAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleRa_dipoleDec_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleRa_dipoleLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleRa_dipoleAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleDec_dipoleLength_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleDec_dipoleAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleLength_dipoleAngle_Cov",
+      "type": "float"
+    },
+    {
+      "name": "dipoleLnL",
+      "type": "float"
+    },
+    {
+      "name": "dipoleChi2",
+      "type": "float"
+    },
+    {
+      "name": "dipoleNdata",
+      "type": "int"
+    },
+    {
+      "name": "forced_PsfFlux_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "forced_PsfFlux_flag_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "forced_PsfFlux_flag_noGoodPixels",
+      "type": "boolean"
+    },
+    {
+      "name": "snapDiffFlux",
+      "type": "float"
+    },
+    {
+      "name": "snapDiffFluxErr",
+      "type": "float"
+    },
+    {
+      "name": "fpBkgd",
+      "type": "float"
+    },
+    {
+      "name": "fpBkgdErr",
+      "type": "float"
+    },
+    {
+      "name": "ixx",
+      "type": "float"
+    },
+    {
+      "name": "ixxErr",
+      "type": "float"
+    },
+    {
+      "name": "iyy",
+      "type": "float"
+    },
+    {
+      "name": "iyyErr",
+      "type": "float"
+    },
+    {
+      "name": "ixy",
+      "type": "float"
+    },
+    {
+      "name": "ixyErr",
+      "type": "float"
+    },
+    {
+      "name": "ixx_iyy_Cov",
+      "type": "float"
+    },
+    {
+      "name": "ixx_ixy_Cov",
+      "type": "float"
+    },
+    {
+      "name": "iyy_ixy_Cov",
+      "type": "float"
+    },
+    {
+      "name": "ixxPSF",
+      "type": "float"
+    },
+    {
+      "name": "iyyPSF",
+      "type": "float"
+    },
+    {
+      "name": "ixyPSF",
+      "type": "float"
+    },
+    {
+      "name": "shape_flag",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_no_pixels",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_not_contained",
+      "type": "boolean"
+    },
+    {
+      "name": "shape_flag_parent_source",
+      "type": "boolean"
+    },
+    {
+      "name": "extendedness",
+      "type": "float"
+    },
+    {
+      "name": "reliability",
+      "type": "float"
+    },
+    {
+      "name": "band",
+      "type": "string"
+    },
+    {
+      "name": "pixelFlags",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_bad",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_cr",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_crCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_edge",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_interpolated",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_interpolatedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_offimage",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_saturated",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_saturatedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_suspect",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_suspectCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_streak",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_streakCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injectedCenter",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected_template",
+      "type": "boolean"
+    },
+    {
+      "name": "pixelFlags_injected_templateCenter",
+      "type": "boolean"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, midPointTai, diaSourceId)"]
+  "indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, diaSourceId)"]
 }

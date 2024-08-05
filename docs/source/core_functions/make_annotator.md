@@ -8,7 +8,7 @@ object in the database, which is a conneciton between the API token of that user
 with the name (`topic`) assigned to the annotator. 
 
 In the first case, write to 
-<a href="mailto:lasair-help@lists.roe.ac.uk?subject=New Annotator">Lasair Team</a>
+<a href="mailto:lasair-help@mlist.is.ed.ac.uk?subject=New Annotator">Lasair Team</a>
 to propose your annotator.
 
 Here we see that admin interface that the Lasair team uses to make your annotator,

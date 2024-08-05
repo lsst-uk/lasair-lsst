@@ -14,23 +14,15 @@ schema = {
     { "name": "ra",       "type": "double", "doc": "Mean RA of this object" },
     { "name": "decl",     "type": "double", "doc": "Mean Dec of this object"},
 
-    { "name": "gPSFluxMax",  "type": "float", 
-        "doc": "Maximum g flux in nJansky" },
-    { "name": "gPSFluxMean", "type": "float", 
-        "doc": "Mean g flux in nJansky" },
-    { "name": "gPSFluxMaxSlope", "type": "float", 
-        "doc": "Maximum ratio of time ordered deltaFlux / deltaTime" },
-    { "name": "gPSFluxNdata", "type": "int", 
-        "doc": "The number of data points used to compute gPSFluxChi2" },
+    { "name": "g_psfFluxMean", "type": "float", 
+        "doc": "Weighted mean point-source model magnitude for g filter" },
+    { "name": "g_psfFluxMeanErr", "type": "float", 
+        "doc": "Standard error of g_psfFluxMean" },
 
-    { "name": "rPSFluxMax",  "type": "float", 
-        "doc": "Maximum r flux in nJansky" },
-    { "name": "rPSFluxMean", "type": "float", 
-        "doc": "Mean r flux in nJansky" },
-    { "name": "rPSFluxMaxSlope", "type": "float", 
-        "doc": "Maximum ratio of time ordered deltaFlux / deltaTime" },
-    { "name": "rPSFluxNdata", "type": "int", 
-        "doc": "The number of data points used to compute rPSFluxChi2" },
+    { "name": "r_psfFluxMean", "type": "float", 
+        "doc": "Weighted mean point-source model magnitude for r filter" },
+    { "name": "r_psfFluxMeanErr", "type": "float", 
+        "doc": "Standard error of r_psfFluxMean" },
 
 # Counting, max, min
     { "name": "nSources",     "type": "int", 
@@ -87,9 +79,15 @@ schema = {
     { "name": "bazinExpFallRateErr", "type": "float", 
         "doc": "Error of bazinExpFallRate" },
     { "name": "bazinExpTempErr", "type": "float", 
-        "doc": "Error of bazinExpTemp"}
+        "doc": "Error of bazinExpTemp"},
 
-
+# timestamp for last modified
+    {
+      "name": "timestamp",
+      "type": "timestamp",
+      "extra": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
+      "doc": "Time at which this object last modified"
+    },
   ],
   "indexes": [
     "PRIMARY KEY (diaObjectId)",

@@ -1,4 +1,4 @@
-USE_CUTOUTCASS = True 
+SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
 SCHEMA = '../../../../common/schema/dp02.avsc'
 CASSANDRA_HEAD = ''
 KAFKA_SERVER=''

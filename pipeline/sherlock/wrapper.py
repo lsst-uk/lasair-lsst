@@ -307,7 +307,7 @@ def run(conf, log):
         batch = 0
         while True:
             if 'max_batches' in conf and conf['max_batches'] > 0 and batch == conf['max_batches']:
-                log.log(logging.INFO_, "reached max batches at batch { batch }")
+                log.log(logging.INFO_, f"reached max batches at batch { batch }")
                 break
             batch += 1
             alerts = []

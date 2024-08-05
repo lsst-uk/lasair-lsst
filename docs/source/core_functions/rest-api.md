@@ -5,7 +5,7 @@ The Lasair-Sherlock API allows developers to run queries and cone-searches, to s
 #### Ways to use the API
 
 The Lasair API uses either HTTP GET or POST. Arguments can be passed in the query string, as JSON or form encoded. Responses are JSON. There is a throttling system in the backend: users with an account get up to 100 calls per hour, but "power" users get up to 10,000 calls per hour. If you wish your account to be upgraded to power user, 
-[email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=power user)
+[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user)
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
@@ -15,7 +15,7 @@ There is an [accompanying set of jupyter notebooks](../python-notebooks.html)
 
 #### Throttling of API Usage
 
-The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
+The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
 
 *   User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.
 *   Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.
@@ -247,7 +247,7 @@ This method returns simple lightcurves for a number of objects. **NOTE:** these 
 The arguments are:
 
 *   `objectIds`: (string) comma-separated string of objectIds to be fetched
-*   There is a upper limit on the number of lightcurves that can be fetched, currently 50. If you need to do serious data mining on Lasair light curves, please write to [contact the Lasair team](mailto:lasair-help@lists.roe.ac.uk?subject=Notebooks).
+*   There is a upper limit on the number of lightcurves that can be fetched, currently 50. If you need to do serious data mining on Lasair light curves, please write to [contact the Lasair team](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks).
 
 GET URL Example
 ```
@@ -288,7 +288,7 @@ and the return is something like:
 
 ## Sherlock Methods
 
-These methods allow you to run a Sherlock crossmatch at a given sky position, or at the position of known objects. This is a recomputation of the Sherlock crossmatch, not just a database lookup. You might want to do this if you are interested in the full record rather than only the top crossmatch, or if a more recent version of Sherlock is now available than the one used when the alert was produced. If you just want to look up the sherlock classification in the database then you should use `query` instead as it will be much faster. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=sherlock).
+These methods allow you to run a Sherlock crossmatch at a given sky position, or at the position of known objects. This is a recomputation of the Sherlock crossmatch, not just a database lookup. You might want to do this if you are interested in the full record rather than only the top crossmatch, or if a more recent version of Sherlock is now available than the one used when the alert was produced. If you just want to look up the sherlock classification in the database then you should use `query` instead as it will be much faster. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=sherlock).
 
 ### <a name="sherlockobjects"></a>/api/sherlock/objects/
 

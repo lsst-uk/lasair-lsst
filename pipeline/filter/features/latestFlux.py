@@ -15,15 +15,15 @@ class latestFlux(FeatureGroup):
     def run(self):
         # sort diaSources in reverse order
         diaSourcesList = sorted(self.alert['diaSourcesList'], 
-            key=lambda ds:ds['midPointTai'], reverse=True)
+            key=lambda ds:ds['midpointMjdTai'], reverse=True)
         dict = {}
         for f in self._features:
             dict[f] = None
         for ds in diaSourcesList:
-            fn = ds['filterName']
+            fn = ds['band']
             fnf = fn + 'PSFlux'
             if not dict[fnf]:
-                dict[fnf] = ds['psFlux']
+                dict[fnf] = ds['psfFlux']
         if self.verbose:
             for f in self._features:
                 if f not in dict:

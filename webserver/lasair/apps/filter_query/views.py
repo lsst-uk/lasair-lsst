@@ -4,6 +4,7 @@ from src import date_nid, db_connect
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
+from datetime import timezone
 from lasair.apps.annotator.models import Annotators
 from lasair.apps.watchmap.models import Watchmap
 from lasair.apps.watchlist.models import Watchlist
@@ -122,7 +123,7 @@ def filter_query_detail(request, mq_id, action=False):
             else:
                 filterQuery.public = 0
             filterQuery.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+                    datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
             tn = topic_name(request.user.id, filterQuery.name)
