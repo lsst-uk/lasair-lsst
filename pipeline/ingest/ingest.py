@@ -65,7 +65,7 @@ class ImageStore:
         futures = []
         try:
             if self.image_store:
-                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
                     if not cutoutType in message:
                         continue
                     content = message[cutoutType]
@@ -343,10 +343,13 @@ class Ingester:
                     future.result()
                 break
             except NoHostAvailable as e:
-                log.warning(str(e))
-                log.info("Waiting for 10 seconds")
-                time.sleep(10)
-                log.info("Retrying")
+                if i > 5:
+                    raise e
+                else:
+                    log.warning(str(e))
+                    log.info("Waiting for 10 seconds")
+                    time.sleep(10)
+                    log.info("Retrying")
 
         self.timers['ifuture'].off()
         self.futures = []
