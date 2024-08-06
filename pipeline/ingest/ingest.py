@@ -27,7 +27,7 @@ from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
 import time, json, io, fastavro, signal
 
@@ -65,7 +65,7 @@ class ImageStore:
         futures = []
         try:
             if self.image_store:
-                for cutoutType in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']:
+                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
                     if not cutoutType in message:
                         continue
                     content = message[cutoutType]
@@ -337,8 +337,17 @@ class Ingester:
 
         # wait for any in-flight cassandra requests to complete
         self.timers['ifuture'].on()
-        for future in self.futures:
-            future.result()
+        for i in range(6):
+            try:
+                for future in self.futures:
+                    future.result()
+                break
+            except NoHostAvailable as e:
+                log.warning(str(e))
+                log.info("Waiting for 10 seconds")
+                time.sleep(10)
+                log.info("Retrying")
+
         self.timers['ifuture'].off()
         self.futures = []
 
