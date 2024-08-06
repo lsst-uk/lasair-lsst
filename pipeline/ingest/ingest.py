@@ -337,17 +337,8 @@ class Ingester:
 
         # wait for any in-flight cassandra requests to complete
         self.timers['ifuture'].on()
-        for i in range(6):
-            try:
-                for future in self.futures:
-                    future.result()
-                break
-            except NoHostAvailable as e:
-                log.warning(str(e))
-                log.info("Waiting for 10 seconds")
-                time.sleep(10)
-                log.info("Retrying")
-
+        for future in self.futures:
+            future.result()
         self.timers['ifuture'].off()
         self.futures = []
 
