@@ -2,6 +2,9 @@
 # Roy Williams and Ken Smith 2023
 
 from cassandra.cluster import Cluster
+# 2024-08-09 KWS Get the reconnection policy.
+from cassandra.policies import ExponentialReconnectionPolicy
+
 try:
     import settings
 except:
@@ -27,7 +30,12 @@ class cutoutStore():
             except:
                 hosts = ['localhost']
             try:
-                self.cluster = Cluster(hosts)
+
+                # 2024-08-09 KWS Implement a reconnection policy. Initially hard wired to attempt
+                #                a connection, wait for 1 sec and keep backing off exponentially
+                #                until 60 secs, after which the connection will fail.
+                reconnection_policy = ExponentialReconnectionPolicy(initial_delay=1, max_delay=60)
+                self.cluster = Cluster(contact_points=hosts, reconnection_policy=reconnection_policy)
                 self.session = self.cluster.connect()
                 self.session.set_keyspace('cutouts')
             except Exception as e:
