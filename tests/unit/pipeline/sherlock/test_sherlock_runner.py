@@ -1,6 +1,7 @@
 """Unit tests for sherlock runner
 """
 
+import os
 import unittest
 import unittest.mock
 from unittest.mock import patch
