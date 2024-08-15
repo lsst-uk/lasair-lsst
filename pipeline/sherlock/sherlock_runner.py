@@ -12,11 +12,13 @@ Options:
     --nprocess=nprocess  Number of processes [default: 1]
     --config=FILE        Configuration file [default: wrapper_runner.json]
 """
+import os
 import sys
 import json
 import yaml
+import signal
 from docopt import docopt
-from multiprocessing import Process
+from multiprocessing import Process, Value, Array
 
 sys.path.append('../../common/src')
 import slack_webhook
@@ -24,7 +26,7 @@ import lasairLogging
 import wrapper
 
 
-def setup_proc(n, nprocess, conffile):
+def setup_proc(exit_code, pids, n, nprocess, conffile):
     # Load runner config
     with open(conffile) as file:
         config = json.load(file)
@@ -50,7 +52,13 @@ def setup_proc(n, nprocess, conffile):
     except Exception as e:
         log.exception('Exception')
         log.critical('Unrecoverable error in sherlock: ' + str(e))
-        sys.exit(1)
+        # set the exit code
+        exit_code.value = 1
+        # send a SIGTERM to all other processes
+        for pid in pids:
+            if pid != os.getpid() and pid > 0:
+                print("Sending SIGTERM to", pid)
+                os.kill(pid, signal.SIGTERM)
 
 
 if __name__ == '__main__':
@@ -63,13 +71,19 @@ if __name__ == '__main__':
 
     conffile = args.get('--config')
 
+    exit_code = Value('i', 0)
+    pids = Array('i', nprocess)
+
     # Start up the processes
     process_list = []
     for i in range(nprocess):
-        p = Process(target=setup_proc, args=(i+1, nprocess, conffile))
+        p = Process(target=setup_proc, args=(exit_code, pids, i+1, nprocess, conffile))
         process_list.append(p)
         p.start()
+        pids[i] = p.pid
 
     for p in process_list:
         p.join()
-    print('ingest_runner exiting')
+
+    print("sherlock_runner exiting with exit code", exit_code.value)
+    sys.exit(exit_code.value)
