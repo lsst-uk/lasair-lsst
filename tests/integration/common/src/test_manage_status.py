@@ -69,20 +69,20 @@ class CommonManageStatusTest(unittest.TestCase):
         status = ms.read(7)
         self.assertEqual(status, {})
 
-#    def test_multiprocessing(self):
-#        msl = mysql.connector.connect(**config)
-#        procs = []
-#        for iproc in range(nproc):
-#            proc = Process(target=func, args=(msl, iproc,))
-#            procs.append(proc)
-#            proc.start()
-#        for proc in procs:
-#            proc.join()
+    def test_multiprocessing(self):
+        msl = mysql.connector.connect(**config)
+        procs = []
+        for iproc in range(nproc):
+            proc = Process(target=func, args=(msl, iproc,))
+            procs.append(proc)
+            proc.start()
+        for proc in procs:
+            proc.join()
 
-#        ms = manage_status(msl, 'test_lasair_statistics')
-#        status = ms.read(nid)
+        ms = manage_status(msl, 'test_lasair_statistics')
+        status = ms.read(nid)
 #        print(status)
-#        self.assertTrue(status['count'] == nproc*niter)
+        self.assertTrue(status['count'] == nproc*niter)
 
     def test_timer(self):
         td = timer('mango')
