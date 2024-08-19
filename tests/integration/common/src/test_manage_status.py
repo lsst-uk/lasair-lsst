@@ -23,6 +23,7 @@ deltaT = 1
 nid    = 7
 
 def func(msl, iproc):
+    msl = mysql.connector.connect(**config)
     ms = manage_status(msl, 'test_lasair_statistics')
     for i in range(niter):
         time.sleep(deltaT*random())
@@ -70,7 +71,7 @@ class CommonManageStatusTest(unittest.TestCase):
         self.assertEqual(status, {})
 
     def test_multiprocessing(self):
-        msl = mysql.connector.connect(**config)
+        msl = None
         procs = []
         for iproc in range(nproc):
             proc = Process(target=func, args=(msl, iproc,))
@@ -79,6 +80,7 @@ class CommonManageStatusTest(unittest.TestCase):
         for proc in procs:
             proc.join()
 
+        msl = mysql.connector.connect(**config)
         ms = manage_status(msl, 'test_lasair_statistics')
         status = ms.read(nid)
 #        print(status)
