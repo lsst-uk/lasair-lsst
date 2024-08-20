@@ -80,7 +80,7 @@ class ConeSerializer(serializers.Serializer):
 
 
 class ObjectsSerializer(serializers.Serializer):
-    diaObjectIds = serializers.CharField(required=True)
+    objectIds = serializers.CharField(required=True)
 
     def save(self):
         diaObjectIds = self.validated_data['objectIds']
@@ -88,7 +88,7 @@ class ObjectsSerializer(serializers.Serializer):
         olist = []
         for tok in diaObjectIds.split(','):
             olist.append(tok.strip())
-#        olist = olist[:10] # restrict to 10
+        olist = olist[:10] # restrict to 10
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -98,18 +98,22 @@ class ObjectsSerializer(serializers.Serializer):
 
         result = []
         for diaObjectId in olist:
-            result.append(objjson(diaObjectId))
+            if 1:
+                obj = objjson(int(diaObjectId))
+#            except:
+#                obj = None
+            result.append(obj)
         return result
 
 
-class SherlockObjectsSerializer(serializers.Serializer):
-    diaObjectIds = serializers.CharField(required=True)
+class SherlockObjectSerializer(serializers.Serializer):
+    objectId = serializers.CharField(required=True)
     lite = serializers.BooleanField()
 
     def save(self):
-        diaObjectIds = None
+        diaObjectId = None
         lite = False
-        diaObjectIds = self.validated_data['objectIds']
+        diaObjectId = self.validated_data['objectId']
 
         if 'lite' in self.validated_data:
             lite = self.validated_data['lite']
@@ -124,14 +128,9 @@ class SherlockObjectsSerializer(serializers.Serializer):
             return {"error": "This Lasair cluster does not have a Sherlock service"}
 
         datadict = {}
-#        url = 'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, diaObjectIds)
-#        if lite: url += '?lite=true'
-#        url += '?lite=true'
-#        r = requests.get(url)
-
         data = {'lite': lite}
         r = requests.post(
-            'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, diaObjectIds),
+            'http://%s/object/%s' % (lasair_settings.SHERLOCK_SERVICE, diaObjectId),
             headers={"Content-Type": "application/json"},
             data=json.dumps(data)
         )
@@ -245,71 +244,8 @@ class QuerySerializer(serializers.Serializer):
             error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
             return {"error": error}
 
-
-class StreamsSerializer(serializers.Serializer):
-    topic = serializers.SlugField(required=False)
-    limit = serializers.IntegerField(required=False)
-    regex = serializers.CharField(required=False)
-
-    def save(self):
-        topic = None
-        if 'topic' in self.validated_data:
-            topic = self.validated_data['topic']
-
-        limit = None
-        if 'limit' in self.validated_data:
-            limit = self.validated_data['limit']
-
-        regex = None
-        if 'regex' in self.validated_data:
-            regex = self.validated_data['regex']
-
-        if not topic and not regex:
-            regex = '.*'
-
-        # Get the authenticated user, if it exists.
-        userId = 'unknown'
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            userId = request.user
-
-        if topic:
-            filename = lasair_settings.KAFKA_STREAMS + '/' + topic
-            try:
-                datafile = open(filename, 'r').read()
-                data = json.loads(datafile)['digest']
-                if limit:
-                    data = data[:limit]
-                return data
-            except:
-                error = 'Cannot open digest file %s' % filename
-                return {"error": error}
-
-        if regex:
-            try:
-                r = re.compile(regex)
-            except:
-                replyMessage = '%s is not a regular expression' % regex
-                return {"topics": [], "info": replyMessage}
-
-            msl = db_connect.readonly()
-            cursor = msl.cursor(buffered=True, dictionary=True)
-            result = []
-            query = 'SELECT mq_id, user, name, topic_name FROM myqueries WHERE active>0'
-            cursor.execute(query)
-            for row in cursor:
-                tn = row['topic_name']
-                if r.match(tn):
-                    td = {'topic': tn, 'more_info': 'https://%s/query/%d/' % (lasair_settings.LASAIR_URL, row['mq_id'])}
-                    result.append(td)
-            info = result
-            return info
-
-        return {"error": 'Must supply either topic or regex'}
-
-
 class LightcurvesSerializer(serializers.Serializer):
-    diaObjectIds = serializers.CharField(max_length=16384, required=True)
+    objectIds = serializers.CharField(max_length=16384, required=True)
 
     def save(self):
         diaObjectIds = self.validated_data['objectIds']
