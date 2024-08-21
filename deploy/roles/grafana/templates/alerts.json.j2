@@ -278,6 +278,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -373,6 +376,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -387,7 +393,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", program=\"MSIP\"}[15m])) by (night,program) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"alerts-simulated\"}[5m])) * 60 / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -470,6 +476,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
