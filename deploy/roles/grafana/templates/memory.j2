@@ -74,7 +74,7 @@
             "type": "prometheus",
             "uid": "{{ datasource.json.uid }}"
           },
-          "expr": "100 * (1 - (node_memory_MemAvailable_bytes{instance=\"{{ host }}:9100\"}/node_memory_MemTotal_bytes{instance=\"{{ host }}:9100\"}))",
+          "expr": "100 * (1 - (node_memory_MemAvailable_bytes{job=\"nodes\",instance=\"{{ host }}:9100\"}/node_memory_MemTotal_bytes{instance=\"{{ host }}:9100\"}))",
           "refId": "A"
         }
       ]

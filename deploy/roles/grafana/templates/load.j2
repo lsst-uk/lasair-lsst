@@ -74,7 +74,7 @@
             "type": "prometheus",
             "uid": "{{ datasource.json.uid }}"
           },
-          "expr": "avg(node_load1{instance=\"{{ host }}:9100\"}) /  count(node_cpu_seconds_total{instance=\"{{ host }}:9100\", mode=\"idle\"}) * 100",
+          "expr": "avg(node_load1{job=\"nodes\",instance=\"{{ host }}:9100\"}) /  count(node_cpu_seconds_total{job=\"nodes\",instance=\"{{ host }}:9100\", mode=\"idle\"}) * 100",
           "refId": "A"
         }
       ]

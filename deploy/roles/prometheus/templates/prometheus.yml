@@ -55,7 +55,7 @@ scrape_configs:
      - target_label: __address__
        replacement: 127.0.0.1:9115 # The blackbox exporter.
 
-  - job_name: svc-node
+  - job_name: nodes
     # If prometheus-node-exporter is installed, grab stats about the local
     # machine by default.
     static_configs:
@@ -69,23 +69,23 @@ scrape_configs:
     static_configs:
       - targets: 
         {% for host in (groups['kafka'] + groups['kafka_pub']) -%}
-        #- "{{ host }}:9100"
+        - "{{ host }}:9100"
         - "{{ host }}:8081"
         - "{{ host }}:8082"
         - "{{ host }}:8083"
         {% endfor %}
 
-    metric_relabel_configs:
-      # Relabel: topic=ztf_20180425_programid2 -> night=20180425, program=MSIP
-      - source_labels: [ topic ]
-        regex: "ztf_(\\d+)_.*"
-        target_label: "night"
-        replacement: "$1"
-      - source_labels: [ topic ]
-        regex: "ztf_\\d+_programid0"
-        target_label: "program"
-        replacement: "Commissioning"
-      - source_labels: [ topic ]
-        regex: "ztf_\\d+_programid1"
-        target_label: "program"
-        replacement: "MSIP"
+#    metric_relabel_configs:
+#      # Relabel: topic=ztf_20180425_programid2 -> night=20180425, program=MSIP
+#      - source_labels: [ topic ]
+#        regex: "ztf_(\\d+)_.*"
+#        target_label: "night"
+#        replacement: "$1"
+#      - source_labels: [ topic ]
+#        regex: "ztf_\\d+_programid0"
+#        target_label: "program"
+#        replacement: "Commissioning"
+#      - source_labels: [ topic ]
+#        regex: "ztf_\\d+_programid1"
+#        target_label: "program"
+#        replacement: "MSIP"
