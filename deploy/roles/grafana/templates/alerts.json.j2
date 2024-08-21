@@ -177,6 +177,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -190,18 +193,18 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(kafka_log_log_value{name=\"LogEndOffset\", program=\"MSIP\"} - on(night, partition, instance) kafka_log_log_value{name=\"LogStartOffset\", program=\"MSIP\"}) by (night) / {{ replication_count }} > 0",
+          "expr": "sum(kafka_log_log_value{name=\"LogEndOffset\", topic=\"alerts-simulated\"} - on(partition, instance) kafka_log_log_value{name=\"LogStartOffset\", topic=\"alerts-simulated\"}) / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ '{{night}}' }}",
+          "legendFormat": "__auto",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Alerts per Night",
+      "title": "Alerts",
       "tooltip": {
         "shared": false,
         "sort": 0,
