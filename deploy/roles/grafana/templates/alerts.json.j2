@@ -659,23 +659,11 @@
       },
       "targets": [
         {
-          "datasource": {
-           "type": "prometheus",
-           "uid": "KsV2hEKVz"
-          },
-          "editorMode": "code",
           "expr": "sum(lasair_alert_batch_lag/60) by (type)",
           "interval": "",
           "legendFormat": "{{ '{{type}}' }}",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "KsV2hEKVz"
-          },
-          "refId": "B"
         }
       ],
       "fieldConfig": {
@@ -729,10 +717,6 @@
           "unit": "m"
         },
         "overrides": []
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "KsV2hEKVz"
       }
     }
   ],
