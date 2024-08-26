@@ -42,5 +42,5 @@ schema = {
       "type": "string"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId,midPointMjdTai)"]
+  "indexes": ['PRIMARY KEY ("diaObjectId","midpointMjdTai")']
 }
