@@ -18,5 +18,5 @@ schema = {
       "type": "float"
     }
   ],
-  "indexes": ["PRIMARY KEY (midpointMjdTai)"]
+  "indexes": ['PRIMARY KEY ("midpointMjdTai")']
 }

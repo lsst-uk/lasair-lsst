@@ -10,5 +10,5 @@ schema = {
       "type": "char"
     },
   ],
-  "indexes": ["PRIMARY KEY (objectId, cutoutId)"]
+  "indexes": ['PRIMARY KEY ("objectId", "cutoutId")']
 }
