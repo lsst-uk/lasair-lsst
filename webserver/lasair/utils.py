@@ -199,11 +199,11 @@ def objjson(diaObjectId, full=False):
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
-        diaSource['mjd'] = mjd = float(diaSource['midpointmjdtai'])
+        diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
         diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
-        diaSourceId = diaSource['diasourceid']
+        diaSourceId = diaSource['diaSourceId']
         date = datetime.strptime("1858/11/17", "%Y/%m/%d")
         date += timedelta(mjd)
         diaSource['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
@@ -238,20 +238,20 @@ def objjson(diaObjectId, full=False):
     # DISC MAGS
     objectData["discMjd"] = detections["mjd"].values[0]
     objectData["discUtc"] = detections["utc"].values[0]
-    objectData["discMag"] = f"{detections['psfflux'].values[0]:.2f}±{detections['psffluxerr'].values[0]:.2f}"
+    objectData["discMag"] = f"{detections['psfFlux'].values[0]:.2f}±{detections['psfFluxErr'].values[0]:.2f}"
     objectData["discFilter"] = detections['band'].values[0]
 
     # LATEST MAGS
     objectData["latestMjd"] = detections["mjd"].values[-1]
     objectData["latestUtc"] = detections["utc"].values[-1]
-    objectData["latestMag"] = f"{detections['psfflux'].values[-1]:.2f}±{detections['psffluxerr'].values[-1]:.2f}"
+    objectData["latestMag"] = f"{detections['psfFlux'].values[-1]:.2f}±{detections['psfFluxErr'].values[-1]:.2f}"
     objectData["latestFilter"] = detections['band'].values[0]
 
     # PEAK MAG
-    peakMag = detections[detections['psfflux'] == detections['psfflux'].min()]
+    peakMag = detections[detections['psfFlux'] == detections['psfFlux'].min()]
     objectData["peakMjd"] = peakMag["mjd"].values[0]
     objectData["peakUtc"] = peakMag["utc"].values[0]
-    objectData["peakMag"] = f"{peakMag['psfflux'].values[0]:.2f}±{peakMag['psffluxerr'].values[0]:.2f}"
+    objectData["peakMag"] = f"{peakMag['psfFlux'].values[0]:.2f}±{peakMag['psfFluxErr'].values[0]:.2f}"
     objectData["peakFilter"] = peakMag['band'].values[0]
 
     # annotations

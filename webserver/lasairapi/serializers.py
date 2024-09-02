@@ -58,26 +58,23 @@ class ConeSerializer(serializers.Serializer):
         # Is there an object within RADIUS arcsec of this object? - KWS - need to fix the gkhtm code!!
         message, results = coneSearchHTM(ra, dec, radius, 'objects', queryType=QUICK, conn=connection, django=True, prefix='htm', suffix='')
 
-        obj = None
-        separation = None
-
-        objectList = []
-        if len(results) > 0:
-            if requestType == "nearest":
+        if requestType == "nearest":
+            if len(results) > 0:
                 obj = results[0][1]['diaObjectId']
                 separation = results[0][0]
-                info = {"object": obj, "separation": separation}
-            elif requestType == "all":
-                for row in results:
-                    objectList.append({"object": row[1]["diaObjectId"], "separation": row[0]})
-                info = objectList
-            elif requestType == "count":
-                info = {'count': len(results)}
+                info = {"nearest": {"object":obj, "separation": separation}}
             else:
-                info = {"error": "Invalid request type"}
-
+                info = {}
+        elif requestType == "count":
+            info = {'count': len(results)}
+        elif requestType == "all":
+            objects = []
+            for row in results:
+                objects.append({"object": row[1]["diaObjectId"], "separation": row[0]})
+            info = {"objects":objects}
+        else:
+            info = {"error": "Invalid request type"}
         return info
-
 
 class ObjectsSerializer(serializers.Serializer):
     objectIds = serializers.CharField(required=True)
@@ -264,8 +261,9 @@ class LightcurvesSerializer(serializers.Serializer):
 
         lightcurves = []
         for diaObjectId in olist:
-            candidates = LF.fetch(diaObjectId)
-            lightcurves.append({'diaObjectId':diaObjectId, 'candidates':candidates})
+            (diaSources,diaForcedSources) = LF.fetch(diaObjectId)
+            lightcurves.append({'diaObjectId':diaObjectId, 
+                'diaSources':diaSources, 'diaForcedSources': diaForcedSources})
 
         LF.close()
         return lightcurves
