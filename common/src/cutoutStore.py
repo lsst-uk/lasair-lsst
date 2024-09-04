@@ -40,8 +40,8 @@ class cutoutStore():
         Args:
             cutoutId: identifier for blob
         """
-        sql = "select cutoutimage from cutouts where imjd=%d and cutoutId='%s'"
-        sql = sql % (imjd, cutoutId)
+        sql = 'select cutoutimage from cutouts where imjd=%d and "cutoutId"=' % imjd
+        sql += "'%s'" % cutoutId
         rows = self.session.execute(sql)
         for row in rows:
             return row.cutoutimage
