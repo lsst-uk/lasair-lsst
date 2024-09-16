@@ -25,19 +25,19 @@ CREATE KEYSPACE IF NOT EXISTS %s WITH replication = {'class':'SimpleStrategy', '
 
 create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
-   cutoutId      ascii,
-   objectId      bigint,
-   imjd          int,
-   cutoutimage   blob,
-  PRIMARY KEY (imjd, cutoutId)
+   "cutoutId"      ascii,
+   "objectId"      bigint,
+   "imjd"          int,
+   "cutoutimage"   blob,
+  PRIMARY KEY ("imjd", "cutoutId")
  );
 """
 
 create_table2 = """
 CREATE TABLE IF NOT EXISTS cutoutsbyobject(
-    objectId bigint,
-    cutoutId ascii,
-    PRIMARY KEY (objectId, cutoutId)
+    "objectId" bigint,
+    "cutoutId" ascii,
+    PRIMARY KEY ("objectId", "cutoutId")
  );
 """
 
@@ -74,7 +74,7 @@ class CassandraCutoutTest(TestCase):
         cls.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
 
         # look for it in there
-        query = "SELECT cutoutId from cutouts where cutoutId='%s' and imjd=%d" % (cutoutId, imjd)
+        query = 'SELECT "cutoutId" from cutouts where "cutoutId"="%s" and "imjd"=%d' % (cutoutId, imjd)
         rows = cls.session.execute(query)
         cls.assertEqual(len(list(rows)), 1)
 
@@ -101,7 +101,7 @@ class CassandraCutoutTest(TestCase):
         future.result()
 
         # look for it in there
-        query = "SELECT cutoutId from cutouts where cutoutId='%s' and imjd=%d" % (cutoutId, imjd)
+        query = 'SELECT "cutoutId" from cutouts where "cutoutId"="%s" and "imjd"=%d' % (cutoutId, imjd)
         rows = cls.session.execute(query)
         cls.assertEqual(len(list(rows)), 1)
 
