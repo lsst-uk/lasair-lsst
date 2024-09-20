@@ -12,7 +12,7 @@ urlpatterns = [
     path('api/query/',                 views.QueryView.as_view()),
     path('api/objects/',               views.ObjectsView.as_view()),
     path('api/lightcurves/',           views.LightcurvesView.as_view()),
-    path('api/sherlock/objects/',      views.SherlockObjectsView.as_view()),
+    path('api/sherlock/object/',       views.SherlockObjectView.as_view()),
     path('api/sherlock/position/',     views.SherlockPositionView.as_view()),
     path('api/auth-token/',            obtain_auth_token, name='auth_token'),
 
