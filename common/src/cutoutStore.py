@@ -40,8 +40,10 @@ class cutoutStore():
         Args:
             cutoutId: identifier for blob
         """
-        sql = "select cutoutimage from cutouts where imjd=%d and cutoutId='%s'"
+
+        sql = "select cutoutimage from cutouts where imjd=%d and \"cutoutId\"='%s'"
         sql = sql % (imjd, cutoutId)
+
         rows = self.session.execute(sql)
         for row in rows:
             return row.cutoutimage
@@ -54,12 +56,12 @@ class cutoutStore():
             cutoutId:
             cutoutBlob:
         """
-        sql = f"insert into cutouts (cutoutId,imjd,objectId,cutoutimage) values (%s,{imjd},{objectId},%s)"
+        sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
         cutoutsByObjectReturn = self.session.execute(sql, [cutoutId])
 
     def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob):
@@ -72,12 +74,12 @@ class cutoutStore():
             cutoutBlob:
         """
         # first the blob keyed by imjd,cutoutId
-        sql = f"insert into cutouts (cutoutId,imjd,objectId,cutoutimage) values (%s,{imjd},{objectId},%s)"
+        sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
         blobData = bytearray(cutoutBlob)
         cutoutReturn = self.session.execute_async(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f"insert into cutoutsbyobject (cutoutId,objectId) values (%s,{objectId})"
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
         cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId])
 
         return cutoutReturn

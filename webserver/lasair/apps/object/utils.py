@@ -256,7 +256,7 @@ def object_difference_lightcurve_forcedphot(
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["midpointmjdtai"],
+                    x=data["midpointMjdTai"],
                     y=data["nanojansky"],
                     customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
                     error_y=error_y,
@@ -394,15 +394,15 @@ def get_default_axis_ranges(
     - `unforcedDF` -- unforced photometry dataframe    
     """
 
-    mjdMin = unforcedDF["midpointmjdtai"].min()
-    mjdMax = unforcedDF["midpointmjdtai"].max()
+    mjdMin = unforcedDF["midpointMjdTai"].min()
+    mjdMax = unforcedDF["midpointMjdTai"].max()
 
     if forcedDF is not None:
 # question: Whats going on here
 #        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
 #        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
-        mjdMin2 = forcedDF["midpointmjdtai"].min()
-        mjdMax2 = forcedDF["midpointmjdtai"].max()
+        mjdMin2 = forcedDF["midpointMjdTai"].min()
+        mjdMax2 = forcedDF["midpointMjdTai"].max()
 
         if mjdMin2 < mjdMin:
             mjdMin = mjdMin2
@@ -411,8 +411,8 @@ def get_default_axis_ranges(
 
     # SORT BY COLUMN NAME
     discovery = unforcedDF.head(1)
-    if mjdMin > discovery["midpointmjdtai"].min():
-        mjdMin = discovery["midpointmjdtai"].min()
+    if mjdMin > discovery["midpointMjdTai"].min():
+        mjdMin = discovery["midpointMjdTai"].min()
 
     mjdRange = mjdMax - mjdMin
     if mjdRange < 5:
@@ -425,13 +425,13 @@ def get_default_axis_ranges(
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
     if forcedDF is not None:
-        fluxMax = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMax = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         fluxMax = fluxMax.max()
-        fluxMin = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMin = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         fluxMin = fluxMin.min()
 
         yrange = fluxMax - fluxMin
@@ -477,17 +477,17 @@ def convert_objectdata_to_dataframes(
     # CREATE DATA FRAME FOR LC
     if len(objectData["diaForcedSources"]):
         forcedDF = pd.DataFrame(objectData["diaForcedSources"])
-        mjds = Time(forcedDF['midpointmjdtai'], format='mjd')
+        mjds = Time(forcedDF['midpointMjdTai'], format='mjd')
         forcedDF['utc'] = mjds.iso
         forcedDF['utc'] = pd.to_datetime(forcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
         # SORT BY COLUMN NAME
-        forcedDF.sort_values(['midpointmjdtai'],
+        forcedDF.sort_values(['midpointMjdTai'],
                              ascending=[True], inplace=True)
 
 # Standard naming
         forcedDF["band"] = forcedDF['band']
-        forcedDF["nanojansky"] = forcedDF['psfflux']
-        forcedDF["nanojanskyerr"] = forcedDF['psffluxerr']
+        forcedDF["nanojansky"] = forcedDF['psfFlux']
+        forcedDF["nanojanskyerr"] = forcedDF['psfFluxErr']
 
 # Convert from flux nJ to mag
         forcedDF["magpsf"]   = 31.4 - 2.5*np.log10(forcedDF["nanojansky"])
@@ -499,14 +499,14 @@ def convert_objectdata_to_dataframes(
     # NORMAL UNFORCED PHOTO
     if len(objectData["diaSources"]):
         unforcedDF = pd.DataFrame(objectData["diaSources"])
-        mjds2 = Time(unforcedDF['midpointmjdtai'], format='mjd')
+        mjds2 = Time(unforcedDF['midpointMjdTai'], format='mjd')
         unforcedDF['utc'] = mjds2.iso
         unforcedDF['utc'] = pd.to_datetime(unforcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        unforcedDF.sort_values(['midpointmjdtai'],
+        unforcedDF.sort_values(['midpointMjdTai'],
                                ascending=[True], inplace=True)
 # Standard naming
-        unforcedDF["nanojansky"] = unforcedDF['psfflux']
-        unforcedDF["nanojanskyerr"] = unforcedDF['psffluxerr']
+        unforcedDF["nanojansky"] = unforcedDF['psfFlux']
+        unforcedDF["nanojanskyerr"] = unforcedDF['psfFluxErr']
 # Convert from flux nJ to mag
         unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
@@ -514,8 +514,8 @@ def convert_objectdata_to_dataframes(
     # MATCH THE FORCED AND UNFORCED TABLES
     if forcedDF is not None:
         mergedDF = pd.merge(unforcedDF, \
-            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointmjdtai', 'band']], \
-            how='left', on=['midpointmjdtai', 'band'])
+            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointMjdTai', 'band']], \
+            how='left', on=['midpointMjdTai', 'band'])
     else:
         mergedDF = unforcedDF
         mergedDF['nanojansky'] = np.nan
