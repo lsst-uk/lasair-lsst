@@ -69,11 +69,20 @@ class ConeSerializer(serializers.Serializer):
             info = {'count': len(results)}
         elif requestType == "all":
             objects = []
+            nearest = {}
+            min_separation = 10000000
             for row in results:
-                objects.append({"object": row[1]["diaObjectId"], "separation": row[0]})
-            info = {"objects":objects}
+                diaObjectId = row[1]["diaObjectId"]
+                separation = row[0]
+                obj = {"object": diaObjectId, "separation": separation}
+                if separation < min_separation:
+                    min_separation = separation
+                    nearest = obj
+                objects.append(obj)
+            info = {"objects":objects, "count":len(objects), "nearest":nearest}
         else:
             info = {"error": "Invalid request type"}
+
         return info
 
 class ObjectsSerializer(serializers.Serializer):
