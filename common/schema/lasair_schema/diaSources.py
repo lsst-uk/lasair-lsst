@@ -546,5 +546,5 @@ schema = {
       "type": "boolean"
     }
   ],
-  "indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, diaSourceId)"]
+  "indexes": ['PRIMARY KEY ("diaObjectId", "midpointMjdTai", "diaSourceId")']
 }

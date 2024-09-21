@@ -18,5 +18,5 @@ schema = {
       "type": "blob"
     }
   ],
-  "indexes": ["PRIMARY KEY ((imjd, cutoutId))"]
+  "indexes": ['PRIMARY KEY (("imjd", "cutoutId"))']
 }
