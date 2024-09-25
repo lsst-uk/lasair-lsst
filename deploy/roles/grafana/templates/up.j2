@@ -105,7 +105,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "node_time_seconds{instance=\"{{ host }}:9100\"}-node_boot_time_seconds{instance=\"{{ host }}:9100\"} OR on() vector(0)",
+          "expr": "node_time_seconds{job=\"nodes\",instance=\"{{ host }}:9100\"}-node_boot_time_seconds{job=\"nodes\",instance=\"{{ host }}:9100\"} OR on() vector(0)",
           "hide": false,
           "instant": true,
           "range": false,

@@ -72,7 +72,7 @@
             "type": "prometheus",
             "uid": "{{ datasource.json.uid }}"
           },
-          "expr": "node_filesystem_avail_bytes{instance=\"{{ host }}:9100\",mountpoint=\"/mnt/cephfs\"}",
+          "expr": "node_filesystem_avail_bytes{job=\"nodes\",instance=\"{{ host }}:9100\",mountpoint=\"/mnt/cephfs\"}",
           "refId": "A",
           "range": false
         }

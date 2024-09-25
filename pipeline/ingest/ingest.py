@@ -27,7 +27,7 @@ from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
 import time, json, io, fastavro, signal
 
@@ -65,7 +65,7 @@ class ImageStore:
         futures = []
         try:
             if self.image_store:
-                for cutoutType in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']:
+                for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
                     if not cutoutType in message:
                         continue
                     content = message[cutoutType]
