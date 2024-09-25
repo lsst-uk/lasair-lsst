@@ -6,8 +6,8 @@
 # 
 # so that $k_r$ is the rise-rate, and $k_f$ is the fall rate.
 # 
-# Define the black body spectrum as a function of wavelength and temperature as
-# $$ B(\lambda, T) = 5000 / (\lambda^5 T^4 [(exp(Q/\lambda T) - 1]) $$
+# Define the black body spectrum (per unit frequency) as a function of wavelength and temperature as
+# $$ B(\lambda, T) = 5000 / (\lambda^3 [(exp(Q/\lambda T) - 1]) $$
 #                                           
 # where Q = hc/k = 14.387 $\mu$m kK, meaning wavelength in microns and temperature in kilo-Kelvins.
 # 
@@ -42,7 +42,7 @@ wl = {
 # ## Black body flux
 def blackbody(wl, T):
     hck = 14.387
-    return 5000*np.power(wl, -5.0)*np.power(T, -4.0) / (np.exp(hck/(wl*T)) - 1)
+    return 5000*np.power(wl, -3.0) / (np.exp(hck/(wl*T)) - 1)
 
 # ## Bazin Fit
 def bazin(t, lam, p):
