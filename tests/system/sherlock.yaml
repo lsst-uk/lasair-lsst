@@ -18,7 +18,7 @@
     - name: Run sherlock
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/sherlock
-        cmd: "python3 wrapper.py -b {{ groups['kafka'][0] }}:9092 -g sherlock_test_1 -e -i sherlock_test -o filter_test -n 1 -m 1 -s sherlock_settings.yaml"
+        cmd: "python3 wrapper.py -b {{ groups['kafka'][0] }}:9092 -g sherlock_test_1 -e -i sherlock_test -o filter_test -n 2 -m 1 -s sherlock_settings.yaml"
       register: sherlock_result
     - name: Result
       ansible.builtin.debug:

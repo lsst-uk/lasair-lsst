@@ -52,7 +52,7 @@
     - name: Run filter
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/filter
-        cmd: "python3 filtercore.py --maxalert=1 --maxbatch=1 --group_id=filter_test_1 --topic_in=filter_test --local_db={{ mysql_db_name }} --send_email=False --send_kafka=False --transfer=False --stats=False"
+        cmd: "python3 filtercore.py --maxalert=1 --maxtotal=1 --maxbatch=5 --group_id=filter_test_1 --topic_in=filter_test --local_db={{ mysql_db_name }} --send_email=False --send_kafka=False --transfer=False --stats=False"
       register: filter_result
     - name: Result
       ansible.builtin.debug:
