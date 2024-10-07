@@ -89,7 +89,7 @@ if __name__ == '__main__':
         token = args.get('--token')
     else:
         try:
-            token = f"https://{settings.API_TOKEN}/api"
+            token = f"{settings.API_TOKEN}"
         except:
             token = '4b762569bb349bd8d60f1bc7da3f39dbfaefff9a'
 
