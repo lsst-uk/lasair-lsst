@@ -16,7 +16,7 @@ schema = {
     },
     {
       "name": "topic",
-      "type": "string",
+      "type": "text",
       "doc": "The topic name of the annotator -- acts as primary key"
     },
     {
