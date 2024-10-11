@@ -279,10 +279,10 @@ class LightcurvesSerializer(serializers.Serializer):
 
 
 class AnnotateSerializer(serializers.Serializer):
-    topic = serializers.CharField(max_length=256, required=True)
+    topic = serializers.CharField(max_length=255, required=True)
     objectId = serializers.CharField(max_length=256, required=True)
-    classification = serializers.CharField(max_length=256, required=True)
-    version = serializers.CharField(max_length=256, required=True)
+    classification = serializers.CharField(max_length=80, required=True)
+    version = serializers.CharField(max_length=80, required=True)
     explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)
     classdict = serializers.CharField(max_length=4096, required=True)
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
