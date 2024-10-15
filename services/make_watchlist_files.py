@@ -191,7 +191,7 @@ if __name__ == "__main__":
     import date_nid, slack_webhook, lasairLogging
     lasairLogging.basicConfig(
         filename='/home/ubuntu/logs/svc.log',
-        slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
+        slack_channel = getattr(settings, 'SLACK_CHANNEL', None),
         webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=slack_channel),
         merge=True
     )
