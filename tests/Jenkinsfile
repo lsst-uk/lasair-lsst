@@ -20,6 +20,10 @@ pipeline {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch_optimised.py'
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_skymaps.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" context.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" settings.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_slack_webhook.py'
+                    sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_topic_name.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'

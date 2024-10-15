@@ -38,7 +38,7 @@ def setup_proc(exit_code, pids, n, nprocess, args):
     # Set up the logger
     lasairLogging.basicConfig(
         filename=f"/home/ubuntu/logs/ingest-{n}.log",
-        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=settings.SLACK_CHANNEL),
         merge=True
     )
     log = lasairLogging.getLogger("ingest_runner")

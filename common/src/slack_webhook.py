@@ -15,11 +15,11 @@ class SlackWebhook():
         _send(self.url, message, self.channel)
 
 
-def send(url, message):
+def send(url, message, channel='#general'):
     """Send a message to the specified URL (deprecated)."""
     warnings.warn("Direct use of send is deprecated, please use LasairLogging.",
                   DeprecationWarning, stacklevel=2)
-    _send(url, message, channel='#general')
+    _send(url, message, channel=channel)
 
 
 def _send(url, message, channel):

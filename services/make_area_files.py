@@ -107,7 +107,8 @@ if __name__ == "__main__":
         areas = fetch_active_areas(msl, cache_dir)
     except:
         s = 'make_area_files: Cannot fetch areas from database'
-        slack_webhook.send(settings.SLACK_URL, s)
+        slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
+        slack_webhook.send(settings.SLACK_URL, s, channel=slack_channel)
         sys.exit(1)
 
     for ar_id in areas['keep']:

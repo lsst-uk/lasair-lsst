@@ -23,6 +23,7 @@ if __name__ == '__main__':
     max_restarts = settings.get('max_restarts', 10)
     wrapper_conf_file = settings.get('wrapper_conf_file', 'wrapper_config.yaml')
     slack_url = settings.get('slack_url', '')
+    slack_channel = settings.get('slack_channel')
 
     conf = {}
     with open(wrapper_conf_file, "r") as f:
@@ -32,7 +33,7 @@ if __name__ == '__main__':
 
     lasairLogging.basicConfig(
         filename='/home/ubuntu/wrapper.log',
-        webhook=slack_webhook.SlackWebhook(url=slack_url),
+        webhook=slack_webhook.SlackWebhook(url=slack_url, channel=slack_channel),
         merge=True
     )
     log = lasairLogging.getLogger("wrapper_runner")
