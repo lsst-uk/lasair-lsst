@@ -84,7 +84,7 @@ if __name__ == '__main__':
     r = gettest(input, 'query', verbose)
     if verbose: print('Query get returned %s' % lenornothing(r))
 
-    curltest(input, 'query', verbose)
+    r = curltest(input, 'query', verbose)
     if verbose: print('Query curl returned %s' % lenornothing(r))
 
     r = L.query(selected, tables, conditions, limit=10)
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     r = gettest(input, 'sherlock/object', verbose)
     if verbose: print('sherlock/object get returned %s' % lenornothing(r))
     
-    curltest(input, 'sherlock/object', verbose)
+    r = curltest(input, 'sherlock/object', verbose)
     if verbose: print('sherlock/object curl returned %s' % lenornothing(r))
 
     r = L.sherlock_object([objid])
