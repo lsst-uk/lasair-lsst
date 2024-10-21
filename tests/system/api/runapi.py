@@ -40,8 +40,7 @@ def curltest(input, method, verbose):
     os.system(cmd)
     try:
         computed = open(out_file).read()
-        json.loads(computed)
-        return computed
+        return json.loads(computed)
     except:
         return None
 
@@ -65,8 +64,7 @@ def gettest(input, method, verbose):
     os.system(cmd)
     try:
         computed = open(out_file).read()
-        json.loads(computed)
-        return computed
+        return json.loads(computed)
     except:
         return None
 
@@ -106,7 +104,7 @@ if __name__ == '__main__':
     r = gettest(input, 'cone', verbose)
     if verbose: print('Cone get returned %s' % lenornothing(r))
 
-    curltest(input, 'cone', verbose)
+    r = curltest(input, 'cone', verbose)
     if verbose: print('Cone curl returned %s' % lenornothing(r))
 
     r = L.cone(objra, objde, radius, requestType='nearest')
@@ -117,7 +115,7 @@ if __name__ == '__main__':
     r = gettest(input, 'lightcurves', verbose)
     if verbose: print('Lightcurves get returned %s' % lenornothing(r))
 
-    curltest(input, 'lightcurves', verbose)
+    r = curltest(input, 'lightcurves', verbose)
     if verbose: print('Lightcurve curl returned %s' % lenornothing(r))
 
     r = L.lightcurves([objid])  # python list
@@ -128,7 +126,7 @@ if __name__ == '__main__':
     r = gettest(input, 'sherlock/position', verbose)
     if verbose: print('sherlock/position get returned %s' % lenornothing(r))
 
-    curltest(input, 'sherlock/position', verbose)
+    r = curltest(input, 'sherlock/position', verbose)
     if verbose: print('sherlock/position curl returned %s' % lenornothing(r))
 
     r = L.sherlock_position(objra, objde, lite=True)
