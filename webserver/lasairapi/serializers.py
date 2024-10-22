@@ -34,6 +34,21 @@ class ConeSerializer(serializers.Serializer):
     radius = serializers.FloatField(required=True)
     requestType = serializers.ChoiceField(choices=REQUEST_TYPE_CHOICES)
 
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
+
+    def validate_radius(self, value):
+        if value < 0:
+            raise serializers.ValidationError('radius must be positive')
+        return value
+
     def save(self):
 
         ra = self.validated_data['ra']
@@ -151,6 +166,16 @@ class SherlockPositionSerializer(serializers.Serializer):
     ra = serializers.FloatField(required=True)
     dec = serializers.FloatField(required=True)
     lite = serializers.BooleanField()
+
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
 
     def save(self):
         lite = False
