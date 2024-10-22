@@ -14,6 +14,7 @@ from datetime import datetime
 from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound
 from src import db_connect
 import settings as lasair_settings
 import sys
@@ -129,15 +130,13 @@ class ObjectsSerializer(serializers.Serializer):
 
 class SherlockObjectSerializer(serializers.Serializer):
     objectId = serializers.CharField(required=True)
-    lite = serializers.BooleanField()
+    lite = serializers.BooleanField(default=False)
 
     def save(self):
         diaObjectId = None
-        lite = False
         diaObjectId = self.validated_data['objectId']
 
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -158,14 +157,15 @@ class SherlockObjectSerializer(serializers.Serializer):
 
         if r.status_code == 200:
             return r.json()
-        else:
-            return {"error": r.text}
+        if r.status_code == 404:
+            raise NotFound(r.json)
+        return {"error": r.text}
 
 
 class SherlockPositionSerializer(serializers.Serializer):
     ra = serializers.FloatField(required=True)
     dec = serializers.FloatField(required=True)
-    lite = serializers.BooleanField()
+    lite = serializers.BooleanField(default=False)
 
     def validate_ra(self, value):
         if value > 360 or value < 0:
@@ -178,19 +178,15 @@ class SherlockPositionSerializer(serializers.Serializer):
         return value
 
     def save(self):
-        lite = False
         ra = self.validated_data['ra']
         dec = self.validated_data['dec']
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
-# can also send multiples, but not yet implemented
-# http://192.41.108.29/query?ra=115.811388,97.486925&dec=-25.76404,-26.975506
 
         if not lasair_settings.SHERLOCK_SERVICE:
             return {"error": "This Lasair cluster does not have a Sherlock service"}
