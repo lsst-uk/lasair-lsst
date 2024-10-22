@@ -120,7 +120,7 @@
           Content-Type: application/json
         status_code: [400, 404]
       tags: error
-    - name: test invalid content
+    - name: test invalid ra and dec
       ansible.builtin.uri:
         method: POST
         url: "https://{{ lasair_name }}.{{ domain }}/api/cone/"
