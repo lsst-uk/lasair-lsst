@@ -85,7 +85,7 @@ CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
 # Cutouts in Cassandra
-CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
+CUTOUTCASS_HOSTS        = {{ groups['cutoutcass'] }}
 
 # Directories on share Cephfs
 #############################
