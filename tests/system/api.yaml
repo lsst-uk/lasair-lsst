@@ -44,6 +44,18 @@
         headers:
           Authorization: "Token {{ api_token.stdout }}"
           Content-Type: application/json
+    - name: test malformed objectIds list
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/lightcurves/"
+        body:
+          objectIds: "123,xyz"
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400]
+      tags: error
     - name: test sherlock position
       ansible.builtin.uri:
         method: POST
@@ -61,13 +73,25 @@
         method: POST
         url: "https://{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
         body:
-          objectId: thisisnotanobject
+          objectId: -99
         body_format: json
         headers:
           Authorization: "Token {{ api_token.stdout }}"
           Content-Type: application/json
         status_code: [404]
-        tags: error
+      tags: error
+    - name: test invalid sherlock object
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
+        body:
+          objectId: thisisnotanobjectid
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400]
+      tags: error
     - name: test invalid token
       ansible.builtin.uri:
         method: POST
