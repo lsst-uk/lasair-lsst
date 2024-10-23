@@ -100,7 +100,7 @@ class Ingester:
         self.cluster = None
         self.timers = {}
         
-        self.wait_time = getattr(settings, WAIT_TIME, 60)
+        self.wait_time = getattr(settings, 'WAIT_TIME', 60)
 
         # set up timers
         for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
