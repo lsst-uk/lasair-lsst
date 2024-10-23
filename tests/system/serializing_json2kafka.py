@@ -28,8 +28,12 @@ if __name__ == '__main__':
         datafile = sys.argv[2]
         topic = sys.argv[3]
     else:
-        print('Usage: json_to_kafka.py <broker> <file> <topic>')
+        print('Usage: json_to_kafka.py <broker> <file> <topic> [n_alerts]')
         sys.exit()
+    if len(sys.argv) > 4:
+        n_alert = int(sys.argv[4])
+    else:
+        n_alert = 1
 
     #schemafile = '../../common/schema/dp02.avsc'
     #schema = json.loads(open(schemafile).read())
@@ -59,6 +63,7 @@ if __name__ == '__main__':
     with open(datafile, 'r') as fin:
         obj = json.load(fin)          
         encode_cutouts(obj)
-        p.produce(topic, value=obj)
+        for i in range(n_alert):
+            p.produce(topic, value=obj)
         p.flush()
 

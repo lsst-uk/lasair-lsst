@@ -8,6 +8,7 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN | --nid=NID] 
               [--topic_out=TOUT]
+              [--wait_time=TIME]
 
 Options:
     --nprocess=NP      Number of processes to use [default:1]
@@ -16,6 +17,7 @@ Options:
     --topic_in=TIN     Kafka topic to use, or
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --wait_time=TIME   Override default wait time (in seconds)
 """
 
 import sys
@@ -98,6 +100,8 @@ class Ingester:
         self.cluster = None
         self.timers = {}
         
+        self.wait_time = getattr(settings, WAIT_TIME, 60)
+
         # set up timers
         for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
             self.timers[name] = manage_status.timer(name)
@@ -167,7 +171,7 @@ class Ingester:
                 'enable.auto.commit': False,
                 'default.topic.config': {'auto.offset.reset': 'earliest'},
                 # wait twice wait time before forgetting me
-                'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
+                'max.poll.interval.ms': 50*self.wait_time*1000,  
                 "value.deserializer": deserializer,
             }
     
@@ -422,8 +426,8 @@ class Ingester:
             if n < mini_batch_size:
                 self._end_batch(nalert, ndiaSource, nforcedSource)
                 nalert = ndiaSource = nforcedSource = 0
-                log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
-                time.sleep(settings.WAIT_TIME)
+                log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
+                time.sleep(self.wait_time)
     
             # every so often commit, flush, and update status
             if nalert >= batch_size:
@@ -458,6 +462,10 @@ def run_ingest(args, log=None):
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
 
     ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
+
+    if args.get('--wait_time'):
+        ingester.wait_time = args['--wait_time']
+
     return ingester.run()
 
 

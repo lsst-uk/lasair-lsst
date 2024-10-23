@@ -49,10 +49,7 @@
       ansible.builtin.pause:
         seconds: 10
     - name: Send test alerts
-      #ansible.builtin.shell: "python3 json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/dp02/1998903343203755338.json ingest_test"
-      #python3 serializing_json2kafka.py lasair-lsst-dev-kafka:9092 sample_alerts/schema7.0/alert.json test
-      ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/schema7.1/alert.json ingest_test"
-      loop: "{{ range(groups['ingest'] | length) | list }}"
+      ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/schema7.1/alert.json ingest_test {{ (groups['ingest'] | length) * (groups['sherlock'] | length) * (groups['filter'] | length) }}"
 
 - hosts: ingest
   gather_facts: false
@@ -61,7 +58,7 @@
     - name: Run ingest
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/ingest
-        cmd: "python3 ingest.py --maxalert=1 --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test"
+        cmd: "python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=5"
       register: ingest_result
     - name: Result
       ansible.builtin.debug:
