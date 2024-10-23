@@ -1,0 +1,139 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  tasks:
+    - name: get api token
+      ansible.builtin.shell:
+        chdir: ../../common
+        cmd: "grep API_TOKEN settings.py | sed 's/.*=[^a-f0-9]*\\([a-f0-9]*\\)[^a-f0-9]*/\\1/'"
+      register: api_token
+      tags: always
+    - name: test query
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/query/"
+        body:
+          selected: "diaObjectId, ra, decl, gPSFlux"
+          tables: "objects"
+          conditions: "gPSFlux > 20000"
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+    - name: test cone search
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/cone/"
+        body:
+          ra: 279.23677285610523
+          dec: -47.772983008485554
+          radius: 20
+          requestType: all
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+    - name: test lightcurves
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/lightcurves/"
+        body:
+          objectIds: -99
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+    - name: test malformed objectIds list
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/lightcurves/"
+        body:
+          objectIds: "123,xyz"
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400]
+      tags: error
+    - name: test sherlock position
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/sherlock/position/"
+        body:
+          ra: 279.23677285610523
+          dec: -47.772983008485554
+          lite: False
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+    - name: test sherlock object
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
+        body:
+          objectId: -99
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [404]
+      tags: error
+    - name: test invalid sherlock object
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
+        body:
+          objectId: thisisnotanobjectid
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400]
+      tags: error
+    - name: test invalid token
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/cone/"
+        body:
+          ra: 279.23677285610523
+          dec: -47.772983008485554
+          radius: 20
+          requestType: all
+        body_format: json
+        headers:
+          Authorization: "Token 0000000011111111222222223333333344444444"
+          Content-Type: application/json
+        status_code: [401, 403]
+      tags: error
+    - name: test invalid method
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/notarealmethod/"
+        body:
+          ra: 279.23677285610523
+          dec: -47.772983008485554
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400, 404]
+      tags: error
+    - name: test invalid ra and dec
+      ansible.builtin.uri:
+        method: POST
+        url: "https://{{ lasair_name }}.{{ domain }}/api/cone/"
+        body:
+          ra: -29.23677285610523
+          dec: 200.0
+          radius: 20
+          requestType: all
+        body_format: json
+        headers:
+          Authorization: "Token {{ api_token.stdout }}"
+          Content-Type: application/json
+        status_code: [400]
+      tags: error
+
+

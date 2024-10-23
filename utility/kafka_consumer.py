@@ -73,7 +73,8 @@ else:
         if q['print_one']:
 #            print(msg.value())
             print_msg(msg.value())
-            sys.exit()
+            #sys.exit()
+            break
         nalert += 1
         if nalert%1000 == 0: print(nalert)
     print('final', nalert)

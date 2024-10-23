@@ -3,16 +3,24 @@ import fastavro
 from confluent_kafka import SerializingProducer, KafkaError
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
+import base64
 
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
 # use sr_client.get_subjects() 
 SCHEMA_SUBJECT = "alert-packet"
 # use sr_client.get_versions('alert-packet')
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 701
 
 def subject_name(context, string):
     return SCHEMA_SUBJECT
     ##return f"{ SCHEMA_SUBJECT }/versions/{ SCHEMA_VERSION }"
+
+def encode_cutouts(data):
+    names = ['cutoutDifference', 'cutoutScience', 'cutoutTemplate']
+    for name in names:
+        if data.get(name):
+            data[name] = base64.b64decode(data[name])
+
 
 if __name__ == '__main__':
     if len(sys.argv) >= 4:
@@ -20,8 +28,12 @@ if __name__ == '__main__':
         datafile = sys.argv[2]
         topic = sys.argv[3]
     else:
-        print('Usage: json_to_kafka.py <broker> <file> <topic>')
+        print('Usage: json_to_kafka.py <broker> <file> <topic> [n_alerts]')
         sys.exit()
+    if len(sys.argv) > 4:
+        n_alert = int(sys.argv[4])
+    else:
+        n_alert = 1
 
     #schemafile = '../../common/schema/dp02.avsc'
     #schema = json.loads(open(schemafile).read())
@@ -50,6 +62,8 @@ if __name__ == '__main__':
 
     with open(datafile, 'r') as fin:
         obj = json.load(fin)          
-        p.produce(topic, value=obj)
+        encode_cutouts(obj)
+        for i in range(n_alert):
+            p.produce(topic, value=obj)
         p.flush()
 
