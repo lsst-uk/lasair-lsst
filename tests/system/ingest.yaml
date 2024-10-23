@@ -2,49 +2,9 @@
 
 ---
 
-- hosts: ingest, kafka
-  gather_facts: true
-  tasks:
-#    - name: Populate service facts
-#      ansible.builtin.service_facts:
-#    - name: Ping hosts
-#      ping:
-#      tags: ping
-
-# - hosts: ingest
-#  gather_facts: false
-#  tasks:
-#    - name: ingest service running
-#      ansible.builtin.assert:
-#        that: ansible_facts.services['lasair-ingest.service'].state == "running"
-#        fail_msg: Ingest service not running
-#        success_msg: Ingest service running
-#        quiet: true
-
-- hosts: kafka
-  gather_facts: false
-  tasks:
-    - name: Check kafka server is listening on port 9092
-      wait_for:
-        port: 9092
-        timeout: 1
-          
 - hosts: localhost
   gather_facts: false
-  vars_files:
-    - ../../deploy/settings.yaml
-  vars:
-    kafka_settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
   tasks:
-    - name: Delete ingest_test topic
-      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t ingest_test"
-      ignore_errors: true
-    - name: Delete sherlock_test topic
-      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t sherlock_test"
-      ignore_errors: true
-    - name: Delete filter_test topic
-      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t filter_test"
-      ignore_errors: true
     - name: Pause for 10 seconds
       ansible.builtin.pause:
         seconds: 10
@@ -58,7 +18,7 @@
     - name: Run ingest
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/ingest
-        cmd: "python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=5"
+        cmd: "python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=4"
       register: ingest_result
 #    - name: Result
 #      ansible.builtin.debug:
