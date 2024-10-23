@@ -16,12 +16,12 @@ schema = {
     },
     {
       "name": "topic",
-      "type": "string",
+      "type": "text",
       "doc": "The topic name of the annotator -- acts as primary key"
     },
     {
       "name": "version",
-      "type": "string",
+      "type": "bigstring",
       "default": "0.1",
       "doc": "Version information for the annotator software"
     },
@@ -33,7 +33,7 @@ schema = {
     },
     {
       "name": "classification",
-      "type": "string",
+      "type": "bigstring",
       "extra": "NOT NULL",
       "doc": "Short, non-trivial string expressing the classification of this object by this annotator"
     },

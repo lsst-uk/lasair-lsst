@@ -48,6 +48,7 @@ WAIT_TIME              = 180
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
+SLACK_CHANNEL          = '{{ lasair_name }}'
 
 # Relational database mysql/galera
 ##################################
@@ -84,7 +85,7 @@ CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
 # Cutouts in Cassandra
-CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
+CUTOUTCASS_HOSTS        = {{ groups['cutoutcass'] }}
 
 # Directories on share Cephfs
 #############################
