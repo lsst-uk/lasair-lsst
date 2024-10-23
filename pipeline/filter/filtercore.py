@@ -635,7 +635,7 @@ if __name__ == "__main__":
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
-    wait_time = args.get('--wait_time') or getattr(settings, 'WAIT_TIME', 60)
+    wait_time = int(args.get('--wait_time')) or getattr(settings, 'WAIT_TIME', 60)
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
                   send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
