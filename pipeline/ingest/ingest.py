@@ -464,7 +464,7 @@ def run_ingest(args, log=None):
     ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
 
     if args.get('--wait_time'):
-        ingester.wait_time = args['--wait_time']
+        ingester.wait_time = int(args['--wait_time'])
 
     return ingester.run()
 
