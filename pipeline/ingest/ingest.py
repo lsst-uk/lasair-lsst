@@ -99,7 +99,7 @@ class Ingester:
         self.timers = {}
         
         # set up timers
-        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
+        for name in ['icutout', 'icassandra', 'ikconsume', 'ikproduce', 'itotal']:
             self.timers[name] = manage_status.timer(name)
 
         # if we weren't given a log to use then create a default one
@@ -318,7 +318,7 @@ class Ingester:
                 raise e
 
         # produce to kafka
-        self.timers['ikafka'].on()
+        self.timers['ikproduce'].on()
         for alert in alerts:
             if self.producer is not None:
                 try:
@@ -328,7 +328,7 @@ class Ingester:
                     log.error("ERROR in ingest/handle_alerts: Kafka production failed for %s" % self.topic_out)
                     log.error("ERROR:", e)
                     raise e
-        self.timers['ikafka'].off()
+        self.timers['ikproduce'].off()
 
         return (nDiaSources, nForcedSources)
 
@@ -336,18 +336,20 @@ class Ingester:
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
-        self.timers['ifuture'].on()
+        self.timers['icassandra'].on()
         for future in self.futures:
             future.result()
-        self.timers['ifuture'].off()
+        self.timers['icassandra'].off()
         self.futures = []
 
         # if this is not flushed, it will run out of memory
         if self.producer is not None:
             self.producer.flush()
 
+        self.timers['ikconsume'].on()
         # commit the alerts we have read
         self.consumer.commit()
+        self.timers['ikconsume'].off()
 
         # update the status page
         nid = date_nid.nid_now()
