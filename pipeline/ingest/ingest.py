@@ -410,7 +410,9 @@ class Ingester:
                 break
 
             # poll for alerts
+            self.timers['ikconsume'].on()
             alerts = self._poll(mini_batch_size)
+            self.timers['ikconsume'].off()
             n = len(alerts)
             nalert += n
             ntotalalert += n
