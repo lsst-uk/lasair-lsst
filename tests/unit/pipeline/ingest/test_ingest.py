@@ -50,10 +50,11 @@ class IngestTest(unittest.TestCase):
         diaObjectId = test_alert['diaObject']['diaObjectId']
         imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_log = unittest.mock.MagicMock()
-        imageStore = ingest.ImageStore(log=mock_log)
-        result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
-        self.assertEqual(len(result), 0)
-        mock_log.warning.assert_called_with('WARNING: attempted to store images, but no image store set up')
+        with self.assertRaises(SystemExit):
+            ingest.ImageStore(log=mock_log)
+        #result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        #self.assertEqual(len(result), 0)
+        #mock_log.warning.assert_called_with('WARNING: attempted to store images, but no image store set up')
 
     def test_store_images_error(self):
         """Test that using the image store raises an exception on error"""
