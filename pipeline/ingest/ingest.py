@@ -100,7 +100,7 @@ class Ingester:
         self.timers = {}
         
         # set up timers
-        for name in ['icutout', 'icassandra', 'ikconsume', 'ikproduce', 'itotal']:
+        for name in ['icutout', 'icassandra', 'ifuture', 'ikconsume', 'ikproduce', 'itotal']:
             self.timers[name] = manage_status.timer(name)
 
         # if we weren't given a log to use then create a default one
@@ -337,10 +337,10 @@ class Ingester:
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
-        self.timers['icassandra'].on()
+        self.timers['ifuture'].on()
         for future in self.futures:
             future.result()
-        self.timers['icassandra'].off()
+        self.timers['ifuture'].off()
         self.futures = []
 
         # if this is not flushed, it will run out of memory
