@@ -59,7 +59,7 @@ class ImageStore:
         self.image_store = cutoutStore.cutoutStore()
         if self.image_store.session is None:
             self.image_store = None
-            log.warning('ERROR: Cannot store cutouts')
+            log.error('ERROR: Cannot store cutouts')
             sys.exit(1)
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
