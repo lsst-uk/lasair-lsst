@@ -14,6 +14,7 @@ from datetime import datetime
 from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound, ValidationError
 from src import db_connect
 import settings as lasair_settings
 import sys
@@ -33,6 +34,21 @@ class ConeSerializer(serializers.Serializer):
     dec = serializers.FloatField(required=True)
     radius = serializers.FloatField(required=True)
     requestType = serializers.ChoiceField(choices=REQUEST_TYPE_CHOICES)
+
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
+
+    def validate_radius(self, value):
+        if value < 0:
+            raise serializers.ValidationError('radius must be positive')
+        return value
 
     def save(self):
 
@@ -93,7 +109,11 @@ class ObjectsSerializer(serializers.Serializer):
 
         olist = []
         for tok in diaObjectIds.split(','):
-            olist.append(tok.strip())
+            try:
+                objId = int(tok.strip())
+                olist.append(objId)
+            except ValueError:
+                raise ValidationError(detail="objectIds must be a list of integers")
         olist = olist[:10] # restrict to 10
 
         # Get the authenticated user, if it exists.
@@ -113,16 +133,14 @@ class ObjectsSerializer(serializers.Serializer):
 
 
 class SherlockObjectSerializer(serializers.Serializer):
-    objectId = serializers.CharField(required=True)
-    lite = serializers.BooleanField()
+    objectId = serializers.IntegerField(required=True)
+    lite = serializers.BooleanField(default=False)
 
     def save(self):
         diaObjectId = None
-        lite = False
         diaObjectId = self.validated_data['objectId']
 
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -143,29 +161,36 @@ class SherlockObjectSerializer(serializers.Serializer):
 
         if r.status_code == 200:
             return r.json()
-        else:
-            return {"error": r.text}
+        if r.status_code == 404:
+            raise NotFound(r.json())
+        return {"error": r.text}
 
 
 class SherlockPositionSerializer(serializers.Serializer):
     ra = serializers.FloatField(required=True)
     dec = serializers.FloatField(required=True)
-    lite = serializers.BooleanField()
+    lite = serializers.BooleanField(default=False)
+
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
 
     def save(self):
-        lite = False
         ra = self.validated_data['ra']
         dec = self.validated_data['dec']
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
-# can also send multiples, but not yet implemented
-# http://192.41.108.29/query?ra=115.811388,97.486925&dec=-25.76404,-26.975506
 
         if not lasair_settings.SHERLOCK_SERVICE:
             return {"error": "This Lasair cluster does not have a Sherlock service"}
@@ -257,7 +282,11 @@ class LightcurvesSerializer(serializers.Serializer):
         diaObjectIds = self.validated_data['objectIds']
         olist = []
         for tok in diaObjectIds.split(','):
-            olist.append(tok.strip())
+            try:
+                objId = int(tok.strip())
+                olist.append(objId)
+            except ValueError:
+                raise ValidationError(detail="objectIds must be a list of integers")
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -280,7 +309,7 @@ class LightcurvesSerializer(serializers.Serializer):
 
 class AnnotateSerializer(serializers.Serializer):
     topic = serializers.CharField(max_length=255, required=True)
-    objectId = serializers.CharField(max_length=256, required=True)
+    objectId = serializers.IntegerField(required=True)
     classification = serializers.CharField(max_length=80, required=True)
     version = serializers.CharField(max_length=80, required=True)
     explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)

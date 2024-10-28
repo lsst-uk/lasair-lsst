@@ -1,0 +1,44 @@
+# Remove test topics and databases
+
+---
+
+- hosts: kafka
+  gather_facts: false
+  tasks:
+    - name: Check kafka server is listening on port 9092
+      wait_for:
+        port: 9092
+        timeout: 1
+          
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Delete ingest_test topic
+      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t ingest_test"
+      ignore_errors: true
+    - name: Delete sherlock_test topic
+      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t sherlock_test"
+      ignore_errors: true
+    - name: Delete filter_test topic
+      ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t filter_test"
+      ignore_errors: true
+
+- hosts: filter
+  gather_facts: false
+  vars_files:
+    - ../../deploy/settings.yaml
+  vars:
+    mysql_db_name: filter_test
+    mysql_db_user: ztf
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+    mysql_root_password: "{{ settings.local_db_root_password }}"
+    mysql_db_password: 123password
+  tasks:
+    - name: Drop local db
+      community.mysql.mysql_query:
+        query:
+          - DROP DATABASE IF EXISTS {{ mysql_db_name }};
+        login_host: 127.0.0.1
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+        single_transaction: yes

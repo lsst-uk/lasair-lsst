@@ -7,8 +7,6 @@ from . import views
 urlpatterns = [
     path('api',  TemplateView.as_view(template_name='api.html')),
     path('api/cone/',                  views.ConeView.as_view()),
-    path('api/streams/',               views.StreamsView.as_view()),
-    path('api/streams/<slug:topic>/',  views.StreamsView.as_view()),
     path('api/query/',                 views.QueryView.as_view()),
     path('api/objects/',               views.ObjectsView.as_view()),
     path('api/lightcurves/',           views.LightcurvesView.as_view()),

@@ -4,6 +4,7 @@ The core filter module. Usually run as a service using filter_runner, but can al
 Usage:
     ingest.py [--maxalert=MAX]
               [--maxbatch=MAX]
+              [--maxtotal=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
               [--local_db=NAME]
@@ -11,10 +12,12 @@ Usage:
               [--send_kafka=BOOL]
               [--transfer=BOOL]
               [--stats=BOOL]
+              [--wait_time=TIME]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
+    --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
     --local_db=NAME    Name of local database to use [default: ztf]
@@ -22,6 +25,7 @@ Options:
     --send_kafka=BOOL  Send kafka [default: True]
     --transfer=BOOL    Transfer results to main [default: True]
     --stats=BOOL       Write stats [default: True]
+    --wait_time=TIME   Override default wait time (in seconds)
 """
 
 import os
@@ -625,21 +629,29 @@ if __name__ == "__main__":
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
+    maxtotal = int(args.get('--maxtotal') or 0)
     local_db = args.get('--local_db')
     send_email = args.get('--send_email') in ['True', 'true', 'Yes', 'yes']
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
+    wait_time = int(args.get('--wait_time')) or getattr(settings, 'WAIT_TIME', 60)
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
                   send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
+
     n_batch = 0
+    total_alerts = 0
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
         n_batch += 1
+        total_alerts += n_alerts 
         if n_batch == maxbatch:
             log.info(f"Exiting after {n_batch} batches")
             sys.exit(0)
+        if maxtotal and total_alerts >= maxtotal:
+            log.info(f"Exiting after {total_alerts} alerts")
+            sys.exit(0)
         if n_alerts == 0:  # process got no alerts, so sleep a few minutes
             log.info('Waiting for more alerts ....')
-            time.sleep(settings.WAIT_TIME)
+            time.sleep(wait_time)
