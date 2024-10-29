@@ -137,7 +137,7 @@ class Ingester:
                 self.cluster = Cluster(settings.CASSANDRA_HEAD)
                 self.cassandra_session = self.cluster.connect()
                 self.cassandra_session.set_keyspace('lasair')
-                self.session.default_timeout = 90
+                self.cassandra_session.default_timeout = 90
             except Exception as e:
                 log.warning("ERROR in ingest/setup: Cannot connect to Cassandra", e)
                 self.cassandra_session = None
