@@ -30,7 +30,7 @@ class cutoutStore():
                 self.cluster = Cluster(hosts)
                 self.session = self.cluster.connect()
                 self.session.set_keyspace('cutouts')
-                self.session.default_timeout = 90
+                self.session.default_timeout = 300
             except Exception as e:
                 print('Cutoutcass session failed to create: ' + str(e))
                 self.session = None
