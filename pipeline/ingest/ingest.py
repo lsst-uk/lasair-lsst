@@ -61,7 +61,8 @@ class ImageStore:
         self.image_store = cutoutStore.cutoutStore()
         if self.image_store.session is None:
             self.image_store = None
-            log.warning('WARNING: Cannot store cutouts')
+            log.error('ERROR: Cannot store cutouts')
+            sys.exit(1)
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
         futures = []
@@ -103,7 +104,7 @@ class Ingester:
         self.wait_time = getattr(settings, 'WAIT_TIME', 60)
 
         # set up timers
-        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
+        for name in ['icutout', 'icassandra', 'ifuture', 'ikconsume', 'ikproduce', 'itotal']:
             self.timers[name] = manage_status.timer(name)
 
         # if we weren't given a log to use then create a default one
@@ -140,6 +141,7 @@ class Ingester:
                 self.cluster = Cluster(settings.CASSANDRA_HEAD)
                 self.cassandra_session = self.cluster.connect()
                 self.cassandra_session.set_keyspace('lasair')
+                self.cassandra_session.default_timeout = 90
             except Exception as e:
                 log.warning("ERROR in ingest/setup: Cannot connect to Cassandra", e)
                 self.cassandra_session = None
@@ -322,7 +324,7 @@ class Ingester:
                 raise e
 
         # produce to kafka
-        self.timers['ikafka'].on()
+        self.timers['ikproduce'].on()
         for alert in alerts:
             if self.producer is not None:
                 try:
@@ -332,7 +334,7 @@ class Ingester:
                     log.error("ERROR in ingest/handle_alerts: Kafka production failed for %s" % self.topic_out)
                     log.error("ERROR:", e)
                     raise e
-        self.timers['ikafka'].off()
+        self.timers['ikproduce'].off()
 
         return (nDiaSources, nForcedSources)
 
@@ -350,8 +352,10 @@ class Ingester:
         if self.producer is not None:
             self.producer.flush()
 
+        self.timers['ikconsume'].on()
         # commit the alerts we have read
         self.consumer.commit()
+        self.timers['ikconsume'].off()
 
         # update the status page
         nid = date_nid.nid_now()
@@ -412,7 +416,9 @@ class Ingester:
                 break
 
             # poll for alerts
+            self.timers['ikconsume'].on()
             alerts = self._poll(mini_batch_size)
+            self.timers['ikconsume'].off()
             n = len(alerts)
             nalert += n
             ntotalalert += n
