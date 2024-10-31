@@ -199,11 +199,11 @@ def objjson(diaObjectId, full=False):
     for diaSource in diaSources:
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
-        diaSource['mjd'] = mjd = float(diaSource['midpointmjdtai'])
+        diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
         diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
-        diaSourceId = diaSource['diasourceid']
+        diaSourceId = diaSource['diaSourceId']
         date = datetime.strptime("1858/11/17", "%Y/%m/%d")
         date += timedelta(mjd)
         diaSource['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
@@ -237,22 +237,22 @@ def objjson(diaObjectId, full=False):
 
     # DISC MAGS
     objectData["discMjd"] = detections["mjd"].values[0]
-    objectData["discUtc"] = detections["utc"].values[0]
-    objectData["discMag"] = f"{detections['apflux'].values[0]:.2f}±{detections['apfluxerr'].values[0]:.2f}"
+    objectData["discUtc"] = detections["utc"].values[0]   ### HACK
+#    objectData["discMag"] = f"{detections['apflux'].values[0]:.2f}±{detections['apflux'].values[0]:.2f}"
     objectData["discFilter"] = detections['band'].values[0]
 
     # LATEST MAGS
     objectData["latestMjd"] = detections["mjd"].values[-1]
     objectData["latestUtc"] = detections["utc"].values[-1]
-    objectData["latestMag"] = f"{detections['apflux'].values[-1]:.2f}±{detections['apfluxerr'].values[-1]:.2f}"
+#    objectData["latestMag"] = f"{detections['magpsf'].values[-1]:.2f}±{detections['sigmapsf'].values[-1]:.2f}"
     objectData["latestFilter"] = detections['band'].values[0]
 
     # PEAK MAG
-    peakMag = detections[detections['apflux'] == detections['apflux'].min()]
-    objectData["peakMjd"] = peakMag["mjd"].values[0]
-    objectData["peakUtc"] = peakMag["utc"].values[0]
-    objectData["peakMag"] = f"{peakMag['apflux'].values[0]:.2f}±{peakMag['apfluxerr'].values[0]:.2f}"
-    objectData["peakFilter"] = peakMag['band'].values[0]
+#    peakMag = detections[detections['apflux'] == detections['apflux'].min()]
+#    objectData["peakMjd"] = peakMag["mjd"].values[0]
+#    objectData["peakUtc"] = peakMag["utc"].values[0]
+#    objectData["peakMag"] = f"{peakMag['apflux'].values[0]:.2f}±{peakMag['apfluxerr'].values[0]:.2f}"
+#    objectData["peakFilter"] = peakMag['band'].values[0]
 
     # annotations
     annotations = []

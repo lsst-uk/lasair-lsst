@@ -378,11 +378,18 @@ def object_difference_lightcurve_forcedphot(
         # Right (magnitude) frame
     ticktext = []
     tickvals = []
+    n = 0
     for _mag in range(20, 58):
         mag = 0.5 * _mag # 10 to 29 with halves
         flux = mag2flux(float(mag))
         tickvals.append(flux)
         ticktext.append(str(mag))
+        if flux > fluxMin and flux < fluxMax:
+            n += 1
+    if n > 0:
+        title = "Difference magnitude"
+    else:
+        title = ''
     fig.update_yaxes(    # RDW:Linear right axis
         range=[fluxMin, fluxMax],
         ticktext=ticktext,
@@ -394,7 +401,7 @@ def object_difference_lightcurve_forcedphot(
         ticksuffix=" ",
         showline=True,
         linewidth=1.5,
-        title="Difference magnitude",
+        title=title,
         title_font_size=16,
         title_font_color=magcolor,
         secondary_y=True
@@ -520,6 +527,8 @@ def get_default_axis_ranges(
                 (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
                 (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         fluxMin = fluxMin.min()
+        if fluxMin < 0 and fluxMax < 0:
+            fluxMax = 0
 
         yrange = fluxMax - fluxMin
 #        if yrange < 50:
@@ -560,6 +569,7 @@ def get_default_axis_ranges(
                 (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         uffluxMin = uffluxMin.abs().min()
         if uffluxMin < 1: uffluxMin = 1
+        if uffluxMax < 0: uffluxMax = 10*abs(uffluxMin)
 
 #        yrange = uffluxMax - uffluxMin
 #        if yrange < 50:
