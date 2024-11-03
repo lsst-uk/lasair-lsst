@@ -229,7 +229,7 @@ def object_difference_lightcurve(
     )
 
     fig.update_layout(
-        title=dict(text="Standard Photometry Magnitudes", font=dict(size=20), y=0.85,
+        title=dict(text="Standard Photometry Flux", font=dict(size=20), y=0.85,
                    x=0.5,
                    xanchor='center',
                    yanchor='top',
@@ -396,6 +396,9 @@ def object_difference_lightcurve_forcedphot(
         tickvals=tickvals,
         tickfont_color=magcolor,
         showgrid=False,
+        zeroline=True,
+        zerolinewidth=3.0,
+        zerolinecolor='rgba(60, 60, 60, 0.8)',
         tickformat='.1f',
         tickfont_size=14,
         ticksuffix=" ",
@@ -574,8 +577,8 @@ def get_default_axis_ranges(
 #        yrange = uffluxMax - uffluxMin
 #        if yrange < 50:
 #            yrange = 50
-#        uffluxMax += (yrange * 0.1)
-#        uffluxMin -= (yrange * 0.1)
+        uffluxMax *= 1.05
+        uffluxMin *= 0.95
 
     return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax
 
