@@ -73,8 +73,8 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append(result)
+                    future = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
@@ -226,13 +226,17 @@ class Ingester:
 
         self.futures += executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects)
         if len(diaSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
+                futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
         if len(diaForcedSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
+                futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
         if len(diaNondetectionLimitsList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList):
+                futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
         if len(ssObjects) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects)
+            for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
+                futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
@@ -344,7 +348,11 @@ class Ingester:
         # wait for any in-flight cassandra requests to complete
         self.timers['ifuture'].on()
         for future in self.futures:
-            future.result()
+            try:
+                future['future'].result()
+            except Exception as e:
+                log.error("ERROR getting future result for {}".format(future['msg']))
+                raise e
         self.timers['ifuture'].off()
         self.futures = []
 
