@@ -224,19 +224,20 @@ class Ingester:
 
         #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
 
-        self.futures += executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects)
+        for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
+            self.futures.append({'future': future, 'msg': 'executeLoadAsync diaObjects'})
         if len(diaSourcesList) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
-                futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
         if len(diaForcedSourcesList) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
-                futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
         if len(diaNondetectionLimitsList) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList):
-                futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
         if len(ssObjects) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
-                futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
