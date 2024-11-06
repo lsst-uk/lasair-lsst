@@ -82,7 +82,7 @@ def object_difference_lightcurve(
                 go.Scatter(
                     x=data["mjd"],
                     y=data["nanojansky"],
-                    customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
                     error_y_color=data["bcolor"].values[0],
@@ -97,7 +97,8 @@ def object_difference_lightcurve(
                     hovertemplate="<b>" + data["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
-                    "Magnitude: %{customdata[1]:.2f} ± %{customdata[2]:.2f}" +
+                    "Flux: %{customdata[1]:.2f} nJy<br>" +
+                    "Magnitude: %{customdata[2]:.2f}" +
                     "<extra></extra>",
                 ),
                 secondary_y=False
@@ -307,7 +308,7 @@ def object_difference_lightcurve_forcedphot(
                 go.Scatter(
                     x=data["midpointMjdTai"],
                     y=data["nanojansky"],
-                    customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
                     error_y_color=data["bcolor"].values[0],
@@ -323,7 +324,8 @@ def object_difference_lightcurve_forcedphot(
                     hovertemplate="<b>" + data["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{customdata[1]:.2f} ± %{customdata[2]:.2f} μJy" +
+                    "Flux: %{customdata[1]:.2f} nJy<br>" +
+                    "Magnitude: %{customdata[2]:.2f}" +
                     "<extra></extra>",
                 ),
                 secondary_y=False
@@ -379,7 +381,7 @@ def object_difference_lightcurve_forcedphot(
     ticktext = []
     tickvals = []
     n = 0
-    for _mag in range(20, 58):
+    for _mag in range(20, 55):
         mag = 0.5 * _mag # 10 to 29 with halves
         flux = mag2flux(float(mag))
         tickvals.append(flux)
