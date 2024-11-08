@@ -402,7 +402,7 @@ class Ingester:
         log = self.log
     
         batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 1000)
-        batch_size = 200 # RDW 8/11/2024
+        batch_size = 500 # RDW 8/11/2024
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
