@@ -384,7 +384,8 @@ class Ingester:
                 # clean shutdown - this should stop the consumer and commit offsets
                 log.debug("Stopping polling for alerts")
                 break
-            msg = self.consumer.poll(timeout=5)
+#            msg = self.consumer.poll(timeout=5)
+            msg = self.consumer.poll(timeout=30)    # RDW 8/11/2024
             # no more messages available
             if msg is None:
                 break
