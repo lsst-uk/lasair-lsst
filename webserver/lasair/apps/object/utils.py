@@ -15,7 +15,6 @@ fluxcolor = '#1A85FF'
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0: 
         mag = 31.4 - 2.5 * math.log10(flux)
-#        magerr = 1.086 * fluxerr / flux
         return mag
     else:        
         return None
@@ -77,6 +76,7 @@ def object_difference_lightcurve(
         if len(data.index):
             dataType = "Diff Mag"
             error_y = {'type': 'data', 'array': data["nanojanskyerr"]}
+
             fig.add_trace(
 
                 go.Scatter(
@@ -536,33 +536,11 @@ def get_default_axis_ranges(
             fluxMax = 0
 
         yrange = fluxMax - fluxMin
-#        if yrange < 50:
-#            yrange = 50
         fluxMax += (yrange * 0.1)
         fluxMin -= (yrange * 0.1)
-
-#        if fluxMin > 0:
-#            fluxMin = 0
     else:
         fluxMin, fluxMax = None, None
 
-    # DETERMINE SENSIBLE Y-AXIS LIMITS
-    # Log plot
-#    unforcedDF["tmpSigmapsf"] = 0
-#
-#    unforcedDF.loc[(unforcedDF['sigmapsf'] > 0), "tmpSigmapsf"] = unforcedDF.loc[(unforcedDF['sigmapsf'] > 0), "sigmapsf"]
-#    unforcedDF["tmpSigmapsf"]
-#    unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "sigmapsf"] = 0
-#    magMax = unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "magpsf"] + unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "tmpSigmapsf"]
-#    magMax = magMax.max()
-#    magMin = unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "magpsf"] - unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "tmpSigmapsf"]
-#    magMin = magMin.min()
-#
-#    yrange = magMax - magMin
-#    if yrange < 3:
-#        yrange = 3
-#    magMax += (yrange * 0.1)
-#    magMin -= (yrange * 0.1)
     # DETERMINE SENSIBLE Y-AXIS LIMITS
     if unforcedDF is not None:
         uffluxMax = unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
@@ -576,9 +554,6 @@ def get_default_axis_ranges(
         if uffluxMin < 1: uffluxMin = 1
         if uffluxMax < 0: uffluxMax = 10*abs(uffluxMin)
 
-#        yrange = uffluxMax - uffluxMin
-#        if yrange < 50:
-#            yrange = 50
         uffluxMax *= 1.05
         uffluxMin *= 0.95
 
@@ -610,7 +585,8 @@ def convert_objectdata_to_dataframes(
         forcedDF["nanojanskyerr"] = forcedDF['psfFluxErr']
 
 # Convert from flux nJ to mag
-        forcedDF["magpsf"]   = 31.4 - 2.5*np.log10(forcedDF["nanojansky"])
+        flux = forcedDF["nanojansky"]
+        forcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         forcedDF["sigmapsf"] = 1.086 * forcedDF["nanojanskyerr"] / forcedDF["nanojansky"]
 
     if forcedDF is not None and len(forcedDF.index) == 0:
@@ -628,7 +604,8 @@ def convert_objectdata_to_dataframes(
         unforcedDF["nanojansky"] = unforcedDF['psfFlux']
         unforcedDF["nanojanskyerr"] = unforcedDF['psfFluxErr']
 # Convert from flux nJ to mag
-        unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
+        flux = unforcedDF["nanojansky"]
+        unforcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
 
     # MATCH THE FORCED AND UNFORCED TABLES
