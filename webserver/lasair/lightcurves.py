@@ -31,8 +31,9 @@ class lightcurve_fetcher():
         if full:
             query = 'SELECT * '
         else:
-            query = 'SELECT "diaSourceId", "midpointMjdTai", ra, decl, band, "psfFlux", "psfFluxErr"'
-        query += ' from diasources where "diaObjectId" = %s' % diaObjectId
+            query = 'SELECT "diaSourceId", "midpointMjdTai", ra, decl, band, "psfFlux", "psfFluxErr" '
+        query += 'from diaSources where "diaObjectId" = %s' % diaObjectId
+
         ret = self.session.execute(query)
 
         diaSources = []
@@ -40,8 +41,9 @@ class lightcurve_fetcher():
             if not math.isnan(diaSource['psfFlux']):
                 diaSources.append(diaSource)
 
-        query = ' SELECT "midpointMjdTai", band, "psfFlux", "psfFluxErr"'
-        query += ' from diaForcedSources where "diaObjectId" = %s' % diaObjectId
+        query = 'SELECT "midpointMjdTai", "band", "psfFlux", "psfFluxErr" '
+        query += 'from diaForcedSources where "diaObjectId" = %s' % diaObjectId
+
         ret = self.session.execute(query)
         diaForcedSources = []
         for diaForcedSource in ret:

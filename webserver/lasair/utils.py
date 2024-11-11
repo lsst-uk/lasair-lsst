@@ -237,6 +237,7 @@ def objjson(diaObjectId, full=False):
 
     # DISC MAGS
     objectData["discMjd"] = detections["mjd"].values[0]
+
     objectData["discUtc"] = detections["utc"].values[0]
     objectData["discMag"] = f"{detections['psfFlux'].values[0]:.2f}±{detections['psfFluxErr'].values[0]:.2f}"
     objectData["discFilter"] = detections['band'].values[0]
@@ -244,6 +245,7 @@ def objjson(diaObjectId, full=False):
     # LATEST MAGS
     objectData["latestMjd"] = detections["mjd"].values[-1]
     objectData["latestUtc"] = detections["utc"].values[-1]
+
     objectData["latestMag"] = f"{detections['psfFlux'].values[-1]:.2f}±{detections['psfFluxErr'].values[-1]:.2f}"
     objectData["latestFilter"] = detections['band'].values[0]
 
