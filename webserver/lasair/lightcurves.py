@@ -1,5 +1,6 @@
 import json
 import sys
+import math
 from cassandra.cluster import Cluster
 from cassandra.query import dict_factory
 
@@ -28,21 +29,26 @@ class lightcurve_fetcher():
 
     def fetch(self, diaObjectId, full=False):
         if full:
-            query = "SELECT * "
+            query = 'SELECT * '
         else:
             query = 'SELECT "diaSourceId", "midpointMjdTai", ra, decl, band, "psfFlux", "psfFluxErr" '
         query += 'from diaSources where "diaObjectId" = %s' % diaObjectId
+
         ret = self.session.execute(query)
+
         diaSources = []
         for diaSource in ret:
-            diaSources.append(diaSource)
+            if not math.isnan(diaSource['psfFlux']):
+                diaSources.append(diaSource)
 
         query = 'SELECT "midpointMjdTai", "band", "psfFlux", "psfFluxErr" '
         query += 'from diaForcedSources where "diaObjectId" = %s' % diaObjectId
+
         ret = self.session.execute(query)
         diaForcedSources = []
         for diaForcedSource in ret:
-            diaForcedSources.append(diaForcedSource)
+            if not math.isnan(diaForcedSource['psfFlux']):
+                diaForcedSources.append(diaForcedSource)
 
         return (diaSources, diaForcedSources)
 

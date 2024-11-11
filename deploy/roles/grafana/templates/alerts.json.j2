@@ -112,7 +112,7 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "time",
         "show": true,
@@ -177,6 +177,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -190,24 +193,24 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(kafka_log_log_value{name=\"LogEndOffset\", program=\"MSIP\"} - on(night, partition, instance) kafka_log_log_value{name=\"LogStartOffset\", program=\"MSIP\"}) by (night) / {{ replication_count }} > 0",
+          "expr": "sum(kafka_log_log_value{name=\"LogEndOffset\", topic=\"alerts-simulated\"} - on(partition, instance) kafka_log_log_value{name=\"LogStartOffset\", topic=\"alerts-simulated\"}) / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "{{ '{{night}}' }}",
+          "legendFormat": "__auto",
           "refId": "A"
         }
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "Alerts per Night",
+      "title": "Alerts",
       "tooltip": {
         "shared": false,
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "series",
         "show": true,
@@ -275,6 +278,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -306,7 +312,7 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "time",
         "show": true,
@@ -370,6 +376,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -384,7 +393,7 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", program=\"MSIP\"}[15m])) by (night,program) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"alerts-simulated\"}[5m])) * 60 / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -402,7 +411,7 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "time",
         "show": true,
@@ -467,6 +476,9 @@
       "links": [],
       "nullPointMode": "null",
       "options": {
+        "legend": {
+          "showLegend": false
+        },
         "alertThreshold": true
       },
       "percentage": false,
@@ -498,7 +510,7 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "time",
         "show": true,
@@ -587,7 +599,7 @@
         "sort": 0,
         "value_type": "individual"
       },
-      "type": "graph",
+      "type": "timeseries",
       "xaxis": {
         "mode": "time",
         "show": true,
@@ -647,23 +659,11 @@
       },
       "targets": [
         {
-          "datasource": {
-           "type": "prometheus",
-           "uid": "KsV2hEKVz"
-          },
-          "editorMode": "code",
           "expr": "sum(lasair_alert_batch_lag/60) by (type)",
           "interval": "",
           "legendFormat": "{{ '{{type}}' }}",
           "range": true,
           "refId": "A"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "KsV2hEKVz"
-          },
-          "refId": "B"
         }
       ],
       "fieldConfig": {
@@ -717,10 +717,6 @@
           "unit": "m"
         },
         "overrides": []
-      },
-      "datasource": {
-        "type": "prometheus",
-        "uid": "KsV2hEKVz"
       }
     }
   ],

@@ -73,7 +73,7 @@ if __name__ == '__main__':
     # Set up the logger
     lasairLogging.basicConfig(
         filename='/home/ubuntu/logs/filter.log',
-        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=settings.SLACK_CHANNEL),
         merge=True
     )
     log = lasairLogging.getLogger("filter_runner")

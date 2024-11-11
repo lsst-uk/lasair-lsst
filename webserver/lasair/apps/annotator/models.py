@@ -5,7 +5,7 @@ from django.contrib.auth.models import User
 
 
 class Annotators(models.Model):
-    topic = models.CharField(primary_key=True, max_length=32)
+    topic = models.CharField(primary_key=True, max_length=255)
     description = models.TextField(blank=True, null=True)
     user = models.ForeignKey(User, models.DO_NOTHING, db_column='user', blank=True, null=True)
     username = models.CharField(max_length=32, blank=True, null=True)

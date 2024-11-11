@@ -95,9 +95,10 @@ It is possible to rerun this on an existing deployment in order to change
 the deployment, e.g. to add extra instances, but take care as deletion
 of instances/volumes etc. will not be warned!
 
-We can validate that our hosts are all up and reachable using the test playbook:
+We can validate that our hosts are all up and reachable using the test playbook
+(in `tests/system`):
 ```
-$ ansible-playbook test.yaml --tags ping
+$ ansible-playbook deployment.yaml --tags ping
 ```
 
 ## Set CephFS credentials
@@ -148,9 +149,9 @@ or a Galera cluster:
 $ ansible-playbook database.yaml
 ```
 
-We can run some checks on the database deployment:
+We can run some checks on the database deployment (in `tests/system`):
 ```
-$ ansible-playbook test.yaml --tags db
+$ ansible-playbook deployment.yaml --tags db
 ```
 
 We can now go ahead and run the deployment playbook:
@@ -163,10 +164,15 @@ The deployment playbook can be used to update Lasair.
 ## Test Lasair
 
 Once Lasair is deployed/updated we can run run the full set of
-post-deployment tests:
+post-deployment and system tests:
 ```
-$ ansible-playbook test.yaml
+$ cd ../tests/system
+$ ./deployment.sh
+$ ./pipeline.sh
+$ ./api.sh
 ```
+
+See `tests/system/README.md` for details.
 
 ## Starting and Stopping
 

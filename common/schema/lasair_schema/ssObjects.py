@@ -210,5 +210,5 @@ schema = {
       "type": "float"
     }
   ],
-  "indexes": ["PRIMARY KEY (ssObjectId)"]
+  "indexes": ['PRIMARY KEY ("ssObjectId")']
 }

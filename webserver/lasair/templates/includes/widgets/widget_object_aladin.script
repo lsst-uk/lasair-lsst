@@ -140,7 +140,7 @@ var surveys = [
 
 let aladin;
 A.init.then(() => {
-    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/PanSTARRS/DR1/color-z-zg-g", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
+    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/DSS2/color", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
 
     {% if data.sherlock.eastSeparationArcsec %}
     var sherlockcat = A.catalog({name: "Sherlock's predicted association", sourceSize: 18, color: "#32CD32"});

@@ -9,11 +9,29 @@
 
 - hosts: all
   gather_facts: true
+  vars_files:
+    - settings.yaml
   tasks:
     - name: Set Lasair version
       ansible.builtin.set_fact:
         lasair_version: "{{ hostvars['localhost']['git_tag'].stdout }}"
-  tags: always
+    - name: Get vault settings
+      ansible.builtin.set_fact:
+        settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+    - name: Get API token
+      ansible.builtin.uri:
+        url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
+        method: POST
+        body_format: json
+        body:
+          username: su
+          password: "{{ settings.django_password }}"
+      register: api_token_response
+    - name: Set API token
+      ansible.builtin.set_fact:
+        powerapi_token: "{{ api_token_response.json.token }}"
+  tags:
+    - always
 
 - hosts: all:!localhost
   gather_facts: false
@@ -87,7 +105,6 @@
     - settings.yaml
     - exports.yaml
   vars:
-    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
@@ -109,7 +126,6 @@
   vars:
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
-    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
     datadir: /var/lib/mysql
   roles:
