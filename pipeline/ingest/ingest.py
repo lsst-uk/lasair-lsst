@@ -400,7 +400,7 @@ class Ingester:
         """Run ingester. Return the total number of alerts ingested."""
         log = self.log
     
-        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 1000)
+        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 200)
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
