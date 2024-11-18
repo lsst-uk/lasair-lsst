@@ -62,12 +62,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // chain function will call the supplied function
     // and recursively call the chain function with the
     // the next element in the array
-    function chain(fn) {
-        if (fn) {
-            fn(() => chain(fns.shift()));
-        }
-    }
-    chain(fns.shift());
+    // function chain(fn) {
+    //     if (fn) {
+    //         fn(() => chain(fns.shift()));
+    //     }
+    // }
+    // chain(fns.shift());
 
     // This prevents the page from scrolling down to where it was previously.
     // if ('scrollRestoration' in history) {
