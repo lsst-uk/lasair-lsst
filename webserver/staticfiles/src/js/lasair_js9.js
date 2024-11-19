@@ -142,13 +142,13 @@ function loadFitsImages(next) {
         let fitsScr = fits.getAttribute("src");
         const newItem = document.createElement('span');
         let uuid = uuidv4();
-        newItem.innerHTML = `<div class="JS9" data-width="100%" id="${uuid}" ></div>`;
+        newItem.innerHTML = `<div class="JS9"  id="${uuid}" ></div>`;
         if (fits.classList.contains("fits-lite")) {
             // DO NOTHING
         } else if (fits.classList.contains("fits-toggle")) {
-            newItem.innerHTML = `<div class="JS9Menubar d-none" id="${uuid}Menubar" data-width="100%"></div>` + newItem.innerHTML
+            newItem.innerHTML = `<div class="JS9Menubar d-none" id="${uuid}Menubar" ></div>` + newItem.innerHTML
         } else {
-            newItem.innerHTML = `<div class="JS9Menubar" id="${uuid}Menubar" data-width="100%"></div>` + newItem.innerHTML
+            newItem.innerHTML = `<div class="JS9Menubar" id="${uuid}Menubar" ></div>` + newItem.innerHTML
         }
 
         fits.parentNode.replaceChild(newItem, fits);
