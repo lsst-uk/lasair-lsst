@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // let fns = [loadFitsImages, fixJS9ExtraStyles, collapseJS9Extras, scrollToTop];
-    let fns = [fixJS9ExtraStyles, collapseJS9Extras];
+    let fns = [loadFitsImages, fixJS9ExtraStyles, collapseJS9Extras];
 
     // chain function will call the supplied function
     // and recursively call the chain function with the
@@ -153,14 +153,14 @@ function loadFitsImages(next) {
 
         fits.parentNode.replaceChild(newItem, fits);
 
-        JS9.Preload(fitsScr, {
-            scale: 'linear',
-            zoom: 'toFit',
-            flip: 'y',
-            onload: setDefaultParams
-        }, {
-            display: uuid
-        });
+        // JS9.Preload(fitsScr, {
+        //     scale: 'linear',
+        //     zoom: 'toFit',
+        //     flip: 'y',
+        //     onload: setDefaultParams
+        // }, {
+        //     display: uuid
+        // });
     });
     next();
 };
