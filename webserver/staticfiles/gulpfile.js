@@ -262,7 +262,7 @@ gulp.task('serve', gulp.series('copy:dist:css', 'copy:dist:files', 'copy:dist:fo
     gulp.watch([paths.src.js], gulp.series('concat:dist:js'));
 }));
 
-gulp.task('build', gulp.series('clean:dist', 'copy:dist:css', 'copy:dist:files', 'copy:dist:fonts', 'copy:dist:img', 'copy:dist:js', 'concat:dist:js', 'concat:vendor:js', 'concat:vendor:css', 'copy:dist:vendor'));
+gulp.task('build', gulp.series('clean:dist', 'copy:dist:css', 'copy:dist:files', 'copy:dist:fonts', 'copy:dist:img', 'copy:dist:js', 'concat:dist:js', 'replace_1', 'concat:vendor:js', 'concat:vendor:css', 'copy:dist:vendor'));
 
 // Default
 gulp.task('default', gulp.series('serve'));
