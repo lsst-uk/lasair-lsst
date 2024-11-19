@@ -32,6 +32,7 @@ var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var touch = require('gulp-touch-fd');
+var replace = require('gulp-replace');
 
 // Define paths
 
@@ -236,6 +237,13 @@ gulp.task('copy:dist:img', function() {
 gulp.task('copy:dist:js', function() {
     return gulp.src(paths.src.js2)
         .pipe(gulp.dest(paths.dist.js))
+});
+
+// REPLACE BAD LINE IN JS9.js
+gulp.task('replace_1', function() {
+    gulp.src([paths.src.node_modules + '/js9/js9.js']) // Every file allown. 
+        .pipe(replace('$(document).scrollTop(0);', ''))
+        .pipe(gulp.dest(paths.src.node_modules + '/js9/js9.js'))
 });
 
 // COPY REQUIRED VENDOR MODULES
