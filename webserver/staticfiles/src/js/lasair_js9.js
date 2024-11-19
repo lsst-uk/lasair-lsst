@@ -153,14 +153,14 @@ function loadFitsImages(next) {
 
         fits.parentNode.replaceChild(newItem, fits);
 
-        // JS9.Preload(fitsScr, {
-        //     scale: 'linear',
-        //     zoom: 'toFit',
-        //     flip: 'y',
-        //     onload: setDefaultParams
-        // }, {
-        //     display: uuid
-        // });
+        JS9.Preload(fitsScr, {
+            scale: 'linear',
+            zoom: 'toFit',
+            flip: 'y',
+            onload: setDefaultParams
+        }, {
+            display: uuid
+        });
     });
     next();
 };
