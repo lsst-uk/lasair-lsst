@@ -1,7 +1,20 @@
 import os, sys
-sys.path.append('../../common')
+import json
+import datetime
 from fink_client.consumer import AlertConsumer
+sys.path.append('../../../common')
 import settings
+
+not_wanted = ['cutoutDifference',
+              'cutoutTemplate',
+              'cutoutScience',
+              'candidate',
+              'prv_candidates']
+def fink_content(message):
+    """ This function removes the voluminous part of tha alert leaving the Fink added value
+    """
+    wanted = {k: message[k] for k in message if k not in not_wanted}
+    return json.dumps(wanted, indent=2)
 
 # Fink configuration
 fink_config = {
@@ -15,13 +28,15 @@ consumer = AlertConsumer(settings.FINK_TOPICS, fink_config)
 
 nalert = 0
 maxtimeout = 5
-while 1:
+maxalerts = 5
+while nalert < maxalerts:
     (topic, alert, version) = consumer.poll(maxtimeout)
     if topic is None:
         break
 
     print(topic)
-    print(alert)
+    print(fink_content(alert))
     nalert += 1
 if nalert > 0:
-    print('\n-- %d from Fink at %s' % (nalert, datetime.now()))
+    print('\n-- %d from Fink at %s' % (nalert, datetime.datetime.now()))
+
