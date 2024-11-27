@@ -7,7 +7,7 @@
       register: git_tag
   tags: always
 
-- hosts: all
+- hosts: all 
   gather_facts: true
   vars_files:
     - settings.yaml
@@ -18,6 +18,35 @@
     - name: Get vault settings
       ansible.builtin.set_fact:
         settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+
+- hosts: all:!localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  roles:
+    - lasair_instance
+  tags: lasair_instance
+
+- hosts: web
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
+    cassandra_head: "{{ groups['cassandranodes'] }}"
+  roles:
+    - lasair_cephfs
+    - webserver
+  tags: web
+
+- hosts: all
+  gather_facts: true
+  vars_files:
+    - settings.yaml
+  tasks:
     - name: Get API token
       ansible.builtin.uri:
         url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
@@ -32,14 +61,6 @@
         powerapi_token: "{{ api_token_response.json.token }}"
   tags:
     - always
-
-- hosts: all:!localhost
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-  roles:
-    - lasair_instance
-  tags: lasair_instance
 
 - hosts: svc
   gather_facts: false
@@ -133,21 +154,6 @@
     - gkansible.gkservercollection.mariadb
     - filter
   tags: filter
-
-- hosts: web
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-    - exports.yaml
-  vars:
-    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
-    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
-    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
-    cassandra_head: "{{ groups['cassandranodes'] }}"
-  roles:
-    - lasair_cephfs
-    - webserver
-  tags: web
 
 - hosts: proxy
   gather_facts: false
