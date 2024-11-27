@@ -18,6 +18,8 @@
     - name: Get vault settings
       ansible.builtin.set_fact:
         settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+  tags:
+    - always
 
 - hosts: all:!localhost
   gather_facts: false
@@ -37,6 +39,7 @@
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     sherlock_svc_host: "{{ groups['sherlock'][0] }}"
     cassandra_head: "{{ groups['cassandranodes'] }}"
+    powerapi_token: "placeholder"
   roles:
     - lasair_cephfs
     - webserver
