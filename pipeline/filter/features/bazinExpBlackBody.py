@@ -2,7 +2,6 @@
 
 import math
 import numpy as np
-from .util import getMostFluxTimeBand
 
 # these come from from https://github.com/RoyWilliams/BBB
 import BBB.settings_bbb
