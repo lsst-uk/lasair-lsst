@@ -51,7 +51,7 @@
 {% set title = "Web Interface" %}
 {% set description = "Probe web interface" %}
 {% set h, w, x = (4, 3, 3) %}
-{% set expr = "probe_success{instance='https://" ~ lasair_name ~ "." ~ domain ~ "/'} OR on() vector(0)" %}
+{% set expr = "probe_success{instance='https://" ~ lasair_name ~ "." ~ domain ~ "/status/'} OR on() vector(0)" %}
 {% include 'service.j2' %}
 {% set title = "Public Kafka Interface" %}
 {% set description = "Probe public kafka interface" %}
