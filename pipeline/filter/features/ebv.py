@@ -17,7 +17,7 @@ class ebv(FeatureGroup):
 
         sfd = SFDQuery()
         c = SkyCoord(ra, decl, unit="deg", frame='icrs')
-        ebv = sfd(c)
+        ebv = float(sfd(c))
         return { 
             "ebv": ebv, 
         }
