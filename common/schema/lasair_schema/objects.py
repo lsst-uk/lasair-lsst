@@ -81,6 +81,10 @@ schema = {
     { "name": "bazinExpTempErr", "type": "float", 
         "doc": "Error of bazinExpTemp"},
 
+# Extinction
+    { "name": "ebv", "type": "float",
+        "doc": "Extinction E(B-V) Schlegel, Finkbeiner & Davis (1998)" },
+
 # timestamp for last modified
     {
       "name": "timestamp",
