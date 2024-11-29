@@ -5,6 +5,8 @@ from unittest import TestCase
 import json
 sys.path.append('../../../../pipeline/filter')
 sys.path.append('../../../../common/schema/lasair_schema')
+sys.path.append('../../../../pipeline/filter/features')
+sys.path.append('../../../../pipeline/filter/features/BBB')
 from objects import schema as objectSchema
 import features
 from features import *
@@ -80,7 +82,8 @@ class FeatureTest(TestCase):
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/402778310355976216.json") as f:
+#    with open("sample_alerts/402778310355976216.json") as f:
+    with open("sample_alerts/99999999999.json") as f:
       alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
