@@ -4,7 +4,7 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class extinction(FeatureGroup):
+class ebv(FeatureGroup):
     """Extinction"""
 
     _features = [
@@ -16,7 +16,7 @@ class extinction(FeatureGroup):
         decl = self.alert['diaObject']['decl']
 
         sfd = SFDQuery()
-        c = SkyCoord(ra, decl, frame='icrs')
+        c = SkyCoord(ra, decl, unit="deg", frame='icrs')
         ebv = sfd(c)
         return { 
             "ebv": ebv, 
