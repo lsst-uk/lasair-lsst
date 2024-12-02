@@ -243,7 +243,7 @@ gulp.task('copy:dist:js', function() {
 gulp.task('replace_1', function() {
 
     gulp.src([paths.src.node_modules + '/js9/js9.js'])
-        .pipe(replace('$(document).scrollTop(0);', ''))
+        .pipe(replace('this.displayConjq.focus();', ''))
     return gulp.src([paths.src.node_modules + '/js9/js9.js']) // Every file allown. 
         .pipe(replace('this.displayConjq.focus();', ''))
         .pipe(gulp.dest(paths.src.node_modules + '/js9/'))
