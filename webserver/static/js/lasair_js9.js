@@ -68,7 +68,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     chain(fns.shift());
-
     // This prevents the page from scrolling down to where it was previously.
     // if ('scrollRestoration' in history) {
     //     history.scrollRestoration = 'manual';
