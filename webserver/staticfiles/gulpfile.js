@@ -241,8 +241,10 @@ gulp.task('copy:dist:js', function() {
 
 // REPLACE BAD LINE IN JS9.js
 gulp.task('replace_1', function() {
-    return gulp.src([paths.src.node_modules + '/js9/js9.js']) // Every file allown. 
+
+    gulp.src([paths.src.node_modules + '/js9/js9.js'])
         .pipe(replace('$(document).scrollTop(0);', ''))
+    return gulp.src([paths.src.node_modules + '/js9/js9.js']) // Every file allown. 
         .pipe(replace('this.displayConjq.focus();', ''))
         .pipe(gulp.dest(paths.src.node_modules + '/js9/'))
 });
