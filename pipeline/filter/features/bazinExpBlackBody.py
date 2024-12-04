@@ -1,14 +1,12 @@
 # Fitting Bazin curves with pre-peak samples: Time-Wavelength
-
+import sys
+import json
 import math
 import numpy as np
+from features.FeatureGroup import FeatureGroup
 
 # these come from from https://github.com/RoyWilliams/BBB
-import BBB.settings_bbb
-import BBB.runBBB
-import BBB.coreBBB
-
-from features.FeatureGroup import FeatureGroup
+from features.BBB import BBBEngine
 
 class bazinExpBlackBody(FeatureGroup):
     """Min and Max time of the diaSources"""
@@ -37,16 +35,33 @@ class bazinExpBlackBody(FeatureGroup):
             np.seterr(over   ='ignore')
             np.seterr(invalid='ignore')
 
-        dict = BBB.runBBB.run(self.alert)
-        if not dict:
+        # only run the expensive BBB fit on 'SN', 'NT', 'ORPHAN'
+        go = False
+        try:
+            classification = self.alert['annotations']['sherlock']['classification']
+            go = (classification in ['SN', 'NT', 'ORPHAN'])
+        except:
             return fdict
-        if 'kr' in dict:
-            dict['k'] = dict['kr']
-            dict['kerr'] = dict['krerr']
-        fdict['bazinExpTemp']        = dict['T']
-        fdict['bazinExpRiseRate']    = dict['k']
-        fdict['bazinExpFallRate']    = dict.get('kf', None)
-        fdict['bazinExpTempErr']     = dict['Terr']
-        fdict['bazinExpRiseRateErr'] = dict['kerr']
-        fdict['bazinExpFallRateErr'] = dict.get('kferr', None)
+        if not go:
+            return fdict
+
+        BE = BBBEngine.BBB('LSST', verbose=False)
+        (fit_e, fit_b) =  BE.make_fit(self.alert)
+        # at some point we should put in AIC or BIC selection
+        # if both fits are made
+        if fit_e:
+            fit = fit_e
+        elif fit_b:
+            fit = fit_b
+            fit['k']    = fit['kr']
+            fit['kerr'] = fit['krerr']
+        else:
+            return fdict
+
+        fdict['bazinExpTemp']        = fit['T']
+        fdict['bazinExpRiseRate']    = fit['k']
+        fdict['bazinExpFallRate']    = fit.get('kf', None)
+        fdict['bazinExpTempErr']     = fit['Terr']
+        fdict['bazinExpRiseRateErr'] = fit['kerr']
+        fdict['bazinExpFallRateErr'] = fit.get('kferr', None)
         return fdict
