@@ -77,7 +77,7 @@ pipeline {
                     junit 'tests/unit/services/annotations/test-reports/*.xml'
                     // junit 'tests/unit/services/externalBrokers/test-reports/*.xml'
                     junit 'tests/unit/services/sherlock/test-reports/*.xml'
-                    cobertura coberturaReportFile: 'tests/unit/coverage.xml'
+                    recordCoverage(tools: [[parser: 'JUNIT', pattern: 'tests/unit/coverage.xml']])
                 }
             }
         }
