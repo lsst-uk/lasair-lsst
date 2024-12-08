@@ -25,6 +25,7 @@
         - scipy
         - skytag
         - dustmaps
+        - bazinBlackBody
 
 - name: Install dustmaps
   become: true
