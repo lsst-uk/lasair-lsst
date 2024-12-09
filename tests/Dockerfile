@@ -49,7 +49,8 @@ RUN pip3 install \
   gkhtm \
   gkdbutils \
   cassandra-driver \
-  fastavro
+  fastavro\
+  bazinBlackBody
 
 # required for MMA
 RUN pip3 install \
