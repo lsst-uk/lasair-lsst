@@ -5,9 +5,8 @@ import math
 import numpy as np
 from features.FeatureGroup import FeatureGroup
 
-# these come from from https://github.com/RoyWilliams/BBB
-sys.path.append('/home/ubuntu/BBB')
-from BBB import BBBEngine
+# these come from from https://github.com/RoyWilliams/bazinBlackBody
+from bazinBlackBody import BBBEngine
 
 class bazinExpBlackBody(FeatureGroup):
     """Min and Max time of the diaSources"""
