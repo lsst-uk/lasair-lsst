@@ -85,6 +85,19 @@ schema = {
     { "name": "ebv", "type": "float",
         "doc": "Extinction E(B-V) Schlegel, Finkbeiner & Davis (1998)" },
 
+# Colour from last Revisit
+    { "name": "revisit_mjd", "type": "float",
+        "doc": "Last revisit MJD" },
+
+    { "name": "revisit_colour_mag", "type": "float",
+        "doc": "Magnitude difference from last revisit" },
+
+    { "name": "revisit_colour_bands", "type": "string",
+        "doc": "Bands used for revisit colour, eg g-r, u-r" },
+
+    { "name": "revisit_colour_temp", "type": "float",
+        "doc": "Extinction corrected effective temperature from last revisit, kiloKelvin" },
+
 # timestamp for last modified
     {
       "name": "timestamp",
