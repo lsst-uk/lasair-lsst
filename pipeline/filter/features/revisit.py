@@ -4,8 +4,8 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class ebv(FeatureGroup):
-    """Extinction"""
+class revisit(FeatureGroup):
+    """Find the most recent revisit and derive colour information"""
 
     _features = [
         "revisit_mjd",
@@ -18,7 +18,7 @@ class ebv(FeatureGroup):
         fdict = {
             "revisit_mjd"         : None,
             "revisit_colour_mag"  : None,
-            "revisit_colour_bands": None,
+            "revisit_colour_bands": '',
             "revisit_colour_temp" : None,
         }
         ra   = self.alert['diaObject']['ra']

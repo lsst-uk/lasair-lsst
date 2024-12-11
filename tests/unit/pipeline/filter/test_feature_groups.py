@@ -6,7 +6,6 @@ import json
 sys.path.append('../../../../pipeline/filter')
 sys.path.append('../../../../common/schema/lasair_schema')
 sys.path.append('../../../../pipeline/filter/features')
-sys.path.append('../../../../pipeline/filter/features/BBB')
 from objects import schema as objectSchema
 import features
 from features import *

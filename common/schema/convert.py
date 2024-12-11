@@ -21,6 +21,7 @@ def sql_create_table(schema):
         elif primtype == 'long':     s += ' bigint'          # 63 bit with sign
         elif primtype == 'bigint':   s += ' bigint'          # 63 bit with sign
         elif primtype == 'date':     s += ' datetime(6)'
+        elif primtype == 'str':      s += ' varchar(16)'
         elif primtype == 'string':   s += ' varchar(16)'
         elif primtype == 'bigstring':s += ' varchar(80)'
         elif primtype == 'text':     s += ' text'

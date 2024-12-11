@@ -92,7 +92,7 @@ schema = {
     { "name": "revisit_colour_mag", "type": "float",
         "doc": "Magnitude difference from last revisit" },
 
-    { "name": "revisit_colour_bands", "type": "string",
+    { "name": "revisit_colour_bands", "type": "str",
         "doc": "Bands used for revisit colour, eg g-r, u-r" },
 
     { "name": "revisit_colour_temp", "type": "float",
