@@ -7,7 +7,10 @@ def sql_create_table(schema):
     # Build the CREATE TABLE statement for MySQL to create this table
     tablename = schema['name']
     lines = []
-    for f in schema['fields']:
+    fields = schema['fields']
+    if 'ext_fields' in schema:
+        fields += schema['ext_fields']
+    for f in fields:
         s = '`' + f['name'] + '`'
         primtype = ''
         if 'type'    in f: 
