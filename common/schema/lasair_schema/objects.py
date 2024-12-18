@@ -288,7 +288,13 @@ schema = {
   ]
 }
 if __name__ == "__main__":
+    print('<html><h2>Fields of the Lasair Object Schema</h2>')
+    print('<h3>Core Attributes</h3><table>')
     for f in schema['fields']:
-        print('%s -- %s' % (f['name'], f['doc']))
+        print('<tr><td><b>%s</b></td><td>%s</td></tr>' % (f['name'], f['doc']))
+    print('</table>')
+
+    print('<h3>Extended Attributes</h3><table>')
     for f in schema['ext_fields']:
-        print('%s -- %s' % (f['name'], f['doc']))
+        print('<tr><td><b>%s</b></td><td>%s</td>' % (f['name'], f['doc']))
+    print('</table></html>')
