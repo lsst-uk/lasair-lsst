@@ -16,23 +16,23 @@ schema = {
 {"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
 {"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
 
-    {"name":"g_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+    {"name":"g_psfFlux", "type":"float", "doc":"Latest g flux (nJy)"},
 {"name":"g_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
 {"name":"g_psfFluxMeanErr", "type":"float", "doc":"Standard error of g_psfFluxMean. (nJy)"},
 
-    {"name":"r_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+    {"name":"r_psfFlux", "type":"float", "doc":"Latest r flux (nJy)"},
 {"name":"r_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
 {"name":"r_psfFluxMeanErr", "type":"float", "doc":"Standard error of r_psfFluxMean. (nJy)"},
 
-    {"name":"i_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+    {"name":"i_psfFlux", "type":"float", "doc":"Latest i flux (nJy)"},
 {"name":"i_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
 {"name":"i_psfFluxMeanErr", "type":"float", "doc":"Standard error of i_psfFluxMean. (nJy)"},
 
-    {"name":"z_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+    {"name":"z_psfFlux", "type":"float", "doc":"Latest z flux (nJy)"},
 {"name":"z_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
 {"name":"z_psfFluxMeanErr", "type":"float", "doc":"Standard error of z_psfFluxMean. (nJy)"},
 
-    {"name":"y_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+    {"name":"y_psfFlux", "type":"float", "doc":"Latest y flux (nJy)"},
 {"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
 {"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
