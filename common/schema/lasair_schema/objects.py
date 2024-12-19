@@ -11,6 +11,30 @@ schema = {
     {"name": "pmRa",               "type":"float",   "doc":"Proper motion in right ascension (mas/yr)"},
     {"name": "pmDec",              "type":"float",   "doc":"Proper motion in declination (mas/yr)"},
 
+# Flux now / mean / err
+    {"name":"u_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
+{"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
+
+    {"name":"g_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"g_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
+{"name":"g_psfFluxMeanErr", "type":"float", "doc":"Standard error of g_psfFluxMean. (nJy)"},
+
+    {"name":"r_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"r_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
+{"name":"r_psfFluxMeanErr", "type":"float", "doc":"Standard error of r_psfFluxMean. (nJy)"},
+
+    {"name":"i_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"i_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
+{"name":"i_psfFluxMeanErr", "type":"float", "doc":"Standard error of i_psfFluxMean. (nJy)"},
+
+    {"name":"z_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"z_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
+{"name":"z_psfFluxMeanErr", "type":"float", "doc":"Standard error of z_psfFluxMean. (nJy)"},
+
+    {"name":"y_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
+{"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
 # Counting
     {"name": "nSources",  "type": "int", "doc": "Number of diaSources associated with this diaObject", "extra": "NOT NULL"},
@@ -135,8 +159,8 @@ schema = {
 {"name":"u_psfFluxMAD", "type":"float", "doc":"Median absolute deviation u band fluxes. (nJy)"},
 {"name":"u_psfFluxMax", "type":"float", "doc":"Maximum observed u band fluxes. (nJy)"},
 {"name":"u_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between u band flux obsevations max(delta_flux/delta_time). (nJy/d)"},
-{"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
-{"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
+#{"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
+#{"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
 {"name":"u_psfFluxMin", "type":"float", "doc":"Minimum observed u band fluxes. (nJy)"},
 {"name":"u_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute u_psfFluxChi2. ()"},
 {"name":"u_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the u band fluxes. (nJy)"},
@@ -161,8 +185,8 @@ schema = {
 {"name":"g_psfFluxMAD", "type":"float", "doc":"Median absolute deviation g band fluxes. (nJy)"},
 {"name":"g_psfFluxMax", "type":"float", "doc":"Maximum observed g band fluxes. (nJy)"},
 {"name":"g_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between g band flux obsevations max(delta_flux/delta_time). (nJy/d)"},
-{"name":"g_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
-{"name":"g_psfFluxMeanErr", "type":"float", "doc":"Standard error of g_psfFluxMean. (nJy)"},
+#{"name":"g_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
+#{"name":"g_psfFluxMeanErr", "type":"float", "doc":"Standard error of g_psfFluxMean. (nJy)"},
 {"name":"g_psfFluxMin", "type":"float", "doc":"Minimum observed g band fluxes. (nJy)"},
 {"name":"g_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute g_psfFluxChi2. ()"},
 {"name":"g_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the g band fluxes. (nJy)"},
@@ -187,8 +211,8 @@ schema = {
 {"name":"r_psfFluxMAD", "type":"float", "doc":"Median absolute deviation r band fluxes. (nJy)"},
 {"name":"r_psfFluxMax", "type":"float", "doc":"Maximum observed r band fluxes. (nJy)"},
 {"name":"r_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between r band flux obsevations max(delta_flux/delta_time). (nJy/d)"},
-{"name":"r_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
-{"name":"r_psfFluxMeanErr", "type":"float", "doc":"Standard error of r_psfFluxMean. (nJy)"},
+#{"name":"r_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
+#{"name":"r_psfFluxMeanErr", "type":"float", "doc":"Standard error of r_psfFluxMean. (nJy)"},
 {"name":"r_psfFluxMin", "type":"float", "doc":"Minimum observed r band fluxes. (nJy)"},
 {"name":"r_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute r_psfFluxChi2. ()"},
 {"name":"r_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the r band fluxes. (nJy)"},
@@ -213,8 +237,8 @@ schema = {
 {"name":"i_psfFluxMAD", "type":"float", "doc":"Median absolute deviation i band fluxes. (nJy)"},
 {"name":"i_psfFluxMax", "type":"float", "doc":"Maximum observed i band fluxes. (nJy)"},
 {"name":"i_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between i band flux obsevations max(delta_flux/delta_time). (nJy/d)"},
-{"name":"i_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
-{"name":"i_psfFluxMeanErr", "type":"float", "doc":"Standard error of i_psfFluxMean. (nJy)"},
+#{"name":"i_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
+#{"name":"i_psfFluxMeanErr", "type":"float", "doc":"Standard error of i_psfFluxMean. (nJy)"},
 {"name":"i_psfFluxMin", "type":"float", "doc":"Minimum observed i band fluxes. (nJy)"},
 {"name":"i_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute i_psfFluxChi2. ()"},
 {"name":"i_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the i band fluxes. (nJy)"},
@@ -239,8 +263,8 @@ schema = {
 {"name":"z_psfFluxMAD", "type":"float", "doc":"Median absolute deviation z band fluxes. (nJy)"},
 {"name":"z_psfFluxMax", "type":"float", "doc":"Maximum observed z band fluxes. (nJy)"},
 {"name":"z_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between z band flux obsevations max(delta_flux/delta_time). (nJy/d)"},
-{"name":"z_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
-{"name":"z_psfFluxMeanErr", "type":"float", "doc":"Standard error of z_psfFluxMean. (nJy)"},
+#{"name":"z_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
+#{"name":"z_psfFluxMeanErr", "type":"float", "doc":"Standard error of z_psfFluxMean. (nJy)"},
 {"name":"z_psfFluxMin", "type":"float", "doc":"Minimum observed z band fluxes. (nJy)"},
 {"name":"z_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute z_psfFluxChi2. ()"},
 {"name":"z_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the z band fluxes. (nJy)"},
@@ -265,8 +289,8 @@ schema = {
 {"name":"y_psfFluxMAD", "type":"float", "doc":"Median absolute deviation y band fluxes. (nJy)"},
 {"name":"y_psfFluxMax", "type":"float", "doc":"Maximum observed y band fluxes. (nJy)"},
 {"name":"y_psfFluxMaxSlope", "type":"float", "doc":"Maximum slope between y band flux obsevations max(delta_flux/delta_time) (nJy/d)"},
-{"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
-{"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
+#{"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
+#{"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
 {"name":"y_psfFluxMin", "type":"float", "doc":"Minimum observed y band fluxes. (nJy)"},
 {"name":"y_psfFluxNdata", "type":"int", "doc":"The number of data points used to compute y_psfFluxChi2. ()"},
 {"name":"y_psfFluxPercentile05", "type":"float", "doc":"Value at the 5% percentile of the y band fluxes. (nJy)"},
@@ -288,13 +312,13 @@ schema = {
   ]
 }
 if __name__ == "__main__":
-    print('<html><h2>Fields of the Lasair Object Schema</h2>')
-    print('<h3>Core Attributes</h3><table>')
+    print('Fields of the Lasair Object Schema')
+    print('--------------------------')
+    print('(1) Core Attributes')
     for f in schema['fields']:
-        print('<tr><td><b>%s</b></td><td>%s</td></tr>' % (f['name'], f['doc']))
-    print('</table>')
+        print('%25s: %s' % (f['name'], f['doc']))
 
-    print('<h3>Extended Attributes</h3><table>')
+    print('--------------------------')
+    print('(2)Extended Attributes')
     for f in schema['ext_fields']:
-        print('<tr><td><b>%s</b></td><td>%s</td>' % (f['name'], f['doc']))
-    print('</table></html>')
+        print('%25s: %s' % (f['name'], f['doc']))
