@@ -57,9 +57,6 @@ schema = {
     {"name": "nearbyObj1LnP",     "type":"float",    "doc":"Natural log of the probability that the observed diaObject is the same as the nearbyObj1."},
     {"name": "nearbyLowzGal",     "type":"str",      "doc":"External catalog name of the nearest low-z potential host."},
     {"name": "nearbyLowzGalSep",  "type":"float",    "doc":"Separation distance of nearbyLowzGal. (arcsc)"},
-    {"name":"nearbyObj1", "type":"long", "doc":"Id of the closest nearby object. ()"},
-    {"name":"nearbyObj1Dist", "type":"float", "doc":"Distance to nearbyObj1. (arcsec)"},
-    {"name":"nearbyObj1LnP", "type":"float", "doc":"Natural log of the probability that the observed diaObject is the same as the nearbyObj1. ()"},
 
 # Sherlock
     {"name": "absMag", "type": "float", "doc":"Most recent absolute magnitude if host galaxy with distance available"},

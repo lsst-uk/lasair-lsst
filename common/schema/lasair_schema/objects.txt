@@ -41,9 +41,6 @@ Fields of the Lasair Object Schema
             nearbyObj1LnP: Natural log of the probability that the observed diaObject is the same as the nearbyObj1.
             nearbyLowzGal: External catalog name of the nearest low-z potential host.
          nearbyLowzGalSep: Separation distance of nearbyLowzGal. (arcsc)
-               nearbyObj1: Id of the closest nearby object. ()
-           nearbyObj1Dist: Distance to nearbyObj1. (arcsec)
-            nearbyObj1LnP: Natural log of the probability that the observed diaObject is the same as the nearbyObj1. ()
                    absMag: Most recent absolute magnitude if host galaxy with distance available
               BBBRiseRate: Fitted Bazin or Exp rise rate
               BBBFallRate: Fitted Bazin or Exp fall rate
