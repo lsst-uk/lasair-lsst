@@ -8,18 +8,18 @@ class revisit(FeatureGroup):
     """Find the most recent revisit and derive colour information"""
 
     _features = [
-        "revisit_mjd",
-        "revisit_colour_mag",
-        "revisit_colour_bands",
-        "revisit_colour_temp",
+        "latest_revisit_mjd",
+        "latest_revisit_colour_mag",
+        "latest_revisit_colour_bands",
+        "latest_revisit_colour_temp",
     ]    
 
     def run(self):
         fdict = {
-            "revisit_mjd"         : None,
-            "revisit_colour_mag"  : None,
-            "revisit_colour_bands": '',
-            "revisit_colour_temp" : None,
+            "latest_revisit_mjd"         : None,
+            "latest_revisit_colour_mag"  : None,
+            "latest_revisit_colour_bands": '',
+            "latest_revisit_colour_temp" : None,
         }
         ra   = self.alert['diaObject']['ra']
         decl = self.alert['diaObject']['decl']

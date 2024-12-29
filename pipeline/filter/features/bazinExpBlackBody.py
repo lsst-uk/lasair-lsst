@@ -12,22 +12,16 @@ class bazinExpBlackBody(FeatureGroup):
     """Min and Max time of the diaSources"""
 
     _features = [
-        "bazinExpRiseRate", 
-        "bazinExpFallRate", 
-        "bazinExpTemp",
-        "bazinExpRiseRateErr", 
-        "bazinExpFallRateErr", 
-        "bazinExpTempErr",
+        "BBBRiseRate", 
+        "BBBFallRate", 
+        "BBBTemp",
     ]
 
     def run(self):
         fdict = {
-            'bazinExpTemp': None, 
-            'bazinExpRiseRate': None, 
-            'bazinExpFallRate': None,
-            'bazinExpTempErr': None, 
-            'bazinExpRiseRateErr': None, 
-            'bazinExpFallRateErr': None,
+            'BBBRiseRate': None, 
+            'BBBFallRate': None,
+            'BBBTemp': None, 
         }
 
         # no whinging about overflows during normal running
@@ -58,10 +52,7 @@ class bazinExpBlackBody(FeatureGroup):
         else:
             return fdict
 
-        fdict['bazinExpTemp']        = fit['T']
-        fdict['bazinExpRiseRate']    = fit['k']
-        fdict['bazinExpFallRate']    = fit.get('kf', None)
-        fdict['bazinExpTempErr']     = fit['Terr']
-        fdict['bazinExpRiseRateErr'] = fit['kerr']
-        fdict['bazinExpFallRateErr'] = fit.get('kferr', None)
+        fdict['BBBTemp']        = fit['T']
+        fdict['BBBRiseRate']    = fit['k']
+        fdict['BBBFallRate']    = fit.get('kf', None)
         return fdict

@@ -4,11 +4,12 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class ebv(FeatureGroup):
-    """Extinction"""
+class milkyWay(FeatureGroup):
+    """Extinction and glacatic latitude"""
 
     _features = [
         "ebv",
+        "glat",
     ]    
 
     def run(self):
@@ -20,4 +21,5 @@ class ebv(FeatureGroup):
         ebv = float(sfd(c))
         return { 
             "ebv": ebv, 
+            "glat": None,
         }

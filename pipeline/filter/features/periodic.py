@@ -4,14 +4,16 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class sherlock(FeatureGroup):
-    """Extinction"""
+class periodic(FeatureGroup):
+    """Periodic behaviour"""
 
     _features = [
-        "absMag",
+        "period",
+        "period_entropy",
     ]    
 
     def run(self):
         return { 
-            "absMag": None, 
+            "period": None, 
+            "period_entropy": None,
         }

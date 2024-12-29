@@ -4,14 +4,16 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class sherlock(FeatureGroup):
-    """Extinction"""
+class meanChange(FeatureGroup):
+    """Change of mean last 10, 20 days"""
 
     _features = [
-        "absMag",
+        "mean10change",
+        "mean20change",
     ]    
 
     def run(self):
         return { 
-            "absMag": None, 
+            "mean10change": None, 
+            "mean20change": None, 
         }
