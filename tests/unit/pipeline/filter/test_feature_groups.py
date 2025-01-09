@@ -48,15 +48,16 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/402778310355976216.json") as f:
-      alert = json.load(f)
+    with open("sample_alerts/402778310355976216.json") as f_in, open("sample_alerts/402778310355976216_object.json") as f_out:
+      sample_alert = json.load(f_in)
+      sample_output = json.load(f_out)
       output = {}
       schema = {}
       for group in features.__all__:
         groupModule = getattr(features, group)
         groupClass = getattr(groupModule, group)
         schema.update(groupClass.get_schema())
-        groupInst = groupClass(alert, verbose=True)
+        groupInst = groupClass(sample_alert, verbose=True)
         output.update(groupInst.run())
         #print(groupInst.run())
       # check the output exists
@@ -76,6 +77,9 @@ class FeatureTest(TestCase):
           (isinstance(output[name], eval(type))) or
           (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
           )
+        # check that the content is correct (or None)
+        if output[name] is not None:
+          self.assertEqual(output[name], sample_output[name], msg=name)
 
   def test4_run_all(self):
     """Test the run_all method"""
