@@ -79,7 +79,10 @@ class FeatureTest(TestCase):
           )
         # check that the content is correct (or None)
         if output[name] is not None:
-          self.assertEqual(output[name], sample_output[name], msg=name)
+          if isinstance(output[name], float):
+            self.assertAlmostEqual(output[name], sample_output[name], msg=name)
+          else:
+            self.assertEqual(output[name], sample_output[name], msg=name)
 
   def test4_run_all(self):
     """Test the run_all method"""
