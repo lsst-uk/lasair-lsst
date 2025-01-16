@@ -4,14 +4,19 @@ schema = {
 
 # These copied from the LSST diaObject
 # https://sdm-schemas.lsst.io/apdb.html
+
+{"section":"Basic information", "doc":"ID, position, proper motion"},
     {"name": "diaObjectId",        "type": "long",   "doc": "ID for this object", "extra": "NOT NULL" },
     {"name": "ra",                 "type": "double", "doc": "Mean RA of this object" },
     {"name": "decl",               "type": "double", "doc": "Mean Dec of this object"},
-    {"name":"radecMjdTai", "type":"double", "doc":"Time at which the object was at a position ra/dec ()"},
     {"name": "pmRa",               "type":"float",   "doc":"Proper motion in right ascension (mas/yr)"},
     {"name": "pmDec",              "type":"float",   "doc":"Proper motion in declination (mas/yr)"},
 
-# Flux now / mean / err
+{"section":"Lightcurve interval", "doc":"MJD of the first and last diaSource of this diaObject"},
+    {"name":  "lastDiaSourceMJD", "type": "double", "doc": "Latest MJD of a diaSource" },
+    {"name": "firstDiaSourceMJD", "type": "double", "doc": "Earliest MJD of a diaSource" },
+
+{"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
     {"name":"u_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
 {"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
 {"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
@@ -36,7 +41,7 @@ schema = {
 {"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
 {"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
-# Counting
+{"section":"Counting", "doc":"Counts of diaSources of different bands"},
     {"name": "nSources",  "type": "int", "doc": "Number of diaSources associated with this diaObject", "extra": "NOT NULL"},
     {"name": "nuSources", "type": "int", "doc": "Number of u sources" },
     {"name": "ngSources", "type": "int", "doc": "Number of u sources" },
@@ -45,11 +50,7 @@ schema = {
     {"name": "nzSources", "type": "int", "doc": "Number of u sources" },
     {"name": "nySources", "type": "int", "doc": "Number of u sources" },
 
-# Min and Max time. Note Max-Min is less than a year
-    {"name": "maxTai", "type": "double", "doc": "Latest MJD of a diaSource" },
-    {"name": "minTai", "type": "double", "doc": "Earliest MJD of a diaSource" },
-
-# Nearest objects fron LSST catalog
+{"section":"Nearest", "doc":"Nearest objects from LSST and other catalogs"},
     {"name": "nearbyExtObj1",     "type":"long",     "doc":"Id of the closest extended DR Object by second moment-based separation."},
     {"name": "nearbyExtObj1Sep",  "type":"float",    "doc":"Second moment-based separation of nearbyExtObj1 (unitless)."},
     {"name": "nearbyObj1",        "type":"long",     "doc":"Id of the closest nearby object."},
@@ -58,34 +59,34 @@ schema = {
     {"name": "nearbyLowzGal",     "type":"str",      "doc":"External catalog name of the nearest low-z potential host."},
     {"name": "nearbyLowzGalSep",  "type":"float",    "doc":"Separation distance of nearbyLowzGal. (arcsc)"},
 
-# Sherlock
-    {"name": "absMag", "type": "float", "doc":"Most recent absolute magnitude if host galaxy with distance available"},
+{"section":"Absolute magnitude", "doc":"Brightness at 1 parsec"},
+    {"name": "absMag", "type": "float", "doc":"Brightest peak absolute magnitude if host galaxy with distance available"},
 
-# Bazin-Exp-Blackbody
 # https://roywilliams.github.io/papers/Bazin_Exp_Blackbody.pdf
+{"section":"BazinBlackBody (BBB)", "doc":"Lightcurve fit as Bazin or Exp in time, Blackbody in wavelength"},
     {"name": "BBBRiseRate", "type": "float", "doc": "Fitted Bazin or Exp rise rate" },
-    {"name": "BBBFallRate", "type": "float", "doc": "Fitted Bazin or Exp fall rate" },
+    {"name": "BBBFallRate", "type": "float", "doc": "Fitted Bazin fall rate or NULL if Exp" },
     {"name": "BBBTemp",     "type": "float", "doc": "Fitted Bazin temperature, kiloKelvins" },
 
-# Milky way
+{"section":"Milky Way", "doc":"Galactic latitude and extinction"},
     {"name": "glat", "type": "float", "doc": "Galactic latitude" },
     {"name": "ebv", "type": "float", "doc": "Extinction E(B-V) Schlegel, Finkbeiner & Davis (1998)" },
 
 # Student t-test for change of mean brightness
-# mean last 10 days compared to mean previous 10 days
-    {"name": "mean10change", "type": "float", "doc": "p-value for change of mean brightness: last 10 days versus 10 before that"},
-    {"name": "mean20change", "type": "float", "doc": "p-value for change of mean brightness: last 20 days versus 20 before that"},
+{"section":"Jump detector", "doc":"Number of sigma jump from 20 day mean"},
+    {"name": "jumpFromMean20", "type": "float", "doc": "Number of sigma jump of recent flux from previous 20 days"},
 
-# Colour from latest Revisit
-    {"name": "latest_revisit_mjd",         "type": "float", "doc": "Latest revisit MJD" },
-    {"name": "latest_revisit_colour_mag",  "type": "float", "doc": "Magnitude difference from latest revisit" },
-    {"name": "latest_revisit_colour_bands","type": "str",   "doc": "Bands used for revisit colour, eg g-r, u-r" },
-    {"name": "latest_revisit_colour_temp", "type": "float", "doc": "Extinction corrected effective temperature from latest revisit, kiloKelvin" },
+{"section":"Revisit colours", "doc":"Colours from 33-minute revisits"},
+    {"name": "latest_rv_mjd",         "type": "float", "doc": "Latest revisit MJD" },
+    {"name": "latest_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from latest revisit" },
+    {"name": "latest_rv_colour_bands","type": "str",   "doc": "Bands used for latest revisit colour, eg g-r, u-r" },
+    {"name": "latest_rv_colour_temp", "type": "float", "doc": "Effective temperature from latest revisit, kiloKelvin" },
+    {"name": "penultimate_rv_mjd",         "type": "float", "doc": "Penultimate revisit MJD" },
+    {"name": "penultimate_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from Penultimate revisit" },
+    {"name": "penultimate_rv_colour_bands","type": "str",   "doc": "Bands used for penultimate revisit colour, eg g-r, u-r" },
+    {"name": "penultimate_rv_colour_temp", "type": "float", "doc": "Effective temperature from penultimate revisit, kiloKelvin" },
 
-# Periodic
-    {"name": "period",         "type": "float", "doc": "Estimate of period (or NULL)" },
-    {"name": "period_entropy",  "type": "float", "doc": "Quality of period estimate (lower is better)" },
-
+{"section":"Utility", "doc":"Other attributes"},
 # HTM index
     {"name": "htm16", "type": "long", "doc": "Hierarchical Triangular Mesh level 16", "extra": "NOT NULL" },
 # timestamp for last modified
@@ -309,13 +310,21 @@ schema = {
   ]
 }
 if __name__ == "__main__":
-    print('Fields of the Lasair Object Schema')
-    print('--------------------------')
-    print('(1) Core Attributes')
+    print('<h2>Fields of the Lasair Object Schema</h2>')
+    print('<h3>Core Attributes</h3>')
+    print('<table border=1>')
     for f in schema['fields']:
-        print('%25s: %s' % (f['name'], f['doc']))
+        if 'section' in f:
+            print('</table>')
+            print('<p><b>%s</b>: %s' % (f['section'], f['doc']))
+            print('<table border=1>')
+        elif 'name' in f:
+            print('<tr><td><tt>%s</tt></td><td>%s</td>' % (f['name'], f['doc']))
+    print('</table>')
 
-    print('--------------------------')
-    print('(2)Extended Attributes')
+    print('<h3>Extended Attributes</h3><table>')
+    print('<table border=1>')
     for f in schema['ext_fields']:
-        print('%25s: %s' % (f['name'], f['doc']))
+       if 'name' in f:
+            print('<tr><td><tt>%s</tt></td><td>%s</td>' % (f['name'], f['doc']))
+    print('</table>')

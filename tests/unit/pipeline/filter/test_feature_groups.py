@@ -19,8 +19,9 @@ class FeatureTest(TestCase):
       groupClass = getattr(groupModule, group)
       impl_features.update(groupClass.get_features())
     for feature in objectSchema['fields']:
-      name = feature['name']
-      self.assertIn(name, impl_features)
+        if 'name' in feature:
+            name = feature['name']
+            self.assertIn(name, impl_features)
 
   def test1_get_schema(self):
     """Check that for every feature group we can get the schema."""
@@ -65,6 +66,8 @@ class FeatureTest(TestCase):
       self.assertTrue(isinstance(output, dict))
       # check the output matches the schema
       for feature in schema:
+        if not 'name' in feature:
+            continue
         name = schema[feature]['name']
         type = schema[feature]['type']
         if name == 'timestamp':

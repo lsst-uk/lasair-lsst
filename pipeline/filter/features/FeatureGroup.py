@@ -70,6 +70,8 @@ class FeatureGroup:
         schema = {}
         our_features = cls.get_features()
         for feature in objectSchema['fields']:
+            if not 'name' in feature:
+                continue
             name = feature['name']
             if name in our_features:
                 schema[name] = feature

@@ -11,6 +11,8 @@ def sql_create_table(schema):
     if 'ext_fields' in schema:
         fields += schema['ext_fields']
     for f in fields:
+        if not 'name' in f:
+            continue
         s = '`' + f['name'] + '`'
         primtype = ''
         if 'type'    in f: 
@@ -56,6 +58,8 @@ def cql_create_table(schema):
     tablename = schema['name']
     lines = []
     for f in schema['fields']:
+        if not 'name' in f:
+            continue
         s = '"' + f['name'] + '"'
         primtype = ''
         if 'type'    in f: 
