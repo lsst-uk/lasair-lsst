@@ -67,6 +67,7 @@
         executable: pip3
         name:
           - parallel-ssh
+        extra_args: "--break-system-packages"
 
   - name: Install vault snap
     become: true
