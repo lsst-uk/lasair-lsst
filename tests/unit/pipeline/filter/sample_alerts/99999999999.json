@@ -2,7 +2,8 @@
   "diaObject": {
     "diaObjectId": 99999999999,
     "ra": 123.0,
-    "decl": 23.0
+    "decl": 23.0,
+    "firstDiaSourceMJD": 60000
   },
   "diaSourcesList": [
     {

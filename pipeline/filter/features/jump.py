@@ -4,16 +4,14 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class meanChange(FeatureGroup):
-    """Change of mean last 10, 20 days"""
+class jump(FeatureGroup):
+    """Jump from mean of 20 days"""
 
     _features = [
-        "mean10change",
-        "mean20change",
+        "jumpFromMean20",
     ]    
 
     def run(self):
         return { 
-            "mean10change": None, 
-            "mean20change": None, 
+            "jumpFromMean20": None, 
         }

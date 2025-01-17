@@ -8,7 +8,6 @@ class diaObjectCopy(FeatureGroup):
         'diaObjectId',
         'ra', 
         'decl',
-        'radecMjdTai',
         'pmRa', 
         'pmDec',
         'u_psfFlux',

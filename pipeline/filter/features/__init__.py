@@ -5,7 +5,6 @@ __all__ = [
     "sherlock",
     "bazinExpBlackBody",
     "milkyWay",
-    "meanChange",
+    "jump",
     "revisit",
-    "periodic",
 ]

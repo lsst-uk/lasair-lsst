@@ -13,8 +13,8 @@ class counting(FeatureGroup):
         "niSources",
         "nzSources",
         "nySources",
-        "minTai",
-        "maxTai"
+        "firstDiaSourceMJD",
+        "lastDiaSourceMJD"
     ]    
 
     def run(self):
@@ -25,8 +25,8 @@ class counting(FeatureGroup):
         if self.verbose:
             print('Found %d sources' % len(time))
         if len(time) > 0:
-            minTai = min(time)
-            maxTai = max(time)
+            firstDiaSourceMJD = self.alert['diaObject']['firstDiaSourceMJD']
+            lastDiaSourceMJD = max(time)
             nSources = len(time)
         else:
             return None
@@ -39,7 +39,7 @@ class counting(FeatureGroup):
             "niSources": nSource['i'],
             "nzSources": nSource['z'],
             "nySources": nSource['y'],
-            "minTai"   : minTai, 
-            "maxTai"   : maxTai,
+            "firstDiaSourceMJD"   : firstDiaSourceMJD, 
+            "lastDiaSourceMJD"    : lastDiaSourceMJD,
         }
         return out
