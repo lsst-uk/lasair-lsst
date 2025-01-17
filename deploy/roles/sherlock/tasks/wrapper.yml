@@ -13,6 +13,7 @@
     name:
       - confluent-kafka
       - multiprocessing-logging
+    extra_args: "--break-system-packages"
 
 - name: Make sure the repo is up to date
   git:

@@ -7,20 +7,22 @@
     pkg:
       - docker.io 
       - docker-compose
+      - python3-docker
+      - python3-compose
     state: present
     update-cache: yes
 
-- name: "Install pip"
-  become: true
-  apt:
-    pkg:
-      - python3-pip
-    state: present
-    update-cache: yes
-
-- name: "Install docker python modules"
-  become: true
-  pip:
-    name:
-      - docker
-      - docker-compose
+#- name: "Install pip"
+#  become: true
+#  apt:
+#    pkg:
+#      - python3-pip
+#    state: present
+#    update-cache: yes
+#
+#- name: "Install docker python modules"
+#  become: true
+#  pip:
+#    name:
+#      - docker
+#      - docker-compose
