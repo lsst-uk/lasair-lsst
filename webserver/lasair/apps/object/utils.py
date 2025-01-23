@@ -7,6 +7,21 @@ import numpy as np
 bands  = ['u', 'g', 'r', 'i', 'z', 'y']
 bandColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
 
+# Coloring for Colorblindness
+# https://davidmathlogic.com/colorblind
+magcolor  = '#D41159'
+fluxcolor = '#1A85FF'
+
+def flux2mag(flux):   # nanoJansky to Magnitude
+    if flux > 0: 
+        mag = 31.4 - 2.5 * math.log10(flux)
+        return mag
+    else:        
+        return None
+
+def mag2flux(mag):    # Magnitude to nanoJansky
+    return math.pow(10.0, (31.4 - mag)/2.5)
+
 def object_difference_lightcurve(
     objectData
 ):
@@ -52,7 +67,7 @@ def object_difference_lightcurve(
         BandData["name"] = band + "-band flux detection"
         allDataSets.append(BandData)
 
-    # START TO PLOT
+    # START TO PLOT LOG flux
     from plotly.subplots import make_subplots
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     # fig = go.Figure()
@@ -60,13 +75,14 @@ def object_difference_lightcurve(
     for data in allDataSets:
         if len(data.index):
             dataType = "Diff Mag"
-            error_y = {'type': 'data', 'array': data["sigmapsf"]}
+            error_y = {'type': 'data', 'array': data["nanojanskyerr"]}
+
             fig.add_trace(
 
                 go.Scatter(
                     x=data["mjd"],
-                    y=data["magpsf"],
-                    customdata=np.stack((data['utc'], data['magpsf'], data['sigmapsf']), axis=-1),
+                    y=data["nanojansky"],
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
                     error_y_color=data["bcolor"].values[0],
@@ -81,21 +97,22 @@ def object_difference_lightcurve(
                     hovertemplate="<b>" + data["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
-                    "Magnitude: %{customdata[1]:.2f} ± %{customdata[2]:.2f}" +
+                    "Flux: %{customdata[1]:.2f} nJy<br>" +
+                    "Magnitude: %{customdata[2]:.2f}" +
                     "<extra></extra>",
                 ),
                 secondary_y=False
             )
             fig.add_traces(
                 go.Scatter(x=data["utc"],
-                           y=data["magpsf"],
+                           y=data["nanojansky"],
                            showlegend=False,
                            opacity=0,
                            hoverinfo='skip',
                            xaxis="x2"))
 
     # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(forcedDF, unforcedDF)
+    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax = get_default_axis_ranges(forcedDF, unforcedDF)
 
     if forcedDF is None:
         title = "MJD"
@@ -121,10 +138,12 @@ def object_difference_lightcurve(
                               'linecolor': '#1F2937'})
 
     fig.update_yaxes(
-        range=[magMax, magMin],
+        range=[math.log10(uffluxMin), math.log10(uffluxMax)],
+        type="log",
         tickformat='.1f',
         tickfont_size=14,
         ticksuffix=" ",
+        tickfont_color=fluxcolor,
         showline=True,
         showgrid=True,
         linewidth=1.5,
@@ -136,9 +155,26 @@ def object_difference_lightcurve(
         zerolinecolor='#1F2937',
         mirror=True,
         ticks='inside',
-        title="Difference Magnitude",
+        title="Log Difference Flux (nanoJy)",
         title_font_size=16,
+        title_font_color=fluxcolor,
         secondary_y=False,
+    )
+    fig.update_yaxes(   # RDW:log right axis
+        range=[flux2mag(uffluxMin), flux2mag(uffluxMax)],
+        secondary_y=True,   # right side
+        showgrid=False,
+        tickformat='.1f',
+        tickfont_size=14,
+        tickfont_color=magcolor,
+        tickcolor=magcolor,
+        ticksuffix=" ",
+        showline=True,
+        linewidth=1.5,
+        ticks='inside',
+        title_text="Difference Magnitude",
+        title_font_size=16,
+        title_font_color=magcolor,
     )
 
     # UPDATE PLOT LAYOUT
@@ -168,7 +204,7 @@ def object_difference_lightcurve(
 
     fig.add_trace(go.Scatter(
         x=discovery["mjd"],
-        y=[magMax - 0.05],
+        y=[uffluxMin*1.05],
         mode="markers+text",
         marker_symbol="triangle-up",
         marker_opacity=1,
@@ -178,9 +214,23 @@ def object_difference_lightcurve(
         text=["Discovery Epoch"],
         textposition="middle right"
     ))
+    fig.add_trace(go.Scatter(  # RDW Log: need add_trace or right axis wont show
+        x=discovery["mjd"],
+        y=[uffluxMin*1.05],
+        mode="markers+text",
+        marker_symbol="triangle-up",
+        marker_opacity=1,
+        marker_color="#1F2937",
+        marker_size=8,
+        showlegend=False,
+        text=["Discovery Epoch"],
+        textposition="middle right"
+    ),
+    secondary_y=True
+    )
 
     fig.update_layout(
-        title=dict(text="Standard Photometry Magnitudes", font=dict(size=20), y=0.85,
+        title=dict(text="Standard Photometry Flux", font=dict(size=20), y=0.85,
                    x=0.5,
                    xanchor='center',
                    yanchor='top',
@@ -256,9 +306,9 @@ def object_difference_lightcurve_forcedphot(
             fig.add_trace(
 
                 go.Scatter(
-                    x=data["midpointmjdtai"],
+                    x=data["midpointMjdTai"],
                     y=data["nanojansky"],
-                    customdata=np.stack((data['utc'], data['nanojansky'], data['nanojanskyerr']), axis=-1),
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     error_y=error_y,
                     error_y_thickness=0.7,
                     error_y_color=data["bcolor"].values[0],
@@ -274,7 +324,8 @@ def object_difference_lightcurve_forcedphot(
                     hovertemplate="<b>" + data["name"] + "</b><br>" +
                     "MJD: %{x:.2f}<br>" +
                     "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{customdata[1]:.2f} ± %{customdata[2]:.2f} μJy" +
+                    "Flux: %{customdata[1]:.2f} nJy<br>" +
+                    "Magnitude: %{customdata[2]:.2f}" +
                     "<extra></extra>",
                 ),
                 secondary_y=False
@@ -289,7 +340,7 @@ def object_difference_lightcurve_forcedphot(
                            xaxis="x2"))
 
     # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(forcedDF, unforcedDF)
+    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax = get_default_axis_ranges(forcedDF, unforcedDF)
 
     fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=14, showline=True, linewidth=1.5, linecolor='#1F2937',
                      gridcolor='#F0F0F0', gridwidth=1,
@@ -310,6 +361,7 @@ def object_difference_lightcurve_forcedphot(
         tickformat='.1f',
         tickfont_size=14,
         ticksuffix=" ",
+        tickfont_color=fluxcolor,
         showline=True,
         linewidth=1.5,
         linecolor='#1F2937',
@@ -322,7 +374,42 @@ def object_difference_lightcurve_forcedphot(
         ticks='inside',
         title="Difference Flux (nanoJy)",
         title_font_size=16,
+        title_font_color=fluxcolor,
         secondary_y=False
+    )
+        # Right (magnitude) frame
+    ticktext = []
+    tickvals = []
+    n = 0
+    for _mag in range(20, 55):
+        mag = 0.5 * _mag # 10 to 29 with halves
+        flux = mag2flux(float(mag))
+        tickvals.append(flux)
+        ticktext.append(str(mag))
+        if flux > fluxMin and flux < fluxMax:
+            n += 1
+    if n > 0:
+        title = "Difference magnitude"
+    else:
+        title = ''
+    fig.update_yaxes(    # RDW:Linear right axis
+        range=[fluxMin, fluxMax],
+        ticktext=ticktext,
+        tickvals=tickvals,
+        tickfont_color=magcolor,
+        showgrid=False,
+        zeroline=True,
+        zerolinewidth=3.0,
+        zerolinecolor='rgba(60, 60, 60, 0.8)',
+        tickformat='.1f',
+        tickfont_size=14,
+        ticksuffix=" ",
+        showline=True,
+        linewidth=1.5,
+        title=title,
+        title_font_size=16,
+        title_font_color=magcolor,
+        secondary_y=True
     )
 
     # UPDATE PLOT LAYOUT
@@ -350,6 +437,7 @@ def object_difference_lightcurve_forcedphot(
         )
     )
 
+
     fig.add_trace(go.Scatter(
         x=discovery["mjd"],
         y=[10],
@@ -362,7 +450,20 @@ def object_difference_lightcurve_forcedphot(
         text=["Discovery Epoch"],
         textposition="middle right"
     ))
-
+    fig.add_trace(go.Scatter(    # RDW:Linear need add_trace or no axis
+        x=discovery["mjd"],
+        y=[10],
+        mode="markers+text",
+        marker_symbol="triangle-up",
+        marker_opacity=1,
+        marker_color="#1F2937",
+        marker_size=8,
+        showlegend=False,
+        text=["Discovery Epoch"],
+        textposition="middle right"
+    ),
+    secondary_y=True
+    )
     fig.update_layout(
         title=dict(text="Forced Photometry Flux", font=dict(size=20), y=0.87,
                    x=0.5,
@@ -394,15 +495,12 @@ def get_default_axis_ranges(
     - `unforcedDF` -- unforced photometry dataframe    
     """
 
-    mjdMin = unforcedDF["midpointmjdtai"].min()
-    mjdMax = unforcedDF["midpointmjdtai"].max()
+    mjdMin = unforcedDF["midpointMjdTai"].min()
+    mjdMax = unforcedDF["midpointMjdTai"].max()
 
     if forcedDF is not None:
-# question: Whats going on here
-#        mjdMin2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].min()
-#        mjdMax2 = forcedDF.loc[((forcedDF['forcediffimflux'] > 50) & (forcedDF['forcediffimfluxunc'] < 50)), "mjd"].max()
-        mjdMin2 = forcedDF["midpointmjdtai"].min()
-        mjdMax2 = forcedDF["midpointmjdtai"].max()
+        mjdMin2 = forcedDF["midpointMjdTai"].min()
+        mjdMax2 = forcedDF["midpointMjdTai"].max()
 
         if mjdMin2 < mjdMin:
             mjdMin = mjdMin2
@@ -411,12 +509,12 @@ def get_default_axis_ranges(
 
     # SORT BY COLUMN NAME
     discovery = unforcedDF.head(1)
-    if mjdMin > discovery["midpointmjdtai"].min():
-        mjdMin = discovery["midpointmjdtai"].min()
+    if mjdMin > discovery["midpointMjdTai"].min():
+        mjdMin = discovery["midpointMjdTai"].min()
 
     mjdRange = mjdMax - mjdMin
-    if mjdRange < 5:
-        mjdRange = 5
+    if mjdRange < 3:
+        mjdRange = 3
     mjdMin -= 4 + mjdRange * 0.05
     mjdMax += 2 + mjdRange * 0.05
 
@@ -424,45 +522,42 @@ def get_default_axis_ranges(
     utcMax = Time(mjdMax, format='mjd').iso
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
+    # for the linear plot
     if forcedDF is not None:
-        fluxMax = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMax = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         fluxMax = fluxMax.max()
-        fluxMin = forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointmjdtai'] > mjdMin) & \
-                (forcedDF['midpointmjdtai'] < mjdMax)), "nanojanskyerr"]
+        fluxMin = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
+                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
         fluxMin = fluxMin.min()
+        if fluxMin < 0 and fluxMax < 0:
+            fluxMax = 0
 
         yrange = fluxMax - fluxMin
-        if yrange < 50:
-            yrange = 50
         fluxMax += (yrange * 0.1)
         fluxMin -= (yrange * 0.1)
-
-        if fluxMin > 0:
-            fluxMin = 0
     else:
         fluxMin, fluxMax = None, None
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
-    unforcedDF["tmpSigmapsf"] = 0
+    if unforcedDF is not None:
+        uffluxMax = unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
+                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
+                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
+        uffluxMax = uffluxMax.max()
+        uffluxMin = unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
+                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
+                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
+        uffluxMin = uffluxMin.abs().min()
+        if uffluxMin < 1: uffluxMin = 1
+        if uffluxMax < 0: uffluxMax = 10*abs(uffluxMin)
 
-    unforcedDF.loc[(unforcedDF['sigmapsf'] > 0), "tmpSigmapsf"] = unforcedDF.loc[(unforcedDF['sigmapsf'] > 0), "sigmapsf"]
-    unforcedDF["tmpSigmapsf"]
-    unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "sigmapsf"] = 0
-    magMax = unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "magpsf"] + unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "tmpSigmapsf"]
-    magMax = magMax.max()
-    magMin = unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "magpsf"] - unforcedDF.loc[((unforcedDF['mjd'] > mjdMin) & (unforcedDF['mjd'] < mjdMax)), "tmpSigmapsf"]
-    magMin = magMin.min()
+        uffluxMax *= 1.05
+        uffluxMin *= 0.95
 
-    yrange = magMax - magMin
-    if yrange < 3:
-        yrange = 3
-    magMax += (yrange * 0.1)
-    magMin -= (yrange * 0.1)
-
-    return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax
+    return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax
 
 def convert_objectdata_to_dataframes(
         objectData):
@@ -477,20 +572,21 @@ def convert_objectdata_to_dataframes(
     # CREATE DATA FRAME FOR LC
     if len(objectData["diaForcedSources"]):
         forcedDF = pd.DataFrame(objectData["diaForcedSources"])
-        mjds = Time(forcedDF['midpointmjdtai'], format='mjd')
+        mjds = Time(forcedDF['midpointMjdTai'], format='mjd')
         forcedDF['utc'] = mjds.iso
         forcedDF['utc'] = pd.to_datetime(forcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
         # SORT BY COLUMN NAME
-        forcedDF.sort_values(['midpointmjdtai'],
+        forcedDF.sort_values(['midpointMjdTai'],
                              ascending=[True], inplace=True)
 
 # Standard naming
         forcedDF["band"] = forcedDF['band']
-        forcedDF["nanojansky"] = forcedDF['psfflux']
-        forcedDF["nanojanskyerr"] = forcedDF['psffluxerr']
+        forcedDF["nanojansky"] = forcedDF['psfFlux']
+        forcedDF["nanojanskyerr"] = forcedDF['psfFluxErr']
 
 # Convert from flux nJ to mag
-        forcedDF["magpsf"]   = 31.4 - 2.5*np.log10(forcedDF["nanojansky"])
+        flux = forcedDF["nanojansky"]
+        forcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         forcedDF["sigmapsf"] = 1.086 * forcedDF["nanojanskyerr"] / forcedDF["nanojansky"]
 
     if forcedDF is not None and len(forcedDF.index) == 0:
@@ -499,23 +595,24 @@ def convert_objectdata_to_dataframes(
     # NORMAL UNFORCED PHOTO
     if len(objectData["diaSources"]):
         unforcedDF = pd.DataFrame(objectData["diaSources"])
-        mjds2 = Time(unforcedDF['midpointmjdtai'], format='mjd')
+        mjds2 = Time(unforcedDF['midpointMjdTai'], format='mjd')
         unforcedDF['utc'] = mjds2.iso
         unforcedDF['utc'] = pd.to_datetime(unforcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        unforcedDF.sort_values(['midpointmjdtai'],
+        unforcedDF.sort_values(['midpointMjdTai'],
                                ascending=[True], inplace=True)
 # Standard naming
-        unforcedDF["nanojansky"] = unforcedDF['psfflux']
-        unforcedDF["nanojanskyerr"] = unforcedDF['psffluxerr']
+        unforcedDF["nanojansky"] = unforcedDF['psfFlux']
+        unforcedDF["nanojanskyerr"] = unforcedDF['psfFluxErr']
 # Convert from flux nJ to mag
-        unforcedDF["magpsf"]   = 31.4 - 2.5*np.log10(unforcedDF["nanojansky"])
+        flux = unforcedDF["nanojansky"]
+        unforcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
 
     # MATCH THE FORCED AND UNFORCED TABLES
     if forcedDF is not None:
         mergedDF = pd.merge(unforcedDF, \
-            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointmjdtai', 'band']], \
-            how='left', on=['midpointmjdtai', 'band'])
+            forcedDF[['nanojansky', 'nanojanskyerr', 'midpointMjdTai', 'band']], \
+            how='left', on=['midpointMjdTai', 'band'])
     else:
         mergedDF = unforcedDF
         mergedDF['nanojansky'] = np.nan

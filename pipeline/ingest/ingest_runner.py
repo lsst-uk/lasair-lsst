@@ -19,9 +19,11 @@ Options:
     --nid=NID            ZTF night number to use (default today)
     --topic_out=TOUT     Kafka topic for output [default:ztf_sherlock]
 """
+import os
 import sys
 from docopt import docopt
-from multiprocessing import Process
+from multiprocessing import Process, Value, Array
+import signal
 
 from ingest import run_ingest
 
@@ -32,11 +34,11 @@ sys.path.append('../../common/src')
 import slack_webhook, lasairLogging
 
 
-def setup_proc(n, nprocess, args):
+def setup_proc(exit_code, pids, n, nprocess, args):
     # Set up the logger
     lasairLogging.basicConfig(
         filename=f"/home/ubuntu/logs/ingest-{n}.log",
-        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL),
+        webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=settings.SLACK_CHANNEL),
         merge=True
     )
     log = lasairLogging.getLogger("ingest_runner")
@@ -47,7 +49,13 @@ def setup_proc(n, nprocess, args):
     except Exception as e:
         log.exception('Exception')
         log.critical('Unrecoverable error in ingest: ' + str(e))
-        sys.exit(1)
+        # set the exit code
+        exit_code.value = 1
+        # send a SIGTERM to all other processes
+        for pid in pids:
+            if pid != os.getpid() and pid > 0:
+                print("Sending SIGTERM to process", pid)
+                os.kill(pid, signal.SIGTERM)
 
 
 if __name__ == '__main__':
@@ -58,14 +66,19 @@ if __name__ == '__main__':
     nprocess = int(args['--nprocess'])
     print('ingest_runner with %d processes' % nprocess)
 
+    exit_code = Value('i', 0)
+    pids = Array('i', nprocess)
+
     # Start up the processes
     process_list = []
     for i in range(nprocess):
-        p = Process(target=setup_proc, args=(i+1, nprocess, args))
+        p = Process(target=setup_proc, args=(exit_code, pids, i+1, nprocess, args))
         process_list.append(p)
         p.start()
+        pids[i] = p.pid
 
     for p in process_list:
         p.join()
 
-    print('ingest_runner exiting')
+    print("ingest_runner exiting with exit code", exit_code.value)
+    sys.exit(exit_code.value)

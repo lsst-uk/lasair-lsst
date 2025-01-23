@@ -1,7 +1,6 @@
 from .util import getFluxTimeBand
 from features.FeatureGroup import FeatureGroup
 
-nSource = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0}
 
 class counting(FeatureGroup):
     """Counts of sources plus Min and Max time of the diaSources"""
@@ -20,6 +19,7 @@ class counting(FeatureGroup):
 
     def run(self):
         (flux, time, band) = getFluxTimeBand(self.alert)
+        nSource = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0}
 
         for b in band: nSource[b] += 1
         if self.verbose:

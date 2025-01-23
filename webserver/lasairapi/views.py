@@ -2,8 +2,8 @@ from django.shortcuts import get_object_or_404, render
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from .serializers import ConeSerializer, StreamsSerializer, QuerySerializer, ObjectsSerializer
-from .serializers import LightcurvesSerializer, SherlockObjectsSerializer, SherlockPositionSerializer
+from .serializers import ConeSerializer, QuerySerializer, ObjectsSerializer
+from .serializers import LightcurvesSerializer, SherlockObjectSerializer, SherlockPositionSerializer
 from .serializers import AnnotateSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
@@ -26,30 +26,6 @@ class ConeView(APIView):
 
     def post(self, request, format=None):
         serializer = ConeSerializer(data=request.data, context={'request': request})
-        if serializer.is_valid():
-            message = serializer.save()
-            return Response(message, status=retcode(message))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class StreamsView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, topic=None):
-        data=request.GET.copy()
-        if topic: 
-            data['topic'] = topic
-        serializer = StreamsSerializer(data=data, context={'request': request})
-        if serializer.is_valid():
-            message = serializer.save()
-            return Response(message, status=retcode(message))
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def post(self, request, format=None, topic=None):
-        data=request.data.copy()
-        if topic: 
-            data['topic'] = topic
-        serializer = StreamsSerializer(data=data, context={'request': request})
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))
@@ -109,19 +85,19 @@ class LightcurvesView(APIView):
             return Response(message, status=retcode(message))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class SherlockObjectsView(APIView):
+class SherlockObjectView(APIView):
     authentication_classes = [TokenAuthentication, QueryAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        serializer = SherlockObjectsSerializer(data=request.GET, context={'request': request})
+        serializer = SherlockObjectSerializer(data=request.GET, context={'request': request})
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def post(self, request, format=None):
-        serializer = SherlockObjectsSerializer(data=request.data, context={'request': request})
+        serializer = SherlockObjectSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))

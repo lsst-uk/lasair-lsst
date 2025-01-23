@@ -40,6 +40,12 @@ def object_detail(request, diaObjectId):
     """
     data = objjson(diaObjectId, full=True)
 
+    # how to replace the real data with fake data
+#    with open('/home/ubuntu/fake.json', 'r') as f:
+#        fake = json.loads(f.read())
+#        data['diaSources'] = fake['diaSources']
+#        data['diaForcedSources'] = fake['diaForcedSources']
+
     if not data:
         return render(request, 'error.html',
                       {'message': 'Object %s not in database' % diaObjectId})

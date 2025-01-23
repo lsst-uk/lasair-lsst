@@ -48,6 +48,7 @@ WAIT_TIME              = 180
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
+SLACK_CHANNEL          = '{{ lasair_name }}'
 
 # Relational database mysql/galera
 ##################################
@@ -84,12 +85,10 @@ CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
 # Cutouts in Cassandra
-CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
+CUTOUTCASS_HOSTS        = {{ groups['cutoutcass'] }}
 
 # Directories on share Cephfs
 #############################
-IMAGEFITS              = '/mnt/cephfs/lasair/fits'
-SYSTEM_STATUS          = '/mnt/cephfs/lasair/system_status'
 SERVICES_LOG           = '/mnt/cephfs/lasair/services_log'
 KAFKA_STREAMS          = '/mnt/cephfs/lasair/streams'
 AREA_MOCS              = '/mnt/cephfs/lasair/areas'
@@ -124,7 +123,7 @@ SHERLOCK_SERVICE       = None
 {% endif %}
 
 # The webserver calls on the API and should not be throttled
-API_TOKEN              = '{{ settings.powerapi_token }}'
+API_TOKEN              = '{{ powerapi_token }}'
 
 # Comparing what we have processed with what ZTF has processed
 GRAFANA_USERNAME       = 'ztf'

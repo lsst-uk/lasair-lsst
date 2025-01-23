@@ -24,6 +24,13 @@
         - docopt
         - scipy
         - skytag
+        - dustmaps
+
+- name: Install dustmaps
+  become: true
+  ansible.builtin.script:
+    cmd: dustmap.py
+    executable: python3
 
 #- name: Create csvfiles directory
 #  file:
