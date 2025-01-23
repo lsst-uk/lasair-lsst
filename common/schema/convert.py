@@ -52,7 +52,7 @@ def cql_create_table(schema):
     tablename = schema['name']
     lines = []
     for f in schema['fields']:
-        s = f['name']
+        s = '"' + f['name'] + '"'
         primtype = ''
         if 'type'    in f: 
             t = f['type']
