@@ -82,6 +82,9 @@ def cql_create_table(schema):
         cql += ',\n' + ',\n'.join(schema['indexes'])
 
     cql += '\n)\n'
+
+    if 'with' in schema:
+        cql += schema['with'] + '\n'
     return cql
 
 import sys
