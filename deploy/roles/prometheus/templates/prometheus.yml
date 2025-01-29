@@ -85,7 +85,8 @@ scrape_configs:
      - targets:
        {% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) -%}
         - "{{ host }}:3306"
-        {% endfor %}
+       {%- endfor %}
+
     relabel_configs:
      - source_labels: [__address__]
        target_label: __param_target

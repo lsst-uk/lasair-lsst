@@ -36,7 +36,7 @@
         "h": 1
       },
       "type": "text",
-      "title": "Public Interfaces",
+      "title": "Interfaces",
       "options": {
         "mode": "markdown",
         "content": ""
@@ -58,6 +58,13 @@
 {% set h, w, x = (4, 3, 6) %}
 {% set expr = "probe_success{instance='kafka." ~ domain ~ ":9092'} OR on() vector(0)" %}
 {% include 'service.j2' %}
+{% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) %}
+{% set title = {{ host }} %}
+{% set description = "Probe DB on port 3306" %}
+{% set h, w, x = (4, 3, 9) %}
+{% set expr = "probe_success{instance='{{ host }}:3306'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% endfor %}
 {% set y = y + 4 %}
     {
       "gridPos": {
