@@ -48,13 +48,9 @@
 </table>
 <p><b>Nearest</b>: Nearest objects from LSST and other catalogs
 <table border=1>
-<tr><td><tt>nearbyExtObj1</tt></td><td>Id of the closest extended DR Object by second moment-based separation.</td>
-<tr><td><tt>nearbyExtObj1Sep</tt></td><td>Second moment-based separation of nearbyExtObj1 (unitless).</td>
 <tr><td><tt>nearbyObj1</tt></td><td>Id of the closest nearby object.</td>
 <tr><td><tt>nearbyObj1Dist</tt></td><td>Distance to nearbyObj1 (arcsec)</td>
 <tr><td><tt>nearbyObj1LnP</tt></td><td>Natural log of the probability that the observed diaObject is the same as the nearbyObj1.</td>
-<tr><td><tt>nearbyLowzGal</tt></td><td>External catalog name of the nearest low-z potential host.</td>
-<tr><td><tt>nearbyLowzGalSep</tt></td><td>Separation distance of nearbyLowzGal. (arcsc)</td>
 </table>
 <p><b>Absolute magnitude</b>: Brightness at 1 parsec
 <table border=1>
@@ -93,170 +89,66 @@
 </table>
 <h3>Extended Attributes</h3><table>
 <table border=1>
-<tr><td><tt>decErr</tt></td><td>Uncertainty of dec. (deg)</td>
-<tr><td><tt>raErr</tt></td><td>Uncertainty of ra. (deg)</td>
-<tr><td><tt>ra_dec_Cov</tt></td><td>Covariance between ra and dec. (deg**2)</td>
-<tr><td><tt>nearbyExtObj2</tt></td><td>Id of the second closest extended DR Object by second moment-based separation. ()</td>
-<tr><td><tt>nearbyExtObj2Sep</tt></td><td>Second moment-based separation of nearbyExtObj2 (unitless). ()</td>
-<tr><td><tt>nearbyObj2</tt></td><td>Id of the second-closest nearby object. ()</td>
-<tr><td><tt>nearbyObj2Dist</tt></td><td>Distance to nearbyObj2. (arcsec)</td>
-<tr><td><tt>nearbyObj2LnP</tt></td><td>Natural log of the probability that the observed diaObject is the same as the nearbyObj2. ()</td>
-<tr><td><tt>nearbyExtObj3</tt></td><td>Id of the third closest extended DR Object by second moment-based separation. ()</td>
-<tr><td><tt>nearbyExtObj3Sep</tt></td><td>Second moment-based separation of nearbyExtObj3 (unitless). ()</td>
-<tr><td><tt>nearbyObj3</tt></td><td>Id of the third-closest nearby object. ()</td>
-<tr><td><tt>nearbyObj3Dist</tt></td><td>Distance to nearbyObj3. (arcsec)</td>
-<tr><td><tt>nearbyObj3LnP</tt></td><td>Natural log of the probability that the observed diaObject is the same as the nearbyObj3. ()</td>
-<tr><td><tt>parallax</tt></td><td>Parallax. (mas)</td>
-<tr><td><tt>parallaxErr</tt></td><td>Uncertainty of parallax. (mas)</td>
-<tr><td><tt>pmDec_parallax_Cov</tt></td><td>Covariance of pmDec and parallax. (mas**2/yr)</td>
-<tr><td><tt>pmDecErr</tt></td><td>Uncertainty of pmDec. (mas/yr)</td>
-<tr><td><tt>pmParallaxChi2</tt></td><td>Chi^2 static of the model fit. ()</td>
-<tr><td><tt>pmParallaxLnL</tt></td><td>Natural log of the likelihood of the linear proper motion parallax fit. ()</td>
-<tr><td><tt>pmParallaxNdata</tt></td><td>The number of data points used to fit the model. ()</td>
-<tr><td><tt>pmRa_parallax_Cov</tt></td><td>Covariance of pmRa and parallax. (mas**2/yr)</td>
-<tr><td><tt>pmRa_pmDec_Cov</tt></td><td>Covariance of pmRa and pmDec. (mas**2/yr**2)</td>
-<tr><td><tt>pmRaErr</tt></td><td>Uncertainty of pmRa. (mas/yr)</td>
-<tr><td><tt>radecMjdTai</tt></td><td>Time at which the object was at a position ra/dec ()</td>
-<tr><td><tt>validityEnd</tt></td><td>Processing time when validity of this diaObject ends. ()</td>
-<tr><td><tt>validityStart</tt></td><td>Processing time when validity of this diaObject starts. ()</td>
-<tr><td><tt>lastNonForcedSource</tt></td><td>Last time when non-forced DIASource was seen for this object. ()</td>
-<tr><td><tt>nDiaSources</tt></td><td>Total number of DiaSources associated with this DiaObject. ()</td>
-<tr><td><tt>u_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for u filter. (nJy)</td>
-<tr><td><tt>u_fpFluxMeanErr</tt></td><td>Standard error of u_fpFluxMean. (nJy)</td>
-<tr><td><tt>u_fpFluxSigma</tt></td><td>Standard deviation of the distribution of u_fpFlux. (nJy)</td>
-<tr><td><tt>u_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of u_psfFlux around u_psfFluxMean. ()</td>
-<tr><td><tt>u_psfFluxErrMean</tt></td><td>Mean of the u band flux errors. (nJy)</td>
-<tr><td><tt>u_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the u band fluxes. ()</td>
-<tr><td><tt>u_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the u band fluxes. (nJy/d)</td>
-<tr><td><tt>u_psfFluxMAD</tt></td><td>Median absolute deviation u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxMax</tt></td><td>Maximum observed u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxMaxSlope</tt></td><td>Maximum slope between u band flux obsevations max(delta_flux/delta_time). (nJy/d)</td>
-<tr><td><tt>u_psfFluxMin</tt></td><td>Minimum observed u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxNdata</tt></td><td>The number of data points used to compute u_psfFluxChi2. ()</td>
-<tr><td><tt>u_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the u band fluxes. (nJy)</td>
-<tr><td><tt>u_psfFluxSigma</tt></td><td>Standard deviation of the distribution of u_psfFlux. (nJy)</td>
-<tr><td><tt>u_psfFluxSkew</tt></td><td>Skewness of the u band fluxes. ()</td>
-<tr><td><tt>u_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the u band fluxes. ()</td>
-<tr><td><tt>u_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for u filter. (nJy)</td>
-<tr><td><tt>u_scienceFluxMeanErr</tt></td><td>Standard error of u_scienceFluxMean. (nJy)</td>
-<tr><td><tt>u_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of u_scienceFlux. (nJy)</td>
-<tr><td><tt>g_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for g filter. (nJy)</td>
-<tr><td><tt>g_fpFluxMeanErr</tt></td><td>Standard error of g_fpFluxMean. (nJy)</td>
-<tr><td><tt>g_fpFluxSigma</tt></td><td>Standard deviation of the distribution of g_fpFlux. (nJy)</td>
-<tr><td><tt>g_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of g_psfFlux around g_psfFluxMean. ()</td>
-<tr><td><tt>g_psfFluxErrMean</tt></td><td>Mean of the g band flux errors. (nJy)</td>
-<tr><td><tt>g_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the g band fluxes. (nJy/d)</td>
-<tr><td><tt>g_psfFluxMAD</tt></td><td>Median absolute deviation g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxMax</tt></td><td>Maximum observed g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxMaxSlope</tt></td><td>Maximum slope between g band flux obsevations max(delta_flux/delta_time). (nJy/d)</td>
-<tr><td><tt>g_psfFluxMin</tt></td><td>Minimum observed g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxNdata</tt></td><td>The number of data points used to compute g_psfFluxChi2. ()</td>
-<tr><td><tt>g_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the g band fluxes. (nJy)</td>
-<tr><td><tt>g_psfFluxSigma</tt></td><td>Standard deviation of the distribution of g_psfFlux. (nJy)</td>
-<tr><td><tt>g_psfFluxSkew</tt></td><td>Skewness of the g band fluxes. ()</td>
-<tr><td><tt>g_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the g band fluxes. ()</td>
-<tr><td><tt>g_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for g filter. (nJy)</td>
-<tr><td><tt>g_scienceFluxMeanErr</tt></td><td>Standard error of g_scienceFluxMean. (nJy)</td>
-<tr><td><tt>g_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of g_scienceFlux. (nJy)</td>
-<tr><td><tt>r_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for r filter. (nJy)</td>
-<tr><td><tt>r_fpFluxMeanErr</tt></td><td>Standard error of r_fpFluxMean. (nJy)</td>
-<tr><td><tt>r_fpFluxSigma</tt></td><td>Standard deviation of the distribution of r_fpFlux. (nJy)</td>
-<tr><td><tt>r_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of r_psfFlux around r_psfFluxMean. ()</td>
-<tr><td><tt>r_psfFluxErrMean</tt></td><td>Mean of the r band flux errors. (nJy)</td>
-<tr><td><tt>r_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the r band fluxes. (nJy/d)</td>
-<tr><td><tt>r_psfFluxMAD</tt></td><td>Median absolute deviation r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxMax</tt></td><td>Maximum observed r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxMaxSlope</tt></td><td>Maximum slope between r band flux obsevations max(delta_flux/delta_time). (nJy/d)</td>
-<tr><td><tt>r_psfFluxMin</tt></td><td>Minimum observed r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxNdata</tt></td><td>The number of data points used to compute r_psfFluxChi2. ()</td>
-<tr><td><tt>r_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the r band fluxes. (nJy)</td>
-<tr><td><tt>r_psfFluxSigma</tt></td><td>Standard deviation of the distribution of r_psfFlux. (nJy)</td>
-<tr><td><tt>r_psfFluxSkew</tt></td><td>Skewness of the r band fluxes. ()</td>
-<tr><td><tt>r_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the r band fluxes. ()</td>
-<tr><td><tt>r_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for r filter. (nJy)</td>
-<tr><td><tt>r_scienceFluxMeanErr</tt></td><td>Standard error of r_scienceFluxMean. (nJy)</td>
-<tr><td><tt>r_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of r_scienceFlux. (nJy)</td>
-<tr><td><tt>i_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for i filter. (nJy)</td>
-<tr><td><tt>i_fpFluxMeanErr</tt></td><td>Standard error of i_fpFluxMean. (nJy)</td>
-<tr><td><tt>i_fpFluxSigma</tt></td><td>Standard deviation of the distribution of i_fpFlux. (nJy)</td>
-<tr><td><tt>i_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of i_psfFlux around i_psfFluxMean. ()</td>
-<tr><td><tt>i_psfFluxErrMean</tt></td><td>Mean of the i band flux errors. (nJy)</td>
-<tr><td><tt>i_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the i band fluxes. (nJy/d)</td>
-<tr><td><tt>i_psfFluxMAD</tt></td><td>Median absolute deviation i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxMax</tt></td><td>Maximum observed i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxMaxSlope</tt></td><td>Maximum slope between i band flux obsevations max(delta_flux/delta_time). (nJy/d)</td>
-<tr><td><tt>i_psfFluxMin</tt></td><td>Minimum observed i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxNdata</tt></td><td>The number of data points used to compute i_psfFluxChi2. ()</td>
-<tr><td><tt>i_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the i band fluxes. (nJy)</td>
-<tr><td><tt>i_psfFluxSigma</tt></td><td>Standard deviation of the distribution of i_psfFlux. (nJy)</td>
-<tr><td><tt>i_psfFluxSkew</tt></td><td>Skewness of the i band fluxes. ()</td>
-<tr><td><tt>i_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the i band fluxes. ()</td>
-<tr><td><tt>i_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for i filter. (nJy)</td>
-<tr><td><tt>i_scienceFluxMeanErr</tt></td><td>Standard error of i_scienceFluxMean. (nJy)</td>
-<tr><td><tt>i_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of i_scienceFlux. (nJy)</td>
-<tr><td><tt>z_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for z filter. (nJy)</td>
-<tr><td><tt>z_fpFluxMeanErr</tt></td><td>Standard error of z_fpFluxMean. (nJy)</td>
-<tr><td><tt>z_fpFluxSigma</tt></td><td>Standard deviation of the distribution of z_fpFlux. (nJy)</td>
-<tr><td><tt>z_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of z_psfFlux around z_psfFluxMean. ()</td>
-<tr><td><tt>z_psfFluxErrMean</tt></td><td>Mean of the z band flux errors. (nJy)</td>
-<tr><td><tt>z_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the z band fluxes. (nJy/d)</td>
-<tr><td><tt>z_psfFluxMAD</tt></td><td>Median absolute deviation z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxMax</tt></td><td>Maximum observed z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxMaxSlope</tt></td><td>Maximum slope between z band flux obsevations max(delta_flux/delta_time). (nJy/d)</td>
-<tr><td><tt>z_psfFluxMin</tt></td><td>Minimum observed z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxNdata</tt></td><td>The number of data points used to compute z_psfFluxChi2. ()</td>
-<tr><td><tt>z_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the z band fluxes. (nJy)</td>
-<tr><td><tt>z_psfFluxSigma</tt></td><td>Standard deviation of the distribution of z_psfFlux. (nJy)</td>
-<tr><td><tt>z_psfFluxSkew</tt></td><td>Skewness of the z band fluxes. ()</td>
-<tr><td><tt>z_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the z band fluxes. ()</td>
-<tr><td><tt>z_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for z filter. (nJy)</td>
-<tr><td><tt>z_scienceFluxMeanErr</tt></td><td>Standard error of z_scienceFluxMean. (nJy)</td>
-<tr><td><tt>z_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of z_scienceFlux. (nJy)</td>
-<tr><td><tt>y_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for y filter. (nJy)</td>
-<tr><td><tt>y_fpFluxMeanErr</tt></td><td>Standard error of y_fpFluxMean. (nJy)</td>
-<tr><td><tt>y_fpFluxSigma</tt></td><td>Standard deviation of the distribution of y_fpFlux. (nJy)</td>
-<tr><td><tt>y_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of y_psfFlux around y_psfFluxMean. ()</td>
-<tr><td><tt>y_psfFluxErrMean</tt></td><td>Mean of the y band flux errors. (nJy)</td>
-<tr><td><tt>y_psfFluxLinearIntercept</tt></td><td>Linear best fit Intercept of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxLinearSlope</tt></td><td>Linear best fit slope of the y band fluxes. (nJy/d)</td>
-<tr><td><tt>y_psfFluxMAD</tt></td><td>Median absolute deviation y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxMax</tt></td><td>Maximum observed y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxMaxSlope</tt></td><td>Maximum slope between y band flux obsevations max(delta_flux/delta_time) (nJy/d)</td>
-<tr><td><tt>y_psfFluxMin</tt></td><td>Minimum observed y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxNdata</tt></td><td>The number of data points used to compute y_psfFluxChi2. ()</td>
-<tr><td><tt>y_psfFluxPercentile05</tt></td><td>Value at the 5% percentile of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxPercentile25</tt></td><td>Value at the 25% percentile of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxPercentile50</tt></td><td>Value at the 50% percentile (median) of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxPercentile75</tt></td><td>Value at the 75% percentile of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxPercentile95</tt></td><td>Value at the 95% percentile of the y band fluxes. (nJy)</td>
-<tr><td><tt>y_psfFluxSigma</tt></td><td>Standard deviation of the distribution of y_psfFlux. (nJy)</td>
-<tr><td><tt>y_psfFluxSkew</tt></td><td>Skewness of the y band fluxes. ()</td>
-<tr><td><tt>y_psfFluxStetsonJ</tt></td><td>StetsonJ statistic for the y band fluxes. ()</td>
-<tr><td><tt>y_scienceFluxMean</tt></td><td>Weighted mean forced photometry flux for y filter. (nJy)</td>
-<tr><td><tt>y_scienceFluxMeanErr</tt></td><td>Standard error of y_scienceFluxMean. (nJy)</td>
-<tr><td><tt>y_scienceFluxSigma</tt></td><td>Standard deviation of the distribution of y_scienceFlux. (nJy)</td>
+<tr><td><tt>raErr</tt></td><td>Uncertainty of ra.</td>
+<tr><td><tt>decErr</tt></td><td>Uncertainty of dec.</td>
+<tr><td><tt>ra_dec_Cov</tt></td><td>Covariance between ra and dec.</td>
+<tr><td><tt>radecMjdTai</tt></td><td>Time at which the object was at a position ra/dec, expressed as Modified Julian Date, International Atomic Time.</td>
+<tr><td><tt>pmRaErr</tt></td><td>Uncertainty of pmRa.</td>
+<tr><td><tt>pmDecErr</tt></td><td>Uncertainty of pmDec.</td>
+<tr><td><tt>parallax</tt></td><td>Parallax.</td>
+<tr><td><tt>parallaxErr</tt></td><td>Uncertainty of parallax.</td>
+<tr><td><tt>pmRa_pmDec_Cov</tt></td><td>Covariance of pmRa and pmDec.</td>
+<tr><td><tt>pmRa_parallax_Cov</tt></td><td>Covariance of pmRa and parallax.</td>
+<tr><td><tt>pmDec_parallax_Cov</tt></td><td>Covariance of pmDec and parallax.</td>
+<tr><td><tt>pmParallaxLnL</tt></td><td>Natural log of the likelihood of the linear proper motion parallax fit.</td>
+<tr><td><tt>pmParallaxChi2</tt></td><td>Chi^2 static of the model fit.</td>
+<tr><td><tt>pmParallaxNdata</tt></td><td>The number of data points used to fit the model.</td>
+<tr><td><tt>u_psfFluxSigma</tt></td><td>Standard deviation of the distribution of u_psfFlux.</td>
+<tr><td><tt>u_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of u_psfFlux around u_psfFluxMean.</td>
+<tr><td><tt>u_psfFluxNdata</tt></td><td>The number of data points used to compute u_psfFluxChi2.</td>
+<tr><td><tt>u_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for u filter.</td>
+<tr><td><tt>u_fpFluxMeanErr</tt></td><td>Standard error of u_fpFluxMean.</td>
+<tr><td><tt>u_fpFluxSigma</tt></td><td>Standard deviation of the distribution of u_fpFlux.</td>
+<tr><td><tt>u_psfFluxErrMean</tt></td><td>Mean of the u band flux errors.</td>
+<tr><td><tt>g_psfFluxSigma</tt></td><td>Standard deviation of the distribution of g_psfFlux.</td>
+<tr><td><tt>g_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of g_psfFlux around g_psfFluxMean.</td>
+<tr><td><tt>g_psfFluxNdata</tt></td><td>The number of data points used to compute g_psfFluxChi2.</td>
+<tr><td><tt>g_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for g filter.</td>
+<tr><td><tt>g_fpFluxMeanErr</tt></td><td>Standard error of g_fpFluxMean.</td>
+<tr><td><tt>g_fpFluxSigma</tt></td><td>Standard deviation of the distribution of g_fpFlux.</td>
+<tr><td><tt>g_psfFluxErrMean</tt></td><td>Mean of the g band flux errors.</td>
+<tr><td><tt>r_psfFluxSigma</tt></td><td>Standard deviation of the distribution of r_psfFlux.</td>
+<tr><td><tt>r_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of r_psfFlux around r_psfFluxMean.</td>
+<tr><td><tt>r_psfFluxNdata</tt></td><td>The number of data points used to compute r_psfFluxChi2.</td>
+<tr><td><tt>r_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for r filter.</td>
+<tr><td><tt>r_fpFluxMeanErr</tt></td><td>Standard error of r_fpFluxMean.</td>
+<tr><td><tt>r_fpFluxSigma</tt></td><td>Standard deviation of the distribution of r_fpFlux.</td>
+<tr><td><tt>r_psfFluxErrMean</tt></td><td>Mean of the r band flux errors.</td>
+<tr><td><tt>i_psfFluxSigma</tt></td><td>Standard deviation of the distribution of i_psfFlux.</td>
+<tr><td><tt>i_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of i_psfFlux around i_psfFluxMean.</td>
+<tr><td><tt>i_psfFluxNdata</tt></td><td>The number of data points used to compute i_psfFluxChi2.</td>
+<tr><td><tt>i_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for i filter.</td>
+<tr><td><tt>i_fpFluxMeanErr</tt></td><td>Standard error of i_fpFluxMean.</td>
+<tr><td><tt>i_fpFluxSigma</tt></td><td>Standard deviation of the distribution of i_fpFlux.</td>
+<tr><td><tt>i_psfFluxErrMean</tt></td><td>Mean of the i band flux errors.</td>
+<tr><td><tt>z_psfFluxSigma</tt></td><td>Standard deviation of the distribution of z_psfFlux.</td>
+<tr><td><tt>z_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of z_psfFlux around z_psfFluxMean.</td>
+<tr><td><tt>z_psfFluxNdata</tt></td><td>The number of data points used to compute z_psfFluxChi2.</td>
+<tr><td><tt>z_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for z filter.</td>
+<tr><td><tt>z_fpFluxMeanErr</tt></td><td>Standard error of z_fpFluxMean.</td>
+<tr><td><tt>z_fpFluxSigma</tt></td><td>Standard deviation of the distribution of z_fpFlux.</td>
+<tr><td><tt>z_psfFluxErrMean</tt></td><td>Mean of the z band flux errors.</td>
+<tr><td><tt>y_psfFluxSigma</tt></td><td>Standard deviation of the distribution of y_psfFlux.</td>
+<tr><td><tt>y_psfFluxChi2</tt></td><td>Chi^2 statistic for the scatter of y_psfFlux around y_psfFluxMean.</td>
+<tr><td><tt>y_psfFluxNdata</tt></td><td>The number of data points used to compute y_psfFluxChi2.</td>
+<tr><td><tt>y_fpFluxMean</tt></td><td>Weighted mean forced photometry flux for y filter.</td>
+<tr><td><tt>y_fpFluxMeanErr</tt></td><td>Standard error of y_fpFluxMean.</td>
+<tr><td><tt>y_fpFluxSigma</tt></td><td>Standard deviation of the distribution of y_fpFlux.</td>
+<tr><td><tt>y_psfFluxErrMean</tt></td><td>Mean of the y band flux errors.</td>
+<tr><td><tt>nearbyObj2</tt></td><td>Id of the second-closest nearby object.</td>
+<tr><td><tt>nearbyObj2Dist</tt></td><td>Distance to nearbyObj2.</td>
+<tr><td><tt>nearbyObj2LnP</tt></td><td>Natural log of the probability that the observed diaObject is the same as the nearbyObj2.</td>
+<tr><td><tt>nearbyObj3</tt></td><td>Id of the third-closest nearby object.</td>
+<tr><td><tt>nearbyObj3Dist</tt></td><td>Distance to nearbyObj3.</td>
+<tr><td><tt>nearbyObj3LnP</tt></td><td>Natural log of the probability that the observed diaObject is the same as the nearbyObj3.</td>
 </table>

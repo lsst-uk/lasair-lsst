@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS ssObjects(
+CREATE TABLE IF NOT EXISTS ssObject(
 "ssObjectId" bigint,
 "discoverySubmissionDate" double,
 "firstObservationDate" double,

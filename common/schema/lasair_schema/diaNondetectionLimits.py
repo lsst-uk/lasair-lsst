@@ -1,5 +1,6 @@
 schema = {
-  "name": "diaNondetectionLimits",
+  'indexes':['PRIMARY KEY ("midpointMjdTai")'],
+  "name": "diaNondetectionLimit",
   "fields": [
     {
       "name": "ccdVisitId",
@@ -17,6 +18,5 @@ schema = {
       "name": "diaNoise",
       "type": "float"
     }
-  ],
-  "indexes": ['PRIMARY KEY ("midpointMjdTai")']
+  ]
 }
