@@ -8,6 +8,8 @@ def sql_create_table(schema):
     tablename = schema['name']
     lines = []
     for f in schema['fields']:
+        if not 'name' in f:
+            continue
         s = '`' + f['name'] + '`'
         primtype = ''
         if 'type'    in f: 

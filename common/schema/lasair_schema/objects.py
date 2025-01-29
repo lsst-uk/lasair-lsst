@@ -17,27 +17,27 @@ schema = {
     {"name": "firstDiaSourceMJD", "type": "double", "doc": "Earliest MJD of a diaSource" },
 
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
-    {"name":"u_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
+{"name":"u_psfFlux", "type":"float", "doc":"Latest u flux (nJy)"},
 {"name":"u_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
 {"name":"u_psfFluxMeanErr", "type":"float", "doc":"Standard error of u_psfFluxMean. (nJy)"},
 
-    {"name":"g_psfFlux", "type":"float", "doc":"Latest g flux (nJy)"},
+{"name":"g_psfFlux", "type":"float", "doc":"Latest g flux (nJy)"},
 {"name":"g_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
 {"name":"g_psfFluxMeanErr", "type":"float", "doc":"Standard error of g_psfFluxMean. (nJy)"},
 
-    {"name":"r_psfFlux", "type":"float", "doc":"Latest r flux (nJy)"},
+{"name":"r_psfFlux", "type":"float", "doc":"Latest r flux (nJy)"},
 {"name":"r_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
 {"name":"r_psfFluxMeanErr", "type":"float", "doc":"Standard error of r_psfFluxMean. (nJy)"},
 
-    {"name":"i_psfFlux", "type":"float", "doc":"Latest i flux (nJy)"},
+{"name":"i_psfFlux", "type":"float", "doc":"Latest i flux (nJy)"},
 {"name":"i_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
 {"name":"i_psfFluxMeanErr", "type":"float", "doc":"Standard error of i_psfFluxMean. (nJy)"},
 
-    {"name":"z_psfFlux", "type":"float", "doc":"Latest z flux (nJy)"},
+{"name":"z_psfFlux", "type":"float", "doc":"Latest z flux (nJy)"},
 {"name":"z_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
 {"name":"z_psfFluxMeanErr", "type":"float", "doc":"Standard error of z_psfFluxMean. (nJy)"},
 
-    {"name":"y_psfFlux", "type":"float", "doc":"Latest y flux (nJy)"},
+{"name":"y_psfFlux", "type":"float", "doc":"Latest y flux (nJy)"},
 {"name":"y_psfFluxMean", "type":"float", "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
 {"name":"y_psfFluxMeanErr", "type":"float", "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
@@ -50,7 +50,8 @@ schema = {
     {"name": "nzSources", "type": "int", "doc": "Number of z sources" },
     {"name": "nySources", "type": "int", "doc": "Number of y sources" },
 
-{"section":"Nearest", "doc":"Nearest objects from LSST and other catalogs"},
+{"section":"Other/Nearest objects", "doc":"Other/Nearest objects from LSST and other catalogs"},
+    {"name": "tns_name",          "type":"string",   "doc":"TNS name of this object if it exists"},
     {"name": "nearbyObj1",        "type":"long",     "doc":"Id of the closest nearby object."},
     {"name": "nearbyObj1Dist",    "type":"float",    "doc":"Distance to nearbyObj1 (arcsec)"},
     {"name": "nearbyObj1LnP",     "type":"float",    "doc":"Natural log of the probability that the observed diaObject is the same as the nearbyObj1."},
@@ -75,11 +76,11 @@ schema = {
 {"section":"Revisit colours", "doc":"Colours from 33-minute revisits"},
     {"name": "latest_rv_mjd",         "type": "float", "doc": "Latest revisit MJD" },
     {"name": "latest_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from latest revisit" },
-    {"name": "latest_rv_colour_bands","type": "str",   "doc": "Bands used for latest revisit colour, eg g-r, u-r" },
+    {"name": "latest_rv_colour_bands","type": "string",   "doc": "Bands used for latest revisit colour, eg g-r, u-r" },
     {"name": "latest_rv_colour_temp", "type": "float", "doc": "Effective temperature from latest revisit, kiloKelvin" },
     {"name": "penultimate_rv_mjd",         "type": "float", "doc": "Penultimate revisit MJD" },
     {"name": "penultimate_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from Penultimate revisit" },
-    {"name": "penultimate_rv_colour_bands","type": "str",   "doc": "Bands used for penultimate revisit colour, eg g-r, u-r" },
+    {"name": "penultimate_rv_colour_bands","type": "string",   "doc": "Bands used for penultimate revisit colour, eg g-r, u-r" },
     {"name": "penultimate_rv_colour_temp", "type": "float", "doc": "Effective temperature from penultimate revisit, kiloKelvin" },
 
 {"section":"Utility", "doc":"Other attributes"},
