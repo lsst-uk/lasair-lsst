@@ -7,12 +7,7 @@ def sql_create_table(schema):
     # Build the CREATE TABLE statement for MySQL to create this table
     tablename = schema['name']
     lines = []
-    fields = schema['fields']
-    if 'ext_fields' in schema:
-        fields += schema['ext_fields']
-    for f in fields:
-        if not 'name' in f:
-            continue
+    for f in schema['fields']:
         s = '`' + f['name'] + '`'
         primtype = ''
         if 'type'    in f: 
@@ -26,7 +21,6 @@ def sql_create_table(schema):
         elif primtype == 'long':     s += ' bigint'          # 63 bit with sign
         elif primtype == 'bigint':   s += ' bigint'          # 63 bit with sign
         elif primtype == 'date':     s += ' datetime(6)'
-        elif primtype == 'str':      s += ' varchar(16)'
         elif primtype == 'string':   s += ' varchar(16)'
         elif primtype == 'bigstring':s += ' varchar(80)'
         elif primtype == 'text':     s += ' text'
@@ -58,8 +52,6 @@ def cql_create_table(schema):
     tablename = schema['name']
     lines = []
     for f in schema['fields']:
-        if not 'name' in f:
-            continue
         s = '"' + f['name'] + '"'
         primtype = ''
         if 'type'    in f: 
@@ -90,6 +82,9 @@ def cql_create_table(schema):
         cql += ',\n' + ',\n'.join(schema['indexes'])
 
     cql += '\n)\n'
+
+    if 'with' in schema:
+        cql += schema['with'] + '\n'
     return cql
 
 import sys
