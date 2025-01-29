@@ -86,6 +86,9 @@ scrape_configs:
        {% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) -%}
         - "{{ host }}:3306"
        {%- endfor %}
+       {% for host in (groups['cluster_control']) -%}
+        - "{{ host }}:9001"
+       {%- endfor %}
 
     relabel_configs:
      - source_labels: [__address__]
