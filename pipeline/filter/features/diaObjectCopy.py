@@ -28,13 +28,9 @@ class diaObjectCopy(FeatureGroup):
         'y_psfFlux',
         'y_psfFluxMean',
         'y_psfFluxMeanErr',
-        'nearbyExtObj1',
-        'nearbyExtObj1Sep',
         'nearbyObj1',
         'nearbyObj1Dist',
         'nearbyObj1LnP',
-        'nearbyLowzGal',
-        'nearbyLowzGalSep',
     ]
 
     def run(self):

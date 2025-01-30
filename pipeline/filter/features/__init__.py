@@ -7,4 +7,5 @@ __all__ = [
     "milkyWay",
     "jump",
     "revisit",
+    "tns",
 ]
