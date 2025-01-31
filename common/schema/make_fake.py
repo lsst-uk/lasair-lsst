@@ -55,7 +55,7 @@ for i in range(ndiaF):
         if v: diaForcedSource[field['name']] = v
     prvDiaForcedSources.append(diaForcedSource)
 
-alertId = random.randrange(10)
+alertId = random.randrange(1000)
 alert = {
     'alertId':             alertId,
     'diaObject':           diaObject,
