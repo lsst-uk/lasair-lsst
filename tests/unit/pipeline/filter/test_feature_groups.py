@@ -69,9 +69,11 @@ class FeatureTest(TestCase):
         if not 'name' in feature:
             continue
         name = schema[feature]['name']
-        type = schema[feature]['type']
         if name == 'timestamp':
             continue
+        type = schema[feature]['type']
+        if type == 'string':
+            type = 'str'
         # check name is in the feature set
         self.assertIn(name, output)
         # check that either the type is ok or that the output is None and allowed to be so 

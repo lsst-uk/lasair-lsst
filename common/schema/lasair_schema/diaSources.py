@@ -1,696 +1,691 @@
 schema = {
   'indexes':['PRIMARY KEY ("diaObjectId", "midpointMjdTai", "diaSourceId")'],
-  "name": "diaSource",
+  "name": "diaSources",
   "fields": [
     {
-      "doc": "Unique identifier of this DiaSource.",
       "name": "diaSourceId",
-      "type": "long"
+      "type": "long",
+      "doc": "Unique identifier of this DiaSource."
     },
     {
-      "doc": "Id of the visit where this diaSource was measured.",
       "name": "visit",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the visit where this diaSource was measured."
     },
     {
-      "doc": "Id of the detector where this diaSource was measured. Datatype short instead of byte because of DB concerns about unsigned bytes.",
       "name": "detector",
-      "type": "int"
+      "type": "int",
+      "doc": "Id of the detector where this diaSource was measured. Datatype short instead of byte because of DB concerns about unsigned bytes."
     },
     {
-      "doc": "Id of the diaObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject).",
       "name": "diaObjectId",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the diaObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
     },
     {
-      "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject).",
       "name": "ssObjectId",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
     },
     {
-      "doc": "Id of the parent diaSource this diaSource has been deblended from, if any.",
       "name": "parentDiaSourceId",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the parent diaSource this diaSource has been deblended from, if any."
     },
     {
-      "doc": "Effective mid-visit time for this diaSource, expressed as Modified Julian Date, International Atomic Time.",
       "name": "midpointMjdTai",
-      "type": "double"
+      "type": "double",
+      "doc": "Effective mid-visit time for this diaSource, expressed as Modified Julian Date, International Atomic Time."
     },
     {
-      "doc": "Right ascension coordinate of the center of this diaSource.",
       "name": "ra",
-      "type": "double"
+      "type": "double",
+      "doc": "Right ascension coordinate of the center of this diaSource."
     },
     {
-      "doc": "Uncertainty of ra.",
       "name": "raErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of ra."
     },
     {
-      "doc": "Declination coordinate of the center of this diaSource.",
       "name": "decl",
-      "type": "double"
+      "type": "double",
+      "doc": "Declination coordinate of the center of this diaSource."
     },
     {
-      "doc": "Uncertainty of dec.",
       "name": "decErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dec."
     },
     {
-      "doc": "Covariance between ra and dec.",
       "name": "ra_dec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance between ra and dec."
     },
     {
-      "doc": "x position computed by a centroiding algorithm.",
       "name": "x",
-      "type": "float"
+      "type": "float",
+      "doc": "x position computed by a centroiding algorithm."
     },
     {
-      "doc": "Uncertainty of x.",
       "name": "xErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of x."
     },
     {
-      "doc": "y position computed by a centroiding algorithm.",
       "name": "y",
-      "type": "float"
+      "type": "float",
+      "doc": "y position computed by a centroiding algorithm."
     },
     {
-      "doc": "Uncertainty of y.",
       "name": "yErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of y."
     },
     {
-      "doc": "Covariance between x and y.",
       "name": "x_y_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance between x and y."
     },
     {
-      "doc": "General centroid algorithm failure flag; set if anything went wrong when fitting the centroid. Another centroid flag field should also be set to provide more information.",
       "name": "centroid_flag",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "General centroid algorithm failure flag; set if anything went wrong when fitting the centroid. Another centroid flag field should also be set to provide more information."
     },
     {
-      "doc": "Source was detected as significantly negative.",
-      "name": "is_negative",
-      "type": "boolean"
-    },
-    {
-      "doc": "Flux in a 12 pixel radius aperture on the difference image.",
       "name": "apFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Flux in a 12 pixel radius aperture on the difference image."
     },
     {
-      "doc": "Estimated uncertainty of apFlux.",
       "name": "apFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Estimated uncertainty of apFlux."
     },
     {
-      "doc": "General aperture flux algorithm failure flag; set if anything went wrong when measuring aperture fluxes. Another apFlux flag field should also be set to provide more information.",
       "name": "apFlux_flag",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "General aperture flux algorithm failure flag; set if anything went wrong when measuring aperture fluxes. Another apFlux flag field should also be set to provide more information."
     },
     {
-      "doc": "Aperture did not fit within measurement image.",
       "name": "apFlux_flag_apertureTruncated",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Aperture did not fit within measurement image."
     },
     {
-      "doc": "The signal-to-noise ratio at which this source was detected in the difference image.",
       "name": "snr",
-      "type": "float"
+      "type": "float",
+      "doc": "The signal-to-noise ratio at which this source was detected in the difference image."
     },
     {
-      "doc": "Flux for Point Source model. Note this actually measures the flux difference between the template and the visit image.",
       "name": "psfFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Flux for Point Source model. Note this actually measures the flux difference between the template and the visit image."
     },
     {
-      "doc": "Uncertainty of psfFlux.",
       "name": "psfFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of psfFlux."
     },
     {
-      "doc": "Right ascension coordinate of centroid for point source model.",
       "name": "psfRa",
-      "type": "double"
+      "type": "double",
+      "doc": "Right ascension coordinate of centroid for point source model."
     },
     {
-      "doc": "Uncertainty of psfRa.",
       "name": "psfRaErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of psfRa."
     },
     {
-      "doc": "Declination coordinate of centroid for point source model.",
       "name": "psfDec",
-      "type": "double"
+      "type": "double",
+      "doc": "Declination coordinate of centroid for point source model."
     },
     {
-      "doc": "Uncertainty of psfDec.",
       "name": "psfDecErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of psfDec."
     },
     {
-      "doc": "Covariance between psfFlux and psfRa.",
       "name": "psfFlux_psfRa_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance between psfFlux and psfRa."
     },
     {
-      "doc": "Covariance between psfFlux and psfDec.",
       "name": "psfFlux_psfDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance between psfFlux and psfDec."
     },
     {
-      "doc": "Covariance between psfRa and psfDec.",
       "name": "psfRa_psfDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance between psfRa and psfDec."
     },
     {
-      "doc": "Natural log likelihood of the observed data given the point source model.",
       "name": "psfLnL",
-      "type": "float"
+      "type": "float",
+      "doc": "Natural log likelihood of the observed data given the point source model."
     },
     {
-      "doc": "Chi^2 statistic of the point source model fit.",
       "name": "psfChi2",
-      "type": "float"
+      "type": "float",
+      "doc": "Chi^2 statistic of the point source model fit."
     },
     {
-      "doc": "The number of data points (pixels) used to fit the point source model.",
       "name": "psfNdata",
-      "type": "int"
+      "type": "int",
+      "doc": "The number of data points (pixels) used to fit the point source model."
     },
     {
-      "doc": "Failure to derive linear least-squares fit of psf model. Another psfFlux flag field should also be set to provide more information.",
       "name": "psfFlux_flag",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Failure to derive linear least-squares fit of psf model. Another psfFlux flag field should also be set to provide more information."
     },
     {
-      "doc": "Object was too close to the edge of the image to use the full PSF model.",
       "name": "psfFlux_flag_edge",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Object was too close to the edge of the image to use the full PSF model."
     },
     {
-      "doc": "Not enough non-rejected pixels in data to attempt the fit.",
       "name": "psfFlux_flag_noGoodPixels",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Not enough non-rejected pixels in data to attempt the fit."
     },
     {
-      "doc": "Flux for a trailed source model. Note this actually measures the flux difference between the template and the visit image.",
       "name": "trailFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Flux for a trailed source model. Note this actually measures the flux difference between the template and the visit image."
     },
     {
-      "doc": "Uncertainty of trailFlux.",
       "name": "trailFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of trailFlux."
     },
     {
-      "doc": "Right ascension coordinate of centroid for trailed source model.",
       "name": "trailRa",
-      "type": "double"
+      "type": "double",
+      "doc": "Right ascension coordinate of centroid for trailed source model."
     },
     {
-      "doc": "Uncertainty of trailRa.",
       "name": "trailRaErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of trailRa."
     },
     {
-      "doc": "Declination coordinate of centroid for trailed source model.",
       "name": "trailDec",
-      "type": "double"
+      "type": "double",
+      "doc": "Declination coordinate of centroid for trailed source model."
     },
     {
-      "doc": "Uncertainty of trailDec.",
       "name": "trailDecErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of trailDec."
     },
     {
-      "doc": "Maximum likelihood fit of trail length.",
       "name": "trailLength",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood fit of trail length."
     },
     {
-      "doc": "Uncertainty of trailLength.",
       "name": "trailLengthErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of trailLength."
     },
     {
-      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the trail direction (bearing).",
       "name": "trailAngle",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the trail direction (bearing)."
     },
     {
-      "doc": "Uncertainty of trailAngle.",
       "name": "trailAngleErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of trailAngle."
     },
     {
-      "doc": "Covariance of trailFlux and trailRa.",
       "name": "trailFlux_trailRa_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailFlux and trailRa."
     },
     {
-      "doc": "Covariance of trailFlux and trailDec.",
       "name": "trailFlux_trailDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailFlux and trailDec."
     },
     {
-      "doc": "Covariance of trailFlux and trailLength",
       "name": "trailFlux_trailLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailFlux and trailLength"
     },
     {
-      "doc": "Covariance of trailFlux and trailAngle",
       "name": "trailFlux_trailAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailFlux and trailAngle"
     },
     {
-      "doc": "Covariance of trailRa and trailDec.",
       "name": "trailRa_trailDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailRa and trailDec."
     },
     {
-      "doc": "Covariance of trailRa and trailLength.",
       "name": "trailRa_trailLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailRa and trailLength."
     },
     {
-      "doc": "Covariance of trailRa and trailAngle.",
       "name": "trailRa_trailAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailRa and trailAngle."
     },
     {
-      "doc": "Covariance of trailDec and trailLength.",
       "name": "trailDec_trailLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailDec and trailLength."
     },
     {
-      "doc": "Covariance of trailDec and trailAngle.",
       "name": "trailDec_trailAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailDec and trailAngle."
     },
     {
-      "doc": "Covariance of trailLength and trailAngle",
       "name": "trailLength_trailAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of trailLength and trailAngle"
     },
     {
-      "doc": "Natural log likelihood of the observed data given the trailed source model.",
       "name": "trailLnL",
-      "type": "float"
+      "type": "float",
+      "doc": "Natural log likelihood of the observed data given the trailed source model."
     },
     {
-      "doc": "Chi^2 statistic of the trailed source model fit.",
       "name": "trailChi2",
-      "type": "float"
+      "type": "float",
+      "doc": "Chi^2 statistic of the trailed source model fit."
     },
     {
-      "doc": "The number of data points (pixels) used to fit the trailed source model.",
       "name": "trailNdata",
-      "type": "int"
+      "type": "int",
+      "doc": "The number of data points (pixels) used to fit the trailed source model."
     },
     {
-      "doc": "This flag is set if a trailed source extends onto or past edge pixels.",
       "name": "trail_flag_edge",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "This flag is set if a trailed source extends onto or past edge pixels."
     },
     {
-      "doc": "Maximum likelihood value for the mean absolute flux of the two lobes for a dipole model.",
       "name": "dipoleMeanFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood value for the mean absolute flux of the two lobes for a dipole model."
     },
     {
-      "doc": "Uncertainty of dipoleMeanFlux.",
       "name": "dipoleMeanFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleMeanFlux."
     },
     {
-      "doc": "Maximum likelihood value for the difference of absolute fluxes of the two lobes for a dipole model.",
       "name": "dipoleFluxDiff",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood value for the difference of absolute fluxes of the two lobes for a dipole model."
     },
     {
-      "doc": "Uncertainty of dipoleFluxDiff.",
       "name": "dipoleFluxDiffErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleFluxDiff."
     },
     {
-      "doc": "Right ascension coordinate of centroid for dipole model.",
       "name": "dipoleRa",
-      "type": "double"
+      "type": "double",
+      "doc": "Right ascension coordinate of centroid for dipole model."
     },
     {
-      "doc": "Uncertainty of dipoleRa.",
       "name": "dipoleRaErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleRa."
     },
     {
-      "doc": "Declination coordinate of centroid for dipole model.",
       "name": "dipoleDec",
-      "type": "double"
+      "type": "double",
+      "doc": "Declination coordinate of centroid for dipole model."
     },
     {
-      "doc": "Uncertainty of dipoleDec.",
       "name": "dipoleDecErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleDec."
     },
     {
-      "doc": "Maximum likelihood value for the lobe separation in dipole model.",
       "name": "dipoleLength",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood value for the lobe separation in dipole model."
     },
     {
-      "doc": "Uncertainty of dipoleLength.",
       "name": "dipoleLengthErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleLength."
     },
     {
-      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the dipole direction (bearing, from negative to positive lobe).",
       "name": "dipoleAngle",
-      "type": "float"
+      "type": "float",
+      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the dipole direction (bearing, from negative to positive lobe)."
     },
     {
-      "doc": "Uncertainty of dipoleAngle.",
       "name": "dipoleAngleErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of dipoleAngle."
     },
     {
-      "doc": "Covariance of dipoleMeanFlux and dipoleFluxDiff.",
       "name": "dipoleMeanFlux_dipoleFluxDiff_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleMeanFlux and dipoleFluxDiff."
     },
     {
-      "doc": "Covariance of dipoleMeanFlux and dipoleRa.",
       "name": "dipoleMeanFlux_dipoleRa_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleMeanFlux and dipoleRa."
     },
     {
-      "doc": "Covariance of dipoleMeanFlux and dipoleDec.",
       "name": "dipoleMeanFlux_dipoleDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleMeanFlux and dipoleDec."
     },
     {
-      "doc": "Covariance of dipoleMeanFlux and dipoleLength.",
       "name": "dipoleMeanFlux_dipoleLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleMeanFlux and dipoleLength."
     },
     {
-      "doc": "Covariance of dipoleMeanFlux and dipoleAngle.",
       "name": "dipoleMeanFlux_dipoleAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleMeanFlux and dipoleAngle."
     },
     {
-      "doc": "Covariance of dipoleFluxDiff and dipoleRa.",
       "name": "dipoleFluxDiff_dipoleRa_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleFluxDiff and dipoleRa."
     },
     {
-      "doc": "Covariance of dipoleFluxDiff and dipoleDec.",
       "name": "dipoleFluxDiff_dipoleDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleFluxDiff and dipoleDec."
     },
     {
-      "doc": "Covariance of dipoleFluxDiff and dipoleLength.",
       "name": "dipoleFluxDiff_dipoleLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleFluxDiff and dipoleLength."
     },
     {
-      "doc": "Covariance of dipoleFluxDiff and dipoleAngle.",
       "name": "dipoleFluxDiff_dipoleAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleFluxDiff and dipoleAngle."
     },
     {
-      "doc": "Covariance of dipoleRa and dipoleDec.",
       "name": "dipoleRa_dipoleDec_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleRa and dipoleDec."
     },
     {
-      "doc": "Covariance of dipoleRa and dipoleLength.",
       "name": "dipoleRa_dipoleLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleRa and dipoleLength."
     },
     {
-      "doc": "Covariance of dipoleRa and dipoleAngle.",
       "name": "dipoleRa_dipoleAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleRa and dipoleAngle."
     },
     {
-      "doc": "Covariance of dipoleDec and dipoleLength.",
       "name": "dipoleDec_dipoleLength_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleDec and dipoleLength."
     },
     {
-      "doc": "Covariance of dipoleDec and dipoleAngle.",
       "name": "dipoleDec_dipoleAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleDec and dipoleAngle."
     },
     {
-      "doc": "Covariance of dipoleLength and dipoleAngle.",
       "name": "dipoleLength_dipoleAngle_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of dipoleLength and dipoleAngle."
     },
     {
-      "doc": "Natural log likelihood of the observed data given the dipole source model.",
       "name": "dipoleLnL",
-      "type": "float"
+      "type": "float",
+      "doc": "Natural log likelihood of the observed data given the dipole source model."
     },
     {
-      "doc": "Chi^2 statistic of the model fit.",
       "name": "dipoleChi2",
-      "type": "float"
+      "type": "float",
+      "doc": "Chi^2 statistic of the model fit."
     },
     {
-      "doc": "The number of data points (pixels) used to fit the model.",
       "name": "dipoleNdata",
-      "type": "int"
+      "type": "int",
+      "doc": "The number of data points (pixels) used to fit the model."
     },
     {
-      "doc": "Forced PSF photometry on science image failed. Another forced_PsfFlux flag field should also be set to provide more information.",
       "name": "forced_PsfFlux_flag",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Forced PSF photometry on science image failed. Another forced_PsfFlux flag field should also be set to provide more information."
     },
     {
-      "doc": "Forced PSF flux on science image was too close to the edge of the image to use the full PSF model.",
       "name": "forced_PsfFlux_flag_edge",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Forced PSF flux on science image was too close to the edge of the image to use the full PSF model."
     },
     {
-      "doc": "Forced PSF flux not enough non-rejected pixels in data to attempt the fit.",
       "name": "forced_PsfFlux_flag_noGoodPixels",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Forced PSF flux not enough non-rejected pixels in data to attempt the fit."
     },
     {
-      "doc": "Calibrated flux for Point Source model centered on radec but measured on the difference of snaps comprising this visit.",
       "name": "snapDiffFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Calibrated flux for Point Source model centered on radec but measured on the difference of snaps comprising this visit."
     },
     {
-      "doc": "Estimated uncertainty of snapDiffFlux.",
       "name": "snapDiffFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Estimated uncertainty of snapDiffFlux."
     },
     {
-      "doc": "Estimated sky background at the position (centroid) of the object.",
       "name": "fpBkgd",
-      "type": "float"
+      "type": "float",
+      "doc": "Estimated sky background at the position (centroid) of the object."
     },
     {
-      "doc": "Estimated uncertainty of fpBkgd.",
       "name": "fpBkgdErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Estimated uncertainty of fpBkgd."
     },
     {
-      "doc": "Adaptive second moment of the source intensity.",
       "name": "ixx",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment of the source intensity."
     },
     {
-      "doc": "Uncertainty of ixx.",
       "name": "ixxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of ixx."
     },
     {
-      "doc": "Adaptive second moment of the source intensity.",
       "name": "iyy",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment of the source intensity."
     },
     {
-      "doc": "Uncertainty of iyy.",
       "name": "iyyErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of iyy."
     },
     {
-      "doc": "Adaptive second moment of the source intensity.",
       "name": "ixy",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment of the source intensity."
     },
     {
-      "doc": "Uncertainty of ixy.",
       "name": "ixyErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of ixy."
     },
     {
-      "doc": "Covariance of ixx and iyy.",
       "name": "ixx_iyy_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of ixx and iyy."
     },
     {
-      "doc": "Covariance of ixx and ixy.",
       "name": "ixx_ixy_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of ixx and ixy."
     },
     {
-      "doc": "Covariance of iyy and ixy.",
       "name": "iyy_ixy_Cov",
-      "type": "float"
+      "type": "float",
+      "doc": "Covariance of iyy and ixy."
     },
     {
-      "doc": "Adaptive second moment for the PSF.",
       "name": "ixxPSF",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment for the PSF."
     },
     {
-      "doc": "Adaptive second moment for the PSF.",
       "name": "iyyPSF",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment for the PSF."
     },
     {
-      "doc": "Adaptive second moment for the PSF.",
       "name": "ixyPSF",
-      "type": "float"
+      "type": "float",
+      "doc": "Adaptive second moment for the PSF."
     },
     {
-      "doc": "General source shape algorithm failure flag; set if anything went wrong when measuring the shape. Another shape flag field should also be set to provide more information.",
       "name": "shape_flag",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "General source shape algorithm failure flag; set if anything went wrong when measuring the shape. Another shape flag field should also be set to provide more information."
     },
     {
-      "doc": "No pixels to measure shape.",
       "name": "shape_flag_no_pixels",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "No pixels to measure shape."
     },
     {
-      "doc": "Center not contained in footprint bounding box.",
       "name": "shape_flag_not_contained",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Center not contained in footprint bounding box."
     },
     {
-      "doc": "This source is a parent source; we should only be measuring on deblended children in difference imaging.",
       "name": "shape_flag_parent_source",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "This source is a parent source; we should only be measuring on deblended children in difference imaging."
     },
     {
-      "doc": "A measure of extendedness, computed by comparing an object's moment-based traced radius to the PSF moments. extendedness = 1 implies a high degree of confidence that the source is extended. extendedness = 0 implies a high degree of confidence that the source is point-like.",
       "name": "extendedness",
-      "type": "float"
+      "type": "float",
+      "doc": "A measure of extendedness, computed by comparing an object's moment-based traced radius to the PSF moments. extendedness = 1 implies a high degree of confidence that the source is extended. extendedness = 0 implies a high degree of confidence that the source is point-like."
     },
     {
-      "doc": "A measure of reliability, computed using information from the source and image characterization, as well as the information on the Telescope and Camera system (e.g., ghost maps, defect maps, etc.).",
       "name": "reliability",
-      "type": "float"
+      "type": "float",
+      "doc": "A measure of reliability, computed using information from the source and image characterization, as well as the information on the Telescope and Camera system (e.g., ghost maps, defect maps, etc.)."
     },
     {
-      "doc": "Filter band this source was observed with.",
       "name": "band",
-      "type": "string"
+      "type": "string",
+      "doc": "Filter band this source was observed with."
     },
     {
-      "doc": "Attempted to fit a dipole model to this source.",
       "name": "dipoleFitAttempted",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Attempted to fit a dipole model to this source."
     },
     {
-      "doc": "General pixel flags failure; set if anything went wrong when setting pixels flags from this footprint's mask. This implies that some pixelFlags for this source may be incorrectly set to False.",
       "name": "pixelFlags",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "General pixel flags failure; set if anything went wrong when setting pixels flags from this footprint's mask. This implies that some pixelFlags for this source may be incorrectly set to False."
     },
     {
-      "doc": "Bad pixel in the DiaSource footprint.",
       "name": "pixelFlags_bad",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Bad pixel in the DiaSource footprint."
     },
     {
-      "doc": "Cosmic ray in the DiaSource footprint.",
       "name": "pixelFlags_cr",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Cosmic ray in the DiaSource footprint."
     },
     {
-      "doc": "Cosmic ray in the 3x3 region around the centroid.",
       "name": "pixelFlags_crCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Cosmic ray in the 3x3 region around the centroid."
     },
     {
-      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or NO_DATA, or centroid off image).",
       "name": "pixelFlags_edge",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or NO_DATA, or centroid off image)."
     },
     {
-      "doc": "Interpolated pixel in the DiaSource footprint.",
       "name": "pixelFlags_interpolated",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Interpolated pixel in the DiaSource footprint."
     },
     {
-      "doc": "Interpolated pixel in the 3x3 region around the centroid.",
       "name": "pixelFlags_interpolatedCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Interpolated pixel in the 3x3 region around the centroid."
     },
     {
-      "doc": "DiaSource center is off image.",
       "name": "pixelFlags_offimage",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "DiaSource center is off image."
     },
     {
-      "doc": "Saturated pixel in the DiaSource footprint.",
       "name": "pixelFlags_saturated",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Saturated pixel in the DiaSource footprint."
     },
     {
-      "doc": "Saturated pixel in the 3x3 region around the centroid.",
       "name": "pixelFlags_saturatedCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Saturated pixel in the 3x3 region around the centroid."
     },
     {
-      "doc": "DiaSource's footprint includes suspect pixels.",
       "name": "pixelFlags_suspect",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "DiaSource's footprint includes suspect pixels."
     },
     {
-      "doc": "Suspect pixel in the 3x3 region around the centroid.",
       "name": "pixelFlags_suspectCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Suspect pixel in the 3x3 region around the centroid."
     },
     {
-      "doc": "Streak in the DiaSource footprint.",
       "name": "pixelFlags_streak",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Streak in the DiaSource footprint."
     },
     {
-      "doc": "Streak in the 3x3 region around the centroid.",
       "name": "pixelFlags_streakCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Streak in the 3x3 region around the centroid."
     },
     {
-      "doc": "Injection in the DiaSource footprint.",
       "name": "pixelFlags_injected",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Injection in the DiaSource footprint."
     },
     {
-      "doc": "Injection in the 3x3 region around the centroid.",
       "name": "pixelFlags_injectedCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Injection in the 3x3 region around the centroid."
     },
     {
-      "doc": "Template injection in the DiaSource footprint.",
       "name": "pixelFlags_injected_template",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Template injection in the DiaSource footprint."
     },
     {
-      "doc": "Template injection in the 3x3 region around the centroid.",
       "name": "pixelFlags_injected_templateCenter",
-      "type": "boolean"
+      "type": "boolean",
+      "doc": "Template injection in the 3x3 region around the centroid."
     }
   ]
 }
