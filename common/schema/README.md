@@ -58,6 +58,8 @@ ssObject
 
 While the directory `lsst_schema` is automatically generated, the `lasair_schema` directory has handmade changes. Start with `mkdir lasair_schema`, then  copy all in `lsst_schema` to `lasair_schema` then make changes: Specifically:
 
+- In diaForcedSources.py, diaObjects.py, diaSources.py: change "dec" to "decl"
+
 - Adding features to the relational table `objects`
   - Look at the new attributes in `lasair_schema/diaObjects.py` and decide if any should be added to the object schema. If so, edit `lasair_schema/objects.py`.
   - Then create suitable `ALTER TABLE` commands and execute these on the main database and on all the local databases associated with filter nodes.

@@ -18,7 +18,7 @@ schema = {
       "doc": "Uncertainty of ra."
     },
     {
-      "name": "decl",
+      "name": "dec",
       "type": "double",
       "doc": "Declination coordinate of the position of the object at time radecMjdTai."
     },

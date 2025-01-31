@@ -18,7 +18,7 @@ schema = {
       "doc": "Right ascension coordinate of the position of the DiaObject at time radecMjdTai."
     },
     {
-      "name": "decl",
+      "name": "dec",
       "type": "double",
       "doc": "Declination coordinate of the position of the DiaObject at time radecMjdTai."
     },

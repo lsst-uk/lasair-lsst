@@ -19,10 +19,7 @@ for q,index in indexes.items():
     }
     fields = rj['fields']
     for field in fields:
-        n = field['name']
-
-        if n == 'dec': d = {'name': 'decl'}
-        else:          d = {'name':n}
+        d = {'name':field['name']}
 
         if type(field['type']) == list: d['type'] = field['type'][1]
         else:                           d['type'] = field['type']
