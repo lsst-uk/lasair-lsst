@@ -93,11 +93,6 @@ schema = {
       "doc": "General centroid algorithm failure flag; set if anything went wrong when fitting the centroid. Another centroid flag field should also be set to provide more information."
     },
     {
-      "name": "is_negative",
-      "type": "boolean",
-      "doc": "Source was detected as significantly negative."
-    },
-    {
       "name": "apFlux",
       "type": "float",
       "doc": "Flux in a 12 pixel radius aperture on the difference image."

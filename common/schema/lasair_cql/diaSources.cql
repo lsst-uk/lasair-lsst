@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS diaSource(
+CREATE TABLE IF NOT EXISTS diaSources(
 "diaSourceId" bigint,
 "visit" bigint,
 "detector" int,
@@ -17,7 +17,6 @@ CREATE TABLE IF NOT EXISTS diaSource(
 "yErr" float,
 "x_y_Cov" float,
 "centroid_flag" boolean,
-"is_negative" boolean,
 "apFlux" float,
 "apFluxErr" float,
 "apFlux_flag" boolean,

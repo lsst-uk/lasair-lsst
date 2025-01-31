@@ -28,10 +28,17 @@
       "psfFluxErr": 100
     },
     {
+      "midpointMjdTai": 60600.95362445494,
+      "mjd": 60600.95362445494,
+      "band": "i",
+      "psfFlux": 11000.0,
+      "psfFluxErr": 100
+    },
+    {
       "midpointMjdTai": 60600.94362445494,
       "mjd": 60600.94362445494,
-      "band": "i",
-      "psfFlux": 11069.959091051645,
+      "band": "r",
+      "psfFlux": 10000.0,
       "psfFluxErr": 100
     },
     {
@@ -52,14 +59,14 @@
       "midpointMjdTai": 60596.10741531256,
       "mjd": 60596.10741531256,
       "band": "i",
-      "psfFlux": 4264.579834222946,
+      "psfFlux": 4000.0,
       "psfFluxErr": 100
     },
     {
-      "midpointMjdTai": 60596.56048252244,
+      "midpointMjdTai": 60596.11748252244,
       "mjd": 60596.56048252244,
       "band": "u",
-      "psfFlux": 1704.3807227741738,
+      "psfFlux": 3000.0,
       "psfFluxErr": 100
     },
     {
