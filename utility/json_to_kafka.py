@@ -15,7 +15,7 @@ if __name__ == '__main__':
     parsed_schema = fastavro.parse_schema(schema)
 
     conf = {
-        'bootstrap.servers': 'lasair-lsst-dev-kafka:9092',
+        'bootstrap.servers': 'lasair-lsst-dev-kafka-0:9092',
         'client.id': 'client-1',
     }
     p = Producer(conf)

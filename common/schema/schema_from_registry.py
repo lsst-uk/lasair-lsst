@@ -7,15 +7,15 @@ import sys
 import time
 import json
 from confluent_kafka.schema_registry import SchemaRegistryClient
-sys.path.append('..')
-import settings
+
+SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
 
 if len(sys.argv) > 1:
     schema_id = int(sys.argv[1])
 else:
     schema_id = 1
 
-sr_client = SchemaRegistryClient({"url": settings.SCHEMA_REG_URL})
+sr_client = SchemaRegistryClient({"url": SCHEMA_REG_URL})
 schema = sr_client.get_schema(schema_id=schema_id)
 s = json.loads(schema.schema_str)
 print(json.dumps(s, indent=2))
