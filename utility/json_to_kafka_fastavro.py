@@ -3,12 +3,16 @@ import fastavro
 from confluent_kafka import Producer, KafkaError
 
 if __name__ == '__main__':
-    if len(sys.argv) >= 3:
+    if len(sys.argv) >= 4:
         datadir    = sys.argv[1]
-        topic      = sys.argv[2]
+        schemafile = sys.argv[2]
+        topic      = sys.argv[3]
     else:
-        print('Usage: json_to_kafka.py <dataset> <topic>')
+        print('Usage: json_to_kafka.py <dataset> <schemafile> <topic>')
         sys.exit()
+
+    schema = json.loads(open(schemafile).read())
+    parsed_schema = fastavro.parse_schema(schema)
 
     conf = {
         'bootstrap.servers': 'lasair-lsst-dev-kafka-0:9092',
@@ -25,7 +29,11 @@ if __name__ == '__main__':
         json_str = fin.read()
         fin.close()
 
-        p.produce(topic, json_str)
+        obj = json.loads(json_str)          
+
+        mockfile = io.BytesIO()
+        fastavro.schemaless_writer(mockfile, parsed_schema, obj)
+        p.produce(topic, mockfile.getvalue())
         n +=1
         if n%100 == 0: 
             print(n)
