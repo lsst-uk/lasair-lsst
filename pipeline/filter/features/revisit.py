@@ -43,7 +43,10 @@ class revisit(FeatureGroup):
                 (i1,i2)=(i2,i1)
                 fluxrat = flux2/flux1
                 T = 12  # guess 12,000 kelvin
-            magdiff = -2.5*math.log10(fluxrat)
+            try:
+                magdiff = -2.5*math.log10(fluxrat)
+            except:
+                return None
             wl1 = WL[i1]
             wl2 = WL[i2]
             for i in range(50):

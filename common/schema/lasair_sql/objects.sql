@@ -54,5 +54,5 @@ CREATE TABLE IF NOT EXISTS objects(
 `timestamp` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (diaObjectId),
 KEY htmid16idx (htm16),
-KEY idxMaxTai (maxTai)
+KEY idxMaxTai (lastDiaSourceMJD)
 )

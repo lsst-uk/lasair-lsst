@@ -188,7 +188,7 @@ schema = {
   "indexes": [
     "PRIMARY KEY (diaObjectId)",
     "KEY htmid16idx (htm16)",
-    "KEY idxMaxTai (maxTai)"
+    "KEY idxMaxTai (lastDiaSourceMJD)"
   ]
 }
 if __name__ == "__main__":
