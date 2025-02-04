@@ -1,6 +1,6 @@
 schema = {
   'indexes':['PRIMARY KEY ("ssObjectId")'],
-  "name": "ssObject",
+  "name": "ssObjects",
   "fields": [
     {
       "doc": "Unique identifier.",

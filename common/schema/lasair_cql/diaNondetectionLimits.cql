@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS diaNondetectionLimit(
+CREATE TABLE IF NOT EXISTS diaNondetectionLimits(
 "ccdVisitId" bigint,
 "midpointMjdTai" double,
 "band" ascii,

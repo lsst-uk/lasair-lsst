@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS diaObject(
+CREATE TABLE IF NOT EXISTS diaObjects(
 "diaObjectId" bigint,
 "ra" double,
 "raErr" float,

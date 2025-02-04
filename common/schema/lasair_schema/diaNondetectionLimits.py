@@ -1,6 +1,6 @@
 schema = {
   'indexes':['PRIMARY KEY ("midpointMjdTai")'],
-  "name": "diaNondetectionLimit",
+  "name": "diaNondetectionLimits",
   "fields": [
     {
       "name": "ccdVisitId",

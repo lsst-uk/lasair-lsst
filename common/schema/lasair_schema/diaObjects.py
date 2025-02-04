@@ -1,6 +1,6 @@
 schema = {
   'indexes':['PRIMARY KEY ("diaObjectId")'],
-  "name": "diaObject",
+  "name": "diaObjects",
   "fields": [
     {
       "doc": "Unique identifier of this DiaObject.",
