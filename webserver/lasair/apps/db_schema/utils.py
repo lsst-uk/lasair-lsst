@@ -21,8 +21,13 @@ def get_schema(
     ```           
     """
     schema_package = importlib.import_module('schema.lasair_schema.' + schema_name)
-    return schema_package.schema['fields']
+    fields = schema_package.schema['fields']
+    named_fields = []
+    for k in fields:
+        if 'name' in k:
+            named_fields.append(k)
 
+    return named_fields
 
 def get_schema_dict(schema_name):
     """*return a database schema as a dictionary*
@@ -38,7 +43,6 @@ def get_schema_dict(schema_name):
     schemaDict = get_schema_dict("diaObjects")
     ```           
     """
-#    schemaDict = {k["name"]: k["doc"] for k in get_schema(schema_name)}
     schemaDict = {}
     for k in get_schema(schema_name):
         if 'doc' in k:
@@ -46,7 +50,6 @@ def get_schema_dict(schema_name):
         else:
             schemaDict[k['name']] = ''
     return schemaDict
-
 
 def get_schema_for_query_selected(
     selected
