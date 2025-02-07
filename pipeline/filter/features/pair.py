@@ -15,7 +15,7 @@ class pair(FeatureGroup):
         'penultimatePairMJD',
         'penultimatePairColourMag',
         'penultimatePairColourBands',
-        'penultimate_pairColourTemp',
+        'penultimatePairColourTemp',
     ]    
 
 
@@ -55,7 +55,11 @@ class pair(FeatureGroup):
                     dfr = dblackbody(wl1, T) - fluxrat*dblackbody(wl2, T)
                 except:
                     return None
-                dT = fr/dfr
+                try:
+                    dT = fr/dfr
+                except:
+                    return None
+
                 T = T - dT
                 if abs(dT) < 0.001: 
                     ret = {
@@ -89,7 +93,8 @@ class pair(FeatureGroup):
         (lc_flux, lc_time, lc_band) = getFluxTimeBand(self.alert)
         latest_done = False
         for i in range(len(lc_flux)-1, 0, -1):
-            if lc_time[i] - lc_time[i-1] < 40.0/(24*60):  # 40 minutes
+            if lc_time[i] - lc_time[i-1] < 40.0/(24*60) \
+                    and lc_band[i] != lc_band[i-1]:  # 40 minutes, different bands
                 # found a revisit
                 if not latest_done:
                     r = compute_revisit(lc_flux[i], lc_flux[i-1], lc_band[i], lc_band[i-1])
