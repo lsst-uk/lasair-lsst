@@ -15,6 +15,9 @@ class bazinExpBlackBody(FeatureGroup):
         "BBBRiseRate", 
         "BBBFallRate", 
         "BBBTemp",
+        "BBBPeakFlux",
+        "BBBPeakAbsMag",
+        "BBBPeakMJD",
     ]
 
     def run(self):
@@ -22,6 +25,9 @@ class bazinExpBlackBody(FeatureGroup):
             'BBBRiseRate': None, 
             'BBBFallRate': None,
             'BBBTemp': None, 
+            'BBBPeakFlux': None,
+            'BBBPeakAbsMag': None,
+            'BBBPeakMJD': None,
         }
 
         # no whinging about overflows during normal running
@@ -55,4 +61,7 @@ class bazinExpBlackBody(FeatureGroup):
         fdict['BBBTemp']        = fit['T']
         fdict['BBBRiseRate']    = fit['k']
         fdict['BBBFallRate']    = fit.get('kf', None)
+        fdict['BBBPeakFlux']    = None
+        fdict['BBBPeakAbsMag']  = None
+        fdict['BBBPeakMJD']     = None
         return fdict

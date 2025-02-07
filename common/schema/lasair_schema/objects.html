@@ -55,13 +55,17 @@
 </table>
 <p><b>Absolute magnitude</b>: Brightness at 1 parsec
 <table border=1>
-<tr><td><tt>absMag</tt></td><td>Brightest peak absolute magnitude if host galaxy with distance available</td>
+<tr><td><tt>absMag</tt></td><td>Peak absolute magnitude (extinction corrected) if host galaxy with distance available</td>
+<tr><td><tt>absMagMJD</tt></td><td>Peak absolute magnitude time if host galaxy with distance available</td>
 </table>
 <p><b>BazinBlackBody (BBB)</b>: Lightcurve fit as Bazin or Exp in time, Blackbody in wavelength
 <table border=1>
 <tr><td><tt>BBBRiseRate</tt></td><td>Fitted Bazin or Exp rise rate</td>
 <tr><td><tt>BBBFallRate</tt></td><td>Fitted Bazin fall rate or NULL if Exp</td>
-<tr><td><tt>BBBTemp</tt></td><td>Fitted Bazin temperature, kiloKelvins</td>
+<tr><td><tt>BBBTemp</tt></td><td>Fitted Bazin temperature, (kiloKelvins)</td>
+<tr><td><tt>BBBPeakFlux</tt></td><td>If Bazin fit, the peak flux (nJy)</td>
+<tr><td><tt>BBBPeakMJD</tt></td><td>If Bazin fit, the time of the peak brightness</td>
+<tr><td><tt>BBBPeakAbsMag</tt></td><td>If Bazin fit and Sherlock host with distance, the peak absolute magnitude</td>
 </table>
 <p><b>Milky Way</b>: Galactic latitude and extinction
 <table border=1>
@@ -72,16 +76,16 @@
 <table border=1>
 <tr><td><tt>jumpFromMean20</tt></td><td>Number of sigma jump of recent flux from previous 20 days</td>
 </table>
-<p><b>Revisit colours</b>: Colours from 33-minute revisits
+<p><b>Pair colours</b>: Colours from 33-minute paired diaSources
 <table border=1>
-<tr><td><tt>latest_rv_mjd</tt></td><td>Latest revisit MJD</td>
-<tr><td><tt>latest_rv_colour_mag</tt></td><td>Magnitude difference from latest revisit</td>
-<tr><td><tt>latest_rv_colour_bands</tt></td><td>Bands used for latest revisit colour, eg g-r, u-r</td>
-<tr><td><tt>latest_rv_colour_temp</tt></td><td>Effective temperature from latest revisit, kiloKelvin</td>
-<tr><td><tt>penultimate_rv_mjd</tt></td><td>Penultimate revisit MJD</td>
-<tr><td><tt>penultimate_rv_colour_mag</tt></td><td>Magnitude difference from Penultimate revisit</td>
-<tr><td><tt>penultimate_rv_colour_bands</tt></td><td>Bands used for penultimate revisit colour, eg g-r, u-r</td>
-<tr><td><tt>penultimate_rv_colour_temp</tt></td><td>Effective temperature from penultimate revisit, kiloKelvin</td>
+<tr><td><tt>latestPairMJD</tt></td><td>Latest pair MJD</td>
+<tr><td><tt>latestPairColourMag</tt></td><td>Magnitude difference from latest pair</td>
+<tr><td><tt>latestPairColourBands</tt></td><td>Bands used for latest pair colour, eg g-r, u-r</td>
+<tr><td><tt>latestPairColourTemp</tt></td><td>Extinction corrected effective temperature from latest pair, kiloKelvin</td>
+<tr><td><tt>penultimatePairMJD</tt></td><td>Penultimate pair MJD</td>
+<tr><td><tt>penultimatePairColourMag</tt></td><td>Magnitude difference from Penultimate pair</td>
+<tr><td><tt>penultimatePairColourBands</tt></td><td>Bands used for penultimate pair colour, eg g-r, u-r</td>
+<tr><td><tt>penultimate_pairColourTemp</tt></td><td>Extinction corrected effective temperature from penultimate pair, kiloKelvin</td>
 </table>
 <p><b>Utility</b>: Other attributes
 <table border=1>

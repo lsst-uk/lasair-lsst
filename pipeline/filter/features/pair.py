@@ -4,18 +4,18 @@ from features.FeatureGroup import FeatureGroup
 #from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class revisit(FeatureGroup):
+class pair(FeatureGroup):
     """Find the most recent revisit and derive colour information"""
 
     _features = [
-        "latest_rv_mjd",
-        "latest_rv_colour_mag",
-        "latest_rv_colour_bands",
-        "latest_rv_colour_temp",
-        "penultimate_rv_mjd",
-        "penultimate_rv_colour_mag",
-        "penultimate_rv_colour_bands",
-        "penultimate_rv_colour_temp",
+        'latestPairMJD',
+        'latestPairColourMag',
+        'latestPairColourBands',
+        'latestPairColourTemp',
+        'penultimatePairMJD',
+        'penultimatePairColourMag',
+        'penultimatePairColourBands',
+        'penultimate_pairColourTemp',
     ]    
 
 
@@ -69,14 +69,14 @@ class revisit(FeatureGroup):
             return None
 
         fdict = {
-            'latest_rv_mjd'         : None,
-            'latest_rv_colour_mag'  : None,
-            'latest_rv_colour_bands': '',
-            'latest_rv_colour_temp' : None,
-            'penultimate_rv_mjd'         : None,
-            'penultimate_rv_colour_mag'  : None,
-            'penultimate_rv_colour_bands': '',
-            'penultimate_rv_colour_temp' : None,
+            'latestPairMJD': None,
+            'latestPairColourMag': None,
+            'latestPairColourBands': None,
+            'latestPairColourTemp': None,
+            'penultimatePairMJD': None,
+            'penultimatePairColourMag': None,
+            'penultimatePairColourBands': None,
+            'penultimatePairColourTemp': None,
         }
 #        ra   = self.alert['diaObject']['ra']
 #        decl = self.alert['diaObject']['decl']
@@ -94,18 +94,18 @@ class revisit(FeatureGroup):
                 if not latest_done:
                     r = compute_revisit(lc_flux[i], lc_flux[i-1], lc_band[i], lc_band[i-1])
                     if r:
-                        fdict['latest_rv_mjd']          = lc_time[i]
-                        fdict['latest_rv_colour_mag']   = r['colour_mag']
-                        fdict['latest_rv_colour_bands'] = r['colour_bands']
-                        fdict['latest_rv_colour_temp']  = r['colour_temp']
+                        fdict['latestPairMJD']         = lc_time[i]
+                        fdict['latestPairColourMag']   = r['colour_mag']
+                        fdict['latestPairColourBands'] = r['colour_bands']
+                        fdict['latestPairColourTemp']  = r['colour_temp']
                     latest_done = True
                 else:
                     r = compute_revisit(lc_flux[i], lc_flux[i-1], lc_band[i], lc_band[i-1])
                     if r:
-                        fdict['penultimate_rv_mjd']          = lc_time[i]
-                        fdict['penultimate_rv_colour_mag']   = r['colour_mag']
-                        fdict['penultimate_rv_colour_bands'] = r['colour_bands']
-                        fdict['penultimate_rv_colour_temp']  = r['colour_temp']
+                        fdict['penultimatePairMJD']          = lc_time[i]
+                        fdict['penultimatePairColourMag']   = r['colour_mag']
+                        fdict['penultimatePairColourBands'] = r['colour_bands']
+                        fdict['penultimatePairColourTemp']  = r['colour_temp']
                     break
 
         return fdict

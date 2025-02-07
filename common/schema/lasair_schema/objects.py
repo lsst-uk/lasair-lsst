@@ -57,13 +57,17 @@ schema = {
     {"name": "nearbyObj1LnP",     "type":"float",    "doc":"Natural log of the probability that the observed diaObject is the same as the nearbyObj1."},
 
 {"section":"Absolute magnitude", "doc":"Brightness at 1 parsec"},
-    {"name": "absMag", "type": "float", "doc":"Brightest peak absolute magnitude if host galaxy with distance available"},
+    {"name": "absMag",    "type": "float", "doc":"Peak absolute magnitude (extinction corrected) if host galaxy with distance available"},
+    {"name": "absMagMJD", "type": "float", "doc":"Peak absolute magnitude time if host galaxy with distance available"},
 
 # https://roywilliams.github.io/papers/Bazin_Exp_Blackbody.pdf
 {"section":"BazinBlackBody (BBB)", "doc":"Lightcurve fit as Bazin or Exp in time, Blackbody in wavelength"},
-    {"name": "BBBRiseRate", "type": "float", "doc": "Fitted Bazin or Exp rise rate" },
-    {"name": "BBBFallRate", "type": "float", "doc": "Fitted Bazin fall rate or NULL if Exp" },
-    {"name": "BBBTemp",     "type": "float", "doc": "Fitted Bazin temperature, kiloKelvins" },
+    {"name": "BBBRiseRate",  "type": "float", "doc": "Fitted Bazin or Exp rise rate" },
+    {"name": "BBBFallRate",  "type": "float", "doc": "Fitted Bazin fall rate or NULL if Exp" },
+    {"name": "BBBTemp",      "type": "float", "doc": "Fitted Bazin temperature, (kiloKelvins)" },
+    {"name": "BBBPeakFlux",  "type": "float", "doc": "If Bazin fit, the peak flux (nJy)" },
+    {"name": "BBBPeakMJD",   "type": "float", "doc": "If Bazin fit, the time of the peak brightness" },
+    {"name": "BBBPeakAbsMag","type": "float", "doc": "If Bazin fit and Sherlock host with distance, the peak absolute magnitude" },
 
 {"section":"Milky Way", "doc":"Galactic latitude and extinction"},
     {"name": "glat", "type": "float", "doc": "Galactic latitude" },
@@ -73,15 +77,15 @@ schema = {
 {"section":"Jump detector", "doc":"Number of sigma jump from 20 day mean"},
     {"name": "jumpFromMean20", "type": "float", "doc": "Number of sigma jump of recent flux from previous 20 days"},
 
-{"section":"Revisit colours", "doc":"Colours from 33-minute revisits"},
-    {"name": "latest_rv_mjd",         "type": "float", "doc": "Latest revisit MJD" },
-    {"name": "latest_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from latest revisit" },
-    {"name": "latest_rv_colour_bands","type": "string",   "doc": "Bands used for latest revisit colour, eg g-r, u-r" },
-    {"name": "latest_rv_colour_temp", "type": "float", "doc": "Effective temperature from latest revisit, kiloKelvin" },
-    {"name": "penultimate_rv_mjd",         "type": "float", "doc": "Penultimate revisit MJD" },
-    {"name": "penultimate_rv_colour_mag",  "type": "float", "doc": "Magnitude difference from Penultimate revisit" },
-    {"name": "penultimate_rv_colour_bands","type": "string",   "doc": "Bands used for penultimate revisit colour, eg g-r, u-r" },
-    {"name": "penultimate_rv_colour_temp", "type": "float", "doc": "Effective temperature from penultimate revisit, kiloKelvin" },
+{"section":"Pair colours", "doc":"Colours from 33-minute paired diaSources"},
+    {"name": "latestPairMJD",        "type": "float", "doc": "Latest pair MJD" },
+    {"name": "latestPairColourMag",  "type": "float", "doc": "Magnitude difference from latest pair" },
+    {"name": "latestPairColourBands","type": "string","doc": "Bands used for latest pair colour, eg g-r, u-r" },
+    {"name": "latestPairColourTemp", "type": "float", "doc": "Extinction corrected effective temperature from latest pair, kiloKelvin" },
+    {"name": "penultimatePairMJD",        "type": "float", "doc": "Penultimate pair MJD" },
+    {"name": "penultimatePairColourMag",  "type": "float", "doc": "Magnitude difference from Penultimate pair" },
+    {"name": "penultimatePairColourBands","type": "string","doc": "Bands used for penultimate pair colour, eg g-r, u-r" },
+    {"name": "penultimate_pairColourTemp","type": "float", "doc": "Extinction corrected effective temperature from penultimate pair, kiloKelvin" },
 
 {"section":"Utility", "doc":"Other attributes"},
 # HTM index

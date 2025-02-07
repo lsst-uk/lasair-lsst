@@ -45,7 +45,6 @@ class diaObjectCopy(FeatureGroup):
             if f in object:
                 output[f] = object.get(f, None)
             else:
-                if self.verbose: print('diaObjectCopy: did not find %s' % f)
                 output[f] = None
 
         # get the latest fluxes from the diaSources

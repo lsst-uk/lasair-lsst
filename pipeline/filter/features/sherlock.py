@@ -9,9 +9,11 @@ class sherlock(FeatureGroup):
 
     _features = [
         "absMag",
+        "absMagMJD",
     ]    
 
     def run(self):
         return { 
             "absMag": None, 
+            "absMagMJD": None, 
         }

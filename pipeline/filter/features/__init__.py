@@ -6,6 +6,6 @@ __all__ = [
     "bazinExpBlackBody",
     "milkyWay",
     "jump",
-    "revisit",
+    "pair",
     "tns",
 ]
