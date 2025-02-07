@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS objects(
 `penultimatePairMJD` float,
 `penultimatePairColourMag` float,
 `penultimatePairColourBands` varchar(16),
-`penultimate_pairColourTemp` float,
+`penultimatePairColourTemp` float,
 `htm16` bigint NOT NULL,
 `timestamp` timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 PRIMARY KEY (diaObjectId),

@@ -85,7 +85,7 @@ schema = {
     {"name": "penultimatePairMJD",        "type": "float", "doc": "Penultimate pair MJD" },
     {"name": "penultimatePairColourMag",  "type": "float", "doc": "Magnitude difference from Penultimate pair" },
     {"name": "penultimatePairColourBands","type": "string","doc": "Bands used for penultimate pair colour, eg g-r, u-r" },
-    {"name": "penultimate_pairColourTemp","type": "float", "doc": "Extinction corrected effective temperature from penultimate pair, kiloKelvin" },
+    {"name": "penultimatePairColourTemp","type": "float", "doc": "Extinction corrected effective temperature from penultimate pair, kiloKelvin" },
 
 {"section":"Utility", "doc":"Other attributes"},
 # HTM index
