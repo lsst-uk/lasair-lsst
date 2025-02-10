@@ -19,8 +19,8 @@ def cfg_assets_root(request):
 
 def global_vars(request):
     if settings.DEBUG:
-        docroot = "https://lasair.readthedocs.io/en/develop"
+        docroot = "https://lasair-lsst.readthedocs.io/en/develop"
     else:
-        docroot = "https://lasair.readthedocs.io/en/main"
+        docroot = "https://lasair-lsst.readthedocs.io/en/main"
 
     return {'docroot': docroot, 'lasair_grafana_url': settings.LASAIR_GRAFANA_URL}
