@@ -8,7 +8,7 @@ astrophysical phenomena (see [here](about.html#extragalactic-transients) for mor
 Alerts from the same place in the sky are combined to 
 [objects](concepts/objects_sources.html).
 The alerts provide the brightness of the object with time -- 
-see [here](concepts/lightcurve.html) for more. 
+see the [lightcurve discussion](concepts/lightcurve.html) for more. 
 Lasair adds information to the object, matching the position with the known 
 astronomical catalogs -- see [here](concepts/sky-context.html).
 
@@ -23,25 +23,22 @@ specifically the one used for building the set of alerts shown on the
 [Lasair front page]({%lasairurl%}/). That display is made from recent, bright, 
 real alerts that are identified with known classes of stars and galaxies. 
 If you click on any of the red, orange, blue, or yellor markers, you will see 
-a popup witha link to the full object page, the age of the most recent alert, 
+a popup with a link to the full object page, the age of the most recent alert, 
 its magnitude, and its class.
 
-Each object in the Lasair objects table has a lot of columns in several tables, 
-and for this example we will concentrate on just a few:
+To get started we will focus on a few properties (columns) of a Lasair object recorded in two of the most commonly used tables:
 
 * From the objects table:
     * `objectId`: The identifier for an object that is used to link to the full 
 object page,
-    * `ramean, decmean`: The position of the object in the sky, to place it 
-correctly,
-    * `gmag, rmag`: the magnitudes of the latest alert in the g and r filters,
+    * `ramean, decmean`: The position of the object in the sky, in decimal degrees, to place it correctly,
+    * `gmag, rmag`: the g and r magnitudes of the latest alert,
     * `jdmax`: the Julian Day (i.e.date and time) of the latest alert,
     * `jdnow()`: an SQL function that returns the Julian Day now, so we can 
 subtract to get the age in days,
     * `ncandgp`: number of good, positive alerts belonging to this object. 
 * From the sherlock_classifications table:
-    * `classification`: Sherlock class according to the sky context -- see 
-[core_functions/sherlock.html](here) for more.
+    * `classification`: [Sherlock class](core_functions/sherlock.html) according to the sky context.
 
 ### Create New Filter
 We can build the filter by clicking on 'Filters' in the Lasair sidebar, then 
@@ -91,7 +88,7 @@ We want bright objects only, mostly to cut the numbers being drawn on the Lasair
 AND objects.ncandgp > 1
 ```
 
-There are a lot of 'orphans' in the Lasair database, that have only one alert. Many of these are not worth looking at, so we require the number of candidates to be greater than 1.
+There are a lot of 'orphans' in the Lasair database, meaning objects that have only one candidate (detection). Many of these are not worth looking at, so we require the number of candidates to be greater than 1.
 ```
 AND sherlock_classifications.classification in ("SN", "NT", "CV", "AGN")
 ```
@@ -113,17 +110,16 @@ your valid email address -- see [here to register]({%lasairurl%}/register).
 
 Click the black button 'Save' on the create fulter page, then fill in the 
 details: Name and Description, and you can choose to make it public, so that it 
-appears in the [Public Gallery](({%lasairurl%}/filters). Once its shared like 
+appears in the [Public Gallery]({%lasairurl%}/filters). Once its shared like 
 this, others can use it, or copy and modify it. Another option in the Save 
-dialogue 
-has three choices:
+dialogue has three choices:
+
 * muted: The filter is saved, and you can run it and edit it
 * email stream (daily): Means that you receive an email -- at the address of 
 your Lasair account -- 
 whenever an alert causes an object to pass through the filter. 
 This is restricted to one email in 24 hours.
-* kafka stream: The substream induced by the filter becomes a kafka stream -- 
-see [here](core_functions/alert-streams.html) for more.
+* kafka stream: The substream induced by the filter becomes a [kafka stream](core_functions/alert-streams.html).
 
 Other options on the filter page bring in other tables in addition to the
 `objects` table 
@@ -145,3 +141,14 @@ that you or someone else has uploaded -- see [here](core_functions/watchmaps.htm
 * `annotation`: you can find events that have been classified or otherwise 
 annotated external to Lasair. You can also set up your own annotation service -- see 
 [here](concepts/annotations.html).
+
+### Lasair client and notebooks
+Once you can build a filter with the web pages, you might want to run with python code instead of clicks.
+There is a client library for Lasair with methods for positional search, 
+running queries on the Lasair database, and other functions -- see 
+[here](core_functions/client.html). There is also a set of Jupyter notebooks illustrating use of the client [here](core_functions/python_notebooks.html).
+
+### Kafka and Annotation
+Once you have a filter that produces the alerts you want, you might want to have your machine receive them and act on your behalf. This is explained [here](core_functions/alert-streams.html).
+
+You can add information to the Lasair database, with your own classification algorithm or other added value. This in the annotation process: see [here](core_functions/alert-streams.html) for more information.

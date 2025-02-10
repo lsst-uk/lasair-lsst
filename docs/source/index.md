@@ -12,7 +12,9 @@ public stream of the [Zwicky Transient Facility (ZTF)](http://www.ztf.caltech.ed
 which is releasing a transient alert stream in a format similar to that 
 envisaged for LSST. We thank ZTF for access to this valuable public data stream.
 
-If you make use of [Lasair]({%lasairurl%}) in any of your work, please remember to cite our paper: [Lasair: The Transient Alert Broker for LSST:UK](https://doi.org/10.3847/2515-5172/ab020f), K. W. Smith, R. D. Williams et. al., Research Notes AAS, **3**,26 (2019).
+If you make use of [Lasair]({%lasairurl%}) in any of your work, please remember to cite our paper: [R.D.Williams et. al., 
+Enabling science from the Rubin alert stream with Lasair](https://doi.org/10.1093/rasti/rzae024), 
+RAS Techniques and Instruments, **3**,1, 362  (2024).
 
 To start using Lasair to filter the deluge of alerts:
 ```eval_rst
@@ -44,7 +46,6 @@ Please start here to discover the key ideas of Lasair:
    concepts/sky-context
    concepts/querying
    concepts/coding
-   concepts/added-value
    concepts/annotations
 ```
 
@@ -60,6 +61,7 @@ Lasair's core features are described in more detail here:
    core_functions/make_filter
    core_functions/watchlists
    core_functions/watchmaps
+   core_functions/client
    core_functions/rest-api
    core_functions/python-notebooks
    core_functions/alert-streams

@@ -18,5 +18,6 @@ transients such as supernova candidates. Once spectroscopically confirmed, new s
 discoveries are officially designated a SN name. Lasair keeps a cache of the database, updated every few hours.
 [Details here](https://www.wis-tns.org/).
 
- - Personal Watchlists: Lasair allows users to upload personal catalogues of interesting sources, which are 
-crossmatched in real time with incoming alerts.
+ - Personal Watchlists: Lasair allows users to upload personal catalogues of interesting sources, which can be crossmatched in real time with incoming alerts if they are **active**. [Details here](core_functions/watchlists.html)
+
+ - Personal Watchmaps: Lasair allows users to upload regions of the sky, expresses as [MOC files](https://cds-astro.github.io/mocpy/), which can be matched in real time with incoming alerts if they are **active**. [Details here](core_functions/watchmaps.html)

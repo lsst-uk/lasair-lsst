@@ -1,17 +1,13 @@
 ## Make a Lasair Filter
 
-Lasair is built around "filters" of the alert stream. Users create a filter with SQL clauses, based on the
-attributes of the object associated with the alert: its lightcurve, sky context, etc.
-First you make a filter and run it on the previous alerts, and then you can save the filter
-(if you have a Lasair account). You can convert your filter to a *streaming* filter, so that results
-are sent to your email or to your own machine as soon as they are available.
+Lasair is built around "filters" of the alert stream. Users create a filter with SQL clauses, based on the attributes of the object associated with the alert: its lightcurve, sky context, etc.  First you make a filter and run it on the previous alerts, and then you can save the filter (if you have a Lasair account). You can convert your filter to an *active* filter, so that results are sent to your email or to your own machine (via Kafka) as soon as they are available.
 
 Let us make a filter for alerts associated with bright stars. Click on "Filters" in the left margin, 
 then "Create New" at top right.
 
 <img src="../_images/make_filter/toy_filter.png" width="500px"/>
 
-Fill in the form as shown here. Name and description, then check the “email” box, and fill in the SELECT as
+Fill in the form as shown here. The SELECT field should be:
 ```
 objects.objectId, objects.gmag, jdnow()-objects.jdmax AS since
 ```
@@ -20,10 +16,10 @@ and fill in the WHERE as
 objects.gmag < 12
 ```
 
-If you click "Run Filter", all the objects will be returned that are brighter than
-12th magnitude and the brightness is variable.
+If you click "Run Filter", all the alerts will be returned that are brighter than
+12th magnitude. The word "alert" means brightness five-sigma brighter or fainter than the reference sky.
 
-Perhaps you would like to see the obejcts with the most recent alerts first:
+Perhaps you would like to see the objects with the most recent alerts first:
 just add to the WHERE clause the phrase
 ```
 ORDER BY objects.jdmax DESC

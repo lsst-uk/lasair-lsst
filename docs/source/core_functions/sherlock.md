@@ -106,8 +106,8 @@ Once each transient has a set of independently crossmatched synonyms and associa
 
 We have constructed a multi-billion row database which contains all these catalogues. It currently consumes about 4.5TB and sits on a separate, similarly specified machine to that of the Lasair database. It will grow significantly as new catalogues are added (e.g. Pan-STARRS 3_π_ DR2, VST and VISTA surveys, future Gaia releases etc).
 
-The _Sherlock_ code is open source and can be found at: [https://github.com/thespacedoctor/sherlock](https://github.com/thespacedoctor/sherlock). Documentation is also available online here: [https://qub-sherlock.readthedocs.io/en/master/](https://qub-sherlock.readthedocs.io/en/master/).
-
+The [_Sherlock_ code](https://github.com/thespacedoctor/sherlock) is open source
+and [there is documentation](https://qub-sherlock.readthedocs.io/en/master/).
 Although the code for _Sherlock_ is public, it requires access to a number of large databases which are custom built from their original, public, releases. The latter is proprietary and therefore would require some effort from users to reproduce. As part of the Lasair project we are exploring public access to the integrated _Sherlock_ code and database information through an API.
 
 Sherlock 2.0 was reviewed as a LSST:UK Deliverable in March 2020. The review noted that an algorithm enhancement would be desirable to take into account stellar proper motions, since some proper motion stars will be variable and if cross-matched with a static catalogue will fall outside the nominal match radius. This is an enhancement we will taken forward for future versions.
