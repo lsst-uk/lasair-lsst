@@ -12,7 +12,7 @@
 <!--  [![](http://157.245.42.153:8080/buildStatus/icon?job=lasair%2Fmaster&subject=build%20master)](http://157.245.42.153:8080/blue/organizations/jenkins/lasair/activity?branch=master)  
 [![](http://157.245.42.153:8080/buildStatus/icon?job=lasair%2Fdevelop&subject=build%20dev)](http://157.245.42.153:8080/blue/organizations/jenkins/lasair/activity?branch=develop) 
 [![](https://cdn.jsdelivr.net/gh/lsst-uk/lasair_api@master/coverage.svg)](https://raw.githack.com/lsst-uk/lasair_api/master/htmlcov/index.html)    -->
-[![](https://readthedocs.org/projects/lasair/badge/?version=master)](https://lasair.readthedocs.io/en/master/)  
+[![](https://readthedocs.org/projects/lasair/badge/?version=master)](https://lasair-lsst.readthedocs.io/en/master/)  
 [![](https://img.shields.io/github/issues/lsst-uk/lasair4/type:%20bug?label=bug%20issues)](https://github.com/lsst-uk/lasair4/issues?q=is%3Aissue+is%3Aopen+label%3A%22type%3A+bug%22+)  
 
 # Lasair. A UK Alert Stream Broker and Transient Science Platform.
@@ -23,7 +23,7 @@ If you make use of Lasair in any of your work, please remember to cite our paper
 
 *[Lasair: The Transient Alert Broker for LSST:UK](https://doi.org/10.3847/2515-5172/ab020f)*, K. W. Smith, R. D. Williams et. al., Research Notes AAS, **3**,26 (2019).
 
-Documentation for Lasair is hosted on [Read the Docs](https://lasair.readthedocs.io/en/main/). The code lives on [github](https://github.com/orgs/lsst-uk/repositories?q=lasair&type=all&language=&sort=). 
+Documentation for Lasair is hosted on [Read the Docs](https://lasair-lsst.readthedocs.io/en/main/). The code lives on [github](https://github.com/orgs/lsst-uk/repositories?q=lasair&type=all&language=&sort=). 
 <hr/>
 Copyright 2023 University of Edinburgh and Queens University Belfast
 

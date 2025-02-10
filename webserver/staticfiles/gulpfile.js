@@ -32,6 +32,7 @@ var concat = require('gulp-concat');
 var rename = require('gulp-rename');
 var uglify = require('gulp-uglify');
 var touch = require('gulp-touch-fd');
+var replace = require('gulp-replace');
 
 // Define paths
 
@@ -238,6 +239,20 @@ gulp.task('copy:dist:js', function() {
         .pipe(gulp.dest(paths.dist.js))
 });
 
+// REPLACE BAD LINE IN JS9.js
+gulp.task('replace_1', function() {
+
+    return gulp.src([paths.src.node_modules + '/js9/js9.js']) // Every file allown. 
+        .pipe(replace('this.displayConjq.focus();', ''))
+        .pipe(gulp.dest(paths.src.node_modules + '/js9/'))
+});
+
+gulp.task('replace_2', function() {
+    return gulp.src([paths.src.node_modules + '/js9/js9.js'])
+        .pipe(replace('$(document).scrollTop(0);', ''))
+        .pipe(gulp.dest(paths.src.node_modules + '/js9/'))
+});
+
 // COPY REQUIRED VENDOR MODULES
 gulp.task('copy:dist:vendor', function() {
     gulp.src(paths.src.node_modules + '/bootstrap-multiselect/dist/**/*.*', )
@@ -254,7 +269,7 @@ gulp.task('serve', gulp.series('copy:dist:css', 'copy:dist:files', 'copy:dist:fo
     gulp.watch([paths.src.js], gulp.series('concat:dist:js'));
 }));
 
-gulp.task('build', gulp.series('clean:dist', 'copy:dist:css', 'copy:dist:files', 'copy:dist:fonts', 'copy:dist:img', 'copy:dist:js', 'concat:dist:js', 'concat:vendor:js', 'concat:vendor:css', 'copy:dist:vendor'));
+gulp.task('build', gulp.series('clean:dist', 'copy:dist:css', 'copy:dist:files', 'copy:dist:fonts', 'copy:dist:img', 'copy:dist:js', 'concat:dist:js', 'replace_1', 'replace_2', 'concat:vendor:js', 'concat:vendor:css', 'copy:dist:vendor'));
 
 // Default
 gulp.task('default', gulp.series('serve'));

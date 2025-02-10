@@ -1,4 +1,5 @@
 import os, sys
+import json
 from datetime import datetime
 import lasair
 
@@ -9,14 +10,19 @@ from src import date_nid
 sys.path.append('fink-client')
 from fink_client.consumer import AlertConsumer
 
+TESTMODE = (len(sys.argv) > 1 and sys.argv[1] == 'TEST')
+
 nid  = date_nid.nid_now()
 date = date_nid.nid_to_date(nid)
-logfile = settings.SERVICES_LOG +'/'+ date + '.log'
-logf = open(logfile, 'a')
+
+if TESTMODE:
+    logf = sys.stdout
+else:
+    logfile = settings.SERVICES_LOG +'/'+ date + '.log'
+    logf = open(logfile, 'a')
 
 # Lasair client
-L = lasair.lasair_client(settings.API_TOKEN, endpoint='https://lasair-ztf.lsst.ac.uk/api')
-#L = lasair.lasair_client(settings.API_TOKEN')
+L = lasair.lasair_client(settings.API_TOKEN, endpoint='https://' + settings.LASAIR_URL + '/api')
 topic_out = 'fink'
 
 # Fink configuration
@@ -29,47 +35,35 @@ fink_config = {
 # Instantiate a consumer
 consumer = AlertConsumer(settings.FINK_TOPICS, fink_config)
 
-#d = consumer.available_topics()
-#topics = list(d.keys())
-#topics.sort()
-#for topic in topics: 
-#    print(topic)
+if TESTMODE:
+    d = consumer.available_topics()
+    topics = list(d.keys())
+    topics.sort()
+    for topic in topics: 
+        if topic.startswith('fink'):
+            print('Found topic:', topic)
 
 nalert = {}
 n = 0
 maxtimeout = 5
-while 1:
+maxalert = 5000
+while n < maxalert:
     (topic, alert, version) = consumer.poll(maxtimeout)
     if topic is None:
         break
-    print(topic)
+    if TESTMODE:
+        print(alert['objectId'], topic)
 
-    objectId = alert['objectId']
-    classification = topic[:16]
-    classdict = {}
-
-    try: classdict['rf_snia_vs_nonia']:   float(alert['rf_snia_vs_nonia']) 
-    except: pass
-
-    try: classdict['snn_snia_vs_nonia']:  float(alert['snn_snia_vs_nonia']) 
-    except: pass
-
-    try: classdict['snn_sn_vs_all']:      float(alert['snn_sn_vs_all']) 
-    except: pass
-
-    try: classdict['rf_kn_vs_nonkn']:     float(alert['rf_kn_vs_nonkn']) 
-    except: pass
-
-    try: classdict['anomaly_score']:      float(alert['anomaly_score']) 
-    except: pass
+    if not topic in settings.FINK_TOPICS:
+        continue
 
     L.annotate(
         topic_out,
-        objectId,
-        classification,
+        alert['objectId'],
+        topic[:16],
         version='0.1',
         explanation='',
-        classdict=classdict,
+        classdict={'classification': topic},
         url='')
 
     n += 1

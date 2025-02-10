@@ -101,20 +101,15 @@ class ConeSerializer(serializers.Serializer):
 
         return info
 
-class ObjectsSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(required=True)
+class ObjectSerializer(serializers.Serializer):
+    objectId = serializers.CharField(required=True)
+    lite = serializers.BooleanField()    # doesnt do anything right now
+    lasair_added = serializers.BooleanField()
 
     def save(self):
-        diaObjectIds = self.validated_data['objectIds']
-
-        olist = []
-        for tok in diaObjectIds.split(','):
-            try:
-                objId = int(tok.strip())
-                olist.append(objId)
-            except ValueError:
-                raise ValidationError(detail="objectIds must be a list of integers")
-        olist = olist[:10] # restrict to 10
+        objectId = self.validated_data['objectId']
+        lite = self.validated_data['lite']
+        lasair_added = self.validated_data['lasair_added']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -122,15 +117,24 @@ class ObjectsSerializer(serializers.Serializer):
         if request and hasattr(request, "user"):
             userId = request.user
 
-        result = []
-        for diaObjectId in olist:
-            if 1:
-                obj = objjson(int(diaObjectId))
-#            except:
-#                obj = None
-            result.append(obj)
-        return result
+        if lasair_added:
+            try:
+                result = objjson(objectId)
+            except Exception as e:
+                result = {'error': str(e)}
+            return result
+        else:
+            # Fetch the lightcurve, either from cassandra or file system
+            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
 
+            try:
+                (candidates, fpcandidates) = LF.fetch(objectId)
+                result = {'objectId':objectId, 'candidates':candidates, 'forcedphot': fpcandidates}
+            except Exception as e:
+                result = {'error': str(e)}
+
+            LF.close()
+            return result
 
 class SherlockObjectSerializer(serializers.Serializer):
     objectId = serializers.IntegerField(required=True)
@@ -275,36 +279,6 @@ class QuerySerializer(serializers.Serializer):
             error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
             return {"error": error}
 
-class LightcurvesSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(max_length=16384, required=True)
-
-    def save(self):
-        diaObjectIds = self.validated_data['objectIds']
-        olist = []
-        for tok in diaObjectIds.split(','):
-            try:
-                objId = int(tok.strip())
-                olist.append(objId)
-            except ValueError:
-                raise ValidationError(detail="objectIds must be a list of integers")
-
-        # Get the authenticated user, if it exists.
-        userId = 'unknown'
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            userId = request.user
-
-            # Fetch the lightcurve, either from cassandra or file system
-        LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
-
-        lightcurves = []
-        for diaObjectId in olist:
-            (diaSources,diaForcedSources) = LF.fetch(diaObjectId)
-            lightcurves.append({'diaObjectId':diaObjectId, 
-                'diaSources':diaSources, 'diaForcedSources': diaForcedSources})
-
-        LF.close()
-        return lightcurves
 
 
 class AnnotateSerializer(serializers.Serializer):

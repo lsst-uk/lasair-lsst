@@ -1,15 +1,25 @@
 # Pulls from the Alerce Stamp or LC Classifier and pushes into Lasair
 
 import sys
-sys.path.append('../../../common')
-from confluent_kafka import Consumer, KafkaError
-from fastavro import reader
-import lasair
-from datetime import datetime
-import io
+import datetime
 import json
+import io
 import random
+import fastavro
+import lasair
+from urllib.request import urlopen
+from confluent_kafka import Consumer, KafkaError
+sys.path.append('../../../common')
 import settings
+
+def load_json_from_web(url):
+  response = urlopen(url)
+  data_json = json.loads(response.read())
+  return data_json
+
+# light curve classifier is schemaless so need to fetch schema first
+schema_url = "https://raw.githubusercontent.com/alercebroker/pipeline/main/schemas/lc_classification_step/output_ztf.avsc"
+schema = load_json_from_web(schema_url)
 
 def make_stamp_annotation(record):
     r = {}
@@ -42,25 +52,58 @@ def make_lc_annotation(record):
     else:
         return r
 
+def handle_deserealized_record(raw_message, topic):
+  bytes_io = io.BytesIO(raw_message.value())
+
+  # Stamp classifier is a normal avro. Read as usual.
+  # Reader returns an iterator with one message
+  if "stamp_classifier" in topic:
+    reader = fastavro.reader(bytes_io)
+    record = next(reader)
+    r = make_stamp_annotation(record)
+    return r
+
+  # LC Classifier is a schemaless abro. Give schema to read.
+  # Reader returns a dict.
+  elif "lc_classifier_ztf" in topic:
+    reader = fastavro.schemaless_reader(bytes_io, schema)
+    record = reader
+    r = make_lc_annotation(record)
+    return r
+
+  else:
+    raise Exception(f"No schema loaded for topic {topic}")
+    return 0
+
+def connect():
+    # create a streamReader
+    conf = {
+        'bootstrap.servers': settings.ALERCE_KAFKA,
+        'group.id'         : settings.ALERCE_GROUP_ID,
+        'security.protocol': 'SASL_SSL',
+        'sasl.mechanism'   : 'SCRAM-SHA-512',
+        'sasl.username'    : 'lasair',
+        'sasl.password'    : settings.ALERCE_PASSWORD,
+        'auto.offset.reset': 'earliest',
+    }
+    streamReader = Consumer(conf)
+    return streamReader
+
+def print_topics(streamReader):
+    # print all the topics this streamReader has
+    t = list(streamReader.list_topics().topics.keys())
+    t = sorted(t)
+    print('Topics are ', t)
+
 #############
 
-conf = {
-    'bootstrap.servers': settings.ALERCE_KAFKA,
-    'group.id'         : settings.ALERCE_GROUP_ID,
-    'security.protocol': 'SASL_PLAINTEXT',
-    'sasl.mechanism'   : 'SCRAM-SHA-256',
-    'sasl.username'    : 'lasair',
-    'sasl.password'    : settings.ALERCE_PASSWORD,
-    'auto.offset.reset': 'earliest',
-}
-streamReader = Consumer(conf)
+
+streamReader = connect()
 nalert = 0
 nann = 0
 
 if len(sys.argv) < 2:
-    # the topics that this server has
-    t = list(streamReader.list_topics().topics.keys())
-    print('Topics are ', t)
+    print_topics(streamReader)
 else:
     # content of given topic
     topic = sys.argv[1]
@@ -73,17 +116,16 @@ else:
         print('Unknown classifier, quitting')
         sys.exit()
 
-    L = lasair.lasair_client(settings.API_TOKEN, endpoint='https://lasair-ztf.lsst.ac.uk/api')
-#    L = lasair.lasair_client(settings.API_TOKEN)
+    L = lasair.lasair_client(settings.API_TOKEN, endpoint='https://' + settings.LASAIR_URL + '/api')
 
+    # consume a topic from a streamReader and call handle
     streamReader.subscribe([topic])
-    while 1:
-        msg = streamReader.poll(timeout=5)
-        if msg == None: 
+    nalert = 0
+    while nalert < 5000:  # just do 5000 at a time for now
+        msg = streamReader.poll(timeout=20)
+        if msg == None:
             break
-        fo = io.BytesIO(msg.value())
-        for record in reader(fo):
-            r = make_annotation(record)
+        r = handle_deserealized_record(msg, topic)
         if r:
             nann += 1
             L.annotate(
@@ -98,4 +140,4 @@ else:
         nalert += 1
 streamReader.close()
 if nann > 0:
-    print('\n-- %d annotations from alerce_%s at %s' % (nann, classifier_type, datetime.now()))
+    print('\n-- %d annotations from alerce_%s at %s' % (nann, classifier_type, datetime.datetime.now()))
