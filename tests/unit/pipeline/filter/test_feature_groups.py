@@ -50,7 +50,8 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/402778310355976216.json") as f:
+#    with open("sample_alerts/402778310355976216.json") as f:
+    with open("sample_alerts/99999999999.json") as f:
       alert = json.load(f)
       output = {}
       schema = {}
