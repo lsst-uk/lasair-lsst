@@ -133,7 +133,7 @@ def objjson(diaObjectId, full=False):
     message = ''
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'SELECT nSources, ra, decl, minTai as mjdmin, maxTai as mjdmax '
+    query = 'SELECT nSources, ra, decl, firstDiaSourceMJD as mjdmin, lastDiaSourceMJD as mjdmax '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:

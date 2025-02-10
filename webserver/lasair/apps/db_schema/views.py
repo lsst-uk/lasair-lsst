@@ -25,4 +25,5 @@ def schema_index(request):
         '<annotator>': get_schema('annotations'),
         'watchlist_hits': get_schema('watchlist_hits'),
     }
+
     return render(request, 'db_schema/schema_index.html', {'schemas': schemas})

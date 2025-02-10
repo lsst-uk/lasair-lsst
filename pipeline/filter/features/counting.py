@@ -13,8 +13,8 @@ class counting(FeatureGroup):
         "niSources",
         "nzSources",
         "nySources",
-        "minTai",
-        "maxTai"
+        "firstDiaSourceMJD",
+        "lastDiaSourceMJD"
     ]    
 
     def run(self):
@@ -24,12 +24,12 @@ class counting(FeatureGroup):
         for b in band: nSource[b] += 1
         if self.verbose:
             print('Found %d sources' % len(time))
-        if len(time) > 0:
-            minTai = min(time)
-            maxTai = max(time)
-            nSources = len(time)
-        else:
-            return None
+        try:  # supposed to be in the alert when Eric gets round to it
+            firstDiaSourceMJD = self.alert['diaObject']['firstDiaSourceMJD']
+        except:
+            firstDiaSourceMJD = 999.0
+        lastDiaSourceMJD = max(time)
+        nSources = len(time)
 
         out = { 
             "nSources": nSources,
@@ -39,7 +39,7 @@ class counting(FeatureGroup):
             "niSources": nSource['i'],
             "nzSources": nSource['z'],
             "nySources": nSource['y'],
-            "minTai"   : minTai, 
-            "maxTai"   : maxTai,
+            "firstDiaSourceMJD"   : firstDiaSourceMJD, 
+            "lastDiaSourceMJD"    : lastDiaSourceMJD,
         }
         return out

@@ -4,16 +4,14 @@ from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
-class sherlock(FeatureGroup):
-    """Extinction"""
+class jump(FeatureGroup):
+    """Jump from mean of 20 days"""
 
     _features = [
-        "absMag",
-        "absMagMJD",
+        "jumpFromMean20",
     ]    
 
     def run(self):
         return { 
-            "absMag": None, 
-            "absMagMJD": None, 
+            "jumpFromMean20": None, 
         }

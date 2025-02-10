@@ -1,13 +1,10 @@
 ## Lasair Schema handling
-As of June 2024, this is based on the LSST 7 schema
+As of Jan 2025, this is based on the LSST 7.3 schema
 
-https://github.com/lsst/alert_packet/tree/main/python/lsst/alert/packet/schema/7/0
+https://github.com/lsst/alert_packet/tree/main/python/lsst/alert/packet/schema/7/3
 
-The schema of the alert is fetched as a single `.avsc` file from LSST (see below).
-
-It is split it into components with the program `avsc2lasair.py`
-with each component being a Lasair schema file (LSF).
-
+The schemata for the varoious components are fetched from github. These versions contain doc strings. Getting the schems from the registry means no doc strings.
+Each component becomes a Lasair schema file (LSF).
 These components are written into the `lsst_schema` directory.
 
 A LSF is a JSON-like file with these keys:
@@ -18,15 +15,12 @@ A LSF is a JSON-like file with these keys:
 - `extra`, text to be appended to the SQL/CQL definition line
 - `doc`, natural language description
 - `indexes`, a set of strings to be added to the SQL/CQL `CREATE TABLE`
+- `with`, a string to be added after the CREATE TABLE command
 
 A LSF is not actually JSON, rather it is JSON text with the phrase `schema = ` prepended,
-
 with a file name ending in `.py`, so that it can be imported into python code.
-
 There may also be Lasair added-value fields in the LSF: features and attributes not present in the original LSST object.
-
 There are other LSFs for Lasair-native data, such as `annotations`, `sherlock_classifications`, etc.
-
 These edited versions of the LSST files, plus the additional LSFs, are kept in the `lasair_schema` directory.
 
 The program `convert.py` can now convert any Lasair schema file into a SQL or CQL
@@ -36,7 +30,6 @@ The program `convert.py` can now convert any Lasair schema file into a SQL or CQ
 ### Updating to a New Schema
 #### Get the old schema out of the way
 ```
-git rm alert-lsst.avsc dp02.avsc dp02.avsc.orig
 git rm -r lsst_schema/*
 git rm lasair_schema/diaObjects.py
 git rm lasair_schema/diaSources.py
@@ -45,38 +38,27 @@ git rm lasair_schema/diaNondetectionLimits.py
 git rm -r lasair_sql/*
 git rm -r lasair_cql/*
 ```
-#### Fetch new schema from registry
+#### Fetch new schema from github
+in the code `fetch_from_github.py` edit the first line to get the correct github url
+and make sure the Cassandra indexes are correct
 ```
-python3 schema_from_registry.py > alert-lsst.avsc
 mkdir lsst_schema
-python3 avsc2lasair.py
+python3 fetch_from_github.py
 ```
 #### Sample output
 ```
-alertId type long
-diaSource record has 104 fields
-prvDiaSources is null or array of diaSource
-prvDiaForcedSources is null or array of diaForcedSource with 10 fields
-prvDiaNondetectionLimits is null or array of diaNondetectionLimit with 4 fields
-diaObject is null or has 83 fields
-ssObject is null or has 53 fields
-cutoutDifference is null or bytes
-cutoutScience is null or bytes
-cutoutTemplate is null or bytes
+diaForcedSource
+diaNondetectionLimit
+diaObject
+diaSource
+ssObject
 ```
 
 #### Modify lasair_schema
 
 While the directory `lsst_schema` is automatically generated, the `lasair_schema` directory has handmade changes. Start with `mkdir lasair_schema`, then  copy all in `lsst_schema` to `lasair_schema` then make changes: Specifically:
-- Adding indexes for the Cassandra tables. 
-  - diaForcedSources.py: `"indexes": ["PRIMARY KEY (diaObjectId,midPointMjdTai)"]`
-  - diaNondetectionLimits.py: `"indexes": ["PRIMARY KEY (midpointMjdTai)"]`
-  - diaObjects.py: `"indexes": ["PRIMARY KEY (diaObjectId, radecMjdTai)"]`
-  - diaSources.py: `"indexes": ["PRIMARY KEY (diaObjectId, midPointMjdTai, `diaSourceId)"]
-  - ssObjects.py: `"indexes": ["PRIMARY KEY (ssObjectId)"]`
 
-- Changing `dec` to `decl`
-Also change `dec` to `decl` in `diaForcedSources.py, diaObjects.py, diaSources.py`.
+- In diaForcedSources.py, diaObjects.py, diaSources.py: change "dec" to "decl"
 
 - Adding features to the relational table `objects`
   - Look at the new attributes in `lasair_schema/diaObjects.py` and decide if any should be added to the object schema. If so, edit `lasair_schema/objects.py`.
