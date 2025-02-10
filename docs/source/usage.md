@@ -2,7 +2,7 @@
 
 ```bash 
     
-    Documentation for lasair can be found here: http://lasair.readthedocs.org/en/stable
+    Documentation for lasair can be found here: http://lasair-lsst.readthedocs.org/en/stable
     
     Usage:
         lasair init

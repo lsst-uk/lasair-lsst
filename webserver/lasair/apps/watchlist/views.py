@@ -297,9 +297,9 @@ c.wl_id={wl_id} limit 1000
         # count = cursor.fetchone()["count"]
 
         if settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this watchlist. But don't worry! You can access results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False

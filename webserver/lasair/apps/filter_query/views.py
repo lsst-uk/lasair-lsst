@@ -1,3 +1,4 @@
+from src.topic_name import topic_name
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
 from src import date_nid, db_connect
@@ -27,7 +28,6 @@ import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 sys.path.append('../common')
-from src.topic_name import topic_name
 
 
 @csrf_exempt
@@ -123,7 +123,7 @@ def filter_query_detail(request, mq_id, action=False):
             else:
                 filterQuery.public = 0
             filterQuery.date_expire = \
-                    datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+                datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
             tn = topic_name(request.user.id, filterQuery.name)
@@ -201,9 +201,9 @@ def filter_query_detail(request, mq_id, action=False):
 
     if count and count == limit:
         if settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{limit}</b> objects matched against this filter. But don't worry! You can access all results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False
