@@ -46,12 +46,13 @@ How to use the Sherlock API to fetch sky context information about a Lasair obje
 #### Fetch_kafka.ipynb
 Fetches alerts that have passed through a kafka-enabled filter, using the kafka consumer.
 
-Usage of the Lasair API is throttled by default to 10 requests per hour. If you get an error message about this, you can [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the “Power Users” category. 
+Usage of the Lasair API is throttled by default to 10 requests per hour. If you get an error message about this, you can [email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the “Power Users” category. 
 
-Please also [Contact us](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks) with any notebooks that you would like to share.
+Please also [Contact us](mailto:lasair-help@lists.roe.ac.uk?subject=Notebooks) with any notebooks that you would like to share.
 
 ## Marshall Notebook
 
 This Jupyter notebook allows you to view the output from a Lasair filter, to link to moreinformation, and to either make it a favourite or veto it so it won't be shoen again.
 The brief instructions for using the Marshall are [at the github page](https://github.com/lsst-uk/lasair-examples/tree/main/notebooks/marshall), and 
 [there is a video](https://youtu.be/sgH5cQk-TDU) about how to use it.
+

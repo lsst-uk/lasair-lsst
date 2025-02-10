@@ -5,17 +5,17 @@ The Lasair-Sherlock API allows developers to run queries and cone-searches, to s
 #### Ways to use the API
 
 The Lasair API uses either HTTP GET or POST. Arguments can be passed in the query string, as JSON or form encoded. Responses are JSON. There is a throttling system in the backend: users with an account get up to 100 calls per hour, but "power" users get up to 10,000 calls per hour. If you wish your account to be upgraded to power user, 
-[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user)
+[email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=power user)
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
 #### Sample Notebooks
-There is an [accompanying set of jupyter notebooks](../python-notebooks.html)
+There is an [accompanying set of jupyter notebooks](python-notebooks.md)
  that show how to use the API.
 
 #### Throttling of API Usage
 
-The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
+The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
 
 *   User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.
 *   Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.
@@ -36,9 +36,10 @@ Click on the method name to jump to documentation in the reference below.
 
 *   [/api/cone/](#cone): runs a cone search on all the objects in the Lasair database.
 *   [/api/query/](#query): runs a SQL SELECT query on the Lasair database.
+*   [/api/streams/](#streams): returns a record of the output from a Lasair streaming query.
 *   [/api/objects/](#objects): returns a machine-readable version of the object web page.
 *   [/api/lightcurves/](#lightcurves): returns simple lightcurves for a number of objects.
-*   [/api/sherlock/object/](#sherlockobject): returns Sherlock information about a named object.
+*   [/api/sherlock/objects/](#sherlockobjects): returns Sherlock information about a list of named objects.
 *   [/api/sherlock/position/](#sherlockposition): returns Sherlock information about a sky position.
 
 ### <a name="cone"></a>/api/cone/
@@ -121,6 +122,73 @@ status= 200
   },
 .... ]
 ```
+### <a name="streams"></a>/api/streams/<topic>/ and /api/streams/
+
+This method returns a record of the output from a Lasair streaming query. It represents an alternative to using a Kafka client to fetch from the Kafka server.
+
+If the `topic` URL is provided (with optional `limit`), the contents of the stream are returned. Alternatively, if the topic is not provided, a `regex` argument may be provided, and a list of matching topic names will be returned. A list of all topics can be obtained with the regex `.*` or by omitting the `regex`.
+
+The arguments are:
+
+*   `limit`: (int) (not required) the maximum number of records to return (default 1000)
+*   `regex`: (str) (not required) an expression used to select from the set of topics (regular expression)
+
+GET URL Example with Regex
+```
+https://lasair-ztf.lsst.ac.uk/api/streams/?regex=.%2ASN.%2A&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+```
+Curl Example with Regex
+
+The authorization token goes in the header of the request, and the data in the data section.
+```
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "regex=.\*SN.\*" https://lasair-ztf.lsst.ac.uk/api/streams/
+```
+and the return is a list of topic names, and a URL to get more information:
+```
+status= 200
+[
+  {
+    "topic": "2SN-likecandidates",
+    "more_info": "https://lasair-ztf.lsst.ac.uk/query/2/"
+  },
+... ]
+```
+GET URL Example with Topic:
+```
+https://lasair-ztf.lsst.ac.uk/api/streams/2SN-likecandidates/?limit=1&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+```
+Curl Example with Topic: The authorization token goes in the header of the request, and the data in the data section. For more information about this stream, see [here](https://lasair-ztf.lsst.ac.uk/query/2/).
+```
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "2SN-likecandidates&limit=1" https://lasair-ztf.lsst.ac.uk/api/streams/
+```
+and the return is something like:
+```
+status= 200
+[
+  {
+    "objectId": "ZTF19abrokxg",
+    "ramean": 35.82811567,
+    "decmean": -27.79242059,
+    "mjdmin": 59134.39827550016,
+    "mjdmax": 59164.37175930012,
+    "magrmin": 18.33,
+    "rmag": 19.4124,
+    "classification": "NT",
+    "score": "Not Near PS1 star",
+    "UTC": "2020-11-11 09:08:49"
+  }
+]
+```
+Python Example with Topic: This code requires the `lasair` library.
+```
+import lasair
+token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
+L = lasair.lasair_client(token)
+print(L.streams_topics())
+c = L.streams('2SN-likecandidates', limit=10)
+```
+and the return is as above with the curl example
+
 ### <a name="objects"></a>/api/objects/
 
 This method returns a machine-readable version of the information on a list of objects, which replicates the information on the object page of the web server. The arguments are:
@@ -164,7 +232,7 @@ is [shown here](ZTF23aabplmy.html).
 
 ### <a name="lightcurves"></a>/api/lightcurves/
 
-This method returns simple lightcurves for a number of objects. **NOTE:** these are difference magnitudes from a reference source, not apparent magnitudes. See [this python code](/lasair/static/mag.py) to convert the quantities below to apparent magnitude. Each lightcurve is a sequence of detections, or _candidates_, each of which has the quantities:
+This method returns simple lightcurves for a number of objects. **NOTE:** these are difference magnitudes from a reference source, not apparent magnitudes. See [this python code](https://raw.githubusercontent.com/lsst-uk/lasair4/main/webserver/static/files/mag.py) to convert the quantities below to apparent magnitude. Each lightcurve is a sequence of detections, or _candidates_, each of which has the quantities:
 
 *   `candid`: the candidate ID for the detection
 *   `fid`: The filter ID for the detection (1 = g and 2 = r)
@@ -179,7 +247,7 @@ This method returns simple lightcurves for a number of objects. **NOTE:** these 
 The arguments are:
 
 *   `objectIds`: (string) comma-separated string of objectIds to be fetched
-*   There is a upper limit on the number of lightcurves that can be fetched, currently 50. If you need to do serious data mining on Lasair light curves, please write to [contact the Lasair team](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks).
+*   There is a upper limit on the number of lightcurves that can be fetched, currently 50. If you need to do serious data mining on Lasair light curves, please write to [contact the Lasair team](mailto:lasair-help@lists.roe.ac.uk?subject=Notebooks).
 
 GET URL Example
 ```
@@ -217,34 +285,27 @@ and the return is something like:
     },
     ]
 ```
+### <a name="sherlockobjects"></a>/api/sherlock/objects/
 
-## Sherlock Methods
+This method returns Sherlock information for a collection of named objects, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. The arguments are:
 
-These methods allow you to run a Sherlock crossmatch at a given sky position, or at the position of known objects. This is a recomputation of the Sherlock crossmatch, not just a database lookup. You might want to do this if you are interested in the full record rather than only the top crossmatch, or if a more recent version of Sherlock is now available than the one used when the alert was produced. If you just want to look up the sherlock classification in the database then you should use `query` instead as it will be much faster. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=sherlock).
-
-### <a name="sherlockobject"></a>/api/sherlock/object/
-
-This method returns Sherlock information for a named object, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. 
-
-The arguments are:
-
-*   `objectId`: a diaObjectId
+*   `objectIds`: a comma-separated list of objectIds, maximum number is 10
 *   `lite`: Set to 'true' to get the lite information only
 
-GET URL Example with object
+GET URL Example with objects
 ```
-https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/?objectIds=ZTF20acpwljl&token=xxxxxxxxxxxxxxxxxxxxxxxx&lite=true&format=json
+https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/?objectIds=ZTF20acpwljl%2CZTF20acqqbkl%2CZTF20acplggt&token=xxxxxxxxxxxxxxxxxxxxxxxx&lite=true&format=json
 ```
-Curl Example with object: The authorization token goes in the header of the request, and the data in the data section.
+Curl Example with list of objects: The authorization token goes in the header of the request, and the data in the data section.
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectId=ZTF20acpwljl&lite=True" https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectIds=ZTF20acpwljl,ZTF20acqqbkl,ZTF20acplggt&lite=True" https://lasair-ztf.lsst.ac.uk/api/sherlock/objects/
 ```
 Python Example with list of objects: This code requires the `lasair` library.
 ```
 import lasair
 token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 L = lasair.lasair_client(token)
-c = L.sherlock_object('ZTF20acgrvqo', lite=False)
+c = L.sherlock_objects(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
 print(c)
 ```
 and the return is something like:
@@ -268,9 +329,7 @@ and the return is something like:
 ```
 ### <a name="sherlockposition"></a>/api/sherlock/position/
 
-This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches.
-
-The arguments are:
+This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. It is meant as an illustration of what Sherlock can do. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@lists.roe.ac.uk?subject=sherlock). The arguments are:
 
 *   `ra`: Right ascension of a point in the sky in degrees
 *   `dec`: Declination of a point in the sky in degrees
@@ -292,7 +351,7 @@ Python Example: This code requires the `lasair` library.
 import lasair
 token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 L = lasair.lasair_client(token)
-c = L.sherlock_position(16.851866, 34.53307, lite=False)
+c = L.sherlock_position(['ZTF20acgrvqo','ZTF19acylwtd','ZTF18acmziob'])
 print(c)
 ```
 and the return is something like:
@@ -304,3 +363,4 @@ status= 200
       "VS",
       "The transient is synonymous with
 ```
+
