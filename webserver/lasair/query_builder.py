@@ -152,7 +152,7 @@ def build_query(select_expression, from_expression, where_condition):
 
     sherlock_classifications = False  # using sherlock_classifications
     crossmatch_tns = False  # using crossmatch tns, but not combined with watchlist
-    annotation_topics = None  # topics of chosen annotations
+    annotation_topics = []  # topics of chosen annotations
     watchlist_id = None     # wl_id of the chosen watchlist, if any
     area_ids = None     # wl_id of the chosen watchlist, if any
 
@@ -177,10 +177,12 @@ def build_query(select_expression, from_expression, where_condition):
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn' % table)
 
+        # multiple annotations comes in here from web as annotator:apple&pear
+        # comes in from API/client as annotator:apple, annotator:pear
         if table.startswith('annotator'):
             w = table.split(':')
             try:
-                annotation_topics = w[1].split('&')
+                annotation_topics += w[1].split('&')
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form annotation:topic' % table)
 
@@ -232,7 +234,8 @@ def build_query(select_expression, from_expression, where_condition):
 
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
-    if annotation_topics:
+
+    if len(annotation_topics) > 0:
         for at in annotation_topics:
             where_clauses.append('objects.diaObjectId=%s.diaObjectId' % at)
             where_clauses.append('%s.topic="%s"' % (at, at))
