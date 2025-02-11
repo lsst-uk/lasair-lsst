@@ -16,9 +16,10 @@ class milkyWay(FeatureGroup):
         ra   = self.alert['diaObject']['ra']
         decl = self.alert['diaObject']['decl']
 
-        sfd = SFDQuery()
-        c = SkyCoord(ra, decl, unit="deg", frame='icrs')
-        ebv = float(sfd(c))
+#        sfd = SFDQuery()
+#        c = SkyCoord(ra, decl, unit="deg", frame='icrs')
+#        ebv = float(sfd(c))
+        ebv = 0.0   #  hack until we decide what to do
         return { 
             "ebv": ebv, 
             "glat": None,
