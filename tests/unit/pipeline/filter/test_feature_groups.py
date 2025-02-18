@@ -82,7 +82,7 @@ class FeatureTest(TestCase):
           else:
             self.assertEqual(output[name], sample_output[name], msg=name)
         else:
-          print(feature)
+          print(schema)
           self.assertTrue(False)
 
   def test4_run_all(self):
