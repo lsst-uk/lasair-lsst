@@ -86,6 +86,8 @@ class FeatureTest(TestCase):
             self.assertAlmostEqual(output[name], sample_output[name], msg=name)
           else:
             self.assertEqual(output[name], sample_output[name], msg=name)
+        else:
+          self.assertTrue(False)
 
   def test4_run_all(self):
     """Test the run_all method"""
