@@ -69,14 +69,9 @@ class FeatureTest(TestCase):
         if 'name' in feature:
           name = schema[feature]['name']
           type = schema[feature]['type']
-          #if type == 'string':
-          #    type = 'str'
-          #if name == 'timestamp':
-          #    continue
           # check name is in the feature set
           self.assertIn(name, output)
           # check that either the type is ok or that the output is None and allowed to be so 
-          #print('===', name, type, output[name])
           self.assertTrue(
             (isinstance(output[name], eval(type))) or
             (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
@@ -87,6 +82,7 @@ class FeatureTest(TestCase):
           else:
             self.assertEqual(output[name], sample_output[name], msg=name)
         else:
+          print(feature)
           self.assertTrue(False)
 
   def test4_run_all(self):
