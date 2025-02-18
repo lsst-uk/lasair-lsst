@@ -66,24 +66,20 @@ class FeatureTest(TestCase):
       self.assertTrue(isinstance(output, dict))
       # check the output matches the schema
       for feature in schema:
-        if 'name' in feature:
-          name = schema[feature]['name']
-          type = schema[feature]['type']
-          # check name is in the feature set
-          self.assertIn(name, output)
-          # check that either the type is ok or that the output is None and allowed to be so 
-          self.assertTrue(
-            (isinstance(output[name], eval(type))) or
-            (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
-            )
-          # check that the content is correct
-          if isinstance(output[name], float):
-            self.assertAlmostEqual(output[name], sample_output[name], msg=name)
-          else:
-            self.assertEqual(output[name], sample_output[name], msg=name)
+        name = schema[feature]['name']
+        type = schema[feature]['type']
+        # check name is in the feature set
+        self.assertIn(name, output)
+        # check that either the type is ok or that the output is None and allowed to be so 
+        self.assertTrue(
+          (isinstance(output[name], eval(type))) or
+          (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
+          )
+        # check that the content is correct
+        if isinstance(output[name], float):
+          self.assertAlmostEqual(output[name], sample_output[name], msg=name)
         else:
-          print(schema)
-          self.assertTrue(False)
+          self.assertEqual(output[name], sample_output[name], msg=name)
 
   def test4_run_all(self):
     """Test the run_all method"""
