@@ -80,5 +80,9 @@ class FeatureGroup:
                     schema[name]['type'] = "float"
                 elif schema[name]['type'] == "long":
                     schema[name]['type'] = "int"
+                elif schema[name]['type'] == "string":
+                    schema[name]['type'] = "str"
+                elif schema[name]['type'] == "timestamp":
+                    schema[name]['type'] = "float"
         return schema
 
