@@ -9,6 +9,7 @@ Usage:
               [--topic_in=TIN | --nid=NID] 
               [--topic_out=TOUT]
               [--wait_time=TIME]
+              [--nocutouts]
 
 Options:
     --nprocess=NP      Number of processes to use [default:1]
@@ -18,6 +19,7 @@ Options:
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
     --wait_time=TIME   Override default wait time (in seconds)
+    --nocutouts        Do not attempt to save cutout images
 """
 
 import sys
@@ -87,11 +89,12 @@ class Ingester:
     # We split the setup between the constructor and setup method in order to allow for
     # an ingester with custom connections to other components, e.g. for testing
 
-    def __init__(self, topic_in, topic_out, group_id, maxalert, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
+    def __init__(self, topic_in, topic_out, group_id, maxalert, nocutouts=False, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
         self.topic_in = topic_in
         self.topic_out = topic_out
         self.group_id = group_id
         self.maxalert = maxalert
+        self.nocutouts = nocutouts
         self.log = log
         self.image_store = image_store
         self.cassandra_session=cassandra_session
@@ -132,7 +135,7 @@ class Ingester:
         log = self.log
 
         # set up image store in Cassandra or shared file system
-        if self.image_store is None:
+        if self.image_store is None and not self.nocutouts:
             self.image_store = ImageStore(log=self.log)
 
         # connect to cassandra cluster for alerts (not cutouts)
@@ -289,7 +292,7 @@ class Ingester:
                 del diaForcedSource['dec']
 
             # deal with images
-            if self.image_store.image_store:
+            if not self.nocutouts and self.image_store.image_store:
                 try:
                     # get the MJD for the latest detection
                     lastSource = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)[0]
@@ -475,8 +478,9 @@ def run_ingest(args, log=None):
     topic_out = args.get('--topic_out') or 'ztf_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
+    nocutouts = args.get('--nocutouts', False)
 
-    ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
+    ingester = Ingester(topic_in, topic_out, group_id, maxalert, nocutouts, log=log)
 
     if args.get('--wait_time'):
         ingester.wait_time = int(args['--wait_time'])
