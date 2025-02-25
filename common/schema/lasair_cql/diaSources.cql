@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS diaSources(
 "midpointMjdTai" double,
 "ra" double,
 "raErr" float,
-"dec" double,
+"decl" double,
 "decErr" float,
 "ra_dec_Cov" float,
 "x" float,

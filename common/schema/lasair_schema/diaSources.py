@@ -48,7 +48,7 @@ schema = {
       "doc": "Uncertainty of ra."
     },
     {
-      "name": "dec",
+      "name": "decl",
       "type": "double",
       "doc": "Declination coordinate of the center of this diaSource."
     },

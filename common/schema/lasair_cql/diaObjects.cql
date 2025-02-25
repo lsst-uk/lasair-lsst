@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS diaObjects(
 "diaObjectId" bigint,
 "ra" double,
 "raErr" float,
-"dec" double,
+"decl" double,
 "decErr" float,
 "ra_dec_Cov" float,
 "radecMjdTai" double,
