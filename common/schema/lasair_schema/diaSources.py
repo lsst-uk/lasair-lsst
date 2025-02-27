@@ -113,6 +113,11 @@ schema = {
       "doc": "Aperture did not fit within measurement image."
     },
     {
+      "name": "is_negative",
+      "type": "boolean",
+      "doc": "Source was detected as significantly negative."
+    },
+    {
       "name": "snr",
       "type": "float",
       "doc": "The signal-to-noise ratio at which this source was detected in the difference image."
@@ -620,7 +625,17 @@ schema = {
     {
       "name": "pixelFlags_edge",
       "type": "boolean",
-      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or NO_DATA, or centroid off image)."
+      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or centroid off image)."
+    },
+    {
+      "name": "pixelFlags_nodata",
+      "type": "boolean",
+      "doc": "NO_DATA pixel in the source footprint."
+    },
+    {
+      "name": "pixelFlags_nodataCenter",
+      "type": "boolean",
+      "doc": "NO_DATA pixel in the 3x3 region around the centroid."
     },
     {
       "name": "pixelFlags_interpolated",

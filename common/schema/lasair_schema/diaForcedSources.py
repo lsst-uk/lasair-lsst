@@ -3,54 +3,54 @@ schema = {
   "name": "diaForcedSources",
   "fields": [
     {
-      "doc": "Unique id.",
       "name": "diaForcedSourceId",
-      "type": "long"
+      "type": "long",
+      "doc": "Unique id."
     },
     {
-      "doc": "Id of the DiaObject that this DiaForcedSource was associated with.",
       "name": "diaObjectId",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the DiaObject that this DiaForcedSource was associated with."
     },
     {
-      "doc": "Right ascension coordinate of the position of the DiaObject at time radecMjdTai.",
       "name": "ra",
-      "type": "double"
+      "type": "double",
+      "doc": "Right ascension coordinate of the position of the DiaObject at time radecMjdTai."
     },
     {
-      "doc": "Declination coordinate of the position of the DiaObject at time radecMjdTai.",
       "name": "decl",
-      "type": "double"
+      "type": "double",
+      "doc": "Declination coordinate of the position of the DiaObject at time radecMjdTai."
     },
     {
-      "doc": "Id of the visit where this forcedSource was measured.",
       "name": "visit",
-      "type": "long"
+      "type": "long",
+      "doc": "Id of the visit where this forcedSource was measured."
     },
     {
-      "doc": "Id of the detector where this forcedSource was measured. Datatype short instead of byte because of DB concerns about unsigned bytes.",
       "name": "detector",
-      "type": "int"
+      "type": "int",
+      "doc": "Id of the detector where this forcedSource was measured. Datatype short instead of byte because of DB concerns about unsigned bytes."
     },
     {
-      "doc": "Point Source model flux.",
       "name": "psfFlux",
-      "type": "float"
+      "type": "float",
+      "doc": "Point Source model flux."
     },
     {
-      "doc": "Uncertainty of psfFlux.",
       "name": "psfFluxErr",
-      "type": "float"
+      "type": "float",
+      "doc": "Uncertainty of psfFlux."
     },
     {
-      "doc": "Effective mid-visit time for this diaForcedSource, expressed as Modified Julian Date, International Atomic Time.",
       "name": "midpointMjdTai",
-      "type": "double"
+      "type": "double",
+      "doc": "Effective mid-visit time for this diaForcedSource, expressed as Modified Julian Date, International Atomic Time."
     },
     {
-      "doc": "Filter band this source was observed with.",
       "name": "band",
-      "type": "string"
+      "type": "string",
+      "doc": "Filter band this source was observed with."
     }
   ]
 }

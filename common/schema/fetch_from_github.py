@@ -1,5 +1,5 @@
 import requests, json
-baseUrl = 'https://raw.githubusercontent.com/lsst/alert_packet/refs/heads/main/python/lsst/alert/packet/schema/7/2/lsst.v7_2.'
+baseUrl = 'https://raw.githubusercontent.com/lsst/alert_packet/refs/heads/main/python/lsst/alert/packet/schema/7/4/lsst.v7_4.'
 
 indexes = {
     'diaForcedSource'     :'PRIMARY KEY ("diaObjectId","midpointMjdTai")', 
