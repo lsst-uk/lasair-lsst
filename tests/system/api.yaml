@@ -14,9 +14,9 @@
         method: POST
         url: "https://{{ lasair_name }}.{{ domain }}/api/query/"
         body:
-          selected: "diaObjectId, ra, decl, gPSFlux"
+          selected: "diaObjectId, ra, decl, g_psfFluxMean"
           tables: "objects"
-          conditions: "gPSFlux > 20000"
+          conditions: "g_psfFluxMean > 20000"
         body_format: json
         headers:
           Authorization: "Token {{ api_token.stdout }}"
@@ -37,19 +37,20 @@
     - name: test lightcurves
       ansible.builtin.uri:
         method: POST
-        url: "https://{{ lasair_name }}.{{ domain }}/api/lightcurves/"
+        url: "https://{{ lasair_name }}.{{ domain }}/api/object/"
         body:
-          objectIds: -99
+          objectId: -99
         body_format: json
         headers:
           Authorization: "Token {{ api_token.stdout }}"
           Content-Type: application/json
+        status_code: [404]
     - name: test malformed objectIds list
       ansible.builtin.uri:
         method: POST
-        url: "https://{{ lasair_name }}.{{ domain }}/api/lightcurves/"
+        url: "https://{{ lasair_name }}.{{ domain }}/api/object/"
         body:
-          objectIds: "123,xyz"
+          objectId: "xyz"
         body_format: json
         headers:
           Authorization: "Token {{ api_token.stdout }}"
