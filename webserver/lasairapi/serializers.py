@@ -103,8 +103,8 @@ class ConeSerializer(serializers.Serializer):
 
 class ObjectSerializer(serializers.Serializer):
     objectId = serializers.CharField(required=True)
-    lite = serializers.BooleanField()    # doesnt do anything right now
-    lasair_added = serializers.BooleanField()
+    lite = serializers.BooleanField(default=False)    # doesnt do anything right now
+    lasair_added = serializers.BooleanField(default=True)
 
     def save(self):
         objectId = self.validated_data['objectId']
@@ -122,6 +122,8 @@ class ObjectSerializer(serializers.Serializer):
                 result = objjson(objectId)
             except Exception as e:
                 result = {'error': str(e)}
+            if not result:
+                raise NotFound()
             return result
         else:
             # Fetch the lightcurve, either from cassandra or file system

@@ -65,6 +65,8 @@ class ObjectView(APIView):
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SherlockObjectView(APIView):
     authentication_classes = [TokenAuthentication, QueryAuthentication]
