@@ -1,8 +1,9 @@
+import features
+from objects import schema as objectSchema
 import sys
 from importlib import import_module
 sys.path.append("../../../common/schema/lasair_schema")
-from objects import schema as objectSchema
-import features
+
 
 class FeatureGroup:
     """FeatureGroups are collections of related features that are
@@ -18,7 +19,7 @@ class FeatureGroup:
 
     def run(self) -> dict:
         """Run the alert processing to generate the features."""
-        return {}     
+        return {}
 
     # The run_all utility method is probably how you usually want to
     # call this class, e.g.
@@ -39,7 +40,7 @@ class FeatureGroup:
             dict = groupInst.run()
             if not dict:
                 return None
-            if verbose: 
+            if verbose:
                 print('%s: %s' % (group, str(dict)))
             output.update(dict)
         return output
@@ -85,4 +86,3 @@ class FeatureGroup:
                 elif schema[name]['type'] == "timestamp":
                     schema[name]['type'] = "float"
         return schema
-
