@@ -1,4 +1,5 @@
 __all__ = [
+    "extended",
     "htm16",
     "diaObjectCopy",
     "counting",
