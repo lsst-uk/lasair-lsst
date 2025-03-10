@@ -1,3 +1,16 @@
+from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.template.context_processors import csrf
+from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+from django.db.models import Q
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
+from django.conf import settings
+import src.date_nid as date_nid
+from src import db_connect
+import settings as lasair_settings
 import importlib
 import random
 import time
@@ -9,20 +22,6 @@ import re
 import sys
 
 sys.path.append('../common')
-import settings as lasair_settings
-from src import db_connect
-import src.date_nid as date_nid
-
-from django.conf import settings
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
-from django.db.models import Q
-from django.db import connection
-from django.views.decorators.csrf import csrf_exempt
-from django.template.context_processors import csrf
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 
 
 def index(request):

@@ -143,6 +143,10 @@ def build_query(select_expression, from_expression, where_condition):
     if where_condition:
         where_condition = sanitise(where_condition)
 
+    select_expression = select_expression.replace("objects_ext", "objects")
+    from_expression = from_expression.replace("objects_ext", "objects")
+    where_condition = where_condition.replace("objects_ext", "objects")
+
     # ----- Handle the from_expression.
     # This is a comma-separated list, of very restricted form
     # Implicitly includes 'objects', dont care if they includid it or not.

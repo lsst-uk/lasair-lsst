@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 perPage = parseInt(dataTableEl.getAttribute('data-perPage'));
             }
 
+            let searchable = true;
+            let paging = true;
+            let bottom = "{select}{info}{pager}"
+            if (dataTableEl.hasAttribute('datatable-vanilla')) {
+                searchable = false;
+                paging = false;
+            }
+
             const dataTable = new simpleDatatables.DataTable(dataTableEl, {
                 labels: {
                     placeholder: "Search table...",
@@ -21,6 +29,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     noRows: "No objects found",
                     info: "Showing {start} to {end} of {rows} rows",
                 },
+                searchable: searchable,
+                paging: paging,
                 layout: {
                     top: "{search}",
                     bottom: "{select}{info}{pager}"

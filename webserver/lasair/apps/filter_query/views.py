@@ -249,13 +249,14 @@ def filter_query_create(request, mq_id=False):
 
     # BUILD CONTENT FOR THE CREATION FORM
     schemas_core = {
-        'objects': get_schema('objects'),
-        'crossmatch_tns': get_schema('crossmatch_tns'),
-        'sherlock_classifications': get_schema('sherlock_classifications')
+        'objects': get_schema('objects', explodeSections=True),
+        'objects_ext': get_schema('objects', extended=True, explodeSections=True),
+        'crossmatch_tns': get_schema('crossmatch_tns', explodeSections=True),
+        'sherlock_classifications': get_schema('sherlock_classifications', explodeSections=True)
     }
     schemas_addtional = {
-        'watchlist_hits': get_schema('watchlist_hits'),
-        'annotations': get_schema('annotations'),
+        'watchlist_hits': get_schema('watchlist_hits', explodeSections=True),
+        'annotations': get_schema('annotations', explodeSections=True),
     }
 
     filterQuery = None
@@ -307,7 +308,7 @@ def filter_query_create(request, mq_id=False):
             active = form.initial["active"]
 
         # EXTRA DEFAULTS
-        tables = "objects"
+        tables = "objects_ext"
         limit = 1000
         offset = 0
 

@@ -14,6 +14,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 perPage = parseInt(dataTableEl.getAttribute('data-perPage'));
             }
 
+            if (dataTableEl.hasAttribute('vanilla')) {
+                top = ""
+                bottom = ""
+            } else {
+                top = "{search}"
+                bottom = "{select}{info}{pager}"
+            }
+
             const dataTable = new simpleDatatables.DataTable(dataTableEl, {
                 labels: {
                     placeholder: "Search table...",
@@ -22,8 +30,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     info: "Showing {start} to {end} of {rows} rows",
                 },
                 layout: {
-                    top: "{search}",
-                    bottom: "{select}{info}{pager}"
+                    top: top,
+                    bottom: bottom
                 },
                 perPage: perPage,
                 perPageSelect: [5, 10, 50, 100, 500, 10000]
