@@ -70,7 +70,7 @@ class FeatureGroup:
         # Default implementation builds our schema from the main schema.
         schema = {}
         our_features = cls.get_features()
-        for feature in objectSchema['fields']:
+        for feature in objectSchema['fields'] + objectSchema.get('ext_fields', []):
             if not 'name' in feature:
                 continue
             name = feature['name']
