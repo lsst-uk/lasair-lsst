@@ -45,7 +45,7 @@ def index(request):
        AND sherlock_classifications.classification in 
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
-    query += '(' + ','.join(S) + ')'
+    query += '(' + ','.join(S) + ') LIMIT 5000'
 
 #    FRONT_PAGE_CACHE = '/home/ubuntu/front_page_cache.json'
 #    FRONT_PAGE_STALE = 1800
