@@ -10,7 +10,7 @@ New plan for schema wrangling, which should take out a lot of the manual interve
 
 - The [Lasair tables](https://github.com/lsst-uk/lasair-lsst/tree/develop/common/schema/lasair_schema) but not the MySQL:objects table. For example sherlock_classification, area_hits are MySQL tables; cutouts and diaSources are CQL tables.
 
-These data files are versioned by the LSST schema number, and will live in a directory called for example "7.4".
+These data files are versioned by the LSST schema number, and will live in a directory called for example "704".
 
 These data files are transformed by three programs:
 
