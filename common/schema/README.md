@@ -4,11 +4,11 @@
 
 New plan for schema wrangling, which should take out a lot of the manual intervention that we have now whenever the Rubin schema gets updated. In the diagram, there is a flow from left to right. On the left are three kinds of input data:
 
-- 1. object_features: This file lists the Lasair-specific object features, with docstrings, together with the section headers for presentation, and the index to be used for the MySQL table.
+- object_features: This file lists the Lasair-specific object features, with docstrings, together with the section headers for presentation, and the index to be used for the MySQL table.
 
-- 2. The five AVSC files from the [Rubin schema](https://github.com/lsst/alert_packet/tree/main/python/lsst/alert/packet/schema/7/3). These are liable to be changed without our control.
+- The five AVSC files from the [Rubin schema](https://github.com/lsst/alert_packet/tree/main/python/lsst/alert/packet/schema/7/3). These are liable to be changed without our control.
 
-- 3. The [Lasair tables](https://github.com/lsst-uk/lasair-lsst/tree/develop/common/schema/lasair_schema) but not the MySQL:objects table. For example sherlock_classification, area_hits are MySQL tables; cutouts and diaSources are CQL tables.
+- The [Lasair tables](https://github.com/lsst-uk/lasair-lsst/tree/develop/common/schema/lasair_schema) but not the MySQL:objects table. For example sherlock_classification, area_hits are MySQL tables; cutouts and diaSources are CQL tables.
 
 These data files are versioned by the LSST schema number, and will live in a directory called for example "7.4".
 
