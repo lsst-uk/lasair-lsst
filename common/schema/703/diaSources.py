@@ -48,7 +48,7 @@ schema = {
       "doc": "Uncertainty of ra."
     },
     {
-      "name": "dec",
+      "name": "decl",
       "type": "double",
       "doc": "Declination coordinate of the center of this diaSource."
     },
@@ -93,6 +93,11 @@ schema = {
       "doc": "General centroid algorithm failure flag; set if anything went wrong when fitting the centroid. Another centroid flag field should also be set to provide more information."
     },
     {
+      "name": "is_negative",
+      "type": "boolean",
+      "doc": "Source was detected as significantly negative."
+    },
+    {
       "name": "apFlux",
       "type": "float",
       "doc": "Flux in a 12 pixel radius aperture on the difference image."
@@ -111,11 +116,6 @@ schema = {
       "name": "apFlux_flag_apertureTruncated",
       "type": "boolean",
       "doc": "Aperture did not fit within measurement image."
-    },
-    {
-      "name": "is_negative",
-      "type": "boolean",
-      "doc": "Source was detected as significantly negative."
     },
     {
       "name": "snr",
@@ -625,17 +625,7 @@ schema = {
     {
       "name": "pixelFlags_edge",
       "type": "boolean",
-      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or centroid off image)."
-    },
-    {
-      "name": "pixelFlags_nodata",
-      "type": "boolean",
-      "doc": "NO_DATA pixel in the source footprint."
-    },
-    {
-      "name": "pixelFlags_nodataCenter",
-      "type": "boolean",
-      "doc": "NO_DATA pixel in the 3x3 region around the centroid."
+      "doc": "Some of the source footprint is outside usable exposure region (masked EDGE or NO_DATA, or centroid off image)."
     },
     {
       "name": "pixelFlags_interpolated",
