@@ -1,6 +1,6 @@
 ## Lasair Schema handling
 
-![Screenshot](lasair-schema.png)
+![Screenshot](lasair_schema.png)
 
 New plan for schema wrangling, which should take out a lot of the manual intervention that we have now whenever the Rubin schema gets updated. In the diagram, there is a flow from left to right. On the left are three kinds of input data:
 
@@ -14,13 +14,13 @@ These data files are versioned by the LSST schema number, and will live in a dir
 
 These data files are transformed by three programs:
 
-- join_object_schema: takes (1) and (2) above and builds the [objects.py](https://github.com/lsst-uk/lasair-lsst/blob/develop/common/schema/lasair_schema/objects.py) table specification
+- `1_fetch_avsc`: pulls the AVSC files from github, and makes some cosmetic changes. Also changes dec to decl and adds the indexes needed to store these in Cassandra.
 
-- fetch_avsc: pulls the AVSC files from github, and makes some cosmetic changes. Also changes dec to decl and adds the indexes needed to store these in Cassandra.
+- `2-join_object_schema`: takes (1) and (2) above and builds the [objects.py](https://github.com/lsst-uk/lasair-lsst/blob/develop/common/schema/lasair_schema/objects.py) table specification
 
-- make_create_table: converts the table specifications to SQL or CQL CREATE TABLE commands.
+- `3_make_create_table`: converts the table specifications to SQL or CQL CREATE TABLE commands, or
 
-- make_alter_table: compares the table specifications of two different schema instantiations and uses the difference to make SQL or CQL ALTER TABLE commands.
+- `3_make_alter_table`: compares the table specifications of two different schema instantiations and uses the difference to make SQL or CQL ALTER TABLE commands.
 
 ### Updating the schema
 
