@@ -35,9 +35,11 @@ python3 1_fetch_avsc.py 704
     python3 2_join_object_schema.py 704
 ```
 - Look for required `ALTER TABLE` commands:
+```
 python3 3_make_alter_table.py sql 703 704 objects
 python3 3_make_alter_table.py cql 703 704 diaForcedSources
 python3 3_make_alter_table.py cql 703 704 diaNondetectionLimits
 python3 3_make_alter_table.py cql 703 704 diaObjects
 python3 3_make_alter_table.py cql 703 704 diaSources
 python3 3_make_alter_table.py cql 703 704 ssObjects
+```
