@@ -73,7 +73,6 @@ class FeatureTest(TestCase):
         # check name is in the feature set
         self.assertIn(name, output)
         # check that either the type is ok or that the output is None and allowed to be so 
-        print('--', output[name], schema[feature])
         self.assertTrue(
           (isinstance(output[name], eval(type))) or
           (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
