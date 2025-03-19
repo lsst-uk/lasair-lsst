@@ -71,8 +71,10 @@ if __name__ == '__main__':
     schema_new = schema_package_new.schema
 
     if switch == 'sql':
-        print(sql_alter_table(schema_old, schema_new))
+        lines = sql_alter_table(schema_old, schema_new)
     elif switch == 'cql':
-        print(cql_alter_table(schema_old, schema_new))
+        lines = cql_alter_table(schema_old, schema_new)
     else:
         print('Unknown switch %s' % switch)
+    if len(lines) > 0:
+        print(lines)

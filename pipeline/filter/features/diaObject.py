@@ -1,12 +1,14 @@
 from features.FeatureGroup import FeatureGroup
 from importlib import import_module
 import sys
-sys.path.append("../../../common/schema/lasair_schema")
+import settings
+sys.path.append("../../../common/schema/" + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 
-class extended(FeatureGroup):
+# Copies in all the features from the diaObject
+class diaObject(FeatureGroup):
     _features = []
-    for feature in objectSchema['ext_fields']:
+    for feature in objectSchema['ext_fields']+objectSchema['ext_fields']:
         if 'name' in feature:
             _features.append(feature['name'])
 

@@ -5,7 +5,7 @@ if len(sys.argv) < 2:
     print('Usage: fetch_from_github.py <schema_version> ... example 704')
     sys.exit()
 schema_version = sys.argv[1]
-tok = schema_version.split('0')
+tok = schema_version.split('_')
 major_sv = tok[0]
 minor_sv = tok[1]
 

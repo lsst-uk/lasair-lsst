@@ -2,6 +2,7 @@
 Schema based utils
 """
 import importlib
+import settings
 
 
 def get_schema(
@@ -24,7 +25,8 @@ def get_schema(
     scheme = get_schema('diaObjects')
     ```           
     """
-    schema_package = importlib.import_module('schema.lasair_schema.' + schema_name)
+    schema_package = importlib.import_module(\
+            'schema.%s.%s' % (settings.SCHEMA_VERSION,  schema_name))
 
     if extended:
         if 'ext_fields' in schema_package.schema:

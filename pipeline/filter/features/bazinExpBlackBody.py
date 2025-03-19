@@ -61,7 +61,7 @@ class bazinExpBlackBody(FeatureGroup):
         fdict['BBBTemp']        = fit['T']
         fdict['BBBRiseRate']    = fit['k']
         fdict['BBBFallRate']    = fit.get('kf', None)
-        fdict['BBBPeakFlux']    = None
-        fdict['BBBPeakAbsMag']  = None
-        fdict['BBBPeakMJD']     = None
+        fdict['BBBPeakFlux']    = fit.get('peakValue', None)
+        fdict['BBBPeakAbsMag']  = None    # to be fixed later
+        fdict['BBBPeakMJD']     = fit.get('peakTime', None)
         return fdict

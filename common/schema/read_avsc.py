@@ -2,7 +2,7 @@ import requests
 import json
 
 def read_from_github(schema_version, component):
-    tok = schema_version.split('0')
+    tok = schema_version.split('_')
     major_sv = tok[0]
     minor_sv = tok[1]
 
