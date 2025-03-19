@@ -22,7 +22,7 @@ schema = {
 {"section":"Lightcurve interval", "doc":"MJD of the first and last diaSource of this diaObject"},
 {"name":  "lastDiaSourceMJD", "type": "double", "origin": "lasair",
     "doc": "Latest MJD of a diaSource" },
-{"name": "firstDiaSourceMJD", "type": "double", "origin": "lsst",
+{"name": "firstDiaSourceMJD", "type": "double", "origin": "lasair",
     "doc": "Earliest MJD of a diaSource" },
 
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},

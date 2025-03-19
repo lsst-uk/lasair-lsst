@@ -1,5 +1,5 @@
 import math
-from .util import getAllFluxTimeBand
+from .util import getFluxTimeBand
 from features.FeatureGroup import FeatureGroup
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
@@ -23,15 +23,14 @@ class jump(FeatureGroup):
         n        = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0 }
         fluxmean = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0 } 
         fluxsd   = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0 } 
-        max_jump = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0 } 
+        max_jump = {'u':0.0, 'g':0.0, 'r':0.0, 'i':0.0, 'z':0.0, 'y':0.0 } 
 
         T = lc_time[-1]   # last diaSource we know about
 
-        n = 0
         for k in range(len(lc_time)):        # look back for sample
             delta = T - lc_time[k]
             # is it in the sample space
-            if delta > settings.t_test and delta < settings.t_test + settings.t_sample:
+            if delta > t_test and delta < t_test + t_sample:
                 f = lc_flux[k]
                 band = lc_band[k]
                 n[band] += 1
@@ -45,17 +44,17 @@ class jump(FeatureGroup):
             flux_mean[band] = fluxsum[band]/n
             flux_sd[band]   = math.sqrt((fluxsum2[band] - m*flux_mean*flux_mean)/(m-1))
 
-        for k in range(len(lc_mjd)):        # look back for test
-            delta = T - lc_mjd[k]
+        for k in range(len(lc_time)):        # look back for test
+            delta = T - lc_time[k]
             # is it in the test space
-            if delta > 0 and delta < settings.t_test:
+            if delta > 0 and delta < t_test:
                 band = lc_band[k]
                 if n[band] < n_sample:  # enough in the sample period
                     continue
                 jmp = abs(lc_flux[k] - flux_mean[band])/flux_sd[band]
                 if jmp > max_jump[band]:
                     max_jump[band] = jmp
-        jumps = list(max_jump.values)
+        jumps = list(max_jump.values())
         jumps.sort()
 
         return { 

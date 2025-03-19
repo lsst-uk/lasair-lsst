@@ -1,7 +1,7 @@
 __all__ = [
     "diaObject",
     "htm16",
-    "latest_flux",
+    "latestFlux",
     "counting",
     "sherlock",
     "bazinExpBlackBody",

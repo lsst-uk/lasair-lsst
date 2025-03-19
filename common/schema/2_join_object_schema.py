@@ -16,7 +16,6 @@ for f in lasair_schema['fields']:
     if 'section' in f: 
         fields.append(f)
     if 'name' in f:
-        del f['origin']
         fields.append(f)
         names.append(f['name'])
 

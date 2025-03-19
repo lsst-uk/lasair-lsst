@@ -8,7 +8,10 @@ from objects import schema as objectSchema
 # Copies in all the features from the diaObject
 class diaObject(FeatureGroup):
     _features = []
-    for feature in objectSchema['ext_fields']+objectSchema['ext_fields']:
+    for feature in objectSchema['fields']:
+        if 'name' in feature and feature['origin'] == 'lsst':
+            _features.append(feature['name'])
+    for feature in objectSchema['ext_fields']:
         if 'name' in feature:
             _features.append(feature['name'])
 
@@ -16,4 +19,5 @@ class diaObject(FeatureGroup):
         out = {}
         for name in self._features:
             out[name] = self.alert['diaObject'][name]
+
         return out
