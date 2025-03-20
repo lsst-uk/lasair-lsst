@@ -1,25 +1,32 @@
+"""
+3_make_alter_table.py
+For a given table, find differences between old and new schema 
+and convert to ALTER TABLE commands
+"""
 import json
 import prims
-# This code reads in Lasair Schema File, loosely based on 
-# AVRO schema files (.avsc) and converts it to any of several formats
-# required by Lasair
 
+# SQL version
 def sql_alter_table(schema_old, schema_new):
-    # Build the ALTER TABLE statement for MySQL to create this table
     tablename = schema_old['name']
 
+    # all the fields from the old schema
     fields_old = schema_old['fields'] + schema_old.get('ext_fields', [])
     attr_old = [f['name'] for f in fields_old if 'name' in f]
 
+    # all the fields from the new schema
     fields_new = schema_new['fields'] + schema_new.get('ext_fields', [])
     attr_new = [f['name'] for f in fields_new if 'name' in f]
 
     lines = ''
+    # What needs to be ADDed to get the new schema
     for f in fields_new:
         if not 'name' in f:       continue
         if f['name'] in attr_old: continue
         lines += 'ALTER TABLE %s ADD `%s` %s;\n' % \
                 (tablename, f['name'], prims.sql_type(f['type']))
+
+    # What needs to be DROPped to get the new schema
     for f in fields_old:
         if not 'name' in f:       continue
         if f['name'] in attr_new: continue
@@ -27,22 +34,27 @@ def sql_alter_table(schema_old, schema_new):
                 (tablename, f['name'], prims.sql_type(f['type']))
     return lines
 
+# CQL version
 def cql_alter_table(schema_old, schema_new):
-    # Build the ALTER statement for Cassandra to create this table
     tablename = schema_old['name']
 
+    # all the fields from the old schema
     fields_old = schema_old['fields'] + schema_old.get('ext_fields', [])
     attr_old = [f['name'] for f in fields_old if 'name' in f]
 
+    # all the fields from the new schema
     fields_new = schema_new['fields'] + schema_new.get('ext_fields', [])
     attr_new = [f['name'] for f in fields_new if 'name' in f]
 
     lines = ''
+    # What needs to be ADDed to get the new schema
     for f in fields_new:
         if not 'name' in f:       continue
         if f['name'] in attr_old: continue
         lines += 'ALTER TABLE %s ADD "%s" %s;\n' % \
                 (tablename, f['name'], prims.cql_type(f['type']))
+
+    # What needs to be DROPped to get the new schema
     for f in fields_old:
         if not 'name' in f:       continue
         if f['name'] in attr_new: continue

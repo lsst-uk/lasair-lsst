@@ -1,60 +1,62 @@
+"""
+3_make_create_table.py
+Build the CREATE TABLE statement for the given table, either SQL or CQL
+"""
 import json
 import prims
-# This code reads in Lasair Schema File, loosely based on 
-# AVRO schema files (.avsc) and converts it to any of several formats
-# required by Lasair
 
+# SQL version
 def sql_create_table(schema):
     # Build the CREATE TABLE statement for MySQL to create this table
     tablename = schema['name']
     lines = []
+    # go through all the fields
     for f in schema['fields'] + schema.get('ext_fields', []):
         if not 'name' in f:
             continue
-        s = '`' + f['name'] + '`'
-        s += prims.sql_type(f['type'])
+        s = '`' + f['name'] + '`'       # name with backquotes for SQL
+        s += prims.sql_type(f['type'])  # convert AVRO type to SQL type
     
-        if 'default' in f:
+        if 'default' in f:              # is there a DEFAULT
             default = 'NULL'
             if f['default']: default = f['default'] 
             s += ' DEFAULT ' + default
 
-        if 'extra' in f:
+        if 'extra' in f:                # is there an EXTRA
             s += ' ' + f['extra']
         lines.append(s)
-    #    if 'doc'     in f and f['doc']:     s += ', ' + f['doc']
     
     sql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'] + '(\n'
     sql += ',\n'.join(lines)
 
-    if 'indexes' in schema:
+    if 'indexes' in schema:             # add in the INDEX
         sql += ',\n' + ',\n'.join(schema['indexes'])
 
     sql += '\n)\n'
     return sql
 
+# CQL version
 def cql_create_table(schema):
-    # Build the CREATE TABLE statement for Cassandra to create this table
     tablename = schema['name']
     lines = []
+    # go through all the fields
     for f in schema['fields']:
-        s = '"' + f['name'] + '"'
-        s += prims.cql_type(f['type'])
+        s = '"' + f['name'] + '"'       # name with doublequotes for CQL
+        s += prims.cql_type(f['type'])  # convert AVRO type to CQL type
     
-        if 'extra' in f:
+        if 'extra' in f:                # is there an EXTRA
             s += ' ' + f['extra']
         lines.append(s)
-    #    if 'doc'     in f and f['doc']:     s += ', ' + f['doc']
     
     cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'] + '(\n'
     cql += ',\n'.join(lines)
 
-    if 'indexes' in schema:
+    if 'indexes' in schema:             # add in the INDEX
         cql += ',\n' + ',\n'.join(schema['indexes'])
 
     cql += '\n)\n'
 
-    if 'with' in schema:
+    if 'with' in schema:                # add in the WITH at the very end
         cql += schema['with'] + '\n'
     return cql
 

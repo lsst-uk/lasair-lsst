@@ -1,3 +1,12 @@
+"""
+2_join_object_schema.py
+The MySQL object schema is special, it involves the Lasair features, the core 
+attributes from the Rubin schema, and the extended attributes.
+
+The file object_features.py serves a prototype of the lasair and core attributes,
+and the extended attributes are pulled from the diaObject schema.
+"""
+
 import json, sys
 import object_features
 import read_avsc
@@ -8,17 +17,24 @@ if len(sys.argv) < 2:
     print('Usage: join_object_schema.py <schema_version> ... example 704')
     sys.exit()
 schema_version = sys.argv[1]
+
+# The Rubin diaObject schema
 diaObject_schema = read_avsc.read_from_github(schema_version, 'diaObject')
 
+# this will be the finished schema
 fields = []
+
+# list of all the attribute names in the object_features schema
 names = []
+
 for f in lasair_schema['fields']:
     if 'section' in f: 
-        fields.append(f)
+        fields.append(f)           # copy in section headings
     if 'name' in f:
-        fields.append(f)
-        names.append(f['name'])
+        fields.append(f)           # copy in the field
+        names.append(f['name'])    # add to list of names
 
+# Everything not already in the object schema goes into extended fields
 ext_fields = []
 for f in diaObject_schema['fields']:
     if not f['name'] in names:
@@ -26,6 +42,7 @@ for f in diaObject_schema['fields']:
 
 print('%d core and %d extended attributes' % (len(fields), len(ext_fields)))
 
+# Now just write it out
 object_schema = {
     "name": "objects",
     "fields": fields,

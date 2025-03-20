@@ -1,8 +1,19 @@
+"""
+1_fetch_avsc.py
+for a given schema version, for example 7_4_a, pull the major and minor revision
+numbers (7 and 4) and use them to 
+- read the avsc files from github
+    - change dec to decl
+    - replace "type":["null","float"] with "type":"float"
+- add in the index for the CQL table
+- write as a .py file in the directory for that schema version
+"""
+
 import json, sys
 import read_avsc
 
 if len(sys.argv) < 2:
-    print('Usage: fetch_from_github.py <schema_version> ... example 704')
+    print('Usage: fetch_avsc.py <schema_version> ... example 704')
     sys.exit()
 schema_version = sys.argv[1]
 tok = schema_version.split('_')

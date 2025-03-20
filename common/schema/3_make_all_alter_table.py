@@ -1,3 +1,7 @@
+"""
+3_make_all_alter_table.py
+Run make_alter_table for all the tables
+"""
 import os,sys
 
 if len(sys.argv) > 2:
