@@ -94,7 +94,7 @@ def insert_tns_hits(fltr, hits):
     query = "REPLACE into objects (tns_name) VALUES\n"
     list = []
     for hit in hits:
-        if wl_id == settings.TNS_WATCHLIST_ID:
+        if hit['wl_id'] == settings.TNS_WATCHLIST_ID:
             list.append('("%s")' % hit['name'])
     query += ',\n'.join(list)
 
