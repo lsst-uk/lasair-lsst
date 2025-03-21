@@ -316,16 +316,10 @@ schema = {
       "doc": "Number of sigma jump from 20 day mean"
     },
     {
-      "name": "jump1",
+      "name": "jumpFromMean20",
       "type": "float",
       "origin": "lasair",
-      "doc": "Largest sigma jump of recent flux from previous -70 to -10  days"
-    },
-    {
-      "name": "jump2",
-      "type": "float",
-      "origin": "lasair",
-      "doc": "Largest sigma jump of recent flux in different band from previous -70 to -10  days"
+      "doc": "Number of sigma jump of recent flux from previous 20 days"
     },
     {
       "section": "Pair colours",

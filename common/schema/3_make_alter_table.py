@@ -30,7 +30,7 @@ def sql_alter_table(schema_old, schema_new):
     for f in fields_old:
         if not 'name' in f:       continue
         if f['name'] in attr_new: continue
-        lines += 'ALTER TABLE %s DROP COLUMN `%s` %s\n;' % \
+        lines += 'ALTER TABLE %s DROP COLUMN `%s` %s;\n' % \
                 (tablename, f['name'], prims.sql_type(f['type']))
     return lines
 
