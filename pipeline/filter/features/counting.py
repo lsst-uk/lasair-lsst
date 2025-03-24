@@ -24,10 +24,12 @@ class counting(FeatureGroup):
         for b in band: nSource[b] += 1
         if self.verbose:
             print('Found %d sources' % len(time))
+
         try:  # supposed to be in the alert when Eric gets round to it
             firstDiaSourceMJD = self.alert['diaObject']['firstDiaSourceMJD']
         except:
             firstDiaSourceMJD = 999.0
+
         lastDiaSourceMJD = max(time)
         nSources = len(time)
 

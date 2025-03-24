@@ -1,12 +1,11 @@
 __all__ = [
-    "extended",
+    "diaObject",
     "htm16",
-    "diaObjectCopy",
+    "latestFlux",
     "counting",
     "sherlock",
     "bazinExpBlackBody",
     "milkyWay",
     "jump",
     "pair",
-    "tns",
 ]

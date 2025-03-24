@@ -59,7 +59,7 @@ import watchlists
 import watchmaps
 import mmagw
 
-sys.path.append('../../common/schema/lasair_schema')
+sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 from features.FeatureGroup import FeatureGroup
 
 sys.path.append('features/BBB')

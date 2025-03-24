@@ -3,8 +3,10 @@ import context
 import unittest.main
 from unittest import TestCase
 import json
+sys.path.append('../../../../common')
+import settings
 sys.path.append('../../../../pipeline/filter')
-sys.path.append('../../../../common/schema/lasair_schema')
+sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 import features
 from features import *
@@ -18,7 +20,7 @@ class FeatureTest(TestCase):
       groupClass = getattr(groupModule, group)
       impl_features.update(groupClass.get_features())
     for feature in objectSchema['fields']:
-      if 'name' in feature:
+      if 'name' in feature and feature['origin'] != 'external':
         name = feature['name']
         self.assertIn(name, impl_features)
 

@@ -1,9 +1,9 @@
 import features
-from objects import schema as objectSchema
 import sys
+import settings
 from importlib import import_module
-sys.path.append("../../../common/schema/lasair_schema")
-
+sys.path.append("../../../common/schema/" + settings.SCHEMA_VERSION)
+from objects import schema as objectSchema
 
 class FeatureGroup:
     """FeatureGroups are collections of related features that are
