@@ -2,7 +2,7 @@ import features
 import sys
 import settings
 from importlib import import_module
-sys.path.append("../../common/schema/" + settings.SCHEMA_VERSION)
+sys.path.append("../../../common/schema/" + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 
 class FeatureGroup:
