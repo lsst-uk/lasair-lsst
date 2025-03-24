@@ -85,7 +85,7 @@ schema = {
             "doc": "Number of y sources" },
 
 {"section":"Other/Nearest objects", "doc":"Other/Nearest objects from LSST and other catalogs"},
-    {"name": "tns_name",          "type":"string",   "origin": "lasair",
+    {"name": "tns_name",          "type":"string",   "origin": "external",
             "doc":"TNS name of this object if it exists"},
     {"name": "nearbyObj1",        "type":"long",    "origin": "lsst",
             "doc":"Id of the closest nearby object."},
@@ -154,7 +154,7 @@ schema = {
 {"name": "timestamp",
     "type": "timestamp",
     "extra": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-    "origin": "lasair",
+    "origin": "external",
     "doc": "Time at which this object last modified",
 },
   ],

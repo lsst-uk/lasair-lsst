@@ -8,5 +8,4 @@ __all__ = [
     "milkyWay",
     "jump",
     "pair",
-    "tns",
 ]

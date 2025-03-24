@@ -20,7 +20,7 @@ class FeatureTest(TestCase):
       groupClass = getattr(groupModule, group)
       impl_features.update(groupClass.get_features())
     for feature in objectSchema['fields']:
-      if 'name' in feature and feature['name'] != 'timestamp':
+      if 'name' in feature and feature['origin'] != 'external':
         name = feature['name']
         self.assertIn(name, impl_features)
 

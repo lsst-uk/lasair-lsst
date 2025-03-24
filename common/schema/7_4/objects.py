@@ -218,7 +218,7 @@ schema = {
     {
       "name": "tns_name",
       "type": "string",
-      "origin": "lasair",
+      "origin": "external",
       "doc": "TNS name of this object if it exists"
     },
     {
@@ -394,7 +394,7 @@ schema = {
       "name": "timestamp",
       "type": "timestamp",
       "extra": "DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP",
-      "origin": "lasair",
+      "origin": "external",
       "doc": "Time at which this object last modified"
     }
   ],
