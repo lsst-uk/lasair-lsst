@@ -28,6 +28,8 @@ schema = {
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
 {"name":"u_psfFlux", "type":"float", "origin": "lasair",
     "doc":"Latest u flux (nJy)"},
+{"name":"u_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest u flux"},
 {"name":"u_psfFluxMean", "type":"float", "origin": "lsst",
     "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
 {"name":"u_psfFluxMeanErr", "type":"float", "origin": "lsst",
@@ -35,6 +37,8 @@ schema = {
 
 {"name":"g_psfFlux", "type":"float", "origin": "lasair",
     "doc":"Latest g flux (nJy)"},
+{"name":"g_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest g flux"},
 {"name":"g_psfFluxMean", "type":"float", "origin": "lsst",
     "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
 {"name":"g_psfFluxMeanErr", "type":"float", "origin": "lsst",
@@ -42,6 +46,8 @@ schema = {
 
 {"name":"r_psfFlux", "type":"float", "origin": "lasair",
     "doc":"Latest r flux (nJy)"},
+{"name":"r_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest r flux"},
 {"name":"r_psfFluxMean", "type":"float", "origin": "lsst",
     "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
 {"name":"r_psfFluxMeanErr", "type":"float", "origin": "lsst",
@@ -49,6 +55,8 @@ schema = {
 
 {"name":"i_psfFlux", "type":"float", "origin": "lasair",
     "doc":"Latest i flux (nJy)"},
+{"name":"i_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest i flux"},
 {"name":"i_psfFluxMean", "type":"float", "origin": "lsst",
     "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
 {"name":"i_psfFluxMeanErr", "type":"float", "origin": "lsst",
@@ -56,6 +64,8 @@ schema = {
 
 {"name":"z_psfFlux", "type":"float", "origin": "lasair",
         "doc":"Latest z flux (nJy)"},
+{"name":"z_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest z flux"},
 {"name":"z_psfFluxMean", "type":"float", "origin": "lsst",
         "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
 {"name":"z_psfFluxMeanErr", "type":"float", "origin": "lsst",
@@ -63,6 +73,8 @@ schema = {
 
 {"name":"y_psfFlux", "type":"float", "origin": "lasair",
         "doc":"Latest y flux (nJy)"},
+{"name":"y_latestMJD", "type":"float", "origin": "lasair",
+    "doc":"MJD of Latest y flux"},
 {"name":"y_psfFluxMean", "type":"float", "origin": "lsst",
         "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
 {"name":"y_psfFluxMeanErr", "type":"float", "origin": "lsst",
