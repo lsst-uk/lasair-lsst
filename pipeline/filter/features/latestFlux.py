@@ -3,12 +3,12 @@ from .util import getFluxTimeBand
 
 class latestFlux(FeatureGroup):
     _features = [
-        'u_psfFlux',
-        'g_psfFlux',
-        'r_psfFlux',
-        'i_psfFlux',
-        'z_psfFlux',
-        'y_psfFlux',
+        'u_psfFlux', 'u_latestMJD',
+        'g_psfFlux', 'g_latestMJD',
+        'r_psfFlux', 'r_latestMJD',
+        'i_psfFlux', 'i_latestMJD',
+        'z_psfFlux', 'z_latestMJD',
+        'y_psfFlux', 'y_latestMJD',
     ]
 
     def run(self):
@@ -18,11 +18,14 @@ class latestFlux(FeatureGroup):
         output = {}
         (lc_flux, lc_time, lc_band) = getFluxTimeBand(self.alert)
         for band in ['u', 'g', 'r', 'i', 'z', 'y']:
-            bandflux = band + '_psfFlux'
+            bandflux  = band + '_psfFlux'
+            latestMJD = band + '_latestMJD'
             output[bandflux] = None
+            output[latestMJD] = None
             for i in range(len(lc_flux)-1, -1, -1):
                 if lc_band[i] == band:
-                    output[bandflux] = lc_flux[i]
+                    output[bandflux]  = lc_flux[i]
+                    output[latestMJD] = lc_time[i]
 
         return output
 
