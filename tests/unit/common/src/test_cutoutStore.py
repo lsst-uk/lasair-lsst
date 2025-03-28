@@ -5,7 +5,14 @@ from unittest.mock import MagicMock
 
 
 class CutoutStoreTest(unittest.TestCase):
-    """Placeholder"""
+    """Tests for the Cassandra based cutoutStore."""
+
+    def test_trim_fits(self):
+        """Test trimming cutout FITS data."""
+        data = open('sample_cutout.fits', 'rb').read()
+        trimmed_data = cutoutStore.trim_fits(data)
+        # Our sample file should contain 3 2880 byte blocks, one header and two data.
+        self.assertEqual(8640, len(trimmed_data))
 
     def test_getCutout(self):
         """Test getting a cutout (normal flow)."""
@@ -32,6 +39,19 @@ class CutoutStoreTest(unittest.TestCase):
         cs.putCutout("somecutoutid", 1234, "objectid", b"blob")
         self.assertEqual(2, mock_session.execute.call_count)
 
+    def test_putCutout_trim_and_compress(self):
+        """Test adding a cutout."""
+        data_in = open('sample_cutout.fits', 'rb').read()
+        data_out = open('sample_cutout_trimmed.fits.lz4', 'rb').read()
+        mock_session = MagicMock()
+        cs = cutoutStore.cutoutStore(mock_session)
+        cs.trim = True
+        cs.compress = True
+        cs.putCutout("somecutoutid", 1234, "objectid", data_in)
+        ((sql, cutout), kwargs) = mock_session.execute.call_args_list[0]
+        self.assertEqual("somecutoutid", cutout[0])
+        self.assertEqual(data_out, cutout[1])
+
     def test_putCutoutAsync(self):
         """Test adding a cutout (async)."""
         mock_session = MagicMock()
@@ -42,11 +62,8 @@ class CutoutStoreTest(unittest.TestCase):
         self.assertEqual(2, mock_session.execute_async.call_count)
         self.assertEqual([mock_future, mock_future], future)
 
-    def test_trim_cutout(self):
-        pass
-
     def test_compression(self):
-        """"Test getting compressed image data"""
+        """"Test getting compressed image data."""
         compressed_data = \
             b'\x04"M\x18h@%\x00\x00\x00\x00\x00\x00\x00\x8e\x10\x00\x00\x00odata a\x01\x00\x07Paaaaa\x00\x00\x00\x00'
         mock_session = MagicMock()

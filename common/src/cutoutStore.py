@@ -12,7 +12,7 @@ except ModuleNotFoundError:
     pass
 
 
-def trim_fits(data):
+def trim_fits(data: bytes) -> bytes:
     """Trim FITS data by removing all but the fist extent."""
     bitpix = 0
     naxis1 = 0
@@ -100,6 +100,11 @@ class cutoutStore():
             objectId: identifier of the associated object
             cutoutBlob: binary data
         """
+        if self.trim:
+            cutoutBlob = trim_fits(cutoutBlob)
+        if self.compress:
+            cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
+
         sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
