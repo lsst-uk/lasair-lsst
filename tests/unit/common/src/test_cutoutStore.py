@@ -3,6 +3,7 @@ import cutoutStore
 import unittest
 from unittest.mock import MagicMock
 
+
 class CutoutStoreTest(unittest.TestCase):
     """Placeholder"""
 
@@ -34,16 +35,27 @@ class CutoutStoreTest(unittest.TestCase):
     def test_putCutoutAsync(self):
         """Test adding a cutout (async)."""
         mock_session = MagicMock()
-        mock_session.execute_async.return_value = "future"
+        mock_future = MagicMock()
+        mock_session.execute_async.return_value = mock_future
         cs = cutoutStore.cutoutStore(mock_session)
         future = cs.putCutoutAsync("somecutoutid", 1234, "objectid", b"blob")
         self.assertEqual(2, mock_session.execute_async.call_count)
-        self.assertEqual("future", future)
+        self.assertEqual([mock_future, mock_future], future)
 
     def test_trim_cutout(self):
         pass
 
     def test_compression(self):
+        """"Test getting compressed image data"""
+        compressed_data = \
+            b'\x04"M\x18h@%\x00\x00\x00\x00\x00\x00\x00\x8e\x10\x00\x00\x00odata a\x01\x00\x07Paaaaa\x00\x00\x00\x00'
+        mock_session = MagicMock()
+        mock_session.execute.return_value = [type("row", (), {"cutoutimage": compressed_data})]
+        cs = cutoutStore.cutoutStore(mock_session)
+        cs.compress = True
+        imagedata = cs.getCutout("somecutoutid", 1234)
+        mock_session.execute.assert_called_once()
+        self.assertEqual(b'data aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa', imagedata)
         pass
 
 
