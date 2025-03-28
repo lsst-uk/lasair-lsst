@@ -9,7 +9,7 @@ import lz4.frame
 try:
     import settings
 except ModuleNotFoundError:
-    pass
+    settings = {}
 
 
 def trim_fits(data: bytes) -> bytes:
