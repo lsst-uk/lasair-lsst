@@ -75,8 +75,9 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    future = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
+                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    for future in result:
+                        futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
