@@ -41,8 +41,8 @@ class jump(FeatureGroup):
             m = n[band]
             if m < n_sample:  # enough in the sample period
                 continue
-            flux_mean[band] = fluxsum[band]/n
-            flux_sd[band]   = math.sqrt((fluxsum2[band] - m*flux_mean*flux_mean)/(m-1))
+            fluxmean[band] = fluxsum[band]/m
+            fluxsd[band]   = math.sqrt((fluxsum2[band] - m*fluxmean[band]*fluxmean[band])/(m-1))
 
         for k in range(len(lc_time)):        # look back for test
             delta = T - lc_time[k]
@@ -51,7 +51,7 @@ class jump(FeatureGroup):
                 band = lc_band[k]
                 if n[band] < n_sample:  # enough in the sample period
                     continue
-                jmp = abs(lc_flux[k] - flux_mean[band])/flux_sd[band]
+                jmp = abs(lc_flux[k] - fluxmean[band])/fluxsd[band]
                 if jmp > max_jump[band]:
                     max_jump[band] = jmp
         jumps = list(max_jump.values())
