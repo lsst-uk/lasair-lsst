@@ -36,14 +36,14 @@ class bazinExpBlackBody(FeatureGroup):
             np.seterr(invalid='ignore')
 
         # only run the expensive BBB fit on 'SN', 'NT', 'ORPHAN'
-        go = False
-        try:
-            classification = self.alert['annotations']['sherlock']['classification']
-            go = (classification in ['SN', 'NT', 'ORPHAN'])
-        except:
-            return fdict
-        if not go:
-            return fdict
+#        go = False
+#        try:
+#            classification = self.alert['annotations']['sherlock']['classification']
+#            go = (classification in ['SN', 'NT', 'ORPHAN'])
+#        except:
+#            return fdict
+#        if not go:
+#            return fdict
 
         BE = BBBEngine.BBB('LSST', verbose=False)
         (fit_e, fit_b) =  BE.make_fit(self.alert)
