@@ -43,12 +43,14 @@ import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
+
 def print_msg(message):
     """ prints the readable stuff, without the cutouts. Purely for debugging
     """
     message_text = {k: message[k] for k in message
-        if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
+                    if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
     print(json.dumps(message_text, indent=2))
+
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
@@ -75,8 +77,9 @@ class ImageStore:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    future = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
+                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                    for future in result:
+                        futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
