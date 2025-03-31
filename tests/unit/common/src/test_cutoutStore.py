@@ -40,7 +40,7 @@ class CutoutStoreTest(unittest.TestCase):
         self.assertEqual(2, mock_session.execute.call_count)
 
     def test_putCutout_trim_and_compress(self):
-        """Test adding a cutout."""
+        """Test adding a cutout with trimming and compression."""
         data_in = open('sample_cutout.fits', 'rb').read()
         data_out = open('sample_cutout_trimmed.fits.lz4', 'rb').read()
         mock_session = MagicMock()
@@ -53,7 +53,7 @@ class CutoutStoreTest(unittest.TestCase):
         self.assertEqual(data_out, cutout[1])
 
     def test_putCutoutAsync(self):
-        """Test adding a cutout (async)."""
+        """Test adding a cutout asynchronously."""
         mock_session = MagicMock()
         mock_future = MagicMock()
         mock_session.execute_async.return_value = mock_future
@@ -61,6 +61,19 @@ class CutoutStoreTest(unittest.TestCase):
         future = cs.putCutoutAsync("somecutoutid", 1234, "objectid", b"blob")
         self.assertEqual(2, mock_session.execute_async.call_count)
         self.assertEqual([mock_future, mock_future], future)
+
+    def test_putCutoutAsync_trim_and_compress(self):
+        """Test adding a cutout asynchronously with trimming and compression."""
+        data_in = open('sample_cutout.fits', 'rb').read()
+        data_out = open('sample_cutout_trimmed.fits.lz4', 'rb').read()
+        mock_session = MagicMock()
+        cs = cutoutStore.cutoutStore(mock_session)
+        cs.trim = True
+        cs.compress = True
+        cs.putCutoutAsync("somecutoutid", 1234, "objectid", data_in)
+        ((sql, cutout), kwargs) = mock_session.execute_async.call_args_list[0]
+        self.assertEqual("somecutoutid", cutout[0])
+        self.assertEqual(data_out, cutout[1])
 
     def test_compression(self):
         """"Test getting compressed image data."""

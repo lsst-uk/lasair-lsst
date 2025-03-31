@@ -122,6 +122,11 @@ class cutoutStore():
             cutoutId:
             cutoutBlob:
         """
+        if self.trim:
+            cutoutBlob = trim_fits(cutoutBlob)
+        if self.compress:
+            cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
+            
         # first the blob keyed by imjd,cutoutId
         sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
         blobData = bytearray(cutoutBlob)
