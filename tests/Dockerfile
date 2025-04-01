@@ -39,7 +39,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN pip3 install \
   cassandra-driver \
   gkdbutils \
-  fastavro
+  fastavro \
+  lz4
 
 # Required for filter
 RUN pip3 install \

@@ -23,6 +23,7 @@ test_alert = {
     'cutoutTemplate': b'bar',
 }
 
+
 class IngestTest(unittest.TestCase):
 
     def test_sigterm_handler(self):
@@ -35,13 +36,15 @@ class IngestTest(unittest.TestCase):
     def test_store_images(self):
         """Test using the image store"""
         mock_image_store = unittest.mock.MagicMock()
+        mock_image_store.putCutoutAsync.return_value = ["future1", "future2"]
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
         imjd = int(test_alert['diaSource']['midpointMjdTai'])
         imageStore = ingest.ImageStore(image_store=mock_image_store)
         result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        # we should get 4 futures back (2 per call)
+        self.assertEqual(4, len(result))
         # check we called putCutoutAsync twice
-        self.assertEqual(len(result), 2)
         self.assertEqual(mock_image_store.putCutoutAsync.call_count, 2)
 
     def test_store_images_no_store(self):
