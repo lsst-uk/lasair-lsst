@@ -56,8 +56,8 @@ class jump(FeatureGroup):
                     max_jump[band] = jmp
         jumps = list(max_jump.values())
         jumps.sort()
-
-        return { 
+        out = { 
             "jump1": jumps[-1], 
             "jump2": jumps[-2], 
-        }
+        } 
+        return out

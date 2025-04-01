@@ -12,4 +12,8 @@ alert_file = sys.argv[1]
 alert = json.loads(open(alert_file).read())
 lasair_features = FeatureGroup.run_all(alert)
 s = json.dumps(lasair_features, indent=2)
-print(s)
+
+out_file   = open(sys.argv[2], 'w')
+out_file.write(s)
+out_file.close()
+

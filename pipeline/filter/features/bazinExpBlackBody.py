@@ -45,8 +45,10 @@ class bazinExpBlackBody(FeatureGroup):
 #        if not go:
 #            return fdict
 
-        BE = BBBEngine.BBB('LSST', verbose=False)
+        BE = BBBEngine.BBB('LSST', nforced=4, A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
         (fit_e, fit_b) =  BE.make_fit(self.alert)
+        print(fit_e)    # hack
+        print(fit_b)    # hack
         # at some point we should put in AIC or BIC selection
         # if both fits are made
         if fit_e:
@@ -63,5 +65,6 @@ class bazinExpBlackBody(FeatureGroup):
         fdict['BBBFallRate']    = fit.get('kf', None)
         fdict['BBBPeakFlux']    = fit.get('peakValue', None)
         fdict['BBBPeakAbsMag']  = None    # to be fixed later
-        fdict['BBBPeakMJD']     = fit.get('peakTime', None)
+        if 'kf' in fit:
+            fdict['BBBPeakMJD'] = fit.get('peakTime', 0.0) + fit.get('mjd_discovery', 0.0)
         return fdict
