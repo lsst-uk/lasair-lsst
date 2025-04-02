@@ -22,14 +22,14 @@ def conesearch_impl(cone):
     hitlist = []
     d = readcone(cone)
 
-    if 'objectIds' in d:
-        data = {'cone': cone, 'hitlist': d['objectIds'],
+    if 'diaObjectIds' in d:
+        data = {'cone': cone, 'hitlist': d['diaObjectIds'],
                 'message': 'Found LSST object names'}
         return data
 
     if 'TNSname' in d:
         cursor = connection.cursor()
-        query = 'SELECT objectId FROM watchlist_hits WHERE wl_id=%d AND name="%s"'
+        query = 'SELECT diaObjectId FROM watchlist_hits WHERE wl_id=%d AND name="%s"'
         query = query % (settings.TNS_WATCHLIST_ID, d['TNSname'])
         cursor.execute(query)
         hits = cursor.fetchall()
@@ -47,8 +47,8 @@ def conesearch_impl(cone):
         dra = radius / (3600 * math.cos(dec * math.pi / 180))
         dde = radius / 3600
         cursor = connection.cursor()
-        query = 'SELECT objectId,ramean,decmean FROM objects WHERE ramean BETWEEN %f and %f AND decmean BETWEEN %f and %f' % (ra - dra, ra + dra, dec - dde, dec + dde)
-#        query = 'SELECT DISTINCT objectId FROM candidates WHERE ra BETWEEN %f and %f AND decl BETWEEN %f and %f' % (ra-dra, ra+dra, dec-dde, dec+dde)
+        query = 'SELECT diaObjectId,ra,decl FROM objects WHERE ra BETWEEN %f and %f AND decl BETWEEN %f and %f' % (ra - dra, ra + dra, dec - dde, dec + dde)
+#        query = 'SELECT DISTINCT diaObjectId FROM candidates WHERE ra BETWEEN %f and %f AND decl BETWEEN %f and %f' % (ra-dra, ra+dra, dec-dde, dec+dde)
         cursor.execute(query)
         hits = cursor.fetchall()
         for hit in hits:
@@ -94,7 +94,7 @@ def readcone(cone):
         if t[0:2] == '20':
             return {'TNSprefix': '', 'TNSname': t}
         if len(t) == 19:
-            return {'objectIds': tok}
+            return {'diaObjectIds': tok}
 
 # if odd number of tokens, must end with radius in arcsec
     radius = 5.0

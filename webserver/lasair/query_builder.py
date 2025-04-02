@@ -151,7 +151,8 @@ def build_query(select_expression, from_expression, where_condition):
     # This is a comma-separated list, of very restricted form
     # Implicitly includes 'objects', dont care if they includid it or not.
     # Can include 'sherlock_classifications' and 'tns_crossmatch' and 'annotations'
-    # Can include 'watchlists:nnn' and 'areas:nnn' where nnn is an integer.
+    # Can include 'watchlists:nnn' and 
+    # 'areas:nnn' or watchmaps:nnn where nnn is an integer.
     # Cannot have both watchlist and crossmatch_tns (the latter IS a watchlist)
 
     sherlock_classifications = False  # using sherlock_classifications
@@ -174,12 +175,12 @@ def build_query(select_expression, from_expression, where_condition):
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form watchlist:nnn' % table)
 
-        if table.startswith('area:'):
+        if table.startswith('area:') or table.startswith('watchmap:'):
             w = table.split(':')
             try:
                 area_ids = w[1].split('&')
             except:
-                raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn' % table)
+                raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn or watchmap:nnn' % table)
 
         # multiple annotations comes in here from web as annotator:apple&pear
         # comes in from API/client as annotator:apple, annotator:pear
