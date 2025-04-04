@@ -91,17 +91,14 @@ def insert_tns_hits(fltr, hits):
         fltr:
         hits:
     """
-    query = "REPLACE into objects (tns_name) VALUES\n"
-    list = []
+    query_template = 'UPDATE objects SET tns_name = "%s" WHERE diaObjectId=%d'
     for hit in hits:
         if hit['wl_id'] == settings.TNS_WATCHLIST_ID:
-            list.append('("%s")' % hit['name'])
-    query += ',\n'.join(list)
-
-    try:
-        fltr.execute_query(query)
-    except Exception as err:
-        fltr.log.error('ERROR in watchlists/insert_tns_hits: insert tns_hit failed: %s' % str(err))
+            query = query_template % (hit['name'], hit['diaObjectId'])
+        try:
+            fltr.execute_query(query)
+        except Exception as err:
+            fltr.log.error('ERROR in watchlists/insert_tns_hits: insert tns_hit failed: %s' % str(err))
 
 def read_watchlist_cache_files(fltr, cache_dir):
     """read_watchlist_cache_files.
