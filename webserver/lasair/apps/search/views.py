@@ -70,7 +70,7 @@ def do_search(
     query = query.strip()
     query = query.replace(",", " ")
 
-    objectName = re.compile(r'(^[a-zA-Z]\S*|^.*[a-zA-Z]$)', re.S)
+    objectName = re.compile(r'(^[a-zA-Z]\S*|^.*[a-zA-Z]$|^\d{17,22})', re.S)
     objectMatch = objectName.match(query)
 
     queries = []
