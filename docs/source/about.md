@@ -45,3 +45,22 @@ See [this page](implementation.html) for a more complete description of how Lasa
 Lasair extracts many types of astrophysical phenomena from the alert streams of ZTF/LSST: extragalactic transients, kilonovae and gravitational wave sources, massive samples of supernovae, active galactic nuclei, tidal disruption events, Milky Way and Local Group stellar transients. However, Lasair does not handle Solar System bodies.
 
 See [this page](sciencegoals.html) for a more complete description of science goals.
+
+
+| Flux       | Magnitude |  
+| :----:     | :----:    |  
+| 1,000      | 23.9      |  
+| 2,000      | 23.1      |  
+| 5,000      | 22.2      |  
+| 10,000     | 21.4      |  
+| 20,000     | 20.6      |  
+| 50,000     | 19.7      |  
+| 100,000    | 18.9      |  
+| 200,000    | 18.1      |  
+| 500,000    | 17.2      |  
+| 1,000,000  | 16.4      |  
+| 2,000,000  | 15.6      |  
+| 5,000,000  | 14.7      |  
+| 10,000,000 | 13.9      |  
+| 20,000,000 | 13.1      |  
+| 50,000,000 | 12.2      | 
