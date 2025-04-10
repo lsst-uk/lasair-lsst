@@ -69,7 +69,7 @@ class bazinExpBlackBody(FeatureGroup):
         fdict['BBBPeakAbsMag']  = None    # to be fixed later
         if 'kf' in fit:
             peakMJD = fit.get('peakTime', 0.0) + fit.get('mjd_discovery', 0.0)
-            if isinf(peakMJD):
+            if math.isinf(peakMJD):
                 fdict['BBBPeakMJD'] = None
             else:
                 fdict['BBBPeakMJD'] = peakMJD
