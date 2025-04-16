@@ -275,7 +275,7 @@ def watchlist_detail(request, wl_id, action=False):
     query_hit = f"""
 SELECT
 h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, 
-o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, tainow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, mjdnow()-o.maxTai as "last detected (days ago)"
 FROM watchlist_cones AS c, watchlist_hits as h, objects AS o
 WHERE c.cone_id=h.cone_id AND h.diaObjectId=o.diaObjectId AND
 c.wl_id={wl_id} limit 1000

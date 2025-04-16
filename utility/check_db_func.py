@@ -1,13 +1,13 @@
 """Check Object Database Functions
 
-Validate the functions used in the object database - currently only tainow.
+Validate the functions used in the object database - currently only mjdnow.
 """
 
 import mysql.connector
 import argparse
 import time
 
-def get_mysql_tainow(conf):
+def get_mysql_mjdnow(conf):
     config = {
       'user': conf['user'], 
       'password': conf['password'], 
@@ -18,15 +18,15 @@ def get_mysql_tainow(conf):
     msl = mysql.connector.connect(**config)
 
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'select tainow()'
+    query = 'select mjdnow()'
     cursor.execute(query)
     mysql_names = []
     row = cursor.fetchone()
-    return row['tainow()']
+    return row['mjdnow()']
 
-def get_tainow():
-    tainow = time.time()/86400.0 + 40587
-    return tainow
+def get_mjdnow():
+    mjdnow = time.time()/86400.0 + 40587
+    return mjdnow
 
 if __name__ == "__main__":
     # parse cmd line arguments
@@ -39,9 +39,9 @@ if __name__ == "__main__":
     conf = vars(parser.parse_args())
 
     # difference between our calculation and db should be < 2s
-    mysql_tainow = get_mysql_tainow(conf)
-    tainow = get_tainow()
-    difference = abs((mysql_tainow - tainow) * 86400.0)
+    mysql_mjdnow = get_mysql_mjdnow(conf)
+    mjdnow = get_mjdnow()
+    difference = abs((mysql_mjdnow - mjdnow) * 86400.0)
     assert difference < 2, "Validation failed: difference = {}".format(difference)
 
     print('mysql functions OK')

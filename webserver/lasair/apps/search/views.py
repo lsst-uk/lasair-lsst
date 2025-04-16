@@ -62,7 +62,7 @@ def do_search(
     ```
     """
 
-    objectColumns = 'o.objectId, o.ramean,o.decmean, o.rmag, o.gmag, tainow()-o.maxTai as "last detected (days ago)"'
+    objectColumns = 'o.objectId, o.ramean,o.decmean, o.rmag, o.gmag, mjdnow()-o.maxTai as "last detected (days ago)"'
 
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
