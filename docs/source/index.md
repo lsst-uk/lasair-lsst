@@ -24,7 +24,7 @@ To start using Lasair to filter the deluge of alerts:
 
    quickstart
    videos
-   examples
+   cookbook
 ```
 
 The following is about the astronomical science enabled by Lasair:

@@ -9,23 +9,24 @@ then "Create New" at top right.
 
 Fill in the form as shown here. The SELECT field should be:
 ```
-objects.objectId, objects.gmag, jdnow()-objects.jdmax AS since
+objects.diaObjectId, objects.g_psfFlux, mjdnow()-objects.lastDiaSourceMJD AS since
 ```
 and fill in the WHERE as
 ```
-objects.gmag < 12
+objects.g_psfFlux > 200000
 ```
 
 If you click "Run Filter", all the alerts will be returned that are brighter than
-12th magnitude. The word "alert" means brightness five-sigma brighter or fainter than the reference sky.
+200,000 nJ -- approx 18th magnitudes. See [formula and conversion table here](concepts.html#lightcurve).
+Note that the word "alert" means brightness five-sigma brighter or fainter than the reference sky.
 
 Perhaps you would like to see the objects with the most recent alerts first:
 just add to the WHERE clause the phrase
 ```
-ORDER BY objects.jdmax DESC
+ORDER BY objects.lastDiaSourceMJD DESC
 ```
-and click "Run Filter" again. The attribute `jdmax` of an object is the Julian Day 
-of the most recent detection of that object.
+and click "Run Filter" again. The attribute `lastDiaSourceMJD` of an object is the 
+Modified Julian Day of the most recent detection of that object.
 
 A good way to understand how filters are made is to browse those in the Public Gallery.
 
@@ -50,15 +51,11 @@ with an object, you type 'sherlock' and the options show -- the grey box below.
 <img src="../_images/make_filter/completion.png" width="600px"/>
 
 The name of the galaxy is the `id` and the catalogue table name to which
-that `id` applies. Here are some sample results fromn the query above:
-
-<img src="../_images/make_filter/sherlock.png" width="600px"/>
+that `id` applies. 
 
 The TNS table `crossmatch_tns` operates in a similar way to the `sherlock_classifications` table. 
 You can, for example, find all the recent Tidal Disruption Events that coincide with ZTF alerts, 
-with redshift and the latest first:
-
-<img src="../_images/make_filter/TNS_TDE.png" width="600px"/>
+with redshift and the latest first.
 
 See the Schema Browser for details of the available attributes.
 
@@ -68,12 +65,6 @@ or one from the public gallery. At the bottom of the filter creation form
 is a selection of watchlists (red oval below). You can then also 
 choose the attributes `name` and `arcsec`, the name and angular distance of the
 coincident source from the watchlist.
-
-<img src="../_images/make_filter/watchlist_filter.png" width="600px"/>
-
-The results might look something like this:
-
-<img src="../_images/make_filter/watchlist_results.png" width="600px"/>
 
 The watchmaps operate in a similar way with the selection box, but there are no 
 attributes available.

@@ -9,13 +9,13 @@ One branch is a set of notebooks showing how the Lasair client works (the API), 
 ## Clone the repo and get your token
 * You need a Lasair login.  There is a video [How to get a Lasair account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that explains how to do this, or just go [here]({%lasairurl%}/register). Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
-* You can go to `notebooks/API_ztf` or `notebooks/marshall`.
+* You can go to `notebooks/API_ztf` or `notebooks/LSST-ztf` or `notebooks/marshall`.
 * Copy the `settings_template.py to `settings.py` then change the `API_TOKEN` to your own token, that you can find in your "profile" at the top-left of the Lasair web page.
 * Install the lasair client with `pip3 install lasair`.
 
 ## API_examples
 
-The notebooks are:
+The available notebooks include:
 ### Using the query and lightcurve methods
 #### Cone_Search.ipynb
 Uses the Lasair cone_search method to find objcts near a given point in the sky.

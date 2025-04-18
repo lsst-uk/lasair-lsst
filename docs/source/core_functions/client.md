@@ -1,8 +1,8 @@
-# Lasair Client
+# Lasair API Client
 
-The Lasair-Sherlock client allows developers to run queries and cone-searches, to see outputs from streaming queries, and to query the Sherlock sky-context system.
+The Lasair-Sherlock client allows developers to run queries and cone-searches with the Lasair API, 
+to listen for outputs from streaming queries, and to query the Sherlock sky-context system.
 
-#### Sample Notebooks
 Installation:
 ```
 pip3 install lasair
@@ -121,24 +121,19 @@ Example:
 import lasair
 token = 'xxxxxxxxxxxxxxxxxxxxxxxx'
 L = lasair.lasair_client(token)
-c = L.object(objectId)
+c = L.object(objectId, lasair_added=True, lite=True)
 print(c)
 ```
-and the return something like this:
-```
-{"objectId":"ZTF18abdphvf",
-"objectData":{
-    "ncand":8,
-    "ramean":293.54591006249996,
-    "decmean":49.429229975,
-    "glonmean":81.77021010499132,
-    "glatmean":13.829346704017533,
-.... }
-```
+There is a notebook in github, [ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/ObjectAPI.ipynb) which illustrates the flags `lasair_added` and `lite`.
+This is how to see exactly what the flags do.
 
-The data includes everything on the object page, including the object and candidates, as well as the Sherlock and TNS information. The candidate section has bot detections, that have a `candid` attribute, and the much smaller non-detections (upper limits). Each candidate has links to the cutout images that are shown on the object web page. A complete example is [shown here](ZTF23aabplmy.html).
+With the arguments above, the `lasairData` section of the dictionary will have 
+everything on the object page, including the object and candidates, as well as the 
+Sherlock and TNS information. The candidate section has bot detections, that have a `candid` 
+attribute, and the much smaller non-detections (upper limits). Each candidate has 
+links to the cutout images that are shown on the object web page. 
 
-Note that `lite=True` and `lasair_added=False` returns the lightcurve of the object.
+Note that `lasair_added=False` and `lite=True` returns the lightcurve of the object.
 
 ### <a name="sherlockobject"></a>sherlock_object
 
