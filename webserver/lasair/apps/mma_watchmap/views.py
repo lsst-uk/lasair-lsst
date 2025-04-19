@@ -56,7 +56,7 @@ def mma_watchmap_index(request):
         # get the type with the largest probability
         max = 0.0
         for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
-            if c[type] > max:
+            if type in c and c[type] > max:
                 max = c[type]
                 gwtype = type
 
