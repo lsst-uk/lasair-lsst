@@ -24,7 +24,7 @@ See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebook
 - Milky way: Galactic latitude and E(B-V) extinction.
 
 - Jump detection: Finds the number of sigma the latest detection is from a mean in the previous 70 days. 
-See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb) for mor information.
+See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb) for more information.
 
 - Pair colours: Finds magnitude differences for pairs of diaSources; also fits a black body temperature to the two fluxes. 
 For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/5_pair.ipynb).
