@@ -15,7 +15,7 @@ to navigate to the resource, then do Export/Original Watchlist File, which you c
 into a new resource on lasair-lsst.
 
 But filters are more difficult, as the objects attributes, used in SQL clauses, 
-have been rebuilt for LSST. First an example WHERE clause:
+have been rebuilt for LSST. First an example WHERE clause from Lasair-ZTF:
 ```
 sherlock_classifications.classification = "AGN"
 AND objects.ncand >= 1
@@ -25,16 +25,18 @@ AND (objects.rmag < 20.0 OR objects.gmag < 20.0)
 AND ((objects.magrmax- objects.magrmin) > 0.5)
 AND objects.dmdt_g >= 1.5
 ```
-- Change `ncand` to `nSources` (could also use nuSources, nrSources, etc for the six bands)
-- Change `decmean` to `decl`
-- For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
+Changes needed for Lasair-LSST are:
+* Change `ncand` to `nSources` (could also use `nuSources`, `ngSources`, `nrSources`, 
+etc for the six bands)
+* Change `decmean` to `decl`
+* For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
 recent g-band detection. There is also the time of latest detection in any band, that is
 `lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
 
 Magnitude 20 is about 50,000 nJ, see [here](concepts) for 
-explanation and conversion table/formula. and the replacement of `rmag` is `r_psfFlux`.
+explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.
 Perhaps the line about maximum and minimum magnitude could be replaced with something 
-about the standard deviation of the lightcurve, the `ext.r_psfFluxSigma`
+about the standard deviation of the lightcurve, the `objects-ext.r_psfFluxSigma`
 
 The last line is most difficult, there is no direct replacement for the 
 ZTF attribute `dmdt_g`, which has always been problematic. If you want fast risers,
@@ -126,7 +128,7 @@ get the filtered alert stream.
 There is a lot of data available at [Lasair ZTF](https://lasair-ztf.lsst.ac.uk/), 
 and not very much at [Lasair LSST](https://lasair-lsst.lsst.ac.uk/).
 Let's look at the tools available in the 2-band ZTF object table, 
-versus the object table of the 6-band LSST archive. In the former case, we can ask about 
+versus the object table of the 6-band LSST object table. In the former case, we can ask about 
 each band separately, but for 6 bands we have tried to make features that give a 
 comprehensive picture.
 
@@ -172,7 +174,7 @@ with an explosive model (exponential in flux, linear in magnitude).
 That attribute would be `BBBRiseRate`, an e-folding rate, 
 which is approximately the same as magnitudes per day.
 The BBB also tries to fit a Bazin in the time direction 
--- exponential rise the exponential fall in flux.
+-- exponential rise then exponential fall in flux.
 
 Another way to do it is `jump1` or `jump2` which compare the latest diaSources, in all 6 bands,
 with a baseline history between 70 and 10 days ago. The jump statistics are each number
