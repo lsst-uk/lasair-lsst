@@ -17,7 +17,7 @@ When it happens again, it must be found quickly – we want the explosion not th
 Light is not expected from a binary black hole (BBH), so we
 restrict attention to binary neutron star (BNS) and neutron-star-black-hole (NSBH) mergers.
 
-For gravitational waves, namespace is `LVK`, , LIGO-Virgo-Kagra, for example `LVK:GW150914`.
+For gravitational waves, namespace is `LVK` (LIGO-Virgo-Kagra), for example `LVK:GW150914`.
 This picture shows the three MOCs on the sky, together with some possible 
 optical counterparts.
 <img src="../_images/multimessenger/skymap.png" width="500px"/>
@@ -28,6 +28,7 @@ BNS or NSBH alerts, and the skymap 90-percentile-area must be sufficiently small
 
 From the skymap, we generate `probdens2`, the probability density on the sky.
 By sorting in reverse order of this, we can list the most likely counterparts first:
+
 <img src="../_images/multimessenger/2dmatching.png" width="500px"/>
 
 But LVK also provides a gaussian distance estimate and error for each pixel. 
@@ -39,6 +40,7 @@ Once this distance information is there, Lasair also provides an estimate of
 absolute magnitude (supernova ~-19 but kilonova -10 to -15), giving an extra filter
 on the alert stream.
 The table of 3d matches looks like this:
+
 <img src="../_images/multimessenger/3dmatching.png" width="500px"/>
 
 Perhaps the best strategy is to follow up the 3D matches first, 
