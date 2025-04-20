@@ -51,6 +51,7 @@ def mma_watchmap_index(request):
     mmaWatchmaps = MmaWatchmap.objects.all()
     d = {}
     for mw in list(mmaWatchmaps):
+        namespace = mw.params['namespace']
         c = mw.params['classification']
 
         # get the type with the largest probability
@@ -58,7 +59,7 @@ def mma_watchmap_index(request):
         for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
             if type in c and c[type] > max:
                 max = c[type]
-                gwtype = type
+                mma_type = namespace + ':' + type
 
         # build data packet
         new = {'mw_id': mw.mw_id,
@@ -66,7 +67,7 @@ def mma_watchmap_index(request):
                'version': mw.version,
                'mocimage': mw.mocimage,
                'area90': mw.area90,
-               'gwtype': gwtype,
+               'mma_type': mma_type,
                'event_date': mw.event_date
                }
         # get the latest version for each otherId
