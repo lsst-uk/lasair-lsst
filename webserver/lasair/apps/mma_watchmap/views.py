@@ -51,7 +51,7 @@ def mma_watchmap_index(request):
     mmaWatchmaps = MmaWatchmap.objects.all()
     d = {}
     for mw in list(mmaWatchmaps):
-        namespace = mw.params['namespace']
+        namespace = mw.namespace
         c = mw.params['classification']
 
         # get the type with the largest probability
