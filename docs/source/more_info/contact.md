@@ -11,12 +11,8 @@ respond to a message sent there.
 ### The Lasair Team
 
 * University of Edinburgh
-    * Gareth Francis
-    * Andy Lawrence
-    * Terry Sloan
-    * Roy Williams
+    * Gareth Francis, Andy Lawrence, Terry Sloan, Roy Williams
 * Queen's University Belfast
-    * Ken Smith
     * Dave Young
 * University of Oxford
-    * Stephen Smartt
+    * Stephen Smartt, Ken Smith

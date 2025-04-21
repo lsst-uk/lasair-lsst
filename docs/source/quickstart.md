@@ -32,7 +32,7 @@ To get started we will focus on a few properties (columns) of a Lasair object re
 object page,
     * `ra, decl`: The position of the object in the sky, in decimal degrees, to place it correctly,
     * `lastDiaSourceMJD`: the Modified Julian Day (i.e.date and time) of the latest alert,
-    * `tainow()`: an SQL function that returns the MJD now, so we can 
+    * `mjdnow()`: an SQL function that returns the MJD now, so we can 
 subtract to get the age in days,
     * `nSources`: number of alerts belonging to this object. 
 * From the sherlock_classifications table:
@@ -44,9 +44,9 @@ the red button 'Create New' at top right.
 
 For your first filter, you won't be using any of the dropdowns for Watchlist, 
 Watchmap, or Object Annotators, you'll fill in the black text areas labelled 
-**SELECT COLUMNS** and **WHERE**. 
+**SELECT** and **WHERE**. 
 
-Type the black lines below in the SELECT COLUMNS.
+Type the black lines below in the SELECT.
 ```
 objects.diaObjectId,
 ```
@@ -58,7 +58,7 @@ objects.ra, objects.decl,
 Next is the time since the object was last observed. Notice the arithmetic and renaming 
 that is part of the SQL language:
 ```
-tainow()-objects.lastDiaSourceMJD AS age,
+mjdnow()-objects.lastDiaSourceMJD AS age,
 ```
 This attribute is from a different table, the Sherlock classification of the object. 
 The long name is renamed as the much simpler `class`.
@@ -72,10 +72,10 @@ three black text areas, labelled **FROM**.
 We select only those objects whose most recent alert has been in the last 7 days.
 Type these lines into the **WHERE** box:
 ```
-tainow() - objects.lastDiaSourceMJD < 7
+mjdnow() - objects.lastDiaSourceMJD < 7
 ```
 We want bright objects only, mostly to cut the numbers being drawn on the Lasair front page. 
-A flux of 100,000 nanoJanskies is about magnitude 19.
+A flux of 100,000 nanoJanskies is about magnitude 19. Lets select g and r band fluxes.
 Don't forget the `AND` at the beginning.
 ```
 AND (objects.g_psfFlux > 100000 OR objects.r_psfFlux > 100000)
@@ -97,6 +97,7 @@ front page.
 You can click on the column headers to sort, and click on the `objectId` to go 
 to the detail 
 for any of the objects.
+You can also add `ORDER BY lastDiaSourceMJD DESC` to get the results with most recent first.
 
 ### Save your filter
 But doing more with Lasair requires an account -- its just a simple matter of 
@@ -115,7 +116,8 @@ your Lasair account --
 whenever an alert causes an object to pass through the filter. 
 This is restricted to one email in 24 hours.
 * kafka stream: The substream induced by the filter becomes a 
-[kafka stream](core_functions/alert-streams.html).
+[kafka stream](core_functions/alert-streams.html). You can use 
+[lasair client](core_functions/client.html) to consume this in your own machine.
 
 Other options on the filter page bring in other tables in addition to the
 `objects` table 
@@ -126,8 +128,8 @@ include:
 multiple catalogues with the position of the alert on the sky -- see 
 [here](core_functions/sherlock.html) for more.
 * `crossmatch_tns`: you can filter your results to be alerts coincident with the 
-[TNS](https://www.wis-tns.org/) name server. You can select supernova types , 
-dscovery date, and more.
+[TNS](https://www.wis-tns.org/) name server. You can select supernova types, 
+discovery date, and more.
 * `watchlist`: you can filter your results to be only those coincident with a 
 list of sources that you or someone else has  uploaded -- see 
 [here](core_functions/watchlists.html) for more.

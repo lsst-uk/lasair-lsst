@@ -27,15 +27,15 @@ write to the help email: lasair-help at mlist.is.ed.ac.uk.
 
 Each filter in Lasair is an SQL SELECT query. The syntax is "SELECT <attributes\> FROM <tables\> WHERE <conditions;\>" The attributes come from the schema -- shown to the right in the filter builder page. The tables are selected from `objects`, `sherlock_classifications`, `crossmatch_tns`, as well as any watchlists, watchmaps or annotations you choose. The conditions in the WHERE clause allow a simplified SQL, using just comparison operators, without operators such as "group" and "having".
 
-* **How can I query the Lasair database?**
-
-You can type SQL into the filter builder -- [instructions here](../core_functions/make_filter.html), 
-and you can run a query somebody else has made that is public. If you sign up and login to Lasair, you can save your queries and you can copy somebody else's query then modify it.
-
 * **What is the difference between a Query and a Filter?**
 
 A query operates on the whole database of alerts, but a filter only runs on new alerts, as they stream from the telescope. They are very similar ideas: but query implies running on the database of past alerts,
 and filter implies running on the stream of incoming new alerts.
+
+* **How can I query/filter the Lasair database?**
+
+You can type SQL into the filter builder -- [instructions here](../core_functions/make_filter.html), 
+and you can run a filter/query somebody else has made that is public. If you sign up and login to Lasair, you can save your filters/queries and you can duplicate somebody else's then modify it.
 
 * **What is the schema of the Lasair database?**
 

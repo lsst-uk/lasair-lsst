@@ -275,7 +275,8 @@ def watchlist_detail(request, wl_id, action=False):
     query_hit = f"""
 SELECT
 h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, 
-o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, mjdnow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, o.r_psfFlux, o.g_psfFlux, 
+mjdnow()-o.lastDiaSourceMJD as "last detected (days ago)"
 FROM watchlist_cones AS c, watchlist_hits as h, objects AS o
 WHERE c.cone_id=h.cone_id AND h.diaObjectId=o.diaObjectId AND
 c.wl_id={wl_id} limit 1000
@@ -366,7 +367,7 @@ def watchlist_download(request, wl_id):
     cursor.execute('SELECT name FROM watchlists WHERE wl_id=%d' % wl_id)
     name = cursor.fetchall()[0]["name"].replace(" ", "_") + "_watchlist_original.csv"
 
-    cursor.execute('SELECT ra, decl, name, radius FROM watchlist_cones WHERE wl_id=%d LIMIT 10000' % wl_id)
+    cursor.execute('SELECT ra, decl, name, radius FROM watchlist_cones WHERE wl_id=%d' % wl_id)
     cones = cursor.fetchall()
     content = []
     content[:] = [','.join(str(value) for value in c.values()) for c in cones]

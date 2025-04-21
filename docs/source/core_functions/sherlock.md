@@ -30,7 +30,7 @@ transient and the centre of the associated galaxy. This is translated to `physic
  -|`Mag` is the magnitude of the associated galaxy, using the system in `MagFilter`. This can
 be combined with distance information to derive absolute magnitude.
 
-The full schema for the Sherlock table is in the [Lasair Schema Browser](https://lasair-dev.lsst.ac.uk/schema/#sherlock_classifications-schema).
+The full schema for the Sherlock table is in the [Lasair Schema Browser]({%lasairurl%}/schema/#sherlock_classifications-schema).
 
 ## How does Sherlock work?
 
@@ -148,4 +148,3 @@ Véron-Cetty, M P, and P Véron. 2010. “A catalogue of quasars and active nucl
 
 * * *
 
-1.  https://ned.ipac.caltech.edu/Library/Distances/

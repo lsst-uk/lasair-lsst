@@ -43,13 +43,13 @@ A.init.then(() => {
         projection: 'AIT', survey: 'P/Mellinger/color'});
     aladin.setFrame('J2000d');
 
-    var moc90 = A.MOCFromURL(url+'90.moc', {name: '90% contour', color: '#ce4257', lineWidth: 6});
+    var moc90 = A.MOCFromURL(url+'90.moc', {name: '90% contour', color: '#ce4257', lineWidth: 1});
     aladin.addMOC(moc90);
 
-    var moc50 = A.MOCFromURL(url+'50.moc', {name: '50% contour', color: '#f0a202', lineWidth: 6});
+    var moc50 = A.MOCFromURL(url+'50.moc', {name: '50% contour', color: '#f0a202', lineWidth: 1});
     aladin.addMOC(moc50);
 
-    var moc10 = A.MOCFromURL(url+'10.moc', {name: '10% contour', color: '#00babb', lineWidth: 6});
+    var moc10 = A.MOCFromURL(url+'10.moc', {name: '10% contour', color: '#00babb', lineWidth: 1});
     aladin.addMOC(moc10);
 
     var cat2 = A.graphicOverlay({name: '2D alerts', color:'lightgreen', lineWidth: 6});

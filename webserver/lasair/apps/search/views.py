@@ -70,7 +70,7 @@ def do_search(
     query = query.strip()
     query = query.replace(",", " ")
 
-    objectName = re.compile(r'(^[a-zA-Z]\S*|^.*[a-zA-Z]$)', re.S)
+    objectName = re.compile(r'(^[a-zA-Z]\S*|^.*[a-zA-Z]$|^\d{17,22})', re.S)
     objectMatch = objectName.match(query)
 
     queries = []
@@ -81,10 +81,10 @@ def do_search(
     if objectMatch:
         objectName = objectMatch.group()
 
-        queries.append(f"select {objectColumns} from objects o where o.objectId = '{objectName}'")
-        queries.append(f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = {settings.TNS_WATCHLIST_ID} and w.cone_id=h.cone_id and h.objectId=o.objectId and t.tns_name = w.name and (w.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' or LOCATE('{objectName}' ,t.disc_int_name))")
-        # queries.append(f"SELECT {objectColumns} FROM objects o, watchlist_hits h where h.wl_id = {settings.TNS_WATCHLIST_ID} AND h.objectId=o.objectId AND h.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' ")
-        queries.append(f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.objectId=o.objectId and o.objectId = '{objectName}'")
+        queries.append(f"select {objectColumns} from objects o where o.diaObjectId = '{objectName}'")
+        queries.append(f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = {settings.TNS_WATCHLIST_ID} and w.cone_id=h.cone_id and h.diaObjectId=o.diaObjectId and t.tns_name = w.name and (w.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' or LOCATE('{objectName}' ,t.disc_int_name))")
+        # queries.append(f"SELECT {objectColumns} FROM objects o, watchlist_hits h where h.wl_id = {settings.TNS_WATCHLIST_ID} AND h.diaObjectId=o.diaObjectId AND h.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' ")
+        queries.append(f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.diaObjectId=o.diaObjectId and o.diaObjectId = '{objectName}'")
 
         for q in queries:
             cursor.execute(q)
@@ -122,15 +122,15 @@ def do_search(
 
         # Is there an object within RADIUS arcsec of this object? - KWS - need to fix the gkhtm code!!
         message, matches = coneSearchHTM(ra, dec, radius, 'objects', queryType=QUICK, conn=connection, django=True, prefix='htm', suffix='')
-        objectIds = [o[1]['objectId'] for o in matches]
-        objectIds = "','".join(objectIds)
-        query = f"select {objectColumns} from objects o where o.objectId in ('{objectIds}')"
+        diaObjectIds = [o[1]['diaObjectId'] for o in matches]
+        diaObjectIds = "','".join(diaObjectIds)
+        query = f"select {objectColumns} from objects o where o.diaObjectId in ('{diaObjectIds}')"
         cursor.execute(query)
         results += cursor.fetchall()
 
     # MAKE UNIQUE
     try:
-        results = list({v['objectId']: v for v in results}.values())
+        results = list({v['diaObjectId']: v for v in results}.values())
     except:
         pass
 

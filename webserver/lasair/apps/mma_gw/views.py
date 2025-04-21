@@ -14,20 +14,20 @@ import sys
 sys.path.append('../../../common')
 
 
-def mm_map_detail(request, skymap_id_version):
-    """*return details of the multimesseneger map*
+def gw_map_detail(request, skymap_id_version):
+    """*return details of the mma_gw map*
 
     **Key Arguments:**
 
     - `request` -- the original request
-    - `skymap_id_version` -- UUID of the multimessenger map
+    - `skymap_id_version` -- UUID of the mma_gw map
 
     **Usage:**
 
     ```python
     urlpatterns = [
         ...
-        path('mm_maps/<skymap_id_version>/', views.mm_map_detail, name='mm_map_detail'),
+        path('gw_maps/<skymap_id_version>/', views.gw_map_detail, name='gw_map_detail'),
         ...
     ]
     ```           
@@ -128,7 +128,7 @@ def mm_map_detail(request, skymap_id_version):
                 'dec': row['decl'],
                 'n': int(row['sum'])})
     tok = skymap_id_version.split('_')
-    return render(request, 'multimessenger_map/multimessenger_map_detail.html',
+    return render(request, 'mma_gw/multimessenger_map_detail.html',
                   {'skymap_id': tok[0], 'skymap_id_version': skymap_id_version, 'isodate': isodate,
                    'niddate1': niddate1, 'niddate2': niddate2,
                    'skymap_distance': skymap_distance,
@@ -143,7 +143,7 @@ def mm_map_detail(request, skymap_id_version):
                    'galaxies_wanted': galaxies_wanted})
 
 
-def mm_map_index(request):
+def gw_map_index(request):
     """*return a list of all multimessenger maps*
 
     **Key Arguments:**
@@ -155,7 +155,7 @@ def mm_map_index(request):
     ```python
     urlpatterns = [
         ...
-        path('mm_maps/', views.mm_map_index, name='mm_map_index'),
+        path('gw_maps/', views.gw_map_index, name='gw_map_index'),
         ...
     ]
     ```           
@@ -171,4 +171,4 @@ def mm_map_index(request):
             t = name.split('.')
             if len(t) > 1 and t[1] == 'json':
                 skymap_list.append(t[0])
-    return render(request, 'multimessenger_map/multimessenger_map_index.html', {'skymap_list': skymap_list, 'message': message})
+    return render(request, 'mma_gw/multimessenger_map_index.html', {'skymap_list': skymap_list, 'message': message})

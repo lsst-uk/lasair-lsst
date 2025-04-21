@@ -1,6 +1,9 @@
-# Lasair API
+# Curl and Get
 
 The Lasair-Sherlock API allows developers to run queries and cone-searches, to see outputs from streaming queries, and to query the Sherlock sky-context system.
+
+Python programmers might prefer the [Lasair Client](https://pypi.org/project/lasair/), 
+which is implemented by the REST API.
 
 #### Ways to use the API
 
