@@ -51,14 +51,15 @@ def mma_watchmap_index(request):
     mmaWatchmaps = MmaWatchmap.objects.all()
     d = {}
     for mw in list(mmaWatchmaps):
+        namespace = mw.namespace
         c = mw.params['classification']
 
         # get the type with the largest probability
         max = 0.0
         for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
-            if c[type] > max:
+            if type in c and c[type] > max:
                 max = c[type]
-                gwtype = type
+                mma_type = namespace + ':' + type
 
         # build data packet
         new = {'mw_id': mw.mw_id,
@@ -66,7 +67,7 @@ def mma_watchmap_index(request):
                'version': mw.version,
                'mocimage': mw.mocimage,
                'area90': mw.area90,
-               'gwtype': gwtype,
+               'mma_type': mma_type,
                'event_date': mw.event_date
                }
         # get the latest version for each otherId
@@ -118,9 +119,9 @@ def mma_watchmap_detail(request, mw_id):
 SELECT
 o.diaObjectId, 
 h.probdens2, h.contour, 
-o.maxTai as "last detected",
-o.minTai - m.event_tai as "t_GW",
-o.rPSFlux, o.gPSFlux,
+o.lastDiaSourceMJD as "last detected",
+o.firstDiaSourceMJD - m.event_tai as "t_GW",
+o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
@@ -187,10 +188,10 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
 SELECT
 o.diaObjectId, 
 h.probdens3, h.contour, h.distance as dist,
-o.maxTai as "last detected",
-o.minTai - m.event_tai as "t_GW",
+o.lastDiaSourceMJD as "last detected",
+o.firstDiaSourceMJD - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.rPSFlux, o.gPSFlux,
+o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 

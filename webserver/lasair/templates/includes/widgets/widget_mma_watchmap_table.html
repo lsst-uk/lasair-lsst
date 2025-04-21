@@ -5,7 +5,7 @@
     <div class="card-header align-items-start mb-0 pb-0 border-0 row d-flex">
         <div class="col-12 px-4">
             <small class="text-gray-500">
-            Watchmaps submitted to the public gallery by other Lasair users. You can view matches or copy individual watchlists into your own collection.
+            Watchmaps from multi-messenger streams that Lasair consumes.
             </small>
         </div>
     </div>
@@ -19,7 +19,7 @@
                             <th>ID-version</th>
                             <th>Image</th>
                             <th>Area90</th>
-                            <th>GWtype</th>
+                            <th>Type</th>
                             <th>Event Time</th>
                         </tr></thead>
                         <tbody>
@@ -28,7 +28,7 @@
 						<b><a href="{% url 'mma_watchmap_detail' mma_watchmap.mw_id %}">{{ mma_watchmap.otherId }}</a></b></td>
                                     <td><img alt="Image placeholder" src="data:image/png;base64,{{ mma_watchmap.mocimage }}" width=150></td>
                                     <td>{{mma_watchmap.area90}}</td>
-                                    <td>{{mma_watchmap.gwtype}}</td>
+                                    <td>{{mma_watchmap.mma_type}}</td>
                                     <td data-type="date" data-format="YYYY-MMM-DD hh:mm:ss">{{mma_watchmap.event_date|date:"Y-m-d"}} {{mma_watchmap.event_date|time:"H:i:s"}}</td>
                                 </tr>
                             {% endfor %}
