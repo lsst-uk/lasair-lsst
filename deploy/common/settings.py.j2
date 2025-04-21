@@ -33,7 +33,7 @@ PUBLIC_GROUP_ID        = 'test124'
 # Schema registry
 #################
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
-SCHEMA         = "/home/ubuntu/lasair-lsst/common/schema/alert-lsst.avsc"
+SCHEMA_VERSION = "7_4"
 
 # Pipeline runtime
 ##################
@@ -48,6 +48,7 @@ WAIT_TIME              = 180
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
+SLACK_CHANNEL          = '{{ lasair_name }}'
 
 # Relational database mysql/galera
 ##################################
@@ -84,7 +85,9 @@ CASSANDRA_CANDIDATES    = 'candidates'
 CASSANDRA_NONCANDIDATES = 'noncandidates'
 
 # Cutouts in Cassandra
-CUTOUTCASS_HOSTS        = ['{{ lasair_name }}-cutoutcass']
+CUTOUTCASS_HOSTS        = {{ groups['cutoutcass'] }}
+CUTOUT_TRIM             = True
+CUTOUT_COMPRESS         = True
 
 # Directories on share Cephfs
 #############################
@@ -122,7 +125,7 @@ SHERLOCK_SERVICE       = None
 {% endif %}
 
 # The webserver calls on the API and should not be throttled
-API_TOKEN              = '{{ settings.powerapi_token }}'
+API_TOKEN              = '{{ powerapi_token }}'
 
 # Comparing what we have processed with what ZTF has processed
 GRAFANA_USERNAME       = 'ztf'
@@ -161,7 +164,5 @@ FINK_TOPICS            = [
     'fink_early_sn_candidates_ztf',
     'fink_sn_candidates_ztf',
     'fink_kn_candidates_ztf',
-    'fink_early_kn_candidates_ztf',
-    'fink_rate_based_kn_candidates_ztf',
 ]
 FINK_SERVERS           = '{{ settings.fink_servers }}'

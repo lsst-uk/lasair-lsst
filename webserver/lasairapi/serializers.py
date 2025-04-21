@@ -14,6 +14,7 @@ from datetime import datetime
 from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
+from rest_framework.exceptions import NotFound, ValidationError
 from src import db_connect
 import settings as lasair_settings
 import sys
@@ -33,6 +34,21 @@ class ConeSerializer(serializers.Serializer):
     dec = serializers.FloatField(required=True)
     radius = serializers.FloatField(required=True)
     requestType = serializers.ChoiceField(choices=REQUEST_TYPE_CHOICES)
+
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
+
+    def validate_radius(self, value):
+        if value < 0:
+            raise serializers.ValidationError('radius must be positive')
+        return value
 
     def save(self):
 
@@ -85,16 +101,54 @@ class ConeSerializer(serializers.Serializer):
 
         return info
 
-class ObjectsSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(required=True)
+def reformat(old, lasair_added=True):
+    new = {}
+    new['diaObjectId'] = old['diaObjectId']
+    diaObject = {
+        'ra'               : old['objectData']['ra'],
+        'decl'             : old['objectData']['decl'],
+        'firstDiaSourceMJD': old['objectData']['mjdmin'],
+        'lastDiaSourceMJD' : old['objectData']['mjdmax']
+    }
+    if lasair_added:
+        lasairData = old['objectData']
+        del lasairData['ra']
+        del lasairData['decl']
+        del lasairData['mjdmin']
+        del lasairData['mjdmax']
+        lasairData['sherlock']    = old['sherlock']
+        lasairData['TNS']         = old['TNS']
+        lasairData['annotations'] = old['annotations']
+    diaSources = []
+    imageUrls = []
+    for ds in old['diaSources']:
+        del ds['json']
+        del ds['mjd']
+        del ds['imjd']
+        del ds['since_now']
+        del ds['utc']
+        iu = ds['image_urls']
+        del ds['image_urls']
+        iu['diaSourceId'] = ds['diaSourceId']
+        imageUrls.append(iu)
+        diaSources.append(ds)
+    if lasair_added:
+        lasairData['imageUrls'] = imageUrls
+        new['lasairData'] = lasairData
+    new['diaObject'] = diaObject
+    new['diaSources'] = diaSources
+    new['diaForcedSources'] = old['diaForcedSources']
+    return new
+
+class ObjectSerializer(serializers.Serializer):
+    objectId     = serializers.CharField(required=True)
+    lite         = serializers.BooleanField(default=False)
+    lasair_added = serializers.BooleanField(default=True)
 
     def save(self):
-        diaObjectIds = self.validated_data['objectIds']
-
-        olist = []
-        for tok in diaObjectIds.split(','):
-            olist.append(tok.strip())
-        olist = olist[:10] # restrict to 10
+        objectId = self.validated_data['objectId']
+        lite = self.validated_data['lite']
+        lasair_added = self.validated_data['lasair_added']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -102,27 +156,45 @@ class ObjectsSerializer(serializers.Serializer):
         if request and hasattr(request, "user"):
             userId = request.user
 
-        result = []
-        for diaObjectId in olist:
-            if 1:
-                obj = objjson(int(diaObjectId))
-#            except:
-#                obj = None
-            result.append(obj)
+        if lasair_added:
+            try:
+                result = objjson(objectId, lite=lite)
+                result = reformat(result, lasair_added=lasair_added)
+            except Exception as e:
+                result = {'error': str(e)}
+            if not result:
+                raise NotFound()
+        else:
+            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
+
+            try:
+                if lite: 
+                    (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    result = {
+                        'diaObjectId':objectId, 
+                        'diaSources':diaSources, 
+                        'diaForcedSources':diaForcedSources}
+                else:
+                    (diaObject, diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    result = {
+                        'diaObjectId':objectId, 
+                        'diaObject':diaObject, 
+                        'diaSources':diaSources, 
+                        'diaForcedSources':diaForcedSources}
+            except Exception as e:
+                result = {'error': str(e)}
+            LF.close()
         return result
 
-
 class SherlockObjectSerializer(serializers.Serializer):
-    objectId = serializers.CharField(required=True)
-    lite = serializers.BooleanField()
+    objectId = serializers.IntegerField(required=True)
+    lite = serializers.BooleanField(default=False)
 
     def save(self):
         diaObjectId = None
-        lite = False
         diaObjectId = self.validated_data['objectId']
 
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -143,29 +215,36 @@ class SherlockObjectSerializer(serializers.Serializer):
 
         if r.status_code == 200:
             return r.json()
-        else:
-            return {"error": r.text}
+        if r.status_code == 404:
+            raise NotFound(r.json())
+        return {"error": r.text}
 
 
 class SherlockPositionSerializer(serializers.Serializer):
     ra = serializers.FloatField(required=True)
     dec = serializers.FloatField(required=True)
-    lite = serializers.BooleanField()
+    lite = serializers.BooleanField(default=False)
+
+    def validate_ra(self, value):
+        if value > 360 or value < 0:
+            raise serializers.ValidationError('ra must be between 0 and 360')
+        return value
+
+    def validate_dec(self, value):
+        if value > 90 or value < -90:
+            raise serializers.ValidationError('dec must be between -90 and 90')
+        return value
 
     def save(self):
-        lite = False
         ra = self.validated_data['ra']
         dec = self.validated_data['dec']
-        if 'lite' in self.validated_data:
-            lite = self.validated_data['lite']
+        lite = self.validated_data['lite']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
-# can also send multiples, but not yet implemented
-# http://192.41.108.29/query?ra=115.811388,97.486925&dec=-25.76404,-26.975506
 
         if not lasair_settings.SHERLOCK_SERVICE:
             return {"error": "This Lasair cluster does not have a Sherlock service"}
@@ -250,39 +329,13 @@ class QuerySerializer(serializers.Serializer):
             error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
             return {"error": error}
 
-class LightcurvesSerializer(serializers.Serializer):
-    objectIds = serializers.CharField(max_length=16384, required=True)
-
-    def save(self):
-        diaObjectIds = self.validated_data['objectIds']
-        olist = []
-        for tok in diaObjectIds.split(','):
-            olist.append(tok.strip())
-
-        # Get the authenticated user, if it exists.
-        userId = 'unknown'
-        request = self.context.get("request")
-        if request and hasattr(request, "user"):
-            userId = request.user
-
-            # Fetch the lightcurve, either from cassandra or file system
-        LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
-
-        lightcurves = []
-        for diaObjectId in olist:
-            (diaSources,diaForcedSources) = LF.fetch(diaObjectId)
-            lightcurves.append({'diaObjectId':diaObjectId, 
-                'diaSources':diaSources, 'diaForcedSources': diaForcedSources})
-
-        LF.close()
-        return lightcurves
 
 
 class AnnotateSerializer(serializers.Serializer):
-    topic = serializers.CharField(max_length=256, required=True)
-    objectId = serializers.CharField(max_length=256, required=True)
-    classification = serializers.CharField(max_length=256, required=True)
-    version = serializers.CharField(max_length=256, required=True)
+    topic = serializers.CharField(max_length=255, required=True)
+    objectId = serializers.IntegerField(required=True)
+    classification = serializers.CharField(max_length=80, required=True)
+    version = serializers.CharField(max_length=80, required=True)
     explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)
     classdict = serializers.CharField(max_length=4096, required=True)
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)

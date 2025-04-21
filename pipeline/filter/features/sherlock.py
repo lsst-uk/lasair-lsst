@@ -1,25 +1,19 @@
+import math
+from .util import getAllFluxTimeBand
 from features.FeatureGroup import FeatureGroup
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
 
 class sherlock(FeatureGroup):
-    """Features that need the sherlock packet"""
+    """Extinction"""
 
     _features = [
-        "absFlux",
+        "absMag",
+        "absMagMJD",
     ]    
 
     def run(self):
-        absFlux = None
-        if 'annotations' in self.alert:
-            annotations = self.alert['annotations']
-            if 'sherlock' in annotations:
-                ann = annotations['sherlock']
-                if 'blabla' in ann:
-                    # figure out absolute flux
-                    absFlux = 100
-                    if verbose:
-                        print('absFlux: Value is %.2e' % absFlux)
-                    
         return { 
-            "absFlux": absFlux, 
+            "absMag": None, 
+            "absMagMJD": None, 
         }
-

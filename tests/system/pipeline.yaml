@@ -2,6 +2,9 @@
 
 ---
 
+- name: Clean
+  import_playbook: clean.yaml
+
 - name: Ingest
   import_playbook: ingest.yaml
 
@@ -10,4 +13,7 @@
 
 - name: Filter
   import_playbook: filter.yaml
+
+- name: Clean
+  import_playbook: clean.yaml
 

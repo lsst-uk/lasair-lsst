@@ -9894,7 +9894,7 @@ JS9.Display = function(el){
     // add to list of displays
     JS9.displays.push(this);
     // set focus
-    this.displayConjq.focus();
+    
     // debugging
     if( JS9.DEBUG ){
 	JS9.log("JS9 display:  %s", this.id);
@@ -28396,7 +28396,7 @@ JS9.init = function(){
 	}
     }
     // scroll to top
-    $(document).scrollTop(0);
+    
     // signal JS9 init is complete
     JS9.inited = true;
     $(document).trigger("JS9:init");

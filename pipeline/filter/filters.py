@@ -264,7 +264,7 @@ def dispose_email(allrecords, last_email, query, force=False):
             if 'diaObjectId' in out:
                 diaObjectId = str(out['diaObjectId'])
                 message += diaObjectId + '\n'
-                message_html += '<a href="%s/objects/%s/">%s</a><br/>' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
+                message_html += '<a href="%s/objects/%s/">%s</a><br/> \n' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
                 jsonout = json.dumps(out, default=datetime_converter)
                 message += jsonout + '\n'

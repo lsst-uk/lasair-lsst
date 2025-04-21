@@ -2,6 +2,7 @@
   "diaObject": {
     "diaObjectId": 402778310355976216,
     "ra": 55.791867711436744,
+    "firstDiaSourceMJD": 60000,
     "raErr": NaN,
     "decErr": NaN,
     "ra_dec_Cov": NaN,

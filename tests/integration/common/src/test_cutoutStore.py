@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS cutoutsbyobject(
  );
 """
 
+
 class CassandraCutoutTest(TestCase):
 
     @classmethod
@@ -63,7 +64,7 @@ class CassandraCutoutTest(TestCase):
         cls.session.execute("DROP KEYSPACE %s" % keyspace, timeout=300)
         cls.session.shutdown()
 
-    def test_1_write(cls):
+    def test_1_write(self):
         """Write something to the database"""
         filename = cutoutId + '.fits'
         cutoutBlob = open(filename, 'rb').read()
@@ -71,25 +72,25 @@ class CassandraCutoutTest(TestCase):
         # put into cassandra
         imjd = 60000
         objectId = 1234567890
-        cls.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
+        self.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
 
         # look for it in there
         query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' and "imjd"=%d' % (cutoutId, imjd)
-        rows = cls.session.execute(query)
-        cls.assertEqual(len(list(rows)), 1)
+        rows = self.session.execute(query)
+        self.assertEqual(len(list(rows)), 1)
 
-    def test_2_read(cls):
+    def test_2_read(self):
         """Read something from the database"""
         imjd = 60000
-        cutout = cls.osc.getCutout(cutoutId, imjd)
+        cutout = self.osc.getCutout(cutoutId, imjd)
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)
         fp.close()
         # assert files are the same
         cmd = 'cmp %s.fits %s_copy.fits' % (cutoutId, cutoutId)
-        cls.assertEqual(os.system(cmd), 0)
+        self.assertEqual(os.system(cmd), 0)
 
-    def test_3_async_write(cls):
+    def test_3_async_write(self):
         """Write something to the database"""
         filename = cutoutId + '.fits'
         cutoutBlob = open(filename, 'rb').read()
@@ -97,13 +98,15 @@ class CassandraCutoutTest(TestCase):
         # put into cassandra
         imjd = 60001
         objectId = 1234567891
-        future = cls.osc.putCutoutAsync(cutoutId, imjd, objectId, cutoutBlob)
-        future.result()
+        futures = self.osc.putCutoutAsync(cutoutId, imjd, objectId, cutoutBlob)
+        for future in futures:
+            future.result()
 
         # look for it in there
         query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' and "imjd"=%d' % (cutoutId, imjd)
-        rows = cls.session.execute(query)
-        cls.assertEqual(len(list(rows)), 1)
+        rows = self.session.execute(query)
+        self.assertEqual(len(list(rows)), 1)
+
 
 if __name__ == '__main__':
     import xmlrunner

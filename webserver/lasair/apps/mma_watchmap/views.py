@@ -1,3 +1,5 @@
+from src import bad_fits
+import settings
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import MmaWatchmap
@@ -26,8 +28,7 @@ import sys
 from .utils import make_image_of_MOC
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
-import settings
-from src import bad_fits
+
 
 @csrf_exempt
 def mma_watchmap_index(request):
@@ -50,24 +51,25 @@ def mma_watchmap_index(request):
     mmaWatchmaps = MmaWatchmap.objects.all()
     d = {}
     for mw in list(mmaWatchmaps):
+        namespace = mw.namespace
         c = mw.params['classification']
 
         # get the type with the largest probability
         max = 0.0
         for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
-            if c[type] > max:
+            if type in c and c[type] > max:
                 max = c[type]
-                gwtype = type
+                mma_type = namespace + ':' + type
 
         # build data packet
-        new = {'mw_id':mw.mw_id, 
-                'otherId': mw.otherId, 
-                'version': mw.version, 
-                'mocimage': mw.mocimage, 
-                'area90':mw.area90, 
-                'gwtype':gwtype, 
-                'event_date':mw.event_date
-                }
+        new = {'mw_id': mw.mw_id,
+               'otherId': mw.otherId,
+               'version': mw.version,
+               'mocimage': mw.mocimage,
+               'area90': mw.area90,
+               'mma_type': mma_type,
+               'event_date': mw.event_date
+               }
         # get the latest version for each otherId
         if mw.otherId in d:
             if mw.version > d[mw.otherId]['version']:
@@ -77,12 +79,14 @@ def mma_watchmap_index(request):
 
     return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': d.values()})
 
+
 def chop(x):
-    if isinstance(x, float): 
+    if isinstance(x, float):
         return '%.2f' % x
     if not x:
         return ''
     return x
+
 
 def mma_watchmap_detail(request, mw_id):
     """*return the resulting matches of a mma_watchmap*
@@ -115,9 +119,9 @@ def mma_watchmap_detail(request, mw_id):
 SELECT
 o.diaObjectId, 
 h.probdens2, h.contour, 
-o.maxTai as "last detected",
-o.minTai - m.event_tai as "t_GW",
-o.rPSFlux, o.gPSFlux,
+o.lastDiaSourceMJD as "last detected",
+o.firstDiaSourceMJD - m.event_tai as "t_GW",
+o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
@@ -137,23 +141,23 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
                 break
     newtable2 = []
     for r2 in table2:
-        r = {'diaObjectId' : r2['diaObjectId'],
-            'probdens'     : chop(r2['probdens2']),
-            'contour'      : r2['contour'],
-            'last detected': r2['last detected'],
-            't_GW'         : chop(r2['t_GW']),
-            }
+        r = {'diaObjectId': r2['diaObjectId'],
+             'probdens': chop(r2['probdens2']),
+             'contour': r2['contour'],
+             'last detected': r2['last detected'],
+             't_GW': chop(r2['t_GW']),
+             }
         if r2['gPSFluxMax'] and r2['gPSFluxMax'] > 0:
-            r['mag_g'] = chop(31.4 - 2.5*math.log10(r2['gPSFluxMax']))
+            r['mag_g'] = chop(31.4 - 2.5 * math.log10(r2['gPSFluxMax']))
         else:
             r['mag_g'] = ''
 
         if r2['rPSFluxMax'] and r2['rPSFluxMax'] > 0:
-            r['mag_r'] = chop(31.4 - 2.5*math.log10(r2['rPSFluxMax']))
+            r['mag_r'] = chop(31.4 - 2.5 * math.log10(r2['rPSFluxMax']))
         else:
             r['mag_r'] = ''
 
-        r['ra']   = r2['ra']
+        r['ra'] = r2['ra']
         r['decl'] = r2['decl']
         newtable2.append(r)
 
@@ -164,9 +168,9 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
         limit = resultCap
 
         if django_settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this mma_watchmap. But don't worry! You can access all results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False
@@ -184,10 +188,10 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
 SELECT
 o.diaObjectId, 
 h.probdens3, h.contour, h.distance as dist,
-o.maxTai as "last detected",
-o.minTai - m.event_tai as "t_GW",
+o.lastDiaSourceMJD as "last detected",
+o.firstDiaSourceMJD - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.rPSFlux, o.gPSFlux,
+o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
@@ -208,63 +212,63 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
                 break
     newtable3 = []
     for r3 in table3:
-        r = {'diaObjectId' : r3['diaObjectId'],
-             'probdens'    : chop(r3['probdens3']),
-            'contour'      : r3['contour'],
-            'last detected': r3['last detected'],
-            't_GW'         : chop(r3['t_GW']),
-            'Sherlock'     : r3['classification'],
-            }
+        r = {'diaObjectId': r3['diaObjectId'],
+             'probdens': chop(r3['probdens3']),
+             'contour': r3['contour'],
+             'last detected': r3['last detected'],
+             't_GW': chop(r3['t_GW']),
+             'Sherlock': r3['classification'],
+             }
 
         if r3['gPSFluxMax'] and r3['gPSFluxMax'] > 0:
-            m = 23.9 - 2.5*math.log10(r3['gPSFluxMax'])
+            m = 23.9 - 2.5 * math.log10(r3['gPSFluxMax'])
             r['mag_g'] = chop(m)
-            r['M_g']   = chop(m - 25 - 5*math.log10(r3['dist']))
+            r['M_g'] = chop(m - 25 - 5 * math.log10(r3['dist']))
         else:
             r['mag_g'] = ''
-            r['M_g']   = ''
+            r['M_g'] = ''
 
         if r3['rPSFluxMax'] and r3['rPSFluxMax'] > 0:
-            m = 23.9 - 2.5*math.log10(r3['rPSFluxMax'])
+            m = 23.9 - 2.5 * math.log10(r3['rPSFluxMax'])
             r['mag_r'] = chop(m)
-            r['M_r']   = chop(m - 25 - 5*math.log10(r3['dist']))
+            r['M_r'] = chop(m - 25 - 5 * math.log10(r3['dist']))
         else:
             r['mag_r'] = ''
-            r['M_r']   = ''
+            r['M_r'] = ''
 
         if r3['z']:
-            r['z']     = r3['z']
-            r['zerr']  = 0.0
+            r['z'] = r3['z']
+            r['zerr'] = 0.0
             r['zflag'] = 'specz'
         elif r3['photoZ']:
-            r['z']     = r3['photoZ']
-            r['zerr']  = r3['photoZerr']
+            r['z'] = r3['photoZ']
+            r['zerr'] = r3['photoZerr']
             r['zflag'] = 'photz'
         else:
-            r['z']     = ''
-            r['zerr']  = ''
+            r['z'] = ''
+            r['zerr'] = ''
             r['zflag'] = 'no_z'
 
-        r['ra']   = r3['ra']
+        r['ra'] = r3['ra']
         r['decl'] = r3['decl']
         newtable3.append(r)
 
-    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'mag_g','M_g', 'mag_r', 'M_r', 'z', 'zerr', 'zflag', 'ra', 'decl']
+    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'mag_g', 'M_g', 'mag_r', 'M_r', 'z', 'zerr', 'zflag', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
 
         if django_settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this mma_watchmap. But don't worry! You can access all results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False
 
     return render(request, 'mma_watchmap/mma_watchmap_detail.html', {
         'mma_watchmap': mma_watchmap,
-        'lasair_url'  : settings.LASAIR_URL,
+        'lasair_url': settings.LASAIR_URL,
         'table2': newtable2, 'schema2': schema2,
         'table3': newtable3, 'schema3': schema3,
         'count': count,

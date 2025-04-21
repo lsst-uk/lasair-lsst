@@ -23,14 +23,15 @@ scrape_configs:
       - targets: ['localhost:9090']
 
   - job_name: websites
+    scrape_interval: 60s
     metrics_path: /probe
     params:
       module: [http_2xx]
     static_configs:
      - targets:
        - "https://www.{{ domain }}/"
-       - "https://{{ lasair_name }}.{{ domain }}/"
-       - "https://{{ (groups['web'] + ['localhost'])[0] }}/"
+       - "https://{{ lasair_name }}.{{ domain }}/status/"
+       #- "https://{{ (groups['web'] + ['localhost'])[0] }}/"
     relabel_configs:
      - source_labels: [__address__]
        target_label: __param_target
@@ -74,6 +75,28 @@ scrape_configs:
         - "{{ host }}:8082"
         - "{{ host }}:8083"
         {% endfor %}
+
+  - job_name: databases
+    scrape_interval: 60s
+    metrics_path: /probe
+    params:
+      module: [tcp_connect]
+    static_configs:
+     - targets:
+       {% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) -%}
+        - "{{ host }}:3306"
+       {%- endfor %}
+       {% for host in (groups['cluster_control']) -%}
+        - "{{ host }}:9001"
+       {%- endfor %}
+
+    relabel_configs:
+     - source_labels: [__address__]
+       target_label: __param_target
+     - source_labels: [__param_target]
+       target_label: instance
+     - target_label: __address__
+       replacement: 127.0.0.1:9115 # The blackbox exporter.
 
 #    metric_relabel_configs:
 #      # Relabel: topic=ztf_20180425_programid2 -> night=20180425, program=MSIP
