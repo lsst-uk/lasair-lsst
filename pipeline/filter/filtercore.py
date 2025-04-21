@@ -438,8 +438,8 @@ class Filter:
     def batch_statistics():
         """How many objects updated since last midnight.
         """
-        tainow = (time.time() / 86400 + 40587)
-        midnight = math.floor(tainow - 0.5) + 0.5
+        mjdnow = (time.time() / 86400 + 40587)
+        midnight = math.floor(mjdnow - 0.5) + 0.5
 
         msl_main = db_connect.readonly()
         cursor = msl_main.cursor(buffered=True, dictionary=True)
@@ -474,9 +474,9 @@ class Filter:
         msl_local = db_connect.local()
         cursor = msl_local.cursor(buffered=True, dictionary=True)
         query = 'SELECT '
-        query += 'tainow()-max(maxTai) AS min_delay, '
-        query += 'tainow()-avg(maxTai) AS avg_delay, '
-        query += 'tainow()-min(maxTai) AS max_delay '
+        query += 'mjdnow()-max(maxTai) AS min_delay, '
+        query += 'mjdnow()-avg(maxTai) AS avg_delay, '
+        query += 'mjdnow()-min(maxTai) AS max_delay '
         query += 'FROM objects'
         try:
             cursor.execute(query)
