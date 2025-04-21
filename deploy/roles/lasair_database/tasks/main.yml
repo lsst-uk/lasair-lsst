@@ -17,7 +17,7 @@
       - GRANT SELECT ON {{ mysql_db_name }}.* TO '{{ msql_db_user_readonly }}'@'%';
       - DROP FUNCTION IF EXISTS mjdnow;
       - CREATE FUNCTION mjdnow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587);
-      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.tainow TO '{{ msql_db_user_readonly }}'@'%';
+      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.mjdnow TO '{{ msql_db_user_readonly }}'@'%';
     login_host: 127.0.0.1
     login_user: root
     login_password: "{{ mysql_root_password }}"
