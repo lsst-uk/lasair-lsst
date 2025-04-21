@@ -139,6 +139,9 @@ REST_FRAMEWORK = {
 
     # for somebody with a token in the 'powerapi' group
     'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', },
+
+    # less strict JSON encoding RDW April 2025
+    'STRICT_JSON': False,
 }
 
 ROOT_URLCONF = 'lasair.urls'

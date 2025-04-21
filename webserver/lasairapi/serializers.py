@@ -101,9 +101,48 @@ class ConeSerializer(serializers.Serializer):
 
         return info
 
+def reformat(old, lasair_added=True):
+    new = {}
+    new['diaObjectId'] = old['diaObjectId']
+    diaObject = {
+        'ra'               : old['objectData']['ra'],
+        'decl'             : old['objectData']['decl'],
+        'firstDiaSourceMJD': old['objectData']['mjdmin'],
+        'lastDiaSourceMJD' : old['objectData']['mjdmax']
+    }
+    if lasair_added:
+        lasairData = old['objectData']
+        del lasairData['ra']
+        del lasairData['decl']
+        del lasairData['mjdmin']
+        del lasairData['mjdmax']
+        lasairData['sherlock']    = old['sherlock']
+        lasairData['TNS']         = old['TNS']
+        lasairData['annotations'] = old['annotations']
+    diaSources = []
+    imageUrls = []
+    for ds in old['diaSources']:
+        del ds['json']
+        del ds['mjd']
+        del ds['imjd']
+        del ds['since_now']
+        del ds['utc']
+        iu = ds['image_urls']
+        del ds['image_urls']
+        iu['diaSourceId'] = ds['diaSourceId']
+        imageUrls.append(iu)
+        diaSources.append(ds)
+    if lasair_added:
+        lasairData['imageUrls'] = imageUrls
+        new['lasairData'] = lasairData
+    new['diaObject'] = diaObject
+    new['diaSources'] = diaSources
+    new['diaForcedSources'] = old['diaForcedSources']
+    return new
+
 class ObjectSerializer(serializers.Serializer):
-    objectId = serializers.CharField(required=True)
-    lite = serializers.BooleanField(default=False)    # doesnt do anything right now
+    objectId     = serializers.CharField(required=True)
+    lite         = serializers.BooleanField(default=False)
     lasair_added = serializers.BooleanField(default=True)
 
     def save(self):
@@ -119,24 +158,33 @@ class ObjectSerializer(serializers.Serializer):
 
         if lasair_added:
             try:
-                result = objjson(objectId)
+                result = objjson(objectId, lite=lite)
+                result = reformat(result, lasair_added=lasair_added)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
                 raise NotFound()
-            return result
         else:
-            # Fetch the lightcurve, either from cassandra or file system
             LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
 
             try:
-                (candidates, fpcandidates) = LF.fetch(objectId)
-                result = {'objectId':objectId, 'candidates':candidates, 'forcedphot': fpcandidates}
+                if lite: 
+                    (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    result = {
+                        'diaObjectId':objectId, 
+                        'diaSources':diaSources, 
+                        'diaForcedSources':diaForcedSources}
+                else:
+                    (diaObject, diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    result = {
+                        'diaObjectId':objectId, 
+                        'diaObject':diaObject, 
+                        'diaSources':diaSources, 
+                        'diaForcedSources':diaForcedSources}
             except Exception as e:
                 result = {'error': str(e)}
-
             LF.close()
-            return result
+        return result
 
 class SherlockObjectSerializer(serializers.Serializer):
     objectId = serializers.IntegerField(required=True)
