@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -12,8 +12,10 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
   g++ \
-  python3-yaml
-RUN pip3 install \
+  python3-yaml \
+  python3-flask \
+  python3-flask-restful
+RUN pip3 install --break-system-packages \
   numpy  \
   scipy
 RUN pip3 install \
@@ -21,41 +23,40 @@ RUN pip3 install \
   qub-sherlock==2.2.0
 
 # Required for tests
-RUN pip3 install \
-  xmlrunner \
-  cryptography \
-  flask \
-  psutil \
-  coverage
+RUN pip3 install --break-system-packages \
+  xmlrunner 
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig 
+  swig \
+  python3-psutil \
+  python3-coverage \
+  python3-cryptography
 
 # Required for Ingest
-RUN pip3 install \
-  cassandra-driver \
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  python3-cassandra \
+  python3-lz4 
+RUN pip3 install --break-system-packages \
   gkdbutils \
-  fastavro \
-  lz4
+  fastavro 
+#  cassandra-driver \
 
 # Required for filter
-RUN pip3 install \
+RUN pip3 install --break-system-packages \
   mocpy \
   mysql-connector-python \
   ephem \
   gkhtm \
   gkdbutils \
-  cassandra-driver \
-  fastavro\
-  bazinBlackBody\
+  bazinBlackBody \
   dustmaps
 
 # required for MMA
-RUN pip3 install \
+RUN pip3 install --break-system-packages \
   skytag
 
 # required for dustmaps
