@@ -131,7 +131,7 @@ def index(request):
 #            iage = 4
 
         alerts[iclass][iage].append({
-            'diaObjectId': row['diaObjectId'],
+            'diaObjectId': str(row['diaObjectId']),
             'age': row["last detected"],
             'class': row["predicted type"],
             'mag': mag,
