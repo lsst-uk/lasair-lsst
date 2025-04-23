@@ -64,7 +64,7 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_sherlock.py'
                 }
                 dir('tests/unit/') {
-                    sh 'pythone3 -m coverage xml'
+                    sh 'python3 -m coverage xml'
                 }
             }
             post {
