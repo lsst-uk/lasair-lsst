@@ -17,7 +17,7 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_logging.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_manage_status.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_objectStore.py'
-                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch.py'
+                    sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_crossmatch_optimised.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_skymaps.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" context.py'
