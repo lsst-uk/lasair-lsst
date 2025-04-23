@@ -14,13 +14,14 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   g++ \
   python3-yaml \
   python3-flask \
-  python3-flask-restful
+  python3-flask-restful \
+  python3-confluent-kafka
 RUN pip3 install --break-system-packages \
   numpy  \
-  scipy
-RUN pip3 install \
-  confluent-kafka==1.7.0 \
+  scipy \
   qub-sherlock==2.2.0
+#RUN pip3 install --break-system-packages \
+#  confluent-kafka==1.7.0 \
 
 # Required for tests
 RUN pip3 install --break-system-packages \
