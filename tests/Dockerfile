@@ -17,7 +17,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-flask-restful \
   python3-confluent-kafka \
   python3-numpy \
-  python3-scipy
+  python3-scipy \
+  python3-unittest2
 RUN pip3 install --break-system-packages \
   qub-sherlock==2.2.0
 
