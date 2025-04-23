@@ -12,7 +12,6 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
   g++ \
-  python3-yaml \
   python3-flask \
   python3-flask-restful \
   python3-confluent-kafka \
@@ -20,6 +19,7 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-scipy \
   python3-unittest2
 RUN pip3 install --break-system-packages \
+  pyyaml<=6 \
   qub-sherlock==2.2.0
 
 # Required for tests
