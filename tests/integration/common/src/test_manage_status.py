@@ -71,7 +71,6 @@ class CommonManageStatusTest(unittest.TestCase):
         self.assertEqual(status, {})
 
     def test_multiprocessing(self):
-        return
         msl = None
         procs = []
         for iproc in range(nproc):
