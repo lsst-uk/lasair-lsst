@@ -17,10 +17,10 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-confluent-kafka \
   python3-numpy \
   python3-scipy \
-  python3-unittest2
+  python3-unittest2 \
+  python3-yaml
 RUN pip3 install --break-system-packages \
-  'pyyaml<6' \
-  qub-sherlock==2.2.0
+  qub-sherlock==2.3.1
 
 # Required for tests
 RUN pip3 install --break-system-packages \
