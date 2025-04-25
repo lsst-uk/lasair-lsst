@@ -87,7 +87,6 @@ class CommonManageStatusTest(unittest.TestCase):
         self.assertTrue(status['count'] == nproc*niter)
 
     def test_timer(self):
-        return
         td = timer('mango')
         time.sleep(1)
 
