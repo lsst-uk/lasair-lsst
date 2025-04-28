@@ -103,6 +103,12 @@ class Filter:
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
 
+        # set up the extinction factory
+        try:
+            self.sfd = SFDQuery()
+        except Exception as e:
+            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
+
     def setup(self):
         """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
         times. We do this separately from __init__ mostly to facilitate testing."""
@@ -117,12 +123,6 @@ class Filter:
                 self.database = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
-
-        # set up the extinction factory
-        try:
-            self.sfd = SFDQuery()
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -274,7 +274,7 @@ class Filter:
         ra   = alert['diaObject']['ra']
         decl = alert['diaObject']['decl']
         c = SkyCoord(ra, decl, unit="deg", frame='icrs')
-        alert['ebv'] = float(sfd(c))
+        alert['ebv'] = float(self.sfd(c))
 
         # build the insert query for this object.
         # if not wanted, returns 0
