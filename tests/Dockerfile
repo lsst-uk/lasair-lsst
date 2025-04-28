@@ -17,51 +17,47 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
-  g++ \
-  python3-flask \
-  python3-flask-restful \
-  python3-confluent-kafka \
-  python3-numpy \
-  python3-scipy \
-  python3-unittest2 \
-  python3-yaml
+  g++ 
+RUN pip3 install \
+  flask \
+  flask-restful \
+  confluent-kafka \
+  numpy \
+  scipy \
+  unittest2 \
+  pyyaml
 RUN pip3 install \
   qub-sherlock==2.3.1
 
 # Required for tests
-#RUN pip3 install --break-system-packages \
 RUN pip3 install \
-  xmlrunner 
+  xmlrunner \
+  psutil \
+  coverage \
+  cryptography 
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig \
-  python3-psutil \
-  python3-coverage \
-  python3-cryptography
+  swig 
 
 # Required for Ingest
-RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-  python3-cassandra \
-  python3-lz4 
-#RUN pip3 install --break-system-packages \
 RUN pip3 install \
   gkdbutils \
-  fastavro 
-#  cassandra-driver \
+  fastavro \
+  cassandra-driver \
+  lz4
 
 # Required for filter
-#RUN pip3 install --break-system-packages \
 RUN pip3 install \
   mocpy \
   mysql-connector-python \
   ephem \
   gkhtm \
   gkdbutils \
-  bazinBlackBody \
+  bazinBlackBody==0.8 \
   dustmaps
 
 # required for MMA
