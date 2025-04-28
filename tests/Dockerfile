@@ -8,6 +8,11 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-dev \
   python3-pip 
 
+# Set up Python virtual environment
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
@@ -19,11 +24,12 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-scipy \
   python3-unittest2 \
   python3-yaml
-RUN pip3 install --break-system-packages \
+RUN pip3 install \
   qub-sherlock==2.3.1
 
 # Required for tests
-RUN pip3 install --break-system-packages \
+#RUN pip3 install --break-system-packages \
+RUN pip3 install \
   xmlrunner 
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
@@ -40,13 +46,15 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   python3-cassandra \
   python3-lz4 
-RUN pip3 install --break-system-packages \
+#RUN pip3 install --break-system-packages \
+RUN pip3 install \
   gkdbutils \
   fastavro 
 #  cassandra-driver \
 
 # Required for filter
-RUN pip3 install --break-system-packages \
+#RUN pip3 install --break-system-packages \
+RUN pip3 install \
   mocpy \
   mysql-connector-python \
   ephem \
@@ -56,7 +64,8 @@ RUN pip3 install --break-system-packages \
   dustmaps
 
 # required for MMA
-RUN pip3 install --break-system-packages \
+#RUN pip3 install --break-system-packages \
+RUN pip3 install \
   skytag
 
 # required for dustmaps
