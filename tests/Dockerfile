@@ -51,7 +51,7 @@ RUN pip3 install \
   gkdbutils \
   cassandra-driver \
   fastavro\
-  bazinBlackBody\
+  bazinBlackBody==0.7\
   dustmaps
 
 # required for MMA
