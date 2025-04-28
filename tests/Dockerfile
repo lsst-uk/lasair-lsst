@@ -6,7 +6,8 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   python3 \
   python3-dev \
-  python3-pip 
+  python3-pip \
+  python3-venv
 
 # Set up Python virtual environment
 ENV VIRTUAL_ENV=/opt/venv
