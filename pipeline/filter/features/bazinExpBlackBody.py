@@ -45,7 +45,8 @@ class bazinExpBlackBody(FeatureGroup):
 #        if not go:
 #            return fdict
 
-        BE = BBBEngine.BBB('LSST', nforced=4, A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
+        BE = BBBEngine.BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
+                A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
         try:
             (fit_e, fit_b) =  BE.make_fit(self.alert)
         except:
