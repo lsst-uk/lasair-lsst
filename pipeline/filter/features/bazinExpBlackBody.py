@@ -35,15 +35,12 @@ class bazinExpBlackBody(FeatureGroup):
             np.seterr(over   ='ignore')
             np.seterr(invalid='ignore')
 
-        # only run the expensive BBB fit on 'SN', 'NT', 'ORPHAN'
-#        go = False
-#        try:
-#            classification = self.alert['annotations']['sherlock']['classification']
-#            go = (classification in ['SN', 'NT', 'ORPHAN'])
-#        except:
-#            return fdict
-#        if not go:
-#            return fdict
+        # only run the expensive BBB fit on some
+        if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+            return fdict
+
+
+
 
         BE = BBBEngine.BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
                 A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
@@ -67,12 +64,21 @@ class bazinExpBlackBody(FeatureGroup):
         fdict['BBBRiseRate']    = fit['k']
         fdict['BBBFallRate']    = fit.get('kf', None)
         fdict['BBBPeakFlux']    = fit.get('peakValue', None)
-        fdict['BBBPeakAbsMag']  = None    # to be fixed later
+
+        # no peak for exp fit, only for bazin
         if 'kf' in fit:
             peakMJD = fit.get('peakTime', 0.0) + fit.get('mjd_discovery', 0.0)
-            if math.isinf(peakMJD):
-                fdict['BBBPeakMJD'] = None
-            else:
+            if not math.isinf(peakMJD):
                 fdict['BBBPeakMJD'] = peakMJD
+
+        # abs mag if there is a redshift
+        z = None
+        if 'z' in sherlock:        z = sherlock['z']
+        elif 'photoz' in sherlock: z = sherlock['photoz']
+        if z:
+            distances = redshift.redshiftToDistance(z)
+            distanceModulus = distances['dmod']
+            ecMag = 31.4 - 2.5*math.log10(fdict['BBBPeakFlux'])
+            fdict['BBBPeakAbsMag'] = ecMag - distanceModulus + 2.5*math.log(1+z)
 
         return fdict

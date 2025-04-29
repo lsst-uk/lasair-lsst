@@ -1,8 +1,7 @@
 import math
-from .util import getAllFluxTimeBand
+import redshift
+from .util import getECFluxTimeBand
 from features.FeatureGroup import FeatureGroup
-from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
 
 class sherlock(FeatureGroup):
     """Extinction"""
@@ -13,7 +12,42 @@ class sherlock(FeatureGroup):
     ]    
 
     def run(self):
-        return { 
+        nothing = { 
             "absMag": None, 
             "absMagMJD": None, 
         }
+
+        try:
+            sherlock = self.alert['annotations']['sherlock']
+        except:
+            return nothing
+        if 'z' in sherlock:
+            z = sherlock['z']
+        elif 'photoz' in sherlock:
+            z = sherlock['photoz']
+        else:
+            return nothing
+
+        # combine z and apparent mag to get absolute mag
+        # using Ken Smith code from Atlas for distance modulus
+        distances = redshift.redshiftToDistance(z)
+        distanceModulus = distances['dmod']
+
+        # extinction corrected lightcurve
+        (lc_ecflux, lc_time, lc_band) = getECFluxTimeBand(self.alert)
+        peakAbsMag = 99
+        peakMJD    = 99
+        for i in range(len(lc_ecflux)):
+            # flux in nanoJ
+            ecMag = 31.4 - 2.5*math.log10(lc_ecflux[i])
+            absMag = ecMag - distanceModulus + 2.5*math.log(1+z)
+            if absMag < peakAbsMag:
+                peakAbsMag = absMag
+                peakMJD = lc_time[i]
+
+        return {
+            "absMag": peakAbsMag,
+            "absMagMJD": peakMJD,
+        }
+
+        return 
