@@ -1,4 +1,4 @@
-<img src="_images/lasair_logo_transparent.png" width=500>
+<img src="_images/lasair_logo_transparent_LSST.png" width=500>
 
 # [Lasair: A UK Alert Stream Broker]({%lasairurl%})
 

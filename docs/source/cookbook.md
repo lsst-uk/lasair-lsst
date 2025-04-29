@@ -198,20 +198,21 @@ $M_{AB}$ = 2.5 log $f_\nu$ + 8.9, for $f$ in Jy
 
 $M_{AB}$ = 2.5 log $f_\nu$ + 31.4, for $f$ in nJy
 
-$\delta M_{AB}$ = 1.08574 $\delta f/f$
+Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, 
+distance, extinction, and k-correction.
 
-Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, distance, extinction, and k-correction.
+$M_R = M_{AB} - \mu - A_O + K_{RO}$
 
-$M_R = M_{AB} - \mu + K_{RO} - A_O$
+Here $\mu$ is the distance modulus, and
+$A_O$ is extinction in observed band for magnitudes in the AB system.
+Note that the extinction happens in the milky way with $z \approx 0$.
 
-Here $\mu$ is the distance modulus, $K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.
+$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
 
-$A_O$ is extinction in observed band (foreground for magnitudes in the AB system, 
-Therefore
+$M_R = m_O - \mu - A_O + 2.5 log (1+z)$
 
-$M_R = m_O - \mu - A_R + 2.5 log (1+z)$
-
-We should also quote the rest frame wavelength this is the effective wavelength for $M_R$:
+Note that the rest frame wavelength is shifted: the effective 
+wavelength for $M_R$ is:
 
 $\lambda_R = \lambda_O/(1+z)$
 
@@ -219,6 +220,9 @@ Error on $M_R$:
 Sum the variances of the sources of error:
 
 $(\delta M_R)^2 = (\delta M_O)^2 + (\delta \mu)^2 + (\delta K)^2$
+
+The error of magnitude comes from the error in flux:
+$\delta M_{AB}$ = 1.08574 $\delta f/f$
 
 Note that $\delta K$ will be small: $\delta K \approx {2.5 \over ln 10} ({\delta z \over 1+z})$
 A Taylor expansion of the K correction term yields $\delta K \approx 1.08574 ({\delta z \over 1+z})$.
