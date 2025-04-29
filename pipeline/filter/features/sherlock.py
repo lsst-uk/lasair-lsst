@@ -21,11 +21,14 @@ class sherlock(FeatureGroup):
             sherlock = self.alert['annotations']['sherlock']
         except:
             return nothing
-        if 'z' in sherlock:
-            z = sherlock['z']
-        elif 'photoz' in sherlock:
-            z = sherlock['photoz']
-        else:
+
+        z = None
+        if sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+            if 'z' in sherlock:
+                z = sherlock['z']
+            elif 'photoz' in sherlock:
+                z = sherlock['photoz']
+        if not z:
             return nothing
 
         # combine z and apparent mag to get absolute mag
