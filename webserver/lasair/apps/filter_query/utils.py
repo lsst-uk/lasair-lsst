@@ -13,13 +13,17 @@ from confluent_kafka import admin, Producer
 
 def add_filter_query_metadata(
         filter_queries,
-        remove_duplicates=False):
+        remove_duplicates=False,
+        filterFirstName=False,
+        filterLastName=False):
     """*add extra metadata to the filter_queries and return a list of filter_queries dictionaries*
 
     **Key Arguments:**
 
     - `filter_queries` -- a list of filter_query objects
     - `remove_duplicates` -- remove duplicate filters 
+    - `filterFirstName` -- return only items belonging to specific user with this first name
+    - `filterLastName` -- return only items belonging to specific user with this last name
 
     **Usage:**
 
@@ -36,8 +40,13 @@ def add_filter_query_metadata(
 
         # ADD LIST USER
         if not remove_duplicates or fq.real_sql not in real_sql:
+            if filterFirstName and filterFirstName.lower() != fq.user.first_name.lower():
+                continue
+            if filterLastName and filterLastName.lower() != fq.user.last_name.lower():
+                continue
             fqDict['user'] = f"{fq.user.first_name} {fq.user.last_name}"
             fqDict['profile_image'] = fq.user.profile.image_b64
+
             updatedFilterQueryLists.append(fqDict)
             real_sql.append(fq.real_sql)
 
@@ -119,6 +128,7 @@ def run_filter(
                        "schema": tableSchema,
                        'sortTable': sortTable})
 
+
 def check_query_zero_limit(real_sql):
     """*use a limit of zero to test the validity of the query*
 
@@ -184,8 +194,8 @@ def topic_refresh(real_sql, topic, limit=10):
 
     timeout = 30
 
-    query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s' \
-            % (timeout, real_sql, limit))
+    query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s'
+             % (timeout, real_sql, limit))
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)

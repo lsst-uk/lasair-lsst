@@ -13,6 +13,12 @@
             {% if type == "my" and user.is_authenticated %}
                 <img class="avatar rounded" style="width:3.8rem;height:3.8rem; "  alt="Image placeholder" src="data:image/png;base64,{{ request.user.profile.image_b64 }}">
 
+            {% elif type == "community" %}
+
+                <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_watchlist.html" %}
+                </div>
+
             {% else %}
 
                 <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
@@ -22,6 +28,8 @@
             <div>
                 <h3 class="fw-extrabold ms-3 mb-0">{% if type == "my" %}
                     My Watchlists
+                {% elif type == "community" %}
+                    Watchlists
                 {% else %}
                     Public Gallery
                 {% endif %} </h3>
@@ -34,6 +42,9 @@
             <small class="text-gray-500">
                 {% if type == "my" %}
                     Your saved watchlists.
+
+                {% elif type == "community" %}
+                    A watchlist is generated from a set of points in the sky, together with an association radius. Each transient falling within an association radius of a watchlist source is flagged as <em>matched</em> against that watchlist.
                 {% else %}
                     Watchlists submitted to the public gallery by other Lasair users. You can view matches or copy individual watchlists into your own collection.
                 {% endif %}

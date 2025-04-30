@@ -12,6 +12,12 @@
             {% if type == "my" and user.is_authenticated %}
                 <img class="avatar rounded" style="width:3.8rem;height:3.8rem; "  alt="Image placeholder" src="data:image/png;base64,{{ request.user.profile.image_b64 }}">
 
+            {% elif type == "community" %}
+
+                <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_filter_query.html" %}
+                </div>
+
             {% else %}
 
                 <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
@@ -21,6 +27,8 @@
             <div>
                 <h3 class="fw-extrabold ms-3 mb-0">{% if type == "my" %}
                     My Filters
+                {% elif type == "community" %}
+                    Filters
                 {% else %}
                     Public Gallery
                 {% endif %} </h3>
@@ -33,6 +41,9 @@
             <small class="text-gray-500">
                 {% if type == "my" %}
                     Your saved filters.
+                {% elif type == "community" %}
+                    Filters are used to select out subsets of transients of interest to Lasair users. Filters are written as SQL queries, created by users, to  match against past transient events found in the Lasair database and saved filters will dyamically match against future events.
+
                 {% else %}
                     Filters submitted to the public gallery by other Lasair users. You can view matches or copy individual filters into your own collection.
                 {% endif %}

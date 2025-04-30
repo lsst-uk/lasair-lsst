@@ -2,10 +2,6 @@
 {% load static %}
 {% block content %}
 
-    {% block title %}
-        Annotators
-    {% endblock title %}
-
 
     <div class="container">
 
@@ -18,9 +14,9 @@
 
                             <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
                                 <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
-                                    {% include "includes/icons/icon_annotator.html" %}
+                                    {% include "includes/icons/icon_resources.html" %}
                                 </div>
-                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Annotators</h2>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Community Resources</h2>
 
                             </div>
 
@@ -28,8 +24,7 @@
 
                             <div class="col-12 px-4">
                                 <small class="text-gray-500">
-                                    Annotators are codes that run on the Lasair transient stream, compute some value added feature(s) for the transients and inject these values back into the stream for other users to use in their filters.
-                                    Some annotators are written by the Lasair Team but others are submitted by a Lasair users. Please get in contact via <a href="https://community.lsst.org/c/support/support-lasair/55">Community</a> if you have an idea for an annotator.
+                                    The example resources highlighted here have been built either by a member of the Lasair Community or by the core Lasair Team. Feel free to duplicate and adapt the resources to your science needs.
                                 </small>
                             </div>
 
@@ -41,17 +36,19 @@
 
             </div>
 
-
-
-            {% if user.is_authenticated %}
-                <div class="col-12 mb-4">
-                    {% include "includes/widgets/widget_annotator_table.html" with type="my" position="auto" %}
-                </div>
-            {% endif %}
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_filter_query_table.html" with type="community" position="auto" %}
+            </div>
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_annotator_table.html" with type="public" position="auto" %}
+                {% include "includes/widgets/widget_watchlist_table.html" with type="community" position="auto" %}
             </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_watchmap_table.html" with type="community" position="auto" %}
+            </div>
+
+
         </div>
 
 {% endblock %}
