@@ -2,7 +2,19 @@
 values for Lasair. Sets up a log file and also sends error and above messages to Slack."""
 
 import os, logging
+from datetime import datetime
 from slack_webhook import SlackWebhook
+
+
+def prometheus_export(msg: str):
+    """Set the message to export to prometheus"""
+     try:
+        filename = '/var/lib/prometheus/node-exporter/lasairlog.prom'
+        f = open(filename, 'w')
+        f.write(msg)
+        f.close()
+    except:
+        print("ERROR in lasairLogging: Cannot open promethus export file %s" % filename)
 
 
 class SlackHandler(logging.Handler):
@@ -14,7 +26,12 @@ class SlackHandler(logging.Handler):
     def emit(self, record):
         """Emit a record."""
         msg = self.format(record)
-        self.webhook.send(msg)
+        try:
+            self.webhook.send(msg)
+        except SlackError as e:
+            ts = str(datetime.now())
+            errmsg = f"[{ ts }] Error sending message to Slack: { str(e) } | Message: { msg }"
+            prometheus_export(errmsg)
 
 
 class DuplicateFilter(logging.Filter):
