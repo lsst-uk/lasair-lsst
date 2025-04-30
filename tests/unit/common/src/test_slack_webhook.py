@@ -20,7 +20,7 @@ class SlackWebhookTest(unittest.TestCase):
         """Test error handling on send"""
         mock_post.return_value.status_code = 500
         sw = slack_webhook.SlackWebhook("myurl", "mychannel")
-        with self.assertRaises(ValueError):
+        with self.assertRaises(slack_webhook.SlackError):
             sw.send("testmessage")
         mock_post.assert_called_once()
 

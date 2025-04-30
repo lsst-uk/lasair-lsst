@@ -3,7 +3,7 @@ values for Lasair. Sets up a log file and also sends error and above messages to
 
 import os, logging
 from datetime import datetime
-from slack_webhook import SlackWebhook
+from slack_webhook import SlackWebhook, SlackError
 
 
 def prometheus_export(msg: str):
