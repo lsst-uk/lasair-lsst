@@ -38,15 +38,15 @@ def community_resource_index(request):
 
     # PUBLIC FILTERS
     publicFilters = filter_query.objects.filter(public__gte=1)
-    publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True, filterFirstName="Community", filterLastName="Resources")
+    publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True, filterFirstName="Lasair", filterLastName="Resources")
 
     # PUBLIC WATCHLISTS
     publicWatchlists = Watchlist.objects.filter(public__gte=1)
-    publicWatchlists = add_watchlist_metadata(publicWatchlists, remove_duplicates=True, filterFirstName="Community", filterLastName="Resources")
+    publicWatchlists = add_watchlist_metadata(publicWatchlists, remove_duplicates=True, filterFirstName="Lasair", filterLastName="Resources")
 
     # PUBLIC WATCHMAPS
     publicWatchmaps = Watchmap.objects.filter(public__gte=1)
-    publicWatchmaps = add_watchmap_metadata(publicWatchmaps, remove_duplicates=True, filterFirstName="Community", filterLastName="Resources")
+    publicWatchmaps = add_watchmap_metadata(publicWatchmaps, remove_duplicates=True, filterFirstName="Lasair", filterLastName="Resources")
 
     # # USER WATCHMAPS
     # if request.user.is_authenticated:

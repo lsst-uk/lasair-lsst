@@ -56,7 +56,7 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" id="{{type}}_datatable">
+            <table  class="table table-flush datatable" {% if type == "community" %} datatable-vanilla {% endif %} id="{{type}}_datatable">
                 <thead class="thead-light">
                     {% if type == "my" %}
                         <tr>
