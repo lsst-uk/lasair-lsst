@@ -79,11 +79,16 @@ objects.diaObjectId,
 crossmatch_tns.tns_prefix, crossmatch_tns.tns_name, crossmatch_tns.type
 ```
 and in the WHERE part of the filter, 
-we put in the classificartion constraint and latest first, and order
+we put in the classification constraint and latest first, and order
 the results latest first.
 ```
 crossmatch_tns.type = "SN II"
 ORDER BY jdmax DESC
+```
+
+You can select on multiple TNS types with this syntax:
+```
+crossmatch_tns.type in ["SN II", "AGN"]
 ```
 ##### Filtering on TNS status
 In the example above, we are concentrating on those LSST objects that are associated
