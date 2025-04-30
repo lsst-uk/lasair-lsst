@@ -17,9 +17,9 @@ class filter_query(models.Model):
     active = models.IntegerField(blank=True, null=True)
     topic_name = models.CharField(max_length=256, blank=True, null=True)
     real_sql = models.CharField(max_length=4096, blank=True, null=True)
-    date_created  = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
-    date_modified = models.DateTimeField(auto_now=    True, editable=False, blank=True, null=True)
-    date_expire   = models.DateTimeField(                   editable=True,  blank=True, null=True)
+    date_created = models.DateTimeField(auto_now_add=True, editable=False, blank=True, null=True)
+    date_modified = models.DateTimeField(auto_now=True, editable=False, blank=True, null=True)
+    date_expire = models.DateTimeField(editable=True, blank=True, null=True)
 
     class Meta:
         """Meta.

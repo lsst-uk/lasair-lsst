@@ -16,6 +16,12 @@
             {% if type == "my" and user.is_authenticated %}
                 <img class="avatar rounded" style="width:3.8rem;height:3.8rem; "  alt="Image placeholder" src="data:image/png;base64,{{ request.user.profile.image_b64 }}">
 
+            {% elif type == "community" %}
+
+                <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
+                    {% include "includes/icons/icon_watchmap.html" %}
+                </div>
+
             {% else %}
 
                 <div class="icon-shape icon-shape-primary rounded me-4 me-sm-0">
@@ -25,6 +31,10 @@
             <div>
                 <h3 class="fw-extrabold ms-3 mb-0">{% if type == "my" %}
                     My Watchmaps
+
+                {% elif type == "community" %}
+                    Watchmaps
+
                 {% else %}
                     Public Gallery
                 {% endif %} </h3>
@@ -37,6 +47,8 @@
             <small class="text-gray-500">
                 {% if type == "my" %}
                     Your saved watchmaps.
+                {% elif type == "community" %}
+                    A watchmap is based on a region file (MOC format) which defines a specific portion of the sky. Each transient falling within that region of the sky is flagged as <em>matched</em> against that watchmap.
                 {% else %}
                     Watchmaps submitted to the public gallery by other Lasair users. You can view matches or copy individual watchlists into your own collection.
                 {% endif %}
@@ -48,7 +60,7 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" id="{{type}}_datatable">
+            <table  class="table table-flush datatable" {% if type == "community" %} datatable-vanilla {% endif %}  id="{{type}}_datatable">
                 <thead class="thead-light">
                     {% if type == "my" %}
                         <tr>
