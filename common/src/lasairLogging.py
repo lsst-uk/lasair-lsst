@@ -8,7 +8,7 @@ from slack_webhook import SlackWebhook
 
 def prometheus_export(msg: str):
     """Set the message to export to prometheus"""
-     try:
+    try:
         filename = '/var/lib/prometheus/node-exporter/lasairlog.prom'
         f = open(filename, 'w')
         f.write(msg)
