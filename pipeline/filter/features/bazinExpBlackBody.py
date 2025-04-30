@@ -3,6 +3,7 @@ import sys
 import json
 import math
 import numpy as np
+from .redshift import redshiftToDistance
 from features.FeatureGroup import FeatureGroup
 
 # these come from from https://github.com/RoyWilliams/bazinBlackBody
@@ -36,11 +37,12 @@ class bazinExpBlackBody(FeatureGroup):
             np.seterr(invalid='ignore')
 
         # only run the expensive BBB fit on some
+        try:
+            sherlock = self.alert['annotations']['sherlock'][0]
+        except:
+            return fdict
         if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
             return fdict
-
-
-
 
         BE = BBBEngine.BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
                 A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
@@ -75,8 +77,8 @@ class bazinExpBlackBody(FeatureGroup):
         z = None
         if 'z' in sherlock:        z = sherlock['z']
         elif 'photoz' in sherlock: z = sherlock['photoz']
-        if z:
-            distances = redshift.redshiftToDistance(z)
+        if z and fdict['BBBPeakFlux'] and fdict['BBBPeakFlux'] > 0:
+            distances = redshiftToDistance(z)
             distanceModulus = distances['dmod']
             ecMag = 31.4 - 2.5*math.log10(fdict['BBBPeakFlux'])
             fdict['BBBPeakAbsMag'] = ecMag - distanceModulus + 2.5*math.log(1+z)

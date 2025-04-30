@@ -1,6 +1,6 @@
 import math
-import redshift
 from .util import getECFluxTimeBand
+from .redshift import redshiftToDistance
 from features.FeatureGroup import FeatureGroup
 
 class sherlock(FeatureGroup):
@@ -18,7 +18,7 @@ class sherlock(FeatureGroup):
         }
 
         try:
-            sherlock = self.alert['annotations']['sherlock']
+            sherlock = self.alert['annotations']['sherlock'][0]
         except:
             return nothing
 
@@ -33,7 +33,7 @@ class sherlock(FeatureGroup):
 
         # combine z and apparent mag to get absolute mag
         # using Ken Smith code from Atlas for distance modulus
-        distances = redshift.redshiftToDistance(z)
+        distances = redshiftToDistance(z)
         distanceModulus = distances['dmod']
 
         # extinction corrected lightcurve
@@ -42,7 +42,10 @@ class sherlock(FeatureGroup):
         peakMJD    = 99
         for i in range(len(lc_ecflux)):
             # flux in nanoJ
-            ecMag = 31.4 - 2.5*math.log10(lc_ecflux[i])
+            try:
+                ecMag = 31.4 - 2.5*math.log10(lc_ecflux[i])
+            except:
+                continue
             absMag = ecMag - distanceModulus + 2.5*math.log(1+z)
             if absMag < peakAbsMag:
                 peakAbsMag = absMag
