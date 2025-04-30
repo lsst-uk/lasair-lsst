@@ -83,7 +83,7 @@ we put in the classification constraint and latest first, and order
 the results latest first.
 ```
 crossmatch_tns.type = "SN II"
-ORDER BY jdmax DESC
+ORDER BY lastDiaSourceMJD DESC
 ```
 
 You can select on multiple TNS types with this syntax:
