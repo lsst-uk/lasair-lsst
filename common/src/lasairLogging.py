@@ -6,22 +6,22 @@ from datetime import datetime
 from slack_webhook import SlackWebhook, SlackError
 
 
-def prometheus_export(msg: str):
-    """Set the message to export to prometheus"""
-    try:
-        filename = '/var/lib/prometheus/node-exporter/lasairlog.prom'
-        f = open(filename, 'w')
-        f.write(msg)
-        f.close()
-    except:
-        print("ERROR in lasairLogging: Cannot open promethus export file %s" % filename)
-
 
 class SlackHandler(logging.Handler):
     """Logging handler to send Slack messages."""
     def __init__(self, webhook: SlackWebhook):
         super().__init__()
         self.webhook = webhook
+        self.prometheus_file = '/var/lib/prometheus/node-exporter/lasairlog.prom'
+
+    def prometheus_export(self, msg: str):
+        """Set the message to export to prometheus"""
+        try:
+            f = open(self.prometheus_file, 'w')
+            f.write(msg)
+            f.close()
+        except:
+            print("ERROR in lasairLogging: Cannot open promethus export file %s" % self.prometheus_file)
 
     def emit(self, record):
         """Emit a record."""
@@ -31,7 +31,7 @@ class SlackHandler(logging.Handler):
         except SlackError as e:
             ts = str(datetime.now())
             errmsg = f"[{ ts }] Error sending message to Slack: { str(e) } | Message: { msg }"
-            prometheus_export(errmsg)
+            self.prometheus_export(errmsg)
 
 
 class DuplicateFilter(logging.Filter):
