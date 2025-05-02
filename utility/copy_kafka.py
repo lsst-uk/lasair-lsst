@@ -11,12 +11,12 @@ def copy(conf):
     consumer_conf = {
         'session.timeout.ms': 10000,
         'default.topic.config': {'auto.offset.reset': 'earliest'},
-        'bootstrap.servers': conf['broker'],
+        'bootstrap.servers': conf['src_broker'],
         'client.id': 'client-1',
         'group.id': uuid.uuid4() # use a random group id
     }
     producer_conf = {
-        'bootstrap.servers': conf['broker'],
+        'bootstrap.servers': conf['dest_broker'],
         'client.id': 'client-1',
     }
     #print("Group: ", kafka_conf['group.id'])
@@ -30,8 +30,9 @@ def copy(conf):
     while n < conf['n']:
         msg = c.poll(1)
         if msg is None:
-            print(".")
+            print(".", end='')
             if e < 30:
+                e += 1
                 continue
             break
         elif not msg.error():
@@ -40,9 +41,14 @@ def copy(conf):
         else:
             print(str(msg.error()))
             break
+        if n % 10 == 0:
+            p.flush()
     if n > 0:
-        c.commit(asynchronous=False)
-        p.flush()
+        try:
+            p.flush()
+            c.commit(asynchronous=False)
+        except:
+            pass
     end_t = perf_counter()
     c.close()
     tt = end_t - start_t
@@ -52,7 +58,8 @@ def copy(conf):
 if __name__ == '__main__':
     # parse cmd line arguments
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('-b', '--broker', default='localhost:9092', type=str, help='address:port of Kafka broker(s)')
+    parser.add_argument('-b', '--src_broker', default='localhost:9092', type=str, help='address:port of Kafka broker(s)')
+    parser.add_argument('-d', '--dest_broker', default='localhost:9092', type=str, help='address:port of Kafka broker(s)')
     parser.add_argument('-n', type=int, default=1, help='number of messages to copy')
     parser.add_argument('-i', '--in_topic', type=str, required=True, help='topic to read')
     parser.add_argument('-o', '--out_topic', type=str, required=True, help='topic to write')
