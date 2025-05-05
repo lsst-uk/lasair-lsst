@@ -274,7 +274,7 @@ class Filter:
         ra   = alert['diaObject']['ra']
         decl = alert['diaObject']['decl']
         c = SkyCoord(ra, decl, unit="deg", frame='icrs')
-        alert['ebv'] = float(sfd(c))
+        alert['ebv'] = float(self.sfd(c))
 
         # build the insert query for this object.
         # if not wanted, returns 0
