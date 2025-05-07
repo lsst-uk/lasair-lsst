@@ -1,5 +1,6 @@
 ## Quick Start
-Lasair is built as a platform to enable scientific discoveries from the dynamic 
+[Lasair]({%lasairurl%}/)
+is built as a platform to enable scientific discoveries from the dynamic 
 Universe.  Its input is a transient survey, that finds significant changes of 
 brightness of object in the night sky, each called an "alert". Such alerts may result 
 from supernovae, active galaxies, merging neutron stars, variable stars, and many other 
