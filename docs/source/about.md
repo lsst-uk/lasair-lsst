@@ -24,7 +24,7 @@ all the pictures that resemble the cats in the training set.
 This is what the other Rubin brokers do.
 
 Another way is to build "features" from the pictures, then filter by the features.
-This is what Lasair does. features might be
+This is what Lasair does. Features might be
 number of legs, detection of whiskers, shape of ears, shape of eyes and irises, 
 mobility of tail, nature of the background context, and so on. 
 Other features can be the classifications made by other brokers. 
