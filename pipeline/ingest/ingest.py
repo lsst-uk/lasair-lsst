@@ -8,6 +8,8 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN | --nid=NID] 
               [--topic_out=TOUT]
+              [--wait_time=TIME]
+              [--nocutouts]
 
 Options:
     --nprocess=NP      Number of processes to use [default:1]
@@ -16,6 +18,8 @@ Options:
     --topic_in=TIN     Kafka topic to use, or
     --nid=NID          ZTF night number to use (default today)
     --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --wait_time=TIME   Override default wait time (in seconds)
+    --nocutouts        Do not attempt to save cutout images
 """
 
 import sys
@@ -27,7 +31,7 @@ from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroDeserializer
 
-from cassandra.cluster import Cluster
+from cassandra.cluster import Cluster, NoHostAvailable
 from gkdbutils.ingesters.cassandra.ingestGenericDatabaseTable import executeLoadAsync
 import time, json, io, fastavro, signal
 
@@ -39,12 +43,14 @@ import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
+
 def print_msg(message):
     """ prints the readable stuff, without the cutouts. Purely for debugging
     """
     message_text = {k: message[k] for k in message
-        if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
+                    if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
     print(json.dumps(message_text, indent=2))
+
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
@@ -59,19 +65,21 @@ class ImageStore:
         self.image_store = cutoutStore.cutoutStore()
         if self.image_store.session is None:
             self.image_store = None
-            log.warning('WARNING: Cannot store cutouts')
+            log.error('ERROR: Cannot store cutouts')
+            sys.exit(1)
 
     def store_images(self, message, diaSourceId, imjd, diaObjectId):
         futures = []
         try:
             if self.image_store:
-                for cutoutType in ['cutoutDifference', 'cutoutTemplate']:
+                for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
                     if not cutoutType in message:
                         continue
                     content = message[cutoutType]
                     cutoutId = '%d_%s' % (diaSourceId, cutoutType)
                     result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    futures.append(result)
+                    for future in result:
+                        futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
@@ -84,11 +92,12 @@ class Ingester:
     # We split the setup between the constructor and setup method in order to allow for
     # an ingester with custom connections to other components, e.g. for testing
 
-    def __init__(self, topic_in, topic_out, group_id, maxalert, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
+    def __init__(self, topic_in, topic_out, group_id, maxalert, nocutouts=False, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
         self.topic_in = topic_in
         self.topic_out = topic_out
         self.group_id = group_id
         self.maxalert = maxalert
+        self.nocutouts = nocutouts
         self.log = log
         self.image_store = image_store
         self.cassandra_session=cassandra_session
@@ -98,8 +107,10 @@ class Ingester:
         self.cluster = None
         self.timers = {}
         
+        self.wait_time = getattr(settings, 'WAIT_TIME', 60)
+
         # set up timers
-        for name in ['icutout', 'icassandra', 'ifuture', 'ikafka', 'itotal']:
+        for name in ['icutout', 'icassandra', 'ifuture', 'ikconsume', 'ikproduce', 'itotal']:
             self.timers[name] = manage_status.timer(name)
 
         # if we weren't given a log to use then create a default one
@@ -127,7 +138,7 @@ class Ingester:
         log = self.log
 
         # set up image store in Cassandra or shared file system
-        if self.image_store is None:
+        if self.image_store is None and not self.nocutouts:
             self.image_store = ImageStore(log=self.log)
 
         # connect to cassandra cluster for alerts (not cutouts)
@@ -136,6 +147,7 @@ class Ingester:
                 self.cluster = Cluster(settings.CASSANDRA_HEAD)
                 self.cassandra_session = self.cluster.connect()
                 self.cassandra_session.set_keyspace('lasair')
+                self.cassandra_session.default_timeout = 90
             except Exception as e:
                 log.warning("ERROR in ingest/setup: Cannot connect to Cassandra", e)
                 self.cassandra_session = None
@@ -167,7 +179,7 @@ class Ingester:
                 'enable.auto.commit': False,
                 'default.topic.config': {'auto.offset.reset': 'earliest'},
                 # wait twice wait time before forgetting me
-                'max.poll.interval.ms': 50*settings.WAIT_TIME*1000,  
+                'max.poll.interval.ms': 50*self.wait_time*1000,  
                 "value.deserializer": deserializer,
             }
     
@@ -218,15 +230,20 @@ class Ingester:
 
         #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
 
-        self.futures += executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects)
+        for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
+            self.futures.append({'future': future, 'msg': 'executeLoadAsync diaObjects'})
         if len(diaSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
         if len(diaForcedSourcesList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
         if len(diaNondetectionLimitsList) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList)
+            for future in executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
         if len(ssObjects) > 0:
-            self.futures += executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects)
+            for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
@@ -278,7 +295,7 @@ class Ingester:
                 del diaForcedSource['dec']
 
             # deal with images
-            if self.image_store.image_store:
+            if not self.nocutouts and self.image_store.image_store:
                 try:
                     # get the MJD for the latest detection
                     lastSource = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)[0]
@@ -318,7 +335,7 @@ class Ingester:
                 raise e
 
         # produce to kafka
-        self.timers['ikafka'].on()
+        self.timers['ikproduce'].on()
         for alert in alerts:
             if self.producer is not None:
                 try:
@@ -328,7 +345,7 @@ class Ingester:
                     log.error("ERROR in ingest/handle_alerts: Kafka production failed for %s" % self.topic_out)
                     log.error("ERROR:", e)
                     raise e
-        self.timers['ikafka'].off()
+        self.timers['ikproduce'].off()
 
         return (nDiaSources, nForcedSources)
 
@@ -338,7 +355,11 @@ class Ingester:
         # wait for any in-flight cassandra requests to complete
         self.timers['ifuture'].on()
         for future in self.futures:
-            future.result()
+            try:
+                future['future'].result()
+            except Exception as e:
+                log.error("ERROR getting future result for {}".format(future['msg']))
+                raise e
         self.timers['ifuture'].off()
         self.futures = []
 
@@ -346,8 +367,10 @@ class Ingester:
         if self.producer is not None:
             self.producer.flush()
 
+        self.timers['ikconsume'].on()
         # commit the alerts we have read
         self.consumer.commit()
+        self.timers['ikconsume'].off()
 
         # update the status page
         nid = date_nid.nid_now()
@@ -383,7 +406,7 @@ class Ingester:
         """Run ingester. Return the total number of alerts ingested."""
         log = self.log
     
-        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 1000)
+        batch_size = getattr(settings, 'INGEST_BATCH_SIZE', 200)
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
@@ -408,7 +431,9 @@ class Ingester:
                 break
 
             # poll for alerts
+            self.timers['ikconsume'].on()
             alerts = self._poll(mini_batch_size)
+            self.timers['ikconsume'].off()
             n = len(alerts)
             nalert += n
             ntotalalert += n
@@ -422,8 +447,8 @@ class Ingester:
             if n < mini_batch_size:
                 self._end_batch(nalert, ndiaSource, nforcedSource)
                 nalert = ndiaSource = nforcedSource = 0
-                log.debug('no more messages ... sleeping %d seconds' % settings.WAIT_TIME)
-                time.sleep(settings.WAIT_TIME)
+                log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
+                time.sleep(self.wait_time)
     
             # every so often commit, flush, and update status
             if nalert >= batch_size:
@@ -456,8 +481,13 @@ def run_ingest(args, log=None):
     topic_out = args.get('--topic_out') or 'ztf_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
+    nocutouts = args.get('--nocutouts', False)
 
-    ingester = Ingester(topic_in, topic_out, group_id, maxalert, log=log)
+    ingester = Ingester(topic_in, topic_out, group_id, maxalert, nocutouts, log=log)
+
+    if args.get('--wait_time'):
+        ingester.wait_time = int(args['--wait_time'])
+
     return ingester.run()
 
 

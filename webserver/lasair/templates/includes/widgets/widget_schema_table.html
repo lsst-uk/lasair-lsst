@@ -40,29 +40,51 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" id="{{type}}_datatable">
-                <thead class="thead-light">
-                    <tr>
-                        <th><code class="fw-extrabold text-gray-700">table.column</code></th>
-                        <th>Description</th>
-                    </tr></thead>
-                <tbody>
 
-                    {% for schema_name, schema_content in schemas.items %}
 
-                        {% if tablename is None or schema_name == tablename %}
-                            {% for row in schema_content %}
-                                <tr>
-                                    <td ><button data-bs-toggle="tooltip" data-bs-trigger="click" data-bs-animation="true" data-bs-placement="top" data-bs-title="copied" onclick="copy('{{schema_name}}.{{row.name}}','#copy_button_{{schema_name}}_{{row.name}}')" id="copy_button_{{schema_name}}_{{row.name}}" class="btn btn-xs copy-button me-1">  {% include "includes/icons/icon_copy.html" %} </button> <code class="fw-extrabold text-gray-400">{{schema_name}}.</code><code class="fw-extrabold text-gray-700">{{row.name}}</code></td>
-                                    <td> {{row.doc}}</td>
+            {% for schema_name, schema_content in schemas.items %}
 
-                                </tr>
-                            {% endfor %}
+                {% if tablename is None or schema_name == tablename %}
+
+                    {% for section in schema_content %}
+
+                        {% if schema_content|length > 1 %}
+
+                            <small class="fw-extrabold">
+                                {{section.section}}.
+                            </small>
+                            <small class="text-gray-500">
+                                {{section.doc}}.
+                            </small>
+
                         {% endif %}
-                    {% endfor %}
 
-                </tbody>
-            </table>
+                        <table  class="table table-flush datatable" datatable-vanilla data-perPage=500  id="{{type}}_datatable">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th><code class="fw-extrabold text-gray-700">table.column</code></th>
+                                    <th>Description</th>
+                                </tr></thead>
+                            <tbody>
+
+
+
+
+                                {% for row in section.fields %}
+                                    <tr>
+                                        <td ><button data-bs-toggle="tooltip" data-bs-trigger="click" data-bs-animation="true" data-bs-placement="top" data-bs-title="copied" onclick="copy('{{schema_name}}.{{row.name}}','#copy_button_{{schema_name}}_{{row.name}}')" id="copy_button_{{schema_name}}_{{row.name}}" class="btn btn-xs copy-button me-1">  {% include "includes/icons/icon_copy.html" %} </button> <code class="fw-extrabold text-gray-400">{{schema_name}}.</code><code class="fw-extrabold text-gray-700">{{row.name}}</code></td>
+                                        <td> {{row.doc}}</td>
+
+                                    </tr>
+                                {% endfor %}
+
+                            </tbody>
+                        </table>
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+
+
         </div>
     </div>
 </div>

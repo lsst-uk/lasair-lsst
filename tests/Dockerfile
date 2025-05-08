@@ -39,7 +39,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN pip3 install \
   cassandra-driver \
   gkdbutils \
-  fastavro
+  fastavro \
+  lz4
 
 # Required for filter
 RUN pip3 install \
@@ -49,8 +50,13 @@ RUN pip3 install \
   gkhtm \
   gkdbutils \
   cassandra-driver \
-  fastavro
+  fastavro\
+  bazinBlackBody>=0.8\
+  dustmaps
 
 # required for MMA
 RUN pip3 install \
   skytag
+
+# required for dustmaps
+RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"

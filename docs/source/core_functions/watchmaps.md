@@ -38,7 +38,7 @@ Building a watchmap starts with building a MOC file -- see the information at <b
 This is the dialogue to load a MOC file, in this case to cover the Orion Nebula. 
 It expects to upload a MOC file.
 One way to build this from python is this code:<br/>
-[Create a MOC from a Concave Polygon](https://cds-astro.github.io/mocpy/examples/examples.html#create-a-moc-from-a-concave-polygon)
+[Create a MOC from a Concave Polygon](https://cds-astro.github.io/mocpy/examples/user_documentation.html#create-a-moc-from-a-concave-polygon)
 For the Orion Nebula, we choose a rectangle like this:
 ```
 import astropy.units as u

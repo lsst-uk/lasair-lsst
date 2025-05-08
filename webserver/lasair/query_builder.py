@@ -143,16 +143,22 @@ def build_query(select_expression, from_expression, where_condition):
     if where_condition:
         where_condition = sanitise(where_condition)
 
+    select_expression = select_expression.replace("objects_ext", "objects")
+    from_expression = from_expression.replace("objects_ext", "objects")
+    if where_condition:
+        where_condition = where_condition.replace("objects_ext", "objects")
+
     # ----- Handle the from_expression.
     # This is a comma-separated list, of very restricted form
     # Implicitly includes 'objects', dont care if they includid it or not.
     # Can include 'sherlock_classifications' and 'tns_crossmatch' and 'annotations'
-    # Can include 'watchlists:nnn' and 'areas:nnn' where nnn is an integer.
+    # Can include 'watchlists:nnn' and 
+    # 'areas:nnn' or watchmaps:nnn where nnn is an integer.
     # Cannot have both watchlist and crossmatch_tns (the latter IS a watchlist)
 
     sherlock_classifications = False  # using sherlock_classifications
     crossmatch_tns = False  # using crossmatch tns, but not combined with watchlist
-    annotation_topics = None  # topics of chosen annotations
+    annotation_topics = []  # topics of chosen annotations
     watchlist_id = None     # wl_id of the chosen watchlist, if any
     area_ids = None     # wl_id of the chosen watchlist, if any
 
@@ -170,17 +176,19 @@ def build_query(select_expression, from_expression, where_condition):
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form watchlist:nnn' % table)
 
-        if table.startswith('area:'):
+        if table.startswith('area:') or table.startswith('watchmap:'):
             w = table.split(':')
             try:
                 area_ids = w[1].split('&')
             except:
-                raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn' % table)
+                raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn or watchmap:nnn' % table)
 
+        # multiple annotations comes in here from web as annotator:apple&pear
+        # comes in from API/client as annotator:apple, annotator:pear
         if table.startswith('annotator'):
             w = table.split(':')
             try:
-                annotation_topics = w[1].split('&')
+                annotation_topics += w[1].split('&')
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form annotation:topic' % table)
 
@@ -232,7 +240,8 @@ def build_query(select_expression, from_expression, where_condition):
 
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
-    if annotation_topics:
+
+    if len(annotation_topics) > 0:
         for at in annotation_topics:
             where_clauses.append('objects.diaObjectId=%s.diaObjectId' % at)
             where_clauses.append('%s.topic="%s"' % (at, at))

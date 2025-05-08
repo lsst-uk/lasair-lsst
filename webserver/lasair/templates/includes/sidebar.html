@@ -88,7 +88,7 @@
                 <li class="nav-item">
                     <span
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1">
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -109,7 +109,7 @@
 
 
                     <div class="multi-level {% if 'watchmaps' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages" aria-expanded="false">
+                        id="submenu-pages1" aria-expanded="false">
                         <ul class="flex-column nav">
 
                             <li class="nav-item">
@@ -121,8 +121,8 @@
 
                             <li class="nav-item">
                                 <a class="nav-link" href="{% url 'mma_watchmap_index' %}">
-                                    <span class="sidebar-text">Gravitational Wave</span>
-                                    {% include "includes/info_tooltip.html" with info="Sky Areas for Gravitational Wave alerts" position="auto" link=docroot|add:"/core_functions/mma.html" %}
+                                    <span class="sidebar-text">MultiMessenger</span>
+                                    {% include "includes/info_tooltip.html" with info="Sky Areas for Gravitational Wave, Fermi, and other alerts" position="auto" link=docroot|add:"/core_functions/mma.html" %}
 
                                 </a>
                             </li>
@@ -148,7 +148,7 @@
                 <li class="nav-item">
                     <span
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2">
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -169,7 +169,7 @@
 
 
                     <div class="multi-level {% if 'status' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages" aria-expanded="false">
+                        id="submenu-pages2" aria-expanded="false">
                         <ul class="flex-column nav">
 
                             <li class="nav-item">
@@ -209,6 +209,19 @@
 
                         </span>
                         <span class="sidebar-text">Quick Start</span>
+                    </a>
+                </li>
+
+                <li class="nav-item {% if 'comres' in request.path %} active {% endif %}">
+
+                    <a class="nav-link" href="{% url 'community_resource_index' %}">
+                        <span class="sidebar-icon">
+                            <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+
+                                <path d="m63.445 43.555c-12.555 6.8906-7.5547 19.223-7.5547 19.223s-1.5547 1.5547-3.1094 4.332c-1.2227-4.7773-3.332-7.8906-3.332-7.8906s9.668-14.332-4.5547-26.332c-14.34-12.109-40.449-11.109-40.449-11.109s3.2227 29.445 16.332 41.332c13.109 11.891 24.668 1.1094 24.668 1.1094 5.668 6.332 2.2227 17 2.2227 17l5 3.668s0.55469-2 0.89062-5.1094c0 0 0.10938-1.7773 0.33203-3.8906 0.33203-2.7773 1.2227-6.5547 4.2227-8.7773 0 0 7.1094 10 18.777 3 11.664-6.8867 18.664-28.664 18.664-28.664s-19.555-4.7773-32.109 2.1094zm-17 16.891c-1.4453 1.4453-4.1094-0.22266-8.8906-9.332-6.8906-13.223-21.109-17.223-21.109-17.223 9.4453 1.5547 17.777 7.5547 23.445 14.891 4.7773 6.3281 7.8867 10.328 6.5547 11.664zm20-3c-5.7773 6.8906-8.1094 7.668-8.7773 6.1094-0.66797-1.5547 2.5547-4.2227 7.7773-8.5547 6-5.1094 13.555-8.4453 20.777-7.7773-0.11328-0.11328-11.445 0.33203-19.777 10.223z"/>
+                            </svg>
+                        </span>
+                        <span class="sidebar-text">Resources</span>
                     </a>
                 </li>
 

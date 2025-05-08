@@ -7,13 +7,19 @@
       register: git_tag
   tags: always
 
-- hosts: all
+- hosts: all 
   gather_facts: true
+  vars_files:
+    - settings.yaml
   tasks:
     - name: Set Lasair version
       ansible.builtin.set_fact:
         lasair_version: "{{ hostvars['localhost']['git_tag'].stdout }}"
-  tags: always
+    - name: Get vault settings
+      ansible.builtin.set_fact:
+        settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+  tags:
+    - always
 
 - hosts: all:!localhost
   gather_facts: false
@@ -22,6 +28,42 @@
   roles:
     - lasair_instance
   tags: lasair_instance
+
+- hosts: web
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
+    cassandra_head: "{{ groups['cassandranodes'] }}"
+    powerapi_token: "placeholder"
+  roles:
+    - lasair_cephfs
+    - webserver
+  tags: web
+
+- hosts: all
+  gather_facts: true
+  vars_files:
+    - settings.yaml
+  tasks:
+    - name: Get API token
+      ansible.builtin.uri:
+        url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
+        method: POST
+        body_format: json
+        body:
+          username: su
+          password: "{{ settings.django_password }}"
+      register: api_token_response
+    - name: Set API token
+      ansible.builtin.set_fact:
+        powerapi_token: "{{ api_token_response.json.token }}"
+  tags:
+    - always
 
 - hosts: svc
   gather_facts: false
@@ -87,7 +129,6 @@
     - settings.yaml
     - exports.yaml
   vars:
-    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
@@ -109,7 +150,6 @@
   vars:
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
-    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
     datadir: /var/lib/mysql
   roles:
@@ -117,21 +157,6 @@
     - gkansible.gkservercollection.mariadb
     - filter
   tags: filter
-
-- hosts: web
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-    - exports.yaml
-  vars:
-    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
-    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
-    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
-    cassandra_head: "{{ groups['cassandranodes'] }}"
-  roles:
-    - lasair_cephfs
-    - webserver
-  tags: web
 
 - hosts: proxy
   gather_facts: false

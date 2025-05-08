@@ -46,7 +46,8 @@ def get_schema_names(conf):
     else:
         schema = schema_package.schema
     for field in schema['fields']:
-        schema_names.append(field['name'])
+        if 'name' in field:
+            schema_names.append(field['name'])
     return schema_names
 
 if __name__ == "__main__":

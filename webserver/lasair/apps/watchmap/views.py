@@ -1,3 +1,4 @@
+from src import bad_fits
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .models import Watchmap
@@ -18,6 +19,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
+from datetime import timezone
 from lasair.apps.db_schema.utils import get_schema_dict
 from src import db_connect
 import copy
@@ -26,7 +28,7 @@ from .forms import WatchmapForm, UpdateWatchmapForm, DuplicateWatchmapForm
 from .utils import make_image_of_MOC, add_watchmap_metadata
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
-from src import bad_fits
+
 
 @csrf_exempt
 def watchmap_index(request):
@@ -77,10 +79,10 @@ def watchmap_index(request):
                 fits_string = bytes2string(fits_bytes)
                 png_bytes = make_image_of_MOC(fits_bytes, request=request)
                 png_string = bytes2string(png_bytes)
-                expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+                expire = datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
                 wm = Watchmap(user=request.user, name=name, description=description,
-                    moc=fits_string, mocimage=png_string, active=active, public=public, date_expire=expire)
+                              moc=fits_string, mocimage=png_string, active=active, public=public, date_expire=expire)
                 wm.save()
                 watchmapname = form.cleaned_data.get('name')
                 messages.success(request, f"The '{watchmapname}' watchmap has been successfully created")
@@ -187,7 +189,7 @@ def watchmap_detail(request, ar_id):
             else:
                 newWm.public = False
             newWm.date_expire = \
-                    datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+                datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             newWm.save()
             wm = newWm
             ar_id = wm.pk
@@ -200,7 +202,7 @@ def watchmap_detail(request, ar_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra,o.decl, o.rPSFluxMean, o.gPSFluxMean, tainow()-o.maxTai as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, mjdnow()-o.lastDiaSourceMJD as "last detected (days ago)"
 FROM area_hits as h, objects AS o
 WHERE h.ar_id={ar_id}
 AND o.diaObjectId=h.diaObjectId
@@ -223,9 +225,9 @@ limit {resultCap}
         # count = cursor.fetchone()["count"]
 
         if settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this watchmap. But don't worry! You can access all results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False

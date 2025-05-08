@@ -15,9 +15,12 @@ Options:
 import sys
 import time
 from docopt import docopt
+sys.path.append('../../../common/')
+import settings
 sys.path.append('../../../common/src')
 import skymaps
 import db_connect
+
 
 if __name__=="__main__":
     args = docopt(__doc__)

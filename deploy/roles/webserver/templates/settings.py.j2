@@ -86,13 +86,14 @@ INSTALLED_APPS = [
     'lasair.apps.annotator',
     'lasair.apps.db_schema',
     'lasair.apps.filter_query',
-    'lasair.apps.multimessenger_map',
+    'lasair.apps.mma_gw',
     'lasair.apps.object',
     'lasair.apps.search',
     'lasair.apps.status',
     'lasair.apps.watchlist',
     'lasair.apps.watchmap',
     'lasair.apps.mma_watchmap',
+    'lasair.apps.community_resource',
     'lasairapi',
     'django.contrib.admin',
     'rest_framework',
@@ -139,6 +140,9 @@ REST_FRAMEWORK = {
 
     # for somebody with a token in the 'powerapi' group
     'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', },
+
+    # less strict JSON encoding RDW April 2025
+    'STRICT_JSON': False,
 }
 
 ROOT_URLCONF = 'lasair.urls'

@@ -36,7 +36,7 @@
         "h": 1
       },
       "type": "text",
-      "title": "Public Interfaces",
+      "title": "Interfaces",
       "options": {
         "mode": "markdown",
         "content": ""
@@ -51,13 +51,27 @@
 {% set title = "Web Interface" %}
 {% set description = "Probe web interface" %}
 {% set h, w, x = (4, 3, 3) %}
-{% set expr = "probe_success{instance='https://" ~ lasair_name ~ "." ~ domain ~ "/'} OR on() vector(0)" %}
+{% set expr = "probe_success{instance='https://" ~ lasair_name ~ "." ~ domain ~ "/status/'} OR on() vector(0)" %}
 {% include 'service.j2' %}
 {% set title = "Public Kafka Interface" %}
 {% set description = "Probe public kafka interface" %}
 {% set h, w, x = (4, 3, 6) %}
 {% set expr = "probe_success{instance='kafka." ~ domain ~ ":9092'} OR on() vector(0)" %}
 {% include 'service.j2' %}
+{% for host in (groups['cluster_control']) %}
+{% set title = "DB Loadbalancer" %}
+{% set description = "Probe LB on port 9001" %}
+{% set h, w, x = (4, 3, 9) %}
+{% set expr = "probe_success{instance='" ~ host ~ ":9001'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% endfor %}
+{% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) %}
+{% set title = host ~ " DB" %}
+{% set description = "Probe DB on port 3306" %}
+{% set h, w, x = (4, 3, 9) %}
+{% set expr = "probe_success{instance='" ~ host ~ ":3306'} OR on() vector(0)" %}
+{% include 'service.j2' %}
+{% endfor %}
 {% set y = y + 4 %}
     {
       "gridPos": {

@@ -1,3 +1,16 @@
+from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
+from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseRedirect, HttpResponse
+from django.template.context_processors import csrf
+from django.views.decorators.csrf import csrf_exempt
+from django.db import connection
+from django.db.models import Q
+from django.contrib.auth.models import User
+from django.contrib.auth import login, authenticate
+from django.conf import settings
+import src.date_nid as date_nid
+from src import db_connect
+import settings as lasair_settings
 import importlib
 import random
 import time
@@ -9,20 +22,6 @@ import re
 import sys
 
 sys.path.append('../common')
-import settings as lasair_settings
-from src import db_connect
-import src.date_nid as date_nid
-
-from django.conf import settings
-from django.contrib.auth import login, authenticate
-from django.contrib.auth.models import User
-from django.db.models import Q
-from django.db import connection
-from django.views.decorators.csrf import csrf_exempt
-from django.template.context_processors import csrf
-from django.http import HttpResponseRedirect, HttpResponse
-from django.shortcuts import render, get_object_or_404, redirect
-from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 
 
 def index(request):
@@ -38,7 +37,7 @@ def index(request):
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
-       tainow()-objects.maxTai AS "last detected",
+       mjdnow()-objects.lastDiaSourceMJD AS "last detected",
        sherlock_classifications.classification AS "predicted type"
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
@@ -46,7 +45,7 @@ def index(request):
        AND sherlock_classifications.classification in 
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
-    query += '(' + ','.join(S) + ')'
+    query += '(' + ','.join(S) + ') LIMIT 5000'
 
 #    FRONT_PAGE_CACHE = '/home/ubuntu/front_page_cache.json'
 #    FRONT_PAGE_STALE = 1800
@@ -132,7 +131,7 @@ def index(request):
 #            iage = 4
 
         alerts[iclass][iage].append({
-            'diaObjectId': row['diaObjectId'],
+            'diaObjectId': str(row['diaObjectId']),
             'age': row["last detected"],
             'class': row["predicted type"],
             'mag': mag,

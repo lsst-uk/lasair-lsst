@@ -1,7 +1,9 @@
 {
+"ebv":0.0,
   "diaObject": {
     "diaObjectId": 402778310355976216,
     "ra": 55.791867711436744,
+    "firstDiaSourceMJD": 60000,
     "raErr": NaN,
     "decErr": NaN,
     "ra_dec_Cov": NaN,
@@ -1983,6 +1985,7 @@
     "sherlock": [
       {
         "classification": "ORPHAN",
+	"z": 0.2,
         "description": "No contexual information is available for this transient",
         "annotator": "https://github.com/thespacedoctor/sherlock/releases/tag/v2.3.1",
         "additional_output": "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/402778310355976216"

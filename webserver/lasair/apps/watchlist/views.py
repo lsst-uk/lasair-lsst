@@ -11,6 +11,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, redirect
+from datetime import timezone
 import src.run_crossmatch_optimised as run_crossmatch
 from django.conf import settings
 from django.contrib import messages
@@ -99,7 +100,7 @@ def watchlist_index(request):
                 except Exception as e:
                     messages.error(request, f'Bad line {len(cone_list)}: {line}\n{str(e)}')
 
-            expire = datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+            expire = datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             wl = Watchlist(user=request.user, name=name, description=description, active=active, public=public, radius=default_radius, date_expire=expire)
             wl.save()
             cones = []
@@ -273,11 +274,12 @@ def watchlist_detail(request, wl_id, action=False):
     # GRAB ALL WATCHLIST MATCHES
     query_hit = f"""
 SELECT
-h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, o.diaObjectId, o.ra,o.decl, o.rPSFlux, o.gPSFlux, jdnow()-o.maxTai as "last detected (days ago)"
-FROM watchlist_cones AS c
-NATURAL JOIN watchlist_hits as h
-NATURAL JOIN objects AS o
-WHERE c.wl_id={wl_id} limit {resultCap}
+h.name as "Catalogue ID", h.arcsec as "separation (arcsec)",c.cone_id, 
+o.diaObjectId, o.ra,o.decl, o.r_psfFlux, o.g_psfFlux, 
+mjdnow()-o.lastDiaSourceMJD as "last detected (days ago)"
+FROM watchlist_cones AS c, watchlist_hits as h, objects AS o
+WHERE c.cone_id=h.cone_id AND h.diaObjectId=o.diaObjectId AND
+c.wl_id={wl_id} limit 1000
 """
 
     cursor.execute(query_hit)
@@ -296,9 +298,9 @@ WHERE c.wl_id={wl_id} limit {resultCap}
         # count = cursor.fetchone()["count"]
 
         if settings.DEBUG:
-            apiUrl = "https://lasair.readthedocs.io/en/develop/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/develop/core_functions/rest-api.html"
         else:
-            apiUrl = "https://lasair.readthedocs.io/en/main/core_functions/rest-api.html"
+            apiUrl = "https://lasair-lsst.readthedocs.io/en/main/core_functions/rest-api.html"
         messages.info(request, f"We are only displaying the first <b>{resultCap}</b> objects matched against this watchlist. But don't worry! You can access results via the <a class='alert-link' href='{apiUrl}' target='_blank'>Lasair API</a>.")
     else:
         limit = False
@@ -365,7 +367,7 @@ def watchlist_download(request, wl_id):
     cursor.execute('SELECT name FROM watchlists WHERE wl_id=%d' % wl_id)
     name = cursor.fetchall()[0]["name"].replace(" ", "_") + "_watchlist_original.csv"
 
-    cursor.execute('SELECT ra, decl, name, radius FROM watchlist_cones WHERE wl_id=%d LIMIT 10000' % wl_id)
+    cursor.execute('SELECT ra, decl, name, radius FROM watchlist_cones WHERE wl_id=%d' % wl_id)
     cones = cursor.fetchall()
     content = []
     content[:] = [','.join(str(value) for value in c.values()) for c in cones]
