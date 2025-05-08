@@ -45,8 +45,8 @@ dev = False
 if os.environ.get("READTHEDOCS"):
     if "dev" in os.environ.get("READTHEDOCS_VERSION"):
         dev = True
-#elif "dev" in str(repo.active_branch):   RDW May 2025
-#    dev = True
+elif "dev" in str(repo.active_branch):   RDW May 2025
+    dev = True
 
 if dev:
     os.environ["lasairurl"] = "https://lasair-lsst-dev.lsst.ac.uk"

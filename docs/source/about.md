@@ -23,8 +23,9 @@ then train a machine-learning system, and it will filter from the stream
 all the pictures that resemble the cats in the training set. 
 This is what the other Rubin brokers do.
 
-Another way is to build "features" from the pictures. 
-Number of legs, detection of whiskers, shape of ears, shape of eyes and irises, 
+Another way is to build "features" from the pictures, then filter by the features.
+This is what Lasair does. features might be
+number of legs, detection of whiskers, shape of ears, shape of eyes and irises, 
 mobility of tail, nature of the background context, and so on. 
 Other features can be the classifications made by other brokers. 
 It is up to the user to combine the features as they wish to make a filter. 
