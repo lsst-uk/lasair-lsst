@@ -28,7 +28,7 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN pip3 install \
   numpy \
   scipy \
-  yaml
+  pyyaml
 RUN pip3 install \
   qub-sherlock==2.3.1 --no-use-pep517
 
