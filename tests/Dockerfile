@@ -43,31 +43,24 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-yaml \
   python3-numpy \
   python3-scipy 
-#RUN pip3 install \
-#  setuptools \
-#  wheel \
-#  confluent-kafka \
-#  numpy \
-#  scipy \
-#  pyyaml
 RUN pip3 install \
   qub-sherlock==2.3.1 --no-use-pep517
 
 # Required for Ingest
-#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-#  python3-cassandra \
-#  python3-lz4
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  python3-cassandra \
+  python3-lz4
 RUN pip3 install \
   gkdbutils \
-  fastavro \
-  cassandra-driver \
-  lz4
+  fastavro 
+#  cassandra-driver \
+#  lz4
 
 # Required for filter
-#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-#  python3-mysql.connector
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  python3-mysql.connector
 RUN pip3 install \
-  mysql-connector-python \
+#  mysql-connector-python \
   mocpy \
   ephem \
   gkhtm \
@@ -76,7 +69,6 @@ RUN pip3 install \
   dustmaps
 
 # required for MMA
-#RUN pip3 install --break-system-packages \
 RUN pip3 install \
   skytag
 
