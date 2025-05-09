@@ -9,7 +9,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-pip \
   python3-venv \
   python3-setuptools \
-  python3-wheel
+  python3-wheel \
+  python3-packaging
 
 # Required for tests
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
