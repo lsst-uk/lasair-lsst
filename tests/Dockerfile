@@ -53,14 +53,12 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 RUN pip3 install \
   gkdbutils \
   fastavro 
-#  cassandra-driver \
-#  lz4
 
 # Required for filter
-RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-  python3-mysql.connector
+#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+#  python3-mysql.connector
 RUN pip3 install \
-#  mysql-connector-python \
+  mysql-connector-python \
   mocpy \
   ephem \
   gkhtm \
