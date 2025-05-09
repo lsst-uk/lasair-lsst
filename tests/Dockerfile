@@ -26,7 +26,7 @@ RUN pip3 install --break-system-packages \
 
 # Set up Python virtual environment
 ENV VIRTUAL_ENV=/opt/venv
-RUN python3 -m venv $VIRTUAL_ENV
+RUN python3 -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Required for Sherlock
@@ -41,8 +41,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
 #  python3-scipy \
 #  python3-unittest2
 RUN pip3 install \
-  setuptools \
-  wheel \
+#  setuptools \
+#  wheel \
   confluent-kafka \
   numpy \
   scipy \
