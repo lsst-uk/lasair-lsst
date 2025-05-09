@@ -21,12 +21,16 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-flask \
   python3-flask-restful \
   python3-confluent-kafka \
-  python3-yaml \
-  python3-numpy \
-  python3-scipy \
+#  python3-yaml \
+#  python3-numpy \
+#  python3-scipy \
   python3-unittest2
 RUN pip3 install \
-  qub-sherlock==2.3.1
+  numpy \
+  scipy \
+  yaml
+RUN pip3 install \
+  qub-sherlock==2.3.1 --no-use-pep517
 
 # Required for tests
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
