@@ -24,32 +24,32 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   python3-cryptography \
   python3-coverage \
   python3-unittest2
-RUN pip3 install --break-system-packages \
-  xmlrunner
 
 # Set up Python virtual environment
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv --system-site-packages $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
+RUN pip3 install \
+  xmlrunner
+
 # Required for Sherlock
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   gcc \
   g++ \
   python3-flask \
-  python3-flask-restful 
-#  python3-confluent-kafka \
-#  python3-yaml \
-#  python3-numpy \
-#  python3-scipy \
-#  python3-unittest2
-RUN pip3 install \
+  python3-flask-restful \
+  python3-confluent-kafka \
+  python3-yaml \
+  python3-numpy \
+  python3-scipy 
+#RUN pip3 install \
 #  setuptools \
 #  wheel \
-  confluent-kafka \
-  numpy \
-  scipy \
-  pyyaml
+#  confluent-kafka \
+#  numpy \
+#  scipy \
+#  pyyaml
 RUN pip3 install \
   qub-sherlock==2.3.1 --no-use-pep517
 
