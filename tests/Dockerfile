@@ -20,12 +20,15 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   g++ \
   python3-flask \
   python3-flask-restful \
-  python3-confluent-kafka \
+#  python3-confluent-kafka \
 #  python3-yaml \
 #  python3-numpy \
 #  python3-scipy \
   python3-unittest2
 RUN pip3 install \
+  setuptools \
+  wheel \
+  confluent-kafka \
   numpy \
   scipy \
   pyyaml
@@ -42,22 +45,24 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   swig \
   python3-psutil \
   python3-cryptography \
-  python3-coverage
-RUN pip3 install \
-  xmlrunner 
+  python3-coverage \
+  python3-xmlrunner
 
 # Required for Ingest
-RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-  python3-cassandra \
-  python3-lz4
+#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+#  python3-cassandra \
+#  python3-lz4
 RUN pip3 install \
   gkdbutils \
-  fastavro 
+  fastavro \
+  cassandra-driver \
+  lz4
 
 # Required for filter
-RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-  python3-mysql.connector
+#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+#  python3-mysql.connector
 RUN pip3 install \
+  mysql-connector-python \
   mocpy \
   ephem \
   gkhtm \
