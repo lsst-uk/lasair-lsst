@@ -19,7 +19,8 @@ RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-insta
   swig \
   python3-psutil \
   python3-cryptography \
-  python3-coverage 
+  python3-coverage \
+  python3-unittest2
 RUN pip3 install --break-system-packages \
   xmlrunner
 
