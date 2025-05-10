@@ -1,6 +1,6 @@
 # Python Notebooks
 
-There is a separate Lasair repo for jupyter notebooks. To begin, lets the repo with:
+There is a separate Lasair repo for jupyter notebooks. To begin, download the repo with:
 ```
 git clone https://github.com/lsst-uk/lasair-examples.git
 ```
@@ -18,7 +18,7 @@ One branch is a set of notebooks showing how the Lasair client works (the API), 
 * Pulls out alerts with a Sherlock host galaxy, and plots lightcurves.
 
 #### [API_lsst/Cone_Search.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Cone_Search.ipynb)
-* Uses the Lasair cone_search method to find objcts near a given point in the sky.
+* Uses the Lasair cone_search method to find objects near a given point in the sky.
 
 #### [API_lsst/ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/ObjectAPI.ipynb)
 * Shows the different amounts of data from the `object` API call, the result of the two flags:

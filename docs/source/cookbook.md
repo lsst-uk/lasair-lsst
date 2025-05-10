@@ -33,7 +33,7 @@ etc for the six bands)
 recent g-band detection. There is also the time of latest detection in any band, that is
 `lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
 
-Magnitude 20 is about 50,000 nJ, see [here](concepts) for 
+Magnitude 20 is about 50,000 nJ, see [here](concepts.html#lightcurve) for 
 explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.
 Perhaps the line about maximum and minimum magnitude could be replaced with something 
 about the standard deviation of the lightcurve, the `objects-ext.r_psfFluxSigma`
