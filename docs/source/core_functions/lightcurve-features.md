@@ -43,6 +43,7 @@ See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebook
 ----
 - **Jump detector**: Finds the number of sigma the latest detection (time T)
  deviates from a mean in the interval [T-70,T-10] days. 
+
 <img src="../_images/jump/jump_image.png" width="450"/>
 
 See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb) for more information.
@@ -58,6 +59,7 @@ flux ratio of 0.5 in a u+r pair; then by fitting a blackbody spectrum
 we can get an effective temperature of 6,880 Kelvin.
 
 <img src="../_images/pair/u_r.png" width="350"/>
+
 For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/5_pair.ipynb).
 
 ### Sherlock table
