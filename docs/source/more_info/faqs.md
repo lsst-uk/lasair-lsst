@@ -13,7 +13,7 @@ Alerts will start to flow in late 2025.
 
 * **What are Lasair-ZTF and Lasair-LSST?**
 
-See [ZTF and LSST](../implementation.html#ztf-and-lsst)
+See [Porting from Lasair-ZTF](porting_from_ztf.html)
 
 * **What can I get from this web site?**
 
@@ -65,7 +65,8 @@ Registration is easy, and just requires a valid email (register [here]({%lasairu
 
 * **Besides Lasair, what other websites carry astronommical transients?**
 
-There are seven community brokers that will receive and process LSST alerts in real time: [ALeRCE](http://alerce.science/), [AMPEL](https://ampelproject.github.io/), [ANTARES](https://antares.noirlab.edu/), BABAMUL, [Fink](https://fink-broker.re%3Cdthedocs.io/en/latest/), [Lasair](https://lasair.roe.ac.uk/), and [Pitt-Google](https://pitt-broker.re%3Cdthedocs.io/en/latest/).
+There are seven community brokers that will receive and process LSST alerts in real time,
+[listed here](https://rubinobservatory.org/for-scientists/data-products/alerts-and-brokers).
 
 * **How long has Lasair been operating?**
 

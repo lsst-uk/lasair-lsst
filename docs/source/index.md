@@ -71,6 +71,7 @@ Lasair's core features are described in more detail here:
    :maxdepth: 1
    :caption: More Information
 
+   more_info/porting_from_ztf
    more_info/account
    more_info/faqs
    more_info/contact
