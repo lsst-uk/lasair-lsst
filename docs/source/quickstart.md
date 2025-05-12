@@ -1,23 +1,12 @@
 ## Quick Start
-Lasair is built as a platform to enable scientific discoveries from the dynamic 
-Universe.  Its input is a transient survey, that finds significant changes of 
-brightness of object in the night sky, each called an "alert". Such alerts may result 
-from supernovae, active galaxies, merging neutron stars, variable stars, and many other 
-astrophysical phenomena (see [here](about.html) for more). 
-
 Alerts from the same place in the sky are combined to 
-[objects](concepts/objects_sources.html).
+[objects](concepts.html#objects_and_sources).
 The alerts provide the brightness of the object with time -- 
-see the [lightcurve discussion](concepts/lightcurve.html) for more. 
+see the [lightcurve discussion](concepts.html#lightcurve) for more. 
 Lasair adds information to the object, matching the position with the known 
-astronomical catalogs -- see [here](concepts/sky-context.html).
+astronomical catalogs -- see [here](core_functions/sherlock.html).
 
-There may be millions of alerts per
-night when the [Rubin Observatory](https://www.lsst.org/) in Chile
-is running its flagship LSST survey. Far too many for a human to consider! 
-Therefore the primary duty of a broker like Lasair is to *filter* the stream to 
-concentrate what is wanted and discard that which is not. In this section 
-we show **how to make a Lasair filter**,
+In this section we show **how to make a Lasair filter**,
 specifically the one used for building the set of alerts shown on the 
 [Lasair front page]({%lasairurl%}/). That display is made from recent, bright, 
 real alerts that are identified with known classes of stars and galaxies. 
@@ -39,24 +28,27 @@ subtract to get the age in days,
     * `classification`: [Sherlock class](core_functions/sherlock.html) according to the sky context.
 
 ### Create New Filter
-We can build the filter by clicking on 'Filters' in the Lasair sidebar, then 
-the red button 'Create New' at top right.
+We can build the filter by clicking on ['Filters']({%lasairurl%}/filters/) 
+in the Lasair sidebar, then the red button 'Create New' at top right.
+We'll start by building the filter that contros the objects
+shown on the front page.
 
 For your first filter, you won't be using any of the dropdowns for Watchlist, 
 Watchmap, or Object Annotators, you'll fill in the black text areas labelled 
 **SELECT** and **WHERE**. 
-
-Type the black lines below in the SELECT.
+Replace the existing text in the SELECT with:
 ```
 objects.diaObjectId,
 ```
-Notice that as you type, the intelligent autocomplete makes suggestions. It will add a comma as well,
-even though the last attribute should not have a comma. Here is the position of the object:
+Notice that as you type, the intelligent autocomplete makes suggestions. 
+It will add a comma as well, even though the last attribute should 
+not have a comma. Let's also select the position of the object:
 ```
 objects.ra, objects.decl,
 ```
-Next is the time since the object was last observed. Notice the arithmetic and renaming 
-that is part of the SQL language:
+Next is the time since the object was last observed. 
+Notice the arithmetic and renaming that is part of the SQL language. 
+The function `mjdnow()` is the modified Julian Day (time) now.
 ```
 mjdnow()-objects.lastDiaSourceMJD AS age,
 ```
@@ -80,29 +72,32 @@ Don't forget the `AND` at the beginning.
 ```
 AND (objects.g_psfFlux > 100000 OR objects.r_psfFlux > 100000)
 ```
-There are a lot of 'orphans' in the Lasair database, meaning objects that have only one candidate (detection). Many of these are not worth looking at, so we require the number of candidates to be greater than 1.
+There are a lot of 'orphans' in the Lasair database, meaning objects that 
+have only one candidate (detection). Many of these are not worth looking at, 
+so we require the number of candidates to be greater than 1.
 ```
 AND objects.nSources > 1
 ```
-Finally, lets choose objects that have an associated host galaxy. These codes are for the different Sherlock classifications: possible supernova, nuclear transient cataclysmic variable, active galaxy.
+Finally, lets choose objects that have an associated host galaxy. 
+These codes are for the different Sherlock classifications: possible supernova, 
+nuclear transient cataclysmic variable, active galaxy.
 ```
 AND sherlock_classifications.classification in ("SN", "NT", "CV", "AGN")
 ```
 
 ### Run your filter
-You can simply run the filter on the existing database by clicking the red 
-button 'Run Filter'.
-You should see a table of the recent alerts, the same set as are on the Lasair 
-front page.
+You can simply run the filter on the existing database by clicking the 
+red button 'Run Filter'. You should see a table of the recent alerts, 
+the same set as are on the Lasair front page.
 You can click on the column headers to sort, and click on the `objectId` to go 
-to the detail 
-for any of the objects.
-You can also add `ORDER BY lastDiaSourceMJD DESC` to get the results with most recent first.
+to the detail for any of the objects. You can also add 
+`ORDER BY lastDiaSourceMJD DESC` in the WHERE area to get the results 
+with most recent first.
 
 ### Save your filter
-But doing more with Lasair requires an account -- its just a simple matter of 
-entering
-your valid email address -- see [here to register]({%lasairurl%}/register).
+But doing more with Lasair requires an account -- its just a simple 
+matter of entering your valid email address -- see 
+[here to register]({%lasairurl%}/register).
 
 Click the black button 'Save' on the create filter page, then fill in the 
 details: Name and Description, and you can choose to make it public, so that it 
@@ -137,7 +132,7 @@ list of sources that you or someone else has  uploaded -- see
 that you or someone else has uploaded -- see [here](core_functions/watchmaps.html) for more.
 * `annotation`: you can find events that have been classified or otherwise 
 annotated external to Lasair. You can also set up your own annotation service -- see 
-[here](concepts/annotations.html).
+[here](concepts.html#annotations).
 
 ### Lasair client and notebooks
 Once you can build a filter with the web pages, you might want to run with python code instead of clicks.

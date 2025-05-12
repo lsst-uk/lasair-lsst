@@ -33,7 +33,7 @@ etc for the six bands)
 recent g-band detection. There is also the time of latest detection in any band, that is
 `lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
 
-Magnitude 20 is about 50,000 nJ, see [here](concepts) for 
+Magnitude 20 is about 50,000 nJ, see [here](concepts.html#lightcurve) for 
 explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.
 Perhaps the line about maximum and minimum magnitude could be replaced with something 
 about the standard deviation of the lightcurve, the `objects-ext.r_psfFluxSigma`
@@ -79,11 +79,16 @@ objects.diaObjectId,
 crossmatch_tns.tns_prefix, crossmatch_tns.tns_name, crossmatch_tns.type
 ```
 and in the WHERE part of the filter, 
-we put in the classificartion constraint and latest first, and order
+we put in the classification constraint and latest first, and order
 the results latest first.
 ```
 crossmatch_tns.type = "SN II"
-ORDER BY jdmax DESC
+ORDER BY lastDiaSourceMJD DESC
+```
+
+You can select on multiple TNS types with this syntax:
+```
+crossmatch_tns.type in ["SN II", "AGN"]
 ```
 ##### Filtering on TNS status
 In the example above, we are concentrating on those LSST objects that are associated
@@ -198,27 +203,36 @@ $M_{AB}$ = 2.5 log $f_\nu$ + 8.9, for $f$ in Jy
 
 $M_{AB}$ = 2.5 log $f_\nu$ + 31.4, for $f$ in nJy
 
-$\delta M_{AB}$ = 1.08574 $\delta f/f$
+Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, 
+distance, extinction, and k-correction.
 
-Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, distance, extinction, and k-correction.
+$M_R = M_{AB} - \mu - A_O + K_{RO}$
 
-$M_R = M_{AB} - \mu + K_{RO} - A_O$
+Here $\mu$ is the distance modulus, and
+$A_O$ is extinction in observed band for magnitudes in the AB system.
+Note that the extinction happens in the milky way with $z \approx 0$.
 
-Here $\mu$ is the distance modulus, $K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.
+$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
 
-$A_O$ is extinction in observed band (foreground for magnitudes in the AB system, 
-Therefore
+$M_R = m_O - \mu - A_O + 2.5 log (1+z)$
 
-$M_R = m_O - \mu - A_R + 2.5 log (1+z)$
-
-We should also quote the rest frame wavelength this is the effective wavelength for $M_R$:
+Note that the rest frame wavelength is shifted: the effective 
+wavelength for $M_R$ is:
 
 $\lambda_R = \lambda_O/(1+z)$
+
+We can compute distance modulus $\mu$ from redshift $z$ following Ned Wright's
+[cosmology calculator](https://www.astro.ucla.edu/~wright/cosmo_02.htm#DL).
+For the code that computes absolute magnitude, see the 
+[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/4_milky_way.ipynb).
 
 Error on $M_R$:
 Sum the variances of the sources of error:
 
 $(\delta M_R)^2 = (\delta M_O)^2 + (\delta \mu)^2 + (\delta K)^2$
+
+The error of magnitude comes from the error in flux:
+$\delta M_{AB}$ = 1.08574 $\delta f/f$
 
 Note that $\delta K$ will be small: $\delta K \approx {2.5 \over ln 10} ({\delta z \over 1+z})$
 A Taylor expansion of the K correction term yields $\delta K \approx 1.08574 ({\delta z \over 1+z})$.

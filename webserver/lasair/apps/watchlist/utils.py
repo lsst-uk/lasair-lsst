@@ -18,13 +18,17 @@ def handle_uploaded_file(f):
 
 def add_watchlist_metadata(
         watchlists,
-        remove_duplicates=False):
+        remove_duplicates=False,
+        filterFirstName=False,
+        filterLastName=False):
     """*add extra metadata to the watchlists and return a list of watchlist dictionaries*
 
     **Key Arguments:**
 
     - `watchlists` -- a list of watchlist objects
     - `remove_duplicates` -- remove duplicate watchlists. Default *False*
+    - `filterFirstName` -- return only items belonging to specific user with this first name
+    - `filterLastName` -- return only items belonging to specific user with this last name
 
     **Usage:**
 
@@ -38,6 +42,11 @@ def add_watchlist_metadata(
     for wlDict, wl in zip(watchlists.values(), watchlists):
         uuid = f"{wlDict['name']},{wlDict['description']},{wlDict['radius']}"
         if uuid not in dupCheck or not remove_duplicates:
+            if filterFirstName and filterFirstName.lower() != wl.user.first_name.lower():
+                continue
+            if filterLastName and filterLastName.lower() != wl.user.last_name.lower():
+                continue
+
             # ADD LIST COUNT
             wlDict['count'] = WatchlistCone.objects.filter(wl_id=wlDict['wl_id']).count()
 

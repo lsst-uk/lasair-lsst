@@ -91,7 +91,7 @@ class FilterTest(unittest.TestCase):
 
     def test_handle_alert_no_sources(self):
         """Test that the handle_alert method returns 0 for an alert with no sources."""
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': []}
         fltr = Filter(group_id='filter_test', maxalert=0)
         result = fltr.handle_alert(test_alert)
@@ -102,7 +102,7 @@ class FilterTest(unittest.TestCase):
     def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
         """Test that handle_alert method returns 1 for an alert with sources."""
         mock_create_insert_query.return_value = "QUERY"
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': ['']}
         fltr = Filter(group_id='filter_test', maxalert=0)
         result = fltr.handle_alert(test_alert)
@@ -117,7 +117,7 @@ class FilterTest(unittest.TestCase):
         """Test that handle_alert method works with a sherlock annotation."""
         mock_create_insert_query.return_value = "QUERY"
         mock_create_insert_sherlock.return_value = "SHERLOCK"
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': [''],
                       'annotations': {'sherlock': [{}]}}
         fltr = Filter(group_id='filter_test', maxalert=0)

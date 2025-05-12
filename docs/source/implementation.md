@@ -41,7 +41,7 @@ a flare from a known CV (cataclysmic variable).
 
 Each filter node computes features of the 30-day light curve that comes with 
 the alert (a year with LSST), as well as matching the alert against user-made 
-watchlists and areas. Records are writen to a local SQL database onboard the 
+watchlists and areas. Records are written to a local SQL database onboard the 
 node for the object and features, the Sherlock data, the watchlist and area 
 tags. Other tables have already been copied into the local database from the 
 main SQL database (see Background Services below). After a batch of perhaps 

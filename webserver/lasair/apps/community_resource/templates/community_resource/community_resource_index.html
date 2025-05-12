@@ -1,0 +1,54 @@
+{% extends "layouts/base.html" %}
+{% load static %}
+{% block content %}
+
+
+    <div class="container">
+
+        <div class="row mt-4">
+            <div class="col-12  mb-4">
+                <div class="card border-0 shadow h-100">
+                    <div class="card-body">
+                        <div class="row d-flex">
+
+
+                            <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                                <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                                    {% include "includes/icons/icon_resources.html" %}
+                                </div>
+                                <h2 class="h1 fw-extrabold mb-0 d-inline ps-3">Lasair Resources</h2>
+
+                            </div>
+
+
+
+                            <div class="col-12 px-4">
+                                <small class="text-gray-500">
+                                    The example resources highlighted here have been built either by a member of the Lasair user community or by the core Lasair team. Feel free to duplicate and adapt the resources to your science needs.
+                                </small>
+                            </div>
+
+
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_filter_query_table.html" with type="community" position="auto" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_watchlist_table.html" with type="community" position="auto" %}
+            </div>
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_watchmap_table.html" with type="community" position="auto" %}
+            </div>
+
+
+        </div>
+
+{% endblock %}

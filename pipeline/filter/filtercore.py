@@ -44,6 +44,8 @@ import numbers
 import confluent_kafka
 from datetime import datetime
 from docopt import docopt
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
 
 sys.path.append('../../common')
 import settings
@@ -100,6 +102,12 @@ class Filter:
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
+
+        # set up the extinction factory
+        try:
+            self.sfd = SFDQuery()
+        except Exception as e:
+            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def setup(self):
         """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
@@ -261,6 +269,12 @@ class Filter:
         # really not interested in alerts that have no detections!
         if len(alert['diaSourcesList']) == 0:
             return 0
+
+        # compute the extinction and insert into the alert packet
+        ra   = alert['diaObject']['ra']
+        decl = alert['diaObject']['decl']
+        c = SkyCoord(ra, decl, unit="deg", frame='icrs')
+        alert['ebv'] = float(self.sfd(c))
 
         # build the insert query for this object.
         # if not wanted, returns 0

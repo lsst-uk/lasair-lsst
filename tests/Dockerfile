@@ -63,7 +63,7 @@ RUN pip3 install \
   ephem \
   gkhtm \
   gkdbutils \
-  bazinBlackBody==0.8 \
+  bazinBlackBody>=0.8\
   dustmaps
 
 # required for MMA

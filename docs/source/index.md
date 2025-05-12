@@ -1,6 +1,6 @@
-<img src="_images/lasair_logo_transparent.png" width=500>
+<img src="_images/lasair_logo_transparent_LSST.png" width=500>
 
-# [Lasair: A UK Alert Stream Broker]({%lasairurl%})
+# [Lasair: A UK Alert Stream Broker]({%lasairurl%}) 
 
 [*Lasair*]({%lasairurl%}) is being developed by The University of Edinburgh, Queen\'s University Belfast,
 and Oxford University to serve transient alerts from the 

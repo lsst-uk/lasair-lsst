@@ -1,4 +1,5 @@
 {
+	"ebv":0.0,
   "diaObject": {
     "diaObjectId": 12345678,
     "ra": 0.0,
@@ -2217,5 +2218,16 @@
   ],
   "diaForcedSourcesList": [],
   "diaNondetectionLimitsList": [],
-  "ssObject": null
+  "ssObject": null,
+  "annotations": {
+    "sherlock": [
+      {
+        "classification": "ORPHAN",
+        "z": 0.2,
+        "description": "No contexual information is available for this transient",
+        "annotator": "https://github.com/thespacedoctor/sherlock/releases/tag/v2.3.1",
+        "additional_output": "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/402778310355976216"
+      }
+    ]
+  }
 }

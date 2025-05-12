@@ -1,5 +1,16 @@
 # Questions and Answers
 
+* **Who is Lasair for?**
+
+Lasair allows astronomers to monitor and get rapid notification 
+of optical transients in the southern sky, allowing rapid followup 
+of the evolving object. For long-term statistical
+study, it might be better to wait for the annual data releases from Rubin..
+
+* **When will the alerts start to flow?**
+
+Alerts will start to flow in late 2025.
+
 * **What are Lasair-ZTF and Lasair-LSST?**
 
 See [ZTF and LSST](../implementation.html#ztf-and-lsst)
@@ -16,7 +27,10 @@ of the telescope taking the observation.
 
 * **What is here for an amateur astronomer?**
 
-A serious amateur telescope would have a 500 mm aperture, with a limiting magnitude of about 16, costing over $40,000. In any year there will be a few supenovae visible to this system.
+Even a 500 mm aperture, costing $40,000 will see only a few of the objects
+that Lasair is reporting from Rubin. 
+However, there will be plenty of scope for citizen science projects hosted by
+the [Zooniverse](https://www.zooniverse.org/) platform.
 
 * **How can I ask a question to the Lasair team?**
 
