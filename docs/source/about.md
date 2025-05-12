@@ -5,8 +5,9 @@ uniform photometry over an entire hemisphere, along with a real-time stream of
 alerts from the ever changing sky. To extract the scientific potential from 
 that stream, the community needs brokers that offer the ability to filter, 
 query, and manipulate the alerts, and combine them with external data sources. 
+There are several "community brokers" for the LSST survey, [listed here](https://rubinobservatory.org/for-scientists/data-products/alerts-and-brokers).
 The [LSST:UK consortium](https://www.lsst.ac.uk/)
-has been building just such a broker [Lasair](http://lasair.lsst.ac.uk), alongside 
+has been building a broker called [Lasair](http://lasair.lsst.ac.uk), alongside 
 an International Data Access Centre (IDAC), building on its strengths and 
 heritage in leading astronomical surveys, data processing and analysis. The hope
 is that Lasair will be of value to the worldwide community, not just to the the UK consortium.
