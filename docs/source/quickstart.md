@@ -30,7 +30,7 @@ subtract to get the age in days,
 ### Create New Filter
 We can build the filter by clicking on ['Filters']({%lasairurl%}/filters/) 
 in the Lasair sidebar, then the red button 'Create New' at top right.
-We'll start by building the filter that contros the objects
+We'll start by building the filter that controls the objects
 shown on the front page.
 
 For your first filter, you won't be using any of the dropdowns for Watchlist, 
@@ -41,8 +41,8 @@ Replace the existing text in the SELECT with:
 objects.diaObjectId,
 ```
 Notice that as you type, the intelligent autocomplete makes suggestions. 
-It will add a comma as well, even though the last attribute should 
-not have a comma. Let's also select the position of the object:
+It will add a comma as well, even though **the last attribute should 
+not have a comma**. Let's also select the position of the object:
 ```
 objects.ra, objects.decl,
 ```
@@ -61,6 +61,9 @@ sherlock_classifications.classification AS class
 You see as you type that the tables you are using appear in the middle of the 
 three black text areas, labelled **FROM**.
 
+----
+Now for the **WHERE** box. This is the heart of the filter, as it decides 
+what passes through and what does not.
 We select only those objects whose most recent alert has been in the last 7 days.
 Type these lines into the **WHERE** box:
 ```
