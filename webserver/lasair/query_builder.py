@@ -66,7 +66,7 @@ def check_select_forbidden(select_expression):
             return ('Cannot use %s in the SELECT clause' % s)
 
     # Want to split on whitespace, parentheses, curlys
-    se = re.split('\s|\(|\)|\{|\}', select_expression.lower())
+    se = re.split('\\s|\(|\)|\{|\}', select_expression.lower())
 
     # Check no forbidden words
     for s in select_forbidden_word_list:
@@ -101,7 +101,7 @@ def check_where_forbidden(where_condition):
         where_condition = regex.sub("", where_condition)
 
     # Want to split on whitespace, parentheses, curlys
-    wc = re.split('\s|\(|\)|\{|\}', where_condition.lower())
+    wc = re.split('\\s|\(|\)|\{|\}', where_condition.lower())
     for w in where_forbidden_word_list:
         if w in wc or w.upper() in wc:
             return('Cannot use the word %s in the WHERE clause' % w.upper())
