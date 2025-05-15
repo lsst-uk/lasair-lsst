@@ -26,8 +26,9 @@ Then log in to the Lasair website.
 * Look in the repo you cloned for the `settings_template.py` and copy it to 
 `settings.py` then edit it with your own token.
 
-### 3. Lasair client
+### 3. Libraries
 Install the lasair client with `pip3 install lasair`.
+Install matplotlib with `pip3 install matplotlib`.
 
 ### 4. When will the alerts start?
 As of this writing (May 2025), LSST has not begun operation, and there is only
