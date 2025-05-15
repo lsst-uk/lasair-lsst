@@ -1,0 +1,5 @@
+---
+
+# python virtual environment path
+venv_path: /opt/lasair_venv
+
