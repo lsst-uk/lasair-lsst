@@ -1,7 +1,6 @@
 import math
 from .util import getFluxTimeBand
 from features.FeatureGroup import FeatureGroup
-from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
 n_sample = 5     # must be this many of given band in sample interval

@@ -1,8 +1,6 @@
 import math
 from .util import getECFluxTimeBand
 from features.FeatureGroup import FeatureGroup
-#from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
 
 class pair(FeatureGroup):
     """Find the most recent revisit and derive colour information"""
