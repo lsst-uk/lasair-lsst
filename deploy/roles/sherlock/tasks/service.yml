@@ -34,18 +34,17 @@
       - uwsgi
       - wsgi-plugin-python3
       - flask-restful
+      - python3-numpy
+      - python3-setuptools
+      - python3-wheel
+      - python3-packaging
 
 - name: "Install pip packages"
   pip:
-    name:
-      - numpy==1.26.4
-    extra_args: "--break-system-packages"
-
-- name: "Install pip packages"
-  pip:
-    name:
+    virtualenv: "{{ venv_path }}"
+    virtualenv_site_packages: true
       - qub-sherlock==2.3.1
-    extra_args: "--break-system-packages"
+    extra_args: "--no-use-pep517"
 
 - name: "Copy app.py"
   get_url:
