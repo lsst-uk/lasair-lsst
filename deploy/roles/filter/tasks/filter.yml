@@ -28,7 +28,6 @@
       - skytag
       - dustmaps
       - bazinBlackBody>=0.8
-    extra_args: "--break-system-packages"
 
 - name: Install dustmaps
   become: true
