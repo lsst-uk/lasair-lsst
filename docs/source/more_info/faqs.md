@@ -123,7 +123,7 @@ This is explained [here](../concepts/objects_sources.html).
 
 This is called a "cone search". See next question.
 
-* **What is a cone-search and can Lasair do this?
+* **What is a cone-search and can Lasair do this?**
 
 A *cone* in this context means a point in the sky with an angular tolerance -- the opening
 angle of the cone, as explained [here](../concepts/sky-search.html). 

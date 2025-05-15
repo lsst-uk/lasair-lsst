@@ -15,7 +15,7 @@ unsuitable for difference flux; it is a logarithm of flux, and therefore cannot 
 negative difference flux. 
 
 There are also solar-system objects and solar-system sources. Lasair does not handle these,
-rather hands off the data to a downstram system called Adler.
+rather hands off the data to a downstream system called Adler.
 ## Lightcurve
 
 A lightcurve is a record of the brightness of an astrophysical object with time, so it is a collection of (time, brightness) pairs. For LSST the brightness of sources are calibrated and provided in flux, in the units of nanoJanskies (nJ). The conversion formula is
