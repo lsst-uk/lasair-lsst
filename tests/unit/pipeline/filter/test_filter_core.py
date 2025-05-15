@@ -171,7 +171,7 @@ class FilterTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = None
-        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123}}'
+        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123, "ra":23, "decl":23}}'
         mock_handle_alert.return_value = 1
         fltr = Filter(group_id='filter_test', maxalert=1)
         fltr.consumer = mock_consumer
