@@ -7,8 +7,8 @@ Type=simple
 User={{ ansible_user_id }}
 WorkingDirectory={{ ansible_env.HOME }}/{{ git_name}}/pipeline/ingest
 ExecStartPre=/usr/bin/touch {{ ansible_env.HOME }}/lockfile
-ExecStart=/usr/bin/python3 ingest_runner.py
-ExecStopPost=/usr/bin/rm /home/ubuntu/lockfile
+ExecStart={{ venv_path }}/bin/python3 ingest_runner.py
+ExecStopPost=/usr/bin/rm {{ ansible_env.HOME }}/lockfile
 Restart=on-failure
 
 

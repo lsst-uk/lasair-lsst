@@ -13,6 +13,8 @@
 - name: "Install python packages"
   become: true
   pip:
+    virtualenv: "{{ venv_path }}"
+    virtualenv_site_packages: true
     name:
       - confluent-kafka
       - confluent_kafka[schemaregistry,avro]
@@ -23,7 +25,6 @@
       - gkdbutils
       - docopt
       - mysql-connector-python
-    extra_args: "--break-system-packages"
 
 - name: Make sure the repo is up to date
   git: 
