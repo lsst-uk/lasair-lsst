@@ -139,23 +139,31 @@ associated with a galaxy whose distance is known. Below we combine flux, sky pos
 and redshift to estimate the peak absolute magnitude of a Rubin object.
 Let $f_\nu$ be the flux in nanoJansky, and $\delta f$ its uncertainty.
 
-Flux is related to $M_{AB}$, the observed magnitudes in the band of LSST.
+Flux is related to the apparent magnitude ($m_{AB}$ measured in the observer frame band O.
 See [Lasair Concepts](concepts.html?Lightcurve#lightcurve) for a conversion table.
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 8.9, for $f$ in Jy
+$m_{AB}$ = -2.5 log $f_\nu$ + 8.9, for $f$ in Jy
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 31.4, for $f$ in nJy
+$m_{AB}$ = -2.5 log $f_\nu$ + 31.4, for $f$ in nJy
 
 Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, 
 distance, extinction, and k-correction.
 
-$M_R = M_{AB} - \mu - A_O + K_{RO}$
+$M_R = m_{AB} - \mu - A_O + K_{RO}$
 
 Here $\mu$ is the distance modulus, and
 $A_O$ is extinction in observed band for magnitudes in the AB system.
-Note that the extinction happens in the milky way with $z \approx 0$.
+Note that the foreground extinction we apply is for the Milky Way, 
+so this is applied to the observer frame flux and magnitude measurement.
 
-$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
+$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. 
+An accurate K-correction requires knowledge of the input spectrum and the redshift, 
+along with the filter throughput function to calculate synthetic photometry. 
+A user may want to do this for full scientific analysis but since 
+Lasair filters are designed for rapid selection we provide the 
+approximate k-correction only (e.g. as described in 
+[Hogg et al. 2002](https://arxiv.org/abs/astro-ph/0210394)).
+For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
 
 $M_R = m_O - \mu - A_O + 2.5 log (1+z)$
 

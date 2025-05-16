@@ -108,7 +108,4 @@ however the user must be authenticated to do so. Lasair staff are happy to
 receive a request to create an annotator, and the successful user
 will be given a `topic` name that allows them to upload annotations.
 
-## Cookbook
-
-For instructions on how to run your own annotator, see [Making an Annotator](../core_functions/make_annotator.html).
-
+For more information, see [Making an Annotator](core_functions/make_annotator.html).
