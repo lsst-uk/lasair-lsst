@@ -22,7 +22,7 @@ account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that
 explains how to do this, or just go [here]({%lasairurl%}/register). 
 Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
-* You can go to `notebooks/API_ztf` or `notebooks/LSST-ztf` or `notebooks/marshall`.
+* You can go to `notebooks/API_lsst` `notebooks/features`.
 * Look in the repo you cloned for the `settings_template.py` and copy it to 
 `settings.py` then edit it with your own token.
 
