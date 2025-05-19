@@ -6,63 +6,6 @@
    cookbook
 ```
 
-
-
----
-### Porting from ZTF
-For watchlists and watchmaps, the porting process should be simple. Use the ZTF website
-to navigate to the resource, then do Export/Original Watchlist File, which you can import 
-into a new resource on lasair-lsst.
-
-But filters are more difficult, as the objects attributes, used in SQL clauses, 
-have been rebuilt for LSST. First an example WHERE clause from Lasair-ZTF:
-```
-sherlock_classifications.classification = "AGN"
-AND objects.ncand >= 1
-AND objects.decmean < 10
-AND objects.jdgmax > jdnow() - 7
-AND (objects.rmag < 20.0 OR objects.gmag < 20.0)
-AND ((objects.magrmax- objects.magrmin) > 0.5)
-AND objects.dmdt_g >= 1.5
-```
-Changes needed for Lasair-LSST are:
-* Change `ncand` to `nSources` (could also use `nuSources`, `ngSources`, `nrSources`, 
-etc for the six bands)
-* Change `decmean` to `decl`
-* For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
-recent g-band detection. There is also the time of latest detection in any band, that is
-`lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
-
-Magnitude 20 is about 50,000 nJ, see [here](concepts) for 
-explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.
-Perhaps the line about maximum and minimum magnitude could be replaced with something 
-about the standard deviation of the lightcurve, the `objects-ext.r_psfFluxSigma`
-
-The last line is most difficult, there is no direct replacement for the 
-ZTF attribute `dmdt_g`, which has always been problematic. If you want fast risers,
-the `bazinBlackBody` set of attributes tries for a collective approach, taking the 
-whole 6-band lightcurve and fitting both temperature on the spectral axis, 
-and explosion models on the time axis. If the fit has converged, the attribute
-`BBBRiseRate` might work, it is an e-folding rate $e^{kt}$ for flux 
-(linear in magnitude), but can also be 
-thought of as magnitudes per day, within a few percent. 
-Perhaps we choose 0.2 magnitudes a day.
-
-So the clause looks like:
-```
-sherlock_classifications.classification = "AGN"
-AND objects.nSources >= 1
-AND objects.decl < 10
-AND objects.g_latestMJD > mjdnow() - 7
-AND (objects.r_psfFlux > 50000 OR objects.g_psfFlux > 50000)
-AND (objects-ext.r_psfFluxSigma > 10000)
-AND objects.BBBRiseRate > 0.2
-```
-
-If you have a porting problem from ZTF to LSST filters, please use the
-[Community Forum](https://community.lsst.org/c/support/support-lasair/55).
----
-
 ### Find a fast riser
 See the cookbook entry 
 [Finding tidal disruption events (TDE)](#finding-tidal-disruption-events--tde-) below,
@@ -196,23 +139,31 @@ associated with a galaxy whose distance is known. Below we combine flux, sky pos
 and redshift to estimate the peak absolute magnitude of a Rubin object.
 Let $f_\nu$ be the flux in nanoJansky, and $\delta f$ its uncertainty.
 
-Flux is related to $M_{AB}$, the observed magnitudes in the band of LSST.
+Flux is related to the apparent magnitude ($m_{AB}$ measured in the observer frame band O.
 See [Lasair Concepts](concepts.html?Lightcurve#lightcurve) for a conversion table.
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 8.9, for $f$ in Jy
+$m_{AB}$ = -2.5 log $f_\nu$ + 8.9, for $f$ in Jy
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 31.4, for $f$ in nJy
+$m_{AB}$ = -2.5 log $f_\nu$ + 31.4, for $f$ in nJy
 
 Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, 
 distance, extinction, and k-correction.
 
-$M_R = M_{AB} - \mu - A_O + K_{RO}$
+$M_R = m_{AB} - \mu - A_O + K_{RO}$
 
 Here $\mu$ is the distance modulus, and
 $A_O$ is extinction in observed band for magnitudes in the AB system.
-Note that the extinction happens in the milky way with $z \approx 0$.
+Note that the foreground extinction we apply is for the Milky Way, 
+so this is applied to the observer frame flux and magnitude measurement.
 
-$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
+$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. 
+An accurate K-correction requires knowledge of the input spectrum and the redshift, 
+along with the filter throughput function to calculate synthetic photometry. 
+A user may want to do this for full scientific analysis but since 
+Lasair filters are designed for rapid selection we provide the 
+approximate k-correction only (e.g. as described in 
+[Hogg et al. 2002](https://arxiv.org/abs/astro-ph/0210394)).
+For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
 
 $M_R = m_O - \mu - A_O + 2.5 log (1+z)$
 

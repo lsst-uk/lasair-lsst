@@ -15,7 +15,7 @@ unsuitable for difference flux; it is a logarithm of flux, and therefore cannot 
 negative difference flux. 
 
 There are also solar-system objects and solar-system sources. Lasair does not handle these,
-rather hands off the data to a downstram system called Adler.
+rather hands off the data to a downstream system called Adler.
 ## Lightcurve
 
 A lightcurve is a record of the brightness of an astrophysical object with time, so it is a collection of (time, brightness) pairs. For LSST the brightness of sources are calibrated and provided in flux, in the units of nanoJanskies (nJ). The conversion formula is
@@ -108,7 +108,4 @@ however the user must be authenticated to do so. Lasair staff are happy to
 receive a request to create an annotator, and the successful user
 will be given a `topic` name that allows them to upload annotations.
 
-## Cookbook
-
-For instructions on how to run your own annotator, see [Making an Annotator](../core_functions/make_annotator.html).
-
+For more information, see [Making an Annotator](core_functions/make_annotator.html).

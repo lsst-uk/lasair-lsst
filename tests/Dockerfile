@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -6,51 +6,63 @@ ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   python3 \
   python3-dev \
-  python3-pip 
-
-# Required for Sherlock
-RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
-  gcc \
-  g++ \
-  python3-yaml
-RUN pip3 install \
-  numpy  \
-  scipy
-RUN pip3 install \
-  confluent-kafka==1.7.0 \
-  qub-sherlock==2.2.0
+  python3-pip \
+  python3-venv \
+  python3-setuptools \
+  python3-wheel \
+  python3-packaging
 
 # Required for tests
-RUN pip3 install \
-  xmlrunner \
-  cryptography \
-  flask \
-  psutil \
-  coverage
 RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
   mysql-client \
   mysql-server \
   openjdk-11-jre-headless \
   wget \
   sudo \
-  swig 
+  swig \
+  python3-psutil \
+  python3-cryptography \
+  python3-coverage \
+  python3-unittest2
+
+# Set up Python virtual environment
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv --system-site-packages $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+RUN pip3 install \
+  xmlrunner
+
+# Required for Sherlock
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  gcc \
+  g++ \
+  python3-flask \
+  python3-flask-restful \
+  python3-confluent-kafka \
+  python3-yaml \
+  python3-numpy \
+  python3-scipy 
+RUN pip3 install \
+  qub-sherlock==2.3.1 --no-use-pep517
 
 # Required for Ingest
+RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+  python3-cassandra \
+  python3-lz4
 RUN pip3 install \
-  cassandra-driver \
   gkdbutils \
-  fastavro \
-  lz4
+  fastavro 
 
 # Required for filter
+#RUN apt-get update && apt-get -yq dist-upgrade && apt-get install -yq --no-install-recommends \
+#  python3-mysql.connector
 RUN pip3 install \
-  mocpy \
   mysql-connector-python \
+  mocpy \
   ephem \
   gkhtm \
   gkdbutils \
-  cassandra-driver \
-  fastavro\
   bazinBlackBody>=0.8\
   dustmaps
 

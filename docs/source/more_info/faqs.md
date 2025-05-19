@@ -1,8 +1,19 @@
 # Questions and Answers
 
+* **Who is Lasair for?**
+
+Lasair allows astronomers to monitor and get rapid notification 
+of optical transients in the southern sky, allowing rapid followup 
+of the evolving object. For long-term statistical
+study, it might be better to wait for the annual data releases from Rubin..
+
+* **When will the alerts start to flow?**
+
+Alerts will start to flow in late 2025.
+
 * **What are Lasair-ZTF and Lasair-LSST?**
 
-See [ZTF and LSST](../implementation.html#ztf-and-lsst)
+See [Porting from Lasair-ZTF](porting_from_ztf.html)
 
 * **What can I get from this web site?**
 
@@ -16,7 +27,10 @@ of the telescope taking the observation.
 
 * **What is here for an amateur astronomer?**
 
-A serious amateur telescope would have a 500 mm aperture, with a limiting magnitude of about 16, costing over $40,000. In any year there will be a few supenovae visible to this system.
+Even a 500 mm aperture, costing $40,000 will see only a few of the objects
+that Lasair is reporting from Rubin. 
+However, there will be plenty of scope for citizen science projects hosted by
+the [Zooniverse](https://www.zooniverse.org/) platform.
 
 * **How can I ask a question to the Lasair team?**
 
@@ -51,7 +65,8 @@ Registration is easy, and just requires a valid email (register [here]({%lasairu
 
 * **Besides Lasair, what other websites carry astronommical transients?**
 
-There are seven community brokers that will receive and process LSST alerts in real time: [ALeRCE](http://alerce.science/), [AMPEL](https://ampelproject.github.io/), [ANTARES](https://antares.noirlab.edu/), BABAMUL, [Fink](https://fink-broker.re%3Cdthedocs.io/en/latest/), [Lasair](https://lasair.roe.ac.uk/), and [Pitt-Google](https://pitt-broker.re%3Cdthedocs.io/en/latest/).
+There are seven community brokers that will receive and process LSST alerts in real time,
+[listed here](https://rubinobservatory.org/for-scientists/data-products/alerts-and-brokers).
 
 * **How long has Lasair been operating?**
 
@@ -108,7 +123,7 @@ This is explained [here](../concepts/objects_sources.html).
 
 This is called a "cone search". See next question.
 
-* **What is a cone-search and can Lasair do this?
+* **What is a cone-search and can Lasair do this?**
 
 A *cone* in this context means a point in the sky with an angular tolerance -- the opening
 angle of the cone, as explained [here](../concepts/sky-search.html). 
