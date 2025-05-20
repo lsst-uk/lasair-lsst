@@ -260,7 +260,7 @@ class Filter:
         query += ',\n'.join(query_list)
         return query
 
-    def handle_alerts(self, alertList):
+    def handle_alert_list(self, alertList):
         """alert_filter: handle a list of alerts
         """
         raList   = []
@@ -337,7 +337,7 @@ class Filter:
             alertList.append(alert)
 
             if nalert_in % 1000 == 0:
-                d = self.handle_alerts(alertList)
+                d = self.handle_alert_list(alertList)
                 alertList = []
                 nalert_out += d
                 self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
@@ -347,7 +347,7 @@ class Filter:
                 # make sure everything is committed
                 self.database.commit()
 
-        d = self.handle_alerts(alertList)
+        d = self.handle_alert_list(alertList)
         nalert_out += d
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 

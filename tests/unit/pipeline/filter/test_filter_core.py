@@ -97,6 +97,12 @@ class FilterTest(unittest.TestCase):
         result = fltr.handle_alert(test_alert)
         self.assertEqual(result, 0)
 
+    def test_handle_alert_list_no_sources(self):
+        """Test that the handle_alert_list method returns  for an alert list with no sources."""
+        fltr = Filter(group_id='filter_test', maxalert=0)
+        result = fltr.handle_alert_list([])
+        self.assertEqual(result, 0)
+
     @patch('filtercore.Filter.create_insert_query')
     @patch('filtercore.Filter.execute_query')
     def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
