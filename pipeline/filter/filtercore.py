@@ -260,21 +260,29 @@ class Filter:
         query += ',\n'.join(query_list)
         return query
 
-    def handle_alert(self, alert: dict):
-        """alert_filter: handle a single alert.
+    def handle_alert_list(self, alertList):
+        """alert_filter: handle a list of alerts
         """
+        raList   = []
+        declList = []
+        for alert in alertList:
+            raList  .append(alert['diaObject']['ra'])
+            declList.append(alert['diaObject']['decl'])
+        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
+        ebvList = self.sfd(c)
+        nalert = 0
+        for ebv,alert in zip(ebvList, alertList):
+            alert['ebv'] = ebv
+            nalert += self.handle_alert(alert)
+        return nalert
+
+    def handle_alert(self, alert):
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
         # really not interested in alerts that have no detections!
         if len(alert['diaSourcesList']) == 0:
             return 0
-
-        # compute the extinction and insert into the alert packet
-        ra   = alert['diaObject']['ra']
-        decl = alert['diaObject']['decl']
-        c = SkyCoord(ra, decl, unit="deg", frame='icrs')
-        alert['ebv'] = float(self.sfd(c))
 
         # build the insert query for this object.
         # if not wanted, returns 0
@@ -302,6 +310,7 @@ class Filter:
         startt = time.time()
         errors = 0
 
+        alertList = []
         while nalert_in < self.maxalert:
             if self.sigterm_raised:
                 # clean shutdown - stop the consumer
@@ -325,11 +334,12 @@ class Filter:
             # Apply filter to each alert
             alert = json.loads(msg.value())
             nalert_in += 1
-#            print(json.dumps(alert, indent=2))  ##############
-            d = self.handle_alert(alert)
-            nalert_out += d
+            alertList.append(alert)
 
             if nalert_in % 1000 == 0:
+                d = self.handle_alert_list(alertList)
+                alertList = []
+                nalert_out += d
                 self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
                               (nalert_in, nalert_out, time.time() - startt))
                 sys.stdout.flush()
@@ -337,6 +347,8 @@ class Filter:
                 # make sure everything is committed
                 self.database.commit()
 
+        d = self.handle_alert_list(alertList)
+        nalert_out += d
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
         if self.stats:

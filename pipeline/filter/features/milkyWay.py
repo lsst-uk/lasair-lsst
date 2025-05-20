@@ -1,8 +1,6 @@
 import math
 from .util import getAllFluxTimeBand
 from features.FeatureGroup import FeatureGroup
-from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
 
 class milkyWay(FeatureGroup):
     """Extinction and galactic latitude"""
