@@ -8,6 +8,7 @@
   vars_files:
     - ../../deploy/settings.yaml
   vars:
+    schema: 7_4_A
     mysql_db_name: filter_test
     mysql_db_user: ztf
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
@@ -28,26 +29,16 @@
         login_user: root
         login_password: "{{ mysql_root_password }}"
         single_transaction: yes
-    - name: Create object table
+    - name: Create tables
       shell:
-        cmd: "mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < objects.sql"
-        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-    - name: Create sherlock_classifications table
-      shell:
-        cmd: "mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < sherlock_classifications.sql"
-        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-    - name: Create area_hits table
-      shell:
-        cmd: "mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < area_hits.sql"
-        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-    - name: Create watchlist_hits table
-      shell:
-        cmd: "mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < watchlist_hits.sql"
-        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-    - name: Create annotations table
-      shell:
-        cmd: "mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < annotations.sql"
-        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
+        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} | mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}'"
+        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+      loop:
+        - objects
+        - sherlock_classifications
+        - area_hits
+        - watchlist_hits
+        - annotations
     - name: Run filter
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/filter
