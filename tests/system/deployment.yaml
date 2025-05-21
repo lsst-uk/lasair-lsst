@@ -54,13 +54,13 @@
     - name: validate object db schema
       ansible.builtin.command:
         chdir: ../../utility
-        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --mod=lasair_schema.objects"
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --mod=7_4_A.objects"
       loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
       changed_when: false
     - name: validate object db schema via load balancer
       ansible.builtin.command:
         chdir: ../../utility
-        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --mod=lasair_schema.objects"
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --mod=7_4_A.objects"
       loop: "{{ groups['cluster_control'] }}"
       changed_when: false
     - name: validate db functions
