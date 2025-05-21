@@ -41,10 +41,10 @@ SCHEMA         = "/home/ubuntu/lasair-lsst/common/schema/alert-lsst.avsc"
 LOCKFILE               = '/home/ubuntu/lockfile'
 
 # Alerts per batch. Can be modified in an instantiated settings.py
-KAFKA_MAXALERTS        = 40000
+KAFKA_MAXALERTS        = 10000
 
 # Time to wait between batches
-WAIT_TIME              = 180
+WAIT_TIME              = 30
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
