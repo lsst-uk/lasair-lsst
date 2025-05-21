@@ -284,6 +284,27 @@
         state: restarted
   tags: maxscale
 
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+  tasks:
+    - name: Create SQL files
+      ansible.builtin.shell:
+        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} > {{ item }}.sql"
+        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+      loop:
+        - "objects"
+        - "sherlock_classifications"
+        - "crossmatch_tns"
+        - "area_hits"
+        - "watchlist_hits"
+        - "annotations"
+        - "mma_area_hits"
+        - "lasair_statistics"
+
 - hosts: db,backend_db[0]
   gather_facts: false
   vars_files:

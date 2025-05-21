@@ -23,9 +23,15 @@
     login_password: "{{ mysql_root_password }}"
     single_transaction: yes
 
+- name: Create SQL files
+  ansible.builtin.shell:
+    cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} > {{ item }}.sql"
+    chdir: 
+
+
 - name: Create tables
   community.mysql.mysql_query:
-    query: "{{ lookup('file', '../common/schema/lasair_sql/' + item, split_lines=false) }}"
+    query: "{{ lookup('file', '../common/schema/' + schema + '/' + item, split_lines=false) }}"
     login_host: 127.0.0.1
     login_user: "{{ mysql_db_user }}"
     login_password: "{{ mysql_db_password }}"
