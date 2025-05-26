@@ -3780,5 +3780,14 @@
   ],
   "diaForcedSourcesList": [],
   "diaNondetectionLimitsList": [],
-  "ssObject": null
+  "ssObject": null,
+  "annotations": {
+    "sherlock": [
+      {
+        "classification": "ORPHAN",
+        "z": 0.2,
+        "description": "No contexual information is available for this transient"
+      }
+    ]
+  }
 }
