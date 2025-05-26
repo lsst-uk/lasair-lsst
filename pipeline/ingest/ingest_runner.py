@@ -10,6 +10,7 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN | --nid=NID]
               [--topic_out=TOUT]
+              [--nocutouts]
 
 Options:
     --maxalert=MAX       Number of alerts to process, default is infinite
@@ -18,6 +19,7 @@ Options:
     --topic_in=TIN       Kafka topic to use, or
     --nid=NID            ZTF night number to use (default today)
     --topic_out=TOUT     Kafka topic for output [default:ztf_sherlock]
+    --nocutouts          Do not attempt to save cutout images
 """
 import os
 import sys

@@ -11,37 +11,33 @@ class lightcurve_fetcher_error(Exception):
 
 
 class lightcurve_fetcher():
-    def __init__(self, cassandra_hosts=None, fileroot=None):
-        if cassandra_hosts is not None:
-            self.using_cassandra = True
-            self.cluster = Cluster(cassandra_hosts)
-            self.session = self.cluster.connect()
-            # Set the row_factory to dict_factory, otherwise
-            # the data returned will be in the form of object properties.
-            self.session.row_factory = dict_factory
-            self.session.set_keyspace('lasair')
-        elif fileroot is not None:
-            self.using_cassandra = False
-            self.fileroot = fileroot
-            self.session = None
-        else:
-            raise lightcurve_fetcher_error('Must give either cassandra_hosts or fileroot')
+    def __init__(self, cassandra_hosts):
+        self.using_cassandra = True
+        self.cluster = Cluster(cassandra_hosts)
+        self.session = self.cluster.connect()
+        # Set the row_factory to dict_factory, otherwise
+        # the data returned will be in the form of object properties.
+        self.session.row_factory = dict_factory
+        self.session.set_keyspace('lasair')
 
-    def fetch(self, diaObjectId, full=False):
-        if full:
+    def fetch(self, diaObjectId, lite=True):
+        # fetch the diaSources from Cassandra
+        if lite:
+            query = 'SELECT "diaSourceId", "midpointMjdTai", band, "psfFlux", "psfFluxErr" '
+        else:
             query = 'SELECT * '
-        else:
-            query = 'SELECT "diaSourceId", "midpointMjdTai", ra, decl, band, "psfFlux", "psfFluxErr" '
         query += 'from diaSources where "diaObjectId" = %s' % diaObjectId
-
         ret = self.session.execute(query)
-
         diaSources = []
         for diaSource in ret:
             if not math.isnan(diaSource['psfFlux']):
                 diaSources.append(diaSource)
 
-        query = 'SELECT "midpointMjdTai", "band", "psfFlux", "psfFluxErr" '
+        # fetch the diaForcedSources from Cassandra
+        if lite:
+            query = 'SELECT "midpointMjdTai", "band", "psfFlux", "psfFluxErr" '
+        else:
+            query = 'SELECT * '
         query += 'from diaForcedSources where "diaObjectId" = %s' % diaObjectId
 
         ret = self.session.execute(query)
@@ -50,7 +46,15 @@ class lightcurve_fetcher():
             if not math.isnan(diaForcedSource['psfFlux']):
                 diaForcedSources.append(diaForcedSource)
 
-        return (diaSources, diaForcedSources)
+        # fetch the diaObject from Cassandra
+        # Note: return is two obj if lite else three obj
+        if lite:
+            return (diaSources, diaForcedSources)
+        else:
+            query = 'SELECT * from diaObjects where "diaObjectId" = %s' % diaObjectId
+            ret = self.session.execute(query)
+            diaObject = ret[0]
+            return (diaObject, diaSources, diaForcedSources)
 
     def close(self):
         if self.session:

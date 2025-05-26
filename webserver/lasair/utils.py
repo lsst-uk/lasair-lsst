@@ -119,7 +119,7 @@ def decsex(de):
         return '-%02d:%02d:%.3f' % (d, m, s)
 
 
-def objjson(diaObjectId, full=False):
+def objjson(diaObjectId, lite=False):
     """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`, `annotations`)
 
     **Usage:**
@@ -133,7 +133,10 @@ def objjson(diaObjectId, full=False):
     message = ''
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'SELECT nSources, ra, decl, minTai as mjdmin, maxTai as mjdmax '
+    if lite:
+        query = 'SELECT nSources, ra, decl, firstDiaSourceMJD, lastDiaSourceMJD '
+    else:
+        query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
     cursor.execute(query)
     for row in cursor:
@@ -144,11 +147,13 @@ def objjson(diaObjectId, full=False):
 
     now = mjd_now()
     if objectData:
-        if objectData and 'annotation' in objectData and objectData['annotation']:
-            objectData['annotation'] = objectData['annotation'].replace('"', '').strip()
+#        if objectData and 'annotation' in objectData and objectData['annotation']:
+#            objectData['annotation'] = objectData['annotation'].replace('"', '').strip()
 
         objectData['rasex'] = rasex(objectData['ra'])
         objectData['decsex'] = decsex(objectData['decl'])
+        objectData['mjdmin'] = objectData['firstDiaSourceMJD']
+        objectData['mjdmax'] = objectData['lastDiaSourceMJD']
 
         (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon
@@ -190,7 +195,10 @@ def objjson(diaObjectId, full=False):
                 TNS[k] = v
 
     LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
-    (diaSources, diaForcedSources) = LF.fetch(diaObjectId, full=full)
+    if lite:
+        (diaSources, diaForcedSources) = LF.fetch(diaObjectId, lite=lite)
+    else:
+        (diaObject, diaSources, diaForcedSources) = LF.fetch(diaObjectId, lite=lite)
     LF.close()
 
     count_all_diaSources = len(diaSources)
@@ -219,13 +227,13 @@ def objjson(diaObjectId, full=False):
     if count_all_diaSources == 0:
         return None
 
-    if not objectData:
-        ra = float(diaSource['ra'])
-        dec = float(diaSource['decl'])
-        objectData = {'ramean': ra, 'decmean': dec,
-                      'rasex': rasex(ra), 'decsex': decsex(dec),
-                      'ncand': len(diaSources), 'MPCname': ssnamenr}
-        objectData['annotation'] = 'Unknown object'
+#    if not objectData:
+#        ra = float(diaSource['ra'])
+#        dec = float(diaSource['decl'])
+#        objectData = {'ramean': ra, 'decmean': dec,
+#                      'rasex': rasex(ra), 'decsex': decsex(dec),
+#                      'ncand': len(diaSources), 'MPCname': ssnamenr}
+#        objectData['annotation'] = 'Unknown object'
 
     message += 'Got %d diaSources' % count_all_diaSources
 

@@ -76,9 +76,9 @@
       - CREATE USER IF NOT EXISTS '{{ mysql_db_user }}'@'localhost' IDENTIFIED BY '{{ mysql_db_password }}';
       - GRANT ALL PRIVILEGES ON {{ mysql_db_name }}.* TO '{{ mysql_db_user }}'@'localhost';
       - GRANT FILE ON *.* TO '{{ mysql_db_user }}'@'localhost';
-      - DROP FUNCTION IF EXISTS tainow;
-      - CREATE FUNCTION tainow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
-      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.tainow TO '{{ mysql_db_user }}'@'localhost';
+      - DROP FUNCTION IF EXISTS mjdnow;
+      - CREATE FUNCTION mjdnow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
+      - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.mjdnow TO '{{ mysql_db_user }}'@'localhost';
     login_host: 127.0.0.1
     login_user: root
     login_password: "{{ mysql_root_password }}"

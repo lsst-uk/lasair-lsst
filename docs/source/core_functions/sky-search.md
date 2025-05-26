@@ -20,7 +20,7 @@ search. The following are supported:
 308.590715 9.278195 60
 ```
 
-- Search by object identifier, for example ```ZTF23aacvrxx```
+- Search by diaObject identifier, for example ```3068394045085582376```
 
 - Search by TNS identifier, for example ```AT2020iry``` or ```SN2020iry``` or ```2020iry```.
 

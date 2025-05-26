@@ -8,42 +8,51 @@ from django.shortcuts import render
 
 
 def add_watchmap_metadata(
-        watchlists,
-        remove_duplicates=False):
-    """*add extra metadata to the watchlists and return a list of watchlist dictionaries*
+        watchmaps,
+        remove_duplicates=False,
+        filterFirstName=False,
+        filterLastName=False):
+    """*add extra metadata to the watchmap and return a list of watchmap dictionaries*
 
     **Key Arguments:**
 
-    - `watchlists` -- a list of watchlist objects
-    - `remove_duplicates` -- remove duplicate watchlists. Default *False*
+    - `watchmaps` -- a list of watchmap objects
+    - `remove_duplicates` -- remove duplicate watchmap. Default *False*
+    - `filterFirstName` -- return only items belonging to specific user with this first name
+    - `filterLastName` -- return only items belonging to specific user with this last name
 
     **Usage:**
 
     ```python
-    watchlistDicts = add_watchmap_metadata(watchlists)
+    watchmapDicts = add_watchmap_metadata(watchmap)
     ```           
     """
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    updatedWatchlists = []
+    updatedWatchmap = []
     mocFiles = []
-    for wlDict, wl in zip(watchlists.values(), watchlists):
-        if wlDict["moc"] not in mocFiles or not remove_duplicates:
+    for wmDict, wm in zip(watchmaps.values(), watchmaps):
+        if wmDict["moc"] not in mocFiles or not remove_duplicates:
+            if filterFirstName and filterFirstName.lower() != wm.user.first_name.lower():
+                continue
+            if filterLastName and filterLastName.lower() != wm.user.last_name.lower():
+                continue
+
             # ADD LIST COUNT
-            # wlDict['count'] = WatchlistCone.objects.filter(wl_id=wlDict['wl_id']).count()
+            # wmDict['count'] = WatchlistCone.objects.filter(wm_id=wmDict['wm_id']).count()
 
             # ADD LIST USER
-            wlDict['user'] = f"{wl.user.first_name} {wl.user.last_name}"
-            wlDict['profile_image'] = wl.user.profile.image_b64
-            updatedWatchlists.append(wlDict)
-            mocFiles.append(wlDict["moc"])
+            wmDict['user'] = f"{wm.user.first_name} {wm.user.last_name}"
+            wmDict['profile_image'] = wm.user.profile.image_b64
+            updatedWatchmap.append(wmDict)
+            mocFiles.append(wmDict["moc"])
 
-            cursor.execute(f'SELECT count(*) AS count FROM area_hits WHERE ar_id={wlDict["ar_id"]}')
+            cursor.execute(f'SELECT count(*) AS count FROM area_hits WHERE ar_id={wmDict["ar_id"]}')
             for row in cursor:
-                wlDict['count'] = row['count']
-    return updatedWatchlists
+                wmDict['count'] = row['count']
+    return updatedWatchmap
 
 
 def make_image_of_MOC(fits_bytes, request):

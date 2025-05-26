@@ -18,5 +18,5 @@ class htm16(FeatureGroup):
             htm16 = htmCircle.htmID(16, ra, decl)
         except:
             htm16 = 0
-            print('ERROR: filter/insert_query: Cannot compute HTM index')
+            print('WARNING: feature/htm16: Cannot compute HTM index')
         return { "htm16": htm16, }

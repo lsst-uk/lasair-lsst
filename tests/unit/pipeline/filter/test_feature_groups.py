@@ -3,8 +3,10 @@ import context
 import unittest.main
 from unittest import TestCase
 import json
+sys.path.append('../../../../common')
+import settings
 sys.path.append('../../../../pipeline/filter')
-sys.path.append('../../../../common/schema/lasair_schema')
+sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 import features
 from features import *
@@ -18,8 +20,9 @@ class FeatureTest(TestCase):
       groupClass = getattr(groupModule, group)
       impl_features.update(groupClass.get_features())
     for feature in objectSchema['fields']:
-      name = feature['name']
-      self.assertIn(name, impl_features)
+      if 'name' in feature and feature['origin'] != 'external':
+        name = feature['name']
+        self.assertIn(name, impl_features)
 
   def test1_get_schema(self):
     """Check that for every feature group we can get the schema."""
@@ -48,15 +51,16 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/402778310355976216.json") as f:
-      alert = json.load(f)
+    with open("sample_alerts/99999999999.json") as f_in, open("sample_alerts/99999999999_object.json") as f_out:
+      sample_alert = json.load(f_in)
+      sample_output = json.load(f_out)
       output = {}
       schema = {}
       for group in features.__all__:
         groupModule = getattr(features, group)
         groupClass = getattr(groupModule, group)
         schema.update(groupClass.get_schema())
-        groupInst = groupClass(alert, verbose=True)
+        groupInst = groupClass(sample_alert, verbose=True)
         output.update(groupInst.run())
         #print(groupInst.run())
       # check the output exists
@@ -66,21 +70,23 @@ class FeatureTest(TestCase):
       for feature in schema:
         name = schema[feature]['name']
         type = schema[feature]['type']
-        if name == 'timestamp':
-            continue
         # check name is in the feature set
         self.assertIn(name, output)
         # check that either the type is ok or that the output is None and allowed to be so 
-        print('===', name, type, output[name])
         self.assertTrue(
           (isinstance(output[name], eval(type))) or
           (output[name] is None and schema[feature].get('extra') != 'NOT NULL')
           )
+        # check that the content is correct
+        if isinstance(output[name], float):
+          self.assertAlmostEqual(output[name], sample_output[name], msg=name)
+        else:
+          self.assertEqual(output[name], sample_output[name], msg=name)
 
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/402778310355976216.json") as f:
+    with open("sample_alerts/99999999999.json") as f:
       alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
@@ -90,6 +96,3 @@ if __name__ == '__main__':
   runner = xmlrunner.XMLTestRunner(output='test-reports')
   unittest.main(testRunner=runner)
   unittest.main()
-
-
-

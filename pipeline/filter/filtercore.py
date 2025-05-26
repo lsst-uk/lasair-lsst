@@ -44,6 +44,8 @@ import numbers
 import confluent_kafka
 from datetime import datetime
 from docopt import docopt
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
 
 sys.path.append('../../common')
 import settings
@@ -59,8 +61,10 @@ import watchlists
 import watchmaps
 import mmagw
 
-sys.path.append('../../common/schema/lasair_schema')
+sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 from features.FeatureGroup import FeatureGroup
+
+sys.path.append('features/BBB')
 
 def now():
     return datetime.utcnow().strftime("%H:%M:%S")
@@ -98,6 +102,12 @@ class Filter:
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
+
+        # set up the extinction factory
+        try:
+            self.sfd = SFDQuery()
+        except Exception as e:
+            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def setup(self):
         """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
@@ -250,9 +260,23 @@ class Filter:
         query += ',\n'.join(query_list)
         return query
 
-    def handle_alert(self, alert: dict):
-        """alert_filter: handle a single alert.
+    def handle_alert_list(self, alertList):
+        """alert_filter: handle a list of alerts
         """
+        raList   = []
+        declList = []
+        for alert in alertList:
+            raList  .append(alert['diaObject']['ra'])
+            declList.append(alert['diaObject']['decl'])
+        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
+        ebvList = self.sfd(c)
+        nalert = 0
+        for ebv,alert in zip(ebvList, alertList):
+            alert['ebv'] = ebv
+            nalert += self.handle_alert(alert)
+        return nalert
+
+    def handle_alert(self, alert):
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
@@ -286,6 +310,7 @@ class Filter:
         startt = time.time()
         errors = 0
 
+        alertList = []
         while nalert_in < self.maxalert:
             if self.sigterm_raised:
                 # clean shutdown - stop the consumer
@@ -309,11 +334,12 @@ class Filter:
             # Apply filter to each alert
             alert = json.loads(msg.value())
             nalert_in += 1
-#            print(json.dumps(alert, indent=2))  ##############
-            d = self.handle_alert(alert)
-            nalert_out += d
+            alertList.append(alert)
 
             if nalert_in % 1000 == 0:
+                d = self.handle_alert_list(alertList)
+                alertList = []
+                nalert_out += d
                 self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
                               (nalert_in, nalert_out, time.time() - startt))
                 sys.stdout.flush()
@@ -321,6 +347,8 @@ class Filter:
                 # make sure everything is committed
                 self.database.commit()
 
+        d = self.handle_alert_list(alertList)
+        nalert_out += d
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
         if self.stats:
@@ -436,8 +464,8 @@ class Filter:
     def batch_statistics():
         """How many objects updated since last midnight.
         """
-        tainow = (time.time() / 86400 + 40587)
-        midnight = math.floor(tainow - 0.5) + 0.5
+        mjdnow = (time.time() / 86400 + 40587)
+        midnight = math.floor(mjdnow - 0.5) + 0.5
 
         msl_main = db_connect.readonly()
         cursor = msl_main.cursor(buffered=True, dictionary=True)
@@ -472,9 +500,9 @@ class Filter:
         msl_local = db_connect.local()
         cursor = msl_local.cursor(buffered=True, dictionary=True)
         query = 'SELECT '
-        query += 'tainow()-max(maxTai) AS min_delay, '
-        query += 'tainow()-avg(maxTai) AS avg_delay, '
-        query += 'tainow()-min(maxTai) AS max_delay '
+        query += 'mjdnow()-max(maxTai) AS min_delay, '
+        query += 'mjdnow()-avg(maxTai) AS avg_delay, '
+        query += 'mjdnow()-min(maxTai) AS max_delay '
         query += 'FROM objects'
         try:
             cursor.execute(query)
@@ -635,7 +663,10 @@ if __name__ == "__main__":
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
-    wait_time = int(args.get('--wait_time')) or getattr(settings, 'WAIT_TIME', 60)
+    if args['--wait_time']:
+        wait_time = int(args['--wait_time'])
+    else: 
+        wait_time = getattr(settings, 'WAIT_TIME', 60)
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
                   send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)

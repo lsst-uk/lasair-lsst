@@ -39,6 +39,7 @@
       - django-browser-reload
       - django-crispy-forms
       - django-recaptcha
+      - lz4
     extra_args: "--break-system-packages"
 
 - name: Install more python packages

@@ -8,7 +8,7 @@ User={{ ansible_user_id }}
 WorkingDirectory={{ ansible_env.HOME }}/{{ git_name}}/pipeline/sherlock
 ExecStart={{ venv_path }}/bin/python3 sherlock_runner.py --nprocess=2
 Restart=on-failure
-
+RestartSec=60
 
 [Install]
 WantedBy=multi-user.target

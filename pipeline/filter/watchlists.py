@@ -36,6 +36,7 @@ def watchlists(fltr):
     if len(hits) > 0:
         try:
             insert_watchlist_hits(fltr, hits)
+            insert_tns_hits(fltr, hits)
         except Exception as e:
             fltr.log.error("ERROR in watchlists/insert_watchlist_hits" + str(e))
             return None
@@ -82,6 +83,22 @@ def insert_watchlist_hits(fltr, hits):
     except Exception as err:
         fltr.log.error('ERROR in watchlists/insert_watchlist_hits: insert watchlist_hit failed: %s' % str(err))
 
+def insert_tns_hits(fltr, hits):
+    """insert_watchlist_hits:
+    Build and execute the insertion query to get the hits into the database
+
+    Args:
+        fltr:
+        hits:
+    """
+    query_template = 'UPDATE objects SET tns_name = "%s" WHERE diaObjectId=%d'
+    for hit in hits:
+        if hit['wl_id'] == settings.TNS_WATCHLIST_ID:
+            query = query_template % (hit['name'], hit['diaObjectId'])
+        try:
+            fltr.execute_query(query)
+        except Exception as err:
+            fltr.log.error('ERROR in watchlists/insert_tns_hits: insert tns_hit failed: %s' % str(err))
 
 def read_watchlist_cache_files(fltr, cache_dir):
     """read_watchlist_cache_files.

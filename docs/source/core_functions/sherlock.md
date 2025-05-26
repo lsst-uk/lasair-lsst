@@ -30,7 +30,7 @@ transient and the centre of the associated galaxy. This is translated to `physic
  -|`Mag` is the magnitude of the associated galaxy, using the system in `MagFilter`. This can
 be combined with distance information to derive absolute magnitude.
 
-The full schema for the Sherlock table is in the [Lasair Schema Browser](https://lasair-dev.lsst.ac.uk/schema/#sherlock_classifications-schema).
+The full schema for the Sherlock table is in the [Lasair Schema Browser]({%lasairurl%}/schema/#sherlock_classifications-schema).
 
 ## How does Sherlock work?
 
@@ -76,11 +76,40 @@ _Sherlock_ employs many smaller source-specific catalogues such as
 
 - Ritter Cataclysmic Binaries Catalog v7.21 (Ritter and Kolb 2003). 
 
-For spectroscopic redshifts we use the 
+For spectroscopic redshifts, we supplement the SDSS DR12 with the following catalogues 
+
+- LASr (Local AGN Survey) catalogue : a complete catalogue of 49,000 
+galaxies within the local 100Mpc volume, all with redshifts (Asmus et al. 2020) 
 
 - GLADE Galaxy Catalogue v2.3 (Dálya et al. 2018) and the 
 
 - NED-D Galaxy Catalogue v13.1
+
+We are currently in the process of upgrading Sherlock with the following major additions 
+
+- Gaia DR3 - proper motion, star-galaxy separation, QSO classifications, 
+stellar classifications will all be included.  
+
+- [DESI Legacy Imaging Surveys DR10](https://www.legacysurvey.org), 
+with photometric redshifts and star/galaxy 
+separation, including NEOWISE. The Legacy surveys have good coverage of the 
+southern hemisphere and morphological classifications of over 5 billion sources, 
+and photometry in griz. There is a photometric redshift catalogue which will 
+also employ (overview of the Legacy Surveys: 
+[Dey et al. 2019](https://ui.adsabs.harvard.edu/abs/2019AJ....157..168D/abstract))
+
+- [DESI DR1](https://data.desi.lbl.gov/doc/releases/dr1/), 
+spectroscopic data for more than 18 million targets from the 
+first release of DESI (14 million galaxies and QSO redshifts). 
+The overlap with the LSST footprint will include about 20% of the DESI targets, 
+as DESI DR1 is mostly a northern survey. 
+([DESI Collaboration, Abdul-Karim et al. 2025](https://arxiv.org/abs/2503.14745))
+
+We are also in the process of compiling deep galaxy and redshift catalogues 
+(spectroscopic and photometric) for the Deep Drilling Fields. These cosmological 
+fields have many targeted areas from deeper surveys and we are harvesting the 
+data from all catalogues available so that cross-matching with transients can 
+start early (Weston et al., in preparation). 
 
 _Sherlock_ also has the ability to remotely query the NASA/IPAC Extragalactic Database, caching results locally to speed up future searches targeting the same region of sky, and in this way we have built up an almost complete local copy of the NED catalogue. More catalogues are continually being added to the library as they are published and become publicly available.
 
@@ -106,8 +135,8 @@ Once each transient has a set of independently crossmatched synonyms and associa
 
 We have constructed a multi-billion row database which contains all these catalogues. It currently consumes about 4.5TB and sits on a separate, similarly specified machine to that of the Lasair database. It will grow significantly as new catalogues are added (e.g. Pan-STARRS 3_π_ DR2, VST and VISTA surveys, future Gaia releases etc).
 
-The _Sherlock_ code is open source and can be found at: [https://github.com/thespacedoctor/sherlock](https://github.com/thespacedoctor/sherlock). Documentation is also available online here: [https://qub-sherlock.readthedocs.io/en/master/](https://qub-sherlock.readthedocs.io/en/master/).
-
+The [_Sherlock_ code](https://github.com/thespacedoctor/sherlock) is open source
+and [there is documentation](https://qub-sherlock.readthedocs.io/en/master/).
 Although the code for _Sherlock_ is public, it requires access to a number of large databases which are custom built from their original, public, releases. The latter is proprietary and therefore would require some effort from users to reproduce. As part of the Lasair project we are exploring public access to the integrated _Sherlock_ code and database information through an API.
 
 Sherlock 2.0 was reviewed as a LSST:UK Deliverable in March 2020. The review noted that an algorithm enhancement would be desirable to take into account stellar proper motions, since some proper motion stars will be variable and if cross-matched with a static catalogue will fall outside the nominal match radius. This is an enhancement we will taken forward for future versions.
@@ -148,4 +177,3 @@ Véron-Cetty, M P, and P Véron. 2010. “A catalogue of quasars and active nucl
 
 * * *
 
-1.  https://ned.ipac.caltech.edu/Library/Distances/

@@ -63,7 +63,7 @@
 
             // DEFAULT, ALWAYS PRESENT AUTOCOMPLETE
             var justTypeCollectionValues = [
-                { key : "MYSQL > tainow", value: "tainow()", info: "The current time in Modified Julian Days"},
+                { key : "MYSQL > mjdnow", value: "mjdnow()", info: "The current time in Modified Julian Days"},
                 { key : "MYSQL > as", value: "as", info: false},
                 { key : "MYSQL > BETWEEN", value: "BETWEEN xx AND xx", info: ""},
                 { key : "MYSQL > LIKE", value: "LIKE '%xx%'", info: ""}
@@ -71,13 +71,16 @@
             var tableColumns = [];
             {% for schema_name, schema_content in schemas_core.items %}
                 justTypeCollectionValues.push({ key : "TABLE > {{schema_name}}", value: "{{schema_name}}", info: ""})
+                // TRIGGER NEEDS TO BE UNIQUE .. WITHOUT SLICING 'OBJECTS_EXT' WILL RETURN 'OBJECTS'
+                trigger = "{{schema_name}}".slice(-5).concat(".");
                 var theseColumns = {
-                    trigger: "{{schema_name}}".concat("."),
+                    trigger: trigger,
                     values: [],
                     noMatchTemplate: "",
                     spaceSelectsMatch: false,
                     selectTemplate: function(item) {
-                        return item.original.value;
+                        // NEED TO REMOVE THE ORIGINAL TRIGGER
+                        return item.original.value.replace("{{schema_name}}".slice(0,-5), "");
                     },
                     menuItemTemplate: function(item) {
                         if (item.original.info.length > 0) {
@@ -153,7 +156,6 @@
                 selectTemplate: function(item) {
                     if (item.original.key.includes("MYSQL >")) {
                         return item.original.value+" ";
-
                     } else {
                         return item.original.value+".";
                     }
@@ -184,14 +186,22 @@
                 document.querySelector("textarea#id_conditions")
             );
 
-            var tributeAutocompleteTestAreaColumns = new Tribute({
+            var tributeAutocompleteSelectedColumns = new Tribute({
                 noMatchTemplate: "",
+                spaceSelectsMatch: '',
+                replaceTextSuffix: ', ',
                 collection: tableColumns
             });
-            tributeAutocompleteTestAreaColumns.attach(
+            var tributeAutocompleteWhereColumns = new Tribute({
+                noMatchTemplate: "",
+                spaceSelectsMatch: '',
+                replaceTextSuffix: ' ',
+                collection: tableColumns
+            });
+            tributeAutocompleteSelectedColumns.attach(
                 document.querySelector("textarea#id_selected")
             );
-            tributeAutocompleteTestAreaColumns.attach(
+            tributeAutocompleteWhereColumns.attach(
                 document.querySelector("textarea#id_conditions")
             );
 
@@ -199,7 +209,7 @@
             document.querySelector("textarea#id_selected").addEventListener('keydown', function(e) {
                 updateFrom()
                 if (e.key == 'Tab') {
-                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteTestAreaColumns.isActive) {
+                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteSelectedColumns.isActive) {
                         e.stopImmediatePropagation()
                     }
                 }
@@ -207,7 +217,7 @@
             });
             document.querySelector("textarea#id_conditions").addEventListener('keydown', function(e) {
                 if (e.key == 'Tab') {
-                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteTestAreaColumns.isActive) {
+                    if (tributeAutocompleteSelectArea.isActive | tributeAutocompleteWhereColumns.isActive) {
                         e.stopImmediatePropagation()
                     }
                 }

@@ -17,7 +17,6 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo',
               'sphinx.ext.coverage', 'sphinx.ext.linkcode',
               'sphinxcontrib.mermaid', 'sphinx_search.extension', 'sphinx_design']
 
-
 class Mock(MagicMock):
     """AVOID INSTALLING THESE C-DEPENDENT PACKAGES"""
     @classmethod
@@ -49,11 +48,11 @@ elif "dev" in str(repo.active_branch):
     dev = True
 
 if dev:
-    os.environ["lasairurl"] = "https://lasair-dev.lsst.ac.uk"
-    os.environ["lasairsvcurl"] = "https://lasair-dev-svc.lsst.ac.uk"
+    os.environ["lasairurl"] = "https://lasair-lsst-dev.lsst.ac.uk"
+    os.environ["lasairsvcurl"] = "https://lasair-lsst-dev-svc.lsst.ac.uk"
 else:
-    os.environ["lasairurl"] = "https://lasair-ztf.lsst.ac.uk"
-    os.environ["lasairsvcurl"] = "https://lasair-ztf-svc.lsst.ac.uk"
+    os.environ["lasairurl"] = "https://lasair-lsst.lsst.ac.uk"
+    os.environ["lasairsvcurl"] = "https://lasair-lsst-svc.lsst.ac.uk"
 
 
 sys.path.insert(0, os.path.abspath(

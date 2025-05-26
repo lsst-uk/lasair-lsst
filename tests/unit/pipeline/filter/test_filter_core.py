@@ -91,10 +91,16 @@ class FilterTest(unittest.TestCase):
 
     def test_handle_alert_no_sources(self):
         """Test that the handle_alert method returns 0 for an alert with no sources."""
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': []}
         fltr = Filter(group_id='filter_test', maxalert=0)
         result = fltr.handle_alert(test_alert)
+        self.assertEqual(result, 0)
+
+    def test_handle_alert_list_no_sources(self):
+        """Test that the handle_alert_list method returns  for an alert list with no sources."""
+        fltr = Filter(group_id='filter_test', maxalert=0)
+        result = fltr.handle_alert_list([])
         self.assertEqual(result, 0)
 
     @patch('filtercore.Filter.create_insert_query')
@@ -102,7 +108,7 @@ class FilterTest(unittest.TestCase):
     def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
         """Test that handle_alert method returns 1 for an alert with sources."""
         mock_create_insert_query.return_value = "QUERY"
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': ['']}
         fltr = Filter(group_id='filter_test', maxalert=0)
         result = fltr.handle_alert(test_alert)
@@ -117,7 +123,7 @@ class FilterTest(unittest.TestCase):
         """Test that handle_alert method works with a sherlock annotation."""
         mock_create_insert_query.return_value = "QUERY"
         mock_create_insert_sherlock.return_value = "SHERLOCK"
-        test_alert = {'diaObject': {'diaObjectId': 'blah'},
+        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': [''],
                       'annotations': {'sherlock': [{}]}}
         fltr = Filter(group_id='filter_test', maxalert=0)
@@ -171,7 +177,7 @@ class FilterTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = None
-        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123}}'
+        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123, "ra":23, "decl":23}}'
         mock_handle_alert.return_value = 1
         fltr = Filter(group_id='filter_test', maxalert=1)
         fltr.consumer = mock_consumer

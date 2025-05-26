@@ -24,5 +24,7 @@ def schema_index(request):
         'sherlock_classifications': get_schema('sherlock_classifications'),
         '<annotator>': get_schema('annotations'),
         'watchlist_hits': get_schema('watchlist_hits'),
+        'objects-ext': get_schema('objects', extended=True),
     }
+
     return render(request, 'db_schema/schema_index.html', {'schemas': schemas})

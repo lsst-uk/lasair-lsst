@@ -25,6 +25,7 @@
       - gkdbutils
       - docopt
       - mysql-connector-python
+      - lz4
 
 - name: Make sure the repo is up to date
   git: 

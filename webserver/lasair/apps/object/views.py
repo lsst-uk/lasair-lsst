@@ -38,7 +38,7 @@ def object_detail(request, diaObjectId):
     ]
     ```           
     """
-    data = objjson(diaObjectId, full=True)
+    data = objjson(diaObjectId, lite=True)
 
     # how to replace the real data with fake data
 #    with open('/home/ubuntu/fake.json', 'r') as f:
