@@ -1,6 +1,6 @@
 """ examples
-python3 run_features.py ~/lasair-lsst/tests/unit/pipeline/filter/sample_alerts/99999999999.json
-python3 run_features.py ~/lasair-lsst/tests/unit/pipeline/filter/sample_alerts/402778310355976216.json
+python3 run_features.py ~/lasair-lsst/tests/unit/pipeline/filter/sample_alerts/
+BE CAREFUL THIS CHANGES THE FILES IN THE TEST SUITE
 """
 import sys, json, os
 sys.path.append('../../common')
@@ -8,7 +8,11 @@ import settings
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 from features.FeatureGroup import FeatureGroup
 
-dir = '/home/ubuntu/lasair-lsst/tests/unit/pipeline/filter/sample_alerts'
+if len(sys.argv) > 1:
+    dir = sys.argv[1]
+else:
+    print('Usage: run_features <sample_alert_directory>')
+    sys.exit()
 
 for file in os.listdir(dir):
     if not file.endswith('.json'): continue
