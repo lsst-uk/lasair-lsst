@@ -14,3 +14,4 @@ master_db_port: "{{ db_port }}"
 master_db_username: "{{ settings.master_db_username }}"
 master_db_password: "{{ settings.master_db_password }}"
 
+venv_path: /opt/lasair_venv

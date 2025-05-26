@@ -40,6 +40,7 @@
       - django-crispy-forms
       - django-recaptcha
       - lz4
+    extra_args: "--break-system-packages"
 
 - name: Install more python packages
   become: true
@@ -56,6 +57,7 @@
       - pandas
       - plotly
       - hmpty
+    extra_args: "--break-system-packages"
 
 - name: Disable Apache
   become: true

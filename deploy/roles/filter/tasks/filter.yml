@@ -1,37 +1,39 @@
 - name: Install apt packages
   become: true
   apt: 
-      name:
-        - swig
-        - python3-dev
-        - python3-pip
-        - postfix
-      state: present
-      update_cache: true
+    name:
+      - swig
+      - python3-dev
+      - python3-pip
+      - python3-venv
+      - postfix
+    state: present
+    update_cache: true
 
 - name: Install python packages
   become: true
   pip: 
-      executable: pip3 
-      name: 
-        - gkhtm
-        - gkutils
-        - numpy
-        - ephem
-        - confluent-kafka==2.1.1
-        - mysql-connector-python
-        - mocpy
-        - docopt
-        - scipy
-        - skytag
-        - dustmaps
-        - bazinBlackBody
+    virtualenv: "{{ venv_path }}" 
+    virtualenv_site_packages: true
+    name: 
+      - gkhtm
+      - gkutils
+      - numpy
+      - ephem
+      - confluent-kafka
+      - mysql-connector-python
+      - mocpy
+      - docopt
+      - scipy
+      - skytag
+      - dustmaps
+      - bazinBlackBody>=0.8
 
 - name: Install dustmaps
   become: true
   ansible.builtin.script:
     cmd: dustmap.py
-    executable: python3
+    executable: "{{ venv_path }}/bin/python3"
 
 #- name: Create csvfiles directory
 #  file:
