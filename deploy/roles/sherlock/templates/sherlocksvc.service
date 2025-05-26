@@ -6,7 +6,7 @@ After=network.target
 User=ubuntu
 Group=www-data
 WorkingDirectory=/opt/lasair
-ExecStart=/home/ubuntu/.local/bin/uwsgi --ini sherlock_service.ini
+ExecStart=uwsgi --virtualenv {{ venv_path }} --ini sherlock_service.ini
 
 [Install]
 WantedBy=multi-user.target

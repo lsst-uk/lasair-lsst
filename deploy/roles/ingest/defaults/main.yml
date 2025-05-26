@@ -1,0 +1,6 @@
+---
+# defaults file for ingest
+
+# python venv path
+venv_path: /opt/lasair_venv
+

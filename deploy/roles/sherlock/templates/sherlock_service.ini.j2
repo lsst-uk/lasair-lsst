@@ -1,11 +1,11 @@
 [uwsgi]
+plugins = python3
 module = app:app
 
 master = true
 processes = 2
 
-socket = sherlocksvc.sock
-chmod-socket = 660
+http-socket = :5500
 vacuum = true
 
 die-on-term = true

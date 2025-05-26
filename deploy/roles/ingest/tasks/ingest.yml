@@ -13,6 +13,8 @@
 - name: "Install python packages"
   become: true
   pip:
+    virtualenv: "{{ venv_path }}"
+    virtualenv_site_packages: true
     name:
       - confluent-kafka
       - confluent_kafka[schemaregistry,avro]

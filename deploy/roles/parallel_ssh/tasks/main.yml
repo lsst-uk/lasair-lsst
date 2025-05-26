@@ -20,4 +20,5 @@
       - mysql-connector==2.1.7
       - cassandra-driver
       - numpy
+    extra_args: "--break-system-packages"
 

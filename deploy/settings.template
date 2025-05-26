@@ -115,7 +115,7 @@ instances:
     floating_ip: false
     flavor: tiny
   cutoutcass:
-    number: 1
+    number: 0
     root_volume_size: 25
     extra_volumes:
       cutoutcass:
@@ -147,16 +147,13 @@ lasair_email: lasair@lsst.ac.uk
 # An admin email address for services that expect one
 admin_email: lasair-help@mlist.is.ed.ac.uk
 
-# Default from address to use when sending email
-lasair_email: lasair@lsst.ac.uk
-
 # CephFS export location for the Sherlock database share
 sherlock_share: "10.19.4.16:6789,10.19.4.17:6789,10.19.4.18:6789:/volumes/_nogroup/f7d66a57-bdce-4924-8817-4b968ca9648f/7a8807b0-f30d-46a5-820a-1114071e5a04"
 
 # OpenStack configuration
 os:
   # Name of the base image
-  image_name: ubuntu-jammy
+  image_name: ubuntu-noble
   # Name of the private network
   network_name: lasair-test
   # Name of the network to use for Manila shares
