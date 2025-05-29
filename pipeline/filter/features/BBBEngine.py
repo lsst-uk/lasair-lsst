@@ -1,4 +1,5 @@
-import json, sys, numpy
+import json, sys, math
+import numpy as np
 from .BBBCore import *
 WL    = [0.380,     0.500,     0.620,     0.740,     0.880,     1.000, ]
 BANDS = ['u',       'g',       'r'  ,     'i'  ,     'z'  ,     'y'    ]
@@ -139,19 +140,34 @@ class BBB():
                 dictb['tns_name'] = lc['TNS']['tns_prefix'] +' '+ lc['TNS']['tns_name']
             except:
                 dictb['tns_name'] = ''
+
+        if dicte:
+            if dictb:
+                if dicte['AIC'] < dictb['AIC']:
+                    dict = dicte
+                else:
+                    dict = dictb
+                    dict['k']    = dict['kr']
+            else:
+                dict = dicte
+        elif dictb:
+            dict = dictb
+            dict['k']    = dict['kr']
+        else:
+            dict = None
     
-        return (dicte, dictb)
+        return dict
 
     def plot(self, alert, dictx, filename):
 
         lc = self.lc
-        isbazin = ('kr' in dictx)
+        isbazin = (dictx and 'kr' in dictx)
         npoint = len(lc['t'])
         tobs = lc['t']
         fobs = lc['flux']
         
         plt.rcParams.update({'font.size': 8})
-        fig = plt.figure(figsize=(6,6))
+        fig = plt.figure(figsize=(4,4))
         ax = plt.subplot(1, 1, 1)
         ax.set_yscale('log')
         ax.scatter([0.0], [0.0], s = 180, marker = "D", color = 'black')
@@ -180,70 +196,25 @@ class BBB():
         # bracket with a bit of slack each side. Log version.
         ax.set_ylim([math.exp(1.1*m - 0.1*M), math.exp(1.1*M - .1*m)])
         ax.legend()
-        isbazin = ('kr' in dictx)
-        if isbazin:
-            left_text  = "%s Bazin in flux" % lc['objectId']
+        if dictx and isbazin:
+            left_text  = "%s Bazin" % lc['objectId']
             right_text ="T=%.1f kK (g-r=%.1f)\nkr=%.2f perday\nkf=%.2f perday"
             right_text = right_text % (dictx['T'], g_minus_r(dictx['T']), dictx['kr'], dictx['kf'])
-        else:
-            left_text  = "%s Exp in flux" % lc['objectId']
+        elif dictx:   # must be exp fit
+            left_text  = "%s Exp" % lc['objectId']
             right_text ="T=%.1f kK (g-r=%.1f)\nk=%.2f perday"
             right_text = right_text % (dictx['T'], g_minus_r(dictx['T']), dictx['k'])
-    
-        ax.plot([0.5,1.5], [fluxmin, fluxmin*math.exp(0.25)], color='black')
-        ax.text(0.8, fluxmin, '0.25 perday', fontsize=10)
-    
-        plt.title(left_text,  fontsize=16, loc='left')
-        plt.title(right_text, fontsize=10, loc='right')
-        plt.savefig(filename)
-        plt.close(fig)
-        npoint = len(lc['t'])
-        tobs = lc['t']
-        fobs = lc['flux']
-        
-        plt.rcParams.update({'font.size': 8})
-        fig = plt.figure(figsize=(6,6))
-        ax = plt.subplot(1, 1, 1)
-        ax.set_yscale('log')
-        ax.scatter([0.0], [0.0], s = 180, marker = "D", color = 'black')
-        trange = np.arange(min(tobs), max(tobs)+1, 1)
-        
-        for iwl in range(len(WL)):
-            tobs_ = []
-            fobs_ = []
-            for i in range(npoint):
-                if lc['bandindex'][i] == iwl:
-                    tobs_.append(tobs[i])
-                    fobs_.append(fobs[i])
-            ax.errorbar(tobs_, fobs_, yerr=sigma, fmt='o', color=color[iwl], label=BANDS[iwl])
-            if dictx:
-                if isbazin:
-                    fitb = [dictx['A'], dictx['T'], dictx['t0'], dictx['kr'], dictx['kf']]
-                    ax.plot(trange, bazin(trange, WL[iwl], fitb), color=color[iwl])
-                else:
-                    fite = [dictx['A'], dictx['T'], dictx['k']]
-                    ax.plot(trange, expit(trange, WL[iwl], fite), color=color[iwl])
-    
-        fluxmin = max(1, np.min(fobs))
-        fluxmax = np.max(fobs)
-        m = math.log(fluxmin)
-        M = math.log(fluxmax)
-        # bracket with a bit of slack each side. Log version.
-        ax.set_ylim([math.exp(1.1*m - 0.1*M), math.exp(1.1*M - .1*m)])
-        ax.legend()
-        if isbazin:
-            left_text  = "%s Bazin in flux" % lc['objectId']
-            right_text ="T=%.1f kK (g-r=%.1f)\nkr=%.2f perday\nkf=%.2f perday"
-            right_text = right_text % (dictx['T'], g_minus_r(dictx['T']), dictx['kr'], dictx['kf'])
         else:
-            left_text  = "%s Exp in flux" % lc['objectId']
-            right_text ="T=%.1f kK (g-r=%.1f)\nk=%.2f perday"
-            right_text = right_text % (dictx['T'], g_minus_r(dictx['T']), dictx['k'])
-    
-        ax.plot([0.5,1.5], [fluxmin, fluxmin*math.exp(0.25)], color='black')
-        ax.text(0.8, fluxmin, '0.25 perday', fontsize=10)
-    
-        plt.title(left_text,  fontsize=16, loc='left')
+            left_text  = "%s" % lc['objectId']
+            right_text = ''
+
+        plt.title(left_text,  fontsize=12, loc='left')
         plt.title(right_text, fontsize=10, loc='right')
-        plt.savefig(filename)
-        plt.close(fig)
+#        ax.plot([0.5,1.5], [fluxmin, fluxmin*math.exp(0.25)], color='black')
+#        ax.text(0.8, fluxmin, '0.25 perday', fontsize=10)
+    
+        if filename:
+            plt.savefig(filename)
+            plt.close(fig)
+        else:
+            plt.show()

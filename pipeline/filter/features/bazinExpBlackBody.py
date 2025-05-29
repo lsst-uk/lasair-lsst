@@ -43,26 +43,13 @@ class bazinExpBlackBody(FeatureGroup):
             return fdict
 
         BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
-                A=1000, T=4, t0=-5, kr=0.1, kf=0.01, verbose=False)
-        try:
-            (fit_e, fit_b) =  BE.make_fit(self.alert)
-        except:
-            return fdict
-
-        # if both fits are made, use the one with the smallest AIC
-        if fit_e:
-            if fit_b:
-                if fit_e['AIC'] < fit_b['AIC']:
-                    fit = fit_e
-                else:
-                    fit = fit_b
-                    fit['k']    = fit['kr']
-            else:
-                fit = fit_e
-        elif fit_b:
-            fit = fit_b
-            fit['k']    = fit['kr']
-        else:
+                A=1000, T=4, t0=-5, kr=0.1, kf=0.01)
+        fit =  BE.make_fit(self.alert)
+        if not fit:
+            BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
+                A=1000, T=4, t0=-5, kr=0.01, kf=0.01)
+            fit =  BE.make_fit(self.alert)
+        if not fit:
             return fdict
 
         fdict['BBBTemp']        = fit['T']
