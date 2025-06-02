@@ -136,7 +136,11 @@
         mysql_cnf_template: "my.cnf.mdb10x-galera"
         mysql_datadir: "/var/lib/mysql"
         mysql_root_password: "{{ settings.master_db_root_password }}"
-        mysql_hostnames: "{{ groups['backend_db'] + groups['frontend_db'] }}"
+        #mysql_hostnames: "{{ groups['backend_db'] + groups['frontend_db'] }}"
+        mysql_hostnames: >-
+          {{ (groups['backend_db'] + groups['frontend_db'])
+             | map('extract', hostvars, ['ansible_default_ipv4','address'])
+             | list }}
         mysql_password: "{{ settings.master_db_root_password }}"
         cmon_mysql_password: "{{ settings.master_db_root_password }}"
         mysql_port: 3306
@@ -211,11 +215,11 @@
           - GRANT SELECT ON mysql.roles_mapping TO 'maxscale'@'{{ ip }}';
           - GRANT SHOW DATABASES ON *.* TO 'maxscale'@'{{ ip }}';
         login_user: root
-        login_password: "{{ password }}"
+        login_password: "{{ settings.master_db_root_password }}"
         single_transaction: yes
       register: result
       until: result is success
-      retries: 90
+      retries: 0
       delay: 10 
   tags: maxscale_user
 
