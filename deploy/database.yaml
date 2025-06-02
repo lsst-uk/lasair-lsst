@@ -1,6 +1,6 @@
 ---
 
-- hosts: db,frontend_db,backend_db,cluster_control
+- hosts: localhost,db,frontend_db,backend_db,cluster_control
   gather_facts: true
   tags: facts
 
@@ -298,7 +298,7 @@
   tasks:
     - name: Create SQL files
       ansible.builtin.shell:
-        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} > {{ item }}.sql"
+        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} > {{ schema }}/{{ item }}.sql"
         chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
       loop:
         - "objects"
@@ -308,7 +308,7 @@
         - "watchlist_hits"
         - "annotations"
         - "mma_area_hits"
-        - "lasair_statistics"
+  tags: create_sql
 
 - hosts: db,backend_db[0]
   gather_facts: false
@@ -317,6 +317,7 @@
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     git_branch: "{{ lasair_version }}"
+    schema: 7_4_A
   roles:
     - lasair_database
   tags: setup_database
