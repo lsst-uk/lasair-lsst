@@ -60,6 +60,7 @@ import filters
 import watchlists
 import watchmaps
 import mmagw
+from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 from features.FeatureGroup import FeatureGroup
