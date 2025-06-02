@@ -124,6 +124,18 @@ class Filter:
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
+        # get the order of the attributes for all tables transferred by CSV
+        tablelist = [
+            'objects',
+            'sherlock_classifications',
+            'watchlist_hits',
+            'area_hits',
+            'mma_area_hits',
+        ]
+        self.csv_attrs = {}
+        for table_name in table_list:
+            self.csv_attrs[table_name] = fetch_attrs(table_name)
+
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
         """
@@ -367,51 +379,15 @@ class Filter:
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        tablelist = [
-            'objects',
-            'sherlock_classifications',
-            'watchlist_hits',
-            'area_hits',
-            'mma_area_hits',
-        ]
-
-        # Make a CSV file for each local table
-        for table in tablelist:
-            query = """
-                SELECT * FROM %s INTO OUTFILE '/data/mysql/%s.txt'
-                FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';
-            """ % (table, table)
-
-            try:
-                self.execute_query(query)
-            except:
-                self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
-                return False
-
-        # Transmit the CSV files to the main database and ingest them
-        try:
-            main_database = db_connect.remote(allow_infile=True)
-        except Exception as e:
-            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
-            return False
-
         commit = True
-        for table in tablelist:
-            sql  = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
-            sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
-            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
-
+        for table_name,attrs in self.csv_attrs.items():
             try:
-                cursor = main_database.cursor(buffered=True)
-                cursor.execute(sql)
-                cursor.close()
-                main_database.commit()
-                self.log.info('%s ingested to main db' % table)
-            except Exception as e:
-                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table, str(e)))
+                transfer_csv(table_name, attrs)
+                self.log.info('%s ingested to main db' % table_name)
+            except:
+                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
                 commit = False
-                break
-        main_database.close()
+                return False
 
         if commit:
             self.consumer.commit()
