@@ -7,12 +7,27 @@
   with_items:
     - "cqlsh -e \"create keyspace if not exists {{ keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor': {{ replication_factor }} };\""
 
-- name: Create tables
-  command: "cqlsh -e 'use {{ keyspace }}; {{ lookup('url', git_raw_url + '/' + git_branch + item, split_lines=false) }};'"
-  with_items:
-    - "/common/schema/lasair_cql/cutouts.cql"
-    - "/common/schema/lasair_cql/cutoutsByObject.cql"
+- name: Make sure the repo is up to date
+  git:
+    repo: "{{ git_url }}"
+    dest: "{{ ansible_env.HOME }}/{{ git_name }}"
+    version: "{{ lasair_version }}"
 
+- name: Create CQL files
+  ansible.builtin.shell:
+    cmd: "python3 3_make_create_table.py cql {{ schema }} {{ item }} > {{ schema }}/{{ item }}.cql"
+    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+  loop:
+    - "cutouts"
+    - "cutoutsByObject"
+
+- name: Create tables
+  ansible.builtin.command:
+    cmd: "cqlsh -k {{ keyspace }} -f {{ schema }}/{{ item }}.cql"
+    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+  with_items:
+    - "cutouts.cql"
+    - "cutoutsByObject.cql"
 
 - name: flush handlers
   meta: flush_handlers
