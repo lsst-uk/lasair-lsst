@@ -207,16 +207,6 @@
   serial: 1
   tags: cassandra
 
-- hosts: cassandranodes[0]
-  vars_files:
-    - settings.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
-    git_branch: "{{ lasair_version }}"
-  roles:
-    - lasair_cassandra
-  tags: cassandra
-
 - hosts: parallel_ssh
   gather_facts: false
   vars_files:
@@ -249,6 +239,30 @@
     - gkansible.gkservercollection.cassandra_start_service
   serial: 1
   tags: cutoutcass
+
+# Hopefully temporary workaround for incompatibility between current version of Cassandra and Python 3.12 - 3/6/25
+- hosts: cassandranodes,cutoutcass
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Remove default cqlsh
+      ansible.builtin.file:
+        path: /usr/bin/cqlsh
+        state: absent
+    - name: Install cqlsh snap
+      community.general.snap:
+        name:
+          - cqlsh
+
+- hosts: cassandranodes[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+    git_branch: "{{ lasair_version }}"
+  roles:
+    - lasair_cassandra
+  tags: cassandra
 
 - hosts: cutoutcass[0]
   vars_files:
