@@ -40,3 +40,4 @@ services:
               source: "{{ mntpath }}/data"
               target: /var/lib/zookeeper/data
             - /opt/jmx_exporter:/opt/jmx_exporter
+            - /etc/hosts:/etc/hosts
