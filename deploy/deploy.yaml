@@ -258,8 +258,8 @@
   vars_files:
     - settings.yaml
   vars:
+    schema: 7_4_A
     cassandra_cluster_name: "{{ lasair_name }}"
-    git_branch: "{{ lasair_version }}"
   roles:
     - lasair_cassandra
   tags: cassandra

@@ -26,8 +26,8 @@
     cmd: "cqlsh -k {{ keyspace }} -f {{ schema }}/{{ item }}.cql"
     chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
   with_items:
-    - "cutouts.cql"
-    - "cutoutsByObject.cql"
+    - "cutouts"
+    - "cutoutsByObject"
 
 - name: flush handlers
   meta: flush_handlers
