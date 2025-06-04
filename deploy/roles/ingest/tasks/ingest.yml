@@ -5,6 +5,7 @@
   apt:
     pkg:
       - python3-pip
+      - python3-venv
       - swig
       - zlib1g
     state: present
@@ -15,6 +16,7 @@
   pip:
     virtualenv: "{{ venv_path }}"
     virtualenv_site_packages: true
+    virtualenv_command: 'python3 -m venv'
     name:
       - confluent-kafka
       - confluent_kafka[schemaregistry,avro]

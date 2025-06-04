@@ -6,6 +6,7 @@
   apt:
       name: 
         - swig
+        - python3-venv
         - python3-dev
         - python3-pip
         - mariadb-client
@@ -20,7 +21,7 @@
   pip:
     virtualenv: "{{ venv_path }}"
     virtualenv_site_packages: true
-    executable: pip3
+    virtualenv_command: 'python3 -m venv'
     name:
       - docopt
       - numpy
@@ -38,10 +39,10 @@
   pip:
     virtualenv: "{{ venv_path }}"
     virtualenv_site_packages: true
-    executable: pip3
+    virtualenv_command: 'python3 -m venv'
     name:
       - hmpty
-    extra_args: "--no-use-pep-517"
+    extra_args: "--no-use-pep517"
 
 - name: Make sure the repo is up to date
   git: 
