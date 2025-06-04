@@ -15,6 +15,7 @@
   pip: 
     virtualenv: "{{ venv_path }}" 
     virtualenv_site_packages: true
+    virtualenv_command: 'python3 -m venv'
     name: 
       - gkhtm
       - gkutils

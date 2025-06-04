@@ -52,7 +52,7 @@
   tasks:
     - name: Get API token
       ansible.builtin.uri:
-        url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
+        url: "http://{{ lasair_name }}-web:8080/api/auth-token/"
         method: POST
         body_format: json
         body:
