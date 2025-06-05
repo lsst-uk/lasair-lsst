@@ -135,7 +135,7 @@ class Filter:
         ]
         self.csv_attrs = {}
         for table_name in table_list:
-            self.csv_attrs[table_name] = fetch_attrs(table_name)
+            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name)
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -380,10 +380,16 @@ class Filter:
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
+        try:
+            main_database = db_connect.remote(allow_infile=True)
+        except Exception as e:
+            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
+            return False
+
         commit = True
         for table_name,attrs in self.csv_attrs.items():
             try:
-                transfer_csv(table_name, attrs)
+                transfer_csv(self.database, main_database, attrs, table_name, table_name)
                 self.log.info('%s ingested to main db' % table_name)
             except:
                 self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
