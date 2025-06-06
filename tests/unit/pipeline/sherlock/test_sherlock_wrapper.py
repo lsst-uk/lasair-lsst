@@ -264,7 +264,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             # alert should not have a Sherlock annotation
             self.assertNotIn('sherlock', alerts[0].get('annotations', []))
             # classify should have been called once
-            mock_classifier.return_value.classify.assert_called_once()
+            mock_classifier.return_value.classify.assert_not_called()
 
     # check that a missing ssnamenr field is treated as null
     #def test_classify_no_ss_alert(self):
