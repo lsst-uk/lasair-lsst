@@ -262,7 +262,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             # length of alerts should still be 1
             self.assertEqual(len(alerts), 1)
             # alert should not have a Sherlock annotation
-            self.assertNotIn('sherlock', alerts[0]['annotations'])
+            self.assertNotIn('sherlock', alerts[0].get('annotations', []))
             # classify should have been called once
             mock_classifier.return_value.classify.assert_called_once()
 
