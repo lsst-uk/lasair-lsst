@@ -156,10 +156,13 @@ def classify(conf, log, alerts):
     dec = []
     for alert in alerts:
         diaObject = alert.get('diaObject')
+        if conf.get('ignore_singletons') and len(alert.get('diaSourcesList')) < 2:
+            log.debug("Skipping classification of singleton")
+            continue
         if diaObject:
             name = str(diaObject['diaObjectId'])
-            if not name in annotations:
-                if not name in names:
+            if name not in annotations:
+                if name not in names:
                     names.append(name)
                     ra.append(diaObject['ra'])
                     dec.append(diaObject['decl'])
@@ -340,6 +343,7 @@ if __name__ == '__main__':
     parser.add_argument('--version', action='version', version='%(prog)s {}'.format(__version__))
     parser.add_argument('--poll_timeout', type=int, default=30, help='kafka consumer poll timeout in s') # see https://docs.confluent.io/platform/current/clients/confluent-kafka-python/html/index.html
     parser.add_argument('--max_poll_interval', type=int, default=300000, help='kafka max poll interval in ms') # see https://github.com/edenhill/librdkafka/blob/master/CONFIGURATION.md
+    parser.add_argument('--ignore_singletons', action="store_true", default=False, help='ignore alerts with <2 sources')
     conf = vars(parser.parse_args())
 
     # use config file if set

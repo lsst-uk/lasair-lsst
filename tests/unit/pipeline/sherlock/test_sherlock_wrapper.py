@@ -18,6 +18,10 @@ with open("sample_alerts/single_alert_batch.json", 'r') as f:
     example_alert = data[0]
     example_input_data = json.dumps(data[0])
 
+with open("sample_alerts/singleton.json", 'r') as f:
+    data = json.load(f)
+    example_singleton = data[0]
+
 #with open("sample_alerts/lsst_ss.json", 'r') as f:
 #    data = json.load(f)
 #    example_alert_ss = data[0]
@@ -204,35 +208,63 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
 
     def test_classify_alert_batch(self):
         conf = {
-            'broker':'',
-            'group':'',
-            'input_topic':'',
-            'output_topic':'',
-            'batch_size':5,
-            'timeout':1,
-            'max_errors':-1,
-            'cache_db':'',
+            'broker': '',
+            'group': '',
+            'input_topic': '',
+            'output_topic': '',
+            'batch_size': 5,
+            'timeout': 1,
+            'max_errors': -1,
+            'cache_db': '',
             'sherlock_settings': 'sherlock_test.yaml'
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
-            alerts = [ example_alert.copy() ]
-            classifications = { "177218944862519874": "Q" }
-            #crossmatches = [ { 'transient_object_id':"ZTF18aapubnx", 'rank':1, 'z':1.2, 'catalogue_object_type':'thing', 'separationArcsec':0.1} ]
+            alerts = [example_alert.copy()]
+            classifications = {"177218944862519874": "Q"}
+            # crossmatches = [ { 'transient_object_id':"ZTF18aapubnx", 'rank':1, 'z':1.2, 'catalogue_object_type':'thing', 'separationArcsec':0.1} ]
             crossmatches = SherlockWrapperClassifierTest.crossmatches
             mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
             # should report classifying 1 alert
             self.assertEqual(wrapper.classify(conf, log, alerts), 1)
-            # length of alerts shouls still be 1
+            # length of alerts should still be 1
             self.assertEqual(len(alerts), 1)
             # content of alerts should be as expected
-            self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
+            self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'],
+                             "^https://github.com/thespacedoctor/sherlock")
+            self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'],
+                             "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
             self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
             for key, value in crossmatches[0].items():
                 if key != 'rank':
                     self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
-            # classify should have been called once 
+            # classify should have been called once
             mock_classifier.return_value.classify.assert_called_once()
+
+    def test_classify_singleton(self):
+        """Test that an alert with only one source gets ignored when ignore_singletons option is true."""
+        conf = {
+            'broker': '',
+            'group': '',
+            'input_topic': '',
+            'output_topic': '',
+            'batch_size': 5,
+            'timeout': 1,
+            'max_errors': -1,
+            'cache_db': '',
+            'sherlock_settings': 'sherlock_test.yaml',
+            'ignore_singletons': True
+            }
+        with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
+            alerts = [example_singleton.copy()]
+            mock_classifier.return_value.classify.return_value = ({}, [])
+            # should report classifying 0 alert
+            self.assertEqual(wrapper.classify(conf, log, alerts), 0)
+            # length of alerts should still be 1
+            self.assertEqual(len(alerts), 1)
+            # alert should not have a Sherlock annotation
+            self.assertNotIn('sherlock', alerts[0].get('annotations', []))
+            # classify should have been called once
+            mock_classifier.return_value.classify.assert_not_called()
 
     # check that a missing ssnamenr field is treated as null
     #def test_classify_no_ss_alert(self):
