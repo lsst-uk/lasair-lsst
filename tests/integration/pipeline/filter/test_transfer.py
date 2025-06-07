@@ -59,10 +59,10 @@ class RunTransferTest(TestCase):
         expected_result = ['objectId', 'a2', 'a1']
         attrs = fetch_attrs(cls.msl, table_from)
         # should return three
-        self.assertEqual(len(attrs), 3)
+        cls.assertEqual(len(attrs), 3)
         # check objectID re as expected
         for i in range(3):
-            self.assertEqual(attrs[1], expected_result[i])
+            cls.assertEqual(attrs[1], expected_result[i])
 
     def test_2_transfer(cls):
         """Make CSV and transfer it"""
@@ -75,7 +75,7 @@ class RunTransferTest(TestCase):
         print(result)
         # check objectID re as expected
 #        for i in range(3):
-#            self.assertEqual(attrs[1], expected_result[i])
+#            cls.assertEqual(attrs[1], expected_result[i])
 
 if __name__ == '__main__':
     import xmlrunner
