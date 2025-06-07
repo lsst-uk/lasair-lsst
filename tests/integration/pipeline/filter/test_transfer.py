@@ -19,7 +19,7 @@ config = {
         'db':       'ztf',
         'port':     3306,
         'charset':  'utf8mb4',
-        'allow_infile' : True,
+        'allow_local_infile' : True,
         }
 
 table_from = 'things_from'
