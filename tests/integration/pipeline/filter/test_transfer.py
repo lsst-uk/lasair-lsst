@@ -2,7 +2,7 @@
 Test the csv transfer function from transfer_to_main using a temporary local database.
 """
 
-import sys
+import os, sys
 import unittest.main
 from unittest import TestCase, expectedFailure, mock
 import mysql.connector
@@ -43,6 +43,8 @@ class RunTransferTest(TestCase):
             # insert a record
             query = f"INSERT INTO { table_from } ( objectId, a2, a1 ) VALUES ( 'ZTF23abcdef', 2.2, 1.1 )"
             cursor.execute(query)
+            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
+            os.system(cmd)
 
     @classmethod
     def tearDownClass(cls):
