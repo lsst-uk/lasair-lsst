@@ -62,10 +62,11 @@ class RunTransferTest(TestCase):
         cls.assertEqual(len(attrs), 3)
         # check objectID re as expected
         for i in range(3):
-            cls.assertEqual(attrs[1], expected_result[i])
+            cls.assertEqual(attrs[i], expected_result[i])
 
     def test_2_transfer(cls):
         """Make CSV and transfer it"""
+        attrs = fetch_attrs(cls.msl, table_from)
         transfer_csv(cls.msl, cls.msl, attrs, table_from, table_to)
 
         query = f"SELECT * FROM { table_to }"
