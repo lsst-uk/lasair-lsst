@@ -126,7 +126,7 @@ class Filter:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
         # get the order of the attributes for all tables transferred by CSV
-        tablelist = [
+        table_list = [
             'objects',
             'sherlock_classifications',
             'watchlist_hits',
