@@ -54,7 +54,7 @@ class RunTransferTest(TestCase):
             cursor.execute(query)
         cls.msl.close()
 
-    def test_1_get_attrs(self):
+    def test_1_get_attrs(cls):
         """Read the attributes of table_from"""
         expected_result = ['objectId', 'a2', 'a1']
         attrs = fetch_attrs(cls.msl, table_from)
@@ -64,7 +64,7 @@ class RunTransferTest(TestCase):
         for i in range(3):
             self.assertEqual(attrs[1], expected_result[i])
 
-    def test_2_transfer(self):
+    def test_2_transfer(cls):
         """Make CSV and transfer it"""
         transfer_csv(cls.msl, cls.msl, attrs, table_from, table_to)
 
