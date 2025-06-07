@@ -25,14 +25,14 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to):
     cursor_local = msl_local.cursor(buffered=True, dictionary=True)
     make_csv = 'SELECT '
     make_csv += ','.join(attrs)
-    make_csv += " FROM things INTO OUTFILE '/data/mysql/%s.txt' " % table_name
+    make_csv += " FROM %s INTO OUTFILE '/data/mysql/%s.txt' " % (table_from, table_from)
     make_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
     cursor_local.execute(make_csv)
     
     # push the CSV to the main database
     cursor_remote = msl_remote.cursor(buffered=True, dictionary=True)
-    push_csv = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table_name
-    push_csv += "REPLACE INTO TABLE %s " % table_name
+    push_csv = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table_from
+    push_csv += "REPLACE INTO TABLE %s " % table_to
     push_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
     cursor_remote.execute(push_csv)
     msl_remote.commit()
