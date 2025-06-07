@@ -33,11 +33,11 @@ class RunTransferTest(TestCase):
         with cls.msl.cursor(buffered=True, dictionary=True) as cursor:
             # source of the data, order is a2, a1
             query = f"CREATE TABLE IF NOT EXISTS { table_from } "
-            query += "( objectId varchar(16) NOT NULL, a2 float, a1 float PRIMARY KEY (objectId) )"
+            query += "( objectId varchar(16) NOT NULL, a2 float, a1 float, PRIMARY KEY (objectId) )"
             cursor.execute(query)
             # sink of the data, order is a1, a2
             query = f"CREATE TABLE IF NOT EXISTS { table_to } "
-            query += "( objectId varchar(16) NOT NULL, a1 float, a2 float PRIMARY KEY (objectId) )"
+            query += "( objectId varchar(16) NOT NULL, a1 float, a2 float, PRIMARY KEY (objectId) )"
             cursor.execute(query)
             # insert a record
             query = f"INSERT INTO { table_from } ( objectId, a2, a1 ) VALUES ( 'ZTF23abcdef', 2.2, 1.1 )"
