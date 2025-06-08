@@ -99,6 +99,7 @@ class Filter:
 
         self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
+        self.csv_attrs = {}
 
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
@@ -134,7 +135,6 @@ class Filter:
             'area_hits',
             'mma_area_hits',
         ]
-        self.csv_attrs = {}
         for table_name in table_list:
             self.csv_attrs[table_name] = fetch_attrs(self.database, table_name)
 
