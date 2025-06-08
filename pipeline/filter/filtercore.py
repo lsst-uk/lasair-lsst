@@ -125,6 +125,7 @@ class Filter:
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
 
+    def setup_transfer(self):
         # get the order of the attributes for all tables transferred by CSV
         table_list = [
             'objects',
@@ -545,6 +546,7 @@ class Filter:
          - Transfer to main database"""
 
         self.setup()
+        self.setup_transfer()
 
         # set up the timers
         timers = {}

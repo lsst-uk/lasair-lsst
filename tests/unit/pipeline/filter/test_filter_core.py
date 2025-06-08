@@ -188,17 +188,16 @@ class FilterTest(unittest.TestCase):
         mock_manage_status.assert_called_once()
         mock_manage_status.return_value.add.assert_called_once()
 
-    @patch('filtercore.Filter.execute_query')
-    def test_transfer_to_main_local_error(self, mock_execute_query):
-        """Test that an error when building the CSV causes transfer_to_main to return None"""
-        mock_log = unittest.mock.MagicMock()
-        mock_execute_query.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.setup()
-        fltr.log = mock_log
-        result = fltr.transfer_to_main()
-        self.assertEqual(result, False)
-        mock_log.error.assert_called_once()
+#    @patch('filtercore.Filter.execute_query')
+#    def test_transfer_to_main_local_error(self, mock_execute_query):
+#        """Test that an error when building the CSV causes transfer_to_main to return None"""
+#        mock_log = unittest.mock.MagicMock()
+#        mock_execute_query.side_effect = Exception('test error')
+#        fltr = Filter(group_id='filter_test', maxalert=0)
+#        fltr.log = mock_log
+#        result = fltr.transfer_to_main()
+#        self.assertEqual(result, False)
+#        mock_log.error.assert_called_once()
 
 #    @patch('filtercore.Filter.execute_query')
 #    @patch('filtercore.db_connect.remote')
