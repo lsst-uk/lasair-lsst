@@ -1,5 +1,7 @@
 ---
 
+cache_db: cache
+
 db_name: crossmatch_catalogues
 
 # database should never be accessed remotely

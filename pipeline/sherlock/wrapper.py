@@ -234,7 +234,7 @@ def classify(conf, log, alerts):
             classification = annotations[name]['classification']
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
-            values.append("\n ('{}','{}','{}',%s)".format(sherlock_version, name, classification))
+            values.append("\n ('{}','{}','{}',%s)".format(name, sherlock_version, classification))
             crossmatches.append(crossmatch)
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
         ##query = "INSERT INTO cache VALUES {} AS new ON DUPLICATE KEY UPDATE class=new.class, crossmatch=new.crossmatch".format(",".join(values))

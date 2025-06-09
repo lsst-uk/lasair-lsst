@@ -42,7 +42,7 @@ max_batches: -1
 max_errors: -1
 
 # location of cache database
-cache_db: ""
+cache_db: "mariadb://127.0.0.1/{{ cache_db }}?user={{ sherlock_secret.user }}&password={{ sherlock_secret.password }}"
 
 # location of sherlock settings file
 sherlock_settings: sherlock_settings.yaml

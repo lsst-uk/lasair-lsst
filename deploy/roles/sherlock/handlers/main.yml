@@ -13,3 +13,12 @@
 - name: Load schema
   ansible.builtin.shell: mysql -u root --password={{ mysql_root_password | quote }} {{ db_name | quote }} < /mnt/sherlock/sherlock_schema.sql
 
+- name: Create cache table
+  community.mysql.mysql_query:
+    query:
+      - CREATE TABLE IF NOT EXISTS cache(`name` bigint, `version` varchar(80), `class` varchar(16), `crossmatch` text)
+      - GRANT ALL PRIVILEGES ON cache.* TO '{{ sherlock_user }}'@'%'
+    login_host: 127.0.0.1
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    single_transaction: yes
