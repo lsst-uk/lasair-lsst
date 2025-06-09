@@ -63,8 +63,8 @@
 
 - name: Create systemd service file
   become: true
-  copy:
-    src: sherlocksvc.service
+  template:
+    src: sherlocksvc.service.j2
     dest: /etc/systemd/system/sherlocksvc.service
 
 - name: Make sure service unit is running
