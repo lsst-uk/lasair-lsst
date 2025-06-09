@@ -41,6 +41,7 @@
       - python3-packaging
 
 - name: "Install pip packages"
+  become: true
   pip:
     virtualenv: "{{ venv_path }}"
     virtualenv_site_packages: true
