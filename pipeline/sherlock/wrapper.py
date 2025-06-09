@@ -132,7 +132,7 @@ def classify(conf, log, alerts):
                 cursor.execute(query)
                 for result in cursor.fetchall():
                     try:
-                        if result['version'] == sherlock_version:
+                        if result.get('version') == sherlock_version:
                             match = json.loads(result.get('crossmatch'))
                             annotations[result['name']] = {
                                 'classification': result['class']
