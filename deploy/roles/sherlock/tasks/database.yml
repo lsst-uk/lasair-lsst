@@ -10,7 +10,7 @@
 - name: Create cache table
   community.mysql.mysql_query:
     query:
-      - CREATE TABLE IF NOT EXISTS cache(`name` bigint, `version` varchar(80), `class` varchar(16), `crossmatch` text)
+      - "CREATE TABLE IF NOT EXISTS {{ cache_db }}.cache(`name` bigint, `version` varchar(80), `class` varchar(16), `crossmatch` text)"
       - GRANT ALL PRIVILEGES ON cache.* TO '{{ sherlock_user }}'@'%'
     login_host: 127.0.0.1
     login_user: root
