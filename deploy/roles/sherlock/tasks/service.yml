@@ -33,7 +33,7 @@
       - python3-flask
       - nginx
       - uwsgi
-      - wsgi-plugin-python3
+      - uwsgi-plugin-python3
       - flask-restful
       - python3-numpy
       - python3-setuptools
