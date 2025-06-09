@@ -132,13 +132,14 @@ def classify(conf, log, alerts):
                 cursor.execute(query)
                 for result in cursor.fetchall():
                     try:
-                        match = json.loads(result.get('crossmatch'))
-                        annotations[result['name']] = {
-                            'classification': result['class']
-                            }
-                        for key,value in match.items():
-                            annotations[result['name']][key] = value
-                        log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
+                        if result['version'] == sherlock_version:
+                            match = json.loads(result.get('crossmatch'))
+                            annotations[result['name']] = {
+                                'classification': result['class']
+                                }
+                            for key,value in match.items():
+                                annotations[result['name']][key] = value
+                            log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
                     except ValueError:
                         log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(result['name']))
                         continue
@@ -233,11 +234,11 @@ def classify(conf, log, alerts):
             classification = annotations[name]['classification']
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
-            values.append("\n ('{}','{}',%s)".format(name, classification))
+            values.append("\n ('{}','{}','{}',%s)".format(sherlock_version, name, classification))
             crossmatches.append(crossmatch)
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
         ##query = "INSERT INTO cache VALUES {} AS new ON DUPLICATE KEY UPDATE class=new.class, crossmatch=new.crossmatch".format(",".join(values))
-        query = "INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE class=VALUES(class), crossmatch=VALUES(crossmatch)".format(",".join(values))
+        query = "INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE version=VALUES(version), class=VALUES(class), crossmatch=VALUES(crossmatch)".format(",".join(values))
         log.info("update cache: {}".format(query))
         try:
             with connection.cursor() as cursor:

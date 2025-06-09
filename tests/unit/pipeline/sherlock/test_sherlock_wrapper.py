@@ -6,6 +6,7 @@ import json
 import context
 import wrapper
 from confluent_kafka import KafkaError, KafkaException
+from pkg_resources import get_distribution
 
 log = logging.getLogger()
 log.level = logging.WARN
@@ -360,11 +361,12 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
+                sherlock_version = get_distribution("qub-sherlock").version
                 alerts = [ example_alert.copy() ]
                 classifications = { "177218944862519874": "Q" }
                 crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-                cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                cache = [{'name': '177218944862519874', 'version': sherlock_version, 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -379,6 +381,33 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
                 # classify should not have been called
                 mock_classifier.return_value.classify.assert_not_called()
+
+    def test_classify_cache_wrong_version(self):
+        conf = {
+            'broker':'',
+            'group':'',
+            'input_topic':'',
+            'output_topic':'',
+            'batch_size':5,
+            'timeout':1,
+            'max_errors':-1,
+            'cache_db':'mysql://user_name:password@localhost:3306/sherlock_cache',
+            'sherlock_settings': 'sherlock_test.yaml'
+            }
+        with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
+            with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
+                alerts = [ example_alert.copy() ]
+                classifications = { "177218944862519874": "Q" }
+                crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
+                mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
+                cache = [{'name': '177218944862519874', 'version': 'blah', 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
+                # should report classifying 1 alert
+                self.assertEqual(wrapper.classify(conf, log, alerts), 1)
+                # content of alerts should be from sherlock - cache should be ignored
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
+                # classify *should* have been called
+                mock_classifier.return_value.classify.assert_called_once()
 
     # if we get a cache hit but the crossmatch is empty/malformed then we should ignore it
     def test_classify_cache_empty_hit(self):
