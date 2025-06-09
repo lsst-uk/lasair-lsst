@@ -34,7 +34,7 @@
       - nginx
       - uwsgi
       - uwsgi-plugin-python3
-      - flask-restful
+      - python3-flask-restful
       - python3-numpy
       - python3-setuptools
       - python3-wheel
