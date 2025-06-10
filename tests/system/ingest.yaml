@@ -20,7 +20,7 @@
     - name: Run ingest
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/ingest
-        cmd: "python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=4"
+        cmd: "/opt/lasair_venv/bin/python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=4"
       register: ingest_result
 #    - name: Result
 #      ansible.builtin.debug:
