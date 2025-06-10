@@ -21,21 +21,6 @@
   tags:
     - always
 
-- hosts: localhost
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-  vars:
-    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
-    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
-    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
-    powerapi_token: "placeholder"
-  tasks:
-    - name: Create settings file
-      template:
-        src: common/settings.py.j2
-        dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
-
 - hosts: all:!localhost
   gather_facts: false
   vars_files:
@@ -79,6 +64,20 @@
         powerapi_token: "{{ api_token_response.json.token }}"
   tags:
     - always
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+  tasks:
+    - name: Create settings file
+      template:
+        src: common/settings.py.j2
+        dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
 
 - hosts: svc
   gather_facts: false
