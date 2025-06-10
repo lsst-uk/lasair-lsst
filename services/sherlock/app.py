@@ -79,7 +79,7 @@ def object(name=""):
     else:
         is_lite = False
 
-    if not re.search("^[\w\-\+,]*$", name):
+    if not re.search("^[\w-+,]*$", name):
         return "Error parsing parameter name", 400
 
     names = name.split(',')
@@ -122,7 +122,7 @@ def query():
             return "Missing required parameters", 400
 
     # validate input
-    if not re.search("^[\w\-\+,]*$", name):
+    if not re.search("^[\w-+,]*$", name):
         return "Error parsing parameter name", 400
     if str(lite).casefold() == "true":
         is_lite = True
@@ -130,11 +130,11 @@ def query():
         is_lite = False
     if not ra:
         return "Missing required parameter ra", 400
-    if not re.search("^[0-9\.,]*$", ra):
+    if not re.search("^[0-9.,]*$", ra):
         return "Error parsing parameter ra", 400
     if not dec:
         return "Missing required parameter dec", 400
-    if not re.search("^[0-9\.,\-]*$", dec):
+    if not re.search("^[0-9.,-]*$", dec):
         return "Error parsing parameter dec", 400
 
     # split lists
