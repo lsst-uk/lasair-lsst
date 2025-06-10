@@ -133,16 +133,19 @@ def classify(conf, log, alerts):
                 for result in cursor.fetchall():
                     if result.get('version') == sherlock_version:
                         try:
-                            annotations[result['name']] = {
+                            name = str(result['name'])
+                            annotations[name] = {
                                 'classification': result['class']
                                 }
-                            if result['class'] != 'ORPHAN':
+                            if result['class'] == 'ORPHAN':
+                                annotations['description'] = "No contexual information is available for this transient"
+                            else:
                                 match = json.loads(result.get('crossmatch'))
                                 for key,value in match.items():
-                                    annotations[result['name']][key] = value
+                                    annotations[name][key] = value
                                 log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
                         except ValueError:
-                            log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(result['name']))
+                            log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(name))
                             continue
 
         except TypeError:
@@ -250,7 +253,6 @@ def classify(conf, log, alerts):
         finally:
             connection.commit()
             connection.close()
-
 
     # add the annotations to the alerts
     n = 0
