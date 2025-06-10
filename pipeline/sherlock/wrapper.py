@@ -131,18 +131,19 @@ def classify(conf, log, alerts):
             with connection.cursor() as cursor:
                 cursor.execute(query)
                 for result in cursor.fetchall():
-                    try:
-                        if result.get('version') == sherlock_version:
-                            match = json.loads(result.get('crossmatch'))
+                    if result.get('version') == sherlock_version:
+                        try:
                             annotations[result['name']] = {
                                 'classification': result['class']
                                 }
-                            for key,value in match.items():
-                                annotations[result['name']][key] = value
-                            log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
-                    except ValueError:
-                        log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(result['name']))
-                        continue
+                            if result['class'] != 'ORPHAN':
+                                match = json.loads(result.get('crossmatch'))
+                                for key,value in match.items():
+                                    annotations[result['name']][key] = value
+                                log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
+                        except ValueError:
+                            log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(result['name']))
+                            continue
 
         except TypeError:
             log.debug("Got TypeError reading cache. Entry probably present, but incomplete or malformed. Ignoring.")
