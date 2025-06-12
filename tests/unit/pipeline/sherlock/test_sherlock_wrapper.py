@@ -425,7 +425,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
                 alerts = [ example_alert.copy() ]
-                classifications = { "177218944862519874": "Q" }
+                classifications = { "177218944862519874": ["QX", "A test"] }
                 crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
                 cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': None}]
@@ -433,7 +433,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
                 # content of alerts should be from sherlock - cache should be ignored
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'Q')
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'QX')
                 # classify *should* have been called
                 mock_classifier.return_value.classify.assert_called_once()
 
