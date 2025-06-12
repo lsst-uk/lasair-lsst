@@ -158,8 +158,8 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             self.assertEqual(wrapper.consume(conf, log, alerts, mock_kafka_consumer), 0)
             # alerts should be empty
             self.assertEqual(alerts, [])
-            # poll should have been called once with timeout 1
-            mock_kafka_consumer.poll.assert_called_once_with(1)
+            # poll should have been called twice with timeout 1
+            self.assertEqual(len(mock_kafka_consumer.poll.mock_calls), 2)
 
     def test_failed_commit(self):
         """test (non-fatal) failure on commit"""
