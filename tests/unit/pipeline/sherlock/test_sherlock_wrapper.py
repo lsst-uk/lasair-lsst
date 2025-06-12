@@ -66,6 +66,14 @@ class SherlockWrapperRunTest(unittest.TestCase):
                     mock_run.assert_called_once()
                     mock_logging.getLogger.assert_called_once()
 
+    def test_run(self):
+        with unittest.mock.patch('wrapper.consume') as mock_consume:
+            with unittest.mock.patch('wrapper.Consumer') as mock_kafka:
+                mock_consume.return_value = 0
+                conf = {'stop_at_end': True}
+                wrapper.run(conf, log)
+                mock_consume.assert_called_once()
+                
 
 class SherlockWrapperConsumerTest(unittest.TestCase):
 
