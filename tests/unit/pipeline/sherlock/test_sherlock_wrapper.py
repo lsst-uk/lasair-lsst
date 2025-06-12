@@ -1,4 +1,5 @@
-import unittest, unittest.mock
+import unittest
+import unittest.mock
 import logging
 import sys
 import json
@@ -99,8 +100,8 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # poll should have been called 5 times
                     self.assertEqual(mock_kafka_consumer.poll.call_count, 5)
 
-    # test that a fatal error is fatal
     def test_fatal_error(self):
+        """test that a fatal error is fatal"""
         with unittest.mock.MagicMock() as mock_kafka_consumer:
             # poll returns None when no messages left to consume
             e = KafkaError(KafkaError._FATAL, "Test Error", fatal=True, retriable=False)
@@ -114,8 +115,8 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             # poll should have been called once with timeout 1
             mock_kafka_consumer.poll.assert_called_once_with(1)
 
-    # test that a non-fatal error is non-fatal
     def test_non_fatal_error(self):
+        """test that a non-fatal error is non-fatal"""
         with unittest.mock.patch('wrapper.classify') as mock_classify:
             with unittest.mock.patch('wrapper.produce') as mock_produce:
                 with unittest.mock.MagicMock() as mock_kafka_consumer:
@@ -133,8 +134,8 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # poll should have been called 6 times
                     self.assertEqual(nfe_call_count, 6)
 
-    # test max non-fatal errors 
     def test_max_errors(self):
+        """test max non-fatal errors"""
         with unittest.mock.MagicMock() as mock_kafka_consumer:
             # poll returns None when no messages left to consume
             e = KafkaError(KafkaError._APPLICATION, "Test Error", fatal=False, retriable=True)
@@ -160,8 +161,8 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             # poll should have been called once with timeout 1
             mock_kafka_consumer.poll.assert_called_once_with(1)
 
-    # test (non-fatal) failure on commit
     def test_failed_commit(self):
+        """test (non-fatal) failure on commit"""
         with unittest.mock.patch('wrapper.classify') as mock_classify:
             with unittest.mock.patch('wrapper.produce') as mock_produce:
                 with unittest.mock.MagicMock() as mock_kafka_consumer:
@@ -352,8 +353,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 # classify *should* have been called
                 mock_classifier.return_value.classify.assert_called_once()
 
-    # if we get a cache hit but the crossmatch is empty/malformed then we should ignore it
     def test_classify_cache_empty_hit(self):
+        """check that if we get a cache hit but the crossmatch is empty/malformed then we ignore it"""
         conf = {
             'broker': '',
             'group': '',
@@ -367,9 +368,9 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
-                alerts = [ example_alert.copy() ]
-                classifications = { "177218944862519874": ["QX", "A test"] }
-                crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
+                alerts = [example_alert.copy()]
+                classifications = {"177218944862519874": ["QX", "A test"]}
+                crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
                 cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': None}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
@@ -420,22 +421,23 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 # fetchall should have been called once
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.assert_called_once()
 
+
 class SherlockWrapperProducerTest(unittest.TestCase):
     conf = {
-        'broker':'',
-        'group':'',
-        'input_topic':'',
-        'output_topic':'',
-        'batch_size':5,
-        'timeout':1,
-        'max_errors':-1,
-        'cache_db':''
+        'broker': '',
+        'group': '',
+        'input_topic': '',
+        'output_topic': '',
+        'batch_size': 5,
+        'timeout': 1,
+        'max_errors': -1,
+        'cache_db': ''
         }
 
-    # test producing a batch of alerts
     def test_produce_alert_batch(self):
+        """test producing a batch of alerts"""
         with unittest.mock.patch('wrapper.Producer') as mock_kafka_producer:
-            alerts = [ {}, {}, {} ]
+            alerts = [{}, {}, {}]
             self.assertEqual(len(alerts), 3)
             # should report producing 3 alerts
             self.assertEqual(wrapper.produce(self.conf, log, alerts), 3)

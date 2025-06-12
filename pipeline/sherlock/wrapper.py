@@ -233,7 +233,7 @@ def classify(conf, log, alerts):
         crossmatches = []
         for name in names:
             classification = annotations[name]['classification']
-            description = annotations[name]['description']
+            description = annotations[name].get('description', '')
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
             values.append("\n ('{}','{}','{}','{}',%s)".format(name, sherlock_version, classification, description))
