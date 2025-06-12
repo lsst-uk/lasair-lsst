@@ -322,7 +322,7 @@ def run(conf, log):
         consumer.close()
 
 
-if __name__ == '__main__':
+def main():
     # parse cmd line arguments
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('-c', '--config', default=None, type=str, help='location of config file')
@@ -391,3 +391,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     run(conf, log)
+
+
+if __name__ == '__main__':
+    main()
