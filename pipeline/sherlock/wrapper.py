@@ -198,7 +198,7 @@ def classify(conf, log, alerts):
         # process classfications
         for name in names:
             if name in classifications:
-                annotations[name] = { 'classification': classifications[name][0] }
+                annotations[name] = {'classification': classifications[name][0]}
                 if len(classifications[name]) > 1:
                     annotations[name]['description'] = classifications[name][1]
         # process crossmatches
