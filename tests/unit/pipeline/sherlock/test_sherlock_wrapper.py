@@ -58,11 +58,13 @@ def non_fatal_error_on_1st_call(timeout):
 class SherlockWrapperRunTest(unittest.TestCase):
 
     def test_main(self):
-        with unittest.mock.patch('wrapper.run') as mock_run:
-            with unittest.mock.patch('wrapper.logging') as mock_logging:
-                wrapper.main()
-                mock_run.assert_called_once()
-                mock_logging.getLogger.assert_called_once()
+        testargs = ["wrapper.py", "-b", "BROKER", "-i", "INPUT", "-o", "OUTPUT"]
+        with unittest.mock.patch.object(sys, 'argv', testargs):
+            with unittest.mock.patch('wrapper.run') as mock_run:
+                with unittest.mock.patch('wrapper.logging') as mock_logging:
+                    wrapper.main()
+                    mock_run.assert_called_once()
+                    mock_logging.getLogger.assert_called_once()
 
 
 class SherlockWrapperConsumerTest(unittest.TestCase):
