@@ -70,10 +70,16 @@ class SherlockWrapperRunTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.consume') as mock_consume:
             with unittest.mock.patch('wrapper.Consumer') as mock_kafka:
                 mock_consume.return_value = 0
-                conf = {'stop_at_end': True}
+                conf = {
+                    'broker': '',
+                    'group': '',
+                    'max_poll_interval': 1000,
+                    'input_topic': '',
+                    'stop_at_end': True
+                }
                 wrapper.run(conf, log)
                 mock_consume.assert_called_once()
-                
+
 
 class SherlockWrapperConsumerTest(unittest.TestCase):
 
