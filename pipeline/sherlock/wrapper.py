@@ -80,10 +80,6 @@ def consume(conf, log, alerts, consumer):
         log.error("Kafka Exception:"+str(e))
         # if the error is fatal then give up
         if e.args[0].fatal():
-            # try to ensure we log something useful
-            msg = c.poll(10)
-            if msg is not None and msg.error():
-                log.error("Kafka Error:"+str(msg.error()))
             raise Exception("Unrecoverable Kafka error.")
         else:
             n_error += 1

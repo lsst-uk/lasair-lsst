@@ -203,7 +203,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
     def test_exception_on_poll(self):
         """test (non-fatal) failure on commit"""
         with unittest.mock.MagicMock() as mock_kafka_consumer:
-            e = KafkaError(KafkaError._NO_OFFSET, 'test no offset', fatal=True)
+            e = KafkaError(KafkaError._APPLICATION, 'test error', fatal=True)
             mock_kafka_consumer.poll.return_value.error.return_value = e
             mock_kafka_consumer.poll.return_value.value.return_value = None
             mock_kafka_consumer.poll.side_effect = KafkaException(e)
