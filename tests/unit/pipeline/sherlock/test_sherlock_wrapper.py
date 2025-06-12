@@ -1,5 +1,6 @@
 import unittest
 import unittest.mock
+from unittest.mock import call
 import logging
 import sys
 import json
@@ -159,6 +160,10 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             # alerts should be empty
             self.assertEqual(alerts, [])
             # poll should have been called twice with timeout 1
+            print('calls:', mock_kafka_consumer.poll.mock_calls)
+            #mock_kafka_consumer.poll.assert_has_calls(
+            #    call()
+            #)
             self.assertEqual(len(mock_kafka_consumer.poll.mock_calls), 2)
 
     def test_failed_commit(self):
