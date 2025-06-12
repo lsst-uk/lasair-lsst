@@ -182,6 +182,24 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # content of alerts should be as expected
                     self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
 
+    def test_fatal_failed_commit(self):
+        """test (non-fatal) failure on commit"""
+        with unittest.mock.patch('wrapper.classify') as mock_classify:
+            with unittest.mock.patch('wrapper.produce') as mock_produce:
+                with unittest.mock.MagicMock() as mock_kafka_consumer:
+                    mock_classify.return_value = 5
+                    mock_produce.return_value = 5
+                    mock_kafka_consumer.poll.return_value.error.return_value = None
+                    mock_kafka_consumer.poll.return_value.value.return_value = example_input_data
+                    e = KafkaError(KafkaError._NO_OFFSET, 'test no offset', fatal=True)
+                    mock_kafka_consumer.commit.side_effect = KafkaException(e)
+                    alerts = []
+                    # consume should raise an exception
+                    with self.assertRaises(Exception):
+                        wrapper.consume(self.conf, log, alerts, mock_kafka_consumer)
+                    # alerts should have len 5
+                    self.assertEqual(len(alerts), 5)
+
 
 class SherlockWrapperClassifierTest(unittest.TestCase):
     crossmatches = [{
