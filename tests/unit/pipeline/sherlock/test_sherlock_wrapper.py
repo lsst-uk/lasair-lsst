@@ -362,11 +362,12 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
                 sherlock_version = get_distribution("qub-sherlock").version
-                alerts = [ example_alert.copy() ]
-                classifications = { "177218944862519874": "Q" }
-                crossmatches = [ { 'transient_object_id':"177218944862519874", 'thing':'foo' } ]
+                alerts = [example_alert.copy()]
+                classifications = {"177218944862519874": ["QY", "Test"]}
+                crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-                cache = [{'name': '177218944862519874', 'version': sherlock_version, 'class': 'T', 'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                cache = [{'name': '177218944862519874', 'version': sherlock_version, 'class': 'T', 'description': 't',
+                          'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -374,8 +375,11 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 self.assertEqual(len(alerts), 1)
                 # content of alerts should be as expected - from cache
                 self.assertEqual(alerts[0]['annotations']['sherlock'][0]['classification'], 'T')
-                self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'], "^https://github.com/thespacedoctor/sherlock")
-                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'], "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['description'], 't')
+                self.assertRegex(alerts[0]['annotations']['sherlock'][0]['annotator'],
+                                 "^https://github.com/thespacedoctor/sherlock")
+                self.assertEqual(alerts[0]['annotations']['sherlock'][0]['additional_output'],
+                                 "http://lasair-lsst.lsst.ac.uk/api/sherlock/object/177218944862519874")
                 for key, value in SherlockWrapperClassifierTest.crossmatches[0].items():
                     if key != 'rank':
                         self.assertEqual(alerts[0]['annotations']['sherlock'][0][key], value)
