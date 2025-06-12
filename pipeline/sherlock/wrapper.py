@@ -5,7 +5,7 @@ adds the Sherlock classification and crossmatches back into the alert and
 republishes on the output topic.
 """
 
-__version__ = "0.7.6"
+__version__ = "0.7.7"
 
 import warnings
 import json
@@ -26,10 +26,9 @@ logging.addLevelName(logging.INFO_, "INFO_")
 
 sherlock_version = get_distribution("qub-sherlock").version
 
-def consume(conf, log, alerts, consumer):
-    "fetch a batch of alerts from kafka, return number of alerts consumed"
 
-    #global alerts
+def consume(conf, log, alerts, consumer):
+    """fetch a batch of alerts from kafka, return number of alerts consumed"""
 
     log.debug('called consume with config: ' + str(conf))
     
@@ -96,7 +95,7 @@ def consume(conf, log, alerts, consumer):
 
 
 def classify(conf, log, alerts):
-    "send a batch of alerts to sherlock and add the responses to the alerts, return the number of alerts classified"
+    """send a batch of alerts to sherlock and add the responses to the alerts, return the number of alerts classified"""
     
     #global alerts
 
@@ -135,15 +134,13 @@ def classify(conf, log, alerts):
                         try:
                             name = str(result['name'])
                             annotations[name] = {
-                                'classification': result['class']
+                                'classification': result['class'],
+                                'description': result['description']
                                 }
-                            if result['class'] == 'ORPHAN':
-                                annotations['description'] = "No contexual information is available for this transient"
-                            else:
-                                match = json.loads(result.get('crossmatch'))
-                                for key,value in match.items():
-                                    annotations[name][key] = value
-                                log.debug("Got crossmatch from cache:\n" + json.dumps(match, indent=2))
+                            match = json.loads(result.get('crossmatch', {}))
+                            for key, value in match.items():
+                                annotations[name][key] = value
+                            log.debug(f"Got crossmatch from cache: { name } { result['class'] } { json.dumps(match, indent=2) }\n")
                         except ValueError:
                             log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(name))
                             continue
@@ -236,13 +233,14 @@ def classify(conf, log, alerts):
         crossmatches = []
         for name in names:
             classification = annotations[name]['classification']
+            description = annotations[name]['description']
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
-            values.append("\n ('{}','{}','{}',%s)".format(name, sherlock_version, classification))
+            values.append("\n ('{}','{}','{}','{}',%s)".format(name, sherlock_version, classification, description))
             crossmatches.append(crossmatch)
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
         ##query = "INSERT INTO cache VALUES {} AS new ON DUPLICATE KEY UPDATE class=new.class, crossmatch=new.crossmatch".format(",".join(values))
-        query = "INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE version=VALUES(version), class=VALUES(class), crossmatch=VALUES(crossmatch)".format(",".join(values))
+        query = "INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE version=VALUES(version), class=VALUES(class), description=VALUES(description), crossmatch=VALUES(crossmatch)".format(",".join(values))
         log.info("update cache: {}".format(query))
         try:
             with connection.cursor() as cursor:
@@ -271,8 +269,9 @@ def classify(conf, log, alerts):
 
     return n
 
+
 def produce(conf, log, alerts):
-    "produce a batch of alerts on the kafka output topic, return number of alerts produced"
+    """produce a batch of alerts on the kafka output topic, return number of alerts produced"""
 
     log.debug('called produce with config: ' + str(conf))
 
@@ -326,6 +325,7 @@ def run(conf, log):
         raise e
     finally:
         consumer.close()
+
 
 if __name__ == '__main__':
     # parse cmd line arguments
