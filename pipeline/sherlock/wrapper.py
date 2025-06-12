@@ -57,7 +57,7 @@ def consume(conf, log, alerts, consumer):
                 #    log.warning(str(msg.error()))
                 # except:
                 #    pass
-                if msg.error().fatal:
+                if msg.error().fatal():
                     log.error(str(msg.error()))
                     break
                 log.warning(str(msg.error()))
@@ -79,7 +79,7 @@ def consume(conf, log, alerts, consumer):
     except KafkaException as e:
         log.error("Kafka Exception:"+str(e))
         # if the error is fatal then give up
-        if e.args[0].fatal:
+        if e.args[0].fatal():
             # try to ensure we log something useful
             msg = c.poll(10)
             if msg is not None and msg.error():
