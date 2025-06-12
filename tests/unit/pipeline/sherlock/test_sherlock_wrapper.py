@@ -149,7 +149,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                 'output_topic': '',
                 'batch_size': 5,
                 'timeout': 1,
-                'max_errors': 0,
+                'max_errors': 1,
                 'cache_db': '',
                 'poll_timeout': 1,
                 'max_poll_interval': 300000
