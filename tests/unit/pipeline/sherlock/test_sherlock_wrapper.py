@@ -183,7 +183,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
 
     def test_fatal_failed_commit(self):
-        """test (non-fatal) failure on commit"""
+        """test (fatal) failure on commit"""
         with unittest.mock.patch('wrapper.classify') as mock_classify:
             with unittest.mock.patch('wrapper.produce') as mock_produce:
                 with unittest.mock.MagicMock() as mock_kafka_consumer:
@@ -201,7 +201,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     self.assertEqual(len(alerts), 5)
 
     def test_exception_on_poll(self):
-        """test (non-fatal) failure on commit"""
+        """test (fatal) failure on poll"""
         with unittest.mock.MagicMock() as mock_kafka_consumer:
             e = KafkaError(KafkaError._APPLICATION, 'test error', fatal=True)
             mock_kafka_consumer.poll.return_value.error.return_value = e
@@ -211,6 +211,24 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             # consume should raise an exception
             with self.assertRaises(Exception):
                 wrapper.consume(self.conf, log, alerts, mock_kafka_consumer)
+
+    def test_failed_produce(self):
+        """test failure to produce all alerts"""
+        with unittest.mock.patch('wrapper.classify') as mock_classify:
+            with unittest.mock.patch('wrapper.produce') as mock_produce:
+                with unittest.mock.MagicMock() as mock_kafka_consumer:
+                    mock_classify.return_value = 5
+                    mock_produce.return_value = 1
+                    mock_kafka_consumer.poll.return_value.error.return_value = None
+                    mock_kafka_consumer.poll.return_value.value.return_value = example_input_data
+                    e = KafkaError(KafkaError._NO_OFFSET, 'test no offset', fatal=False)
+                    mock_kafka_consumer.commit.side_effect = KafkaException(e)
+                    alerts = []
+                    # should raise an exception
+                    with self.assertRaises(Exception):
+                        wrapper.consume(self.conf, log, alerts, mock_kafka_consumer)
+                    # we should not have called commit
+                    mock_kafka_consumer.commit.assert_not_called()
 
 
 class SherlockWrapperClassifierTest(unittest.TestCase):
