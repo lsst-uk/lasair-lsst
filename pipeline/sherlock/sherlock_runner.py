@@ -27,6 +27,7 @@ import wrapper
 
 
 def setup_proc(exit_code, pids, n, nprocess, conffile):
+    print('test')
     # Load runner config
     with open(conffile) as file:
         config = json.load(file)
@@ -61,13 +62,12 @@ def setup_proc(exit_code, pids, n, nprocess, conffile):
                 os.kill(pid, signal.SIGTERM)
 
 
-if __name__ == '__main__':
-
+def main():
     # Deal with arguments
     args = docopt(__doc__)
 
     nprocess = int(args.get('--nprocess'))
-    print('sherlock_runner with %d processes' % nprocess)
+    print('sherlock_runner with %d processes' % nprocess, flush=True)
 
     conffile = args.get('--config')
 
@@ -86,4 +86,9 @@ if __name__ == '__main__':
         p.join()
 
     print("sherlock_runner exiting with exit code", exit_code.value)
-    sys.exit(exit_code.value)
+    return exit_code.value
+
+
+if __name__ == '__main__':
+    retval = main()
+    sys.exit(retval)
