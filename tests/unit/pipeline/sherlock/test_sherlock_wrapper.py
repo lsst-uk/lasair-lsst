@@ -8,7 +8,6 @@ import json
 import context
 import wrapper
 from confluent_kafka import KafkaError, KafkaException
-from pkg_resources import get_distribution
 
 log = logging.getLogger()
 log.level = logging.WARN
@@ -376,7 +375,7 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
             }
         with unittest.mock.patch('wrapper.transient_classifier') as mock_classifier:
             with unittest.mock.patch('wrapper.pymysql.connect') as mock_pymysql:
-                sherlock_version = get_distribution("qub-sherlock").version
+                sherlock_version = wrapper.sherlock_version
                 alerts = [example_alert.copy()]
                 classifications = {"177218944862519874": ["QY", "Test"]}
                 crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]

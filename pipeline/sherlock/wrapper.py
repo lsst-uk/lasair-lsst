@@ -17,14 +17,16 @@ from urllib.parse import urlparse
 import pymysql.cursors
 from confluent_kafka import Consumer, Producer, KafkaError, KafkaException
 from sherlock import transient_classifier
-from pkg_resources import get_distribution
+from importlib.metadata import version, PackageNotFoundError
 
 # use custom info_ log level so we can print info messages for wrapper without having to do so for sherlock
 logging.INFO_ = 25
 logging.addLevelName(logging.INFO_, "INFO_")
 
-sherlock_version = get_distribution("qub-sherlock").version
-
+try:
+    sherlock_version = version("qub-sherlock")
+except PackageNotFoundError:
+    sherlock_version = '0.0.0'
 
 def consume(conf, log, alerts, consumer):
     """fetch a batch of alerts from kafka, return number of alerts consumed"""
