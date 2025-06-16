@@ -27,7 +27,6 @@ import wrapper
 
 
 def setup_proc(exit_code, pids, n, nprocess, conffile):
-    print('test')
     # Load runner config
     with open(conffile) as file:
         config = json.load(file)
