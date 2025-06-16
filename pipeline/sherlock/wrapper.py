@@ -236,7 +236,7 @@ def classify(conf, log, alerts):
         # crossmatch=new.crossmatch".format(",".join(values))
         query = ("INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE version=VALUES(version), class=VALUES(class),\
                  description=VALUES(description), crossmatch=VALUES(crossmatch)".format(",".join(values)))
-        log.info("update cache: {}".format(query))
+        log.debug("update cache: {}".format(query))
         try:
             with connection.cursor() as cursor:
                 # make deprecation warning non-fatal
