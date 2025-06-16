@@ -109,7 +109,7 @@ class BBB():
         # extract the lightcurve as a time-wavelenght surface
         lc = self.lc = self.read_alert(alert)
         if not lc:
-            return (None, None)
+            return None
     
         tobs = lc['t']
         lobs = [WL[i] for i in lc['bandindex']]

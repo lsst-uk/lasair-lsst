@@ -25,9 +25,10 @@
     - "ssObjects"
 
 - name: Create tables
-  ansible.builtin.command:
-    cmd: "cqlsh -k {{ keyspace }} -f {{ schema }}/{{ item }}.cql"
-    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+  ansible.builtin.shell:
+    # slightly convoluted way of invoking cqlsh because the cqlsh snap has problems reading files
+    cmd: "echo ';' | cat {{ item }}.cql - | cqlsh -k {{ keyspace }}"
+    chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/{{ schema }}"
   with_items:
     - "diaForcedSources"
     - "diaNondetectionLimits"

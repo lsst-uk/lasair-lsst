@@ -1,8 +1,7 @@
 ---
 # tasks file for sherlock
 
-# db is now done in mysql_sherlock role
-#- import_tasks: database.yml
+- import_tasks: database.yml
 - import_tasks: filesystem.yml
 
 - name: Include mariadb role

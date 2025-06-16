@@ -1,12 +1,18 @@
 ---
 
-- name: Create Sherlock database
+- name: Create cache database
   community.mysql.mysql_db:
-    name: "{{ db_name }}"
+    name: "{{ cache_db }}"
     login_host: 127.0.0.1
     login_user: root
     login_password: "{{ mysql_root_password }}"
-  notify:
-    - Create Sherlock user
-    - Load schema
 
+- name: Create cache table
+  community.mysql.mysql_query:
+    query:
+      - "CREATE TABLE IF NOT EXISTS {{ cache_db }}.cache(`name` bigint PRIMARY KEY, `version` varchar(80), `class` varchar(16), `description` text, `crossmatch` text)"
+      - "GRANT ALL PRIVILEGES ON cache.* TO '{{ sherlock_user }}'@'%'"
+    login_host: 127.0.0.1
+    login_user: root
+    login_password: "{{ mysql_root_password }}"
+    single_transaction: yes

@@ -73,13 +73,12 @@ class ImageStore:
         try:
             if self.image_store:
                 for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
-                    if not cutoutType in message:
-                        continue
-                    content = message[cutoutType]
-                    cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                    result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
-                    for future in result:
-                        futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
+                    content = message.get(cutoutType)
+                    if content:
+                        cutoutId = '%d_%s' % (diaSourceId, cutoutType)
+                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                        for future in result:
+                            futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
                 self.log.warning('WARNING: attempted to store images, but no image store set up')
         except Exception as e:
