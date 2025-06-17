@@ -93,6 +93,7 @@ class Filter:
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.sfd = None
 
         self.consumer = None
         self.database = None
@@ -104,12 +105,6 @@ class Filter:
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
-
-        # set up the extinction factory
-        try:
-            self.sfd = SFDQuery()
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def setup(self):
         """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
@@ -136,6 +131,13 @@ class Filter:
         ]
         for table_name in table_list:
             self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
+
+        # set up the extinction factory
+        if not self.sfd:
+            try:
+                self.sfd = SFDQuery()
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -284,7 +286,7 @@ class Filter:
         c = SkyCoord(raList, declList, unit="deg", frame='icrs')
         ebvList = self.sfd(c)
         nalert = 0
-        for ebv,alert in zip(ebvList, alertList):
+        for ebv, alert in zip(ebvList, alertList):
             alert['ebv'] = ebv
             nalert += self.handle_alert(alert)
         return nalert
@@ -386,21 +388,17 @@ class Filter:
             self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
             return False
 
-        commit = True
-        for table_name,attrs in self.csv_attrs.items():
+        for table_name, attrs in self.csv_attrs.items():
             try:
                 transfer_csv(self.database, main_database, attrs, table_name, table_name, log=self.log)
                 self.log.info('%s ingested to main db' % table_name)
             except Exception as e:
                 self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
-                commit = False
                 return False
 
-        if commit:
-            self.consumer.commit()
-            self.log.info('Kafka committed for this batch')
-
-        return commit
+        self.consumer.commit()
+        self.log.info('Kafka committed for this batch')
+        return True
 
     def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
