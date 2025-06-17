@@ -2,9 +2,6 @@
 # First it gets the attributes from the main database in order
 # Then is makes tghe CSV file, and transfers it over
 
-import os
-import settings
-
 def fetch_attrs(msl_remote, table_name):
     # fetch the attributes from the main database in correct order
     fetch_attrs = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s' "
@@ -36,3 +33,18 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to):
     push_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
     cursor_remote.execute(push_csv)
     msl_remote.commit()
+
+if __name__ == "__main__":
+    import os, sys
+    sys.path.append('../../common')
+    sys.path.append('../../common/src')
+    import db_connect
+    msl_local = db_connect.local()
+    msl_remote = db_connect.remote(allow_infile=True)
+
+    attrs = fetch_attrs(msl_remote, 'objects')
+    print(len(attrs), 'attributes')
+
+    os.system('sudo --non-interactive rm /data/mysql/*.txt')
+
+    transfer_csv(msl_local, msl_remote, attrs, 'objects', 'objects')
