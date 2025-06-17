@@ -42,7 +42,7 @@ import urllib
 import urllib.parse
 import numbers
 import confluent_kafka
-from datetime import datetime
+import datetime
 from docopt import docopt
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
@@ -68,7 +68,7 @@ from features.FeatureGroup import FeatureGroup
 sys.path.append('features/BBB')
 
 def now():
-    return datetime.utcnow().strftime("%H:%M:%S")
+    return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
 
 class Filter:
@@ -135,7 +135,7 @@ class Filter:
             'mma_area_hits',
         ]
         for table_name in table_list:
-            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name)
+            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -389,7 +389,7 @@ class Filter:
         commit = True
         for table_name,attrs in self.csv_attrs.items():
             try:
-                transfer_csv(self.database, main_database, attrs, table_name, table_name)
+                transfer_csv(self.database, main_database, attrs, table_name, table_name, log=self.log)
                 self.log.info('%s ingested to main db' % table_name)
             except Exception as e:
                 self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
@@ -510,7 +510,7 @@ class Filter:
     def grafana_today():
         """How many objects reported today from LSST.
         """
-        g = datetime.utcnow()
+        g = datetime.datetime.now(datetime.UTC)
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
         # do not have this for LSST yet
 #        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='

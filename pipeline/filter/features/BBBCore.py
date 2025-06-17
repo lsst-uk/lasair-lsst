@@ -74,7 +74,10 @@ def fit_bazin(tobs, lobs, fobs, pbazin0, verbose=False):
 
 # https://en.wikipedia.org/wiki/Akaike_information_criterion
 # with 5 degrees of freedom
-    AIC = 100 + npoint*math.log(SSE/npoint) + 2*5
+    try:
+        AIC = 100 + npoint*math.log(SSE/npoint) + 2*5
+    except:
+        return None
 
     Rsq = SSE/SST
     if Rsq > 0.25: return None
@@ -117,9 +120,12 @@ def fit_bazin(tobs, lobs, fobs, pbazin0, verbose=False):
             maxq = q
             maxwl = wl
 
-    tau = -math.log(dict['kf']/(dict['kr']-dict['kf'])) / dict['kr']
-    dict['peakTime'] = dict['t0'] + tau
-    dict['peakValue'] = bazin(dict['peakTime'], maxwl, fit)
+    try:
+        tau = -math.log(dict['kf']/(dict['kr']-dict['kf'])) / dict['kr']
+        dict['peakTime'] = dict['t0'] + tau
+        dict['peakValue'] = bazin(dict['peakTime'], maxwl, fit)
+    except:
+        pass
     
     return dict
 
@@ -144,7 +150,10 @@ def fit_expit(tobs, lobs, fobs, pexpit0, verbose=True):
 
 # https://en.wikipedia.org/wiki/Akaike_information_criterion
 # with 3 degrees of freedom
-    AIC = 100 + npoint*math.log(SSE/npoint) + 2*3
+    try:
+        AIC = 100 + npoint*math.log(SSE/npoint) + 2*3
+    except:
+        return None
 
     Rsq = SSE/SST
     if Rsq > 0.35: 
