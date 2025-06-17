@@ -10,7 +10,9 @@ def fetch_attrs(msl_remote, table_name):
     cursor.execute(fetch_attrs)
     attrs = []
     for row in cursor:
-        attrs.append(row['column_name'])
+        cn = row['column_name']
+        if not cn in attrs:
+            attrs.append(cn)
     cursor.close()
     return attrs
 
