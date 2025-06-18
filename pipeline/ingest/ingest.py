@@ -25,7 +25,7 @@ Options:
 import sys
 import json
 from docopt import docopt
-from datetime import datetime
+import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
 from confluent_kafka import DeserializingConsumer
 from confluent_kafka.schema_registry import SchemaRegistryClient
@@ -200,7 +200,7 @@ class Ingester:
     @classmethod
     def _now(cls):
         """current UTC as string"""
-        return datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+        return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     def _insert_cassandra(self, alert):
         """Inset a single alert into cassandra.
