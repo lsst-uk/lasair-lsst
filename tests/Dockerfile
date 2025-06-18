@@ -73,6 +73,3 @@ RUN pip3 install \
 # required for dustmaps
 RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"
 
-# ensure mysql tmp dir exists and is writable
-RUN mkdir -p /data/mysql && chmod 777 /data/mysql
-
