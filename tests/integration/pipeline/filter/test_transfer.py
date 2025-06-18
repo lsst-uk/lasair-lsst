@@ -79,7 +79,7 @@ class RunTransferTest(TestCase):
             pass
         log = mock.MagicMock()
         rc = transfer_csv(self.msl, self.msl, attrs, table_from, table_to, log=log)
-        log.error.assertNotCalled()
+        log.error.assert_not_called()
         self.assertTrue(rc)
         query = f"SELECT * FROM { table_to }"
         cursor = self.msl.cursor(buffered=True, dictionary=True)
