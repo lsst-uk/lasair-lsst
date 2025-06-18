@@ -40,10 +40,11 @@ class RunTransferTest(TestCase):
             query = f"CREATE TABLE IF NOT EXISTS { table_to } "
             query += "( objectId varchar(16) NOT NULL, a1 float, a2 float, PRIMARY KEY (objectId) )"
             cursor.execute(query)
-            # insert a record
+            # insert a record. a2=2.2, a1=1.1
             query = f"INSERT INTO { table_from } ( objectId, a2, a1 ) VALUES ( 'ZTF23abcdef', 2.2, 1.1 )"
             cursor.execute(query)
-            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
+            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'  # HACK
+            cmd = 'rm /data/mysql/*.txt'
             os.system(cmd)
 
     @classmethod
@@ -77,9 +78,9 @@ class RunTransferTest(TestCase):
             cursor.execute(query)
         result = cursor.fetchall()
         print(result)
-        # check objectID re as expected
-#        for i in range(3):
-#            cls.assertEqual(attrs[1], expected_result[i])
+        cls.assertEqual(result[0], 'ZTF23abcdef')
+        cls.assertEqual(result[1], 1.1)
+        cls.assertEqual(result[2], 2.2)
 
 if __name__ == '__main__':
     import xmlrunner
