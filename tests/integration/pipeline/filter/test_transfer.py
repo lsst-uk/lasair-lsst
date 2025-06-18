@@ -75,13 +75,13 @@ class RunTransferTest(TestCase):
         transfer_csv(cls.msl, cls.msl, attrs, table_from, table_to)
 
         query = f"SELECT * FROM { table_to }"
-        with cls.msl.cursor(buffered=True, dictionary=True) as cursor:
-            cursor.execute(query)
-        result = list(cursor)
+        cursor = cls.msl.cursor(buffered=True, dictionary=True)
+        cursor.execute(query)
+        result = cursor.fetchall()
         print(result)
-        cls.assertEqual(result[0], 'ZTF23abcdef')
-        cls.assertEqual(result[1], 1.1)
-        cls.assertEqual(result[2], 2.2)
+        cls.assertEqual(result['objectId'], 'ZTF23abcdef')
+        cls.assertEqual(result['a1'],       1.1)
+        cls.assertEqual(result['a2'],       2.2)
 
 if __name__ == '__main__':
     import xmlrunner
