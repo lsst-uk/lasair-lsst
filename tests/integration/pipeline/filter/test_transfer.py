@@ -25,6 +25,7 @@ config = {
 table_from = 'things_from'
 table_to   = 'things_to'
 
+
 class RunTransferTest(TestCase):
 
     @classmethod
@@ -72,6 +73,10 @@ class RunTransferTest(TestCase):
     def test_2_transfer(cls):
         """Make CSV and transfer it"""
         attrs = fetch_attrs(cls.msl, table_from)
+        try:
+            os.remove(f"/data/mysql/{ table_to }.txt")
+        except FileNotFoundError:
+            pass
         transfer_csv(cls.msl, cls.msl, attrs, table_from, table_to)
 
         query = f"SELECT * FROM { table_to }"
@@ -80,8 +85,9 @@ class RunTransferTest(TestCase):
         result = list(cursor.fetchall())
         print(result)
         cls.assertEqual(result[0], 'ZTF23abcdef', msg=str(result))
-        cls.assertEqual(result[1],       1.1)
-        cls.assertEqual(result[2],       2.2)
+        cls.assertEqual(result[1], 1.1)
+        cls.assertEqual(result[2], 2.2)
+
 
 if __name__ == '__main__':
     import xmlrunner
