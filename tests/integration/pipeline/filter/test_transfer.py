@@ -74,7 +74,7 @@ class RunTransferTest(TestCase):
         """Make CSV and transfer it"""
         attrs = fetch_attrs(self.msl, table_from)
         try:
-            os.remove(f"/data/mysql/{ table_to }.txt")
+            os.remove(f"/data/mysql/{ table_from }.txt")
         except FileNotFoundError:
             pass
         log = mock.MagicMock()
