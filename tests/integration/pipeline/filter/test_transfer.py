@@ -79,7 +79,7 @@ class RunTransferTest(TestCase):
         cursor.execute(query)
         result = list(cursor.fetchall())
         print(result)
-        cls.assertEqual(result[0], 'ZTF23abcdef')
+        cls.assertEqual(result[0], 'ZTF23abcdef', msg=str(result))
         cls.assertEqual(result[1],       1.1)
         cls.assertEqual(result[2],       2.2)
 
