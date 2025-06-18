@@ -44,9 +44,9 @@ class RunTransferTest(TestCase):
             query = f"INSERT INTO { table_from } ( objectId, a2, a1 ) VALUES ( 'ZTF23abcdef', 2.2, 1.1 )"
             cursor.execute(query)
 
-# no sudo allowed on jenkins, but maybe dont need it
-#            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
-#            os.system(cmd)
+            # get ride of the old files
+            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
+            os.system(cmd)
 
     @classmethod
     def tearDownClass(cls):
