@@ -43,9 +43,10 @@ class RunTransferTest(TestCase):
             # insert a record. a2=2.2, a1=1.1
             query = f"INSERT INTO { table_from } ( objectId, a2, a1 ) VALUES ( 'ZTF23abcdef', 2.2, 1.1 )"
             cursor.execute(query)
-            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'  # HACK
-            cmd = 'rm /data/mysql/*.txt'
-            os.system(cmd)
+
+# no sudo allowed on jenkins, but maybe dont need it
+#            cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
+#            os.system(cmd)
 
     @classmethod
     def tearDownClass(cls):
@@ -76,7 +77,7 @@ class RunTransferTest(TestCase):
         query = f"SELECT * FROM { table_to }"
         with cls.msl.cursor(buffered=True, dictionary=True) as cursor:
             cursor.execute(query)
-        result = cursor.fetchall()
+        result = list(cursor)
         print(result)
         cls.assertEqual(result[0], 'ZTF23abcdef')
         cls.assertEqual(result[1], 1.1)
