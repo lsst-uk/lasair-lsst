@@ -73,22 +73,22 @@ class RunTransferTest(TestCase):
     def test_2_transfer(self):
         """Make CSV and transfer it"""
         attrs = fetch_attrs(self.msl, table_from)
+        # ensure that outfile is not present
         try:
             os.remove(f"/data/mysql/{ table_from }.txt")
         except FileNotFoundError:
             pass
         log = mock.MagicMock()
         rc = transfer_csv(self.msl, self.msl, attrs, table_from, table_to, log=log)
+        # transfer should return true with no errors
         log.error.assert_not_called()
         self.assertTrue(rc)
+        # check the contents of the dest table
         query = f"SELECT * FROM { table_to }"
         cursor = self.msl.cursor(buffered=True, dictionary=True)
         cursor.execute(query)
-        result = list(cursor.fetchall())
-        print(result)
-        self.assertEqual(result[0], 'ZTF23abcdef', msg=str(result))
-        self.assertEqual(result[1], 1.1)
-        self.assertEqual(result[2], 2.2)
+        result = cursor.fetchone()
+        self.assertEqual(result, {'objectId': 'ZTF23abcdef', 'a1': 1.1, 'a2': 2.2})
 
 
 if __name__ == '__main__':
