@@ -61,8 +61,8 @@ class RunTransferTest(TestCase):
         cls.msl.close()
 
     def test_1_get_attrs(self):
-        """Read the attributes of table_from"""
-        expected_result = ['objectId', 'a2', 'a1']
+        """Read the attributes of table_to"""
+        expected_result = ['objectId', 'a1', 'a2']
         attrs = fetch_attrs(self.msl, table_from)
         # should return three
         self.assertEqual(len(attrs), 3)
@@ -72,7 +72,7 @@ class RunTransferTest(TestCase):
 
     def test_2_transfer(self):
         """Make CSV and transfer it"""
-        attrs = fetch_attrs(self.msl, table_from)
+        attrs = fetch_attrs(self.msl, table_to)
         # ensure that outfile is not present
         try:
             os.remove(f"/data/mysql/{ table_from }.txt")
