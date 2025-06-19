@@ -25,6 +25,7 @@ config = {
 table_from = 'things_from'
 table_to   = 'things_to'
 
+
 class RunTransferTest(TestCase):
 
     @classmethod
@@ -59,29 +60,36 @@ class RunTransferTest(TestCase):
             cursor.execute(query)
         cls.msl.close()
 
-    def test_1_get_attrs(cls):
+    def test_1_get_attrs(self):
         """Read the attributes of table_from"""
         expected_result = ['objectId', 'a2', 'a1']
-        attrs = fetch_attrs(cls.msl, table_from)
+        attrs = fetch_attrs(self.msl, table_from)
         # should return three
-        cls.assertEqual(len(attrs), 3)
+        self.assertEqual(len(attrs), 3)
         # check objectID re as expected
         for i in range(3):
-            cls.assertEqual(attrs[i], expected_result[i])
+            self.assertEqual(attrs[i], expected_result[i])
 
-    def test_2_transfer(cls):
+    def test_2_transfer(self):
         """Make CSV and transfer it"""
-        attrs = fetch_attrs(cls.msl, table_from)
-        transfer_csv(cls.msl, cls.msl, attrs, table_from, table_to)
-
+        attrs = fetch_attrs(self.msl, table_from)
+        try:
+            os.remove(f"/data/mysql/{ table_from }.txt")
+        except FileNotFoundError:
+            pass
+        log = mock.MagicMock()
+        rc = transfer_csv(self.msl, self.msl, attrs, table_from, table_to, log=log)
+        log.error.assert_not_called()
+        self.assertTrue(rc)
         query = f"SELECT * FROM { table_to }"
-        cursor = cls.msl.cursor(buffered=True, dictionary=True)
+        cursor = self.msl.cursor(buffered=True, dictionary=True)
         cursor.execute(query)
         result = list(cursor.fetchall())
         print(result)
-        cls.assertEqual(result[0], 'ZTF23abcdef', msg=str(result))
-        cls.assertEqual(result[1],       1.1)
-        cls.assertEqual(result[2],       2.2)
+        self.assertEqual(result[0], 'ZTF23abcdef', msg=str(result))
+        self.assertEqual(result[1], 1.1)
+        self.assertEqual(result[2], 2.2)
+
 
 if __name__ == '__main__':
     import xmlrunner
