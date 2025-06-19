@@ -62,7 +62,7 @@ class RunTransferTest(TestCase):
 
     def test_1_get_attrs(self):
         """Read the attributes of table_to"""
-        expected_result = ['objectId', 'a1', 'a2']
+        expected_result = ['objectId', 'a2', 'a1']
         attrs = fetch_attrs(self.msl, table_from)
         # should return three
         self.assertEqual(len(attrs), 3)
