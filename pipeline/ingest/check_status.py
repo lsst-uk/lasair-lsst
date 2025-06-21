@@ -12,7 +12,7 @@ def check_status(nid, nalert):
         nalert: number of alerts ingested in this batch
     """
 
-#    update_time = datetime.datetime.utcnow().isoformat()
+#    update_time = datetime.datetime.now(datetime.UTC).isoformat()
 #    update_time = update_time.split('.')[0]
     
     ms = manage_status.manage_status()

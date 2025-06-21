@@ -3,7 +3,7 @@ pipeline {
         dockerfile {
             dir 'tests'
             filename 'Dockerfile'
-            args '--network host'
+            args '--network host --mount type=bind,src=/data/mysql,dst=/data/mysql'
         }
     }
     stages {
@@ -93,6 +93,7 @@ pipeline {
                 dir('tests/integration/pipeline/filter') {
                     sh 'python3 test_run_query.py'
                     sh 'python3 test_watchlist.py'
+                    sh 'python3 test_transfer.py'
                 }
                 dir('tests/integration/pipeline/sherlock') {
                     sh 'python3 test_sherlock_wrapper.py'

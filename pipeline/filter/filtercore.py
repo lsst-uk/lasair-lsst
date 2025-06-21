@@ -42,7 +42,7 @@ import urllib
 import urllib.parse
 import numbers
 import confluent_kafka
-from datetime import datetime
+import datetime
 from docopt import docopt
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
@@ -60,6 +60,7 @@ import filters
 import watchlists
 import watchmaps
 import mmagw
+from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 from features.FeatureGroup import FeatureGroup
@@ -67,7 +68,7 @@ from features.FeatureGroup import FeatureGroup
 sys.path.append('features/BBB')
 
 def now():
-    return datetime.utcnow().strftime("%H:%M:%S")
+    return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
 
 class Filter:
@@ -92,22 +93,18 @@ class Filter:
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.sfd = None
 
         self.consumer = None
         self.database = None
 
         self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
+        self.csv_attrs = {}
 
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
         self.sigterm_raised = False
-
-        # set up the extinction factory
-        try:
-            self.sfd = SFDQuery()
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def setup(self):
         """Set up connections to Kafka, database, etc. if not already done. It is safe to call this multiple
@@ -123,6 +120,24 @@ class Filter:
                 self.database = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+
+        # get the order of the attributes for all tables transferred by CSV
+        table_list = [
+            'objects',
+            'sherlock_classifications',
+            'watchlist_hits',
+            'area_hits',
+            'mma_area_hits',
+        ]
+        for table_name in table_list:
+            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
+
+        # set up the extinction factory
+        if not self.sfd:
+            try:
+                self.sfd = SFDQuery()
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -271,7 +286,7 @@ class Filter:
         c = SkyCoord(raList, declList, unit="deg", frame='icrs')
         ebvList = self.sfd(c)
         nalert = 0
-        for ebv,alert in zip(ebvList, alertList):
+        for ebv, alert in zip(ebvList, alertList):
             alert['ebv'] = ebv
             nalert += self.handle_alert(alert)
         return nalert
@@ -367,57 +382,23 @@ class Filter:
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        tablelist = [
-            'objects',
-            'sherlock_classifications',
-            'watchlist_hits',
-            'area_hits',
-            'mma_area_hits',
-        ]
-
-        # Make a CSV file for each local table
-        for table in tablelist:
-            query = """
-                SELECT * FROM %s INTO OUTFILE '/data/mysql/%s.txt'
-                FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n';
-            """ % (table, table)
-
-            try:
-                self.execute_query(query)
-            except:
-                self.log.error('ERROR in filter/transfer_to_main: cannot build CSV from local database')
-                return False
-
-        # Transmit the CSV files to the main database and ingest them
         try:
             main_database = db_connect.remote(allow_infile=True)
         except Exception as e:
             self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
             return False
 
-        commit = True
-        for table in tablelist:
-            sql  = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table
-            sql += "REPLACE INTO TABLE %s FIELDS TERMINATED BY ',' " % table
-            sql += "ENCLOSED BY '\"' LINES TERMINATED BY '\n'"
-
+        for table_name, attrs in self.csv_attrs.items():
             try:
-                cursor = main_database.cursor(buffered=True)
-                cursor.execute(sql)
-                cursor.close()
-                main_database.commit()
-                self.log.info('%s ingested to main db' % table)
+                transfer_csv(self.database, main_database, attrs, table_name, table_name, log=self.log)
+                self.log.info('%s ingested to main db' % table_name)
             except Exception as e:
-                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table, str(e)))
-                commit = False
-                break
-        main_database.close()
+                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
+                return False
 
-        if commit:
-            self.consumer.commit()
-            self.log.info('Kafka committed for this batch')
-
-        return commit
+        self.consumer.commit()
+        self.log.info('Kafka committed for this batch')
+        return True
 
     def write_stats(self, timers: dict, nalerts: int):
         """ Write the statistics to lasair status and to prometheus.
@@ -527,7 +508,7 @@ class Filter:
     def grafana_today():
         """How many objects reported today from LSST.
         """
-        g = datetime.utcnow()
+        g = datetime.datetime.now(datetime.UTC)
         date = '%4d%02d%02d' % (g.year, g.month, g.day)
         # do not have this for LSST yet
 #        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
