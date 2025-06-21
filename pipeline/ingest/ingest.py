@@ -261,7 +261,8 @@ class Ingester:
         nDiaSources = 0
         nForcedSources = 0
 
-        alerts = []
+        alerts = []    # pushed to kafka, sherlock, filters etc
+        alertsDB = []  # put into cassandra
         for lsst_alert in lsst_alerts:
 #            print_msg(lsst_alert)
 #            sys.exit()
@@ -293,11 +294,15 @@ class Ingester:
                 diaForcedSource['decl'] = diaForcedSource['dec']
                 del diaForcedSource['dec']
 
+            # sort the diaSources and diaForcedSources, newest first
+            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+            diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+
             # deal with images
             if not self.nocutouts and self.image_store.image_store:
                 try:
                     # get the MJD for the latest detection
-                    lastSource = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)[0]
+                    lastSource = diaSourcesList[0]
                     # ID for the latest detection, this is what the cutouts belong to
                     diaSourceId = lastSource['diaSourceId']
                     # MJD for storing images
@@ -323,11 +328,40 @@ class Ingester:
             }
             alerts.append(alert)
 
+            # build the subset of the diaSources and diaForcedSources that do into Cassandra
+            # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
+            nds = settings.N_DIASOURCES_DB
+            if len(diaSourcesList) < nds:
+                diaSourcesListDB            = diaSourcesList
+                diaForcedSourcesListDB      = diaForcedSourcesList
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList
+            else:
+                diaSourcesListDB = diaSourcesList[:nds]
+                fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
+
+                for i in range(len(diaForcedSourcesList)):
+                    if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaForcedSourcesListDB = diaForcedSourcesList[:i]
+
+                for i in range(len(diaNondetectionLimitsList)):
+                    if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+            alertDB = {
+                'diaObject': diaObject,
+                'diaSourcesList': diaSourcesListDB,
+                'diaForcedSourcesList': diaForcedSourcesListDB,
+                'diaNondetectionLimitsList': diaNondetectionLimitsListDB,
+                'ssObject': ssObject,
+            }
+            alertsDB.append(alertDB)
+
         # Call on Cassandra
-        if len(alerts) > 0:
+        if len(alertsDB) > 0:
             try:
                 self.timers['icassandra'].on()
-                self._insert_cassandra_multi(alerts)
+                self._insert_cassandra_multi(alertsDB)
                 self.timers['icassandra'].off()
             except Exception as e:
                 log.error('ERROR in ingest/handle_alerts: Cassandra insert failed' + str(e))
