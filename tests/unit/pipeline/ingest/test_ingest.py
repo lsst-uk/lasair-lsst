@@ -13,15 +13,16 @@ test_alert = {
     'prvDiaSources': [
         {'diaSourceId': 176891668354564642, 'midpointMjdTai': 57074.0, 'ra':123, 'dec':23},
         {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695887, 'midpointMjdTai': 57071.0, 'ra':123, 'dec':23},
         {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.0, 'ra':123, 'dec':23},
         ],
 
     # zero of these
     'prvDiaForcedSources': [
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57074.0},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57073.0},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57069.0},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57067.0},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57074.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57073.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57069.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57067.0, 'ra':123, 'dec':23},
         ],
     'prvDiaNondetectionLimits': [],
     'ssObject': {},
@@ -106,7 +107,7 @@ class IngestTest(unittest.TestCase):
         ingester = ingest.Ingester('', '', '', 1, cassandra_session=True, ms=True)
         ingester._insert_cassandra(alert)
         # executeLoad should get called three times, once for diaObject and once for each nonempty list
-        self.assertEqual(mock_executeLoadAsync.call_count, 2)
+        self.assertEqual(mock_executeLoadAsync.call_count, 3)
 
     @patch('ingest.Ingester._insert_cassandra_multi')
     def test_handle_alert(self, mock_insert_cassandra_multi):
@@ -116,7 +117,9 @@ class IngestTest(unittest.TestCase):
         ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer, ms=True)
         result = ingester._handle_alert(test_alert)
         # check the return values
-        self.assertEqual(result, (3, 0))   # 3 diaSources and zero diaForcedSources
+        # 5 diaSources with 4 sent to DB
+        # 4 diaForcedSources with 2 sent to DB
+        self.assertEqual(result, (5, 4, 4, 2))   
         # store_images should get called once
         mock_image_store.store_images.assert_called_once()
         # insert_cassandra_multi should get called once
@@ -131,7 +134,7 @@ class IngestTest(unittest.TestCase):
         mock_ms = unittest.mock.MagicMock()
         ingester = ingest.Ingester('', '', '', 1, log=mock_log, producer=mock_producer, consumer=mock_consumer,
                                    ms=mock_ms)
-        ingester._end_batch(1, 2, 2)
+        ingester._end_batch(1, 5, 4, 4, 2)
         # log message should get sent
         mock_log.info.assert_called_once()
         # producer should get flushed
@@ -139,7 +142,7 @@ class IngestTest(unittest.TestCase):
         # consumer offsets should get committed
         mock_consumer.commit.assert_called_once()
         # status page should get updated
-        self.assertEqual(mock_ms.add.call_count, 1 + len(ingester.timers))
+        self.assertEqual(mock_ms.add.call_count, 4 + len(ingester.timers))
 
     def test_poll(self):
         mock_log = unittest.mock.MagicMock()
