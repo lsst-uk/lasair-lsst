@@ -386,7 +386,7 @@ class Ingester:
 
         return (nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
 
-    def _end_batch(self, nalert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
+    def _end_batch(self, nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
@@ -411,14 +411,17 @@ class Ingester:
 
         # update the status page
         nid = date_nid.nid_now()
-        self.ms.add({'today_alert':nalert, 'diaSource':nDiaSource}, nid)
-        self.ms.add({'today_alert':nalert, 'diaSourceDB':nDiaSourceDB}, nid)
-        self.ms.add({'today_alert':nalert, 'diaForcedSource':nDiaForcedSource}, nid)
-        self.ms.add({'today_alert':nalert, 'diaForcedSourceDB':nDiaForcedSourceDB}, nid)
+        self.ms.add({
+            'today_alert':nAlert, 
+            'diaSource':nDiaSource,
+            'diaSourceDB':nDiaSourceDB,
+            'diaForcedSource':nDiaForcedSource,
+            'diaForcedSourceDB':nDiaForcedSourceDB
+        }, nid)
         for name,td in self.timers.items():
             td.add2ms(self.ms, nid)
 
-        log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nalert, nDiaSource, nDiaForcedSource))
+        log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nAlert, nDiaSource, nDiaForcedSource))
         sys.stdout.flush()
 
     def _poll(self, n):
@@ -452,7 +455,7 @@ class Ingester:
         # setup connections to Kafka, Cassandra, etc.
         self.setup()
     
-        nalert = 0        # number not yet send to manage_status
+        nAlert = 0        # number not yet send to manage_status
         nDiaSource = 0    # number not yet send to manage_status
         nDiaSourceDB = 0    # number sent to database
         nDiaForcedSource = 0    # number not yet send to manage_status
@@ -463,7 +466,7 @@ class Ingester:
         n_remaining = self.maxalert
         self.timers['itotal'].on()
         while n_remaining > 0:
-            n_remaining = self.maxalert - ntotalalert
+            n_remaining = self.maxalert - nTotalAlert
             if n_remaining < mini_batch_size:
                 mini_batch_size = n_remaining
 
@@ -477,28 +480,28 @@ class Ingester:
             alerts = self._poll(mini_batch_size)
             self.timers['ikconsume'].off()
             n = len(alerts)
-            nalert += n
-            ntotalalert += n
+            nAlert += n
+            nTotalAlert += n
 
             # process alerts
             (iDiaSource,iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
-            nDiaSource += idiaSource
-            nDiaSourceDB += idiaSourceDB
-            nDiaForcedSource += iforcedSource
-            nDiaForcedSourceDB += iforcedSourceDB
+            nDiaSource += iDiaSource
+            nDiaSourceDB += iDiaSourceDB
+            nDiaForcedSource += iDiaForcedSource
+            nDiaForcedSourceDB += iDiaForcedSourceDB
            
             # partial alert batch case
             if n < mini_batch_size:
-                self._end_batch(nalert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
-                nalert = nDiaSource = nDiaForcedSource = 0
+                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
                 time.sleep(self.wait_time)
     
             # every so often commit, flush, and update status
-            if nalert >= batch_size:
-                self._end_batch(nalert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
-                nalert = nDiaSource = nDiaForcedSource = 0
+            if nAlert >= batch_size:
+                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
     
         self.timers['itotal'].off()
@@ -506,7 +509,7 @@ class Ingester:
         # if we exit this loop, clean up
         log.info('Shutting down')
     
-        self._end_batch(nalert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+        self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
     
         # shut down kafka consumer
         self.consumer.close()
@@ -515,7 +518,7 @@ class Ingester:
         if self.cassandra_session:
             self.cluster.shutdown()
 
-        return ntotalalert
+        return nTotalAlert
 
 
 def run_ingest(args, log=None):
