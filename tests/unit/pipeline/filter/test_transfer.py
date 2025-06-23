@@ -26,9 +26,9 @@ class TransferTest(unittest.TestCase):
         mock_msl = MagicMock()
         mock_msl.cursor.return_value = mock_cursor
         mock_log = MagicMock()
-        result = transfer.fetch_attrs(mock_msl, 'my_table', log=mock_log)
-        self.assertFalse(result)
-        mock_log.error.assert_called()
+        with self.assertRaises(Exception):
+            transfer.fetch_attrs(mock_msl, 'my_table', log=mock_log)
+            mock_log.error.assert_called()
 
     def test_transfer(self):
         """Test transfer csv (doesn't actually do very much)"""
@@ -45,15 +45,15 @@ class TransferTest(unittest.TestCase):
         mock_log = MagicMock()
         mock_msl_local = MagicMock()
         mock_msl_local.cursor.return_value.execute.side_effect = Exception('test exception')
-        result = transfer.transfer_csv(
-            mock_msl_local,
-            MagicMock(name='msl_remote'),
-            ['attr', 'list'],
-            'table_from',
-            'table_to',
-            log=mock_log)
-        self.assertFalse(result)
-        mock_log.error.assert_called()
+        with self.assertRaises(Exception):
+            transfer.transfer_csv(
+                mock_msl_local,
+                MagicMock(name='msl_remote'),
+                ['attr', 'list'],
+                'table_from',
+                'table_to',
+                log=mock_log)
+            mock_log.error.assert_called()
 
     @patch('db_connect.remote')
     @patch('db_connect.local')
