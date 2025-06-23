@@ -20,6 +20,7 @@ def fetch_attrs(msl_remote, table_name, log=None):
     cursor.close()
     return attrs
 
+
 def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
     # delete the old file (might be done elsewhere)
     #os.system('sudo --non-interactive rm /data/mysql/%s.txt' % table_name)
@@ -45,7 +46,8 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
     msl_remote.commit()
     return True
 
-if __name__ == "__main__":
+
+def main():
     import os, sys
     sys.path.append('../../common')
     sys.path.append('../../common/src')
@@ -59,3 +61,7 @@ if __name__ == "__main__":
     os.system('sudo --non-interactive rm /data/mysql/*.txt')
 
     transfer_csv(msl_local, msl_remote, attrs, 'objects', 'objects')
+
+
+if __name__ == "__main__":
+    main()
