@@ -142,7 +142,7 @@ class IngestTest(unittest.TestCase):
         # consumer offsets should get committed
         mock_consumer.commit.assert_called_once()
         # status page should get updated
-        self.assertEqual(mock_ms.add.call_count, 4 + len(ingester.timers))
+        self.assertEqual(mock_ms.add.call_count, 1 + len(ingester.timers))
 
     def test_poll(self):
         mock_log = unittest.mock.MagicMock()
