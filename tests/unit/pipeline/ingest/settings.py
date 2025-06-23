@@ -7,3 +7,5 @@ SLACK_URL=''
 SLACK_CHANNEL=''
 KAFKA_GROUPID=''
 
+# Number of the latest diaSources to put into database
+N_DIASOURCES_DB        = 2

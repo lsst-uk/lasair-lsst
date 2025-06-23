@@ -9,13 +9,20 @@ test_alert = {
     'diaObject': {'diaObjectId': 1998903343203749723, 'ra':123, 'dec':23},
 
     # 3 diaSources
-    'diaSource': {'diaSourceId': 181071530527032103, 'midpointMjdTai': 57095.171263959775, 'ra':123, 'dec':23},
+    'diaSource': {'diaSourceId': 181071530527032103, 'midpointMjdTai': 57075.0, 'ra':123, 'dec':23},
     'prvDiaSources': [
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.34313563427, 'ra':123, 'dec':23},
-        {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.34253447427, 'ra':123, 'dec':23}],
+        {'diaSourceId': 176891668354564642, 'midpointMjdTai': 57074.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.0, 'ra':123, 'dec':23},
+        ],
 
     # zero of these
-    'prvDiaForcedSources': [],
+    'prvDiaForcedSources': [
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57074.0},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57073.0},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57069.0},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57067.0},
+        ],
     'prvDiaNondetectionLimits': [],
     'ssObject': {},
 
