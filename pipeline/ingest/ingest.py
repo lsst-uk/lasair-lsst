@@ -259,9 +259,12 @@ class Ingester:
         """
         log = self.log
         nDiaSources = 0
+        nDiaSourcesDB = 0
         nForcedSources = 0
+        nForcedSourcesDB = 0
 
-        alerts = []
+        alerts = []    # pushed to kafka, sherlock, filters etc
+        alertsDB = []  # put into cassandra
         for lsst_alert in lsst_alerts:
 #            print_msg(lsst_alert)
 #            sys.exit()
@@ -293,11 +296,15 @@ class Ingester:
                 diaForcedSource['decl'] = diaForcedSource['dec']
                 del diaForcedSource['dec']
 
+            # sort the diaSources and diaForcedSources, newest first
+            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+            diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+
             # deal with images
             if not self.nocutouts and self.image_store.image_store:
                 try:
                     # get the MJD for the latest detection
-                    lastSource = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)[0]
+                    lastSource = diaSourcesList[0]
                     # ID for the latest detection, this is what the cutouts belong to
                     diaSourceId = lastSource['diaSourceId']
                     # MJD for storing images
@@ -323,11 +330,42 @@ class Ingester:
             }
             alerts.append(alert)
 
+            # build the subset of the diaSources and diaForcedSources that do into Cassandra
+            # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
+            nds = settings.N_DIASOURCES_DB
+            if len(diaSourcesList) < nds:
+                diaSourcesListDB            = diaSourcesList
+                diaForcedSourcesListDB      = diaForcedSourcesList
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList
+            else:
+                diaSourcesListDB = diaSourcesList[:nds]
+                fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
+
+                for i in range(len(diaForcedSourcesList)):
+                    if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaForcedSourcesListDB = diaForcedSourcesList[:i]
+
+                for i in range(len(diaNondetectionLimitsList)):
+                    if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+            alertDB = {
+                'diaObject': diaObject,
+                'diaSourcesList': diaSourcesListDB,
+                'diaForcedSourcesList': diaForcedSourcesListDB,
+                'diaNondetectionLimitsList': diaNondetectionLimitsListDB,
+                'ssObject': ssObject,
+            }
+            nDiaSourcesDB += len(diaSourcesListDB)
+            nForcedSourcesDB += len(diaForcedSourcesListDB)
+            alertsDB.append(alertDB)
+
         # Call on Cassandra
-        if len(alerts) > 0:
+        if len(alertsDB) > 0:
             try:
                 self.timers['icassandra'].on()
-                self._insert_cassandra_multi(alerts)
+                self._insert_cassandra_multi(alertsDB)
                 self.timers['icassandra'].off()
             except Exception as e:
                 log.error('ERROR in ingest/handle_alerts: Cassandra insert failed' + str(e))
@@ -346,9 +384,9 @@ class Ingester:
                     raise e
         self.timers['ikproduce'].off()
 
-        return (nDiaSources, nForcedSources)
+        return (nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
 
-    def _end_batch(self, nalert, ndiaSource, nforcedSource):
+    def _end_batch(self, nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
@@ -373,11 +411,17 @@ class Ingester:
 
         # update the status page
         nid = date_nid.nid_now()
-        self.ms.add({'today_alert':nalert, 'today_diaSource':ndiaSource}, nid)
+        self.ms.add({
+            'today_alert':nAlert, 
+            'diaSource':nDiaSource,
+            'diaSourceDB':nDiaSourceDB,
+            'diaForcedSource':nDiaForcedSource,
+            'diaForcedSourceDB':nDiaForcedSourceDB
+        }, nid)
         for name,td in self.timers.items():
             td.add2ms(self.ms, nid)
 
-        log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nalert, ndiaSource, nforcedSource))
+        log.info('%s %d alerts %d diaSource %d forcedSource' % (self._now(), nAlert, nDiaSource, nDiaForcedSource))
         sys.stdout.flush()
 
     def _poll(self, n):
@@ -411,16 +455,18 @@ class Ingester:
         # setup connections to Kafka, Cassandra, etc.
         self.setup()
     
-        nalert = 0        # number not yet send to manage_status
-        ndiaSource = 0    # number not yet send to manage_status
-        nforcedSource = 0    # number not yet send to manage_status
-        ntotalalert = 0   # number since this program started
+        nAlert = 0        # number not yet send to manage_status
+        nDiaSource = 0    # number not yet send to manage_status
+        nDiaSourceDB = 0    # number sent to database
+        nDiaForcedSource = 0    # number not yet send to manage_status
+        nDiaForcedSourceDB = 0    # number sent to database
+        nTotalAlert = 0   # number since this program started
         log.info('INGEST starts %s' % self._now())
     
         n_remaining = self.maxalert
         self.timers['itotal'].on()
         while n_remaining > 0:
-            n_remaining = self.maxalert - ntotalalert
+            n_remaining = self.maxalert - nTotalAlert
             if n_remaining < mini_batch_size:
                 mini_batch_size = n_remaining
 
@@ -434,32 +480,36 @@ class Ingester:
             alerts = self._poll(mini_batch_size)
             self.timers['ikconsume'].off()
             n = len(alerts)
-            nalert += n
-            ntotalalert += n
+            nAlert += n
+            nTotalAlert += n
 
             # process alerts
-            (idiaSource,iforcedSource) = self._handle_alerts(alerts)
-            ndiaSource += idiaSource
-            nforcedSource += iforcedSource
+            (iDiaSource,iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
+            nDiaSource += iDiaSource
+            nDiaSourceDB += iDiaSourceDB
+            nDiaForcedSource += iDiaForcedSource
+            nDiaForcedSourceDB += iDiaForcedSourceDB
            
             # partial alert batch case
             if n < mini_batch_size:
-                self._end_batch(nalert, ndiaSource, nforcedSource)
-                nalert = ndiaSource = nforcedSource = 0
+                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nAlert = nDiaSource = nDiaForcedSource = 0
+                nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
                 time.sleep(self.wait_time)
     
             # every so often commit, flush, and update status
-            if nalert >= batch_size:
-                self._end_batch(nalert, ndiaSource, nforcedSource)
-                nalert = ndiaSource = nforcedSource = 0
+            if nAlert >= batch_size:
+                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nAlert = nDiaSource = nDiaForcedSource = 0
+                nDiaSourceDB = nDiaForcedSourceDB = 0
     
         self.timers['itotal'].off()
 
         # if we exit this loop, clean up
         log.info('Shutting down')
     
-        self._end_batch(nalert, ndiaSource, nforcedSource)
+        self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
     
         # shut down kafka consumer
         self.consumer.close()
@@ -468,7 +518,7 @@ class Ingester:
         if self.cassandra_session:
             self.cluster.shutdown()
 
-        return ntotalalert
+        return nTotalAlert
 
 
 def run_ingest(args, log=None):
