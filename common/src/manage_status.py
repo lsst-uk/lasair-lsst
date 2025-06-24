@@ -86,8 +86,7 @@ class manage_status():
         for name,value in dictionary.items():
             query = queryfmt % (nid, name, value, value)
 #            print(query)
-            cursor.execute(query)
-        self.execute_with_retry(query)
+            self.execute_with_retry(query)
 
 # A timing class built with manage_status
 class timer():
