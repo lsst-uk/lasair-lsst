@@ -52,10 +52,12 @@ class manage_status():
     def tostr(self, nid):
         return json.dumps(self.read(nid), indent=2)
 
-    def commit_with_retry(self, max_retries=5, initial_wait=1):
+    def execute_with_retry(self, query, max_retries=5, initial_wait=1):
         wait_time = initial_wait
+        cursor  = self.msl.cursor(buffered=True, dictionary=True)
         for attempt in range(1, max_retries + 1):
             try:
+                cursor.execute(query)
                 self.msl.commit()
                 return  # Success, exit the function
             except Exception as e:
@@ -75,9 +77,7 @@ class manage_status():
             ql.append("(%d,'%s',%f)" % (nid, name, value))
         query += ','.join(ql)
 #        print(query)
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
-        cursor.execute(query)
-        self.commit_with_retry()
+        self.commit_with_retry(query)
 
     def add(self, dictionary, nid):
         queryfmt = "INSERT INTO %s (nid,name,value) VALUES " % self.table
@@ -87,7 +87,7 @@ class manage_status():
             query = queryfmt % (nid, name, value, value)
 #            print(query)
             cursor.execute(query)
-        self.commit_with_retry()
+        self.commit_with_retry(query)
 
 # A timing class built with manage_status
 class timer():
