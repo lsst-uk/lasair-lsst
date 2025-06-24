@@ -77,7 +77,7 @@ class manage_status():
             ql.append("(%d,'%s',%f)" % (nid, name, value))
         query += ','.join(ql)
 #        print(query)
-        self.commit_with_retry(query)
+        self.execute_with_retry(query)
 
     def add(self, dictionary, nid):
         queryfmt = "INSERT INTO %s (nid,name,value) VALUES " % self.table
@@ -87,7 +87,7 @@ class manage_status():
             query = queryfmt % (nid, name, value, value)
 #            print(query)
             cursor.execute(query)
-        self.commit_with_retry(query)
+        self.execute_with_retry(query)
 
 # A timing class built with manage_status
 class timer():
