@@ -258,8 +258,8 @@ class Ingester:
         Returns: (nObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
         """
         log = self.log
-        nDiaObjects = 0
-        nSSObjects = 0
+        nDiaObject = 0
+        nSSObject = 0
         nDiaSources = 0
         nDiaSourcesDB = 0
         nForcedSources = 0
@@ -404,7 +404,7 @@ class Ingester:
                     raise e
         self.timers['ikproduce'].off()
 
-        return (nObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+        return (nDiaObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
 
     def _end_batch(self, nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
