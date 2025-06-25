@@ -458,7 +458,8 @@ class Filter:
             for row in cursor:
                 count = row['count']
                 break
-        except:
+        except Exception as e:
+            self.log.warning("batch_statistics today: %s %s" % (str(e), query))
             count = -1
 
         # total number of objects
@@ -471,6 +472,7 @@ class Filter:
                 since = 24 * float(row['since'])
                 break
         except:
+            self.log.warning("batch_statistics total: %s %s" % (str(e), query))
             total_count = -1
             since = -1
 
