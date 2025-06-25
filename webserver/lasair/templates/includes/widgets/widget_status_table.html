@@ -14,10 +14,10 @@
                     </tr></thead>
                 <tbody>
 
-                    {% for metric, value, comment in status %}
+                    {% for metric, value in status %}
 
                         <tr>
-                            <td >{{metric}}{% include "includes/info_tooltip.html" with info=comment position="auto" %}</td>
+                            <td >{{metric}}</td>
                             <td>{{value}}</td>
 
 

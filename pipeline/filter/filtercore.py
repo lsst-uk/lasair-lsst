@@ -497,6 +497,8 @@ class Filter:
         except:
             pass
 
+        update_time = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+
         return {
             'total_count': total_count,  # number of objects in database
             'count': count,  # number of objects updated since midnight
@@ -504,6 +506,7 @@ class Filter:
             'min_delay': min_delay,  # for grafana min delay in this batch, minutes
             'avg_delay': avg_delay,  # for grafana avg delay in this batch, minutes
             'max_delay': max_delay,  # for grafana max delay in this batch, minutes
+            'update_time': update_time,
         }
 
     @staticmethod

@@ -255,9 +255,11 @@ class Ingester:
         Args:
             lsst_alerts:
 
-        Returns: (number of diaSoucres, number of forced sources)
+        Returns: (nObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
         """
         log = self.log
+        nDiaObjects = 0
+        nSSObjects = 0
         nDiaSources = 0
         nDiaSourcesDB = 0
         nForcedSources = 0
@@ -269,87 +271,103 @@ class Ingester:
 #            print_msg(lsst_alert)
 #            sys.exit()
 
-            diaObject = lsst_alert['diaObject']
+            diaObject = lsst_alert.get('diaObject', None)
 
             diaSourcesList = [lsst_alert['diaSource']]
             if lsst_alert['prvDiaSources']:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
+            else:
+                diaSourcesList = []
 
-            diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
-            if not diaForcedSourcesList: diaForcedSourcesList = []
+            if lsst_alert['prvDiaForcedSources']:
+                diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
+            else:
+                diaForcedSourcesList = []
 
-            diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
-            if not diaNondetectionLimitsList: diaNondetectionLimitsList = []
+            if lsst_alert['prvDiaNondetectionLimits']:
+                diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
+            else:
+                diaNondetectionLimitsList = []
 
-            ssObject = lsst_alert['ssObject']
-
-            nDiaSources += len(diaSourcesList)
-            nForcedSources += len(diaForcedSourcesList)
-
-            # change dec to decl so MySQL doesnt get confused
-            diaObject['decl'] = diaObject['dec']
-            del diaObject['dec']
-            for diaSource in diaSourcesList:
-                diaSource['decl'] = diaSource['dec']
-                del diaSource['dec']
-            for diaForcedSource in diaForcedSourcesList:
-                diaForcedSource['decl'] = diaForcedSource['dec']
-                del diaForcedSource['dec']
-
-            # sort the diaSources and diaForcedSources, newest first
-            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
-            diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
-
-            # deal with images
-            if not self.nocutouts and self.image_store.image_store:
-                try:
-                    # get the MJD for the latest detection
-                    lastSource = diaSourcesList[0]
-                    # ID for the latest detection, this is what the cutouts belong to
-                    diaSourceId = lastSource['diaSourceId']
-                    # MJD for storing images
-                    imjd = int(lastSource['midpointMjdTai'])
-                    # objectID
-                    diaObjectId = diaObject['diaObjectId']
-                    # store the fits images
-                    self.timers['icutout'].on()
-                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
-                    self.timers['icutout'].off()
-                    self.futures += image_futures
-                except IndexError:
-                    # This will happen if the list of sources is empty
-                    log.debug("No latest detection so not storing cutouts")
-
-            # build the outgoing alerts
-            alert = {
-                'diaObject': diaObject,
-                'diaSourcesList': diaSourcesList,
-                'diaForcedSourcesList': diaForcedSourcesList,
-                'diaNondetectionLimitsList': diaNondetectionLimitsList,
-                'ssObject': ssObject,
-            }
-            alerts.append(alert)
-
-            # build the subset of the diaSources and diaForcedSources that do into Cassandra
-            # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
-            nds = settings.N_DIASOURCES_DB
-            if len(diaSourcesList) < nds:
+            ssObject = lsst_alert.get('ssObject', None)
+            if ssObject:
+                nSSObject += 1
                 diaSourcesListDB            = diaSourcesList
                 diaForcedSourcesListDB      = diaForcedSourcesList
                 diaNondetectionLimitsListDB = diaNondetectionLimitsList
-            else:
-                diaSourcesListDB = diaSourcesList[:nds]
-                fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
 
-                for i in range(len(diaForcedSourcesList)):
-                    if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                        break
-                diaForcedSourcesListDB = diaForcedSourcesList[:i]
+            if diaObject:
+                nDiaObject += 1
+                nDiaSources += len(diaSourcesList)
+                nForcedSources += len(diaForcedSourcesList)
 
-                for i in range(len(diaNondetectionLimitsList)):
-                    if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                        break
-                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                # change dec to decl so MySQL doesnt get confused
+                diaObject['decl'] = diaObject['dec']
+                del diaObject['dec']
+                for diaSource in diaSourcesList:
+                    diaSource['decl'] = diaSource['dec']
+                    del diaSource['dec']
+                for diaForcedSource in diaForcedSourcesList:
+                    diaForcedSource['decl'] = diaForcedSource['dec']
+                    del diaForcedSource['dec']
+
+                # sort the diaSources and diaForcedSources, newest first
+                diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+                diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+
+                # deal with images
+                if not self.nocutouts and self.image_store.image_store:
+                    try:
+                        # get the MJD for the latest detection
+                        lastSource = diaSourcesList[0]
+                        # ID for the latest detection, this is what the cutouts belong to
+                        diaSourceId = lastSource['diaSourceId']
+                        # MJD for storing images
+                        imjd = int(lastSource['midpointMjdTai'])
+                        # objectID
+                        diaObjectId = diaObject['diaObjectId']
+                        # store the fits images
+                        self.timers['icutout'].on()
+                        image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
+                        self.timers['icutout'].off()
+                        self.futures += image_futures
+                    except IndexError:
+                        # This will happen if the list of sources is empty
+                        log.debug("No latest detection so not storing cutouts")
+
+                # build the subset of the diaSources and diaForcedSources that do into Cassandra
+                # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
+                nds = settings.N_DIASOURCES_DB
+                if len(diaSourcesList) < nds:
+                    diaSourcesListDB            = diaSourcesList
+                    diaForcedSourcesListDB      = diaForcedSourcesList
+                    diaNondetectionLimitsListDB = diaNondetectionLimitsList
+                else:
+                    diaSourcesListDB = diaSourcesList[:nds]
+                    fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
+    
+                    for i in range(len(diaForcedSourcesList)):
+                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
+    
+                    for i in range(len(diaNondetectionLimitsList)):
+                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+        
+                # build the outgoing alerts
+                alert = {
+                    'diaObject': diaObject,
+                    'diaSourcesList': diaSourcesList,
+                    'diaForcedSourcesList': diaForcedSourcesList,
+                    'diaNondetectionLimitsList': diaNondetectionLimitsList,
+                    'ssObject': ssObject,
+                }
+                alerts.append(alert)
+
+            # end of if diaObject
+
             alertDB = {
                 'diaObject': diaObject,
                 'diaSourcesList': diaSourcesListDB,
@@ -362,6 +380,7 @@ class Ingester:
             alertsDB.append(alertDB)
 
         # Call on Cassandra
+        # both diaObjects and ssObjects go in
         if len(alertsDB) > 0:
             try:
                 self.timers['icassandra'].on()
@@ -373,6 +392,7 @@ class Ingester:
 
         # produce to kafka
         self.timers['ikproduce'].on()
+        # alerts will not have any ssObjects
         for alert in alerts:
             if self.producer is not None:
                 try:
@@ -384,9 +404,9 @@ class Ingester:
                     raise e
         self.timers['ikproduce'].off()
 
-        return (nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+        return (nObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
 
-    def _end_batch(self, nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
+    def _end_batch(self, nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
@@ -413,6 +433,8 @@ class Ingester:
         nid = date_nid.nid_now()
         self.ms.add({
             'today_alert':nAlert, 
+            'diaObject': nDiaObject,
+            'ssObject': nSSObject,
             'diaSource':nDiaSource,
             'diaSourceDB':nDiaSourceDB,
             'diaForcedSource':nDiaForcedSource,
@@ -456,6 +478,8 @@ class Ingester:
         self.setup()
     
         nAlert = 0        # number not yet send to manage_status
+        nDiaObject = 0
+        nSSObject = 0
         nDiaSource = 0    # number not yet send to manage_status
         nDiaSourceDB = 0    # number sent to database
         nDiaForcedSource = 0    # number not yet send to manage_status
@@ -484,7 +508,9 @@ class Ingester:
             nTotalAlert += n
 
             # process alerts
-            (iDiaSource,iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
+            (iDiaObject, iSSObject, iDiaSource,iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
+            nDiaObject += iDiaObject
+            nSSObject += iSSObject
             nDiaSource += iDiaSource
             nDiaSourceDB += iDiaSourceDB
             nDiaForcedSource += iDiaForcedSource
@@ -492,7 +518,7 @@ class Ingester:
            
             # partial alert batch case
             if n < mini_batch_size:
-                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                self._end_batch(nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
                 nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
@@ -500,7 +526,7 @@ class Ingester:
     
             # every so often commit, flush, and update status
             if nAlert >= batch_size:
-                self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                self._end_batch(nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
                 nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
     
@@ -509,7 +535,7 @@ class Ingester:
         # if we exit this loop, clean up
         log.info('Shutting down')
     
-        self._end_batch(nAlert, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+        self._end_batch(nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
     
         # shut down kafka consumer
         self.consumer.close()

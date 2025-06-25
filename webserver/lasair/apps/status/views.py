@@ -50,37 +50,41 @@ def status(request, nid):
     ms = manage_status.manage_status()
     status = ms.read(nid)
 
-    if status and 'today_filter' in status and 'today_filter_ss' in status:
-        status['today_singleton'] = \
-            status['today_filter'] - status['today_filter_out'] - status['today_filter_ss']
-
-    # KEY: (DEFINITION, COMMENT)
     statusSchema = {
-        'today_alert': ('Alerts received by Ingest stage today', ''),
-        'today_candidate': ('New detections today', ''),
-        'update_time': ('Last Lasair update time (UTC)', ''),
-        'today_filter': ('Alerts received by Filter stage today', 'Database Alerts + Solar System Alerts'),
-        'today_filter_out': ('Alerts sent to database today', ''),
-        'today_filter_ss': ('Solar system detections today', ''),
-        'today_lsst': ('Alerts sent by LSST today', ''),
-        'today_database': ('Updated objects in database today', ''),
-        'total_count': ("Total objects in database", ''),
-        'min_delay': ('Hours since most recent alert', ''),
-        'nid': ('Night number (nid)', ''),
-        "mjd": ('MJD', ''),
-        'countTNS': ('Number in TNS database', ''),
-        'today_singleton': ('Singletons today', '')
+        'nid'              : 'Night number (nid)',
+        'update_time'      : 'Last Lasair update time',
+        'today_lsst'       : 'Alerts sent by LSST today',
+        'min_delay'        : 'Hours since most recent alert',
+        'today_alert'      : 'Alerts received today',
+        'diaObject'        : 'Objects received',
+        'SSObject'         : 'SS objects received',
+        'diaSource'        : 'Detections received',
+        'diaSourceDB'      : 'Detections inserted into Cassandra',
+        'diaForcedSource'  : 'Forced detections received',
+        'diaForcedSourceDB': 'Forced detections inserted into Cassandra',
+        'today_filter'     : 'Alerts received by Filter stage today',
+        'today_filter_out' : 'Alerts sent to MySQL today',
+        'today_database'   : 'Updated objects in database today',
+        'total_count'      : "Total objects in database",
+
+        'icassandra'       :'icassandra time today',
+        'icutout'          :'icutout time today',
+        'ifuture'          :'ifuture time today',
+        'ikconsume'        :'ikconsume time today',
+        'ikproduce'        :'ikproduce time today',
+        'itotal'           :'ingest total time today',
+        'ffeatures'        :'features time today'),
+        'fwatchlist'       :'watchlist time today'),
+        'fwatchmap'        :'watchmap time today'),
+        'fmmagw'           :'mmagw time today'),
+        'ffilters'         :'filters time today'),
+        'ftransfer'        :'transfer time today'),
+        'ftotal'           :'total filter time today'),
     }
-    statusOrder = ["total_count", "nid", "update_time", "today_lsst", "today_alert", "today_filter_out", "today_filter_ss", "today_filter", "today_candidate", "today_database", "min_delay", "countTNS"]
 
-    for k, v in statusSchema.items():
-        if not k in status:
-            status[k] = ''
-
-    statusTable = []
-
-    if status:
-        statusTable[:] = [(statusSchema[s][0], status.get(s,0.0), statusSchema[s][1]) for s in statusOrder]
+    for k,v in statusSchema.items():
+        if k in status:
+            statusTable.append((v, status(k))
 
     date = date_nid.nid_to_date(nid)
 
