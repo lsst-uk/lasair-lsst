@@ -2,9 +2,14 @@
     Print out the lasair_statistics table for given nid, default today
 """
 import sys
-sys.path.append('../common')
-from src import date_nid
-from src.manage_status import manage_status
+try:
+    from . import date_nid
+    from . import db_connect
+    from .manage_status import manage_status
+except:
+    import date_nid
+    import db_connect
+    from manage_status import manage_status
 
 def combine_status(status):
     # the keys come in as apple_0=123, apple_1=199 etc from the nodes
