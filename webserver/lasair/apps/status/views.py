@@ -1,7 +1,9 @@
+import sys
 import json
 from django.shortcuts import render
 import src.date_nid as date_nid
 import src.manage_status as manage_status
+import src.lasairStatistics as lasairStatistics
 import settings
 from astropy.time import Time
 import datetime
@@ -49,6 +51,7 @@ def status(request, nid):
     web_domain = settings.WEB_DOMAIN
     ms = manage_status.manage_status()
     status = ms.read(nid)
+    status = lasairStatistics.combine_status(status)
 
     statusSchema = {
         'nid'              : 'Night number (nid)',
@@ -73,18 +76,19 @@ def status(request, nid):
         'ikconsume'        :'ikconsume time today',
         'ikproduce'        :'ikproduce time today',
         'itotal'           :'ingest total time today',
-        'ffeatures'        :'features time today'),
-        'fwatchlist'       :'watchlist time today'),
-        'fwatchmap'        :'watchmap time today'),
-        'fmmagw'           :'mmagw time today'),
-        'ffilters'         :'filters time today'),
-        'ftransfer'        :'transfer time today'),
-        'ftotal'           :'total filter time today'),
+        'ffeatures'        :'features time today',
+        'fwatchlist'       :'watchlist time today',
+        'fwatchmap'        :'watchmap time today',
+        'fmmagw'           :'mmagw time today',
+        'ffilters'         :'filters time today',
+        'ftransfer'        :'transfer time today',
+        'ftotal'           :'total filter time today',
     }
 
+    statusTable = []
     for k,v in statusSchema.items():
         if k in status:
-            statusTable.append((v, status(k))
+            statusTable.append((v, status[k]))
 
     date = date_nid.nid_to_date(nid)
 
