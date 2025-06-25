@@ -25,12 +25,13 @@ except:
 class manage_status():
     """ manage_status.
     """
-    def __init__(self, msl=None, table='lasair_statistics'):
+    def __init__(self, msl=None, table='lasair_statistics', log=None):
         if msl:
             self.msl = msl
         else:
             self.msl = db_connect.remote()
         self.table = table
+        self.log = log
 
     def read(self, nid):
         cursor  = self.msl.cursor(buffered=True, dictionary=True)
@@ -61,13 +62,14 @@ class manage_status():
                 self.msl.commit()
                 return  # Success, exit the function
             except Exception as e:
-                print(f"Attempt {attempt}: {e}")
                 if attempt < max_retries:
-                    print(f"Retrying in {wait_time} seconds...")
+                    if self.log: 
+                        self.log.warning("manage_status: Retrying in %.1f seconds...%s" % (wait_time, str(e)))
                     time.sleep(wait_time)
                     wait_time *= 2  # Double the wait time
                 else:
-                    print("All retries failed. Giving up.")
+                    if self.log: 
+                        self.log.warning("manage_status: All retries failed. Giving up.")
                     return
 
     def set(self, dictionary, nid):

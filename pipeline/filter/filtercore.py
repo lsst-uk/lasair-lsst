@@ -367,7 +367,7 @@ class Filter:
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
         if self.stats:
-            ms = manage_status.manage_status()
+            ms = manage_status.manage_status(log=self.log)
             nid = date_nid.nid_now()
             ms.add({
                 'today_filter': nalert_in,
@@ -406,7 +406,7 @@ class Filter:
         if not self.stats:
             return
 
-        ms = manage_status.manage_status()
+        ms = manage_status.manage_status(log=self.log)
         nid = date_nid.nid_now()
         d = Filter.batch_statistics()
         ms.set({

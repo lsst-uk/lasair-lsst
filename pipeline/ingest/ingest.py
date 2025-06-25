@@ -123,7 +123,7 @@ class Ingester:
         if ms:
             self.ms = ms
         else:
-            self.ms = manage_status.manage_status()
+            self.ms = manage_status.manage_status(log=self.log)
     
         # catch SIGTERM so that we can finish processing cleanly
         signal.signal(signal.SIGTERM, self._sigterm_handler)
