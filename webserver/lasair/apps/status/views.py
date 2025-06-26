@@ -48,7 +48,7 @@ def combine_status(status):
             for i in range(10):
                 other_key = '%s_%d' % (root, i)
                 if other_key in status:
-                    s = tostr(status[other_key])
+                    s = int(status[other_key])
                     kl.append(s)
                     del status[other_key]
                 else:
@@ -56,7 +56,7 @@ def combine_status(status):
                     break
         else:
             s = tostr(status[key])
-            new_status[key] = str(s)
+            new_status[key] = s
     return new_status
 
 def status(request, nid):
