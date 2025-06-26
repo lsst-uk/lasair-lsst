@@ -478,13 +478,13 @@ class Ingester:
         self.setup()
     
         nAlert = 0        # number not yet send to manage_status
+        nTotalAlert = 0   # number since this program started
         nDiaObject = 0
         nSSObject = 0
-        nDiaSource = 0    # number not yet send to manage_status
-        nDiaSourceDB = 0    # number sent to database
-        nDiaForcedSource = 0    # number not yet send to manage_status
-        nDiaForcedSourceDB = 0    # number sent to database
-        nTotalAlert = 0   # number since this program started
+        nDiaSource = 0
+        nDiaSourceDB = 0
+        nDiaForcedSource = 0
+        nDiaForcedSourceDB = 0
         log.info('INGEST starts %s' % self._now())
     
         n_remaining = self.maxalert
@@ -508,18 +508,19 @@ class Ingester:
             nTotalAlert += n
 
             # process alerts
-            (iDiaObject, iSSObject, iDiaSource,iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
+            (iDiaObject, iSSObject, iDiaSource, iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
             nDiaObject += iDiaObject
             nSSObject += iSSObject
             nDiaSource += iDiaSource
             nDiaSourceDB += iDiaSourceDB
             nDiaForcedSource += iDiaForcedSource
             nDiaForcedSourceDB += iDiaForcedSourceDB
-           
+
             # partial alert batch case
             if n < mini_batch_size:
                 self._end_batch(nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
-                nAlert = nDiaSource = nDiaForcedSource = 0
+                nDiaObject = nSSObject = 0
+                nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
                 time.sleep(self.wait_time)
@@ -527,6 +528,7 @@ class Ingester:
             # every so often commit, flush, and update status
             if nAlert >= batch_size:
                 self._end_batch(nAlert, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nDiaObject = nSSObject = 0
                 nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
     
@@ -545,7 +547,6 @@ class Ingester:
             self.cluster.shutdown()
 
         return nTotalAlert
-
 
 def run_ingest(args, log=None):
     if args.get('--topic_in'):
