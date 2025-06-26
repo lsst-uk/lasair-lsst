@@ -414,7 +414,6 @@ class Filter:
             'today_database': d['count'],
             'total_count': d['total_count'],
             'min_delay': d['since'],  # hours since most recent alert
-            'update_time': d['update_time'],
             'nid': nid},
             nid)
         for name, td in timers.items():
@@ -505,7 +504,6 @@ class Filter:
             'min_delay': min_delay,  # for grafana min delay in this batch, minutes
             'avg_delay': avg_delay,  # for grafana avg delay in this batch, minutes
             'max_delay': max_delay,  # for grafana max delay in this batch, minutes
-            'update_time': mjdnow,
         }
 
     @staticmethod
