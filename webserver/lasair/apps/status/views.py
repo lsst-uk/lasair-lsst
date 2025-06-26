@@ -3,7 +3,6 @@ import json
 from django.shortcuts import render
 import src.date_nid as date_nid
 import src.manage_status as manage_status
-import src.lasairStatistics as lasairStatistics
 import settings
 from astropy.time import Time
 import datetime
@@ -29,6 +28,36 @@ def status_today(request):
     nid = date_nid.nid_now()
     return status(request, nid)
 
+def tostr(f):
+    s = int(round(f, 0))
+    return f'{s:,}'
+
+def combine_status(status):
+    # the keys come in as apple_0=123, apple_1=199 etc from the nodes
+    # here we combine them into a list apple = [123,199]
+    keys = sorted(status.keys())
+    new_status = {}
+    for key in keys:
+        if not key in status:
+            continue
+        v = '%.0f' % status[key]
+        # collect values from different nodes
+        if key.endswith('_0'):
+            kl = []
+            root = key[:-2]
+            for i in range(10):
+                other_key = '%s_%d' % (root, i)
+                if other_key in status:
+                    s = tostr(status[other_key])
+                    kl.append(s)
+                    del status[other_key]
+                else:
+                    new_status[root] = str(kl)
+                    break
+        else:
+            s = tostr(status[key])
+            new_status[key] = str(s)
+    return new_status
 
 def status(request, nid):
     """*return staus report for a specific night*
@@ -50,8 +79,7 @@ def status(request, nid):
     """
     web_domain = settings.WEB_DOMAIN
     ms = manage_status.manage_status()
-    status = ms.read(nid)
-    status = lasairStatistics.combine_status(status)
+    status = combine_status(ms.read(nid))
 
     statusSchema = {
         'nid'              : 'Night number (nid)',
@@ -59,8 +87,8 @@ def status(request, nid):
         'today_lsst'       : 'Alerts sent by LSST today',
         'min_delay'        : 'Hours since most recent alert',
         'today_alert'      : 'Alerts received today',
-        'diaObject'        : 'Objects received',
-        'SSObject'         : 'SS objects received',
+        'diaObject'        : 'NonSS objects received today',
+        'SSObject'         : 'SS objects received today',
         'diaSource'        : 'Detections received',
         'diaSourceDB'      : 'Detections inserted into Cassandra',
         'diaForcedSource'  : 'Forced detections received',
@@ -70,19 +98,19 @@ def status(request, nid):
         'today_database'   : 'Updated objects in database today',
         'total_count'      : "Total objects in database",
 
-        'icassandra'       :'icassandra time today',
-        'icutout'          :'icutout time today',
-        'ifuture'          :'ifuture time today',
-        'ikconsume'        :'ikconsume time today',
-        'ikproduce'        :'ikproduce time today',
-        'itotal'           :'ingest total time today',
-        'ffeatures'        :'features time today',
-        'fwatchlist'       :'watchlist time today',
-        'fwatchmap'        :'watchmap time today',
-        'fmmagw'           :'mmagw time today',
-        'ffilters'         :'filters time today',
-        'ftransfer'        :'transfer time today',
-        'ftotal'           :'total filter time today',
+        'icassandra'       :'icassandra time today, seconds',
+        'icutout'          :'icutout time today, seconds',
+        'ifuture'          :'ifuture time today, seconds',
+        'ikconsume'        :'ikconsume time today, seconds',
+        'ikproduce'        :'ikproduce time today, seconds',
+        'itotal'           :'ingest total time today, seconds',
+        'ffeatures'        :'features time today, seconds',
+        'fwatchlist'       :'watchlist time today, seconds',
+        'fwatchmap'        :'watchmap time today, seconds',
+        'fmmagw'           :'mmagw time today, seconds',
+        'ffilters'         :'filters time today, seconds',
+        'ftransfer'        :'transfer time today, seconds',
+        'ftotal'           :'total filter time today, seconds',
     }
 
     statusTable = []
