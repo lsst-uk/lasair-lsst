@@ -88,7 +88,7 @@ def status(request, nid):
         'min_delay'        : 'Hours since most recent alert',
         'today_alert'      : 'Alerts received today',
         'diaObject'        : 'NonSS objects received today',
-        'SSObject'         : 'SS objects received today',
+        'ssObject'         : 'SS objects received today',
         'diaSource'        : 'Detections received',
         'diaSourceDB'      : 'Detections inserted into Cassandra',
         'diaForcedSource'  : 'Forced detections received',
