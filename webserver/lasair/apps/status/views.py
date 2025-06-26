@@ -82,13 +82,11 @@ def status(request, nid):
     status = combine_status(ms.read(nid))
 
     statusSchema = {
-        'nid'              : 'Night number (nid)',
-        'update_time'      : 'Last Lasair update time',
-        'today_lsst'       : 'Alerts sent by LSST today',
-        'min_delay'        : 'Hours since most recent alert',
         'today_alert'      : 'Alerts received today',
+        'today_lsst'       : 'Alerts sent by LSST today',
         'diaObject'        : 'NonSS objects received today',
         'ssObject'         : 'SS objects received today',
+        'min_delay'        : 'Hours since most recent alert',
         'diaSource'        : 'Detections received',
         'diaSourceDB'      : 'Detections inserted into Cassandra',
         'diaForcedSource'  : 'Forced detections received',
@@ -97,6 +95,7 @@ def status(request, nid):
         'today_filter_out' : 'Alerts sent to MySQL today',
         'today_database'   : 'Updated objects in database today',
         'total_count'      : "Total objects in database",
+        'update_time'      : 'Last Lasair update time',
 
         'icassandra'       :'icassandra time today, seconds',
         'icutout'          :'icutout time today, seconds',
@@ -111,6 +110,8 @@ def status(request, nid):
         'ffilters'         :'filters time today, seconds',
         'ftransfer'        :'transfer time today, seconds',
         'ftotal'           :'total filter time today, seconds',
+
+        'nid'              : 'Night number (nid)',
     }
 
     statusTable = []
