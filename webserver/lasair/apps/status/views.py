@@ -95,7 +95,6 @@ def status(request, nid):
         'today_filter_out' : 'Alerts sent to MySQL today',
         'today_database'   : 'Updated objects in database today',
         'total_count'      : "Total objects in database",
-        'update_time'      : 'Last Lasair update time',
 
         'icassandra'       :'icassandra time today, seconds',
         'icutout'          :'icutout time today, seconds',
