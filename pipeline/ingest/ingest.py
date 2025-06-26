@@ -523,7 +523,9 @@ class Ingester:
                 nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
+                self.timers['itotal'].off()
                 time.sleep(self.wait_time)
+                self.timers['itotal'].on()
     
             # every so often commit, flush, and update status
             if nAlert >= batch_size:
