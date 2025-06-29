@@ -28,7 +28,8 @@
 
                             {% csrf_token %}
 
-			    An activation code has been sent to {{ email }}. Please enter it here:
+			    An activation code has been sent to {{ email }}. 
+			    {{ message }}:
 
                             <div class="form-group mb-4">
                                 <label for="first_name">Activation Code</label>

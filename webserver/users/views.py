@@ -14,6 +14,36 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
 
+def password_reset(request):
+    if request.method != "POST":
+        return render(request, 'users/password_reset.html')
+    else:
+        if not 'input_code' in request.POST:
+            code = '%06d' % random.randrange(999999)
+            email_address = request.POST.get("email")
+            mail_subject = "Activate your Lasair account."
+            message = render_to_string("users/password_reset_email.html", 
+               { 'code': code, })
+            email = EmailMessage(mail_subject, message, to=[email_address])
+            if not email.send():
+                messages.error(request, 
+                f'Problem sending email to {email_address}, please check you typed it correctly.')
+            return render(request, 'users/password_reset_confirm.html', 
+                  {'email': email_address, 'code':code})
+        else:
+            input_code   = request.POST.get("input_code")
+            code         = request.POST.get("code")
+            email_address = request.POST.get("email")
+            new_password = request.POST.get("new_password1")
+            User = get_user_model()
+            try:
+                users = User.objects.filter(email=email_address)
+                user = users[0]
+            except:
+                messages.error(request, "User not found")
+            user.set_password(new_password)
+            messages.success(request, "Your password is changed. Now you can login to your account.")
+            return redirect('login')
 
 def register(request):
     if request.method == "POST":
@@ -25,10 +55,8 @@ def register(request):
             code = '%06d' % random.randrange(999999)
             email_address = form.cleaned_data.get('email')
             mail_subject = "Activate your Lasair account."
-            message = render_to_string("users/email_verification_email.html", {
-                'email': email_address,
-                'code': code,
-            })
+            message = render_to_string("users/email_verification_email.html", 
+               { 'code': code, })
             email = EmailMessage(mail_subject, message, to=[email_address])
             if not email.send():
                 messages.error(request, 
