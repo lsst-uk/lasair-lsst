@@ -4,15 +4,21 @@ from django.contrib.auth import authenticate, get_user_model
 from django.shortcuts import render, redirect
 from django.contrib.sites.shortcuts import get_current_site
 from django.contrib import messages
-#from rest_framework.authtoken.models import Token
+from rest_framework.authtoken.models import Token
 from .forms import UserRegisterForm, ProfileUpdateForm, UserUpdateForm
 from django.contrib.auth.decorators import login_required
 import sys
+import hashlib
 #from .utils import account_activation_token
 from django.template.loader import render_to_string
 #from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 #from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
+
+def get_hash(s):
+    encoded_string = s.encode()
+    sha1_hash = hashlib.sha1(encoded_string)
+    return sha1_hash.hexdigest()
 
 def password_reset(request):
     if request.method != "POST":
@@ -35,7 +41,7 @@ def password_reset(request):
             if not email.send():
                 messages.error(request, 
                 f'Problem sending email to {email_address}, please check you typed it correctly.')
-            hashcode = str(hash(code))
+            hashcode = str(get_hash(code))
             return render(request, 'users/password_reset_confirm.html', 
                   {'email': email_address, 'hashcode':hashcode})
         else:
@@ -50,7 +56,7 @@ def password_reset(request):
             except:
                 messages.error(request, "User not found")
 
-            if str(hash(input_code)) == hashcode:
+            if str(get_hash(input_code)) == hashcode:
                 user.set_password(new_password)
                 messages.success(request, "Your password is changed. Now you can login to your account.")
                 return redirect('login')
@@ -76,7 +82,7 @@ def register(request):
                 messages.error(request, 
                 f'Problem sending email to {email_address}, please check you typed it correctly.')
 
-            hashcode = str(hash(code))
+            hashcode = str(get_hash(code))
             return render(request, 'users/activation_code.html', 
                           {'email': email_address, 'hashcode':hashcode})
         else:
@@ -98,7 +104,7 @@ def activate(request):
     except:
         user = None
 
-    if user is not None and str(hash(input_code)) == hashcode:
+    if user is not None and str(get_hash(input_code)) == hashcode:
         user.is_active = True
         user.save()
 
