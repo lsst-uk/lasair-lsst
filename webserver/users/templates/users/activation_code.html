@@ -23,13 +23,13 @@
 
 
                         <form method="post" action="/activate/" class="mt-4">
-				<input type="hidden" name="code" value="{{ code }}">
+				<input type="hidden" name="hashcode" value="{{ hashcode }}">
 				<input type="hidden" name="email" value="{{ email }}">
 
                             {% csrf_token %}
 
-			    An activation code has been sent to {{ email }}. 
-			    {{ message }}:
+			    An activation code has been sent to {{ email }}. Please type it here.
+			    {{ message }}
 
                             <div class="form-group mb-4">
                                 <label for="first_name">Activation Code</label>
