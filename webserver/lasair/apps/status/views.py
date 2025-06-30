@@ -1,3 +1,4 @@
+import sys
 import json
 from django.shortcuts import render
 import src.date_nid as date_nid
@@ -27,6 +28,36 @@ def status_today(request):
     nid = date_nid.nid_now()
     return status(request, nid)
 
+def tostr(f):
+    s = int(round(f, 0))
+    return f'{s:,}'
+
+def combine_status(status):
+    # the keys come in as apple_0=123, apple_1=199 etc from the nodes
+    # here we combine them into a list apple = [123,199]
+    keys = sorted(status.keys())
+    new_status = {}
+    for key in keys:
+        if not key in status:
+            continue
+        v = '%.0f' % status[key]
+        # collect values from different nodes
+        if key.endswith('_0'):
+            kl = []
+            root = key[:-2]
+            for i in range(10):
+                other_key = '%s_%d' % (root, i)
+                if other_key in status:
+                    s = int(status[other_key])
+                    kl.append(s)
+                    del status[other_key]
+                else:
+                    new_status[root] = str(kl)
+                    break
+        else:
+            s = tostr(status[key])
+            new_status[key] = s
+    return new_status
 
 def status(request, nid):
     """*return staus report for a specific night*
@@ -48,39 +79,44 @@ def status(request, nid):
     """
     web_domain = settings.WEB_DOMAIN
     ms = manage_status.manage_status()
-    status = ms.read(nid)
+    status = combine_status(ms.read(nid))
 
-    if status and 'today_filter' in status and 'today_filter_ss' in status:
-        status['today_singleton'] = \
-            status['today_filter'] - status['today_filter_out'] - status['today_filter_ss']
-
-    # KEY: (DEFINITION, COMMENT)
     statusSchema = {
-        'today_alert': ('Alerts received by Ingest stage today', ''),
-        'today_candidate': ('New detections today', ''),
-        'update_time': ('Last Lasair update time (UTC)', ''),
-        'today_filter': ('Alerts received by Filter stage today', 'Database Alerts + Solar System Alerts'),
-        'today_filter_out': ('Alerts sent to database today', ''),
-        'today_filter_ss': ('Solar system detections today', ''),
-        'today_lsst': ('Alerts sent by LSST today', ''),
-        'today_database': ('Updated objects in database today', ''),
-        'total_count': ("Total objects in database", ''),
-        'min_delay': ('Hours since most recent alert', ''),
-        'nid': ('Night number (nid)', ''),
-        "mjd": ('MJD', ''),
-        'countTNS': ('Number in TNS database', ''),
-        'today_singleton': ('Singletons today', '')
-    }
-    statusOrder = ["total_count", "nid", "update_time", "today_lsst", "today_alert", "today_filter_out", "today_filter_ss", "today_filter", "today_candidate", "today_database", "min_delay", "countTNS"]
+        'today_alert'      : 'Alerts received today',
+        'today_lsst'       : 'Alerts sent by LSST today',
+        'diaObject'        : 'NonSS objects received today',
+        'ssObject'         : 'SS objects received today',
+        'min_delay'        : 'Hours since most recent alert',
+        'diaSource'        : 'Detections received',
+        'diaSourceDB'      : 'Detections inserted into Cassandra',
+        'diaForcedSource'  : 'Forced detections received',
+        'diaForcedSourceDB': 'Forced detections inserted into Cassandra',
+        'today_filter'     : 'Alerts received by Filter stage today',
+        'today_filter_out' : 'Alerts sent to MySQL today',
+        'today_database'   : 'Updated objects in database today',
+        'total_count'      : "Total objects in database",
 
-    for k, v in statusSchema.items():
-        if not k in status:
-            status[k] = ''
+        'icassandra'       :'icassandra time today, seconds',
+        'icutout'          :'icutout time today, seconds',
+        'ifuture'          :'ifuture time today, seconds',
+        'ikconsume'        :'ikconsume time today, seconds',
+        'ikproduce'        :'ikproduce time today, seconds',
+        'itotal'           :'ingest total time today, seconds',
+        'ffeatures'        :'features time today, seconds',
+        'fwatchlist'       :'watchlist time today, seconds',
+        'fwatchmap'        :'watchmap time today, seconds',
+        'fmmagw'           :'mmagw time today, seconds',
+        'ffilters'         :'filters time today, seconds',
+        'ftransfer'        :'transfer time today, seconds',
+        'ftotal'           :'total filter time today, seconds',
+
+        'nid'              : 'Night number (nid)',
+    }
 
     statusTable = []
-
-    if status:
-        statusTable[:] = [(statusSchema[s][0], status.get(s,0.0), statusSchema[s][1]) for s in statusOrder]
+    for k,v in statusSchema.items():
+        if k in status:
+            statusTable.append((v, status[k]))
 
     date = date_nid.nid_to_date(nid)
 

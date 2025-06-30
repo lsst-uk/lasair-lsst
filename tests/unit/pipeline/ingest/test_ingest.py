@@ -119,7 +119,7 @@ class IngestTest(unittest.TestCase):
         # check the return values
         # 5 diaSources with 4 sent to DB
         # 4 diaForcedSources with 2 sent to DB
-        self.assertEqual(result, (5, 4, 4, 2))   
+        self.assertEqual(result, (1, 0, 5, 4, 4, 2))   
         # store_images should get called once
         mock_image_store.store_images.assert_called_once()
         # insert_cassandra_multi should get called once
@@ -134,7 +134,15 @@ class IngestTest(unittest.TestCase):
         mock_ms = unittest.mock.MagicMock()
         ingester = ingest.Ingester('', '', '', 1, log=mock_log, producer=mock_producer, consumer=mock_consumer,
                                    ms=mock_ms)
-        ingester._end_batch(1, 5, 4, 4, 2)
+        nAlert             = 1
+        nDiaObject         = 1
+        nSSObject          = 0
+        nDiaSource         = 5
+        nDiaSourceDB       = 4
+        nDiaForcedSource   = 4
+        nDiaForcedSourceDB = 2
+        ingester._end_batch(nAlert, nDiaObject, nSSObject, 
+                            nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
         # log message should get sent
         mock_log.info.assert_called_once()
         # producer should get flushed

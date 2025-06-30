@@ -367,7 +367,7 @@ class Filter:
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
         if self.stats:
-            ms = manage_status.manage_status()
+            ms = manage_status.manage_status(log=self.log)
             nid = date_nid.nid_now()
             ms.add({
                 'today_filter': nalert_in,
@@ -406,9 +406,9 @@ class Filter:
         if not self.stats:
             return
 
-        ms = manage_status.manage_status()
+        ms = manage_status.manage_status(log=self.log)
         nid = date_nid.nid_now()
-        d = Filter.batch_statistics()
+        d = Filter.batch_statistics(self.log)
         ms.set({
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
@@ -442,7 +442,7 @@ class Filter:
             self.log.error("ERROR in filter/write_stats: Cannot open promethus export file %s" % filename)
 
     @staticmethod
-    def batch_statistics():
+    def batch_statistics(log):
         """How many objects updated since last midnight.
         """
         mjdnow = (time.time() / 86400 + 40587)
@@ -452,17 +452,18 @@ class Filter:
         cursor = msl_main.cursor(buffered=True, dictionary=True)
 
         # objects modified since last midnight
-        query = 'SELECT count(*) AS count FROM objects WHERE maxTai > %.1f' % midnight
+        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMJD > %.1f' % midnight
         try:
             cursor.execute(query)
             for row in cursor:
                 count = row['count']
                 break
-        except:
+        except Exception as e:
+            log.warning("batch_statistics today: %s %s" % (str(e), query))
             count = -1
 
         # total number of objects
-        query = 'SELECT count(*) AS total_count, mjdnow()-max(maxTai) AS since FROM objects'
+        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMJD) AS since FROM objects'
 
         try:
             cursor.execute(query)
@@ -471,6 +472,7 @@ class Filter:
                 since = 24 * float(row['since'])
                 break
         except:
+            log.warning("batch_statistics total: %s %s" % (str(e), query))
             total_count = -1
             since = -1
 

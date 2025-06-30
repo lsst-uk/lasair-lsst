@@ -30,4 +30,3 @@ if __name__ == '__main__':
         nid = date_nid.nid_now()
 
     printLasairStatistics(nid)
-
