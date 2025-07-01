@@ -59,3 +59,24 @@
     #enabled: false
     name: lasair-sherlock
 
+- name: "Check the cron daemon is installed"
+  become: true
+  apt:
+    name:  cron
+    state: present
+
+- name: "Check the cron daemon is enabled and started"
+  become: true
+  service:
+    enabled: true
+    name:  cron
+    state: started
+
+# Set to expire based only on version number - can be changed to something more useful later
+- name: "Crontab for cache expiry"
+  cron:
+    name:   "Expire cache"
+    user:   "{{ ansible_env.USER }}"
+    minute: '40'
+    hour:   '22'
+    job:    "{{ ansible_env.HOME }}/{{ git_name }}/pipeline/sherlock/expire_cache.py --database mariadb://{{ sherlock_secret.user }}:{{ sherlock_secret.password }}@127.0.0.1/{{ cache_db }} --min_version=2.3.0"
