@@ -47,8 +47,7 @@ def main(args):
         elif args.get('--max_days'):
             n = args['--max_days']
             print(f"trimming cache to {n} days")
-            now = datetime.now(tz=timezone.utc)
-            cutoff = now - timedelta(days=n)
+            cutoff = (datetime.now(tz=timezone.utc) - timedelta(days=n)).strftime('%Y-%m-%d %H:%M:%S')
             sql = f"DELETE FROM cache WHERE updated < '{cutoff}'"
             cursor.execute(sql)
             print(f"deleted {cursor.rowcount} record(s)")
