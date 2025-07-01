@@ -9,6 +9,7 @@ from .forms import UserRegisterForm, ProfileUpdateForm, UserUpdateForm
 from django.contrib.auth.decorators import login_required
 import sys
 import hashlib
+import settings
 #from .utils import account_activation_token
 from django.template.loader import render_to_string
 #from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
@@ -16,7 +17,8 @@ from django.template.loader import render_to_string
 from django.core.mail import EmailMessage
 
 def get_hash(s):
-    encoded_string = s.encode()
+    salted_string = s + settings.HASH_SALT
+    encoded_string = salted_string.encode()
     sha1_hash = hashlib.sha1(encoded_string)
     return sha1_hash.hexdigest()
 
