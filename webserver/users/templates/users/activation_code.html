@@ -1,0 +1,53 @@
+{% extends "layouts/base-fullscreen.html" %}
+{% load widget_tweaks %}
+{% block title %} Activation code {% endblock %}
+
+<!-- Specific Page CSS goes HERE  -->
+{% block stylesheets %}{% endblock stylesheets %}
+
+{% block content %}
+
+
+    <div class="container">
+        <div class="row justify-content-center">
+
+            <div class="col-12 d-flex align-items-center justify-content-center">
+
+                <div class="bg-white shadow border-0 rounded border-light p-4 p-lg-5 w-100 fmxw-500 mt-9">
+                    {% include "includes/icons/icon.html" %}
+                    <div class="text-center text-md-center mb-4 mt-md-0">
+                        <h1 class="mb-0 h3">
+                            Account Activation
+                        </h1>
+                    </div>
+
+
+                        <form method="post" action="/activate/" class="mt-4">
+				<input type="hidden" name="hashcode" value="{{ hashcode }}">
+				<input type="hidden" name="email" value="{{ email }}">
+
+                            {% csrf_token %}
+
+			    An activation code has been sent to {{ email }}. Please type it here.
+			    {{ message }}
+
+                            <div class="form-group mb-4">
+                                <label for="first_name">Activation Code</label>
+                                <div class="input-group">
+                                    <input type="text" id="input_code" name="input_code"><br><br>
+                                </div>
+                            </div>
+
+                            <div class="d-grid mt-3">
+                                <button type="submit" name="activate" class="btn btn-gray-800">Activate</button>
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock content %}
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}{% endblock javascripts %}
