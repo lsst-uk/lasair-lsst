@@ -58,6 +58,8 @@ def password_reset(request):
 
             if str(get_hash(input_code)) == hashcode:
                 user.set_password(new_password)
+                user.is_active = True
+                user.save()
                 messages.success(request, "Your password is changed. Now you can login to your account.")
                 return redirect('login')
             else:
