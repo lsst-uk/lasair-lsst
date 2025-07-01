@@ -381,7 +381,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
                 cache = [{'name': '177218944862519874', 'version': sherlock_version, 'class': 'T', 'description': 't',
-                          'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                          'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0]),
+                          'updated': '2025-07-01 09:52:37'}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -419,7 +420,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
                 cache = [{'name': '177218944862519874', 'version': 'blah', 'class': 'T', 'description': 't',
-                          'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0])}]
+                          'crossmatch': json.dumps(SherlockWrapperClassifierTest.crossmatches[0]),
+                          'updated': '2025-07-01 09:52:37'}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
@@ -447,7 +449,8 @@ class SherlockWrapperClassifierTest(unittest.TestCase):
                 classifications = {"177218944862519874": ["QX", "A test"]}
                 crossmatches = [{'transient_object_id': "177218944862519874", 'thing': 'foo'}]
                 mock_classifier.return_value.classify.return_value = (classifications, crossmatches)
-                cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': None}]
+                cache = [{'name': '177218944862519874', 'class': 'T', 'crossmatch': None,
+                          'updated': '2025-07-01 09:52:37'}]
                 mock_pymysql.return_value.cursor.return_value.__enter__.return_value.fetchall.return_value = cache
                 # should report classifying 1 alert
                 self.assertEqual(wrapper.classify(conf, log, alerts), 1)
