@@ -50,7 +50,10 @@ def filter_query_index(request):
     """
 
     # PUBLIC FILTERS
-    publicFilters = filter_query.objects.filter(public__gte=1)
+    publicFilters = filter_query.objects \
+        .filter(public=True)  \
+        .filter(active__gt=0) \
+        .order_by('name')
     publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True)
 
     # USER FILTERS

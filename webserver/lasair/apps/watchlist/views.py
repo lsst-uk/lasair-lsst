@@ -122,7 +122,10 @@ def watchlist_index(request):
         form = WatchlistForm(request=request)
 
     # PUBLIC WATCHLISTS
-    publicWatchlists = Watchlist.objects.filter(public__gte=1)
+    publicWatchlists = Watchlist.objects \
+        .filter(public=True)  \
+        .filter(active=True) \
+        .order_by('name')
     publicWatchlists = add_watchlist_metadata(publicWatchlists, remove_duplicates=True)
 
     # USER WATCHLISTS
