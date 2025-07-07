@@ -31,8 +31,13 @@ mobility of tail, nature of the background context, and so on.
 Other features can be the classifications made by other brokers. 
 It is up to the user to combine the features as they wish to make a filter. 
 
-The hope is that (1) cats are discovered that are definitely cats, but 
-different from those in the training set; and (2) different sub-species are 
+The machine-learning approach can suffer from confirmation bias: all the
+cats that are found look like the cats in the training set, which may not include
+exotic cats.
+The hope of the features-based approach is that 
+(1) exotic cats are discovered that are definitely cats, but 
+different from those in the training set; and 
+(2) different sub-species are 
 distinguished that were lumped together into one by the machine learning.
 
 ## The Lasair approach
