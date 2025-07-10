@@ -58,17 +58,35 @@
 {% set h, w, x = (4, 3, 6) %}
 {% set expr = "probe_success{instance='kafka." ~ domain ~ ":9092'} OR on() vector(0)" %}
 {% include 'service.j2' %}
+{% set y = y + 4 %}
+    {
+      "gridPos": {
+        "x": 0,
+        "y": {{ y }},
+        "w": 18,
+        "h": 1
+      },
+      "type": "text",
+      "title": "Database",
+      "options": {
+        "mode": "markdown",
+        "content": ""
+      },
+    },
+{% set y = y + 1 %}
+{% set h, w, x = (4, 3, 0) %}
 {% for host in (groups['cluster_control']) %}
+{% set x = x + (3 * loop.index0) %}
 {% set title = "DB Loadbalancer" %}
 {% set description = "Probe LB on port 9001" %}
-{% set h, w, x = (4, 3, 9) %}
 {% set expr = "probe_success{instance='" ~ host ~ ":9001'} OR on() vector(0)" %}
 {% include 'service.j2' %}
 {% endfor %}
+{% set x = x + (3 * (groups['cluster_control'] | length)) %}
 {% for host in (groups['db'] + groups['frontend_db'] + groups['backend_db']) %}
+{% set x = x + (3 * loop.index0) %}
 {% set title = host ~ " DB" %}
 {% set description = "Probe DB on port 3306" %}
-{% set h, w, x = (4, 3, 9) %}
 {% set expr = "probe_success{instance='" ~ host ~ ":3306'} OR on() vector(0)" %}
 {% include 'service.j2' %}
 {% endfor %}

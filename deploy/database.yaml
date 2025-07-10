@@ -1,6 +1,6 @@
 ---
 
-- hosts: db,frontend_db,backend_db,cluster_control
+- hosts: localhost,db,frontend_db,backend_db,cluster_control
   gather_facts: true
   tags: facts
 
@@ -136,11 +136,15 @@
         mysql_cnf_template: "my.cnf.mdb10x-galera"
         mysql_datadir: "/var/lib/mysql"
         mysql_root_password: "{{ settings.master_db_root_password }}"
-        mysql_hostnames: "{{ groups['backend_db'] + groups['frontend_db'] }}"
+        #mysql_hostnames: "{{ groups['backend_db'] + groups['frontend_db'] }}"
+        mysql_hostnames: >-
+          {{ (groups['backend_db'] + groups['frontend_db'])
+             | map('extract', hostvars, ['ansible_default_ipv4','address'])
+             | list }}
         mysql_password: "{{ settings.master_db_root_password }}"
         cmon_mysql_password: "{{ settings.master_db_root_password }}"
         mysql_port: 3306
-        mysql_version: "10.6"
+        mysql_version: "10.11"
         ssh_keyfile: "{{ remote_login_user_home }}/.ssh/id_rsa"
         ssh_user: "{{ remote_login_user }}"
         sudo_password: ""
@@ -211,11 +215,11 @@
           - GRANT SELECT ON mysql.roles_mapping TO 'maxscale'@'{{ ip }}';
           - GRANT SHOW DATABASES ON *.* TO 'maxscale'@'{{ ip }}';
         login_user: root
-        login_password: "{{ password }}"
+        login_password: "{{ settings.master_db_root_password }}"
         single_transaction: yes
       register: result
       until: result is success
-      retries: 90
+      retries: 0
       delay: 10 
   tags: maxscale_user
 
@@ -253,7 +257,8 @@
     - settings.yaml
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
-    maxscale_deb_url: https://dlm.mariadb.com/1961572/MaxScale/2.5.18/packages/ubuntu/focal/x86_64/maxscale-2.5.18-1.ubuntu.focal.x86_64.deb
+    #maxscale_deb_url: https://dlm.mariadb.com/1961572/MaxScale/2.5.18/packages/ubuntu/focal/x86_64/maxscale-2.5.18-1.ubuntu.focal.x86_64.deb
+    maxscale_deb_url: https://dlm.mariadb.com/3995340/MaxScale/24.02.4/packages/ubuntu/noble/x86_64/maxscale_24.02.4~noble-1_amd64.deb
     backend_servers: "{{ groups['backend_db'] }}"
     frontend_servers: "{{ groups['frontend_db'] }}"
   roles: 
@@ -284,6 +289,27 @@
         state: restarted
   tags: maxscale
 
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+  tasks:
+    - name: Create SQL files
+      ansible.builtin.shell:
+        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} > {{ schema }}/{{ item }}.sql"
+        chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
+      loop:
+        - "objects"
+        - "sherlock_classifications"
+        - "crossmatch_tns"
+        - "area_hits"
+        - "watchlist_hits"
+        - "annotations"
+        - "mma_area_hits"
+  tags: create_sql
+
 - hosts: db,backend_db[0]
   gather_facts: false
   vars_files:
@@ -291,6 +317,7 @@
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     git_branch: "{{ lasair_version }}"
+    schema: 7_4_A
   roles:
     - lasair_database
   tags: setup_database

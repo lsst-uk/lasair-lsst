@@ -30,12 +30,16 @@ resource "openstack_compute_instance_v2" "server" {
   }
 }
 
+data "openstack_networking_port_v2" "vm-port" {
+  device_id  = openstack_compute_instance_v2.server.id
+  network_id = openstack_compute_instance_v2.server.network.0.uuid
+}
+
 # Attach the floating IP if necessary
-resource "openstack_compute_floatingip_associate_v2" "floating_ip" {
+resource "openstack_networking_floatingip_associate_v2" "floating_ip" {
   count = var.floating_ip ? 1 : 0
-  floating_ip = "${openstack_networking_floatingip_v2.floating_ip[0].address}"
-  instance_id = "${openstack_compute_instance_v2.server.id}"
-  fixed_ip    = "${openstack_compute_instance_v2.server.network.0.fixed_ip_v4}"
+  floating_ip = openstack_networking_floatingip_v2.floating_ip[0].address
+  port_id     = data.openstack_networking_port_v2.vm-port.id
 }
 
 # Attach any extra networks

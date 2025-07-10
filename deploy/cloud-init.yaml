@@ -1,0 +1,31 @@
+---
+# Openstack instances with multiple instances don't always bring up both instances
+# so we need to re-run cloud-init to fix this
+
+- hosts: all:!localhost
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Re-run cloud init
+      ansible.builtin.command:
+        cmd: "cloud-init clean --logs"
+    - name: Schedule restart
+      ansible.builtin.command:
+        cmd: "shutdown -r +1"
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Remove known hosts file
+      ansible.builtin.file:
+        path: ~/.ssh/known_hosts
+        state: absent
+
+- hosts: all
+  gather_facts: false
+  tasks:
+    - name: Wait for hosts
+      ansible.builtin.wait_for_connection:
+        delay: 60
+        timeout: 180
+

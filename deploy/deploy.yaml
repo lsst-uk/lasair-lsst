@@ -52,7 +52,7 @@
   tasks:
     - name: Get API token
       ansible.builtin.uri:
-        url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
+        url: "http://{{ lasair_name }}-web:8080/api/auth-token/"
         method: POST
         body_format: json
         body:
@@ -64,6 +64,20 @@
         powerapi_token: "{{ api_token_response.json.token }}"
   tags:
     - always
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+  tasks:
+    - name: Create settings file
+      template:
+        src: common/settings.py.j2
+        dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
 
 - hosts: svc
   gather_facts: false
@@ -148,6 +162,7 @@
     - settings.yaml
     - exports.yaml
   vars:
+    schema: 7_4_A
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
@@ -207,16 +222,6 @@
   serial: 1
   tags: cassandra
 
-- hosts: cassandranodes[0]
-  vars_files:
-    - settings.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
-    git_branch: "{{ lasair_version }}"
-  roles:
-    - lasair_cassandra
-  tags: cassandra
-
 - hosts: parallel_ssh
   gather_facts: false
   vars_files:
@@ -250,12 +255,36 @@
   serial: 1
   tags: cutoutcass
 
+# Hopefully temporary workaround for incompatibility between current version of Cassandra and Python 3.12 - 3/6/25
+- hosts: cassandranodes,cutoutcass
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Remove default cqlsh
+      ansible.builtin.file:
+        path: /usr/bin/cqlsh
+        state: absent
+    - name: Install cqlsh snap
+      community.general.snap:
+        name:
+          - cqlsh
+
+- hosts: cassandranodes[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - lasair_cassandra
+  tags: cassandra
+
 - hosts: cutoutcass[0]
   vars_files:
     - settings.yaml
   vars:
+    schema: 7_4_A
     cassandra_cluster_name: "{{ lasair_name }}_cutout"
-    git_branch: "{{ lasair_version }}"
   roles:
     - lasair_cutoutcass
   tags: cutoutcass

@@ -259,7 +259,7 @@ AND peakExtCorrAbsMag < -19                  # peak extinction corrected absolut
 #### Watchlist
 A further cut for this type of alert might be a [publication of French and Zabludoff](https://ui.adsabs.harvard.edu/abs/2018ApJ...868...99F/abstract): 
 Identifying Tidal Disruption Events via Prior Photometric Selection of Their Preferred Hosts.
-The catalogue of 57,000 galaxies (is available from Vizier)[https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=J/ApJ/868/99/table5], and there are (instructions)[core_functions/watchlists.html] 
+The catalogue of 57,000 galaxies [is available from Vizier](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=J/ApJ/868/99/table5), and there are (instructions)[core_functions/watchlists.html] 
 for how to ingest this into Lasair.
 
 In order to filter alerts based on a watchlist: in the filter builder web form, select 

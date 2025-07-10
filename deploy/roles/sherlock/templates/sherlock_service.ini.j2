@@ -1,11 +1,12 @@
 [uwsgi]
+plugins = python3
+virtualenv = {{ venv_path }}
 module = app:app
 
 master = true
 processes = 2
 
-socket = sherlocksvc.sock
-chmod-socket = 660
+http-socket = :5500
 vacuum = true
 
 die-on-term = true
