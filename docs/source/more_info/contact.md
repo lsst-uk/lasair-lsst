@@ -8,7 +8,8 @@ It's a simple process, give your email and respond to a message sent there.
 
 ### [Lasair Blog](https://community.lsst.org/c/sci/lasair-blog/67):
 Please be sure to follow the [Lasair Blog](https://community.lsst.org/c/sci/lasair-blog/67).
-It is a collection of articles on how to use Lasair, and the science our users are doing.
+It is a collection of articles on how to use Lasair, the science our users are doing,
+and Lasair-focussed events.
 Please "watch" this page so you get an email whenever a new post appears --
 just click on the bell-shaped icon at the top right, and choose the "Watching" option.
 
