@@ -1,7 +1,6 @@
 ---
 # tasks file for sherlock
 
-- import_tasks: database.yml
 - import_tasks: filesystem.yml
 
 - name: Include mariadb role
@@ -12,6 +11,7 @@
   ansible.builtin.include_role:
     name: gkansible.gkservercollection.mysql_sherlock
 
+- import_tasks: database.yml
 - import_tasks: wrapper.yml
 - import_tasks: service.yml
 
