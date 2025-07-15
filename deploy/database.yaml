@@ -139,8 +139,9 @@
         #mysql_hostnames: "{{ groups['backend_db'] + groups['frontend_db'] }}"
         mysql_hostnames: >-
           {{ (groups['backend_db'] + groups['frontend_db'])
-             | map('extract', hostvars, ['ansible_default_ipv4','address'])
+             | map('extract', hostvars, ['ansible_nodename'])
              | list }}
+        #| map('extract', hostvars, ['ansible_default_ipv4','address'])
         mysql_password: "{{ settings.master_db_root_password }}"
         cmon_mysql_password: "{{ settings.master_db_root_password }}"
         mysql_port: 3306
@@ -152,9 +153,13 @@
         nodes: | 
           [
           {%- for host in groups['backend_db'] + groups['frontend_db'] -%}
-            { "hostname": "{{ host }}", "hostname_data": "{{ host }}", "hostname_internal": "", "port": "3306" },
+            { "hostname": "{{ hostvars[host]['ansible_default_ipv4']['address'] }}", "hostname_data": "{{ hostvars[host]['ansible_default_ipv4']['address'] }}", "hostname_internal": "", "port": "3306" },
           {%- endfor -%}
           ] 
+  tasks:
+    - name: print cc_cluster
+      debug:
+        var: cc_cluster
   tags: cluster_control_2
 
 - hosts: db,cluster_control,backend_db,frontend_db

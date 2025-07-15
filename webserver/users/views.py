@@ -34,7 +34,8 @@ def password_reset(request):
                 users = User.objects.filter(email=email_address)
                 user = users[0]
             except:
-                message.error('Email address not registered')
+                messages.error(request, 'Email address not registered')
+                return render(request, 'users/password_reset.html')
 
             mail_subject = "Activate your Lasair account."
             message = render_to_string("users/password_reset_email.html", 
