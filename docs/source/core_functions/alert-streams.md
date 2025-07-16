@@ -32,7 +32,7 @@ While this can be done with the email channel, it is awkward. To convert your fi
 choose the filter, then click the Settings button, and change the streaming option to 'kafka stream'.
 
 *   We recommend [Confluent Kafka](https://pypi.org/project/confluent-kafka/), the python install being `pip install confluent_kafka`.
-*   You will be connecting to kafka.lsst.ac.uk on port 9092
+*   You will be connecting to lasair-lsst-kafka.lsst.ac.uk on port 9092
 
 You will need to understand two concepts: Topic and GroupID. 
 
@@ -57,7 +57,7 @@ Here is the sample code
 import json
 from lasair import lasair_consumer
 
-kafka_server = 'kafka.lsst.ac.uk:9092'
+kafka_server = 'lasair-lsst-kafka.lsst.ac.uk:9092'
 group_id     = 'test123'
 my_topic     = 'lasair_2SN-likecandidates'
 consumer = lasair_consumer(kafka_server, group_id, my_topic)
