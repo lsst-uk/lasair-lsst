@@ -1,0 +1,90 @@
+# Playbook for deploying standalone cassandra clusters
+
+---
+
+- hosts: cassandranodes, cutoutcass
+  gather_facts: true
+  tags: always
+
+- hosts: cassandranodes, cutoutcass
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: create filesystems
+      community.general.filesystem:
+        fstype: ext4
+        dev: "{{ item }}"
+      loop:
+        - /dev/vdb
+        - /dev/vdc
+    - name: ensure commitlog filesystem is mounted
+      ansible.posix.mount:
+        path: /var/lib/cassandra-commitlog
+        src: /dev/vdb
+        fstype: ext4
+        opts: nofail
+        state: mounted
+    - name: ensure data filesystem is mounted
+      ansible.posix.mount:
+        path: /var/lib/cassandra
+        src: /dev/vdc
+        fstype: ext4
+        opts: nofail
+        state: mounted
+  tags: filesystem
+
+- hosts: cassandranodes, cutoutcass
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+    cassandra_commitlog_dir: /var/lib/cassandra-commitlog
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cassandra
+
+- hosts: cassandranodes, cutoutcass
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - gkansible.gkservercollection.cassandra_start_service
+  serial: 1
+  tags: cassandra
+
+# Hopefully temporary workaround for incompatibility between current version of Cassandra and Python 3.12 - 3/6/25
+- hosts: cassandranodes, cutoutcass
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Remove default cqlsh
+      ansible.builtin.file:
+        path: /usr/bin/cqlsh
+        state: absent
+    - name: Install cqlsh snap
+      community.general.snap:
+        name:
+          - cqlsh
+
+- hosts: cassandranodes[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+    cassandra_cluster_name: "{{ lasair_name }}"
+  roles:
+    - lasair_cassandra
+  tags: cassandra
+
+- hosts: cutoutcass[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+    cassandra_cluster_name: "{{ lasair_name }}_cutout"
+  roles:
+    - lasair_cutoutcass
+  tags: cutoutcass
+
