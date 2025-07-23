@@ -5,7 +5,7 @@
 - name: Create keyspace
   command: "{{ item }}"
   with_items:
-    - "cqlsh -e \"create keyspace if not exists {{ keyspace }} WITH replication = {'class':'SimpleStrategy', 'replication_factor': {{ replication_factor }} };\""
+    - "cqlsh -e \"CREATE KEYSPACE IF NOT EXISTS {{ keyspace }} WITH REPLICATION = {'class':'NetworkTopologyStrategy','somerville':{{ replication_factor }}, };\""
 
 - name: Make sure the repo is up to date
   git:
