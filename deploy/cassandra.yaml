@@ -33,7 +33,7 @@
         state: mounted
   tags: filesystem
 
-- hosts: cassandranodes
+- hosts: cassandranodes, cutoutcass
   gather_facts: false
   vars_files:
     - settings.yaml
@@ -41,17 +41,6 @@
   vars:
     cassandra_cluster_name: "{{ lasair_name }}"
     cassandra_commitlog_dir: /var/lib/cassandra-commitlog
-  roles:
-    - gkansible.gkservercollection.cassandra4
-  tags: cassandra
-
-- hosts: cutoutcass
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-    - cassandra_mapping.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
   roles:
     - gkansible.gkservercollection.cassandra4
   tags: cassandra
