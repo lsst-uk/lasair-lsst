@@ -58,7 +58,9 @@ def cql_create_table(schema):
 
     if 'with' in schema:                # add in the WITH at the very end
         cql += schema['with'] + '\n'
-    return cql
+
+    # 2025-07-24 KWS For some reason execution of CQL files requires a semicolon.
+    return cql + ';'
 
 import sys
 import importlib
