@@ -1,6 +1,27 @@
 # Playbook for deploying standalone cassandra clusters
 
 ---
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Get current git branch
+      ansible.builtin.command: git branch --show-current
+      register: git_tag
+  tags: always
+
+- hosts: all
+  gather_facts: true
+  vars_files:
+    - settings.yaml
+  tasks:
+    - name: Set Lasair version
+      ansible.builtin.set_fact:
+        lasair_version: "{{ hostvars['localhost']['git_tag'].stdout }}"
+    - name: Get vault settings
+      ansible.builtin.set_fact:
+        settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+  tags:  
+    - always
 
 - hosts: cassandranodes, cutoutcass
   gather_facts: true
@@ -33,23 +54,36 @@
         state: mounted
   tags: filesystem
 
-- hosts: cassandranodes, cutoutcass
+- hosts: cassandranodes
   gather_facts: false
   vars_files:
     - settings.yaml
     - cassandra_mapping.yaml
   vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
+    cassandra_cluster_name: "{{ group_names[0] }}"
     cassandra_commitlog_dir: /var/lib/cassandra-commitlog
   roles:
     - gkansible.gkservercollection.cassandra4
   tags: cassandra
 
+- hosts: cutoutcass
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - cassandra_mapping.yaml
+  vars:
+    cassandra_cluster_name: "{{ group_names[0] }}"
+    cassandra_commitlog_dir: /var/lib/cassandra-commitlog
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cassandra
+
+
 - hosts: cassandranodes, cutoutcass
   vars_files:
     - settings.yaml
   vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
+    cassandra_cluster_name: "{{ group_names[0] }}"
   roles:
     - gkansible.gkservercollection.cassandra_start_service
   serial: 1
@@ -65,17 +99,14 @@
         path: /usr/bin/cqlsh
         state: absent
     - name: Install cqlsh snap
-      community.general.snap:
-        name:
-          - cqlsh
-        devmode: true
+      shell: "sudo snap install cqlsh --devmode"
+  tags: cassandra, cutoutcass
 
 - hosts: cassandranodes[0]
   vars_files:
     - settings.yaml
   vars:
     schema: 7_4_A
-    cassandra_cluster_name: "{{ lasair_name }}"
   roles:
     - lasair_cassandra
   tags: cassandra
@@ -85,7 +116,6 @@
     - settings.yaml
   vars:
     schema: 7_4_A
-    cassandra_cluster_name: "{{ lasair_name }}_cutout"
   roles:
     - lasair_cutoutcass
   tags: cutoutcass
