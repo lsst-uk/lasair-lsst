@@ -25,12 +25,13 @@ except:
 class manage_status():
     """ manage_status.
     """
-    def __init__(self, msl=None, table='lasair_statistics'):
+    def __init__(self, msl=None, table='lasair_statistics', log=None):
         if msl:
             self.msl = msl
         else:
             self.msl = db_connect.remote()
         self.table = table
+        self.log = log
 
     def read(self, nid):
         cursor  = self.msl.cursor(buffered=True, dictionary=True)
@@ -52,20 +53,23 @@ class manage_status():
     def tostr(self, nid):
         return json.dumps(self.read(nid), indent=2)
 
-    def commit_with_retry(self, max_retries=5, initial_wait=1):
+    def execute_with_retry(self, query, max_retries=5, initial_wait=1):
         wait_time = initial_wait
+        cursor  = self.msl.cursor(buffered=True, dictionary=True)
         for attempt in range(1, max_retries + 1):
             try:
+                cursor.execute(query)
                 self.msl.commit()
                 return  # Success, exit the function
             except Exception as e:
-                print(f"Attempt {attempt}: {e}")
                 if attempt < max_retries:
-                    print(f"Retrying in {wait_time} seconds...")
+                    if self.log: 
+                        self.log.warning("manage_status: Retrying in %.1f seconds...%s" % (wait_time, str(e)))
                     time.sleep(wait_time)
                     wait_time *= 2  # Double the wait time
                 else:
-                    print("All retries failed. Giving up.")
+                    if self.log: 
+                        self.log.warning("manage_status: All retries failed. Giving up.")
                     return
 
     def set(self, dictionary, nid):
@@ -75,9 +79,7 @@ class manage_status():
             ql.append("(%d,'%s',%f)" % (nid, name, value))
         query += ','.join(ql)
 #        print(query)
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
-        cursor.execute(query)
-        self.commit_with_retry()
+        self.execute_with_retry(query)
 
     def add(self, dictionary, nid):
         queryfmt = "INSERT INTO %s (nid,name,value) VALUES " % self.table
@@ -86,8 +88,7 @@ class manage_status():
         for name,value in dictionary.items():
             query = queryfmt % (nid, name, value, value)
 #            print(query)
-            cursor.execute(query)
-        self.commit_with_retry()
+            self.execute_with_retry(query)
 
 # A timing class built with manage_status
 class timer():

@@ -6,19 +6,19 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" id="{{type}}_datatable">
+            <table style='width:50%' class="table table-flush datatable" id="{{type}}_datatable">
                 <thead class="thead-light">
                     <tr>
                         <th>Metric</th>
-                        <th>Value</th>
+                        <th align='right'>Value</th>
                     </tr></thead>
                 <tbody>
 
-                    {% for metric, value, comment in status %}
+                    {% for metric, value in status %}
 
                         <tr>
-                            <td >{{metric}}{% include "includes/info_tooltip.html" with info=comment position="auto" %}</td>
-                            <td>{{value}}</td>
+                            <td >{{metric}}</td>
+                            <td align='right'>{{value}}</td>
 
 
 
