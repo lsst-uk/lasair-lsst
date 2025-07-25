@@ -234,8 +234,9 @@ def classify(conf, log, alerts):
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
         # query = "INSERT INTO cache VALUES {} AS new ON DUPLICATE KEY UPDATE class=new.class,
         # crossmatch=new.crossmatch".format(",".join(values))
-        query = ("INSERT INTO cache VALUES {} ON DUPLICATE KEY UPDATE version=VALUES(version), class=VALUES(class),\
-                 description=VALUES(description), crossmatch=VALUES(crossmatch)".format(",".join(values)))
+        query = ("INSERT INTO cache (name, version, class, description, crossmatch) VALUES {} ON DUPLICATE KEY UPDATE \
+                 version=VALUES(version), class=VALUES(class), description=VALUES(description), \
+                 crossmatch=VALUES(crossmatch)".format(",".join(values)))
         log.debug("update cache: {}".format(query))
         try:
             with connection.cursor() as cursor:

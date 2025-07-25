@@ -37,7 +37,7 @@ Come back after the data starts flowing.
 
 ----
 Now you can run the notebooks with your favourite Jupyter client. 
-They are described bwlow.
+They are described below.
 
 #### [API_lsst/BrightSNe.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/BrightSNe.ipynb)
 * Pulls out alerts with a Sherlock host galaxy, and plots lightcurves.

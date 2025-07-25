@@ -1,0 +1,74 @@
+cassandra_map:
+  nodes:
+    - instance: lasair-lsst-cassandranodes-0
+      hv: sv-hpe-0-8
+      lvm: 1
+    - instance: lasair-lsst-cassandranodes-1
+      hv: sv-hpe-0-9
+      lvm: 2
+    - instance: lasair-lsst-cassandranodes-2
+      hv: sv-hpe-0-10
+      lvm: 3
+    - instance: lasair-lsst-cassandranodes-3
+      hv: sv-hpe-0-11
+      lvm: 4
+    - instance: lasair-lsst-cassandranodes-4
+      hv: sv-hpe-0-12
+      lvm: 1
+    - instance: lasair-lsst-cassandranodes-5
+      hv: sv-hpe-0-14
+      lvm: 2
+    - instance: lasair-lsst-cassandranodes-6
+      hv: sv-hpe-0-8
+      lvm: 3
+    - instance: lasair-lsst-cassandranodes-7
+      hv: sv-hpe-0-9
+      lvm: 4
+    - instance: lasair-lsst-cassandranodes-8
+      hv: sv-hpe-0-10
+      lvm: 1
+    - instance: lasair-lsst-cassandranodes-9
+      hv: sv-hpe-0-11
+      lvm: 2
+    - instance: lasair-lsst-cassandranodes-10
+      hv: sv-hpe-0-12
+      lvm: 2
+    - instance: lasair-lsst-cassandranodes-11
+      hv: sv-hpe-0-14
+      lvm: 2
+    - instance: lasair-lsst-cutoutcass-0
+      hv: sv-hpe-0-8
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-1
+      hv: sv-hpe-0-9
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-2
+      hv: sv-hpe-0-10
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-3
+      hv: sv-hpe-0-11
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-4
+      hv: sv-hpe-0-12
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-5
+      hv: sv-hpe-0-14
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-6
+      hv: sv-hpe-0-8
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-7
+      hv: sv-hpe-0-9
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-8
+      hv: sv-hpe-0-10
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-9
+      hv: sv-hpe-0-11
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-10
+      hv: sv-hpe-0-12
+      lvm: 3
+    - instance: lasair-lsst-cutoutcass-11
+      hv: sv-hpe-0-14
+      lvm: 3

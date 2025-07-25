@@ -113,6 +113,9 @@ ANNOTATION_GROUP_ID    = 'test004'
 # Can have different web look and feel for different clusters
 WEB_DOMAIN             = '{{ lasair_name }}'
 
+# Make the register and passwordchange secure
+HASH_SALT              = '{{ settings.hash_salt }}'
+
 # To include links in emails of filter results
 #LASAIR_URL             = 'lasair-iris.roe.ac.uk'
 LASAIR_URL             = '{{ lasair_name }}.{{ domain }}'
