@@ -13,7 +13,7 @@ import yaml
 import argparse
 import logging
 import sys
-from urllib.parse import urlparse
+from urllib.parse import urlparse, quote, unquote
 import pymysql.cursors
 from confluent_kafka import Consumer, Producer, KafkaError, KafkaException
 from sherlock import transient_classifier
@@ -126,8 +126,8 @@ def classify(conf, log, alerts):
                         try:
                             name = str(result['name'])
                             annotations[name] = {
-                                'classification': result['class'],
-                                'description': result['description']
+                                'classification': unquote(result['class']),
+                                'description': unquote(result['description'])
                                 }
                             match = json.loads(result.get('crossmatch', {}))
                             for key, value in match.items():
@@ -225,8 +225,8 @@ def classify(conf, log, alerts):
         values = []
         crossmatches = []
         for name in names:
-            classification = annotations[name]['classification']
-            description = annotations[name].get('description', '')
+            classification = quote(annotations[name]['classification'])
+            description = quote(annotations[name].get('description', ''))
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
             values.append("\n ('{}','{}','{}','{}',%s)".format(name, sherlock_version, classification, description))
