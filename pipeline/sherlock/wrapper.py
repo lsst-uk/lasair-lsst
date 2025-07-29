@@ -129,13 +129,16 @@ def classify(conf, log, alerts):
                                 'classification': result['class'],
                                 'description': result['description']
                                 }
+                            if result['class'] == 'ORPHAN':
+                                log.debug(f"Got ORPHAN from cache: { name }")
+                                continue
                             match = json.loads(result.get('crossmatch', {}))
                             for key, value in match.items():
                                 annotations[name][key] = value
                             log.debug("Got crossmatch from cache: {} {} {}\n".format(
                                 name, result['class'], json.dumps(match, indent=2)))
                         except ValueError:
-                            log.info("Ignoring cache entry with malformed or missing crossmatch: {}".format(name))
+                            log.info("Ignoring malformed or missing crossmatch: {}".format(name))
                             continue
 
         except TypeError:
