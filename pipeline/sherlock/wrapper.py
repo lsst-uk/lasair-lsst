@@ -13,7 +13,7 @@ import yaml
 import argparse
 import logging
 import sys
-from urllib.parse import urlparse, quote, unquote
+from urllib.parse import urlparse
 import pymysql.cursors
 from confluent_kafka import Consumer, Producer, KafkaError, KafkaException
 from sherlock import transient_classifier
@@ -126,8 +126,8 @@ def classify(conf, log, alerts):
                         try:
                             name = str(result['name'])
                             annotations[name] = {
-                                'classification': unquote(result['class']),
-                                'description': unquote(result['description'])
+                                'classification': result['class'],
+                                'description': result['description']
                                 }
                             match = json.loads(result.get('crossmatch', {}))
                             for key, value in match.items():
@@ -223,14 +223,15 @@ def classify(conf, log, alerts):
                 charset='utf8mb4',
                 cursorclass=pymysql.cursors.DictCursor)
         values = []
-        crossmatches = []
+        parameters = []
         for name in names:
-            classification = quote(annotations[name]['classification'])
-            description = quote(annotations[name].get('description', ''))
+            classification = annotations[name]['classification']
+            description = annotations[name].get('description', '')
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
-            values.append("\n ('{}','{}','{}','{}',%s)".format(name, sherlock_version, classification, description))
-            crossmatches.append(crossmatch)
+            values.append("\n ('{}','{}','{}','%s',%s)".format(name, sherlock_version, classification))
+            parameters.append(description)
+            parameters.append(crossmatch)
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
         # query = "INSERT INTO cache VALUES {} AS new ON DUPLICATE KEY UPDATE class=new.class,
         # crossmatch=new.crossmatch".format(",".join(values))
@@ -243,7 +244,7 @@ def classify(conf, log, alerts):
                 # make deprecation warning non-fatal
                 with warnings.catch_warnings():
                     warnings.simplefilter('default')
-                    cursor.execute(query, crossmatches)
+                    cursor.execute(query, parameters)
         finally:
             connection.commit()
             connection.close()
