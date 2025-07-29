@@ -229,7 +229,7 @@ def classify(conf, log, alerts):
             description = annotations[name].get('description', '')
             cm = cm_by_name.get(name, [])
             crossmatch = "{}".format(json.dumps(cm[0])) if len(cm) > 0 else "NULL"
-            values.append("\n ('{}','{}','{}','%s',%s)".format(name, sherlock_version, classification))
+            values.append("\n ('{}','{}','{}',%s,%s)".format(name, sherlock_version, classification))
             parameters.append(description)
             parameters.append(crossmatch)
         # Syntax for ON DUPLICATE KEY appears to differ between MySQL and MariaDB :(
