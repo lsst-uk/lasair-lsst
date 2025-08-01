@@ -469,9 +469,9 @@ class Filter:
             cursor.execute(query)
             for row in cursor:
                 total_count = row['total_count']
-                since = 24 * float(row['since'])
+                since = 24 * float(row.get('since', 1000000.0))
                 break
-        except:
+        except Exception as e:
             log.warning("batch_statistics total: %s %s" % (str(e), query))
             total_count = -1
             since = -1
