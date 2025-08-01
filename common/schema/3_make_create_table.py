@@ -41,6 +41,7 @@ def cql_create_table(schema):
     lines = []
     # go through all the fields
     for f in schema['fields']:
+        print(f['name'], f['type'])
         s = '"' + f['name'] + '"'       # name with doublequotes for CQL
         s += prims.cql_type(f['type'])  # convert AVRO type to CQL type
     
@@ -70,7 +71,7 @@ if __name__ == '__main__':
         schema_version = sys.argv[2]
         table          = sys.argv[3]
     else:
-        print("Usage: convert.py switch schema_version table")
+        print("Usage: 3_make_create_table.py switch schema_version table")
         print("Where switch can be sql or cql")
         print("and schema_verrsion can be for example 704")
         print("and table is one of objects, sherlock_classifications, etc")

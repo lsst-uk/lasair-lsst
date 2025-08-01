@@ -17,9 +17,13 @@ if len(sys.argv) < 2:
     print('Usage: join_object_schema.py <schema_version> ... example 704')
     sys.exit()
 schema_version = sys.argv[1]
+if len(sys.argv) >= 3:
+    branch = sys.argv[2]
+else:
+    branch = 'main'
 
 # The Rubin diaObject schema
-diaObject_schema = read_avsc.read_from_github(schema_version, 'diaObject')
+diaObject_schema = read_avsc.read_from_github(schema_version, 'diaObject', branch)
 
 # this will be the finished schema
 fields = []
