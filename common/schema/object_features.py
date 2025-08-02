@@ -24,9 +24,9 @@ schema = {
     "doc":"Proper motion in declination (mas/yr)"},
 
 {"section":"Lightcurve interval", "doc":"MJD of the first and last diaSource of this diaObject"},
-{"name":  "lastDiaSourceMJD", "type": "double", "origin": "lasair",
+{"name":  "lastDiaSourceMjdTai", "type": "double", "origin": "lasair",
     "doc": "Latest MJD of a diaSource" },
-{"name": "firstDiaSourceMJD", "type": "double", "origin": "lasair",
+{"name": "firstDiaSourceMjdTai", "type": "double", "origin": "lsst",
     "doc": "Earliest MJD of a diaSource" },
 
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
