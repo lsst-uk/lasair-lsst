@@ -13,6 +13,18 @@ schema = {
       "extra": "NOT NULL"
     },
     {
+      "name": "observation_reason",
+      "type": "string",
+      "origin": "lsst",
+      "doc": "Latest observation reason for this object"
+    },
+    {
+      "name": "target_name",
+      "type": "string",
+      "origin": "lsst",
+      "doc": "Latest target name for this object"
+    },
+    {
       "name": "ra",
       "type": "double",
       "origin": "lsst",
