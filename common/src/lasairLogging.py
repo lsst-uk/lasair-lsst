@@ -1,10 +1,10 @@
 """Common Lasair logging module. Based on standard logging module with sensible default
 values for Lasair. Sets up a log file and also sends error and above messages to Slack."""
 
-import os, logging
+import os
+import logging
 from datetime import datetime
 from slack_webhook import SlackWebhook, SlackError
-
 
 
 class SlackHandler(logging.Handler):
@@ -20,7 +20,7 @@ class SlackHandler(logging.Handler):
             f = open(self.prometheus_file, 'w')
             f.write(msg)
             f.close()
-        except:
+        except OSError:
             print("ERROR in lasairLogging: Cannot open promethus export file %s" % self.prometheus_file)
 
     def emit(self, record):
@@ -28,6 +28,7 @@ class SlackHandler(logging.Handler):
         msg = self.format(record)
         try:
             self.webhook.send(msg)
+            self.prometheus_export(msg)
         except SlackError as e:
             ts = str(datetime.now())
             errmsg = f"[{ ts }] Error sending message to Slack: { str(e) } | Message: { msg }"
@@ -41,6 +42,7 @@ class DuplicateFilter(logging.Filter):
         self.n_msg = 0
         self.webhook = webhook
         self.maxmerge = maxmerge
+        self.last_log = None
 
     def filter(self, record):
         current_log = (record.levelno, record.msg)
