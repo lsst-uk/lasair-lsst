@@ -34,6 +34,7 @@ urlpatterns = [
     path('fits/<int:imjd>/<slug:candid_cutoutType>/', fits, name='fits'),
     path('', include('lasairapi.urls')),
     path('', include('lasair.apps.annotator.urls')),
+    path('', include('lasair.apps.community_resource.urls')),
     path('', include('lasair.apps.db_schema.urls')),
     path('', include('lasair.apps.filter_query.urls')),
     path('', include('lasair.apps.mma_gw.urls')),

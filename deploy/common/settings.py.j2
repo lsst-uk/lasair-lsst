@@ -41,10 +41,13 @@ SCHEMA_VERSION = "7_4"
 LOCKFILE               = '/home/ubuntu/lockfile'
 
 # Alerts per batch. Can be modified in an instantiated settings.py
-KAFKA_MAXALERTS        = 40000
+KAFKA_MAXALERTS        = 10000
+
+# Number of the latest diaSources to put into database
+N_DIASOURCES_DB        = 4
 
 # Time to wait between batches
-WAIT_TIME              = 180
+WAIT_TIME              = 30
 
 # When something goes wrong
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
@@ -109,6 +112,9 @@ ANNOTATION_GROUP_ID    = 'test004'
 ###################
 # Can have different web look and feel for different clusters
 WEB_DOMAIN             = '{{ lasair_name }}'
+
+# Make the register and passwordchange secure
+HASH_SALT              = '{{ settings.hash_salt }}'
 
 # To include links in emails of filter results
 #LASAIR_URL             = 'lasair-iris.roe.ac.uk'

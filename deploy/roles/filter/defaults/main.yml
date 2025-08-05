@@ -10,3 +10,7 @@ db_port: settings.master_db_port
 mysql_db_name: ztf
 mysql_db_user: ztf
 mysql_db_password: 123password
+
+# python venv path
+venv_path: /opt/lasair_venv
+

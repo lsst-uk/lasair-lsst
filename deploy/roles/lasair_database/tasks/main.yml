@@ -25,7 +25,7 @@
 
 - name: Create tables
   community.mysql.mysql_query:
-    query: "{{ lookup('file', '../common/schema/lasair_sql/' + item, split_lines=false) }}"
+    query: "{{ lookup('file', '../common/schema/' + schema + '/' + item, split_lines=false) }}"
     login_host: 127.0.0.1
     login_user: "{{ mysql_db_user }}"
     login_password: "{{ mysql_db_password }}"
@@ -39,6 +39,6 @@
     - "watchlist_hits.sql"
     - "annotations.sql"
     - "mma_area_hits.sql"
-    - "lasair_statistics.sql"
+    #- "lasair_statistics.sql"
     #- "/common/schema/lasair_sql/ssObjects.sql"
 

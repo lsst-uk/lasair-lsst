@@ -1,6 +1,6 @@
-<img src="_images/lasair_logo_transparent.png" width=500>
+<img src="_images/lasair_logo_transparent_LSST.png" width=500>
 
-# [Lasair: A UK Alert Stream Broker]({%lasairurl%})
+# [Lasair: A UK Alert Stream Broker]({%lasairurl%}) 
 
 [*Lasair*]({%lasairurl%}) is being developed by The University of Edinburgh, Queen\'s University Belfast,
 and Oxford University to serve transient alerts from the 
@@ -71,6 +71,7 @@ Lasair's core features are described in more detail here:
    :maxdepth: 1
    :caption: More Information
 
+   more_info/porting_from_ztf
    more_info/account
    more_info/faqs
    more_info/contact

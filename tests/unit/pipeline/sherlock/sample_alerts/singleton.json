@@ -1,0 +1,57 @@
+[
+{
+    "diaObject": {
+        "diaObjectId": 177218944862519874,
+        "ra": 155.06611633096068,
+        "decl": -3.970923686106955,
+
+        "gPSFluxMax": 3000.6015625,
+        "gPSFluxMean": -1522.6015625,
+        "gPSFluxMaxSlope": 137.81825256347656,
+        "gPSFluxNdata": 6,
+
+        "rPSFluxMax": 3000.6015625,
+        "rPSFluxMean": 2000.6015625,
+        "rPSFluxMaxSlope": 77.81825256347656,
+        "rPSFluxNdata": 3
+    },
+
+    "diaSourcesList": [
+    {
+      "diaSourceId": 4895,
+      "midPointTai": -13.888738992260812,
+      "filterName": "g",
+      "psFlux": 6445.303006011039,
+      "psFluxErr": 1000
+    }
+  ],
+  "diaForcedSourcesList": [
+    {
+      "diaSourceId": 4876,
+      "midPointTai": -14.616266601927792,
+      "filterName": "u",
+      "psFlux": 1485.9275521319603,
+      "psFluxErr": 1000
+    },
+    {
+      "diaSourceId": 2512,
+      "midPointTai": -14.223276731645264,
+      "filterName": "y",
+      "psFlux": 1569.5973988279195,
+      "psFluxErr": 1000
+    }
+  ],
+  "diaNondetectionLimitsList": [
+    {
+      "midPointTai": -19.48084208961185,
+      "filterName": "z",
+      "diaNoise": 2397.898881278231
+    },
+    {
+      "midPointTai": -19.336249964997368,
+      "filterName": "z",
+      "diaNoise": -1040.7561480438649
+    }
+  ]
+}
+]

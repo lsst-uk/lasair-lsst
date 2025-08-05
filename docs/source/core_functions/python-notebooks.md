@@ -1,24 +1,49 @@
 # Python Notebooks
 
-There is a separate Lasair repo for jupyter notebooks. To begin, lets the repo with:
+In order to use the example notebooks, please DO NOT just download and run
+a single notebook. There are other files that the notebooks will expect 
+to find, and it will fail when these are not present.
+
+**Please follow the instructions below**.
+
+### 1. Clone the repo
+There is a separate Lasair repo for jupyter notebooks. To begin, download the repo with:
 ```
 git clone https://github.com/lsst-uk/lasair-examples.git
 ```
-One branch is a set of notebooks showing how the Lasair client works (the API), and the other is a "Marshall" to enable viewing, vetoing and favouriting objects that pass through a kafka-enabled filter.
+One branch is a set of notebooks showing how the Lasair client works 
+(the API), and the other is a "Marshall" to enable viewing, 
+vetoing and favouriting objects that pass through a kafka-enabled filter.
 
-**Clone the repo and get your token**
+### 2. Get your token
 
-* You need a Lasair login.  There is a video [How to get a Lasair account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that explains how to do this, or just go [here]({%lasairurl%}/register). Then log in to the Lasair website.
+* You need a Lasair login.  There is a video [How to get a Lasair 
+account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that 
+explains how to do this, or just go [here]({%lasairurl%}/register). 
+Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
-* You can go to `notebooks/API_ztf` or `notebooks/LSST-ztf` or `notebooks/marshall`.
-* Copy the `settings_template.py to `settings.py` then change the `API_TOKEN` to your own token, that you can find in your "profile" at the top-left of the Lasair web page.
-* Install the lasair client with `pip3 install lasair`.
+* You can go to `notebooks/API_lsst` or `notebooks/features`.
+* Look in the repo for the `settings_template.py` and copy it to 
+`settings.py` then edit it with your own token.
+
+### 3. Libraries
+Install the lasair client with `pip3 install lasair`.
+Install matplotlib with `pip3 install matplotlib`.
+
+### 4. When will the alerts start?
+As of this writing (May 2025), LSST has not begun operation, and there is only
+fake data, and not much of that. Many of the filters will return nothing. 
+Come back after the data starts flowing.
+
+----
+Now you can run the notebooks with your favourite Jupyter client. 
+They are described below.
 
 #### [API_lsst/BrightSNe.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/BrightSNe.ipynb)
 * Pulls out alerts with a Sherlock host galaxy, and plots lightcurves.
 
 #### [API_lsst/Cone_Search.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Cone_Search.ipynb)
-* Uses the Lasair cone_search method to find objcts near a given point in the sky.
+* Uses the Lasair cone_search method to find objects near a given point in the sky.
 
 #### [API_lsst/ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/ObjectAPI.ipynb)
 * Shows the different amounts of data from the `object` API call, the result of the two flags:

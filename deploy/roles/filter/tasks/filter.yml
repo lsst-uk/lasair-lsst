@@ -1,37 +1,39 @@
 - name: Install apt packages
   become: true
   apt: 
-      name:
-        - swig
-        - python3-dev
-        - python3-pip
-        - postfix
-      state: present
-      update_cache: true
+    name:
+      - swig
+      - python3-dev
+      - python3-pip
+      - python3-venv
+      - postfix
+    state: present
+    update_cache: true
 
 - name: Install python packages
   become: true
   pip: 
-      executable: pip3 
-      name: 
-        - gkhtm
-        - gkutils
-        - numpy
-        - ephem
-        - confluent-kafka==2.1.1
-        - mysql-connector-python
-        - mocpy
-        - docopt
-        - scipy
-        - skytag
-        - dustmaps
-        - bazinBlackBody
+    virtualenv: "{{ venv_path }}" 
+    virtualenv_site_packages: true
+    virtualenv_command: 'python3 -m venv'
+    name: 
+      - gkhtm
+      - gkutils
+      - numpy
+      - ephem
+      - confluent-kafka
+      - mysql-connector-python
+      - mocpy
+      - docopt
+      - scipy
+      - skytag
+      - dustmaps
 
 - name: Install dustmaps
   become: true
   ansible.builtin.script:
     cmd: dustmap.py
-    executable: python3
+    executable: "{{ venv_path }}/bin/python3"
 
 #- name: Create csvfiles directory
 #  file:
@@ -82,33 +84,20 @@
     login_password: "{{ mysql_root_password }}"
     single_transaction: yes
 
-- name: Create object table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < objects.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-
-- name: Create sherlock_classifications table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < sherlock_classifications.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-
-- name: Create area_hits table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < area_hits.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-
-- name: Create mma_area_hits table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < mma_area_hits.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-
-- name: Create watchlist_hits table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < watchlist_hits.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
-
-- name: Create annotations table
-  shell:
-      cmd: mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}' < annotations.sql
-      chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/lasair_sql"
+- name: Create tables
+  community.mysql.mysql_query:
+    query: "{{ lookup('file', '../common/schema/' + schema + '/' + item, split_lines=false) }}"
+    login_host: 127.0.0.1
+    login_user: "{{ mysql_db_user }}"
+    login_password: "{{ mysql_db_password }}"
+    login_db: "{{ mysql_db_name }}"
+    single_transaction: yes
+  with_items:
+    - "objects.sql"
+    - "sherlock_classifications.sql"
+    - "crossmatch_tns.sql"
+    - "area_hits.sql"
+    - "watchlist_hits.sql"
+    - "annotations.sql"
+    - "mma_area_hits.sql"
 

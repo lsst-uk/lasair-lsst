@@ -7,7 +7,7 @@ volumes:
 services:
     zookeep:
         image:
-            confluentinc/cp-zookeeper:7.5.0
+            confluentinc/cp-zookeeper:7.9.1
         network_mode: host
         environment:
             - "ZOOKEEPER_SERVER_ID={{ play_hosts.index(inventory_hostname) + 1 }}"
@@ -40,3 +40,4 @@ services:
               source: "{{ mntpath }}/data"
               target: /var/lib/zookeeper/data
             - /opt/jmx_exporter:/opt/jmx_exporter
+            - /etc/hosts:/etc/hosts

@@ -159,11 +159,14 @@ class ObjectSerializer(serializers.Serializer):
         if lasair_added:
             try:
                 result = objjson(objectId, lite=lite)
-                result = reformat(result, lasair_added=lasair_added)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
                 raise NotFound()
+            try:
+                result = reformat(result, lasair_added=lasair_added)
+            except Exception as e:
+                result = {'error': str(e)}
         else:
             LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
 

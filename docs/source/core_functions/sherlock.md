@@ -76,11 +76,40 @@ _Sherlock_ employs many smaller source-specific catalogues such as
 
 - Ritter Cataclysmic Binaries Catalog v7.21 (Ritter and Kolb 2003). 
 
-For spectroscopic redshifts we use the 
+For spectroscopic redshifts, we supplement the SDSS DR12 with the following catalogues 
+
+- LASr (Local AGN Survey) catalogue : a complete catalogue of 49,000 
+galaxies within the local 100Mpc volume, all with redshifts (Asmus et al. 2020) 
 
 - GLADE Galaxy Catalogue v2.3 (Dálya et al. 2018) and the 
 
 - NED-D Galaxy Catalogue v13.1
+
+We are currently in the process of upgrading Sherlock with the following major additions 
+
+- Gaia DR3 - proper motion, star-galaxy separation, QSO classifications, 
+stellar classifications will all be included.  
+
+- [DESI Legacy Imaging Surveys DR10](https://www.legacysurvey.org), 
+with photometric redshifts and star/galaxy 
+separation, including NEOWISE. The Legacy surveys have good coverage of the 
+southern hemisphere and morphological classifications of over 5 billion sources, 
+and photometry in griz. There is a photometric redshift catalogue which will 
+also employ (overview of the Legacy Surveys: 
+[Dey et al. 2019](https://ui.adsabs.harvard.edu/abs/2019AJ....157..168D/abstract))
+
+- [DESI DR1](https://data.desi.lbl.gov/doc/releases/dr1/), 
+spectroscopic data for more than 18 million targets from the 
+first release of DESI (14 million galaxies and QSO redshifts). 
+The overlap with the LSST footprint will include about 20% of the DESI targets, 
+as DESI DR1 is mostly a northern survey. 
+([DESI Collaboration, Abdul-Karim et al. 2025](https://arxiv.org/abs/2503.14745))
+
+We are also in the process of compiling deep galaxy and redshift catalogues 
+(spectroscopic and photometric) for the Deep Drilling Fields. These cosmological 
+fields have many targeted areas from deeper surveys and we are harvesting the 
+data from all catalogues available so that cross-matching with transients can 
+start early (Weston et al., in preparation). 
 
 _Sherlock_ also has the ability to remotely query the NASA/IPAC Extragalactic Database, caching results locally to speed up future searches targeting the same region of sky, and in this way we have built up an almost complete local copy of the NED catalogue. More catalogues are continually being added to the library as they are published and become publicly available.
 

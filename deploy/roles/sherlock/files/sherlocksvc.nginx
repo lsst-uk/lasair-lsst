@@ -3,6 +3,6 @@ server {
 
     location / {
         include uwsgi_params;
-        uwsgi_pass unix:/opt/lasair/sherlocksvc.sock;
+        proxy_pass http://127.0.0.1:5500;
     }
 }

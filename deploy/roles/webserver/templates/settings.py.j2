@@ -93,6 +93,7 @@ INSTALLED_APPS = [
     'lasair.apps.watchlist',
     'lasair.apps.watchmap',
     'lasair.apps.mma_watchmap',
+    'lasair.apps.community_resource',
     'lasairapi',
     'django.contrib.admin',
     'rest_framework',
@@ -190,6 +191,10 @@ DATABASES = {
 # Redirect to home URL after login (Default redirects to /accounts/profile/)
 LOGIN_REDIRECT_URL = 'index'
 LOGIN_URL = 'login'
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.AllowAllUsersModelBackend"
+]
 
 AUTH_PASSWORD_VALIDATORS = [
     {

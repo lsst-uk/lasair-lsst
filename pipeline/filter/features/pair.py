@@ -1,8 +1,6 @@
 import math
-from .util import getFluxTimeBand
+from .util import getECFluxTimeBand
 from features.FeatureGroup import FeatureGroup
-#from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
 
 class pair(FeatureGroup):
     """Find the most recent revisit and derive colour information"""
@@ -82,15 +80,9 @@ class pair(FeatureGroup):
             'penultimatePairColourBands': None,
             'penultimatePairColourTemp': None,
         }
-#        ra   = self.alert['diaObject']['ra']
-#        decl = self.alert['diaObject']['decl']
-#        sfd = SFDQuery()
-#        c = SkyCoord(ra, decl, unit='deg', frame='icrs')
-#        ebv = float(sfd(c))
-
 
  # get the latest fluxes from the diaSources
-        (lc_flux, lc_time, lc_band) = getFluxTimeBand(self.alert)
+        (lc_flux, lc_time, lc_band) = getECFluxTimeBand(self.alert)
         latest_done = False
         for i in range(len(lc_flux)-1, 0, -1):
             if lc_time[i] - lc_time[i-1] < 40.0/(24*60) \

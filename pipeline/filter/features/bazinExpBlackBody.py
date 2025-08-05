@@ -3,10 +3,9 @@ import sys
 import json
 import math
 import numpy as np
+from .redshift import redshiftToDistance
+from .BBBEngine import BBB
 from features.FeatureGroup import FeatureGroup
-
-# these come from from https://github.com/RoyWilliams/bazinBlackBody
-from bazinBlackBody import BBBEngine
 
 class bazinExpBlackBody(FeatureGroup):
     """Min and Max time of the diaSources"""
@@ -35,43 +34,43 @@ class bazinExpBlackBody(FeatureGroup):
             np.seterr(over   ='ignore')
             np.seterr(invalid='ignore')
 
-        # only run the expensive BBB fit on 'SN', 'NT', 'ORPHAN'
-#        go = False
-#        try:
-#            classification = self.alert['annotations']['sherlock']['classification']
-#            go = (classification in ['SN', 'NT', 'ORPHAN'])
-#        except:
-#            return fdict
-#        if not go:
-#            return fdict
-
-        BE = BBBEngine.BBB('LSST', nforced=4, A=100, T=4, t0=-6, kr=0.1, kf=0.01, verbose=False)
+        # only run the expensive BBB fit on some
         try:
-            (fit_e, fit_b) =  BE.make_fit(self.alert)
+            sherlock = self.alert['annotations']['sherlock'][0]
         except:
             return fdict
+        if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+            return fdict
 
-        # at some point we should put in AIC or BIC selection
-        # if both fits are made
-        if fit_e:
-            fit = fit_e
-        elif fit_b:
-            fit = fit_b
-            fit['k']    = fit['kr']
-            fit['kerr'] = fit['krerr']
-        else:
+        BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
+                A=1000, T=4, t0=-5, kr=0.1, kf=0.01)
+        fit =  BE.make_fit(self.alert)
+        if not fit:
+            BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
+                A=1000, T=4, t0=-5, kr=0.01, kf=0.01)
+            fit =  BE.make_fit(self.alert)
+        if not fit:
             return fdict
 
         fdict['BBBTemp']        = fit['T']
         fdict['BBBRiseRate']    = fit['k']
         fdict['BBBFallRate']    = fit.get('kf', None)
         fdict['BBBPeakFlux']    = fit.get('peakValue', None)
-        fdict['BBBPeakAbsMag']  = None    # to be fixed later
+
+        # no peak for exp fit, only for bazin
         if 'kf' in fit:
             peakMJD = fit.get('peakTime', 0.0) + fit.get('mjd_discovery', 0.0)
-            if math.isinf(peakMJD):
-                fdict['BBBPeakMJD'] = None
-            else:
+            if not math.isinf(peakMJD):
                 fdict['BBBPeakMJD'] = peakMJD
+
+        # abs mag if there is a redshift
+        z = None
+        if 'z' in sherlock:        z = sherlock['z']
+        elif 'photoz' in sherlock: z = sherlock['photoz']
+        if z and fdict['BBBPeakFlux'] and fdict['BBBPeakFlux'] > 0:
+            distances = redshiftToDistance(z)
+            distanceModulus = distances['dmod']
+            ecMag = 31.4 - 2.5*math.log10(fdict['BBBPeakFlux'])
+            fdict['BBBPeakAbsMag'] = ecMag - distanceModulus + 2.5*math.log(1+z)
 
         return fdict

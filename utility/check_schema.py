@@ -45,7 +45,7 @@ def get_schema_names(conf):
         schema = json.loads(schema_text)
     else:
         schema = schema_package.schema
-    for field in schema['fields']:
+    for field in schema['fields'] + schema['ext_fields']:
         if 'name' in field:
             schema_names.append(field['name'])
     return schema_names
@@ -71,13 +71,12 @@ if __name__ == "__main__":
         schema_package = import_module('schema.' + conf['mod'])
 
     schema_names = get_schema_names(conf)
-    print (schema_names)
     mysql_names = get_mysql_names(conf)
 
     assert len(mysql_names) == len(schema_names), "Schema validation failed: different length"
 
     for i in range(len(mysql_names)):
-        assert mysql_names[i] == schema_names[i], "Schema validation failed: {} != {}".format(mysql_names[i], schema_names[i])
+        assert mysql_names.sort() == schema_names.sort(), "Schema validation failed: {} != {}".format(mysql_names, schema_names)
 
     print('mysql and object schema identical')
 

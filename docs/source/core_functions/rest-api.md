@@ -13,14 +13,14 @@ uses either HTTP GET or POST. Arguments can be passed in the query string, as JS
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
-#### Throttling of API Usage
+**Throttling of API Usage**
 
 The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
 
 *   User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.
 *   Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.
 
-**Note: WE ASK YOU TO PLEASE NOT SHARE THESE TOKENS.** If you share code that uses the Lasair API, please put the token in a separate, imported file or environment variable, that you do not share, and is not put in github.
+**Note: PLEASE NOT SHARE THESE TOKENS.** If you share code that uses the Lasair API, please put the token in a separate, imported file or environment variable, that you do not share, and is not put in github.
 
 ##### Authorisation Token
 
@@ -34,11 +34,11 @@ Once you are logged in on the website, click on your name at the top right, and 
 
 Click on the method name to jump to documentation in the reference below.
 
-*   [/api/cone/](#cone): runs a cone search on all the objects in the Lasair database.
-*   [/api/query/](#query): runs a SQL SELECT query on the Lasair database.
-*   [/api/object/](#object): returns a machine-readable version of the object web page.
-*   [/api/sherlock/object/](#sherlockobject): returns Sherlock information about a named objects.
-*   [/api/sherlock/position/](#sherlockposition): returns Sherlock information about a sky position.
+*   [cone](#cone): runs a cone search on all the objects in the Lasair database.
+*   [query](#query): runs a SQL SELECT query on the Lasair database.
+*   [object](#object): returns a machine-readable version of the object web page.
+*   [sherlock/object](#sherlockobject): returns Sherlock information about a named objects.
+*   [sherlock/position](#sherlockposition): returns Sherlock information about a sky position.
 
 ### <a name="cone"></a>/api/cone/
 

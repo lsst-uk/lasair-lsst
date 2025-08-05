@@ -4,12 +4,14 @@
 
 - hosts: localhost
   gather_facts: false
+  vars:
+    schema: 7.4.A
   tasks:
     - name: Pause for 10 seconds
       ansible.builtin.pause:
         seconds: 10
     - name: Send test alerts
-      ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/schema7.1/alert.json ingest_test {{ (groups['ingest'] | length) * (groups['sherlock'] | length) * (groups['filter'] | length) }}"
+      ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/schema{{ schema }}/alert.json ingest_test {{ (groups['ingest'] | length) * (groups['sherlock'] | length) * (groups['filter'] | length) }}"
 
 - hosts: ingest
   gather_facts: false
@@ -18,7 +20,7 @@
     - name: Run ingest
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/ingest
-        cmd: "python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=4"
+        cmd: "/opt/lasair_venv/bin/python3 ingest.py --maxalert={{ (groups['sherlock'] | length) * (groups['filter'] | length) }} --group_id=ingest_test_1 --topic_in=ingest_test --topic_out=sherlock_test --wait_time=4"
       register: ingest_result
 #    - name: Result
 #      ansible.builtin.debug:

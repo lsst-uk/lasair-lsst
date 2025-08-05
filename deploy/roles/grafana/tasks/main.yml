@@ -69,14 +69,16 @@
     enabled: true
     name:  grafana-server
     state: started
-  notify:
-    - Pause for 30s
+
+- name: Wait for port 3000
+  ansible.builtin.wait_for:
+    port: 3000
 
 # After starting the Grafana service we pause for 30s before trying to set the admin password to ensure that
 # everything is running, otherwise the password reset will fail
 
-- name: Flush handlers
-  meta: flush_handlers
+#- name: Flush handlers
+#  meta: flush_handlers
 
 # This no loger appears to work as of 9/12/22 so we use the config file to set initial pw instead
 #- name: "Set admin password"

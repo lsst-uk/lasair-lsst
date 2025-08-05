@@ -52,7 +52,7 @@
   tasks:
     - name: Get API token
       ansible.builtin.uri:
-        url: "https://{{ lasair_name }}.{{ domain }}/api/auth-token/"
+        url: "http://{{ lasair_name }}-web:8080/api/auth-token/"
         method: POST
         body_format: json
         body:
@@ -64,6 +64,20 @@
         powerapi_token: "{{ api_token_response.json.token }}"
   tags:
     - always
+
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    kafka_secret: "{{ lookup('hashi_vault', 'secret='+vault.path+'/kafka url='+vault.url)}}"
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+  tasks:
+    - name: Create settings file
+      template:
+        src: common/settings.py.j2
+        dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
 
 - hosts: svc
   gather_facts: false
@@ -148,6 +162,7 @@
     - settings.yaml
     - exports.yaml
   vars:
+    schema: 7_4_A
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
@@ -174,14 +189,24 @@
   gather_facts: false
   become: yes
   tasks:
-    - name: create filesystem for data
+    - name: create filesystems
       community.general.filesystem:
         fstype: ext4
-        dev: /dev/vdb
+        dev: "{{ item }}"
+      loop:
+        - /dev/vdb
+        - /dev/vdc
+    - name: ensure commitlog filesystem is mounted
+      ansible.posix.mount:
+        path: /var/lib/cassandra-commitlog
+        src: /dev/vdb
+        fstype: ext4
+        opts: nofail
+        state: mounted
     - name: ensure data filesystem is mounted
       ansible.posix.mount:
         path: /var/lib/cassandra
-        src: /dev/vdb
+        src: /dev/vdc
         fstype: ext4
         opts: nofail
         state: mounted
@@ -191,31 +216,65 @@
   gather_facts: false
   vars_files:
     - settings.yaml
+    - cassandra_mapping.yaml
   vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
+    cassandra_cluster_name: "{{ group_names[0] }}"
+    cassandra_commitlog_dir: /var/lib/cassandra-commitlog
   roles:
     - gkansible.gkservercollection.cassandra4
   tags: cassandra
 
-- hosts: cassandranodes
+- hosts: cutoutcass
+  gather_facts: false
   vars_files:
     - settings.yaml
   vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
+    cassandra_cluster_name: "{{ group_names[0] }}"
+    cassandra_commitlog_dir: /var/lib/cassandra-commitlog
+  roles:
+    - gkansible.gkservercollection.cassandra4
+  tags: cutoutcass
+
+- hosts: cassandranodes, cutoutcass
+  vars_files:
+    - settings.yaml
+  vars:
+    cassandra_cluster_name: "{{ group_names[0] }}"
   roles:
     - gkansible.gkservercollection.cassandra_start_service
   serial: 1
   tags: cassandra
 
+# Hopefully temporary workaround for incompatibility between current version of Cassandra and Python 3.12 - 3/6/25
+- hosts: cassandranodes,cutoutcass
+  gather_facts: false
+  become: yes
+  tasks:
+    - name: Remove default cqlsh
+      ansible.builtin.file:
+        path: /usr/bin/cqlsh
+        state: absent
+    - name: Install cqlsh snap
+      shell: "sudo snap install cqlsh --devmode"
+  tags: cassandra, cutoutcass
+
 - hosts: cassandranodes[0]
   vars_files:
     - settings.yaml
   vars:
-    cassandra_cluster_name: "{{ lasair_name }}"
-    git_branch: "{{ lasair_version }}"
+    schema: 7_4_A
   roles:
     - lasair_cassandra
   tags: cassandra
+
+- hosts: cutoutcass[0]
+  vars_files:
+    - settings.yaml
+  vars:
+    schema: 7_4_A
+  roles:
+    - lasair_cutoutcass
+  tags: cutoutcass
 
 - hosts: parallel_ssh
   gather_facts: false
@@ -229,34 +288,3 @@
     - role: parallel_ssh
       when: instances.parallel_ssh.started
   tags: parallel_ssh
-
-- hosts: cutoutcass
-  gather_facts: false
-  vars_files:
-    - settings.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}_cutout"
-  roles:
-    - gkansible.gkservercollection.cassandra4
-  tags: cutoutcass
-
-- hosts: cutoutcass
-  vars_files:
-    - settings.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}_cutout"
-  roles:
-    - gkansible.gkservercollection.cassandra_start_service
-  serial: 1
-  tags: cutoutcass
-
-- hosts: cutoutcass[0]
-  vars_files:
-    - settings.yaml
-  vars:
-    cassandra_cluster_name: "{{ lasair_name }}_cutout"
-    git_branch: "{{ lasair_version }}"
-  roles:
-    - lasair_cutoutcass
-  tags: cutoutcass
-

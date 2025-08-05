@@ -158,7 +158,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     cursor = msl.cursor(buffered=True, dictionary=True)
     n = 0
     query_results = []
-    utc = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+    utc = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
     try:
         cursor.execute(sqlquery_real)
         for record in cursor:
@@ -199,7 +199,7 @@ def dispose_query_results(query, query_results, fltr=None):
         if not fltr or fltr.send_kafka:
             dispose_kafka(query_results, query['topic_name'])
 
-    utcnow = datetime.datetime.utcnow()
+    utcnow = datetime.datetime.now(datetime.UTC)
     write_digest(allrecords, query['topic_name'], utcnow, last_email)
     return len(query_results)
 
@@ -243,7 +243,7 @@ def fetch_digest(topic_name):
 def dispose_email(allrecords, last_email, query, force=False):
     """ Send out email notifications
     """
-    utcnow = datetime.datetime.utcnow()
+    utcnow = datetime.datetime.now(datetime.UTC)
     if not force:
         delta = (utcnow - last_email)
         delta = delta.days + delta.seconds/86400.0

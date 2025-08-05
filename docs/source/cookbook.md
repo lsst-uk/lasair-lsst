@@ -6,63 +6,6 @@
    cookbook
 ```
 
-
-
----
-### Porting from ZTF
-For watchlists and watchmaps, the porting process should be simple. Use the ZTF website
-to navigate to the resource, then do Export/Original Watchlist File, which you can import 
-into a new resource on lasair-lsst.
-
-But filters are more difficult, as the objects attributes, used in SQL clauses, 
-have been rebuilt for LSST. First an example WHERE clause from Lasair-ZTF:
-```
-sherlock_classifications.classification = "AGN"
-AND objects.ncand >= 1
-AND objects.decmean < 10
-AND objects.jdgmax > jdnow() - 7
-AND (objects.rmag < 20.0 OR objects.gmag < 20.0)
-AND ((objects.magrmax- objects.magrmin) > 0.5)
-AND objects.dmdt_g >= 1.5
-```
-Changes needed for Lasair-LSST are:
-* Change `ncand` to `nSources` (could also use `nuSources`, `ngSources`, `nrSources`, 
-etc for the six bands)
-* Change `decmean` to `decl`
-* For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
-recent g-band detection. There is also the time of latest detection in any band, that is
-`lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
-
-Magnitude 20 is about 50,000 nJ, see [here](concepts) for 
-explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.
-Perhaps the line about maximum and minimum magnitude could be replaced with something 
-about the standard deviation of the lightcurve, the `objects-ext.r_psfFluxSigma`
-
-The last line is most difficult, there is no direct replacement for the 
-ZTF attribute `dmdt_g`, which has always been problematic. If you want fast risers,
-the `bazinBlackBody` set of attributes tries for a collective approach, taking the 
-whole 6-band lightcurve and fitting both temperature on the spectral axis, 
-and explosion models on the time axis. If the fit has converged, the attribute
-`BBBRiseRate` might work, it is an e-folding rate $e^{kt}$ for flux 
-(linear in magnitude), but can also be 
-thought of as magnitudes per day, within a few percent. 
-Perhaps we choose 0.2 magnitudes a day.
-
-So the clause looks like:
-```
-sherlock_classifications.classification = "AGN"
-AND objects.nSources >= 1
-AND objects.decl < 10
-AND objects.g_latestMJD > mjdnow() - 7
-AND (objects.r_psfFlux > 50000 OR objects.g_psfFlux > 50000)
-AND (objects-ext.r_psfFluxSigma > 10000)
-AND objects.BBBRiseRate > 0.2
-```
-
-If you have a porting problem from ZTF to LSST filters, please use the
-[Community Forum](https://community.lsst.org/c/support/support-lasair/55).
----
-
 ### Find a fast riser
 See the cookbook entry 
 [Finding tidal disruption events (TDE)](#finding-tidal-disruption-events--tde-) below,
@@ -79,11 +22,16 @@ objects.diaObjectId,
 crossmatch_tns.tns_prefix, crossmatch_tns.tns_name, crossmatch_tns.type
 ```
 and in the WHERE part of the filter, 
-we put in the classificartion constraint and latest first, and order
+we put in the classification constraint and latest first, and order
 the results latest first.
 ```
 crossmatch_tns.type = "SN II"
-ORDER BY jdmax DESC
+ORDER BY lastDiaSourceMJD DESC
+```
+
+You can select on multiple TNS types with this syntax:
+```
+crossmatch_tns.type in ["SN II", "AGN"]
 ```
 ##### Filtering on TNS status
 In the example above, we are concentrating on those LSST objects that are associated
@@ -191,34 +139,51 @@ associated with a galaxy whose distance is known. Below we combine flux, sky pos
 and redshift to estimate the peak absolute magnitude of a Rubin object.
 Let $f_\nu$ be the flux in nanoJansky, and $\delta f$ its uncertainty.
 
-Flux is related to $M_{AB}$, the observed magnitudes in the band of LSST.
+Flux is related to the apparent magnitude ($m_{AB}$ measured in the observer frame band O.
 See [Lasair Concepts](concepts.html?Lightcurve#lightcurve) for a conversion table.
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 8.9, for $f$ in Jy
+$m_{AB}$ = -2.5 log $f_\nu$ + 8.9, for $f$ in Jy
 
-$M_{AB}$ = 2.5 log $f_\nu$ + 31.4, for $f$ in nJy
+$m_{AB}$ = -2.5 log $f_\nu$ + 31.4, for $f$ in nJy
 
-$\delta M_{AB}$ = 1.08574 $\delta f/f$
+Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, 
+distance, extinction, and k-correction.
 
-Let $M_R$ be absolute magnitude in restframe band R. It is related to apparent magnitude, distance, extinction, and k-correction.
+$M_R = m_{AB} - \mu - A_O + K_{RO}$
 
-$M_R = M_{AB} - \mu + K_{RO} - A_O$
+Here $\mu$ is the distance modulus, and
+$A_O$ is extinction in observed band for magnitudes in the AB system.
+Note that the foreground extinction we apply is for the Milky Way, 
+so this is applied to the observer frame flux and magnitude measurement.
 
-Here $\mu$ is the distance modulus, $K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.
+$K_{RO}$ is the k-correction to convert for wavelength shifting from band R to the band O. 
+An accurate K-correction requires knowledge of the input spectrum and the redshift, 
+along with the filter throughput function to calculate synthetic photometry. 
+A user may want to do this for full scientific analysis but since 
+Lasair filters are designed for rapid selection we provide the 
+approximate k-correction only (e.g. as described in 
+[Hogg et al. 2002](https://arxiv.org/abs/astro-ph/0210394)).
+For redshift $z$, we have $K_{RO} = -2.5 log (1+z)$.  Therefore:
 
-$A_O$ is extinction in observed band (foreground for magnitudes in the AB system, 
-Therefore
+$M_R = m_O - \mu - A_O + 2.5 log (1+z)$
 
-$M_R = m_O - \mu - A_R + 2.5 log (1+z)$
-
-We should also quote the rest frame wavelength this is the effective wavelength for $M_R$:
+Note that the rest frame wavelength is shifted: the effective 
+wavelength for $M_R$ is:
 
 $\lambda_R = \lambda_O/(1+z)$
+
+We can compute distance modulus $\mu$ from redshift $z$ following Ned Wright's
+[cosmology calculator](https://www.astro.ucla.edu/~wright/cosmo_02.htm#DL).
+For the code that computes absolute magnitude, see the 
+[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/4_milky_way.ipynb).
 
 Error on $M_R$:
 Sum the variances of the sources of error:
 
 $(\delta M_R)^2 = (\delta M_O)^2 + (\delta \mu)^2 + (\delta K)^2$
+
+The error of magnitude comes from the error in flux:
+$\delta M_{AB}$ = 1.08574 $\delta f/f$
 
 Note that $\delta K$ will be small: $\delta K \approx {2.5 \over ln 10} ({\delta z \over 1+z})$
 A Taylor expansion of the K correction term yields $\delta K \approx 1.08574 ({\delta z \over 1+z})$.
@@ -294,7 +259,7 @@ AND peakExtCorrAbsMag < -19                  # peak extinction corrected absolut
 #### Watchlist
 A further cut for this type of alert might be a [publication of French and Zabludoff](https://ui.adsabs.harvard.edu/abs/2018ApJ...868...99F/abstract): 
 Identifying Tidal Disruption Events via Prior Photometric Selection of Their Preferred Hosts.
-The catalogue of 57,000 galaxies (is available from Vizier)[https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=J/ApJ/868/99/table5], and there are (instructions)[core_functions/watchlists.html] 
+The catalogue of 57,000 galaxies [is available from Vizier](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=J/ApJ/868/99/table5), and there are (instructions)[core_functions/watchlists.html] 
 for how to ingest this into Lasair.
 
 In order to filter alerts based on a watchlist: in the filter builder web form, select 

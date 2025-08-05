@@ -17,3 +17,6 @@
 - name: deploy infrastructure using terraform
   import_playbook: infra.yaml
 
+- name: re-run cloud-init to fix network interfaces
+  import_playbook: cloud-init.yaml
+
