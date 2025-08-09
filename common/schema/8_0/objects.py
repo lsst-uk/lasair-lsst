@@ -53,15 +53,15 @@ schema = {
       "doc": "MJD of the first and last diaSource of this diaObject"
     },
     {
-      "name": "lastDiaSourceMJD",
+      "name": "lastDiaSourceMjdTai",
       "type": "double",
       "origin": "lasair",
       "doc": "Latest MJD of a diaSource"
     },
     {
-      "name": "firstDiaSourceMJD",
+      "name": "firstDiaSourceMjdTai",
       "type": "double",
-      "origin": "lasair",
+      "origin": "lsst",
       "doc": "Earliest MJD of a diaSource"
     },
     {
@@ -861,11 +861,6 @@ schema = {
       "name": "lastNonForcedSource",
       "type": "long",
       "doc": "Last time when non-forced DIASource was seen for this object."
-    },
-    {
-      "name": "firstDiaSourceMjdTai",
-      "type": "double",
-      "doc": "Time of the first diaSource, expressed as Modified Julian Date, International Atomic Time."
     },
     {
       "name": "nDiaSources",

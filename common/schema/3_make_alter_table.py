@@ -58,7 +58,7 @@ def cql_alter_table(schema_old, schema_new):
     for f in fields_old:
         if not 'name' in f:       continue
         if f['name'] in attr_new: continue
-        lines += 'ALTER TABLE %s DROP `%s` ;\n' % \
+        lines += 'ALTER TABLE %s DROP "%s" ;\n' % \
                 (tablename, f['name'])
     return lines
 
