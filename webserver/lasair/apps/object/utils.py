@@ -5,7 +5,7 @@ import math, json
 import numpy as np
 
 bands  = ['u', 'g', 'r', 'i', 'z', 'y']
-bandColors = ["#9900cc", "#3366ff", "#33cc33", "#ffcc00", "#ff0000", "#cc6600"]
+bandColors = ['#1600ea', '#31de1f', '#b52626', '#370201', '#ba52ff', '#61a2b3']
 
 # Coloring for Colorblindness
 # https://davidmathlogic.com/colorblind
