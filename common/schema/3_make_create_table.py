@@ -41,7 +41,6 @@ def cql_create_table(schema):
     lines = []
     # go through all the fields
     for f in schema['fields']:
-        print(f['name'], f['type'])
         s = '"' + f['name'] + '"'       # name with doublequotes for CQL
         s += prims.cql_type(f['type'])  # convert AVRO type to CQL type
     

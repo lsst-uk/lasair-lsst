@@ -300,86 +300,89 @@ class Ingester:
                 diaForcedSourcesListDB      = diaForcedSourcesList
                 diaNondetectionLimitsListDB = diaNondetectionLimitsList
 
-            nDiaObject += 1
-            nDiaSources += len(diaSourcesList)
-            nForcedSources += len(diaForcedSourcesList)
-
-            # change dec to decl so MySQL doesnt get confused
-            diaObject['decl'] = diaObject['dec']
-            del diaObject['dec']
-            for diaSource in diaSourcesList:
-                diaSource['decl'] = diaSource['dec']
-                del diaSource['dec']
-            for diaForcedSource in diaForcedSourcesList:
-                diaForcedSource['decl'] = diaForcedSource['dec']
-                del diaForcedSource['dec']
-
-            # copy the observation_reason and target_name into the diaObject
-            # limit to 16 characters
-            if 'observation_reason' in lsst_alert:
-                diaObject['observation_reason'] = lsst_alert.['observation_reason'][:16]
-            else:
-                diaObject['observation_reason'] = ''
-
-            if 'target_name' in lsst_alert:
-                diaObject['target_name'] = lsst_alert.['target_name'][:16]
-            else:
-                diaObject['target_name'] = ''
-
-            # sort the diaSources and diaForcedSources, newest first
-            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
-            diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
-
-            # deal with images
-            if not self.nocutouts and self.image_store.image_store:
-                try:
-                    # get the MJD for the latest detection
-                    lastSource = diaSourcesList[0]
-                    # ID for the latest detection, this is what the cutouts belong to
-                    diaSourceId = lastSource['diaSourceId']
-                    # MJD for storing images
-                    imjd = int(lastSource['midpointMjdTai'])
-                    # objectID
-                    diaObjectId = diaObject['diaObjectId']
-                    # store the fits images
-                    self.timers['icutout'].on()
-                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
-                    self.timers['icutout'].off()
-                    self.futures += image_futures
-                except IndexError:
-                    # This will happen if the list of sources is empty
-                    log.debug("No latest detection so not storing cutouts")
-
-            # build the subset of the diaSources and diaForcedSources that do into Cassandra
-            # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
-            nds = settings.N_DIASOURCES_DB
-            if len(diaSourcesList) < nds:
-                diaSourcesListDB            = diaSourcesList
-                diaForcedSourcesListDB      = diaForcedSourcesList
-                diaNondetectionLimitsListDB = diaNondetectionLimitsList
-            else:
-                diaSourcesListDB = diaSourcesList[:nds]
-                fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
-
-                for i in range(len(diaForcedSourcesList)):
-                    if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                        break
-                diaForcedSourcesListDB = diaForcedSourcesList[:i]
-
-                for i in range(len(diaNondetectionLimitsList)):
-                    if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                        break
-                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+            if diaObject:
+                nDiaObject += 1
+                nDiaSources += len(diaSourcesList)
+                nForcedSources += len(diaForcedSourcesList)
     
-            # build the outgoing alerts
-            alert = {
-                'diaObject': diaObject,
-                'diaSourcesList': diaSourcesList,
-                'diaForcedSourcesList': diaForcedSourcesList,
-                'diaNondetectionLimitsList': diaNondetectionLimitsList,
-                'ssObject': ssObject,
-            }
-            alerts.append(alert)
+                # change dec to decl so MySQL doesnt get confused
+                diaObject['decl'] = diaObject['dec']
+                del diaObject['dec']
+                for diaSource in diaSourcesList:
+                    diaSource['decl'] = diaSource['dec']
+                    del diaSource['dec']
+                for diaForcedSource in diaForcedSourcesList:
+                    diaForcedSource['decl'] = diaForcedSource['dec']
+                    del diaForcedSource['dec']
+    
+                # copy the observation_reason and target_name into the diaObject
+                # limit to 16 characters
+                if 'observation_reason' in lsst_alert:
+                    diaObject['observation_reason'] = lsst_alert.['observation_reason'][:16]
+                else:
+                    diaObject['observation_reason'] = ''
+    
+                if 'target_name' in lsst_alert:
+                    diaObject['target_name'] = lsst_alert.['target_name'][:16]
+                else:
+                    diaObject['target_name'] = ''
+    
+                # sort the diaSources and diaForcedSources, newest first
+                diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+                diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+    
+                # deal with images
+                if not self.nocutouts and self.image_store.image_store:
+                    try:
+                        # get the MJD for the latest detection
+                        lastSource = diaSourcesList[0]
+                        # ID for the latest detection, this is what the cutouts belong to
+                        diaSourceId = lastSource['diaSourceId']
+                        # MJD for storing images
+                        imjd = int(lastSource['midpointMjdTai'])
+                        # objectID
+                        diaObjectId = diaObject['diaObjectId']
+                        # store the fits images
+                        self.timers['icutout'].on()
+                        image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
+                        self.timers['icutout'].off()
+                        self.futures += image_futures
+                    except IndexError:
+                        # This will happen if the list of sources is empty
+                        log.debug("No latest detection so not storing cutouts")
+    
+                # build the subset of the diaSources and diaForcedSources that do into Cassandra
+                # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
+                nds = settings.N_DIASOURCES_DB
+                if len(diaSourcesList) < nds:
+                    diaSourcesListDB            = diaSourcesList
+                    diaForcedSourcesListDB      = diaForcedSourcesList
+                    diaNondetectionLimitsListDB = diaNondetectionLimitsList
+                else:
+                    diaSourcesListDB = diaSourcesList[:nds]
+                    fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
+    
+                    for i in range(len(diaForcedSourcesList)):
+                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
+    
+                    for i in range(len(diaNondetectionLimitsList)):
+                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+        
+                # build the outgoing alerts
+                alert = {
+                    'diaObject': diaObject,
+                    'diaSourcesList': diaSourcesList,
+                    'diaForcedSourcesList': diaForcedSourcesList,
+                    'diaNondetectionLimitsList': diaNondetectionLimitsList,
+                    'ssObject': ssObject,
+                }
+                alerts.append(alert)
+    
+            # end of if diaObject
 
             alertDB = {
                 'diaObject': diaObject,
