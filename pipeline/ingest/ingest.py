@@ -318,12 +318,12 @@ class Ingester:
                 # copy the observation_reason and target_name into the diaObject
                 # limit to 16 characters
                 if 'observation_reason' in lsst_alert:
-                    diaObject['observation_reason'] = lsst_alert.['observation_reason'][:16]
+                    diaObject['observation_reason'] = lsst_alert['observation_reason'][:16]
                 else:
                     diaObject['observation_reason'] = ''
     
                 if 'target_name' in lsst_alert:
-                    diaObject['target_name'] = lsst_alert.['target_name'][:16]
+                    diaObject['target_name'] = lsst_alert['target_name'][:16]
                 else:
                     diaObject['target_name'] = ''
     
