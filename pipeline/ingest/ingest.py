@@ -132,7 +132,7 @@ class Ingester:
         # list of future objects for in-flight cassandra requests
         self.futures = []
 
-    def setup(self):
+    def setup_cassandra(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
 
@@ -152,7 +152,9 @@ class Ingester:
                 self.cassandra_session = None
                 raise e
 
+    def setup_producer(self):
         # set up kafka producer
+        log = self.log
         if self.producer is None:
             producer_conf = {
                 'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
@@ -162,7 +164,9 @@ class Ingester:
             self.producer = Producer(producer_conf)
             log.info('Producing to   %s' % settings.KAFKA_SERVER)
         
+    def setup_consumer(self):
         # set up kafka consumer
+        log = self.log
         if self.consumer is None:
             log.info('Consuming from %s' % settings.KAFKA_SERVER)
             log.info('Topic_in       %s' % self.topic_in)
@@ -183,7 +187,7 @@ class Ingester:
             }
     
             try:
-                self.consumer = DeserializingConsumer(consumer_conf)
+                self.consumer = DeserializingConsumer(consumer_conf)   # hack
                 self.consumer.subscribe([self.topic_in])
             except Exception as e:
                 log.error('ERROR in ingest/setup: Cannot connect to Kafka', e)
@@ -272,27 +276,23 @@ class Ingester:
 #            sys.exit()
 
             diaObject = lsst_alert.get('diaObject', None)
-            if not diaObject:
-                continue  # every alert must have a diaObject
 
             diaSourcesList = [lsst_alert['diaSource']]
-            if lsst_alert['prvDiaSources']:
+            if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
             else:
                 diaSourcesList = []
 
-            if lsst_alert['prvDiaForcedSources']:
+            if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
                 diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
             else:
                 diaForcedSourcesList = []
 
-            if lsst_alert['prvDiaNondetectionLimits']:
+            if 'prvDiaNondetectionLimits' in lsst_alert and lsst_alert['prvDiaNondetectionLimits']:
                 diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
             else:
                 diaNondetectionLimitsList = []
 
-            # Always a diaObject and at least one diaSource. 
-            # May be a ssObject in addition
             ssObject = lsst_alert.get('ssObject', None)
             if ssObject:
                 nSSObject += 1
@@ -304,33 +304,24 @@ class Ingester:
                 nDiaObject += 1
                 nDiaSources += len(diaSourcesList)
                 nForcedSources += len(diaForcedSourcesList)
-    
+
                 # change dec to decl so MySQL doesnt get confused
-                diaObject['decl'] = diaObject['dec']
-                del diaObject['dec']
+                if 'dec' in diaObject:
+                    diaObject['decl'] = diaObject['dec']
+                    del diaObject['dec']
                 for diaSource in diaSourcesList:
-                    diaSource['decl'] = diaSource['dec']
-                    del diaSource['dec']
+                    if 'dec' in diaSource:
+                        diaSource['decl'] = diaSource['dec']
+                        del diaSource['dec']
                 for diaForcedSource in diaForcedSourcesList:
-                    diaForcedSource['decl'] = diaForcedSource['dec']
-                    del diaForcedSource['dec']
-    
-                # copy the observation_reason and target_name into the diaObject
-                # limit to 16 characters
-                if 'observation_reason' in lsst_alert:
-                    diaObject['observation_reason'] = lsst_alert['observation_reason'][:16]
-                else:
-                    diaObject['observation_reason'] = ''
-    
-                if 'target_name' in lsst_alert:
-                    diaObject['target_name'] = lsst_alert['target_name'][:16]
-                else:
-                    diaObject['target_name'] = ''
-    
+                    if 'dec' in diaForcedSource:
+                        diaForcedSource['decl'] = diaForcedSource['dec']
+                        del diaForcedSource['dec']
+
                 # sort the diaSources and diaForcedSources, newest first
                 diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
                 diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
-    
+
                 # deal with images
                 if not self.nocutouts and self.image_store.image_store:
                     try:
@@ -350,7 +341,7 @@ class Ingester:
                     except IndexError:
                         # This will happen if the list of sources is empty
                         log.debug("No latest detection so not storing cutouts")
-    
+
                 # build the subset of the diaSources and diaForcedSources that do into Cassandra
                 # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
                 nds = settings.N_DIASOURCES_DB
@@ -381,7 +372,7 @@ class Ingester:
                     'ssObject': ssObject,
                 }
                 alerts.append(alert)
-    
+
             # end of if diaObject
 
             alertDB = {
@@ -491,7 +482,9 @@ class Ingester:
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
-        self.setup()
+        self.setup_cassandra()
+        self.setup_consumer()
+        self.setup_producer()
     
         nAlert = 0        # number not yet send to manage_status
         nTotalAlert = 0   # number since this program started
