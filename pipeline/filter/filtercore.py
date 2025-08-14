@@ -452,7 +452,7 @@ class Filter:
         cursor = msl_main.cursor(buffered=True, dictionary=True)
 
         # objects modified since last midnight
-        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMJD > %.1f' % midnight
+        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMjdTai > %.1f' % midnight
         try:
             cursor.execute(query)
             for row in cursor:
@@ -463,7 +463,7 @@ class Filter:
             count = -1
 
         # total number of objects
-        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMJD) AS since FROM objects'
+        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMjdTai) AS since FROM objects'
 
         try:
             cursor.execute(query)
