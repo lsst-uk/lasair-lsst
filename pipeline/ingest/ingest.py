@@ -353,15 +353,21 @@ class Ingester:
                     diaSourcesListDB = diaSourcesList[:nds]
                     fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
     
-                    for i in range(len(diaForcedSourcesList)):
-                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
+                    if len(diaForcedSourcesList) > 0:
+                        for i in range(len(diaForcedSourcesList)):
+                            if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                                break
+                        diaForcedSourcesListDB = diaForcedSourcesList[:i]
+                    else:
+                        diaForcedSourcesListDB = []
     
-                    for i in range(len(diaNondetectionLimitsList)):
-                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                    if len(diaNondetectionLimitsList) > 0:
+                        for i in range(len(diaNondetectionLimitsList)):
+                            if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                                break
+                        diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                    else:
+                        diaNondetectionLimitsListDB = []
         
                 # build the outgoing alerts
                 alert = {

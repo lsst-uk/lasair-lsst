@@ -1,6 +1,13 @@
+import os, sys
 import json
 import logging
 import ingest
+
+if len(sys.argv) > 1:
+    dir          = sys.argv[1]
+else:
+    print("Usage: make_sample_alert.py <directory>")
+    sys.exit()
 
 topic_in = ''
 topic_out = 'ztf_ingest'
@@ -16,9 +23,17 @@ print('setup')
 ingester.setup_cassandra()
 ingester.setup_producer()
 
-filename = '/home/ubuntu/ZTF25aaaachu.lsst'
-lsst_alert = json.loads(open(filename).read())
+alerts = []
+for file in os.listdir(dir):
+    alerts.append(json.loads(open(dir +'/'+ file).read()))
 
-print('handle_alert')
+print('ingesting %s files' % len(alerts))
+
 (iDiaObject, iSSObject, iDiaSource, iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) \
-    = ingester._handle_alerts([lsst_alert])
+    = ingester._handle_alerts(alerts)
+
+print('iDiaObject = %d' % iDiaObject)
+print('iDiaSource = %d' % iDiaSource)
+print('iDiaSourceDB = %d' % iDiaSourceDB)
+print('iDiaForcedSource = %d' % iDiaForcedSource)
+print('iDiaForcedSourceDB = %d' % iDiaForcedSourceDB)

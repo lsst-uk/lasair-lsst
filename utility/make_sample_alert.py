@@ -2,7 +2,7 @@
 make_sample_alert.py
 use file info or just zeros to make a sample alert
 """
-import sys
+import os, sys
 sys.path.append('../common/schema')
 import prims
 import json
@@ -18,20 +18,17 @@ def makeDefault(name):
 
 if __name__ == '__main__':
     attrs = ['midpointMjdTai', 'ra', 'dec', 'band', 'psfFlux', 'psfFluxErr']
-    infile = None
-    if len(sys.argv) > 1:
+        # infile should have objectId and list of candidates, each with
+        # radecMjdTai, ra dec, band, psfFlux, psfFluxErr
+    if len(sys.argv) > 3:
         schema_version = sys.argv[1]
+        indir          = sys.argv[2]
+        outdir         = sys.argv[3]
     else:
-        print("Usage: make_sample_alert.py schema_version outfile [infile]")
+        print("Usage: make_sample_alert.py schema_version indir outdir")
         print("schema_verrsion can be for example 7_4_A")
         print("sample alert goes to outfile, can use infile if provided")
         sys.exit()
-    if len(sys.argv) > 2:
-        outfile           = sys.argv[2]
-    if len(sys.argv) > 3:
-        infile           = sys.argv[3]
-        # infile should have objectId and list of candidates, each with
-        # radecMjdTai, ra dec, band, psfFlux, psfFluxErr
 
     component = 'diaSources'
     schema_package = importlib.import_module('%s.%s' % (schema_version, component))
@@ -43,27 +40,27 @@ if __name__ == '__main__':
     schema = schema_package.schema
     dobj = makeDefault(component)
 
-    if infile:
-        inalert = json.loads(open(infile).read())
+    for file in os.listdir(indir):
+        inalert = json.loads(open(indir +'/'+ file).read())
         numerical_objectId = abs(hash(inalert['objectId']))
         print('converting %s --> %d' % (inalert['objectId'], numerical_objectId))
         cands = inalert['candidates']
 
-    dslist = []
-    for cand in cands:
-        ds['diaObjectId'] = numerical_objectId
-        for attr in attrs:
-            ds[attr] = cand[attr]
-        dslist.append(ds)
-    alert = {
-        'diaObjectId': numerical_objectId,
-        'observation_reason': inalert['observation_reason'],
-        'target_name': inalert['target_name'],
-        'diaObject': dobj,
-        'diaSource': dslist[-1],
-        'prvdiaSources': dslist[:-1],
-    }
-    f = open(outfile, 'w')
-    f.write(json.dumps(alert, indent=2))
-    f.close()
-    print('Wrote ', outfile)
+        dslist = []
+        for cand in cands:
+            ds['diaObjectId'] = numerical_objectId
+            for attr in attrs:
+                ds[attr] = cand[attr]
+            dslist.append(ds)
+        alert = {
+            'diaObjectId': numerical_objectId,
+            'observation_reason': inalert['observation_reason'],
+            'target_name': inalert['target_name'],
+            'diaObject': dobj,
+            'diaSource': dslist[-1],
+            'prvDiaSources': dslist[:-1],
+        }
+        f = open(outdir +'/'+ file, 'w')
+        f.write(json.dumps(alert, indent=2))
+        f.close()
+        print('Wrote ', file)
