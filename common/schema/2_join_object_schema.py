@@ -54,7 +54,7 @@ object_schema = {
     "indexes": [
         "PRIMARY KEY (diaObjectId)",
         "KEY htmid16idx (htm16)",
-        "KEY idxMaxTai (lastDiaSourceMJD)"
+        "KEY idxMaxTai (lastDiaSourceMjdTai)"
       ]
     }
 

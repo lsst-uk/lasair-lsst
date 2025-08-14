@@ -275,7 +275,9 @@ class Ingester:
 #            print_msg(lsst_alert)
 #            sys.exit()
 
-            diaObject = lsst_alert.get('diaObject', None)
+            diaObject          = lsst_alert.get('diaObject', None)
+            observation_reason = lsst_alert.get('observation_reason', '')
+            target_name        = lsst_alert.get('target_name', '')
 
             diaSourcesList = [lsst_alert['diaSource']]
             if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
@@ -304,6 +306,9 @@ class Ingester:
                 nDiaObject += 1
                 nDiaSources += len(diaSourcesList)
                 nForcedSources += len(diaForcedSourcesList)
+
+                diaObject['observation_reason'] = observation_reason
+                diaObject['target_name'] = target_name
 
                 # change dec to decl so MySQL doesnt get confused
                 if 'dec' in diaObject:
