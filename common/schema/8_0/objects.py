@@ -37,18 +37,6 @@ schema = {
       "doc": "Mean Dec of this object"
     },
     {
-      "name": "pmRa",
-      "type": "float",
-      "origin": "lsst",
-      "doc": "Proper motion in right ascension (mas/yr)"
-    },
-    {
-      "name": "pmDec",
-      "type": "float",
-      "origin": "lsst",
-      "doc": "Proper motion in declination (mas/yr)"
-    },
-    {
       "section": "Lightcurve interval",
       "doc": "MJD of the first and last diaSource of this diaObject"
     },
@@ -268,24 +256,6 @@ schema = {
       "type": "string",
       "origin": "external",
       "doc": "TNS name of this object if it exists"
-    },
-    {
-      "name": "nearbyObj1",
-      "type": "long",
-      "origin": "lsst",
-      "doc": "Id of the closest nearby object."
-    },
-    {
-      "name": "nearbyObj1Dist",
-      "type": "float",
-      "origin": "lsst",
-      "doc": "Distance to nearbyObj1 (arcsec)"
-    },
-    {
-      "name": "nearbyObj1LnP",
-      "type": "float",
-      "origin": "lsst",
-      "doc": "Natural log of the probability that the observed diaObject is the same as the nearbyObj1."
     },
     {
       "section": "Absolute magnitude",

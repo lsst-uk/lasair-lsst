@@ -54,8 +54,8 @@ if __name__ == '__main__':
             dslist.append(ds)
         alert = {
             'diaObjectId': numerical_objectId,
-            'observation_reason': inalert['observation_reason'],
-            'target_name': inalert['target_name'],
+            'observation_reason': inalert['observation_reason'][:16],
+            'target_name': inalert['target_name'][:16],
             'diaObject': dobj,
             'diaSource': dslist[-1],
             'prvDiaSources': dslist[:-1],
