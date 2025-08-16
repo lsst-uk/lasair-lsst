@@ -1,6 +1,22 @@
 """
 make_sample_alert.py
-use file info or just zeros to make a sample alert
+Use "simple alerts" combined with selected schema to make LSST alerts,
+with most of the attributes set to zero or some other default.
+Example input:
+{
+    "objectId": "Active_galactic_nucleus_AGN_54063785",
+    "observation_reason": "plasticc",
+    "target_name": "Active_galactic_nucleus_AGN",
+    "candidates": [
+        {
+            "midpointMjdTai": 59584.073,
+            "psfFlux": 777.190674,
+            "psfFluxErr": 41.012691,
+            "band": "u",
+            "ra": 301.48454525887274,
+            "dec": 9.5206549640737
+        },
+etc etc
 """
 import os, sys
 sys.path.append('../common/schema')

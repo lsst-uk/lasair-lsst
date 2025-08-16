@@ -307,9 +307,6 @@ class Ingester:
                 nDiaSources += len(diaSourcesList)
                 nForcedSources += len(diaForcedSourcesList)
 
-                diaObject['observation_reason'] = observation_reason
-                diaObject['target_name'] = target_name
-
                 # change dec to decl so MySQL doesnt get confused
                 if 'dec' in diaObject:
                     diaObject['decl'] = diaObject['dec']
@@ -375,8 +372,12 @@ class Ingester:
                         diaNondetectionLimitsListDB = []
         
                 # build the outgoing alerts
+                diaObject_with_observation_target = diaObject.copy()
+                diaObject_with_observation_target['observation_reason'] = observation_reason
+                diaObject_with_observation_target['target_name'] = target_name
+
                 alert = {
-                    'diaObject': diaObject,
+                    'diaObject': diaObject_with_observation_target,
                     'diaSourcesList': diaSourcesList,
                     'diaForcedSourcesList': diaForcedSourcesList,
                     'diaNondetectionLimitsList': diaNondetectionLimitsList,
@@ -444,7 +445,8 @@ class Ingester:
 
         self.timers['ikconsume'].on()
         # commit the alerts we have read
-        self.consumer.commit()
+        if self.consumer:
+            self.consumer.commit()
         self.timers['ikconsume'].off()
 
         # update the status page
