@@ -1,3 +1,11 @@
+"""
+Ingestion from files -- no cutouts
+Usage:
+    python3 make_sample_alert.py <directory>
+where directory holds JSON alerts compliant to the latest schema
+defined in SCHEMA_VERSION in lasair-lsst/common/settings.py
+"""
+
 import os, sys
 import json
 import logging
