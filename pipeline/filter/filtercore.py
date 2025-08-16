@@ -129,8 +129,12 @@ class Filter:
             'area_hits',
             'mma_area_hits',
         ]
-        for table_name in table_list:
-            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
+        try:
+            main_database = db_connect.remote(allow_infile=True)
+            for table_name in table_list:
+                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
+        except Exception as e:
+            self.log.error('ERROR connecting to main database: %s' % str(e))
 
         # set up the extinction factory
         if not self.sfd:
