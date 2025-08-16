@@ -333,7 +333,7 @@ class Filter:
                 break
 
             # Here we get the next alert by kafka
-            msg = self.consumer.poll(timeout=5)
+            msg = self.consumer.poll(timeout=20)
             if msg is None:
                 print('message is null')
                 break
@@ -469,7 +469,10 @@ class Filter:
             cursor.execute(query)
             for row in cursor:
                 total_count = row['total_count']
-                since = 24 * float(row.get('since', 1000000.0))
+                try:
+                    since = 24*float(row['since'])
+                except:
+                    since = 1000000000.0
                 break
         except Exception as e:
             log.warning("batch_statistics total: %s %s" % (str(e), query))
