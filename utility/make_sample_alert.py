@@ -63,12 +63,18 @@ if __name__ == '__main__':
         cands = inalert['candidates']
 
         dslist = []
+        ralist = []
+        declist = []
         for cand in cands:
+            ralist.append(cand['ra'])
+            declist.append(cand['dec'])
             for attr in attrs:
                 ds[attr] = cand[attr]
             ds['diaObjectId'] = numerical_objectId
             dslist.append(ds)
         dobj['diaObjectId'] = numerical_objectId
+        dobj['ra'] = sum(ralist)/len(ralist)
+        dobj['dec'] = sum(declist)/len(declist)
         alert = {
             'diaObjectId': numerical_objectId,
             'observation_reason': inalert['observation_reason'][:16],
