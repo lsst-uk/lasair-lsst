@@ -64,10 +64,11 @@ if __name__ == '__main__':
 
         dslist = []
         for cand in cands:
-            ds['diaObjectId'] = numerical_objectId
             for attr in attrs:
                 ds[attr] = cand[attr]
+            ds['diaObjectId'] = numerical_objectId
             dslist.append(ds)
+        dobj['diaObjectId'] = numerical_objectId
         alert = {
             'diaObjectId': numerical_objectId,
             'observation_reason': inalert['observation_reason'][:16],
