@@ -18,7 +18,7 @@ Example input:
         },
 etc etc
 """
-import os, sys
+import os, sys, random
 sys.path.append('../common/schema')
 import prims
 import json
@@ -71,6 +71,7 @@ if __name__ == '__main__':
             for attr in attrs:
                 ds[attr] = cand[attr]
             ds['diaObjectId'] = numerical_objectId
+            ds['diaSourceId'] = random.randint(1, 100000000000)
             dslist.append(ds)
         dobj['diaObjectId'] = numerical_objectId
         dobj['ra'] = sum(ralist)/len(ralist)
