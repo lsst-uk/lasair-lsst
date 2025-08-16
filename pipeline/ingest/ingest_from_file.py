@@ -29,11 +29,14 @@ for file in os.listdir(dir):
 
 print('ingesting %s files' % len(alerts))
 
-(iDiaObject, iSSObject, iDiaSource, iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) \
+(nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB) \
     = ingester._handle_alerts(alerts)
 
-print('iDiaObject = %d' % iDiaObject)
-print('iDiaSource = %d' % iDiaSource)
-print('iDiaSourceDB = %d' % iDiaSourceDB)
-print('iDiaForcedSource = %d' % iDiaForcedSource)
-print('iDiaForcedSourceDB = %d' % iDiaForcedSourceDB)
+print('nDiaObject = %d' % nDiaObject)
+print('nDiaSource = %d' % nDiaSource)
+print('nDiaSourceDB = %d' % nDiaSourceDB)
+print('nDiaForcedSource = %d' % nDiaForcedSource)
+print('nDiaForcedSourceDB = %d' % nDiaForcedSourceDB)
+
+ingester._end_batch(nDiaObject, nDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+
