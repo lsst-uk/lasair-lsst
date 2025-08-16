@@ -85,7 +85,7 @@ def annotator_detail(request, topic):
     # GRAB ALL ANNOTATOR MATCHES
     query_hit = f"""
 SELECT 
-o.diaObjectId, FORMAT(mjdnow()-o.lastDiaSourceMJD,1) as "days since",
+o.diaObjectId, FORMAT(mjdnow()-o.lastDiaSourceMjdTai,1) as "days since",
 a.classification, CAST(a.classdict as varchar(10000)) as classdict
 FROM annotations AS a, objects AS o 
 WHERE a.topic='{topic}' 

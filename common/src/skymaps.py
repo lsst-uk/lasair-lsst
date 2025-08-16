@@ -104,7 +104,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     query += ' FROM objects,sherlock_classifications '
     query += ' WHERE objects.diaObjectId=sherlock_classifications.diaObjectId '
     if mjdmin and mjdmax:
-        query += ' AND lastDiaSourceMJD BETWEEN %f AND %f' % (mjdmin, mjdmax)
+        query += ' AND lastDiaSourceMjdTai BETWEEN %f AND %f' % (mjdmin, mjdmax)
     cursor.execute(query)
 
     objlist = []
