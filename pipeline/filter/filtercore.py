@@ -268,7 +268,7 @@ class Filter:
         query_list = []
         query = 'REPLACE INTO objects SET '
         for key, value in lasair_features.items():
-            if not value:
+            if value is None:
                 query_list.append(key + '=NULL')
             elif isinstance(value, numbers.Number) and math.isnan(value):
                 query_list.append(key + '=NULL')
