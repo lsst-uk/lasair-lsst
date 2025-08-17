@@ -66,7 +66,7 @@ def object_detail(request, diaObjectId):
     if mergedDF is not None:
         lcData = mergedDF.to_dict('records')
     else:
-        lcData = data["candidates"]
+        lcData = data["diaSources"]
 
     return render(request, 'object/object_detail.html', {
         'data': data,

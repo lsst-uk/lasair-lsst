@@ -615,8 +615,8 @@ def convert_objectdata_to_dataframes(
             how='left', on=['midpointMjdTai', 'band'])
     else:
         mergedDF = unforcedDF
-        mergedDF['nanojansky'] = np.nan
-        mergedDF['nanojanskyerr'] = np.nan
+#        mergedDF['nanojansky'] = np.nan    # RDW aug 2025 
+#        mergedDF['nanojanskyerr'] = np.nan   # no idea why these are set to nan just befor trying to plot
     mergedDF = mergedDF.replace({np.nan: None})
     mergedDF.sort_values(['mjd'], ascending=[False], inplace=True)
 
