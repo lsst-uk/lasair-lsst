@@ -33,9 +33,6 @@ def makeDefault(name):
     return obj
 
 if __name__ == '__main__':
-    attrs = ['midpointMjdTai', 'ra', 'dec', 'band', 'psfFlux', 'psfFluxErr']
-        # infile should have objectId and list of candidates, each with
-        # radecMjdTai, ra dec, band, psfFlux, psfFluxErr
     if len(sys.argv) > 3:
         schema_version = sys.argv[1]
         indir          = sys.argv[2]
@@ -49,13 +46,14 @@ if __name__ == '__main__':
     component = 'diaSources'
     schema_package = importlib.import_module('%s.%s' % (schema_version, component))
     schema = schema_package.schema
-    ds = makeDefault(component)
+    ds_default = makeDefault(component)
 
     component = 'diaObjects'
     schema_package = importlib.import_module('%s.%s' % (schema_version, component))
     schema = schema_package.schema
     dobj = makeDefault(component)
 
+    attrs = ['midpointMjdTai', 'ra', 'dec', 'band', 'psfFlux', 'psfFluxErr']
     for file in os.listdir(indir):
         inalert = json.loads(open(indir +'/'+ file).read())
         numerical_objectId = abs(hash(inalert['objectId']))
@@ -66,6 +64,7 @@ if __name__ == '__main__':
         ralist = []
         declist = []
         for cand in cands:
+            ds = ds_default.copy()
             ralist.append(cand['ra'])
             declist.append(cand['dec'])
             for attr in attrs:
@@ -84,6 +83,7 @@ if __name__ == '__main__':
             'diaSource': dslist[-1],
             'prvDiaSources': dslist[:-1],
         }
+    
         f = open(outdir +'/'+ file, 'w')
         f.write(json.dumps(alert, indent=2))
         f.close()
