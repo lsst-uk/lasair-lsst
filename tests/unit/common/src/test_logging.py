@@ -2,6 +2,7 @@
 
 import context
 import lasairLogging
+from slack_webhook import SlackError
 import os
 import sys
 import glob
@@ -156,6 +157,25 @@ class CommonLoggingTest(unittest.TestCase):
         with open("test_multi_logger.log", "r") as f:
             self.assertRegex(f.readlines()[-1].strip(),
                              "^\\[.*\\] INFO: test_multi_logger: Test message 10")
+
+    def test_slack_failure(self):
+        """Start a logger configured to send >=ERROR to Slack (mock).
+        Send an ERROR message. The (mock) Slack webhook should be called."""
+        with unittest.mock.MagicMock() as mock_slack_webhook:
+            mock_slack_webhook.send.side_effect = SlackError('Failure')
+            lasairLogging.basicConfig(
+                filename="test_slack_error.log",
+                webhook=mock_slack_webhook,
+                force=True
+            )
+            log = lasairLogging.getLogger("test_logger")
+            slack_handler = log.parent.handlers[-1]
+            slack_handler.prometheus_file = "test_prometheus_file.txt"
+            log.error("Test message 11")
+            with open("test_prometheus_file.txt", "r") as f:
+                self.assertRegex(f.readlines()[-1].strip(),
+                                 "test_slack_failure: Test message 11")
+            mock_slack_webhook.send.assert_called_once()
 
 
 if __name__ == '__main__':
