@@ -77,8 +77,8 @@ if __name__ == '__main__':
         dobj['dec'] = sum(declist)/len(declist)
         alert = {
             'diaObjectId': numerical_objectId,
-            'observation_reason': inalert['observation_reason'][:16],
-            'target_name': inalert['target_name'][:16],
+#            'observation_reason': inalert['observation_reason'][:16],
+#            'target_name': inalert['target_name'][:16],
             'diaObject': dobj,
             'diaSource': dslist[-1],
             'prvDiaSources': dslist[:-1],

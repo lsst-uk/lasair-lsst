@@ -13,18 +13,6 @@ schema = {
       "extra": "NOT NULL"
     },
     {
-      "name": "observation_reason",
-      "type": "string",
-      "origin": "lsst",
-      "doc": "Latest observation reason for this object"
-    },
-    {
-      "name": "target_name",
-      "type": "string",
-      "origin": "lsst",
-      "doc": "Latest target name for this object"
-    },
-    {
       "name": "ra",
       "type": "double",
       "origin": "lsst",
@@ -443,14 +431,9 @@ schema = {
       "doc": "Standard deviation of the distribution of u_psfFlux [nJy]."
     },
     {
-      "name": "u_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of u_psfFlux around u_psfFluxMean."
-    },
-    {
       "name": "u_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute u_psfFluxChi2."
+      "doc": "The number of u-band data points."
     },
     {
       "name": "u_fpFluxMean",
@@ -468,14 +451,9 @@ schema = {
       "doc": "Standard deviation of the distribution of g_psfFlux [nJy]."
     },
     {
-      "name": "g_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of g_psfFlux around g_psfFluxMean."
-    },
-    {
       "name": "g_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute g_psfFluxChi2."
+      "doc": "The number of g-band data points."
     },
     {
       "name": "g_fpFluxMean",
@@ -493,14 +471,9 @@ schema = {
       "doc": "Standard deviation of the distribution of r_psfFlux [nJy]."
     },
     {
-      "name": "r_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of r_psfFlux around r_psfFluxMean."
-    },
-    {
       "name": "r_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute r_psfFluxChi2."
+      "doc": "The number of r-band data points."
     },
     {
       "name": "r_fpFluxMean",
@@ -518,14 +491,9 @@ schema = {
       "doc": "Standard deviation of the distribution of i_psfFlux [nJy]."
     },
     {
-      "name": "i_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of i_psfFlux around i_psfFluxMean."
-    },
-    {
       "name": "i_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute i_psfFluxChi2."
+      "doc": "The number of i-band data points."
     },
     {
       "name": "i_fpFluxMean",
@@ -543,14 +511,9 @@ schema = {
       "doc": "Standard deviation of the distribution of z_psfFlux [nJy]."
     },
     {
-      "name": "z_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of z_psfFlux around z_psfFluxMean."
-    },
-    {
       "name": "z_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute z_psfFluxChi2."
+      "doc": "The number of z-band data points."
     },
     {
       "name": "z_fpFluxMean",
@@ -568,14 +531,9 @@ schema = {
       "doc": "Standard deviation of the distribution of y_psfFlux [nJy]."
     },
     {
-      "name": "y_psfFluxChi2",
-      "type": "float",
-      "doc": "Chi^2 statistic for the scatter of y_psfFlux around y_psfFluxMean."
-    },
-    {
       "name": "y_psfFluxNdata",
       "type": "int",
-      "doc": "The number of data points used to compute y_psfFluxChi2."
+      "doc": "The number of y-band data points."
     },
     {
       "name": "y_fpFluxMean",
@@ -598,11 +556,6 @@ schema = {
       "doc": "Standard error of u_scienceFluxMean [nJy]."
     },
     {
-      "name": "u_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of u_scienceFlux [nJy]."
-    },
-    {
       "name": "g_scienceFluxMean",
       "type": "float",
       "doc": "Weighted mean forced photometry flux for g filter [nJy]."
@@ -611,11 +564,6 @@ schema = {
       "name": "g_scienceFluxMeanErr",
       "type": "float",
       "doc": "Standard error of g_scienceFluxMean [nJy]."
-    },
-    {
-      "name": "g_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of g_scienceFlux [nJy]."
     },
     {
       "name": "r_scienceFluxMean",
@@ -628,11 +576,6 @@ schema = {
       "doc": "Standard error of r_scienceFluxMean [nJy]."
     },
     {
-      "name": "r_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of r_scienceFlux [nJy]."
-    },
-    {
       "name": "i_scienceFluxMean",
       "type": "float",
       "doc": "Weighted mean forced photometry flux for i filter [nJy]."
@@ -641,11 +584,6 @@ schema = {
       "name": "i_scienceFluxMeanErr",
       "type": "float",
       "doc": "Standard error of i_scienceFluxMean [nJy]."
-    },
-    {
-      "name": "i_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of i_scienceFlux [nJy]."
     },
     {
       "name": "z_scienceFluxMean",
@@ -658,11 +596,6 @@ schema = {
       "doc": "Standard error of z_scienceFluxMean [nJy]."
     },
     {
-      "name": "z_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of z_scienceFlux [nJy]."
-    },
-    {
       "name": "y_scienceFluxMean",
       "type": "float",
       "doc": "Weighted mean forced photometry flux for y filter [nJy]."
@@ -671,16 +604,6 @@ schema = {
       "name": "y_scienceFluxMeanErr",
       "type": "float",
       "doc": "Standard error of y_scienceFluxMean [nJy]."
-    },
-    {
-      "name": "y_scienceFluxSigma",
-      "type": "float",
-      "doc": "Standard deviation of the distribution of y_scienceFlux [nJy]."
-    },
-    {
-      "name": "u_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the u band fluxes."
     },
     {
       "name": "u_psfFluxMin",
@@ -703,11 +626,6 @@ schema = {
       "doc": "Mean of the u band flux errors [nJy]."
     },
     {
-      "name": "g_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the g band fluxes."
-    },
-    {
       "name": "g_psfFluxMin",
       "type": "float",
       "doc": "Minimum observed g band fluxes [nJy]."
@@ -726,11 +644,6 @@ schema = {
       "name": "g_psfFluxErrMean",
       "type": "float",
       "doc": "Mean of the g band flux errors [nJy]."
-    },
-    {
-      "name": "r_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the r band fluxes."
     },
     {
       "name": "r_psfFluxMin",
@@ -753,11 +666,6 @@ schema = {
       "doc": "Mean of the r band flux errors [nJy]."
     },
     {
-      "name": "i_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the i band fluxes."
-    },
-    {
       "name": "i_psfFluxMin",
       "type": "float",
       "doc": "Minimum observed i band fluxes [nJy]."
@@ -778,11 +686,6 @@ schema = {
       "doc": "Mean of the i band flux errors [nJy]."
     },
     {
-      "name": "z_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the z band fluxes."
-    },
-    {
       "name": "z_psfFluxMin",
       "type": "float",
       "doc": "Minimum observed z band fluxes [nJy]."
@@ -801,11 +704,6 @@ schema = {
       "name": "z_psfFluxErrMean",
       "type": "float",
       "doc": "Mean of the z band flux errors [nJy]."
-    },
-    {
-      "name": "y_psfFluxSkew",
-      "type": "float",
-      "doc": "Skewness of the y band fluxes."
     },
     {
       "name": "y_psfFluxMin",

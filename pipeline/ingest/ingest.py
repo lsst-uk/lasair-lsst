@@ -276,8 +276,8 @@ class Ingester:
 #            sys.exit()
 
             diaObject          = lsst_alert.get('diaObject', None)
-            observation_reason = lsst_alert.get('observation_reason', '')
-            target_name        = lsst_alert.get('target_name', '')
+#            observation_reason = lsst_alert.get('observation_reason', '')
+#            target_name        = lsst_alert.get('target_name', '')
 
             diaSourcesList = [lsst_alert['diaSource']]
             if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
@@ -371,13 +371,8 @@ class Ingester:
                     else:
                         diaNondetectionLimitsListDB = []
         
-                # build the outgoing alerts
-                diaObject_with_observation_target = diaObject.copy()
-                diaObject_with_observation_target['observation_reason'] = observation_reason
-                diaObject_with_observation_target['target_name'] = target_name
-
                 alert = {
-                    'diaObject': diaObject_with_observation_target,
+                    'diaObject': diaObject,
                     'diaSourcesList': diaSourcesList,
                     'diaForcedSourcesList': diaForcedSourcesList,
                     'diaNondetectionLimitsList': diaNondetectionLimitsList,
