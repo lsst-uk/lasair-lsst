@@ -193,6 +193,11 @@ class Ingester:
                 log.error('ERROR in ingest/setup: Cannot connect to Kafka', e)
                 raise e
 
+    def setup(self):
+        self.setup_consumer()
+        self.setup_producer()
+        self.setup_cassandra()
+
     # end of class Ingester
     
     def _sigterm_handler(self, signum, frame):
