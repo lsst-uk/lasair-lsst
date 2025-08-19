@@ -24,6 +24,6 @@ class milkyWay(FeatureGroup):
         glat = math.degrees(math.asin(sdngp*sde + cdngp*cde*cra))
 
         return { 
-            "ebv": self.alert['ebv'],
+            "ebv": self.alert.get('ebv', 0.0),
             "glat": glat,
         }
