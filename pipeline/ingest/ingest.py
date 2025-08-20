@@ -132,7 +132,7 @@ class Ingester:
         # list of future objects for in-flight cassandra requests
         self.futures = []
 
-    def setup(self):
+    def setup_cassandra(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
 
@@ -152,7 +152,9 @@ class Ingester:
                 self.cassandra_session = None
                 raise e
 
+    def setup_producer(self):
         # set up kafka producer
+        log = self.log
         if self.producer is None:
             producer_conf = {
                 'bootstrap.servers': '%s' % settings.KAFKA_SERVER,
@@ -162,7 +164,9 @@ class Ingester:
             self.producer = Producer(producer_conf)
             log.info('Producing to   %s' % settings.KAFKA_SERVER)
         
+    def setup_consumer(self):
         # set up kafka consumer
+        log = self.log
         if self.consumer is None:
             log.info('Consuming from %s' % settings.KAFKA_SERVER)
             log.info('Topic_in       %s' % self.topic_in)
@@ -183,11 +187,16 @@ class Ingester:
             }
     
             try:
-                self.consumer = DeserializingConsumer(consumer_conf)
+                self.consumer = DeserializingConsumer(consumer_conf)   # hack
                 self.consumer.subscribe([self.topic_in])
             except Exception as e:
                 log.error('ERROR in ingest/setup: Cannot connect to Kafka', e)
                 raise e
+
+    def setup(self):
+        self.setup_consumer()
+        self.setup_producer()
+        self.setup_cassandra()
 
     # end of class Ingester
     
@@ -271,20 +280,22 @@ class Ingester:
 #            print_msg(lsst_alert)
 #            sys.exit()
 
-            diaObject = lsst_alert.get('diaObject', None)
+            diaObject          = lsst_alert.get('diaObject', None)
+#            observation_reason = lsst_alert.get('observation_reason', '')
+#            target_name        = lsst_alert.get('target_name', '')
 
             diaSourcesList = [lsst_alert['diaSource']]
-            if lsst_alert['prvDiaSources']:
+            if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
             else:
                 diaSourcesList = []
 
-            if lsst_alert['prvDiaForcedSources']:
+            if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
                 diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
             else:
                 diaForcedSourcesList = []
 
-            if lsst_alert['prvDiaNondetectionLimits']:
+            if 'prvDiaNondetectionLimits' in lsst_alert and lsst_alert['prvDiaNondetectionLimits']:
                 diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
             else:
                 diaNondetectionLimitsList = []
@@ -302,14 +313,17 @@ class Ingester:
                 nForcedSources += len(diaForcedSourcesList)
 
                 # change dec to decl so MySQL doesnt get confused
-                diaObject['decl'] = diaObject['dec']
-                del diaObject['dec']
+                if 'dec' in diaObject:
+                    diaObject['decl'] = diaObject['dec']
+                    del diaObject['dec']
                 for diaSource in diaSourcesList:
-                    diaSource['decl'] = diaSource['dec']
-                    del diaSource['dec']
+                    if 'dec' in diaSource:
+                        diaSource['decl'] = diaSource['dec']
+                        del diaSource['dec']
                 for diaForcedSource in diaForcedSourcesList:
-                    diaForcedSource['decl'] = diaForcedSource['dec']
-                    del diaForcedSource['dec']
+                    if 'dec' in diaForcedSource:
+                        diaForcedSource['decl'] = diaForcedSource['dec']
+                        del diaForcedSource['dec']
 
                 # sort the diaSources and diaForcedSources, newest first
                 diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
@@ -346,17 +360,22 @@ class Ingester:
                     diaSourcesListDB = diaSourcesList[:nds]
                     fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
     
-                    for i in range(len(diaForcedSourcesList)):
-                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
+                    if len(diaForcedSourcesList) > 0:
+                        for i in range(len(diaForcedSourcesList)):
+                            if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                                break
+                        diaForcedSourcesListDB = diaForcedSourcesList[:i]
+                    else:
+                        diaForcedSourcesListDB = []
     
-                    for i in range(len(diaNondetectionLimitsList)):
-                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                    if len(diaNondetectionLimitsList) > 0:
+                        for i in range(len(diaNondetectionLimitsList)):
+                            if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                                break
+                        diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                    else:
+                        diaNondetectionLimitsListDB = []
         
-                # build the outgoing alerts
                 alert = {
                     'diaObject': diaObject,
                     'diaSourcesList': diaSourcesList,
@@ -426,7 +445,8 @@ class Ingester:
 
         self.timers['ikconsume'].on()
         # commit the alerts we have read
-        self.consumer.commit()
+        if self.consumer:
+            self.consumer.commit()
         self.timers['ikconsume'].off()
 
         # update the status page
@@ -475,7 +495,9 @@ class Ingester:
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
-        self.setup()
+        self.setup_cassandra()
+        self.setup_consumer()
+        self.setup_producer()
     
         nAlert = 0        # number not yet send to manage_status
         nTotalAlert = 0   # number since this program started

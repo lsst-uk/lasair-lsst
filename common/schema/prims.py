@@ -28,3 +28,13 @@ def sql_type(primtype):
         print('ERROR unknown SQL type ', primtype)
         return None
 
+def default(primtype):
+    if   primtype == 'float':    return 0.0
+    elif primtype == 'double':   return 0.0
+    elif primtype == 'int':      return 0
+    elif primtype == 'long':     return 1234
+    elif primtype == 'bigint':   return 1234
+    elif primtype == 'string':   return 'hello'
+    elif primtype == 'bigstring':return 'hello'
+    elif primtype == 'text':     return 'hello'
+    else: return None

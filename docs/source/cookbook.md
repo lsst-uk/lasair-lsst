@@ -26,7 +26,7 @@ we put in the classification constraint and latest first, and order
 the results latest first.
 ```
 crossmatch_tns.type = "SN II"
-ORDER BY lastDiaSourceMJD DESC
+ORDER BY lastDiaSourceMjdTai DESC
 ```
 
 You can select on multiple TNS types with this syntax:
@@ -205,8 +205,8 @@ filter is a possible way to reduce the deluge of LSST alerts to something manage
 #### Fast riser
 We want objects with a rapid initial rise, and nothing there before. We can make SQL like this:
 ```
-    mjdnow() - objects.lastDiaSourceMJD < 7   # must be diaSource in last 7 days
-AND mjdnow() - objects.firstDiaSourceMJD < 30 # nothing before 30 days ago
+    mjdnow() - objects.lastDiaSourceMjdTai < 7   # must be diaSource in last 7 days
+AND mjdnow() - objects.firstDiaSourceMjdTai < 30 # nothing before 30 days ago
 AND objects.BBBRiseRate > 0.2                 # magnitudes per day
 ```
 The first two lines are about epochs of first and last diaSources in this diaObject:
@@ -279,8 +279,8 @@ You can choose the SELECT part of the SQL query as you like, but the WHERE
 section is where the filter is actually implemented. Here are the clauses from above
 collected together for the WHERE section:
 ```
-    mjdnow() - objects.lastDiaSourceMJD < 7
-AND mjdnow() - objects.firstDiaSourceMJD < 30
+    mjdnow() - objects.lastDiaSourceMjdTai < 7
+AND mjdnow() - objects.firstDiaSourceMjdTai < 30
 AND objects.BBBRiseRate > 0.2
 AND objects.latestPairColourTemp > 10  
 AND objects.penultimatePairColourTemp > 10

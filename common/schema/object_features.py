@@ -10,19 +10,19 @@ schema = {
 {"section":"Basic information", "doc":"ID, position, proper motion"},
 {"name": "diaObjectId",        "type": "long",   "origin": "lsst",
     "doc": "ID for this object", "extra": "NOT NULL" },
+#{"name": "observation_reason", "type": "string",   "origin": "lsst",
+#    "doc": "Latest observation reason for this object" },
+#{"name": "target_name",        "type": "string",   "origin": "lsst",
+#    "doc": "Latest target name for this object" },
 {"name": "ra",                 "type": "double", "origin": "lsst",
     "doc": "Mean RA of this object" },
 {"name": "decl",               "type": "double", "origin": "lsst",
     "doc": "Mean Dec of this object"},
-{"name": "pmRa",               "type":"float",   "origin": "lsst",
-    "doc":"Proper motion in right ascension (mas/yr)"},
-{"name": "pmDec",              "type":"float",   "origin": "lsst",
-    "doc":"Proper motion in declination (mas/yr)"},
 
 {"section":"Lightcurve interval", "doc":"MJD of the first and last diaSource of this diaObject"},
-{"name":  "lastDiaSourceMJD", "type": "double", "origin": "lasair",
+{"name":  "lastDiaSourceMjdTai", "type": "double", "origin": "lasair",
     "doc": "Latest MJD of a diaSource" },
-{"name": "firstDiaSourceMJD", "type": "double", "origin": "lasair",
+{"name": "firstDiaSourceMjdTai", "type": "double", "origin": "lsst",
     "doc": "Earliest MJD of a diaSource" },
 
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
@@ -99,12 +99,6 @@ schema = {
 {"section":"Other/Nearest objects", "doc":"Other/Nearest objects from LSST and other catalogs"},
     {"name": "tns_name",          "type":"string",   "origin": "external",
             "doc":"TNS name of this object if it exists"},
-    {"name": "nearbyObj1",        "type":"long",    "origin": "lsst",
-            "doc":"Id of the closest nearby object."},
-    {"name": "nearbyObj1Dist",    "type":"float",   "origin": "lsst",
-            "doc":"Distance to nearbyObj1 (arcsec)"},
-    {"name": "nearbyObj1LnP",     "type":"float",   "origin": "lsst",
-            "doc":"Natural log of the probability that the observed diaObject is the same as the nearbyObj1."},
 
 {"section":"Absolute magnitude", "doc":"Brightness at 1 parsec"},
 {"name": "absMag",    "type": "float", "origin": "lasair",
@@ -173,7 +167,7 @@ schema = {
 "indexes": [
     "PRIMARY KEY (diaObjectId)",
     "KEY htmid16idx (htm16)",
-    "KEY idxMaxTai (lastDiaSourceMJD)"
+    "KEY idxMaxTai (lastDiaSourceMjdTai)"
   ]
 }
 if __name__ == "__main__":

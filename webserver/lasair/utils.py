@@ -134,7 +134,7 @@ def objjson(diaObjectId, lite=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     if lite:
-        query = 'SELECT nSources, ra, decl, firstDiaSourceMJD, lastDiaSourceMJD '
+        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai '
     else:
         query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
@@ -152,8 +152,8 @@ def objjson(diaObjectId, lite=False):
 
         objectData['rasex'] = rasex(objectData['ra'])
         objectData['decsex'] = decsex(objectData['decl'])
-        objectData['mjdmin'] = objectData['firstDiaSourceMJD']
-        objectData['mjdmax'] = objectData['lastDiaSourceMJD']
+        objectData['mjdmin'] = objectData['firstDiaSourceMjdTai']
+        objectData['mjdmax'] = objectData['lastDiaSourceMjdTai']
 
         (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon

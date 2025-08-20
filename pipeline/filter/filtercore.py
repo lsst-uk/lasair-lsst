@@ -129,8 +129,12 @@ class Filter:
             'area_hits',
             'mma_area_hits',
         ]
-        for table_name in table_list:
-            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
+        try:
+            main_database = db_connect.remote(allow_infile=True)
+            for table_name in table_list:
+                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
+        except Exception as e:
+            self.log.error('ERROR connecting to main database: %s' % str(e))
 
         # set up the extinction factory
         if not self.sfd:
@@ -264,7 +268,7 @@ class Filter:
         query_list = []
         query = 'REPLACE INTO objects SET '
         for key, value in lasair_features.items():
-            if not value:
+            if value is None:
                 query_list.append(key + '=NULL')
             elif isinstance(value, numbers.Number) and math.isnan(value):
                 query_list.append(key + '=NULL')
@@ -333,7 +337,7 @@ class Filter:
                 break
 
             # Here we get the next alert by kafka
-            msg = self.consumer.poll(timeout=5)
+            msg = self.consumer.poll(timeout=20)
             if msg is None:
                 print('message is null')
                 break
@@ -452,7 +456,7 @@ class Filter:
         cursor = msl_main.cursor(buffered=True, dictionary=True)
 
         # objects modified since last midnight
-        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMJD > %.1f' % midnight
+        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMjdTai > %.1f' % midnight
         try:
             cursor.execute(query)
             for row in cursor:
@@ -463,13 +467,16 @@ class Filter:
             count = -1
 
         # total number of objects
-        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMJD) AS since FROM objects'
+        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMjdTai) AS since FROM objects'
 
         try:
             cursor.execute(query)
             for row in cursor:
                 total_count = row['total_count']
-                since = 24 * float(row.get('since', 1000000.0))
+                try:
+                    since = 24*float(row['since'])
+                except:
+                    since = 1000000000.0
                 break
         except Exception as e:
             log.warning("batch_statistics total: %s %s" % (str(e), query))

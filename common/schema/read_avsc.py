@@ -1,13 +1,14 @@
 import requests
 import json
 
-def read_from_github(schema_version, component):
+def read_from_github(schema_version, component, branch='main'):
     tok = schema_version.split('_')
     major_sv = tok[0]
     minor_sv = tok[1]
 
-    baseUrl = 'https://raw.githubusercontent.com/lsst/alert_packet/refs/heads/main/python/lsst/alert/packet/schema/%s/%s/lsst.v%s_%s.'
-    baseUrl = baseUrl % (major_sv, minor_sv, major_sv, minor_sv)
+    baseUrl = 'https://raw.githubusercontent.com/lsst/alert_packet/refs/heads/%s/python/lsst/alert/packet/schema/%s/%s/lsst.v%s_%s.'
+    baseUrl = baseUrl % (branch, major_sv, minor_sv, major_sv, minor_sv)
+    url = baseUrl + component + '.avsc'
 
     r = requests.get(baseUrl + component + '.avsc')
     rj = json.loads(r.text)
@@ -25,8 +26,9 @@ def read_from_github(schema_version, component):
         d = {'name':name}
 
         # forget the [type, null] possibility, the database defaults missing values to null
-        if type(field['type']) == list: d['type'] = field['type'][1]
-        else:                           d['type'] = field['type']
+        if type(field['type']) == list  : d['type'] = field['type'][1]
+        elif type(field['type']) == dict: d['type'] = field['type']['type']
+        else:                             d['type'] = field['type']
 
         if 'doc' in field: d['doc'] = field['doc']
 

@@ -23,7 +23,7 @@ To get started we will focus on a few properties (columns) of a Lasair object re
     * `diaObjectId`: The identifier for an object that is used to link to the full 
 object page,
     * `ra, decl`: The position of the object in the sky, in decimal degrees, to place it correctly,
-    * `lastDiaSourceMJD`: the Modified Julian Day (i.e.date and time) of the latest alert,
+    * `lastDiaSourceMjdTai`: the Modified Julian Day (i.e.date and time) of the latest alert,
     * `mjdnow()`: an SQL function that returns the MJD now, so we can 
 subtract to get the age in days,
     * `nSources`: number of alerts belonging to this object. 

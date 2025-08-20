@@ -10,6 +10,9 @@ sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 import features
 from features import *
+from modify_alert import modify
+
+sample = 'Tidal_disruption_event_TDE_114933870'
 
 class FeatureTest(TestCase):
   def test0_get_features(self):
@@ -51,8 +54,8 @@ class FeatureTest(TestCase):
 
   def test3_run_feature(self):
     """Check that the feature runs"""
-    with open("sample_alerts/99999999999.json") as f_in, open("sample_alerts/99999999999_object.json") as f_out:
-      sample_alert = json.load(f_in)
+    with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_object.json"%sample) as f_out:
+      sample_alert = modify(json.load(f_in))
       sample_output = json.load(f_out)
       output = {}
       schema = {}
@@ -86,8 +89,8 @@ class FeatureTest(TestCase):
   def test4_run_all(self):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
-    with open("sample_alerts/99999999999.json") as f:
-      alert = json.load(f)
+    with open("sample_alerts/%s.json"%sample) as f:
+      alert = modify(json.load(f))
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 

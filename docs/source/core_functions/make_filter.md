@@ -9,7 +9,7 @@ then "Create New" at top right.
 
 Fill in the form as shown here. The SELECT field should be:
 ```
-objects.diaObjectId, objects.g_psfFlux, mjdnow()-objects.lastDiaSourceMJD AS since
+objects.diaObjectId, objects.g_psfFlux, mjdnow()-objects.lastDiaSourceMjdTai AS since
 ```
 and fill in the WHERE as
 ```
@@ -23,9 +23,9 @@ Note that the word "alert" means brightness five-sigma brighter or fainter than 
 Perhaps you would like to see the objects with the most recent alerts first:
 just add to the WHERE clause the phrase
 ```
-ORDER BY objects.lastDiaSourceMJD DESC
+ORDER BY objects.lastDiaSourceMjdTai DESC
 ```
-and click "Run Filter" again. The attribute `lastDiaSourceMJD` of an object is the 
+and click "Run Filter" again. The attribute `lastDiaSourceMjdTai` of an object is the 
 Modified Julian Day of the most recent detection of that object.
 
 A good way to understand how filters are made is to browse those in the Public Gallery.

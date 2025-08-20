@@ -119,8 +119,8 @@ def mma_watchmap_detail(request, mw_id):
 SELECT
 o.diaObjectId, 
 h.probdens2, h.contour, 
-o.lastDiaSourceMJD as "last detected",
-o.firstDiaSourceMJD - m.event_tai as "t_GW",
+o.lastDiaSourceMjdTai as "last detected",
+o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
@@ -188,8 +188,8 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
 SELECT
 o.diaObjectId, 
 h.probdens3, h.contour, h.distance as dist,
-o.lastDiaSourceMJD as "last detected",
-o.firstDiaSourceMJD - m.event_tai as "t_GW",
+o.lastDiaSourceMjdTai as "last detected",
+o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
 o.r_psfFlux, o.g_psfFlux,
 o.ra, o.decl 
