@@ -37,13 +37,13 @@ class bazinExpBlackBody(FeatureGroup):
         # only run the expensive BBB fit on some
         try:
             sherlock = self.alert['annotations']['sherlock'][0]
+            if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+                return fdict
         except:
-            return fdict
-        if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
-            return fdict
+            sherlock = None
 
         BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
-                A=1000, T=4, t0=-5, kr=0.1, kf=0.01)
+                A=100, T=4, t0=6, kr=0.1, kf=0.01)
         fit =  BE.make_fit(self.alert)
         if not fit:
             BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
@@ -65,12 +65,13 @@ class bazinExpBlackBody(FeatureGroup):
 
         # abs mag if there is a redshift
         z = None
-        if 'z' in sherlock:        z = sherlock['z']
-        elif 'photoz' in sherlock: z = sherlock['photoz']
-        if z and fdict['BBBPeakFlux'] and fdict['BBBPeakFlux'] > 0:
-            distances = redshiftToDistance(z)
-            distanceModulus = distances['dmod']
-            ecMag = 31.4 - 2.5*math.log10(fdict['BBBPeakFlux'])
-            fdict['BBBPeakAbsMag'] = ecMag - distanceModulus + 2.5*math.log(1+z)
+        if sherlock:
+            if 'z' in sherlock:        z = sherlock['z']
+            elif 'photoz' in sherlock: z = sherlock['photoz']
+            if z and fdict['BBBPeakFlux'] and fdict['BBBPeakFlux'] > 0:
+                distances = redshiftToDistance(z)
+                distanceModulus = distances['dmod']
+                ecMag = 31.4 - 2.5*math.log10(fdict['BBBPeakFlux'])
+                fdict['BBBPeakAbsMag'] = ecMag - distanceModulus + 2.5*math.log(1+z)
 
         return fdict

@@ -36,9 +36,8 @@ def modify(lsst_alert):
             del diaForcedSource['dec']
 
 
-    diaObject['ebv'] = 0.0
-
     alert = {
+        'ebv': 0.0,
         'diaObject': diaObject,
         'diaSourcesList': diaSourcesList,
         'diaForcedSourcesList': diaForcedSourcesList,
