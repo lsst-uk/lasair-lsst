@@ -8,6 +8,7 @@ sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
 import features
 from features import *
 from features.FeatureGroup import FeatureGroup
+print('using schema', settings.SCHEMA_VERSION)
 
 if len(sys.argv) > 1:
     sample = sys.argv[1]
