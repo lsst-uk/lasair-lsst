@@ -76,7 +76,9 @@ if __name__ == '__main__':
         print("and table is one of objects, sherlock_classifications, etc")
         sys.exit()
 
-    schema_package = importlib.import_module('%s.%s' % (schema_version, table))
+    module = '%s.%s' % (schema_version, table)
+    print('importing ', module)
+    schema_package = importlib.import_module(module)
     schema = schema_package.schema
 
     if switch == 'sql':
