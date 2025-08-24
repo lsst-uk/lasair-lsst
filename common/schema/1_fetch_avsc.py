@@ -30,7 +30,7 @@ cql_indexes = {
     "diaObject"           :"PRIMARY KEY (\"diaObjectId\")",
     "diaSource"           :"PRIMARY KEY (\"diaObjectId\", \"midpointMjdTai\", \"diaSourceId\")",
     "ssObject"            :"PRIMARY KEY (\"ssObjectId\")",
-#    "ssSource"            :"PRIMARY KEY (\"ssSourceId\", \"diaSourceId\")", should be!
+#    "ssSource"            :"PRIMARY KEY (\"ssSourceId\", \"diaObjectId\")", should be!
     "ssSource"            :"PRIMARY KEY (\"diaSourceId\")",
     "MPCORB"              :"PRIMARY KEY (\"ssObjectId\")",
 }
