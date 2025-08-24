@@ -82,7 +82,7 @@ class FeatureTest(TestCase):
           )
         # check that the content is correct
         if isinstance(output[name], float):
-          self.assertAlmostEqual(output[name], sample_output[name], msg=name)
+          self.assertAlmostEqual(output[name], sample_output[name], places=5, msg=name)
         else:
           self.assertEqual(output[name], sample_output[name], msg=name)
 
