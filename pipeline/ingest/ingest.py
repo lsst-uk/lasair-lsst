@@ -235,11 +235,11 @@ class Ingester:
             diaSourcesList += alert['diaSourcesList']
             diaForcedSourcesList += alert['diaForcedSourcesList']
             diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
-            if alert['ssObject']:
+            if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
-            if alert['ssSource']:
+            if 'ssSource' in alert and alert['ssSource']:
                 ssSources += alert['ssSource']
-            if alert['MPCORB']:
+            if 'MPCORB' in alert and alert['MPCORB']:
                 MPCORBs += alert['MPCORB']
 
         #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
