@@ -152,8 +152,15 @@ def objjson(diaObjectId, lite=False):
 
         objectData['rasex'] = rasex(objectData['ra'])
         objectData['decsex'] = decsex(objectData['decl'])
-        objectData['mjdmin'] = objectData['firstDiaSourceMjdTai']
-        objectData['mjdmax'] = objectData['lastDiaSourceMjdTai']
+        if objectData['firstDiaSourceMjdTai']:
+            objectData['mjdmin'] = objectData['firstDiaSourceMjdTai']
+        else:
+            objectData['mjdmin'] = 60000
+
+        if objectData['lastDiaSourceMjdTai']:
+            objectData['mjdmax'] = objectData['lastDiaSourceMjdTai']
+        else:
+            objectData['mjdmax'] = 61000
 
         (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon
