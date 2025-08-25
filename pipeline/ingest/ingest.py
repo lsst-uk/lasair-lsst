@@ -227,14 +227,20 @@ class Ingester:
         diaForcedSourcesList = []
         diaNondetectionLimitsList = []
         ssObjects = []
+        ssSources = []
+        MPCORBs = []
         for alert in alerts:
             if alert['diaObject']:
                 diaObjects.append(alert['diaObject'])
             diaSourcesList += alert['diaSourcesList']
             diaForcedSourcesList += alert['diaForcedSourcesList']
             diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
-            if alert['ssObject']:
+            if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
+            if 'ssSource' in alert and alert['ssSource']:
+                ssSources += alert['ssSource']
+            if 'MPCORB' in alert and alert['MPCORB']:
+                MPCORBs += alert['MPCORB']
 
         #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
 
@@ -252,6 +258,12 @@ class Ingester:
         if len(ssObjects) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
                 self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
+        if len(ssSources) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'ssSources', ssSources):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssSources'})
+        if len(MPCORBs) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'MPCORBs', MPCORBs):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync MPCORBs'})
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
@@ -299,6 +311,9 @@ class Ingester:
                 diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
             else:
                 diaNondetectionLimitsList = []
+
+            ssSource = lsst_alert.get('ssSource', None)
+            MPCORB   = lsst_alert.get('MPCORB', None)
 
             ssObject = lsst_alert.get('ssObject', None)
             if ssObject:
@@ -382,6 +397,8 @@ class Ingester:
                     'diaForcedSourcesList': diaForcedSourcesList,
                     'diaNondetectionLimitsList': diaNondetectionLimitsList,
                     'ssObject': ssObject,
+                    'ssSource': ssSource,
+                    'MPCORB': MPCORB,
                 }
                 alerts.append(alert)
 
@@ -393,6 +410,8 @@ class Ingester:
                 'diaForcedSourcesList': diaForcedSourcesListDB,
                 'diaNondetectionLimitsList': diaNondetectionLimitsListDB,
                 'ssObject': ssObject,
+                'ssSource': ssSource,
+                'MPCORB': MPCORB,
             }
             nDiaSourcesDB += len(diaSourcesListDB)
             nForcedSourcesDB += len(diaForcedSourcesListDB)

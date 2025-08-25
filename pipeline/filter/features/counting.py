@@ -13,7 +13,6 @@ class counting(FeatureGroup):
         "niSources",
         "nzSources",
         "nySources",
-        "lastDiaSourceMjdTai"
     ]    
 
     def run(self):
@@ -24,7 +23,6 @@ class counting(FeatureGroup):
         if self.verbose:
             print('Found %d sources' % len(time))
 
-        lastDiaSourceMjdTai = max(time)
         nSources = len(time)
 
         out = { 
@@ -35,6 +33,5 @@ class counting(FeatureGroup):
             "niSources": nSource['i'],
             "nzSources": nSource['z'],
             "nySources": nSource['y'],
-            "lastDiaSourceMjdTai"    : lastDiaSourceMjdTai,
         }
         return out

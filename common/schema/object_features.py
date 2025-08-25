@@ -20,7 +20,7 @@ schema = {
     "doc": "Mean Dec of this object"},
 
 {"section":"Lightcurve interval", "doc":"MJD of the first and last diaSource of this diaObject"},
-{"name":  "lastDiaSourceMjdTai", "type": "double", "origin": "lasair",
+{"name":  "lastDiaSourceMjdTai", "type": "double", "origin": "lsst",
     "doc": "Latest MJD of a diaSource" },
 {"name": "firstDiaSourceMjdTai", "type": "double", "origin": "lsst",
     "doc": "Earliest MJD of a diaSource" },

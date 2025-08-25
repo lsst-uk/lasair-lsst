@@ -19,10 +19,10 @@
     chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
   loop:
     - "diaForcedSources"
-    - "diaNondetectionLimits"
     - "diaSources"
     - "diaObjects"
-    - "ssObjects"
+    - "ssSources"
+    - "MPCORBs"
 
 - name: Create tables
   ansible.builtin.shell:
@@ -32,10 +32,10 @@
     chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema/{{ schema }}"
   with_items:
     - "diaForcedSources"
-    - "diaNondetectionLimits"
     - "diaSources"
     - "diaObjects"
-    - "ssObjects"
+    - "ssSources"
+    - "MPCORBs"
 
 - name: flush handlers
   meta: flush_handlers
