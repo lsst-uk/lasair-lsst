@@ -93,7 +93,7 @@ def status(request, nid):
         'diaForcedSourceDB': 'Forced detections inserted into Cassandra',
         'today_filter'     : 'Alerts received by Filter stage today',
         'today_filter_out' : 'Alerts sent to MySQL today',
-        'today_database'   : 'Updated objects in database today',
+        'today_database'   : 'Objects with detections today',
         'total_count'      : "Total objects in database",
 
         'icassandra'       :'icassandra time today, seconds',
