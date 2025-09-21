@@ -270,7 +270,7 @@ class Filter:
         for key, value in lasair_features.items():
             if value is None:
                 query_list.append(key + '=NULL')
-            elif isinstance(value, numbers.Number) and math.isnan(value):
+            elif isinstance(value, numbers.Number) and (math.isnan(value) or math.isinf(value)):
                 query_list.append(key + '=NULL')
             elif isinstance(value, str):
                 query_list.append(key + '="' + str(value) + '"')
