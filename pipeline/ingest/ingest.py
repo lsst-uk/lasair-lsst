@@ -238,11 +238,11 @@ class Ingester:
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
             if 'ssSource' in alert and alert['ssSource']:
-                ssSources += alert['ssSource']
+                ssSources.append(alert['ssSource'])
             if 'MPCORB' in alert and alert['MPCORB']:
-                MPCORBs += alert['MPCORB']
+                MPCORBs.append(alert['MPCORB'])
 
-        #print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
+#        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
 
         if len(diaObjects) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
@@ -250,6 +250,7 @@ class Ingester:
         if len(diaSourcesList) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
                 self.futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
+
         if len(diaForcedSourcesList) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
                 self.futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
@@ -259,6 +260,8 @@ class Ingester:
         if len(ssObjects) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
                 self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
+
+# sept 2025, getting Invalid null value in condition for column diaSourceId
 #        if len(ssSources) > 0:
 #            for future in executeLoadAsync(self.cassandra_session, 'ssSources', ssSources):
 #                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssSources'})
@@ -291,6 +294,7 @@ class Ingester:
         alertsDB = []  # put into cassandra
         for lsst_alert in lsst_alerts:
 #            print_msg(lsst_alert)
+#            print(',
 #            sys.exit()
 
             diaObject          = lsst_alert.get('diaObject', None)
@@ -300,8 +304,6 @@ class Ingester:
             diaSourcesList = [lsst_alert['diaSource']]
             if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
-            else:
-                diaSourcesList = []
 
             if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
                 diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
@@ -325,85 +327,85 @@ class Ingester:
 
             if diaObject:
                 nDiaObject += 1
-                nDiaSources += len(diaSourcesList)
-                nForcedSources += len(diaForcedSourcesList)
-
                 # change dec to decl so MySQL doesnt get confused
                 if 'dec' in diaObject:
                     diaObject['decl'] = diaObject['dec']
                     del diaObject['dec']
-                for diaSource in diaSourcesList:
-                    if 'dec' in diaSource:
-                        diaSource['decl'] = diaSource['dec']
-                        del diaSource['dec']
-                for diaForcedSource in diaForcedSourcesList:
-                    if 'dec' in diaForcedSource:
-                        diaForcedSource['decl'] = diaForcedSource['dec']
-                        del diaForcedSource['dec']
 
-                # sort the diaSources and diaForcedSources, newest first
-                diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
-                diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+            nDiaSources += len(diaSourcesList)
+            nForcedSources += len(diaForcedSourcesList)
+            # change dec to decl so MySQL doesnt get confused
+            for diaSource in diaSourcesList:
+                if 'dec' in diaSource:
+                    diaSource['decl'] = diaSource['dec']
+                    del diaSource['dec']
+            for diaForcedSource in diaForcedSourcesList:
+                if 'dec' in diaForcedSource:
+                    diaForcedSource['decl'] = diaForcedSource['dec']
+                    del diaForcedSource['dec']
 
-                # deal with images
-                if not self.nocutouts and self.image_store.image_store:
-                    try:
-                        # get the MJD for the latest detection
-                        lastSource = diaSourcesList[0]
-                        # ID for the latest detection, this is what the cutouts belong to
-                        diaSourceId = lastSource['diaSourceId']
-                        # MJD for storing images
-                        imjd = int(lastSource['midpointMjdTai'])
-                        # objectID
+            # sort the diaSources and diaForcedSources, newest first
+            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+            diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+
+            # deal with images
+            if not self.nocutouts and self.image_store.image_store:
+                try:
+                    # get the MJD for the latest detection
+                    lastSource = diaSourcesList[0]
+                    # ID for the latest detection, this is what the cutouts belong to
+                    diaSourceId = lastSource['diaSourceId']
+                    # MJD for storing images
+                    imjd = int(lastSource['midpointMjdTai'])
+                    # objectID
+                    if diaObject and 'diaObjectId' in diaObject:
                         diaObjectId = diaObject['diaObjectId']
                         # store the fits images
                         self.timers['icutout'].on()
                         image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
                         self.timers['icutout'].off()
                         self.futures += image_futures
-                    except IndexError:
-                        # This will happen if the list of sources is empty
-                        log.debug("No latest detection so not storing cutouts")
+                except IndexError:
+                    # This will happen if the list of sources is empty
+                    log.debug("No latest detection so not storing cutouts")
 
-                # build the subset of the diaSources and diaForcedSources that do into Cassandra
-                # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
-                nds = settings.N_DIASOURCES_DB
-                if len(diaSourcesList) < nds:
-                    diaSourcesListDB            = diaSourcesList
-                    diaForcedSourcesListDB      = diaForcedSourcesList
-                    diaNondetectionLimitsListDB = diaNondetectionLimitsList
+            # build the subset of the diaSources and diaForcedSources that do into Cassandra
+            # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
+            nds = settings.N_DIASOURCES_DB
+            if len(diaSourcesList) < nds:
+                diaSourcesListDB            = diaSourcesList
+                diaForcedSourcesListDB      = diaForcedSourcesList
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList
+            else:
+                diaSourcesListDB = diaSourcesList[:nds]
+                fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
+   
+                if len(diaForcedSourcesList) > 0:
+                    for i in range(len(diaForcedSourcesList)):
+                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
                 else:
-                    diaSourcesListDB = diaSourcesList[:nds]
-                    fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
-    
-                    if len(diaForcedSourcesList) > 0:
-                        for i in range(len(diaForcedSourcesList)):
-                            if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                                break
-                        diaForcedSourcesListDB = diaForcedSourcesList[:i]
-                    else:
-                        diaForcedSourcesListDB = []
-    
-                    if len(diaNondetectionLimitsList) > 0:
-                        for i in range(len(diaNondetectionLimitsList)):
-                            if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                                break
-                        diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
-                    else:
-                        diaNondetectionLimitsListDB = []
+                    diaForcedSourcesListDB = []
+  
+                if len(diaNondetectionLimitsList) > 0:
+                    for i in range(len(diaNondetectionLimitsList)):
+                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                            break
+                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                else:
+                    diaNondetectionLimitsListDB = []
         
-                alert = {
-                    'diaObject': diaObject,
-                    'diaSourcesList': diaSourcesList,
-                    'diaForcedSourcesList': diaForcedSourcesList,
-                    'diaNondetectionLimitsList': diaNondetectionLimitsList,
-                    'ssObject': ssObject,
-                    'ssSource': ssSource,
-                    'MPCORB': MPCORB,
-                }
-                alerts.append(alert)
-
-            # end of if diaObject
+            alert = {
+                'diaObject': diaObject,
+                'diaSourcesList': diaSourcesList,
+                'diaForcedSourcesList': diaForcedSourcesList,
+                'diaNondetectionLimitsList': diaNondetectionLimitsList,
+                'ssObject': ssObject,
+                'ssSource': ssSource,
+                'MPCORB': MPCORB,
+            }
+            alerts.append(alert)
 
             alertDB = {
                 'diaObject': diaObject,
@@ -503,7 +505,6 @@ class Ingester:
                 log.error('ERROR in ingest/poll: ' +  str(msg.error()))
                 break
             lsst_alert = msg.value()
-            #print(lsst_alert['alertId'])
             alerts.append(lsst_alert)
         return alerts
 
