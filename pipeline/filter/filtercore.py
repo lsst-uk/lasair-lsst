@@ -285,6 +285,8 @@ class Filter:
         raList   = []
         declList = []
         for alert in alertList:
+            if 'diaObject' not in alert or not alert['diaObject']:
+                continue
             raList  .append(alert['diaObject']['ra'])
             declList.append(alert['diaObject']['decl'])
         c = SkyCoord(raList, declList, unit="deg", frame='icrs')
@@ -296,6 +298,8 @@ class Filter:
         return nalert
 
     def handle_alert(self, alert):
+        if 'diaObject' not in alert or not alert['diaObject']:
+            return 0
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
@@ -497,6 +501,7 @@ class Filter:
         try:
             cursor.execute(query)
             for row in cursor:
+                print(row)
                 min_delay = 24 * 60 * float(row['min_delay'])  # minutes
                 avg_delay = 24 * 60 * float(row['avg_delay'])  # minutes
                 max_delay = 24 * 60 * float(row['max_delay'])  # minutes
