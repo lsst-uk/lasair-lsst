@@ -47,7 +47,7 @@
                         <th>MJD</th>
                         <th>UTC</th>
                         <th>band</th>
-                        <th>diff flux</th>
+                        <th>target diff flux</th>
                         <th>images</th>
                         <th>alert packet</th>
                     </tr></thead>
@@ -60,6 +60,7 @@
 			    <td>{{ cand.band }}</td>
 			    <td>{{ cand.psfFlux|floatformat:0 }} &plusmn; {{ cand.psfFluxErr|floatformat:0 }}</td>
                             <td>
+				    {% if cand.image_urls.Science %} <a href='javascript:JS9Popout("/fits/{{cand.imjd}}/{{ cand.diaSourceId }}_cutoutScience");'><small>target</small></a> {% endif %}
 				    {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{cand.imjd}}/{{ cand.diaSourceId }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
 				    {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{cand.imjd}}/{{ cand.diaSourceId }}_cutoutDifference");'><small>diff</small></a> {% endif %}
                             </td>
