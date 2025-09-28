@@ -13,6 +13,7 @@ Usage:
               [--transfer=BOOL]
               [--stats=BOOL]
               [--wait_time=TIME]
+              [--verbose=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
@@ -84,6 +85,7 @@ class Filter:
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
+                 verbose: bool = False,
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
@@ -93,6 +95,7 @@ class Filter:
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.verbose = verbose
         self.sfd = None
 
         self.consumer = None
@@ -262,6 +265,9 @@ class Filter:
 
         lasair_features = FeatureGroup.run_all(alert)
         if not lasair_features:
+            if self.verbose:
+                print('Features did not run')
+                print(json.dumps(alert, indent=2))
             return None
 
         # Make the query
@@ -285,8 +291,6 @@ class Filter:
         raList   = []
         declList = []
         for alert in alertList:
-            if 'diaObject' not in alert or not alert['diaObject']:
-                continue
             raList  .append(alert['diaObject']['ra'])
             declList.append(alert['diaObject']['decl'])
         c = SkyCoord(raList, declList, unit="deg", frame='icrs')
@@ -295,22 +299,27 @@ class Filter:
         for ebv, alert in zip(ebvList, alertList):
             alert['ebv'] = ebv
             nalert += self.handle_alert(alert)
+        if self.verbose:
+            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
         return nalert
 
     def handle_alert(self, alert):
-        if 'diaObject' not in alert or not alert['diaObject']:
-            return 0
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
         # really not interested in alerts that have no detections!
         if len(alert['diaSourcesList']) == 0:
+            if self.verbose:
+                print('No diaSources')
             return 0
 
         # build the insert query for this object.
         # if not wanted, returns 0
         query = Filter.create_insert_query(alert)
         if not query:
+            if self.verbose:
+                print('Failed to make insert query')
+                print(json.dumps(alert, indent=2))
             return 0
         self.execute_query(query)
 
@@ -356,6 +365,12 @@ class Filter:
                 continue
             # Apply filter to each alert
             alert = json.loads(msg.value())
+
+            # don't know what to do with these
+            if 'diaObject' not in alert or not alert['diaObject']:
+                if self.verbose: print('No diaObject')
+                continue
+
             nalert_in += 1
             alertList.append(alert)
 
@@ -662,9 +677,11 @@ if __name__ == "__main__":
         wait_time = int(args['--wait_time'])
     else: 
         wait_time = getattr(settings, 'WAIT_TIME', 60)
+    verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, 
+                  stats=stats, verbose=verbose)
 
     n_batch = 0
     total_alerts = 0
