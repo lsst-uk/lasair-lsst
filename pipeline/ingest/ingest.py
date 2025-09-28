@@ -43,15 +43,6 @@ import objectStore, manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
-
-def print_msg(message):
-    """ prints the readable stuff, without the cutouts. Purely for debugging
-    """
-    message_text = {k: message[k] for k in message
-                    if k not in ['cutoutDifference', 'cutoutTemplate', 'cutoutScience']}
-    print(json.dumps(message_text, indent=2))
-
-
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
     common interface."""
@@ -294,9 +285,6 @@ class Ingester:
         alerts = []    # pushed to kafka, sherlock, filters etc
         alertsDB = []  # put into cassandra
         for lsst_alert in lsst_alerts:
-#            print_msg(lsst_alert)
-#            print(',
-#            sys.exit()
 
             diaObject          = lsst_alert.get('diaObject', None)
 #            observation_reason = lsst_alert.get('observation_reason', '')
@@ -400,7 +388,7 @@ class Ingester:
                     diaNondetectionLimitsListDB = []
 
             # Dont pass on the ones with no diaObejct
-            if not 'diaObject' in alert or not alert['diaObject']:
+            if not 'diaObject':
                 continue
         
             alert = {
