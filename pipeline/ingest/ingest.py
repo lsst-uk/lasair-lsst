@@ -398,6 +398,10 @@ class Ingester:
                     diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
                 else:
                     diaNondetectionLimitsListDB = []
+
+            # Dont pass on the ones with no diaObejct
+            if not 'diaObject' in alert or not alert['diaObject']:
+                continue
         
             alert = {
                 'diaObject': diaObject,
@@ -436,7 +440,6 @@ class Ingester:
 
         # produce to kafka
         self.timers['ikproduce'].on()
-        # alerts will not have any ssObjects
         for alert in alerts:
             if self.producer is not None:
                 try:
