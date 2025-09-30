@@ -103,7 +103,7 @@ tables   = 'objects,watchlists:139'
 ```
 which returns the name of the associated watchlist entry and its distance in arcseconds.
 
-It is also possible to query the JSON dictionary associated with an annotator. See the section [filtering on an annotator](core_functions/make_filter.html#filtering-on-an-annotator).
+It is also possible to query the JSON dictionary associated with an annotator. See the section [filtering on an annotator](make_filter.html#filtering-on-an-annotator).
 
 
 
