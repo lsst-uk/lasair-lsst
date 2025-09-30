@@ -201,69 +201,6 @@ class Ingester:
         """current UTC as string"""
         return datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
 
-    def _insert_cassandra(self, alert):
-        """Inset a single alert into cassandra.
-        Returns a list of future objects."""
-        return self._insert_cassandra_multi([alert])
-
-    def _insert_cassandra_multi(self, alerts):
-        """Insert a list of alerts into casssandra."""
-        log = self.log
-        if not self.cassandra_session:
-            # if this is not set, then we are not doing cassandra
-            log.debug("cassandra_session not set, skipping")
-            return None
-        diaObjects = []
-        diaSourcesList = []
-        diaForcedSourcesList = []
-        diaNondetectionLimitsList = []
-        ssObjects = []
-        ssSources = []
-        MPCORBs = []
-        for alert in alerts:
-            if alert['diaObject']:
-                diaObjects.append(alert['diaObject'])
-            diaSourcesList += alert['diaSourcesList']
-            diaForcedSourcesList += alert['diaForcedSourcesList']
-            diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
-            if 'ssObject' in alert and alert['ssObject']:
-                ssObjects += alert['ssObject']
-            if 'ssSource' in alert and alert['ssSource']:
-                ssSources.append(alert['ssSource'])
-            if 'MPCORB' in alert and alert['MPCORB']:
-                MPCORBs.append(alert['MPCORB'])
-
-#        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
-
-        if len(diaObjects) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaObjects'})
-        if len(diaSourcesList) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
-
-        if len(diaForcedSourcesList) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
-        if len(diaNondetectionLimitsList) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
-        if len(ssObjects) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
-
-# sept 2025, getting Invalid null value in condition for column diaSourceId
-#        if len(ssSources) > 0:
-#            for future in executeLoadAsync(self.cassandra_session, 'ssSources', ssSources):
-#                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssSources'})
-#        if len(MPCORBs) > 0:
-#            for future in executeLoadAsync(self.cassandra_session, 'MPCORBs', MPCORBs):
-#                self.futures.append({'future': future, 'msg': 'executeLoadAsync MPCORBs'})
-
-    def _handle_alert(self, lsst_alert):
-        """Handle a single alert"""
-        return self._handle_alerts([lsst_alert])
-
     def _handle_alerts(self, lsst_alerts):
         """Handle a list of alerts.
         Store cutout images, write information to cassandra, and produce a kafka message.
@@ -274,58 +211,70 @@ class Ingester:
         Returns: (nObject, nNoDiaObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
         """
         log = self.log
-        nDiaObject = 0
-        nNoDiaObject = 0
-        nSSObject = 0
-        nDiaSources = 0
-        nDiaSourcesDB = 0
-        nForcedSources = 0
+        nDiaObject       = 0
+        nNoDiaObject     = 0
+        nSSObject        = 0
+        nDiaSources      = 0
+        nDiaSourcesDB    = 0
+        nForcedSources   = 0
         nForcedSourcesDB = 0
 
         alerts = []    # pushed to kafka, sherlock, filters etc
         alertsDB = []  # put into cassandra
         for lsst_alert in lsst_alerts:
-
-            diaObject          = lsst_alert.get('diaObject', None)
+            diaSourcesList = [lsst_alert['diaSource']]
 #            observation_reason = lsst_alert.get('observation_reason', '')
 #            target_name        = lsst_alert.get('target_name', '')
 
-            diaSourcesList = [lsst_alert['diaSource']]
+            is_dia_alert = ('diaObject' in lsst_alert and lsst_alert['diaObject'])
+
+            if not is_dia_alert:   # solar system
+                ssSource = lsst_alert['ssSource']
+                MPCORB   = lsst_alert['MPCORB']
+                ssObject = lsst_alert.get('ssObject', None)
+                if ssObject:
+                    nSSObject += 1
+                nNoDiaObject += 1
+                alertDB = {
+                    'diaSourcesList': diaSourcesList,
+                    'ssObject'      : ssObject,
+                    'ssSource'      : ssSource,
+                    'MPCORB'        : MPCORB,
+                }
+                diaSource = diaSourcesList[0]
+                if 'dec' in diaSource:
+                    diaSource['decl'] = diaSource['dec']
+                    del diaSource['dec']
+                if ssSource['diaSourceId'] is None:
+                    ssSource['diaSourceId'] = 0
+                nDiaSources += 1
+                alertsDB.append(alertDB)
+                continue   # all done with this solar system alert
+
+            # assume dia alert now
+            diaObject = lsst_alert['diaObject']
+            nDiaObject += 1
+
             if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
                 diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
+            nDiaSources += len(diaSourcesList)
 
             if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
                 diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
             else:
                 diaForcedSourcesList = []
+            nForcedSources += len(diaForcedSourcesList)
 
             if 'prvDiaNondetectionLimits' in lsst_alert and lsst_alert['prvDiaNondetectionLimits']:
                 diaNondetectionLimitsList = lsst_alert['prvDiaNondetectionLimits']
             else:
                 diaNondetectionLimitsList = []
 
-            ssSource = lsst_alert.get('ssSource', None)
-            MPCORB   = lsst_alert.get('MPCORB', None)
-
-            ssObject = lsst_alert.get('ssObject', None)
-            if ssObject:
-                nSSObject += 1
-            diaSourcesListDB            = diaSourcesList
-            diaForcedSourcesListDB      = diaForcedSourcesList
-            diaNondetectionLimitsListDB = diaNondetectionLimitsList
-
-            if diaObject:
-                nDiaObject += 1
-                # change dec to decl so MySQL doesnt get confused
-                if 'dec' in diaObject:
-                    diaObject['decl'] = diaObject['dec']
-                    del diaObject['dec']
-            else:
-                nNoDiaObject += 1
-
-            nDiaSources += len(diaSourcesList)
-            nForcedSources += len(diaForcedSourcesList)
             # change dec to decl so MySQL doesnt get confused
+            if 'dec' in diaObject:
+                diaObject['decl'] = diaObject['dec']
+                del diaObject['dec']
+
             for diaSource in diaSourcesList:
                 if 'dec' in diaSource:
                     diaSource['decl'] = diaSource['dec']
@@ -338,6 +287,11 @@ class Ingester:
             # sort the diaSources and diaForcedSources, newest first
             diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
             diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
+
+            diaSourcesListDB            = diaSourcesList
+            diaForcedSourcesListDB      = diaForcedSourcesList
+            diaNondetectionLimitsListDB = diaNondetectionLimitsList
+
 
             # deal with images
             if not self.nocutouts and self.image_store.image_store:
@@ -387,18 +341,11 @@ class Ingester:
                 else:
                     diaNondetectionLimitsListDB = []
 
-            # Dont pass on the ones with no diaObejct
-            if not 'diaObject':
-                continue
-        
             alert = {
                 'diaObject': diaObject,
                 'diaSourcesList': diaSourcesList,
                 'diaForcedSourcesList': diaForcedSourcesList,
                 'diaNondetectionLimitsList': diaNondetectionLimitsList,
-                'ssObject': ssObject,
-                'ssSource': ssSource,
-                'MPCORB': MPCORB,
             }
             alerts.append(alert)
 
@@ -407,13 +354,13 @@ class Ingester:
                 'diaSourcesList': diaSourcesListDB,
                 'diaForcedSourcesList': diaForcedSourcesListDB,
                 'diaNondetectionLimitsList': diaNondetectionLimitsListDB,
-                'ssObject': ssObject,
-                'ssSource': ssSource,
-                'MPCORB': MPCORB,
             }
+            alertsDB.append(alertDB)
+
             nDiaSourcesDB += len(diaSourcesListDB)
             nForcedSourcesDB += len(diaForcedSourcesListDB)
-            alertsDB.append(alertDB)
+
+        # end of loop over lsst_alerts #####
 
         # Call on Cassandra
         # both diaObjects and ssObjects go in
@@ -440,6 +387,73 @@ class Ingester:
         self.timers['ikproduce'].off()
 
         return (nDiaObject, nNoDiaObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+
+    def _insert_cassandra(self, alert):
+        """Inset a single alert into cassandra.
+        Returns a list of future objects."""
+        return self._insert_cassandra_multi([alert])
+
+    def _insert_cassandra_multi(self, alerts):
+        """Insert a list of alerts into casssandra."""
+        log = self.log
+        if not self.cassandra_session:
+            # if this is not set, then we are not doing cassandra
+            log.debug("cassandra_session not set, skipping")
+            return None
+        diaObjects                = []
+        diaSourcesList            = []
+        diaForcedSourcesList      = []
+        diaNondetectionLimitsList = []
+        ssObjects                 = []
+        ssSources                 = []
+        MPCORBs                   = []
+        for alert in alerts:
+            diaSourcesList += alert['diaSourcesList']
+
+            if 'diaObject' in alert:
+                diaObjects.append(alert['diaObject'])
+                diaForcedSourcesList += alert['diaForcedSourcesList']
+                diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
+
+            if 'ssSource' in alert and alert['ssSource']:
+                ssSources.append(alert['ssSource'])
+                MPCORBs.append(alert['MPCORB'])
+            if 'ssObject' in alert and alert['ssObject']:
+                ssObjects += alert['ssObject']
+
+#        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
+
+        if len(diaObjects) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaObjects'})
+
+        if len(diaSourcesList) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'diaSources', diaSourcesList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaSources'})
+
+        if len(diaForcedSourcesList) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'diaForcedSources', diaForcedSourcesList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaForcedSources'})
+
+        if len(diaNondetectionLimitsList) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'diaNondetectionLimits', diaNondetectionLimitsList):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync diaNondetectionLimits'})
+
+        if len(ssObjects) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'ssObjects', ssObjects):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssObjects'})
+
+        if len(ssSources) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'ssSources', ssSources):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync ssSources'})
+
+        if len(MPCORBs) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'MPCORBs', MPCORBs):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync MPCORBs'})
+
+    def _handle_alert(self, lsst_alert):
+        """Handle a single alert"""
+        return self._handle_alerts([lsst_alert])
 
     def _end_batch(self, nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
@@ -469,13 +483,13 @@ class Ingester:
         nid = date_nid.nid_now()
         self.ms.add({
             'today_alert':nAlert, 
-            'diaObject': nDiaObject,
-            'noDiaObject': nNoDiaObject,
-            'ssObject': nSSObject,
-            'diaSource':nDiaSource,
-            'diaSourceDB':nDiaSourceDB,
-            'diaForcedSource':nDiaForcedSource,
-            'diaForcedSourceDB':nDiaForcedSourceDB
+            'diaObject'        : nDiaObject,
+            'noDiaObject'      : nNoDiaObject,
+            'ssObject'         : nSSObject,
+            'diaSource'        : nDiaSource,
+            'diaSourceDB'      : nDiaSourceDB,
+            'diaForcedSource'  : nDiaForcedSource,
+            'diaForcedSourceDB': nDiaForcedSourceDB
         }, nid)
         for name,td in self.timers.items():
             td.add2ms(self.ms, nid)
