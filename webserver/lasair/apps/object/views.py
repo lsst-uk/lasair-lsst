@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, HttpResponse
 from src import db_connect
-from src.objectStore import objectStore
 import settings
 import os
 import sys

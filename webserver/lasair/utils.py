@@ -8,7 +8,7 @@ import json
 import base64
 
 sys.path.append('../common')
-from src import objectStore, cutoutStore
+from src import cutoutStore
 from src import db_connect
 import settings as lasair_settings
 
