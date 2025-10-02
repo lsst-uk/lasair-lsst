@@ -47,9 +47,8 @@ class IngestTest(unittest.TestCase):
         mock_image_store.putCutoutAsync.return_value = ["future1", "future2"]
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
-        imjd = int(test_alert['diaSource']['midpointMjdTai'])
         imageStore = ingest.ImageStore(image_store=mock_image_store)
-        result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        result = imageStore.store_images(test_alert, diaSourceId, diaObjectId)
         # we should get 4 futures back (2 per call)
         self.assertEqual(4, len(result))
         # check we called putCutoutAsync twice
@@ -68,12 +67,11 @@ class IngestTest(unittest.TestCase):
         """Test that using the image store raises an exception on error"""
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
-        imjd = int(test_alert['diaSource']['midpointMjdTai'])
         mock_image_store = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_image_store.putCutoutAsync.side_effect = Exception('test error')
         imageStore = ingest.ImageStore(log=mock_log, image_store=mock_image_store)
-        self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, imjd, diaObjectId)
+        self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, diaObjectId)
         mock_log.error.assert_called_with('ERROR in ingest/store_images: test error')
 
     @patch('ingest.ImageStore')
