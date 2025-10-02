@@ -124,7 +124,7 @@ def reformat(old, lasair_added=True):
     for ds in old['diaSources']:
         del ds['json']
         del ds['mjd']
-        del ds['imjd']
+#        del ds['imjd']
         del ds['since_now']
         del ds['utc']
         iu = ds['image_urls']

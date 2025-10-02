@@ -10,15 +10,11 @@ schema = {
       "type": "bigint"
     },
     {
-      "name": "imjd",
-      "type": "int"
-    },
-    {
       "name": "cutoutimage",
       "type": "blob"
     }
   ],
-  "indexes": ['PRIMARY KEY ("cutoutId", imjd)'],
+  "indexes": ['PRIMARY KEY ("cutoutId")'],
   "with": """WITH compaction=
 {'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy', 
 'compaction_window_size': '7', 
