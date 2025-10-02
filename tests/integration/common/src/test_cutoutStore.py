@@ -27,7 +27,7 @@ create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
    "cutoutId"      ascii,
    "objectId"      bigint,
-   "cutoutimage"   blob,
+   "cutoutimage"   blob
   PRIMARY KEY "cutoutId"
  );
 """
