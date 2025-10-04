@@ -41,7 +41,7 @@
     virtualenv_site_packages: true
     virtualenv_command: 'python3 -m venv'
     name:
-      - hmpty
+      - hmpty>=1.8
     extra_args: "--no-use-pep517"
 
 - name: Make sure the repo is up to date
