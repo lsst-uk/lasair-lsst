@@ -3,15 +3,15 @@
 
 - name: "Add Grafana GPG key"
   become: true
-  apt_key:
-    id: 963FA27710458545
-    url: https://apt.grafana.com/gpg.key 
-    state: present
+  ansible.builtin.get_url:
+    url: https://apt.grafana.com/gpg.key
+    dest: /etc/apt/keyrings/grafana.asc
+    checksum: sha256:3d4029689bc7e4444ec00abafa07f21e9c812b41f1123ab5bbe6f8c3e3f7ff8c
 
 - name: "Add Grafana repo"
   become: true
   apt_repository:
-    repo: "deb https://apt.grafana.com stable main"
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.asc] https://apt.grafana.com stable main"
     state: present
 
 - name: "Install Packages"
