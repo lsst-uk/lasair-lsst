@@ -70,7 +70,7 @@ class CutoutStoreTest(unittest.TestCase):
         cs = cutoutStore.cutoutStore(mock_session)
         cs.trim = True
         cs.compress = True
-        cs.putCutoutAsync("somecutoutid", "objectid", data_in)
+        cs.putCutoutAsync("somecutoutid", "objectid", True, data_in)
         ((sql, cutout), kwargs) = mock_session.execute_async.call_args_list[0]
         self.assertEqual("somecutoutid", cutout[0])
         self.assertEqual(data_out, cutout[1])
