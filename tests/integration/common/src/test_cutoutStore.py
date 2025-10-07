@@ -27,6 +27,7 @@ create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
    "cutoutId"      ascii,
    "objectId"      bigint,
+   "isDiaObject"   boolean,
    "cutoutimage"   blob,
   PRIMARY KEY ("cutoutId")
  );
@@ -34,9 +35,10 @@ CREATE TABLE IF NOT EXISTS cutouts (
 
 create_table2 = """
 CREATE TABLE IF NOT EXISTS cutoutsbyobject(
-    "objectId" bigint,
-    "cutoutId" ascii,
-    PRIMARY KEY ("objectId", "cutoutId")
+   "objectId" bigint,
+   "isDiaObject"   boolean,
+   "cutoutId" ascii,
+   PRIMARY KEY ("objectId", "cutoutId")
  );
 """
 
@@ -70,7 +72,8 @@ class CassandraCutoutTest(TestCase):
         
         # put into cassandra
         objectId = 1234567890
-        self.osc.putCutout(cutoutId, objectId, cutoutBlob)
+        isDiaObject = True
+        self.osc.putCutout(cutoutId, objectId, isDiaObject, cutoutBlob)
 
         # look for it in there
         query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' ' % cutoutId
@@ -94,7 +97,8 @@ class CassandraCutoutTest(TestCase):
         
         # put into cassandra
         objectId = 1234567891
-        futures = self.osc.putCutoutAsync(cutoutId, objectId, cutoutBlob)
+        isDiaObject = True
+        futures = self.osc.putCutoutAsync(cutoutId, objectId, isDiaObject, cutoutBlob)
         for future in futures:
             future.result()
 

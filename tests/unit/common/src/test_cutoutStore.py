@@ -36,7 +36,7 @@ class CutoutStoreTest(unittest.TestCase):
         """Test adding a cutout."""
         mock_session = MagicMock()
         cs = cutoutStore.cutoutStore(mock_session)
-        cs.putCutout("somecutoutid", "objectid", b"blob")
+        cs.putCutout("somecutoutid", "objectid", True, b"blob")
         self.assertEqual(2, mock_session.execute.call_count)
 
     def test_putCutout_trim_and_compress(self):
@@ -47,7 +47,7 @@ class CutoutStoreTest(unittest.TestCase):
         cs = cutoutStore.cutoutStore(mock_session)
         cs.trim = True
         cs.compress = True
-        cs.putCutout("somecutoutid", "objectid", data_in)
+        cs.putCutout("somecutoutid", "objectid", True, data_in)
         ((sql, cutout), kwargs) = mock_session.execute.call_args_list[0]
         self.assertEqual("somecutoutid", cutout[0])
         self.assertEqual(data_out, cutout[1])
@@ -58,7 +58,7 @@ class CutoutStoreTest(unittest.TestCase):
         mock_future = MagicMock()
         mock_session.execute_async.return_value = mock_future
         cs = cutoutStore.cutoutStore(mock_session)
-        future = cs.putCutoutAsync("somecutoutid", "objectid", b"blob")
+        future = cs.putCutoutAsync("somecutoutid", "objectid", True, b"blob")
         self.assertEqual(2, mock_session.execute_async.call_count)
         self.assertEqual([mock_future, mock_future], future)
 

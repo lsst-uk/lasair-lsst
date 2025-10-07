@@ -90,11 +90,12 @@ class cutoutStore():
             return image
         return None
 
-    def putCutout(self, cutoutId: str, objectId: str, cutoutBlob: bytes):
+    def putCutout(self, cutoutId: str, objectId: str, isDiaObject: bool, cutoutBlob: bytes):
         """putCutout. put in the blob with given identifier
 
         Args:
             cutoutId: identifier for blob
+            isDiaObject: does the cutout come from a diaObject
             objectId: identifier of the associated object
             cutoutBlob: binary data
         """
@@ -103,21 +104,22 @@ class cutoutStore():
         if self.compress:
             cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
 
-        sql = f'insert into cutouts ("cutoutId","objectId",cutoutimage) values (%s,{objectId},%s)'
+        sql = f'insert into cutouts ("cutoutId","objectId","isDiaObject",cutoutimage) values (%s,{objectId},{isDiaObject},%s)'
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId","isDiaObject") values (%s,{objectId},{isDiaObject})'
         self.session.execute(sql, [cutoutId])
 
-    def putCutoutAsync(self, cutoutId, objectId, cutoutBlob) -> [Future]:
+    def putCutoutAsync(self, cutoutId, objectId, isDiaObject, cutoutBlob) -> [Future]:
         """putCutoutAsync. put in the blob with given identifier. 
         Also put data into cutoutsbyobject, but without the blob.
         Use async communication and return a list of future objects.
 
         Args:
             cutoutId:
+            isDiaObject:
             cutoutBlob:
         """
         if self.trim:
@@ -126,12 +128,12 @@ class cutoutStore():
             cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
             
         # first the blob keyed by cutoutId
-        sql = f'insert into cutouts ("cutoutId","objectId",cutoutimage) values (%s,{objectId},%s)'
+        sql = f'insert into cutouts ("cutoutId","objectId","isDiaObject",cutoutimage) values (%s,{objectId},{isDiaObject},%s)'
         blobData = bytearray(cutoutBlob)
         cutoutReturn = self.session.execute_async(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId","isDiaObject") values (%s,{objectId},{isDiaObject})'
         cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId])
 
         return [cutoutReturn, cutoutsByObjectReturn]

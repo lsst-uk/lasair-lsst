@@ -59,15 +59,15 @@ class ImageStore:
             log.error('ERROR: Cannot store cutouts')
             sys.exit(1)
 
-    def store_images(self, message, diaSourceId, diaObjectId):
+    def store_images(self, message, sourceId, objectId, isDiaObject):
         futures = []
         try:
             if self.image_store:
                 for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
                     content = message.get(cutoutType)
                     if content:
-                        cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                        result = self.image_store.putCutoutAsync(cutoutId, diaObjectId, content)
+                        cutoutId = '%d_%s' % (sourceId, cutoutType)
+                        result = self.image_store.putCutoutAsync(cutoutId, objectId, isDiaObject, content)
                         for future in result:
                             futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
@@ -246,14 +246,17 @@ class Ingester:
                     # objectID
                     if diaObject:
                         objectId = diaObject['diaObjectId']
+                        isDiaObject = True
                     elif ssObject:
                         objectId = ssObject['ssObjectId']
+                        isDiaObject = False
                     else:
                         objectId = 0
+                        isDiaObject = False
 
                     # store the fits images
                     self.timers['icutout'].on()
-                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, objectId)
+                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, objectId, isDiaObject)
                     self.timers['icutout'].off()
                     self.futures += image_futures
                 except IndexError:

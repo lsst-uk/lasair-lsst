@@ -10,6 +10,10 @@ schema = {
       "type": "bigint"
     },
     {
+      "name": "isDiaObject",
+      "type": "boolean"
+    },
+    {
       "name": "cutoutimage",
       "type": "blob"
     }
