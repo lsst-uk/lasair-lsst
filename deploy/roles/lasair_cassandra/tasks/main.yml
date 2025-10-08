@@ -34,6 +34,7 @@
     - "diaForcedSources"
     - "diaSources"
     - "diaObjects"
+    - "ssObjects"
     - "ssSources"
     - "MPCORBs"
 
