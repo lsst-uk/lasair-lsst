@@ -8,7 +8,7 @@ import json
 import base64
 
 sys.path.append('../common')
-from src import objectStore, cutoutStore
+from src import cutoutStore
 from src import db_connect
 import settings as lasair_settings
 
@@ -215,7 +215,6 @@ def objjson(diaObjectId, lite=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
-        diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
         diaSourceId = diaSource['diaSourceId']
@@ -336,11 +335,11 @@ def string2bytes(str):
     return bytes
 
 
-def fits(request, imjd, candid_cutoutType):
+def fits(request, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
     osc = cutoutStore.cutoutStore()
     try:
-        fitsdata = osc.getCutout(candid_cutoutType, imjd)
+        fitsdata = osc.getCutout(candid_cutoutType)
     except:
         fitsdata = ''
 

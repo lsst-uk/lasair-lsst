@@ -38,7 +38,7 @@ There should be a file `settings.py` file to accomany the code below with these 
    * `TOPIC_OUT`: The name of your annotator as agreed with the Lasair team (above)
 
 If the code below is not clear, it would be good for you to read about how 
-the (Lasair client)[rest-api.html] works.
+the [Lasair client](rest-api.html) works.
 
 For more information about what is returned as `objectInfo`, a complete example 
 is [shown here](ZTF23aabplmy.html).
