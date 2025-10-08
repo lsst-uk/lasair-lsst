@@ -39,7 +39,7 @@ sys.path.append('../../common')
 import settings
 
 sys.path.append('../../common/src')
-import objectStore, manage_status, date_nid, slack_webhook
+import manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
@@ -59,15 +59,15 @@ class ImageStore:
             log.error('ERROR: Cannot store cutouts')
             sys.exit(1)
 
-    def store_images(self, message, diaSourceId, imjd, diaObjectId):
+    def store_images(self, message, sourceId, objectId, isDiaObject):
         futures = []
         try:
             if self.image_store:
                 for cutoutType in ['cutoutScience', 'cutoutDifference', 'cutoutTemplate']:
                     content = message.get(cutoutType)
                     if content:
-                        cutoutId = '%d_%s' % (diaSourceId, cutoutType)
-                        result = self.image_store.putCutoutAsync(cutoutId, imjd, diaObjectId, content)
+                        cutoutId = '%d_%s' % (sourceId, cutoutType)
+                        result = self.image_store.putCutoutAsync(cutoutId, objectId, isDiaObject, content)
                         for future in result:
                             futures.append({'future': future, 'msg': 'image_store.putCutoutAsync'})
             else:
@@ -221,17 +221,52 @@ class Ingester:
 
         alerts = []    # pushed to kafka, sherlock, filters etc
         alertsDB = []  # put into cassandra
+
         for lsst_alert in lsst_alerts:
-            diaSourcesList = [lsst_alert['diaSource']]
 #            observation_reason = lsst_alert.get('observation_reason', '')
 #            target_name        = lsst_alert.get('target_name', '')
 
-            is_dia_alert = ('diaObject' in lsst_alert and lsst_alert['diaObject'])
+            diaSourcesList = [lsst_alert['diaSource']]
+            # sort the diaSources, newest first
+            if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
+                diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
+            nDiaSources += len(diaSourcesList)
+            diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
 
-            if not is_dia_alert:   # solar system
+            diaObject = lsst_alert.get('diaObject', None)
+            ssObject  = lsst_alert.get('ssObject', None)
+
+            # deal with images
+            if not self.nocutouts and self.image_store.image_store:
+                try:
+                    # get the MJD for the latest detection
+                    lastSource = diaSourcesList[0]
+                    # ID for the latest detection, this is what the cutouts belong to
+                    diaSourceId = lastSource['diaSourceId']
+                    # objectID
+                    if diaObject:
+                        objectId = diaObject['diaObjectId']
+                        isDiaObject = True
+                    elif ssObject:
+                        objectId = ssObject['ssObjectId']
+                        isDiaObject = False
+                    else:
+                        objectId = 0
+                        isDiaObject = False
+
+                    # store the fits images
+                    self.timers['icutout'].on()
+                    image_futures = self.image_store.store_images(lsst_alert, diaSourceId, objectId, isDiaObject)
+                    self.timers['icutout'].off()
+                    self.futures += image_futures
+                except IndexError:
+                    # This will happen if the list of sources is empty
+                    log.debug("No latest detection so not storing cutouts")
+
+            if not diaObject:   # solar system
+#                print('ss alert')
                 ssSource = lsst_alert['ssSource']
                 MPCORB   = lsst_alert['MPCORB']
-                ssObject = lsst_alert.get('ssObject', None)
                 if ssObject:
                     nSSObject += 1
                 nNoDiaObject += 1
@@ -251,13 +286,9 @@ class Ingester:
                 alertsDB.append(alertDB)
                 continue   # all done with this solar system alert
 
-            # assume dia alert now
             diaObject = lsst_alert['diaObject']
+#            print('==', diaObject['diaObjectId'])
             nDiaObject += 1
-
-            if 'prvDiaSources' in lsst_alert and lsst_alert['prvDiaSources']:
-                diaSourcesList = diaSourcesList + lsst_alert['prvDiaSources']
-            nDiaSources += len(diaSourcesList)
 
             if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
                 diaForcedSourcesList = lsst_alert['prvDiaForcedSources']
@@ -276,6 +307,7 @@ class Ingester:
                 del diaObject['dec']
 
             for diaSource in diaSourcesList:
+#                print('--', diaSource['diaSourceId'])
                 if 'dec' in diaSource:
                     diaSource['decl'] = diaSource['dec']
                     del diaSource['dec']
@@ -284,35 +316,12 @@ class Ingester:
                     diaForcedSource['decl'] = diaForcedSource['dec']
                     del diaForcedSource['dec']
 
-            # sort the diaSources and diaForcedSources, newest first
-            diaSourcesList       = sorted(diaSourcesList,       key=lambda x: x['midpointMjdTai'], reverse=True)
+            # sort the diaForcedSources, newest first
             diaForcedSourcesList = sorted(diaForcedSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
 
             diaSourcesListDB            = diaSourcesList
             diaForcedSourcesListDB      = diaForcedSourcesList
             diaNondetectionLimitsListDB = diaNondetectionLimitsList
-
-
-            # deal with images
-            if not self.nocutouts and self.image_store.image_store:
-                try:
-                    # get the MJD for the latest detection
-                    lastSource = diaSourcesList[0]
-                    # ID for the latest detection, this is what the cutouts belong to
-                    diaSourceId = lastSource['diaSourceId']
-                    # MJD for storing images
-                    imjd = int(lastSource['midpointMjdTai'])
-                    # objectID
-                    if diaObject and 'diaObjectId' in diaObject:
-                        diaObjectId = diaObject['diaObjectId']
-                        # store the fits images
-                        self.timers['icutout'].on()
-                        image_futures = self.image_store.store_images(lsst_alert, diaSourceId, imjd, diaObjectId)
-                        self.timers['icutout'].off()
-                        self.futures += image_futures
-                except IndexError:
-                    # This will happen if the list of sources is empty
-                    log.debug("No latest detection so not storing cutouts")
 
             # build the subset of the diaSources and diaForcedSources that do into Cassandra
             # if more than 4 diaSources, take only diaForcedSources after fourth diaSource
@@ -324,7 +333,7 @@ class Ingester:
             else:
                 diaSourcesListDB = diaSourcesList[:nds]
                 fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
-   
+
                 if len(diaForcedSourcesList) > 0:
                     for i in range(len(diaForcedSourcesList)):
                         if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
@@ -332,7 +341,7 @@ class Ingester:
                     diaForcedSourcesListDB = diaForcedSourcesList[:i]
                 else:
                     diaForcedSourcesListDB = []
-  
+    
                 if len(diaNondetectionLimitsList) > 0:
                     for i in range(len(diaNondetectionLimitsList)):
                         if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
@@ -360,7 +369,7 @@ class Ingester:
             nDiaSourcesDB += len(diaSourcesListDB)
             nForcedSourcesDB += len(diaForcedSourcesListDB)
 
-        # end of loop over lsst_alerts #####
+            # end of loop over lsst_alerts #####
 
         # Call on Cassandra
         # both diaObjects and ssObjects go in

@@ -27,17 +27,18 @@ create_table = """
 CREATE TABLE IF NOT EXISTS cutouts (
    "cutoutId"      ascii,
    "objectId"      bigint,
-   "imjd"          int,
+   "isDiaObject"   boolean,
    "cutoutimage"   blob,
-  PRIMARY KEY ("imjd", "cutoutId")
+  PRIMARY KEY ("cutoutId")
  );
 """
 
 create_table2 = """
 CREATE TABLE IF NOT EXISTS cutoutsbyobject(
-    "objectId" bigint,
-    "cutoutId" ascii,
-    PRIMARY KEY ("objectId", "cutoutId")
+   "objectId" bigint,
+   "isDiaObject"   boolean,
+   "cutoutId" ascii,
+   PRIMARY KEY ("objectId", "cutoutId")
  );
 """
 
@@ -70,19 +71,18 @@ class CassandraCutoutTest(TestCase):
         cutoutBlob = open(filename, 'rb').read()
         
         # put into cassandra
-        imjd = 60000
         objectId = 1234567890
-        self.osc.putCutout(cutoutId, imjd, objectId, cutoutBlob)
+        isDiaObject = True
+        self.osc.putCutout(cutoutId, objectId, isDiaObject, cutoutBlob)
 
         # look for it in there
-        query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' and "imjd"=%d' % (cutoutId, imjd)
+        query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' ' % cutoutId
         rows = self.session.execute(query)
         self.assertEqual(len(list(rows)), 1)
 
     def test_2_read(self):
         """Read something from the database"""
-        imjd = 60000
-        cutout = self.osc.getCutout(cutoutId, imjd)
+        cutout = self.osc.getCutout(cutoutId)
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)
         fp.close()
@@ -96,14 +96,14 @@ class CassandraCutoutTest(TestCase):
         cutoutBlob = open(filename, 'rb').read()
         
         # put into cassandra
-        imjd = 60001
         objectId = 1234567891
-        futures = self.osc.putCutoutAsync(cutoutId, imjd, objectId, cutoutBlob)
+        isDiaObject = True
+        futures = self.osc.putCutoutAsync(cutoutId, objectId, isDiaObject, cutoutBlob)
         for future in futures:
             future.result()
 
         # look for it in there
-        query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' and "imjd"=%d' % (cutoutId, imjd)
+        query = 'SELECT "cutoutId" from cutouts where "cutoutId"=\'%s\' ' % cutoutId
         rows = self.session.execute(query)
         self.assertEqual(len(list(rows)), 1)
 

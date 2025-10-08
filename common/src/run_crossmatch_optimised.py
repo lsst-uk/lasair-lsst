@@ -1,8 +1,7 @@
-import settings
 import math
 import sys
 sys.path.append('..')
-
+import settings
 
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     """ Delete all the hits and remake.

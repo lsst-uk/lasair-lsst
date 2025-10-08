@@ -5,6 +5,10 @@ schema = {
       "name": "objectId",
       "type": "bigint"
     },
+        {
+      "name": "isDiaObject",
+      "type": "boolean"
+    },
     {
       "name": "cutoutId",
       "type": "char"
