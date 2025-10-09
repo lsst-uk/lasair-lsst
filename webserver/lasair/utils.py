@@ -8,7 +8,7 @@ import json
 import base64
 
 sys.path.append('../common')
-from src import objectStore, cutoutStore
+from src import cutoutStore
 from src import db_connect
 import settings as lasair_settings
 
@@ -134,7 +134,7 @@ def objjson(diaObjectId, lite=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     if lite:
-        query = 'SELECT nSources, ra, decl, firstDiaSourceMJD, lastDiaSourceMJD '
+        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai '
     else:
         query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
@@ -152,8 +152,15 @@ def objjson(diaObjectId, lite=False):
 
         objectData['rasex'] = rasex(objectData['ra'])
         objectData['decsex'] = decsex(objectData['decl'])
-        objectData['mjdmin'] = objectData['firstDiaSourceMJD']
-        objectData['mjdmax'] = objectData['lastDiaSourceMJD']
+        if objectData['firstDiaSourceMjdTai']:
+            objectData['mjdmin'] = objectData['firstDiaSourceMjdTai']
+        else:
+            objectData['mjdmin'] = 60000
+
+        if objectData['lastDiaSourceMjdTai']:
+            objectData['mjdmax'] = objectData['lastDiaSourceMjdTai']
+        else:
+            objectData['mjdmax'] = 61000
 
         (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon
@@ -208,7 +215,6 @@ def objjson(diaObjectId, lite=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
-        diaSource['imjd'] = int(mjd)
         diaSource['since_now'] = mjd - now
         count_all_diaSources += 1
         diaSourceId = diaSource['diaSourceId']
@@ -329,11 +335,11 @@ def string2bytes(str):
     return bytes
 
 
-def fits(request, imjd, candid_cutoutType):
+def fits(request, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
     osc = cutoutStore.cutoutStore()
     try:
-        fitsdata = osc.getCutout(candid_cutoutType, imjd)
+        fitsdata = osc.getCutout(candid_cutoutType)
     except:
         fitsdata = ''
 

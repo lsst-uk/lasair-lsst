@@ -1,6 +1,6 @@
 import sys
-sys.path.append('../common')
 import math
+sys.path.append('../common')
 import settings
 from src import db_connect
 from gkhtm import _gkhtm as htmCircle
@@ -10,7 +10,7 @@ def distance(ra1, de1, ra2, de2):
     dde = (de1 - de2)
     return math.sqrt(dra*dra + dde*dde)
 
-def run_crossmatch(msl, radius, wl_id):
+def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     """ Delete all the hits and remake.
     """
     cursor  = msl.cursor(buffered=True, dictionary=True)
@@ -27,7 +27,8 @@ def run_crossmatch(msl, radius, wl_id):
         n_cones += 1
         n_hits += crossmatch(msl, wl_id, row['cone_id'], row['ra'], row['decl'], row['name'], radius)
     print("%d cones, %d hits" % (n_cones, n_hits))
-    return n_hits
+    message = 'done'
+    return n_hits, message
 
 def crossmatch(msl, wl_id, cone_id, myRA, myDecl, name, radius):
     cursor2 = msl.cursor(buffered=True, dictionary=True)

@@ -47,9 +47,9 @@ class IngestTest(unittest.TestCase):
         mock_image_store.putCutoutAsync.return_value = ["future1", "future2"]
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
-        imjd = int(test_alert['diaSource']['midpointMjdTai'])
+        isDiaObject = True
         imageStore = ingest.ImageStore(image_store=mock_image_store)
-        result = imageStore.store_images(test_alert, diaSourceId, imjd, diaObjectId)
+        result = imageStore.store_images(test_alert, diaSourceId, diaObjectId, isDiaObject)
         # we should get 4 futures back (2 per call)
         self.assertEqual(4, len(result))
         # check we called putCutoutAsync twice
@@ -68,12 +68,12 @@ class IngestTest(unittest.TestCase):
         """Test that using the image store raises an exception on error"""
         diaSourceId = test_alert['diaSource']['diaSourceId']
         diaObjectId = test_alert['diaObject']['diaObjectId']
-        imjd = int(test_alert['diaSource']['midpointMjdTai'])
+        isDiaObject = True
         mock_image_store = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_image_store.putCutoutAsync.side_effect = Exception('test error')
         imageStore = ingest.ImageStore(log=mock_log, image_store=mock_image_store)
-        self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, imjd, diaObjectId)
+        self.assertRaises(Exception, imageStore.store_images, test_alert, diaSourceId, diaObjectId, isDiaObject)
         mock_log.error.assert_called_with('ERROR in ingest/store_images: test error')
 
     @patch('ingest.ImageStore')
@@ -119,7 +119,7 @@ class IngestTest(unittest.TestCase):
         # check the return values
         # 5 diaSources with 4 sent to DB
         # 4 diaForcedSources with 2 sent to DB
-        self.assertEqual(result, (1, 0, 5, 4, 4, 2))   
+        self.assertEqual(result, (1, 0, 0, 5, 4, 4, 2))   
         # store_images should get called once
         mock_image_store.store_images.assert_called_once()
         # insert_cassandra_multi should get called once
@@ -136,12 +136,13 @@ class IngestTest(unittest.TestCase):
                                    ms=mock_ms)
         nAlert             = 1
         nDiaObject         = 1
+        nNoDiaObject       = 0
         nSSObject          = 0
         nDiaSource         = 5
         nDiaSourceDB       = 4
         nDiaForcedSource   = 4
         nDiaForcedSourceDB = 2
-        ingester._end_batch(nAlert, nDiaObject, nSSObject, 
+        ingester._end_batch(nAlert, nDiaObject, nNoDiaObject, nSSObject, 
                             nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
         # log message should get sent
         mock_log.info.assert_called_once()

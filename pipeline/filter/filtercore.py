@@ -13,6 +13,7 @@ Usage:
               [--transfer=BOOL]
               [--stats=BOOL]
               [--wait_time=TIME]
+              [--verbose=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
@@ -84,6 +85,7 @@ class Filter:
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
+                 verbose: bool = False,
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
@@ -93,6 +95,7 @@ class Filter:
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.verbose = verbose
         self.sfd = None
 
         self.consumer = None
@@ -129,8 +132,12 @@ class Filter:
             'area_hits',
             'mma_area_hits',
         ]
-        for table_name in table_list:
-            self.csv_attrs[table_name] = fetch_attrs(self.database, table_name, log=self.log)
+        try:
+            main_database = db_connect.remote(allow_infile=True)
+            for table_name in table_list:
+                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
+        except Exception as e:
+            self.log.error('ERROR connecting to main database: %s' % str(e))
 
         # set up the extinction factory
         if not self.sfd:
@@ -258,15 +265,18 @@ class Filter:
 
         lasair_features = FeatureGroup.run_all(alert)
         if not lasair_features:
+            if self.verbose:
+                print('Features did not run')
+                print(json.dumps(alert, indent=2))
             return None
 
         # Make the query
         query_list = []
         query = 'REPLACE INTO objects SET '
         for key, value in lasair_features.items():
-            if not value:
+            if value is None:
                 query_list.append(key + '=NULL')
-            elif isinstance(value, numbers.Number) and math.isnan(value):
+            elif isinstance(value, numbers.Number) and (math.isnan(value) or math.isinf(value)):
                 query_list.append(key + '=NULL')
             elif isinstance(value, str):
                 query_list.append(key + '="' + str(value) + '"')
@@ -289,6 +299,8 @@ class Filter:
         for ebv, alert in zip(ebvList, alertList):
             alert['ebv'] = ebv
             nalert += self.handle_alert(alert)
+        if self.verbose:
+            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
         return nalert
 
     def handle_alert(self, alert):
@@ -297,12 +309,17 @@ class Filter:
 
         # really not interested in alerts that have no detections!
         if len(alert['diaSourcesList']) == 0:
+            if self.verbose:
+                print('No diaSources')
             return 0
 
         # build the insert query for this object.
         # if not wanted, returns 0
         query = Filter.create_insert_query(alert)
         if not query:
+            if self.verbose:
+                print('Failed to make insert query')
+                print(json.dumps(alert, indent=2))
             return 0
         self.execute_query(query)
 
@@ -333,7 +350,7 @@ class Filter:
                 break
 
             # Here we get the next alert by kafka
-            msg = self.consumer.poll(timeout=5)
+            msg = self.consumer.poll(timeout=20)
             if msg is None:
                 print('message is null')
                 break
@@ -348,6 +365,12 @@ class Filter:
                 continue
             # Apply filter to each alert
             alert = json.loads(msg.value())
+
+            # don't know what to do with these
+            if 'diaObject' not in alert or not alert['diaObject']:
+                if self.verbose: print('No diaObject')
+                continue
+
             nalert_in += 1
             alertList.append(alert)
 
@@ -452,7 +475,7 @@ class Filter:
         cursor = msl_main.cursor(buffered=True, dictionary=True)
 
         # objects modified since last midnight
-        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMJD > %.1f' % midnight
+        query = 'SELECT count(*) AS count FROM objects WHERE lastDiaSourceMjdTai > %.1f' % midnight
         try:
             cursor.execute(query)
             for row in cursor:
@@ -463,15 +486,18 @@ class Filter:
             count = -1
 
         # total number of objects
-        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMJD) AS since FROM objects'
+        query = 'SELECT count(*) AS total_count, mjdnow()-max(lastDiaSourceMjdTai) AS since FROM objects'
 
         try:
             cursor.execute(query)
             for row in cursor:
                 total_count = row['total_count']
-                since = 24 * float(row['since'])
+                try:
+                    since = 24*float(row['since'])
+                except:
+                    since = 1000000000.0
                 break
-        except:
+        except Exception as e:
             log.warning("batch_statistics total: %s %s" % (str(e), query))
             total_count = -1
             since = -1
@@ -490,6 +516,7 @@ class Filter:
         try:
             cursor.execute(query)
             for row in cursor:
+                print(row)
                 min_delay = 24 * 60 * float(row['min_delay'])  # minutes
                 avg_delay = 24 * 60 * float(row['avg_delay'])  # minutes
                 max_delay = 24 * 60 * float(row['max_delay'])  # minutes
@@ -650,9 +677,11 @@ if __name__ == "__main__":
         wait_time = int(args['--wait_time'])
     else: 
         wait_time = getattr(settings, 'WAIT_TIME', 60)
+    verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
     fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, stats=stats)
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, 
+                  stats=stats, verbose=verbose)
 
     n_batch = 0
     total_alerts = 0

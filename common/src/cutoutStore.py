@@ -71,16 +71,15 @@ class cutoutStore():
         self.trim = getattr(settings, 'CUTOUT_TRIM', False)
         self.compress = getattr(settings, 'CUTOUT_COMPRESS', False)
 
-    def getCutout(self, cutoutId: str, imjd: int):
+    def getCutout(self, cutoutId: str):
         """getCutout.
 
         Args:
             cutoutId: identifier for blob
-            imjd: MJD of the source
         """
 
-        sql = "select cutoutimage from cutouts where imjd=%d and \"cutoutId\"='%s'"
-        sql = sql % (imjd, cutoutId)
+        sql = "select cutoutimage from cutouts where \"cutoutId\"='%s'"
+        sql = sql % cutoutId
 
         rows = self.session.execute(sql)
         for row in rows:
@@ -91,12 +90,12 @@ class cutoutStore():
             return image
         return None
 
-    def putCutout(self, cutoutId: str, imjd: int, objectId: str, cutoutBlob: bytes):
+    def putCutout(self, cutoutId: str, objectId: str, isDiaObject: bool, cutoutBlob: bytes):
         """putCutout. put in the blob with given identifier
 
         Args:
             cutoutId: identifier for blob
-            imjd: MJD of the source
+            isDiaObject: does the cutout come from a diaObject
             objectId: identifier of the associated object
             cutoutBlob: binary data
         """
@@ -105,21 +104,22 @@ class cutoutStore():
         if self.compress:
             cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
 
-        sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
+        sql = f'insert into cutouts ("cutoutId","objectId","isDiaObject",cutoutimage) values (%s,{objectId},{isDiaObject},%s)'
         blobData = bytearray(cutoutBlob)
         self.session.execute(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId","isDiaObject") values (%s,{objectId},{isDiaObject})'
         self.session.execute(sql, [cutoutId])
 
-    def putCutoutAsync(self, cutoutId, imjd, objectId, cutoutBlob) -> [Future]:
+    def putCutoutAsync(self, cutoutId, objectId, isDiaObject, cutoutBlob) -> [Future]:
         """putCutoutAsync. put in the blob with given identifier. 
         Also put data into cutoutsbyobject, but without the blob.
         Use async communication and return a list of future objects.
 
         Args:
             cutoutId:
+            isDiaObject:
             cutoutBlob:
         """
         if self.trim:
@@ -127,13 +127,13 @@ class cutoutStore():
         if self.compress:
             cutoutBlob = lz4.frame.compress(cutoutBlob, compression_level=0)
             
-        # first the blob keyed by imjd,cutoutId
-        sql = f'insert into cutouts ("cutoutId",imjd,"objectId",cutoutimage) values (%s,{imjd},{objectId},%s)'
+        # first the blob keyed by cutoutId
+        sql = f'insert into cutouts ("cutoutId","objectId","isDiaObject",cutoutimage) values (%s,{objectId},{isDiaObject},%s)'
         blobData = bytearray(cutoutBlob)
         cutoutReturn = self.session.execute_async(sql, [cutoutId, blobData])
 
         # then the cutoutId keyed by objectId
-        sql = f'insert into cutoutsbyobject ("cutoutId","objectId") values (%s,{objectId})'
+        sql = f'insert into cutoutsbyobject ("cutoutId","objectId","isDiaObject") values (%s,{objectId},{isDiaObject})'
         cutoutsByObjectReturn = self.session.execute_async(sql, [cutoutId])
 
         return [cutoutReturn, cutoutsByObjectReturn]
@@ -146,9 +146,7 @@ if __name__ == "__main__":
     import sys
     sys.path.append('..')
     import settings
-    imjd = 57072
     cutoutId = '176805391051522611_cutoutTemplate'
-    imjd = 60487
     cutoutId = '3068394670028488705_cutoutDifference'
 
 #    fp = open(cutoutId + '.fits', 'rb')
@@ -156,9 +154,9 @@ if __name__ == "__main__":
 #    fp.close()
 
     osc = cutoutStore()
-#    osc.putCutout(cutoutId, cutoutBlob, imjd)
+#    osc.putCutout(cutoutId, cutoutBlob)
 
-    cutout = osc.getCutout(cutoutId, imjd)
+    cutout = osc.getCutout(cutoutId)
     if cutout:
         fp = open(cutoutId + '_copy.fits', 'wb')
         fp.write(cutout)

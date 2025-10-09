@@ -14,7 +14,7 @@ def getECFluxTimeBand(alert):
     time = []
     band = []
     for s in sources:
-        flux.append(s['psfFlux']*math.pow(10, alert['ebv']*EXTCOEF[s['band']]/2.5))
+        flux.append(s['psfFlux']*math.pow(10, alert.get('ebv', 0.0)*EXTCOEF[s['band']]/2.5))
         time.append(s['midpointMjdTai'])
         band.append(s['band'])
     return (flux, time, band)

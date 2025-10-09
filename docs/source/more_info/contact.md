@@ -1,4 +1,4 @@
-## Contact/Community
+## Support/Blog/Contact
 
 For bug reports, questions, and Lasair news, please use the 
 [Rubin Community Forum](https://community.lsst.org/).
@@ -9,8 +9,9 @@ It's a simple process, give your email and respond to a message sent there.
 ### [Lasair Blog](https://community.lsst.org/c/sci/lasair-blog/67):
 Please be sure to follow the [Lasair Blog](https://community.lsst.org/c/sci/lasair-blog/67).
 It is a collection of articles on how to use Lasair, the science our users are doing,
-and Lasair-focussed events.
-Please "watch" this page so you get an email whenever a new post appears --
+and Lasair-focussed events. The Lasair Blog is a great way to advertise your latest paper!
+If you would like to contribute, please write to lasair-help at mlist.is.ed.ac.uk.
+To subscribe, please "watch" this page so you get an email whenever a new post appears --
 just click on the bell-shaped icon at the top right, and choose the "Watching" option.
 
 ### [Lasair Support](https://community.lsst.org/c/support/support-lasair/55):

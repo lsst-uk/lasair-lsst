@@ -107,8 +107,8 @@ def reformat(old, lasair_added=True):
     diaObject = {
         'ra'               : old['objectData']['ra'],
         'decl'             : old['objectData']['decl'],
-        'firstDiaSourceMJD': old['objectData']['mjdmin'],
-        'lastDiaSourceMJD' : old['objectData']['mjdmax']
+        'firstDiaSourceMjdTai': old['objectData']['mjdmin'],
+        'lastDiaSourceMjdTai' : old['objectData']['mjdmax']
     }
     if lasair_added:
         lasairData = old['objectData']
@@ -124,7 +124,7 @@ def reformat(old, lasair_added=True):
     for ds in old['diaSources']:
         del ds['json']
         del ds['mjd']
-        del ds['imjd']
+#        del ds['imjd']
         del ds['since_now']
         del ds['utc']
         iu = ds['image_urls']

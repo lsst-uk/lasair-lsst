@@ -37,7 +37,7 @@ def index(request):
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
-       mjdnow()-objects.lastDiaSourceMJD AS "last detected",
+       mjdnow()-objects.lastDiaSourceMjdTai AS "last detected",
        sherlock_classifications.classification AS "predicted type"
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId

@@ -58,7 +58,7 @@ def cql_alter_table(schema_old, schema_new):
     for f in fields_old:
         if not 'name' in f:       continue
         if f['name'] in attr_new: continue
-        lines += 'ALTER TABLE %s DROP `%s` %s;\n' % \
+        lines += 'ALTER TABLE %s DROP "%s" ;\n' % \
                 (tablename, f['name'])
     return lines
 
@@ -71,7 +71,7 @@ if __name__ == '__main__':
         schema_ver_new = sys.argv[3]
         table          = sys.argv[4]
     else:
-        print("Usage: convert.py switch schema_ver_old schema_ver_new table")
+        print("Usage: 3_make_alter_table.py switch schema_ver_old schema_ver_new table")
         print("Where switch can be sql or cql")
         print("and schema_version can be for example 704")
         print("and table is one of objects, sherlock_classifications, etc")

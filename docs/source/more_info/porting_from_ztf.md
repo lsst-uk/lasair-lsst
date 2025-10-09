@@ -32,7 +32,7 @@ etc for the six bands)
 * Change `decmean` to `decl`
 * For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
 recent g-band detection. There is also the time of latest detection in any band, that is
-`lastDiaSourceMJD`. Also notice that Lasair-LSST uses MJD instead of JD.
+`lastDiaSourceMjdTai`. Also notice that Lasair-LSST uses MJD instead of JD.
 
 Magnitude 20 is about 50,000 nJ, see [here](concepts.html#lightcurve) for 
 explanation and conversion table/formula. And the replacement of `rmag` is `r_psfFlux`.

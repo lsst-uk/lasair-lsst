@@ -3,6 +3,10 @@ import argparse
 import warnings
 
 
+class SlackError(Exception):
+    """Exception raised if we encounter an error sending to Slack"""
+
+
 class SlackWebhook():
     """Represents a Slack app or integration that we can send messages to."""
 
@@ -29,7 +33,7 @@ def _send(url, message, channel):
     response = requests.post(url, data=json.dumps(data),
                              headers={'Content-Type': 'application/json'})
     if response.status_code != 200:
-        raise ValueError(
+        raise SlackError(
             'Request to slack returned an error %s, the response is:\n%s'
             % (response.status_code, response.text)
         )

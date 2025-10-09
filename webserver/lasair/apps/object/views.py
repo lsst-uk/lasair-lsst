@@ -10,7 +10,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, HttpResponse
 from src import db_connect
-from src.objectStore import objectStore
 import settings
 import os
 import sys
@@ -66,7 +65,7 @@ def object_detail(request, diaObjectId):
     if mergedDF is not None:
         lcData = mergedDF.to_dict('records')
     else:
-        lcData = data["candidates"]
+        lcData = data["diaSources"]
 
     return render(request, 'object/object_detail.html', {
         'data': data,
