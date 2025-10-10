@@ -1,6 +1,22 @@
 
 var surveys = [
     {
+        "id": "P/DESI-Legacy-Surveys/DR10/color",
+        "url": "https://alasky.cds.unistra.fr/DESI-legacy-surveys/DR10/CDS_P_DESI-Legacy-Surveys_DR10_color/",
+        "name": "DESI Legacy",
+        "maxOrder": 11,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/DECaPS/DR2/color",
+        "url": "https://alasky.cds.unistra.fr/DECaPS/DR2/CDS_P_DECaPS_DR2_color/",
+        "name": "DECaPS_DR2",
+        "maxOrder": 11,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
         "id": "P/PanSTARRS/DR1/color-z-zg-g",
         "url": "http://alasky.u-strasbg.fr/Pan-STARRS/DR1/color-z-zg-g/",
         "name": "PanSTARRS",
@@ -47,14 +63,6 @@ var surveys = [
         "maxOrder": 9,
         "frame": "equatorial",
         "format": "jpeg"
-    },
-    {
-        "id": "P/DSS2/red",
-        "url": "http://alasky.u-strasbg.fr/DSS/DSS2Merged",
-        "name": "DSS2 Red (F+R)",
-        "maxOrder": 9,
-        "frame": "equatorial",
-        "format": "jpeg fits"
     },
     {
         "id": "P/Fermi/color",
@@ -107,7 +115,7 @@ var surveys = [
     {
         "id": "P/SPITZER/color",
         "url": "http://alasky.u-strasbg.fr/SpitzerI1I2I4color",
-        "name": "IRAC color I1,I2,I4 - (GLIMPSE, SAGE, SAGE-SMC, SINGS)",
+        "name": "IRAC color",
         "maxOrder": 9,
         "frame": "galactic",
         "format": "jpeg"
@@ -140,7 +148,7 @@ var surveys = [
 
 let aladin;
 A.init.then(() => {
-    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/DSS2/color", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
+    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/DESI-Legacy-Surveys/DR10/color", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
 
     {% if data.sherlock.eastSeparationArcsec %}
     var sherlockcat = A.catalog({name: "Sherlock's predicted association", sourceSize: 18, color: "#32CD32"});
