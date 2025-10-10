@@ -62,7 +62,7 @@
                             {% include "includes/help_popover.html" with title="SELECT Help" position="right" content="In the SELECT box type a comma-separated list of column names you wish to appear in the filter results. To find the columns you need, search the <a target='_blank' href='/schema/'>Lasair Schema Browser</a> or just start typing and use the auto-complete function to find and input the column names.</br></br>If your query overflows the textbox, consider adding newlines to make the query more readable." %}
 
                             <div id="select_div" class="input-group">
-                                <textarea name="selected" class="prism-live language-sql fill prism-live-source" required="" id="id_selected" spellcheck="false">{{ form.selected.value|default_if_none:"objects.diaObjectId, objects.g_psfFluxMean, objects.lastDiaSourceMJD as 'latest detection',  sherlock_classifications.classification as 'predicted classification' " }}</textarea>
+                                <textarea name="selected" class="prism-live language-sql fill prism-live-source" required="" id="id_selected" spellcheck="false">{{ form.selected.value|default_if_none:"objects.diaObjectId, objects.g_psfFluxMean, objects.lastDiaSourceMjdTai as 'latest detection',  sherlock_classifications.classification as 'predicted classification' " }}</textarea>
                             </div>
                         </div>
 
