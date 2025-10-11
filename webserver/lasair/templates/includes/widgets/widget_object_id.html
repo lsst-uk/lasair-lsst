@@ -73,15 +73,19 @@
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-gray-900">Detection Count</td>
-                                        <td class="fw-bold text-gray-400">{{ data.count_isdiffpos }} (excluding {{ data.count_isdiffneg }} neg flux detections)</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.nSources }}</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-gray-900">Equatorial Coords</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-bold text-gray-900">Galactic Coords</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.glonmean|floatformat:6 }}, {{ data.objectData.glatmean|floatformat:6 }}</td>
+                                        <td class="fw-bold text-gray-900">Galactic Latitude</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.glat|floatformat:6 }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
                                     </tr>
                                     <tr>
                                         <td class="fw-bold text-gray-900">Ecliptic Coords</td>
@@ -90,28 +94,8 @@
                                 </tbody>
                             </table>
 
-                            <div class="d-flex justify-content-center">
-
-                                <!-- BROKER LINKS -->
-                                <a href="https://alerce.online/object/{{data.diaObjectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
-                                    alerce
-                                </a>
-                                <a href="https://antares.noirlab.edu/loci?query=%7B%22currentPage%22%3A1,%22filters%22%3A%5B%7B%22type%22%3A%22query_string%22,%22field%22%3A%7B%22query%22%3A%22%2a{{data.diaObjectId}}%2a%22,%22fields%22%3A%5B%22properties.ztf_object_id%22,%22locus_id%22%5D%7D,%22value%22%3Anull,%22text%22%3A%22ID%20Lookup%3A%20{{data.diaObjectId}}%22%7D%5D,%22sortBy%22%3A%22properties.newest_alert_observation_time%22,%22sortDesc%22%3Atrue,%22perPage%22%3A25%7D" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
-                                    antares
-                                </a>
-                                <a href="https://fink-portal.org/{{data.diaObjectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">
-                                    fink
-                                </a>
-
-                            </div>
                         </div>
-
-
-
-
                     </div>
-
-
 
                 </div>
 

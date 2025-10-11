@@ -20,53 +20,21 @@
                 <div class="d-block">
                     <h2 class="h6 text-gray-400 mb-1 ps-2 ps-lg-0">External Resources{% include "includes/info_tooltip.html" with info="Links to external services providing further context information at the location of the transient" position="auto" %}</h2>
                 </div>
-                <a href="http://simbad.u-strasbg.fr/simbad/sim-coo?Coord={{ data.objectData.ramean }}%20{{ data.objectData.decmean }}&Radius=0.08" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-xxl-0">
-                    <img src="{{ ASSETS_ROOT }}/img/icons/simbad.png" class="image-fluid image-xs">
-                </a>
-                <a href="http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?lon={{ data.objectData.ramean|floatformat:6 }}d&lat={{ data.objectData.decmean|floatformat:6 }}d&radius=2&search_type=Near+Position+Search" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
-                    <img src="{{ ASSETS_ROOT }}/img/icons/ned.png" class="image-fluid image-xs">
-                </a>
 
-                <a href="https://www.legacysurvey.org/viewer?ra={{ data.objectData.ramean }}&dec={{ data.objectData.decmean }}&zoom=16&mark={{ data.objectData.ramean }},{{ data.objectData.decmean }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
-                    <img src="{{ ASSETS_ROOT }}/img/icons/decals.png" class="image-fluid image-xs me-1">
-                    DECaLS Sky Browser
-                </a>
+		<a href="https://alerce.online/object/{{data.diaObjectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Alerce </a>
 
-                <a href="http://nedwww.ipac.caltech.edu/cgi-bin/nph-calc?in_csys=Equatorial&in_equinox=J2000.0&obs_epoch=2000.0&lon={{ data.objectData.ramean }}d&lat={{ data.objectData.decmean }}&pa=0.0&out_csys=Equatorial&out_equinox=J2000.0" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0">
+                <a href="https://antares.noirlab.edu/loci?query=%7B%22currentPage%22%3A1,%22filters%22%3A%5B%7B%22type%22%3A%22query_string%22,%22field%22%3A%7B%22query%22%3A%22%2a{{data.diaObjectId}}%2a%22,%22fields%22%3A%5B%22properties.ztf_object_id%22,%22locus_id%22%5D%7D,%22value%22%3Anull,%22text%22%3A%22ID%20Lookup%3A%20{{data.diaObjectId}}%22%7D%5D,%22sortBy%22%3A%22properties.newest_alert_observation_time%22,%22sortDesc%22%3Atrue,%22perPage%22%3A25%7D" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Antares </a>
 
-                    <svg class="icon icon-sm me-2" fill="currentColor" stroke="currentColor" stroke-width="2" viewBox="0 0 100 100"  xmlns="http://www.w3.org/2000/svg">
-                        <g>
-                            <path  d="m57 70c-0.19141 0-0.37891-0.011719-0.57031-0.019531-0.55078-0.039063-0.96875-0.51953-0.92969-1.0703 0.039062-0.55078 0.51953-0.94922 1.0703-0.92969 1.7383 0.12109 3.4414-0.51172 4.6719-1.7383 1.1367-1.1328 1.7578-2.6406 1.7578-4.2422s-0.62109-3.1094-1.7617-4.2383c-1.1367-1.1328-2.6367-1.7617-4.2383-1.7617h-30c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1h30c2.1406 0 4.1484 0.82812 5.6602 2.3398 1.5117 1.5117 2.3398 3.5195 2.3398 5.6602s-0.82812 4.1484-2.3398 5.6602c-1.5117 1.5-3.5508 2.3398-5.6602 2.3398z"/>
-                            <path  d="m64 51h-42c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1h42c4.4102 0 8-3.5898 8-8s-3.5898-8-8-8c-0.55078 0-1-0.44922-1-1s0.44922-1 1-1c5.5117 0 10 4.4883 10 10s-4.4883 10-10 10z"/>
-                            <path  d="m39.5 44c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m45.5 45c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m54.5 46c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m62.5 43c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m31.5 45c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m41.5 60c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m48.5 61c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m56.5 62c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m71.5 62c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m31.5 60c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m44.5 66c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m51.5 68c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m47.5 73c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m39.5 70c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m69.5 55c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m76.5 54c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m57.5 38c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m51.5 41c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m44.5 39c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m35.5 38c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m53.5 31c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m49.5 36c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m43.5 33c0 2-3 2-3 0s3-2 3 0"/>
-                            <path   d="m36.5 64c0 2-3 2-3 0s3-2 3 0"/>
-                        </g>
-                    </svg>
+                <a href="https://www.legacysurvey.org/viewer?ra={{ data.objectData.ramean }}&dec={{ data.objectData.decmean }}&zoom=16&mark={{ data.objectData.ra }},{{ data.objectData.decl }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0"> DECaLS </a>
 
-                    <nobr>Galactic Extinction</nobr>
-                </a>
+		<a href="https://fink-portal.org/{{data.diaObjectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Fink </a>
+
+                <a href="http://ned.ipac.caltech.edu/cgi-bin/nph-objsearch?lon={{ data.objectData.ra|floatformat:6 }}d&lat={{ data.objectData.decl|floatformat:6 }}d&radius=2&search_type=Near+Position+Search" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0"> NED </a>
+
+                <a href="http://simbad.u-strasbg.fr/simbad/sim-coo?Coord={{ data.objectData.ra }}%20{{ data.objectData.decl }}&Radius=0.08" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-xxl-0"> SIMBAD </a>
+
+                <a href="https://lasair-ztf.lsst.ac.uk/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> ZTF </a>
+
             </div>
         </div>
     </div>
