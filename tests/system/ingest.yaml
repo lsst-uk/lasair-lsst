@@ -4,8 +4,8 @@
 
 - hosts: localhost
   gather_facts: false
-  vars:
-    schema: 7.4.A
+  vars_files:
+    - system_test_settings.yaml
   tasks:
     - name: Pause for 10 seconds
       ansible.builtin.pause:
