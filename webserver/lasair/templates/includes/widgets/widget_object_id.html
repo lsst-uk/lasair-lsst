@@ -36,7 +36,7 @@
                 <small class="text-gray-500">
                     <div><b>Discovery Date:</b> {{ data.objectData.discUtc }} UTC</div>
                     <div><b>Discovery MJD:</b> {{  data.objectData.discMjd|floatformat:2 }}</div>
-                    <div><b>Disc {{ data.objectData.discFilter }}-Mag:</b> {{  data.objectData.discMag }}</div>
+                    <div><b>Disc {{ data.objectData.discFilter }}-Flux:</b> {{  data.objectData.discMag }}</div>
                 </small>
 
             </div>
@@ -44,7 +44,7 @@
                 <small class="text-gray-500">
                     <div><b>Latest Date:</b> {{ data.objectData.latestUtc }} UTC</div>
                     <div><b>Latest MJD:</b> {{  data.objectData.latestMjd|floatformat:2 }}</div>
-                    <div><b>Latest {{ data.objectData.latestFilter }}-Mag:</b> {{  data.objectData.latestMag }}</div>
+                    <div><b>Latest {{ data.objectData.latestFilter }}-Flux:</b> {{  data.objectData.latestMag }}</div>
                 </small>
             </div>
         </div>
@@ -60,15 +60,15 @@
 
                                 <tbody>
                                     <tr>
-                                        <td class="fw-bold text-gray-900">Peak Mag</td>
+                                        <td class="fw-bold text-gray-900">Peak Flux</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-bold text-gray-900">Peak Date</td>
+                                        <td class="fw-bold text-gray-900">UTC at Peak</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.peakUtc }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-bold text-gray-900">Peak MJD</td>
+                                        <td class="fw-bold text-gray-900">MJD at Peak</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.peakMjd|floatformat:2 }}</td>
                                     </tr>
                                     <tr>
@@ -80,16 +80,16 @@
                                         <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
                                     </tr>
                                     <tr>
-                                        <td class="fw-bold text-gray-900">Galactic Latitude</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.glat|floatformat:6 }}</td>
+                                        <td class="fw-bold text-gray-900">Galactic Lon,Lat</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}</td>
                                     </tr>
+                                    <tr>
+                                        <td class="fw-bold text-gray-900">Ecliptic Lon,Lat</td>
+                                        <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
                                     <tr>
                                         <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
                                     </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Ecliptic Coords</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
                                     </tr>
                                 </tbody>
                             </table>
