@@ -63,21 +63,20 @@ def mjd_now():
     """
     return time.time() / 86400 + 40587.0
 
-
-def ecliptic(ra, dec):
-    """*return equatorial coordinates as ecliptic coordinates*
+def ecliptic_and_galactic(ra, dec):
+    """*return equatorial coordinates as ecliptic and galactic coordinates*
 
     **Usage:**
 
     ```python
-    from lasair.apps.object import ecliptic
-    ra, dec = ecliptic(ra, dec)
+    from lasair.apps.object import ecliptic_and_galactic
+    elon,elat,glon,glat = ecliptic_and_galactic(ra, dec)
     ```           
     """
     np = ephem.Equatorial(math.radians(ra), math.radians(dec), epoch='2000')
     e = ephem.Ecliptic(np)
-    return (math.degrees(e.lon), math.degrees(e.lat))
-
+    g = ephem.Galactic(np)
+    return (math.degrees(e.lon), math.degrees(e.lat), math.degrees(g.lon), math.degrees(g.lat))
 
 def rasex(ra):
     """*return ra in sexigesimal format*
@@ -134,7 +133,7 @@ def objjson(diaObjectId, lite=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     if lite:
-        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai '
+        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai,glat,ebv '
     else:
         query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
@@ -162,9 +161,11 @@ def objjson(diaObjectId, lite=False):
         else:
             objectData['mjdmax'] = 61000
 
-        (ec_lon, ec_lat) = ecliptic(objectData['ra'], objectData['decl'])
+        (ec_lon, ec_lat, g_lon, g_lat) = ecliptic_and_galactic(objectData['ra'], objectData['decl'])
         objectData['ec_lon'] = ec_lon
         objectData['ec_lat'] = ec_lat
+        objectData['g_lon']  = g_lon
+        objectData['g_lat']  = g_lat
 
         objectData['now_mjd'] = '%.2f' % now
         objectData['mjdmin_ago'] = now - objectData['mjdmin']
@@ -264,7 +265,7 @@ def objjson(diaObjectId, lite=False):
     objectData["latestFilter"] = detections['band'].values[0]
 
     # PEAK MAG
-    peakMag = detections[detections['psfFlux'] == detections['psfFlux'].min()]
+    peakMag = detections[detections['psfFlux'] == detections['psfFlux'].max()]
     objectData["peakMjd"] = peakMag["mjd"].values[0]
     objectData["peakUtc"] = peakMag["utc"].values[0]
     objectData["peakMag"] = f"{peakMag['psfFlux'].values[0]:.2f}±{peakMag['psfFluxErr'].values[0]:.2f}"
