@@ -584,7 +584,7 @@ class Ingester:
                 self._end_batch(nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
                 nDiaObject = nNoDiaObject = nSSObject = 0
                 nDiaSource = nDiaForcedSource = 0
-                nDiaSourceDB = nDiaForcedSourceDB = 0
+                nAlert = nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
                 self.timers['itotal'].off()
                 time.sleep(self.wait_time)
