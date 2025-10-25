@@ -167,7 +167,7 @@ class BBB():
         fobs = lc['flux']
         
         plt.rcParams.update({'font.size': 8})
-        fig = plt.figure(figsize=(4,4))
+        fig = plt.figure(figsize=(7,7))
         ax = plt.subplot(1, 1, 1)
         ax.set_yscale('log')
         ax.scatter([0.0], [0.0], s = 180, marker = "D", color = 'black')
