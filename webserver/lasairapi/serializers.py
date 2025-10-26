@@ -136,7 +136,7 @@ def reformat(old, lasair_added=True):
         lasairData['imageUrls'] = imageUrls
         new['lasairData'] = lasairData
     new['diaObject'] = diaObject
-    new['diaSources'] = diaSources
+    new['diaSourcesList'] = diaSourcesList
     new['diaForcedSourcesList'] = old['diaForcedSources']
     return new
 
