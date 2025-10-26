@@ -114,6 +114,7 @@ class BBB():
         tobs = lc['t']
         lobs = [WL[i] for i in lc['bandindex']]
         fobs = lc['flux']
+        fobserr = lc['fluxerr']
         npoint = len(lc['t'])
         objectId = lc['objectId']
     
@@ -165,6 +166,7 @@ class BBB():
         npoint = len(lc['t'])
         tobs = lc['t']
         fobs = lc['flux']
+        fobserr = lc['fluxerr']
         
         plt.rcParams.update({'font.size': 8})
         fig = plt.figure(figsize=(size, size))
@@ -174,13 +176,15 @@ class BBB():
         trange = np.arange(min(tobs), max(tobs)+1, 1)
         
         for iwl in range(nwl):
-            tobs_ = []
-            fobs_ = []
+            tobs_    = []
+            fobs_    = []
+            fobserr_ = []
             for i in range(npoint):
                 if lc['bandindex'][i] == iwl:
                     tobs_.append(tobs[i])
                     fobs_.append(fobs[i])
-            ax.errorbar(tobs_, fobs_, yerr=sigma, fmt='o', color=color[iwl], label=BANDS[iwl])
+                    fobserr_.append(fobserr[i])
+            ax.errorbar(tobs_, fobs_, yerr=fobserr_, fmt='o', color=color[iwl], label=BANDS[iwl])
             if dictx:
                 if isbazin:
                     fitb = [dictx['A'], dictx['T'], dictx['t0'], dictx['kr'], dictx['kf']]
