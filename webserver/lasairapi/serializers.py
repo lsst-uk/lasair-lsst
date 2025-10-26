@@ -119,7 +119,7 @@ def reformat(old, lasair_added=True):
         lasairData['sherlock']    = old['sherlock']
         lasairData['TNS']         = old['TNS']
         lasairData['annotations'] = old['annotations']
-    diaSources = []
+    diaSourcesList = []
     imageUrls = []
     for ds in old['diaSources']:
         del ds['json']
@@ -131,13 +131,13 @@ def reformat(old, lasair_added=True):
         del ds['image_urls']
         iu['diaSourceId'] = ds['diaSourceId']
         imageUrls.append(iu)
-        diaSources.append(ds)
+        diaSourcesList.append(ds)
     if lasair_added:
         lasairData['imageUrls'] = imageUrls
         new['lasairData'] = lasairData
     new['diaObject'] = diaObject
     new['diaSources'] = diaSources
-    new['diaForcedSources'] = old['diaForcedSources']
+    new['diaForcedSourcesList'] = old['diaForcedSources']
     return new
 
 class ObjectSerializer(serializers.Serializer):
