@@ -172,18 +172,18 @@ class ObjectSerializer(serializers.Serializer):
 
             try:
                 if lite: 
-                    (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    (diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
                     result = {
                         'diaObjectId':objectId, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
                 else:
-                    (diaObject, diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
                     result = {
                         'diaObjectId':objectId, 
                         'diaObject':diaObject, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
             except Exception as e:
                 result = {'error': str(e)}
             LF.close()
