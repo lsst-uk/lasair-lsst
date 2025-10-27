@@ -18,9 +18,6 @@ class diaObject(FeatureGroup):
     def run(self):
         out = {}
         for name in self._features:
-            try:
-                out[name] = self.alert['diaObject'][name]
-            except:
-                pass
+            out[name] = self.alert['diaObject'][name]
 
         return out
