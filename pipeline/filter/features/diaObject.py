@@ -21,6 +21,6 @@ class diaObject(FeatureGroup):
             try:
                 out[name] = self.alert['diaObject'][name]
             except:
-                out[name] = None
+                pass
 
         return out
