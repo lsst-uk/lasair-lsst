@@ -89,7 +89,7 @@
 
 
                                     <b><a href="{% url 'watchmap_detail' watchmap.ar_id %}">{{ watchmap.name }}</a></b></td>
-                                    <td>{{ watchmap.active }}</td>
+                                    <td><input type="checkbox" disabled {% if watchmap.active %}checked{% endif %}></td>
                                     <td  style="white-space: normal;">{% if watchmap.description|length > 60 %}
                                         {{ watchmap.description|slice:"0:60" }} ...
 
@@ -115,7 +115,7 @@
 
 
                                     <b><a href="{% url 'watchmap_detail' watchmap.ar_id %}">{{ watchmap.name }}</a></b></td>
-                                    <td>{{ watchmap.active }}</td>
+                                    <td><input type="checkbox" disabled {% if watchmap.active %}checked{% endif %}></td>
                                     <td><img alt="Image placeholder" src="data:image/png;base64,{{ watchmap.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ watchmap.user }}</td>
                                     <td  style="white-space: normal;">{% if watchmap.description|length > 60 %}
                                         {{ watchmap.description|slice:"0:60" }} ...

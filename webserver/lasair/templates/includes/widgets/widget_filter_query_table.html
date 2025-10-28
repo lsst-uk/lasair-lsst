@@ -90,7 +90,7 @@
 
 
                                     <b><a href="{% url 'filter_query_detail' fq.mq_id %}">{{ fq.name }}</a></b></td>
-                                    <td>{{ fq.active }}</td>
+					<td><input type="checkbox" disabled {% if fq.active > 0 %}checked{% endif %}/></td>
                                     <td  style="white-space: normal;" >{% if fq.description|length > 60 %}
                                         {{ fq.description|slice:"0:60" }} ...
 
@@ -114,7 +114,7 @@
 
 
                                     <b><a href="{% url 'filter_query_detail' fq.mq_id %}">{{ fq.name }}</a></b></td>
-                                    <td>{{ fq.active }}</td>
+					<td><input type="checkbox" disabled {% if fq.active > 0 %}checked{% endif %}/></td>
                                     <td><img alt="Image placeholder" src="data:image/png;base64,{{ fq.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ fq.user }}</td>
                                     <td  style="white-space: normal;">{% if fq.description|length > 60 %}
                                         {{ fq.description|slice:"0:60" }} ...
