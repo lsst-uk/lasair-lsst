@@ -81,7 +81,7 @@
     "y_psfFluxMaxSlope": 0.0,
     "y_psfFluxErrMean": 0.0,
     "firstDiaSourceMjdTai": 0.0,
-    "lastDiaSourceMjdTai": 0.0,
+    "lastDiaSourceMjdTai": 60102.2511,
     "nDiaSources": 0,
     "dec": -9.92704035644642
   },
