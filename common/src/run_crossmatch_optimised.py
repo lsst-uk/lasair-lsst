@@ -1,7 +1,8 @@
 import math
 import sys
-sys.path.append('..')
+sys.path.append('../common')
 import settings
+
 
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     """ Delete all the hits and remake.
@@ -10,6 +11,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     from HMpTy.mysql import conesearch
     from fundamentals.logs import emptyLogger
     from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
+    from collections import defaultdict
 
     dbSettings = {
         'host': settings.DB_HOST,
@@ -25,7 +27,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
 
     # GRAB ALL SOURCES IN THE WATCHLIST
     sqlQuery = f"""
-        SELECT cone_id, ra,decl, name FROM watchlist_cones WHERE wl_id={wl_id}
+        SELECT cone_id, ra,decl, name, radius  FROM watchlist_cones WHERE wl_id={wl_id}
     """
     wlCones = readquery(
         log=emptyLogger(),
@@ -46,23 +48,41 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
         dbConn=dbConn
     )
 
-    total = len(wlCones[1:])
-    batches = int(total / batchSize)
+    # GROUP SOURCES BY RADIUS
+    grouped_by_radius = defaultdict(list)
+    for s in wlCones:
+        if not s["radius"]:
+            s["radius"] = radius
+        grouped_by_radius[s["radius"]].append(s)
 
-    start = 0
-    end = 0
+    # CREATE BATCHES WHERE EACH BATCH CONTAINS ITEMS WITH THE SAME RADIUS
+    batches_by_radius = []
+    for radius, sources in grouped_by_radius.items():
+        for i in range(0, len(sources), batchSize):
+            batch = sources[i:i + batchSize]
+            batches_by_radius.append((radius, batch))
+
+
+    # SPLIT INTO BATCHES
     theseBatches = []
-    for i in range(batches + 1):
-        end = end + batchSize
-        start = i * batchSize
-        thisBatch = wlCones[start:end]
-        theseBatches.append(thisBatch)
+    for radius, groupbatch in batches_by_radius:
+        gbTotal = len(groupbatch)
+        gbBatches = int(gbTotal / batchSize)
+        start = 0
+        end = 0
+        for i in range(gbBatches + 1):
+            end = end + batchSize
+            start = i * batchSize
+            thisBatch = groupbatch[start:end]
+            if len(thisBatch):
+                theseBatches.append(thisBatch)
 
     n_hits = 0
     wlMatches = []
     for batch in theseBatches:
         # DO THE CONESEARCH
-        raList, decList, nameList, coneIdList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"]) for s in batch])
+        
+        raList, decList, nameList, coneIdList, radiusList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"], s["radius"]) for s in batch])
         cs = conesearch(
             log=emptyLogger(),
             dbConn=dbConn,
@@ -72,7 +92,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dec=decList,
             raCol="ra",
             decCol="decl",
-            radiusArcsec=radius,
+            radiusArcsec=radiusList[0],
             separations=True,
             distinct=False,
             sqlWhere="",
@@ -129,4 +149,3 @@ if __name__ == "__main__":
     # SETUP ALL DATABASE CONNECTIONS
 
     run_crossmatch(None, radius, wl_id)
-
