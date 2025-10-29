@@ -91,12 +91,12 @@ def watchmap_index(request):
         form = WatchmapForm(request=request)
 
     # PUBLIC WATCHMAPS
-    publicWatchmaps = Watchmap.objects.filter(public__gte=1)
+    publicWatchmaps = Watchmap.objects.filter(public__gte=1).order_by('-active', 'name')
     publicWatchmaps = add_watchmap_metadata(publicWatchmaps, remove_duplicates=True)
 
     # USER WATCHMAPS
     if request.user.is_authenticated:
-        myWatchmaps = Watchmap.objects.filter(user=request.user)
+        myWatchmaps = Watchmap.objects.filter(user=request.user).order_by('-active', 'name')
         myWatchmaps = add_watchmap_metadata(myWatchmaps)
     else:
         myWatchmaps = None

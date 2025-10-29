@@ -23,6 +23,10 @@ import sys
 
 sys.path.append('../common')
 
+def flux2mag(flux):   # nanoJansky to Magnitude
+    if flux > 0:
+        mag = 31.4 - 2.5 * math.log10(flux)
+        return mag
 
 def index(request):
     """
@@ -37,6 +41,12 @@ def index(request):
     query = """
     SELECT objects.diaObjectId,
        objects.ra, objects.decl,
+       objects.u_psfFlux,
+       objects.g_psfFlux,
+       objects.r_psfFlux,
+       objects.i_psfFlux,
+       objects.z_psfFlux,
+       objects.y_psfFlux,
        mjdnow()-objects.lastDiaSourceMjdTai AS "last detected",
        sherlock_classifications.classification AS "predicted type"
     FROM objects, sherlock_classifications
@@ -103,22 +113,15 @@ def index(request):
         alerts[iclass] = [[] for iage in range(nage)]
 
     for row in table:
-        mag = 16
-#        if row['gmag']:
-#            if row['rmag']:
-#                mag = min(row['gmag'], row['rmag'])
-#            else:
-#                mag = row['gmag']
-#        else:
-#            if row['rmag']:
-#                mag = row['rmag']
-#            else:
-#                continue
+        flux = 1
+        for fluxband in ['u_psfFlux', 'g_psfFlux', 'r_psfFlux', 'i_psfFlux', 'z_psfFlux', 'y_psfFlux']:
+            if row[fluxband] and row[fluxband] > flux:
+                flux = row[fluxband]
+        mag = flux2mag(flux)
 
         iclass = sherlock_classes.index(row["predicted type"])
 
         age = row["last detected"]
-#        iage = 1
         if   age <  4: iage = 0
         elif age < 10: iage = 1
         elif age < 20: iage = 2

@@ -125,12 +125,12 @@ def watchlist_index(request):
         form = WatchlistForm(request=request)
 
     # PUBLIC WATCHLISTS
-    publicWatchlists = Watchlist.objects.filter(public__gte=1)
+    publicWatchlists = Watchlist.objects.filter(public__gte=1).order_by('-active', 'name')
     publicWatchlists = add_watchlist_metadata(publicWatchlists, remove_duplicates=True)
 
     # USER WATCHLISTS
     if request.user.is_authenticated:
-        myWatchlists = Watchlist.objects.filter(user=request.user)
+        myWatchlists = Watchlist.objects.filter(user=request.user).order_by('-active', 'name')
         myWatchlists = add_watchlist_metadata(myWatchlists)
     else:
         myWatchlists = None
