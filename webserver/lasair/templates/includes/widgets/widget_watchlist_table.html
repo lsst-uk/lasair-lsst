@@ -116,8 +116,8 @@
 
 
                                     <b><a href="{% url 'watchlist_detail' wl.wl_id %}">{{ wl.name }}</a></b></td>
-                                    <td><img alt="Image placeholder" src="data:image/png;base64,{{ wl.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ wl.user }}</td>
                                     <td>{% if wl.active %}&#10003;{% endif %}</td>
+                                    <td><img alt="Image placeholder" src="data:image/png;base64,{{ wl.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ wl.user }}</td>
                                     <td  style="white-space: normal;">{% if wl.description|length > 60 %}
                                         {{ wl.description|slice:"0:60" }} ...
 
