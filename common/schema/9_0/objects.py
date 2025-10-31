@@ -287,19 +287,19 @@ schema = {
       "name": "BBBPeakFlux",
       "type": "float",
       "origin": "lasair",
-      "doc": "If Bazin fit, the peak flux (nJy)"
+      "doc": "If Bazin fit, the peak flux (nJy), else NULL"
     },
     {
       "name": "BBBPeakMJD",
       "type": "float",
       "origin": "lasair",
-      "doc": "If Bazin fit, the time of the peak brightness"
+      "doc": "If Bazin fit, the time of the peak brightness, else NULL"
     },
     {
       "name": "BBBPeakAbsMag",
       "type": "float",
       "origin": "lasair",
-      "doc": "If Bazin fit and Sherlock host with distance, the peak absolute magnitude"
+      "doc": "If Bazin fit and Sherlock host with distance, the peak absolute magnitude, else NULL"
     },
     {
       "section": "Milky Way",
