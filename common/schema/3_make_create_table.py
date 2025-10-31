@@ -72,7 +72,7 @@ if __name__ == '__main__':
     else:
         print("Usage: 3_make_create_table.py switch schema_version table")
         print("Where switch can be sql or cql")
-        print("and schema_verrsion can be for example 704")
+        print("and schema_verrsion can be for example 7_4")
         print("and table is one of objects, sherlock_classifications, etc")
         sys.exit()
 

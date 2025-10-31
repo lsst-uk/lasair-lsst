@@ -60,7 +60,7 @@ schema = {
       "name": "u_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for u filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for u filter. (nJy)"
     },
     {
       "name": "u_psfFluxMeanErr",
@@ -84,7 +84,7 @@ schema = {
       "name": "g_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for g filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for g filter. (nJy)"
     },
     {
       "name": "g_psfFluxMeanErr",
@@ -108,7 +108,7 @@ schema = {
       "name": "r_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for r filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for r filter. (nJy)"
     },
     {
       "name": "r_psfFluxMeanErr",
@@ -132,7 +132,7 @@ schema = {
       "name": "i_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for i filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for i filter. (nJy)"
     },
     {
       "name": "i_psfFluxMeanErr",
@@ -156,7 +156,7 @@ schema = {
       "name": "z_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for z filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for z filter. (nJy)"
     },
     {
       "name": "z_psfFluxMeanErr",
@@ -180,7 +180,7 @@ schema = {
       "name": "y_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model magnitude for y filter. (nJy)"
+      "doc": "Weighted mean point-source model flux for y filter. (nJy)"
     },
     {
       "name": "y_psfFluxMeanErr",

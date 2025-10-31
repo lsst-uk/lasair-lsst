@@ -13,7 +13,7 @@ import json, sys
 import read_avsc
 
 if len(sys.argv) < 2:
-    print('Usage: fetch_avsc.py <schema_version> [branch] ... example 704')
+    print('Usage: fetch_avsc.py <schema_version> [branch] ... example 7_4')
     sys.exit()
 schema_version = sys.argv[1]
 tok = schema_version.split('_')
