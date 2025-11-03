@@ -123,7 +123,7 @@ def do_search(
         # Is there an object within RADIUS arcsec of this object? - KWS - need to fix the gkhtm code!!
         message, matches = coneSearchHTM(ra, dec, radius, 'objects', queryType=QUICK, conn=connection, django=True, prefix='htm', suffix='')
         diaObjectIds = [o[1]['diaObjectId'] for o in matches]
-        diaObjectIds = "','".join(diaObjectIds)
+        diaObjectIds = "','".join(str(x) for x in diaObjectIds)
         query = f"select {objectColumns} from objects o where o.diaObjectId in ('{diaObjectIds}')"
         cursor.execute(query)
         results += cursor.fetchall()
