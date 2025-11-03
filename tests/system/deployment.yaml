@@ -326,12 +326,22 @@
 # filter service
 - hosts: filter
   gather_facts: false
+  vars_files:
+    - settings.yaml
+    - system_test_settings.yaml
+  vars:
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
   tasks:
+    - name: validate filter db schema
+      ansible.builtin.command:
+        chdir: lasair-lsst/utility
+        cmd: "/opt/lasair_venv/bin/python3 check_schema.py --user=ztf --password={{ settings.local_db_password }} --host=localhost --port=3306 --mod={{ schema_mod }}.objects"
+      changed_when: false
     - name: filter service running
       ansible.builtin.assert:
         that: ansible_facts.services['lasair-filter.service'].state == "running"
         fail_msg: Filter service not running
         success_msg: Filter service running
         quiet: true
-  ignore_errors: true
+      ignore_errors: true
   tags: filter
