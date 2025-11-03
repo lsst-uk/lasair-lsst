@@ -94,9 +94,7 @@
                                 </tbody>
                             </table>
 			    <div class="d-flex justify-content-center">
-    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Coincident diaObjects </a> 
-    {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." 
-    position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}</h2>
+    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Coincident diaObjects </a> {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
                    
 </div>
 
