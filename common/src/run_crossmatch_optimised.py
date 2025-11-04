@@ -2,16 +2,27 @@ import math
 import sys
 sys.path.append('../common')
 import settings
+from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
+from fundamentals.logs import emptyLogger
+from HMpTy.mysql import conesearch
+from collections import defaultdict
 
+def flip_hits(dbConn, wl_id):
+
+    sqlQuery = 'DELETE FROM watchlist_hits WHERE cone_id > 0 AND wl_id=%d' % wl_id
+    writequery(
+        log=emptyLogger(),
+        sqlQuery=sqlQuery,
+        dbConn=dbConn
+    )
+    sqlQuery = 'UPDATE watchlist_hits SET cone_id=-cone_id WHERE wl_id=%d' % wl_id
+    writequery(
+        log=emptyLogger(),
+        sqlQuery=sqlQuery,
+        dbConn=dbConn
+    )
 
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
-    """ Delete all the hits and remake.
-    """
-
-    from HMpTy.mysql import conesearch
-    from fundamentals.logs import emptyLogger
-    from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
-    from collections import defaultdict
 
     dbSettings = {
         'host': settings.DB_HOST,
@@ -109,9 +120,10 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             # VALUES TO ADD TO DB
 
             for r, d, n, c, m in zip(raList, decList, nameList, coneIdList, matches.list):
+                negative_c = -c
                 keepDict = {
                     "wl_id": wl_id,
-                    "cone_id": c,
+                    "cone_id": negative_c,
                     "arcsec": m["cmSepArcsec"],
                     "name": n,
                     "diaObjectId": m["diaObjectId"]
@@ -133,6 +145,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbSettings=dbSettings
         )
 
+    flip_hits(dbConn, wl_id)
     message = f"{n_hits} LSST objects have been associated with the {n_cones} sources in this watchlist"
     print(message)
     return n_hits, message

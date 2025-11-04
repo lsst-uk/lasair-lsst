@@ -10,14 +10,18 @@ def distance(ra1, de1, ra2, de2):
     dde = (de1 - de2)
     return math.sqrt(dra*dra + dde*dde)
 
-def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
-    """ Delete all the hits and remake.
-    """
+def flip_hits(msl, wl_id):
     cursor  = msl.cursor(buffered=True, dictionary=True)
-    query = 'DELETE FROM watchlist_hits WHERE wl_id=%d' % wl_id
+
+    query = 'DELETE FROM watchlist_hits WHERE cone_id > 0 AND wl_id=%d' % wl_id
+    cursor.execute(query)
+
+    query = 'UPDATE watchlist_hits SET cone_id=-cone_id WHERE wl_id=%d' % wl_id
     cursor.execute(query)
     msl.commit()
 
+def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
+    cursor  = msl.cursor(buffered=True, dictionary=True)
     n_cones = 0
     n_hits = 0
     # get all the cones and run them
@@ -30,6 +34,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             r = row['radius']
         n_hits += crossmatch(msl, wl_id, row['cone_id'], row['ra'], row['decl'], row['name'], r)
     message = "%d cones, %d hits" % (n_cones, n_hits)
+    flip_hits(msl, wl_id)
     return n_hits, message
 
 def crossmatch(msl, wl_id, cone_id, myRA, myDecl, name, radius):
@@ -46,9 +51,10 @@ def crossmatch(msl, wl_id, cone_id, myRA, myDecl, name, radius):
         arcsec = 3600*distance(myRA, myDecl, row['ra'], row['decl'])
         if arcsec > radius:
             continue
+        negative_cone_id = -cone_id
         n_hits += 1
         query3 = "INSERT INTO watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n"
-        query3 += ' (%d, %d, "%s", %.2f, "%s")' % (wl_id, cone_id, objectId, arcsec, name)
+        query3 += ' (%d, %d, "%s", %.2f, "%s")' % (wl_id, negative_cone_id, objectId, arcsec, name)
         if 1:
             cursor3.execute(query3)
             msl.commit()
