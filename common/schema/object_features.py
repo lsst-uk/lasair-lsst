@@ -142,7 +142,7 @@ schema = {
 {"name": "latestPairColourBands","type": "string","origin": "lasair",
         "doc": "Bands used for latest pair colour, eg g-r, u-r" },
 {"name": "latestPairColourTemp", "type": "float", "origin": "lasair",
-        "doc": "Extinction corrected effective temperature from latest pair, kiloKelvin" },
+        "doc": "Extinction corrected blackbody fit temperature from latest pair, kiloKelvin" },
 {"name": "penultimatePairMJD",        "type": "float", "origin": "lasair",
         "doc": "Penultimate pair MJD" },
 {"name": "penultimatePairColourMag",  "type": "float", "origin": "lasair",
@@ -150,7 +150,7 @@ schema = {
 {"name": "penultimatePairColourBands","type": "string","origin": "lasair",
         "doc": "Bands used for penultimate pair colour, eg g-r, u-r" },
 {"name": "penultimatePairColourTemp","type": "float", "origin": "lasair",
-        "doc": "Extinction corrected effective temperature from penultimate pair, kiloKelvin" },
+        "doc": "Extinction corrected blackbody fit temperature from penultimate pair, kiloKelvin" },
 
 {"section":"Utility", "doc":"Other attributes"},
 # HTM index
