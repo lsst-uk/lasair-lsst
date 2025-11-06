@@ -22,8 +22,8 @@ class RunCrossmatchTest(unittest.TestCase):
         # A small cone and a large cone
         wl_id = 1
         cones = [
-            {'cone_id':1, 'myRA':1.0, 'myDecl':1.0, 'radius':1.0,   'name':'small'},
-            {'cone_id':2, 'myRA':2.0, 'myDecl':1.0, 'radius':100.0, 'name':'large'},
+            {'cone_id':101, 'myRA':1.0, 'myDecl':1.0, 'radius':1.0,   'name':'small'},
+            {'cone_id':102, 'myRA':2.0, 'myDecl':1.0, 'radius':100.0, 'name':'large'},
         ]
 
         # A set of objects to run against
@@ -37,8 +37,8 @@ class RunCrossmatchTest(unittest.TestCase):
 
         # expected results
         expect_results = [
-            '(1,1,"123",0.51,"small")',
-            '(1,2,"125",72.00,"large")',
+            '(1,-101,"123",0.51,"small")',
+            '(1,-102,"125",72.00,"large")',
         ]
 
         mock_session = MagicMock()
