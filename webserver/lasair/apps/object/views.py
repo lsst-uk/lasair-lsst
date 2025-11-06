@@ -73,5 +73,6 @@ def object_detail(request, diaObjectId):
         'authenticated': request.user.is_authenticated,
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
-        'lcData': lcData
+        'lcData': lcData,
+        'lasair_url': settings.LASAIR_URL,
     })

@@ -40,25 +40,25 @@ def index(request):
 
     query = """
     SELECT objects.diaObjectId,
-       objects.ra, objects.decl,
+       mjdnow()-objects.lastDiaSourceMjdTai AS "last detected",
+       sherlock_classifications.classification AS "predicted type",
+       objects.nSources,
+       objects.absMag,
        objects.u_psfFlux,
        objects.g_psfFlux,
        objects.r_psfFlux,
        objects.i_psfFlux,
        objects.z_psfFlux,
        objects.y_psfFlux,
-       mjdnow()-objects.lastDiaSourceMjdTai AS "last detected",
-       sherlock_classifications.classification AS "predicted type"
+       objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
        AND objects.nSources > 1
-       AND sherlock_classifications.classification in 
+       AND sherlock_classifications.classification in (%s)
+    ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
-    query += '(' + ','.join(S) + ') LIMIT 5000'
-
-#    FRONT_PAGE_CACHE = '/home/ubuntu/front_page_cache.json'
-#    FRONT_PAGE_STALE = 1800
+    query = query % (','.join(S))
 
     table = None
     try:
