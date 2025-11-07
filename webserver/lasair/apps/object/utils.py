@@ -4,13 +4,15 @@ import plotly.graph_objects as go
 import math, json
 import numpy as np
 
+# THESE ARE THE RUBIN STYLE GUIDE COLOURS AND SYMBOLS
 bands  = ['u', 'g', 'r', 'i', 'z', 'y']
 bandColors = ['#1600ea', '#31de1f', '#b52626', '#370201', '#ba52ff', '#61a2b3']
+bandsymbols = ['o', '^', 'v', 's', '*', 'p']
+bandColorsDark = ['#3eb7ff','#30c39f','#ff7e00', '#2af5ff','#a7f9c1','#fdc900']
 
-# Coloring for Colorblindness
-# https://davidmathlogic.com/colorblind
-magcolor  = '#D41159'
-fluxcolor = '#1A85FF'
+# BOTH SIDEBARS SET TO BLACK
+magcolor  = '#002b36'
+fluxcolor = '#002b36'
 
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0: 
@@ -18,18 +20,21 @@ def flux2mag(flux):   # nanoJansky to Magnitude
         return mag
     else:        
         return None
-
+    
+    
 def mag2flux(mag):    # Magnitude to nanoJansky
     return math.pow(10.0, (31.4 - mag)/2.5)
 
 def object_difference_lightcurve(
-    objectData
+    objectData,
+    forced=False
 ):
     """*Generate the Plotly HTML lightcurve for the object*
 
     **Key Arguments:**
 
     - ``objectData`` -- a json object containing lightcurve data (and more)
+    - ``forced`` -- a boolean indicating whether to use forced photometry or not
 
     **Usage:**
 
@@ -41,29 +46,34 @@ def object_difference_lightcurve(
     # CREATE DATA FRAME FOR LC
     forcedDF, unforcedDF, mergedDF = convert_objectdata_to_dataframes(objectData)
 
+    if forced:
+        lcDF = unforcedDF 
+    else:
+        lcDF = unforcedDF
+
     # FILTER DATA FRAME
-    unforcedDF["marker_color"] = "#268bd2"
-    unforcedDF["marker_symbol"] = "arrow-bar-down-open"
-    unforcedDF["marker_size"] = 8
-    unforcedDF["marker_opacity"] = 0.6
-    unforcedDF["name"] = "anon"
+    lcDF["marker_color"] = "#268bd2"
+    lcDF["marker_symbol"] = "arrow-bar-down-open"
+    lcDF["marker_size"] = 8
+    lcDF["marker_opacity"] = 0.6
+    lcDF["name"] = "anon"
     symbol_sequence = ["arrow-bar-down-open", "circle"]
 
     for bandColor,band in zip(bandColors, bands):
-        unforcedDF.loc[(unforcedDF['band'] == band), "marker_color"] = bandColor
-        unforcedDF.loc[(unforcedDF['band'] == band), "bcolor"] = bandColor
+        lcDF.loc[(lcDF['band'] == band), "marker_color"] = bandColor
+        lcDF.loc[(lcDF['band'] == band), "bcolor"] = bandColor
 
-    unforcedDF["marker_symbol"] = "circle"
-    unforcedDF["marker_size"]   = 10
+    lcDF["marker_symbol"] = "circle"
+    lcDF["marker_size"]   = 10
 
     # SORT BY COLUMN NAME
-    discovery = unforcedDF.head(1)
+    discovery = lcDF.head(1)
 
     # GENERATE THE DATASETS
     allDataSets = []
 
     for band in bands:
-        BandData = unforcedDF.loc[(unforcedDF['band'] == band)]
+        BandData = lcDF.loc[(lcDF['band'] == band)]
         BandData["name"] = band + "-band flux detection"
         allDataSets.append(BandData)
 
@@ -103,6 +113,29 @@ def object_difference_lightcurve(
                 ),
                 secondary_y=False
             )
+            fig.add_trace(
+
+                go.Scatter(
+                    x=data["mjd"],
+                    y=data["magpsf"],
+                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
+                    mode='markers',
+                    marker_size=data["marker_size"].values[0],
+                    marker_color="#268bd2",
+                    marker_symbol=data["marker_symbol"].values[0],
+                    marker_line_color=data["bcolor"].values[0],
+                    marker_line_width=1.5,
+                    marker_opacity=data["marker_opacity"].values[0],
+                    name=data["name"].values[0],
+                    hovertemplate="<b>" + data["name"] + "</b><br>" +
+                    "MJD: %{x:.2f}<br>" +
+                    "UTC: %{customdata[0]}<br>" +
+                    "Flux: %{customdata[1]:.2f} nJy<br>" +
+                    "Magnitude: %{customdata[2]:.2f}" +
+                    "<extra></extra>",
+                ),
+                secondary_y=True
+            )
             fig.add_traces(
                 go.Scatter(x=data["utc"],
                            y=data["nanojansky"],
@@ -123,24 +156,43 @@ def object_difference_lightcurve(
         tickfont_size = 11
         title_font_size = 16
 
-    fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=tickfont_size, showline=True, linewidth=1.5, linecolor='#1F2937',
-                     gridcolor='#F0F0F0', gridwidth=1,
-                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title=title, title_font_size=title_font_size)
-    fig.update_layout(xaxis2={'range': [utcMin, utcMax],
-                              'showgrid': False,
-                              'anchor': 'y',
-                              'overlaying': 'x',
-                              'side': 'top',
-                              'tickangle': -55,
-                              'tickfont_size': 14,
-                              'showline': True,
-                              'linewidth': 1.5,
-                              'linecolor': '#1F2937'})
+    fig.update_layout(
+        legend=dict(orientation="h"),
+        xaxis=dict(
+            side="bottom",
+            range=[mjdMin, mjdMax],
+            tickformat='d',
+            tickangle=-55,
+            tickfont_size=tickfont_size,
+            showline=True,
+            linewidth=1.5,
+            linecolor='#1F2937',
+            gridcolor='#F0F0F0',
+            gridwidth=1,
+            zeroline=True,
+            zerolinewidth=1.5,
+            zerolinecolor='#1F2937',
+            ticks='inside',
+            title=title, 
+            title_font_size=title_font_size
+        ),
+        xaxis2=dict(
+            title=dict(text=""),
+            side="top",
+            range=[utcMin, utcMax],
+            overlaying="x",
+            tickmode="sync",
+            tickangle=-55,
+            tickfont_size=14,
+            showline=True,
+            linewidth=1.5,
+            linecolor='#1F2937'
+        ),
+    )
 
     fig.update_yaxes(
-        range=[math.log10(uffluxMin), math.log10(uffluxMax)],
-        type="log",
-        tickformat='.1f',
+        range=[uffluxMin, uffluxMax],
+        tickformat='.0f',
         tickfont_size=14,
         ticksuffix=" ",
         tickfont_color=fluxcolor,
@@ -155,262 +207,105 @@ def object_difference_lightcurve(
         zerolinecolor='#1F2937',
         mirror=True,
         ticks='inside',
-        title="Log Difference Flux (nanoJy)",
-        title_font_size=16,
-        title_font_color=fluxcolor,
-        secondary_y=False,
-    )
-    fig.update_yaxes(   # RDW:log right axis
-        range=[flux2mag(uffluxMin), flux2mag(uffluxMax)],
-        secondary_y=True,   # right side
-        showgrid=False,
-        tickformat='.1f',
-        tickfont_size=14,
-        tickfont_color=magcolor,
-        tickcolor=magcolor,
-        ticksuffix=" ",
-        showline=True,
-        linewidth=1.5,
-        ticks='inside',
-        title_text="Difference Magnitude",
-        title_font_size=16,
-        title_font_color=magcolor,
-    )
-
-    # UPDATE PLOT LAYOUT
-    fig.update_layout(
-        plot_bgcolor='white',
-        paper_bgcolor='white',
-        height=550,
-        margin_t=0,
-        margin_b=0,
-        margin_r=1,
-        legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1.0,
-            xanchor="left",
-            x=0,
-            bgcolor="#E6E5E5",
-            borderwidth=4,
-            bordercolor="#E6E5E5",
-        ),
-        hoverlabel=dict(
-            font_color="white",
-            bgcolor="#1F2937",
-            font_size=14,
-        )
-    )
-
-    fig.add_trace(go.Scatter(
-        x=discovery["mjd"],
-        y=[uffluxMin*1.05],
-        mode="markers+text",
-        marker_symbol="triangle-up",
-        marker_opacity=1,
-        marker_color="#1F2937",
-        marker_size=8,
-        showlegend=False,
-        text=["Discovery Epoch"],
-        textposition="middle right"
-    ))
-    fig.add_trace(go.Scatter(  # RDW Log: need add_trace or right axis wont show
-        x=discovery["mjd"],
-        y=[uffluxMin*1.05],
-        mode="markers+text",
-        marker_symbol="triangle-up",
-        marker_opacity=1,
-        marker_color="#1F2937",
-        marker_size=8,
-        showlegend=False,
-        text=["Discovery Epoch"],
-        textposition="middle right"
-    ),
-    secondary_y=True
-    )
-
-    fig.update_layout(
-        title=dict(text="Standard Photometry Flux", font=dict(size=20), y=0.85,
-                   x=0.5,
-                   xanchor='center',
-                   yanchor='top',
-                   font_color="#657b83",)
-    )
-
-    htmlLightcurve = fig.to_html(
-        config={
-            'displayModeBar': False,
-            'displaylogo': False,
-            'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
-            'toImageButtonOptions': {'filename': objectData["diaObjectId"] + "_lasair_lc"},
-            'responsive': True
-        })
-
-    return htmlLightcurve, mergedDF
-
-
-def object_difference_lightcurve_forcedphot(
-    objectData
-):
-    """*Generate the Plotly HTML lightcurve for the object force photometry*
-
-    **Key Arguments:**
-
-    - ``objectData`` -- a json object containing lightcurve data (and more)
-
-    **Usage:**
-
-    ```python
-    from lasair.apps.objects.utils import object_difference_lightcurve_forcedphot
-    htmlLightcurve = object_difference_lightcurve_forcedphot(data)
-    ```
-    """
-    forcedDF, unforcedDF, mergedDF = convert_objectdata_to_dataframes(objectData)
-
-    if forcedDF is None:
-        return None, None
-
-    # FILTER DATA FRAME
-    forcedDF["marker_color"] = "#268bd2"
-    forcedDF["bcolor"] = "#268bd2"
-    forcedDF["marker_symbol"] = "arrow-bar-down-open"
-    forcedDF["marker_size"] = 8
-    forcedDF["marker_opacity"] = 0.6
-    forcedDF["name"] = "anon"
-    symbol_sequence = ["arrow-bar-down-open", "circle"]
-    for bandColor,band in zip(bandColors, bands):
-        forcedDF.loc[(forcedDF['band'] == band), "marker_color"] = bandColor
-        forcedDF.loc[(forcedDF['band'] == band), "bcolor"] = bandColor
-
-    forcedDF["marker_symbol"] = "circle"
-    forcedDF["marker_size"] = 10
-
-    discovery = unforcedDF.head(1)
-
-    # GENERATE THE DATASETS
-    allDataSets = []
-    for band in bands:
-        BandDetections = forcedDF.loc[(forcedDF['band'] == band)]
-        BandDetections["name"] = band + "-band detection"
-        allDataSets.append(BandDetections)
-
-    # START TO PLOT
-    from plotly.subplots import make_subplots
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    # fig = go.Figure()
-
-    for data in allDataSets:
-        if len(data.index):
-            dataType = "Diff Flux"
-            error_y = {'type': 'data', 'array': data["nanojanskyerr"]}
-            fig.add_trace(
-
-                go.Scatter(
-                    x=data["midpointMjdTai"],
-                    y=data["nanojansky"],
-                    customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
-                    error_y=error_y,
-                    error_y_thickness=0.7,
-                    error_y_color=data["bcolor"].values[0],
-                    mode='markers',
-                    showlegend=True,
-                    marker_size=data["marker_size"].values[0],
-                    marker_color=data["marker_color"].values[0],
-                    marker_symbol=data["marker_symbol"].values[0],
-                    marker_line_color=data["bcolor"].values[0],
-                    marker_line_width=1.5,
-                    marker_opacity=data["marker_opacity"].values[0],
-                    name=data["name"].values[0],
-                    hovertemplate="<b>" + data["name"] + "</b><br>" +
-                    "MJD: %{x:.2f}<br>" +
-                    "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{customdata[1]:.2f} nJy<br>" +
-                    "Magnitude: %{customdata[2]:.2f}" +
-                    "<extra></extra>",
-                ),
-                secondary_y=False
-            )
-
-            fig.add_traces(
-                go.Scatter(x=data["utc"],
-                           y=data["nanojansky"],
-                           showlegend=False,
-                           opacity=0,
-                           hoverinfo='skip',
-                           xaxis="x2"))
-
-    # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax = get_default_axis_ranges(forcedDF, unforcedDF)
-
-    fig.update_xaxes(range=[mjdMin, mjdMax], tickformat='d', tickangle=-55, tickfont_size=14, showline=True, linewidth=1.5, linecolor='#1F2937',
-                     gridcolor='#F0F0F0', gridwidth=1,
-                     zeroline=True, zerolinewidth=1.5, zerolinecolor='#1F2937', ticks='inside', title="MJD", title_font_size=16)
-    fig.update_layout(xaxis2={'range': [utcMin, utcMax],
-                              'showgrid': False,
-                              'anchor': 'y',
-                              'overlaying': 'x',
-                              'side': 'top',
-                              'tickangle': -55,
-                              'tickfont_size': 11,
-                              'showline': True,
-                              'linewidth': 1.5,
-                              'linecolor': '#1F2937'})
-
-    fig.update_yaxes(
-        range=[fluxMin, fluxMax],
-        tickformat='.1f',
-        tickfont_size=14,
-        ticksuffix=" ",
-        tickfont_color=fluxcolor,
-        showline=True,
-        linewidth=1.5,
-        linecolor='#1F2937',
-        gridcolor='#F0F0F0',
-        gridwidth=1,
-        zeroline=True,
-        zerolinewidth=3.0,
-        zerolinecolor='rgba(60, 60, 60, 0.8)',
-        mirror=True,
-        ticks='inside',
         title="Difference Flux (nanoJy)",
-        title_font_size=16,
+        title_font_size=14,
         title_font_color=fluxcolor,
         secondary_y=False
     )
-        # Right (magnitude) frame
-    ticktext = []
-    tickvals = []
-    n = 0
-    for _mag in range(20, 55):
-        mag = 0.5 * _mag # 10 to 29 with halves
-        flux = mag2flux(float(mag))
-        tickvals.append(flux)
-        ticktext.append(str(mag))
-        if flux > fluxMin and flux < fluxMax:
-            n += 1
-    if n > 0:
-        title = "Difference magnitude"
-    else:
-        title = ''
-    fig.update_yaxes(    # RDW:Linear right axis
-        range=[fluxMin, fluxMax],
-        ticktext=ticktext,
-        tickvals=tickvals,
-        tickfont_color=magcolor,
-        showgrid=False,
-        zeroline=True,
-        zerolinewidth=3.0,
-        zerolinecolor='rgba(60, 60, 60, 0.8)',
-        tickformat='.1f',
-        tickfont_size=14,
-        ticksuffix=" ",
-        showline=True,
-        linewidth=1.5,
-        title=title,
-        title_font_size=16,
-        title_font_color=magcolor,
-        secondary_y=True
+    # if forced:
+    #     fig.update_yaxes(autorange="reversed",secondary_y=True)
+    # else:
+    #     fig.update_yaxes(autorange="reversed",secondary_y=True,type="log")
+
+    for k in fig.layout:
+        if k[:5] ==  'y2axis':
+            # print(k)
+            fig.layout[k]['range'] = [flux2mag(uffluxMin),flux2mag(uffluxMax)]
+            fig.layout[k]['title']['text'] = "Difference Magnitude (AB)"
+
+
+    # fig.update_yaxes(   # RDW:log right axis
+    #     range=[math.log10(flux2mag(uffluxMin)), math.log10(flux2mag(uffluxMax))],  # Inverted range
+    #     secondary_y=True,   # right side
+    #     showgrid=True,
+    #     # tickformat='.3f',
+    #     tickfont_size=14,
+    #     tickfont_color=magcolor,
+    #     tickcolor=magcolor,
+    #     ticksuffix=" ",
+    #     showline=True,
+    #     linewidth=1.5,
+    #     linecolor='#1F2937',
+    #     ticks='inside',
+    #     title_text="Difference Magnitude (AB)",
+    #     title_font_size=16,
+    #     title_font_color=magcolor,
+    #     # overlaying="y",
+    #     # tickmode="sync",
+    #     type="log"
+    # )
+
+    # Add a text box annotation
+    fig.add_annotation(
+        text=f"uffluxMin = {uffluxMin:.2f} nJy<br>uffluxMax = {uffluxMax:.2f} nJy<br>mag min = {flux2mag(uffluxMin):.2f} mag<br>mag max = {flux2mag(uffluxMax):.2f} mag",
+        xref="paper", yref="paper",
+        x=0.5, y=1.1,  # Position above the plot
+        showarrow=False,
+        font=dict(size=14, color="#1F2937"),
+        align="center",
+        bgcolor="#E6E5E5",
+        bordercolor="#1F2937",
+        borderwidth=1
     )
+
+    # Create shared y-axis scaling
+    # fig.update_yaxes(
+    #     range=[uffluxMin, uffluxMax],
+    #     tickformat='.0f',
+    #     tickfont_size=14,
+    #     ticksuffix=" ",
+    #     tickfont_color=fluxcolor,
+    #     showline=True,
+    #     showgrid=True,
+    #     linewidth=1.5,
+    #     linecolor='#1F2937',
+    #     gridcolor='#F0F0F0',
+    #     gridwidth=1,
+    #     zeroline=True,
+    #     zerolinewidth=1.5,
+    #     zerolinecolor='#1F2937',
+    #     mirror=True,
+    #     ticks='inside',
+    #     title="Difference Flux (nanoJy)",
+    #     title_font_size=14,
+    #     title_font_color=fluxcolor,
+    #     secondary_y=False,
+    #     scaleanchor="y2",
+    #     scaleratio=1
+    # )
+    
+    # fig.update_yaxes(   # RDW:log right axis
+    #     range=[flux2mag(uffluxMin), flux2mag(uffluxMax)],
+    #     secondary_y=True,   # right side
+    #     showgrid=False,
+    #     tickformat='.1f',
+    #     tickfont_size=14,
+    #     tickfont_color=magcolor,
+    #     tickcolor=magcolor,
+    #     ticksuffix=" ",
+    #     showline=True,
+    #     linewidth=1.5,
+    #     linecolor='#1F2937',
+    #     ticks='inside',
+    #     title_text="Difference Magnitude",
+    #     title_font_size=16,
+    #     title_font_color=magcolor,
+    #     matches='y',
+    #     scaleanchor="y",
+    #     scaleratio=1
+    # )
+
+
 
     # UPDATE PLOT LAYOUT
     fig.update_layout(
@@ -434,13 +329,35 @@ def object_difference_lightcurve_forcedphot(
             font_color="white",
             bgcolor="#1F2937",
             font_size=14,
-        )
+        ),
+        updatemenus=[
+            dict(
+                type="buttons",
+                direction="right",
+                active=True,
+                font=dict(color="#D1D5DB"),
+                bgcolor="#6B7280",
+                borderwidth=1,
+                bordercolor="#D1D5DB",
+                x=-0.03,  # Horizontal position (0 to 1)
+                y=1.02,  # Vertical position (above the plot)
+                xanchor="center",  # Anchor the button group at the center
+                yanchor="bottom",     # Anchor the button group at the top
+                buttons=[
+                    dict(
+                        label="Log",
+                        method="relayout",
+                        args=[{"yaxis.type": "linear", "updatemenus[0].font.color": "#D1D5DB", "updatemenus[0].bgcolor": "#6B7280"}],
+                        args2=[{"yaxis.type": "log","updatemenus[0].font.color": "#E11D48", "updatemenus[0].bgcolor": "#D1D5DB"}],
+                    ),
+                ],
+            )
+        ]
     )
-
 
     fig.add_trace(go.Scatter(
         x=discovery["mjd"],
-        y=[10],
+        y=[uffluxMin*1.05],
         mode="markers+text",
         marker_symbol="triangle-up",
         marker_opacity=1,
@@ -450,22 +367,14 @@ def object_difference_lightcurve_forcedphot(
         text=["Discovery Epoch"],
         textposition="middle right"
     ))
-    fig.add_trace(go.Scatter(    # RDW:Linear need add_trace or no axis
-        x=discovery["mjd"],
-        y=[10],
-        mode="markers+text",
-        marker_symbol="triangle-up",
-        marker_opacity=1,
-        marker_color="#1F2937",
-        marker_size=8,
-        showlegend=False,
-        text=["Discovery Epoch"],
-        textposition="middle right"
-    ),
-    secondary_y=True
-    )
+
+    if forced:
+        title_text = "Forced Photometry Flux"
+    else:
+        title_text = "Standard Photometry Flux"
+
     fig.update_layout(
-        title=dict(text="Forced Photometry Flux", font=dict(size=20), y=0.87,
+        title=dict(text=title_text, font=dict(size=20), y=0.85,
                    x=0.5,
                    xanchor='center',
                    yanchor='top',
@@ -482,7 +391,6 @@ def object_difference_lightcurve_forcedphot(
         })
 
     return htmlLightcurve, mergedDF
-
 
 def get_default_axis_ranges(
         forcedDF,
@@ -579,15 +487,16 @@ def convert_objectdata_to_dataframes(
         forcedDF.sort_values(['midpointMjdTai'],
                              ascending=[True], inplace=True)
 
-# Standard naming
+        # Standard naming
         forcedDF["band"] = forcedDF['band']
         forcedDF["nanojansky"] = forcedDF['psfFlux']
         forcedDF["nanojanskyerr"] = forcedDF['psfFluxErr']
 
-# Convert from flux nJ to mag
+        # Convert from flux nJ to mag
         flux = forcedDF["nanojansky"]
         forcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         forcedDF["sigmapsf"] = 1.086 * forcedDF["nanojanskyerr"] / forcedDF["nanojansky"]
+        
 
     if forcedDF is not None and len(forcedDF.index) == 0:
         forcedDF = None
@@ -600,10 +509,10 @@ def convert_objectdata_to_dataframes(
         unforcedDF['utc'] = pd.to_datetime(unforcedDF['utc']).dt.strftime('%Y-%m-%d %H:%M:%S')
         unforcedDF.sort_values(['midpointMjdTai'],
                                ascending=[True], inplace=True)
-# Standard naming
+        # Standard naming
         unforcedDF["nanojansky"] = unforcedDF['psfFlux']
         unforcedDF["nanojanskyerr"] = unforcedDF['psfFluxErr']
-# Convert from flux nJ to mag
+        # Convert from flux nJ to mag
         flux = unforcedDF["nanojansky"]
         unforcedDF["magpsf"]   = np.where(flux>0, 31.4 - 2.5 * np.log10(flux), 99.0)
         unforcedDF["sigmapsf"] = 1.086 * unforcedDF["nanojanskyerr"] / unforcedDF["nanojansky"]
@@ -615,8 +524,6 @@ def convert_objectdata_to_dataframes(
             how='left', on=['midpointMjdTai', 'band'])
     else:
         mergedDF = unforcedDF
-#        mergedDF['nanojansky'] = np.nan    # RDW aug 2025 
-#        mergedDF['nanojanskyerr'] = np.nan   # no idea why these are set to nan just befor trying to plot
     mergedDF = mergedDF.replace({np.nan: None})
     mergedDF.sort_values(['mjd'], ascending=[False], inplace=True)
 
