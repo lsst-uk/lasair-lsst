@@ -61,15 +61,15 @@ def index(request):
     query = query % (','.join(S))
 
     table = None
-#    try:
-#        # if there is a young cache file, try to use it
-#        age = time.time() - os.stat(settings.FRONT_PAGE_CACHE).st_mtime
-#        if age < settings.FRONT_PAGE_STALE:
-#            f = open(settings.FRONT_PAGE_CACHE, 'r')
-#            table = json.loads(f.read())
-#            f.close()
-#    except:
-#        pass
+    try:
+        # if there is a young cache file, try to use it
+        age = time.time() - os.stat(settings.FRONT_PAGE_CACHE).st_mtime
+        if age < settings.FRONT_PAGE_STALE:
+            f = open(settings.FRONT_PAGE_CACHE, 'r')
+            table = json.loads(f.read())
+            f.close()
+    except:
+        pass
 
     if table is None:
         msl = db_connect.readonly()
@@ -161,8 +161,8 @@ def index(request):
         'alerts': str(alerts),
         'colors': str(colors),
         'news': news,
-        'table': table,
-        'textTable': textTable,
-        'schema': schema
+        'table': textTable,
+        'schema': schema,
+        'sortTable': True,
     }
     return render(request, 'index.html', context)
