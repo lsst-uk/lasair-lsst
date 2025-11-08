@@ -13,7 +13,7 @@
             <div class="modal-body px-md-5 mb-3">
                 <h2 class="h4 text-center">Filter Settings</h2>
                 <p class="text-center mb-4">Update your filter settings</p>
-		<p style='color:red;' class="mb-6">Warning: Saving the filter (even with no changes) clears the Kafka queue and puts in 10 new examples. If you want to experiment with your filter and keep previous data, then use the Duplicate Filter option.</p>
+		<p style='color:red;' class="text-justify mb-6">Warning: Saving the filter (even with no changes) clears the Kafka queue and puts in 10 new examples. If you want to experiment with your filter and keep previous data, then use the Duplicate Filter option.</p>
                 {% if filterQ %}
                     <form enctype="multipart/form-data" action="{% url 'filter_query_detail' filterQ.mq_id %}" method="post" class="mt-0 mb-3">
                 {% else %}
