@@ -163,6 +163,5 @@ def index(request):
         'news': news,
         'table': textTable,
         'schema': schema,
-        'sortTable': True,
     }
     return render(request, 'index.html', context)
