@@ -37,8 +37,8 @@ class RunCrossmatchTest(unittest.TestCase):
 
         # expected results
         expect_results = [
-            '(1,-101,"123",0.51,"small")',
-            '(1,-102,"125",72.00,"large")',
+            '(1,101,"123",0.51,"small")',
+            '(1,102,"125",72.00,"large")',
         ]
 
         mock_session = MagicMock()
