@@ -2,12 +2,12 @@ import math
 import sys
 sys.path.append('../common')
 import settings
-from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
-from fundamentals.logs import emptyLogger
-from HMpTy.mysql import conesearch
-from collections import defaultdict
 
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
+    from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
+    from fundamentals.logs import emptyLogger
+    from HMpTy.mysql import conesearch
+    from collections import defaultdict
 
     dbSettings = {
         'host': settings.DB_HOST,
