@@ -7,21 +7,6 @@ from fundamentals.logs import emptyLogger
 from HMpTy.mysql import conesearch
 from collections import defaultdict
 
-def flip_hits(dbConn, wl_id):
-
-    sqlQuery = 'DELETE FROM watchlist_hits WHERE cone_id > 0 AND wl_id=%d' % wl_id
-    writequery(
-        log=emptyLogger(),
-        sqlQuery=sqlQuery,
-        dbConn=dbConn
-    )
-    sqlQuery = 'UPDATE watchlist_hits SET cone_id=-cone_id WHERE wl_id=%d' % wl_id
-    writequery(
-        log=emptyLogger(),
-        sqlQuery=sqlQuery,
-        dbConn=dbConn
-    )
-
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
 
     dbSettings = {
@@ -142,14 +127,13 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbTableName="watchlist_hits",
             dateCreated=False,
             batchSize=200000,
+            replace=True,
             dbSettings=dbSettings
         )
 
-    flip_hits(dbConn, wl_id)
     message = f"{n_hits} LSST objects have been associated with the {n_cones} sources in this watchlist"
     print(message)
     return n_hits, message
-
 
 if __name__ == "__main__":
     try:
