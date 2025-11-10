@@ -3,11 +3,7 @@ import sys
 sys.path.append('../common')
 import settings
 
-
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
-    """ Delete all the hits and remake.
-    """
-
     from HMpTy.mysql import conesearch
     from fundamentals.logs import emptyLogger
     from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
@@ -130,6 +126,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbTableName="watchlist_hits",
             dateCreated=False,
             batchSize=200000,
+            replace=True,
             dbSettings=dbSettings
         )
 
