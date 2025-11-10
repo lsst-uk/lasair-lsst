@@ -4,9 +4,9 @@ sys.path.append('../common')
 import settings
 
 def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
-    from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
-    from fundamentals.logs import emptyLogger
     from HMpTy.mysql import conesearch
+    from fundamentals.logs import emptyLogger
+    from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
     from collections import defaultdict
 
     dbSettings = {
@@ -105,10 +105,9 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             # VALUES TO ADD TO DB
 
             for r, d, n, c, m in zip(raList, decList, nameList, coneIdList, matches.list):
-                negative_c = -c
                 keepDict = {
                     "wl_id": wl_id,
-                    "cone_id": negative_c,
+                    "cone_id": c,
                     "arcsec": m["cmSepArcsec"],
                     "name": n,
                     "diaObjectId": m["diaObjectId"]
@@ -134,6 +133,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     message = f"{n_hits} LSST objects have been associated with the {n_cones} sources in this watchlist"
     print(message)
     return n_hits, message
+
 
 if __name__ == "__main__":
     try:
