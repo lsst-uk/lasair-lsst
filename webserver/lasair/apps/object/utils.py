@@ -7,7 +7,7 @@ import numpy as np
 # THESE ARE THE RUBIN STYLE GUIDE COLOURS AND SYMBOLS
 bands  = ['u', 'g', 'r', 'i', 'z', 'y']
 bandColors = ['#1600ea', '#31de1f', '#b52626', '#370201', '#ba52ff', '#61a2b3']
-bandsymbols = ['o', '^', 'v', 's', '*', 'p']
+bandSymbols = ['circle', 'triangle-up', 'triangle-down', 'square', 'star', 'hexagon']
 bandColorsDark = ['#3eb7ff','#30c39f','#ff7e00', '#2af5ff','#a7f9c1','#fdc900']
 
 # BOTH SIDEBARS SET TO BLACK
@@ -43,52 +43,51 @@ def object_difference_lightcurve(
     htmlLightcurve = object_difference_lightcurve(data)
     ```
     """
+
+    from plotly.subplots import make_subplots
+
     # CREATE DATA FRAME FOR LC
     forcedDF, unforcedDF, mergedDF = convert_objectdata_to_dataframes(objectData)
+    
 
     if forced:
         lcDF = unforcedDF 
     else:
         lcDF = unforcedDF
+        forcedDF = unforcedDF
 
-    # FILTER DATA FRAME
+    # DETERMINE SENSIBLE X-AXIS LIMITS
+    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(lcDF)
+
+    # DEFAULT DATA FRAME
     lcDF["marker_color"] = "#268bd2"
     lcDF["marker_symbol"] = "arrow-bar-down-open"
-    lcDF["marker_size"] = 8
+    lcDF["marker_size"]   = 10
     lcDF["marker_opacity"] = 0.6
     lcDF["name"] = "anon"
-    symbol_sequence = ["arrow-bar-down-open", "circle"]
 
-    for bandColor,band in zip(bandColors, bands):
+    for bandColor,band,symbol in zip(bandColors, bands, bandSymbols):
         lcDF.loc[(lcDF['band'] == band), "marker_color"] = bandColor
         lcDF.loc[(lcDF['band'] == band), "bcolor"] = bandColor
+        lcDF.loc[(lcDF['band'] == band), "marker_symbol"] = symbol
 
-    lcDF["marker_symbol"] = "circle"
-    lcDF["marker_size"]   = 10
-
-    # SORT BY COLUMN NAME
-    discovery = lcDF.head(1)
+    # SORT BY COLUMN NAME ... DISCOVERY IS ALWAYS FROM UNFORCED DATA
+    discovery = unforcedDF.head(1)
 
     # GENERATE THE DATASETS
     allDataSets = []
 
     for band in bands:
         BandData = lcDF.loc[(lcDF['band'] == band)]
-        BandData["name"] = band + "-band flux detection"
+        BandData["name"] = band + "-band"
         allDataSets.append(BandData)
 
-    # START TO PLOT LOG flux
-    from plotly.subplots import make_subplots
+    # START PLOTTING
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    # fig = go.Figure()
-
     for data in allDataSets:
         if len(data.index):
-            dataType = "Diff Mag"
-            error_y = {'type': 'data', 'array': data["nanojanskyerr"]}
-
+            error_y = {'type': 'data', 'array': data["nanojanskyerr"], 'visible': True}
             fig.add_trace(
-
                 go.Scatter(
                     x=data["mjd"],
                     y=data["nanojansky"],
@@ -105,19 +104,19 @@ def object_difference_lightcurve(
                     marker_opacity=data["marker_opacity"].values[0],
                     name=data["name"].values[0],
                     hovertemplate="<b>" + data["name"] + "</b><br>" +
-                    "MJD: %{x:.2f}<br>" +
-                    "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{customdata[1]:.2f} nJy<br>" +
-                    "Magnitude: %{customdata[2]:.2f}" +
-                    "<extra></extra>",
+                        "MJD: %{x:.2f}<br>" +
+                        "UTC: %{customdata[0]}<br>" +
+                        "Flux: %{customdata[1]:.2f} nJy<br>" +
+                        "Magnitude: %{customdata[2]:.2f}" +
+                        "<extra></extra>",
                 ),
                 secondary_y=False
             )
+            ## REPLOT THE SAME DATA ON THE RHS AXIS (BUT HIDDEN)
             fig.add_trace(
-
                 go.Scatter(
                     x=data["mjd"],
-                    y=data["magpsf"],
+                    y=data["nanojansky"],
                     customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     mode='markers',
                     marker_size=data["marker_size"].values[0],
@@ -127,43 +126,47 @@ def object_difference_lightcurve(
                     marker_line_width=1.5,
                     marker_opacity=data["marker_opacity"].values[0],
                     name=data["name"].values[0],
-                    hovertemplate="<b>" + data["name"] + "</b><br>" +
-                    "MJD: %{x:.2f}<br>" +
-                    "UTC: %{customdata[0]}<br>" +
-                    "Flux: %{customdata[1]:.2f} nJy<br>" +
-                    "Magnitude: %{customdata[2]:.2f}" +
-                    "<extra></extra>",
+                    hoverinfo='skip',
+                    opacity=0,
+                    showlegend=False
                 ),
                 secondary_y=True
             )
+            # REPLOT FOR THE TOP X-AXIS
             fig.add_traces(
                 go.Scatter(x=data["utc"],
-                           y=data["nanojansky"],
+                           y=data["nanojansky"],    
                            showlegend=False,
                            opacity=0,
                            hoverinfo='skip',
                            xaxis="x2"))
 
-    # DETERMINE SENSIBLE X-AXIS LIMITS
-    mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax = get_default_axis_ranges(forcedDF, unforcedDF)
-
-    if forcedDF is None:
-        title = "MJD"
-        tickfont_size = 14
-        title_font_size = 1
+    if forced or (forcedDF is None and not forced):
+        btitle = "MJD"
+        btickfont_size = 14
+        btitle_font_size = 16
     else:
-        title = ""
-        tickfont_size = 11
-        title_font_size = 16
+        btitle = ""
+        btickfont_size = 11
+        btitle_font_size = 16
+        
+
+    if forced:
+        ttitle = ""
+        ttickfont_size = 11
+        ttitle_font_size = 16
+    else:
+        ttitle = "UTC Time"
+        ttickfont_size = 14
+        ttitle_font_size = 16
 
     fig.update_layout(
-        legend=dict(orientation="h"),
         xaxis=dict(
             side="bottom",
             range=[mjdMin, mjdMax],
             tickformat='d',
             tickangle=-55,
-            tickfont_size=tickfont_size,
+            tickfont_size=btickfont_size,
             showline=True,
             linewidth=1.5,
             linecolor='#1F2937',
@@ -173,25 +176,33 @@ def object_difference_lightcurve(
             zerolinewidth=1.5,
             zerolinecolor='#1F2937',
             ticks='inside',
-            title=title, 
-            title_font_size=title_font_size
+            title=dict(text=btitle), 
+            title_font_size=btitle_font_size
         ),
         xaxis2=dict(
-            title=dict(text=""),
+            title=dict(text=ttitle),
+            title_font_size=ttitle_font_size,
+            tickfont_size=ttickfont_size,
             side="top",
             range=[utcMin, utcMax],
             overlaying="x",
             tickmode="sync",
             tickangle=-55,
-            tickfont_size=14,
             showline=True,
             linewidth=1.5,
             linecolor='#1F2937'
-        ),
+        )
     )
 
+    # Define the tick values for the secondary y-axis
+    rangeFlux = fluxMax - fluxMin
+    tickvals = np.linspace(fluxMin-rangeFlux*5, fluxMax+rangeFlux*5,  70)
+
+    # Convert tick values to the desired format
+    ticktext = [f'{flux2mag(val):.2f}' if val > 0 else '' for val in tickvals]
+
     fig.update_yaxes(
-        range=[uffluxMin, uffluxMax],
+        range=[fluxMin, fluxMax],
         tickformat='.0f',
         tickfont_size=14,
         ticksuffix=" ",
@@ -205,107 +216,35 @@ def object_difference_lightcurve(
         zeroline=True,
         zerolinewidth=1.5,
         zerolinecolor='#1F2937',
-        mirror=True,
         ticks='inside',
         title="Difference Flux (nanoJy)",
         title_font_size=14,
         title_font_color=fluxcolor,
-        secondary_y=False
-    )
-    # if forced:
-    #     fig.update_yaxes(autorange="reversed",secondary_y=True)
-    # else:
-    #     fig.update_yaxes(autorange="reversed",secondary_y=True,type="log")
+        secondary_y=False,
 
-    for k in fig.layout:
-        if k[:5] ==  'y2axis':
-            # print(k)
-            fig.layout[k]['range'] = [flux2mag(uffluxMin),flux2mag(uffluxMax)]
-            fig.layout[k]['title']['text'] = "Difference Magnitude (AB)"
-
-
-    # fig.update_yaxes(   # RDW:log right axis
-    #     range=[math.log10(flux2mag(uffluxMin)), math.log10(flux2mag(uffluxMax))],  # Inverted range
-    #     secondary_y=True,   # right side
-    #     showgrid=True,
-    #     # tickformat='.3f',
-    #     tickfont_size=14,
-    #     tickfont_color=magcolor,
-    #     tickcolor=magcolor,
-    #     ticksuffix=" ",
-    #     showline=True,
-    #     linewidth=1.5,
-    #     linecolor='#1F2937',
-    #     ticks='inside',
-    #     title_text="Difference Magnitude (AB)",
-    #     title_font_size=16,
-    #     title_font_color=magcolor,
-    #     # overlaying="y",
-    #     # tickmode="sync",
-    #     type="log"
-    # )
-
-    # Add a text box annotation
-    fig.add_annotation(
-        text=f"uffluxMin = {uffluxMin:.2f} nJy<br>uffluxMax = {uffluxMax:.2f} nJy<br>mag min = {flux2mag(uffluxMin):.2f} mag<br>mag max = {flux2mag(uffluxMax):.2f} mag",
-        xref="paper", yref="paper",
-        x=0.5, y=1.1,  # Position above the plot
-        showarrow=False,
-        font=dict(size=14, color="#1F2937"),
-        align="center",
-        bgcolor="#E6E5E5",
-        bordercolor="#1F2937",
-        borderwidth=1
     )
 
-    # Create shared y-axis scaling
-    # fig.update_yaxes(
-    #     range=[uffluxMin, uffluxMax],
-    #     tickformat='.0f',
-    #     tickfont_size=14,
-    #     ticksuffix=" ",
-    #     tickfont_color=fluxcolor,
-    #     showline=True,
-    #     showgrid=True,
-    #     linewidth=1.5,
-    #     linecolor='#1F2937',
-    #     gridcolor='#F0F0F0',
-    #     gridwidth=1,
-    #     zeroline=True,
-    #     zerolinewidth=1.5,
-    #     zerolinecolor='#1F2937',
-    #     mirror=True,
-    #     ticks='inside',
-    #     title="Difference Flux (nanoJy)",
-    #     title_font_size=14,
-    #     title_font_color=fluxcolor,
-    #     secondary_y=False,
-    #     scaleanchor="y2",
-    #     scaleratio=1
-    # )
-    
-    # fig.update_yaxes(   # RDW:log right axis
-    #     range=[flux2mag(uffluxMin), flux2mag(uffluxMax)],
-    #     secondary_y=True,   # right side
-    #     showgrid=False,
-    #     tickformat='.1f',
-    #     tickfont_size=14,
-    #     tickfont_color=magcolor,
-    #     tickcolor=magcolor,
-    #     ticksuffix=" ",
-    #     showline=True,
-    #     linewidth=1.5,
-    #     linecolor='#1F2937',
-    #     ticks='inside',
-    #     title_text="Difference Magnitude",
-    #     title_font_size=16,
-    #     title_font_color=magcolor,
-    #     matches='y',
-    #     scaleanchor="y",
-    #     scaleratio=1
-    # )
-
-
+    fig.update_yaxes(   # RDW:log right axis
+        range=[fluxMin, fluxMax],  # Inverted range
+        secondary_y=True,   # right side
+        showgrid=True,
+        tickformat='.2f',
+        tickfont_size=14,
+        tickfont_color=magcolor,
+        tickcolor=magcolor,
+        ticksuffix=" ",
+        showline=True,
+        linewidth=1.5,
+        linecolor='#1F2937',
+        ticks='inside',
+        title_text="Difference Magnitude (AB)",
+        title_font_size=16,
+        title_font_color=magcolor,
+        tickvals=tickvals,  # Original tick values
+        ticktext=ticktext,    # Converted tick labels
+        overlaying="y",
+        matches="y"  # Keep the two y-axes in sync
+    )
 
     # UPDATE PLOT LAYOUT
     fig.update_layout(
@@ -347,8 +286,8 @@ def object_difference_lightcurve(
                     dict(
                         label="Log",
                         method="relayout",
-                        args=[{"yaxis.type": "linear", "updatemenus[0].font.color": "#D1D5DB", "updatemenus[0].bgcolor": "#6B7280"}],
-                        args2=[{"yaxis.type": "log","updatemenus[0].font.color": "#E11D48", "updatemenus[0].bgcolor": "#D1D5DB"}],
+                        args=[{"yaxis.type": "linear", "yaxis2.type": "linear", "updatemenus[0].font.color": "#D1D5DB", "updatemenus[0].bgcolor": "#6B7280"}],
+                        args2=[{"yaxis.type": "log","yaxis2.type": "log","updatemenus[0].font.color": "#E11D48", "updatemenus[0].bgcolor": "#D1D5DB"}],
                     ),
                 ],
             )
@@ -357,7 +296,7 @@ def object_difference_lightcurve(
 
     fig.add_trace(go.Scatter(
         x=discovery["mjd"],
-        y=[uffluxMin*1.05],
+        y=[fluxMin*1.08],
         mode="markers+text",
         marker_symbol="triangle-up",
         marker_opacity=1,
@@ -370,11 +309,13 @@ def object_difference_lightcurve(
 
     if forced:
         title_text = "Forced Photometry Flux"
+        y=0.82
     else:
         title_text = "Standard Photometry Flux"
+        y=0.80
 
     fig.update_layout(
-        title=dict(text=title_text, font=dict(size=20), y=0.85,
+        title=dict(text=title_text, font=dict(size=20), y=y,
                    x=0.5,
                    xanchor='center',
                    yanchor='top',
@@ -388,35 +329,31 @@ def object_difference_lightcurve(
             'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
             'toImageButtonOptions': {'filename': objectData["diaObjectId"] + "_lasair_lc"},
             'responsive': True
-        })
+        },post_script="""
+            document.addEventListener("DOMContentLoaded", function() {
+                let scrollers = document.querySelectorAll('.x2y');
+                scrollers.forEach(function(scroller) {
+                    scroller.remove();
+                });
+            });
+        """)
 
     return htmlLightcurve, mergedDF
 
 def get_default_axis_ranges(
-        forcedDF,
-        unforcedDF):
+        lcDF):
     """*get the default x and y-axis ranges for the lightcurve plots*
 
     **Key Arguments:**
 
-    - `forcedDF` -- forced photometry dataframe
-    - `unforcedDF` -- unforced photometry dataframe    
+    - `lcDF` -- licghtcurve dataframe
     """
 
-    mjdMin = unforcedDF["midpointMjdTai"].min()
-    mjdMax = unforcedDF["midpointMjdTai"].max()
-
-    if forcedDF is not None:
-        mjdMin2 = forcedDF["midpointMjdTai"].min()
-        mjdMax2 = forcedDF["midpointMjdTai"].max()
-
-        if mjdMin2 < mjdMin:
-            mjdMin = mjdMin2
-        if mjdMax2 > mjdMax:
-            mjdMax = mjdMax2
+    mjdMin = lcDF["midpointMjdTai"].min()
+    mjdMax = lcDF["midpointMjdTai"].max()
 
     # SORT BY COLUMN NAME
-    discovery = unforcedDF.head(1)
+    discovery = lcDF.head(1)
     if mjdMin > discovery["midpointMjdTai"].min():
         mjdMin = discovery["midpointMjdTai"].min()
 
@@ -430,42 +367,25 @@ def get_default_axis_ranges(
     utcMax = Time(mjdMax, format='mjd').iso
 
     # DETERMINE SENSIBLE Y-AXIS LIMITS
-    # for the linear plot
-    if forcedDF is not None:
-        fluxMax = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
-                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
-                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
-        fluxMax = fluxMax.max()
-        fluxMin = forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
-                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - forcedDF.loc[((forcedDF['midpointMjdTai'] > mjdMin) & \
-                (forcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
-        fluxMin = fluxMin.min()
-        if fluxMin < 0 and fluxMax < 0:
-            fluxMax = 0
+    fluxMax = lcDF.loc[((lcDF['midpointMjdTai'] > mjdMin) & \
+            (lcDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + lcDF.loc[((lcDF['midpointMjdTai'] > mjdMin) & \
+            (lcDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
+    fluxMax = fluxMax.max()
+    fluxMin = lcDF.loc[((lcDF['midpointMjdTai'] > mjdMin) & \
+            (lcDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - lcDF.loc[((lcDF['midpointMjdTai'] > mjdMin) & \
+            (lcDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
+    fluxMin = fluxMin.min()
+    if fluxMin < 0 and fluxMax < 0:
+        fluxMax = 0
 
-        yrange = fluxMax - fluxMin
-        fluxMax += (yrange * 0.1)
-        fluxMin -= (yrange * 0.1)
-    else:
-        fluxMin, fluxMax = None, None
+    yrange = fluxMax - fluxMin
+    fluxMax += (yrange * 0.1)
+    fluxMin -= (yrange * 0.1)
 
-    # DETERMINE SENSIBLE Y-AXIS LIMITS
-    if unforcedDF is not None:
-        uffluxMax = unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
-                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] + unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
-                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
-        uffluxMax = uffluxMax.max()
-        uffluxMin = unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
-                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojansky"] - unforcedDF.loc[((unforcedDF['midpointMjdTai'] > mjdMin) & \
-                (unforcedDF['midpointMjdTai'] < mjdMax)), "nanojanskyerr"]
-        uffluxMin = uffluxMin.abs().min()
-        if uffluxMin < 1: uffluxMin = 1
-        if uffluxMax < 0: uffluxMax = 10*abs(uffluxMin)
+    magMin = flux2mag(fluxMin)
+    magMax = flux2mag(fluxMax)
 
-        uffluxMax *= 1.05
-        uffluxMin *= 0.95
-
-    return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, uffluxMin, uffluxMax
+    return mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax
 
 def convert_objectdata_to_dataframes(
         objectData):
