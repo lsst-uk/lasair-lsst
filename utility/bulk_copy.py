@@ -1,11 +1,12 @@
 """
 Bulk copy utility. Copy a directory of files in parallel.
 Usage:
-    bulk_copy.py <src_dir> <dst_dir> [--nprocess=<n>] [--max_size=<bytes>]
+    bulk_copy.py <src_dir> <dst_dir> [--nprocess=<n>] [--max_size=<bytes>] [--rsync]
 
 Options:
     --nprocess=<n>     Number of processes [default: 1]
     --max_size=<bytes> Skip files larger than this, default is unlimited
+    --rsync            Use rsync update instead of cp
 """
 
 import os
@@ -14,10 +15,13 @@ from multiprocessing import Pool, current_process
 from time import perf_counter
 
 
-def copy_file(src, dst):
+def copy_file(src, dst, rsync=False):
     print(f"{current_process().name}: {src} -> {dst}")
     size = os.path.getsize(src)
-    os.system(f"cp {src} {dst}")
+    if rsync:
+        os.system(f"rsync --update {src} {dst}")
+    else:
+        os.system(f"cp {src} {dst}")
     return size
 
 
@@ -26,6 +30,7 @@ if __name__ == '__main__':
     args = docopt(__doc__)
     nprocess = int(args['--nprocess'])
     max_size = args['--max_size']
+    rsync = args['--rsync']
     src = args['<src_dir>']
     dst = args['<dst_dir>']
 
@@ -35,7 +40,7 @@ if __name__ == '__main__':
     for f in files:
         if max_size and os.path.getsize(f"{src}/{f}") > int(max_size):
             continue
-        copies.append((f"{src}/{f}",f"{dst}/{f}"))
+        copies.append((f"{src}/{f}", f"{dst}/{f}", rsync))
     print(f'Copying {len(copies)} files from {src} to {dst} with {nprocess} processes')
 
     # copy the files
