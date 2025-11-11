@@ -335,7 +335,15 @@ def object_difference_lightcurve(
                 scrollers.forEach(function(scroller) {
                     scroller.remove();
                 });
+                let plots = document.querySelectorAll('.js-plotly-plot');
+                plot.on('plotly_relayout', function(eventData) {
+                    let scrollers = document.querySelectorAll('.x2y');
+                    scrollers.forEach(function(scroller) {
+                        scroller.remove();
+                    });
+                });
             });
+            
         """)
 
     return htmlLightcurve, mergedDF
