@@ -49,12 +49,15 @@ def object_difference_lightcurve(
     # CREATE DATA FRAME FOR LC
     forcedDF, unforcedDF, mergedDF = convert_objectdata_to_dataframes(objectData)
     
+    if forced and not forcedDF:
+        return None, None
 
     if forced:
-        lcDF = unforcedDF 
+        lcDF = forcedDF 
     else:
         lcDF = unforcedDF
-        forcedDF = unforcedDF
+
+    
 
     # DETERMINE SENSIBLE X-AXIS LIMITS
     mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(lcDF)
@@ -134,7 +137,7 @@ def object_difference_lightcurve(
             )
             # REPLOT FOR THE TOP X-AXIS
             fig.add_traces(
-                go.Scatter(x=data["utc"],
+                go.Scatter(x=data["mjd"],
                            y=data["nanojansky"],    
                            showlegend=False,
                            opacity=0,
@@ -160,12 +163,49 @@ def object_difference_lightcurve(
         ttickfont_size = 14
         ttitle_font_size = 16
 
+    # Define the tick values for the secondary y-axis
+    rangeDays = int(mjdMax - mjdMin)
+    # NUMPY ARRAY FROM 10 to 100 in steps of 2
+    steps = int(rangeDays/5)
+    tickvals = np.arange(int(mjdMin)-rangeDays*5, int(mjdMax)+rangeDays*5,  steps)
+    
+
+    # Convert tick values to the desired format
+    mjd2utc = Time(tickvals, format='mjd')
+    from datetime import datetime
+    ticktext = [datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') for time in mjd2utc.iso]
+
+    adjustTopTitle = round(len(allDataSets)/2)-4
+    if adjustTopTitle > 0:
+        adjustTopTitle = adjustTopTitle * 0.05
+    else:
+        adjustTopTitle = 0
+
     fig.update_layout(
+        annotations=[
+            dict(
+                xref="paper",
+                yref="paper",
+                x=0.5+adjustTopTitle,  # Adjust x position (0=left, 1=right of plot area)
+                y=1.22, # Adjust y position (relative to plot area)
+                text=ttitle,
+                showarrow=False,
+                xanchor="right", 
+                yanchor="top",
+                font_size=ttitle_font_size,
+            )
+        ]
+    )
+
+    
+
+
+    fig.update_layout(  
         xaxis=dict(
             side="bottom",
             range=[mjdMin, mjdMax],
             tickformat='d',
-            tickangle=-55,
+            tickangle=-25,
             tickfont_size=btickfont_size,
             showline=True,
             linewidth=1.5,
@@ -176,27 +216,51 @@ def object_difference_lightcurve(
             zerolinewidth=1.5,
             zerolinecolor='#1F2937',
             ticks='inside',
-            title=dict(text=btitle), 
-            title_font_size=btitle_font_size
+            title=dict(
+                text=btitle
+            ),
+            title_font_size=btitle_font_size,
+            tickvals=tickvals,  # Original tick values
         ),
         xaxis2=dict(
-            title=dict(text=ttitle),
+            title=dict(
+                text=""
+            ),
             title_font_size=ttitle_font_size,
             tickfont_size=ttickfont_size,
             side="top",
-            range=[utcMin, utcMax],
-            overlaying="x",
-            tickmode="sync",
-            tickangle=-55,
+            overlaying="x", # Overlay on the first x-axis
+            matches="x",  # Keep the two x-axes in sync
+            range=[mjdMin, mjdMax],
+            tickangle=-25,
+            ticks='inside',
             showline=True,
             linewidth=1.5,
-            linecolor='#1F2937'
+            linecolor='#1F2937',
+            gridcolor='#F0F0F0',  # Add grid color
+            gridwidth=1,          # Add grid width
+            tickvals=tickvals,  # Original tick values
+            ticktext=ticktext,    # Converted tick labels
         )
     )
 
     # Define the tick values for the secondary y-axis
-    rangeFlux = fluxMax - fluxMin
-    tickvals = np.linspace(fluxMin-rangeFlux*5, fluxMax+rangeFlux*5,  70)
+    fluxMaxRounded = round((fluxMax) / 1000) * 1000
+    fluxMinRounded = round((fluxMin) / 1000) * 1000
+    rangeFlux = fluxMaxRounded - fluxMinRounded
+    if rangeFlux > 20000:
+        step = 5000
+    elif rangeFlux > 10000:
+        step = 3000
+    elif rangeFlux > 7000:
+        step = 1500
+    elif rangeFlux > 3000:
+        step = 1000
+    elif rangeFlux > 1000:
+        step = 500
+    elif rangeFlux > 500:
+        step = 200
+    tickvals = np.arange(fluxMinRounded-rangeFlux*5, fluxMaxRounded+rangeFlux*5,  step)
 
     # Convert tick values to the desired format
     ticktext = [f'{flux2mag(val):.2f}' if val > 0 else '' for val in tickvals]
@@ -221,6 +285,7 @@ def object_difference_lightcurve(
         title_font_size=14,
         title_font_color=fluxcolor,
         secondary_y=False,
+        tickvals=tickvals,  # Original tick values
 
     )
 
@@ -236,9 +301,14 @@ def object_difference_lightcurve(
         showline=True,
         linewidth=1.5,
         linecolor='#1F2937',
+        gridcolor='#F0F0F0',
+        gridwidth=1,
+        zeroline=True,
+        zerolinewidth=1.5,
+        zerolinecolor='#1F2937',
         ticks='inside',
         title_text="Difference Magnitude (AB)",
-        title_font_size=16,
+        title_font_size=14,
         title_font_color=magcolor,
         tickvals=tickvals,  # Original tick values
         ticktext=ticktext,    # Converted tick labels
@@ -246,23 +316,35 @@ def object_difference_lightcurve(
         matches="y"  # Keep the two y-axes in sync
     )
 
+
+    if forced:
+        title_text = " Forced Photometry"
+        margin_t = 100
+        y = 1.2
+    else:
+        title_text = " Standard Photometry"
+        margin_t = 0
+        y = 1.25
+
+
     # UPDATE PLOT LAYOUT
     fig.update_layout(
         plot_bgcolor='white',
         paper_bgcolor='white',
-        height=550,
-        margin_t=0,
+        height=550+margin_t,
+        margin_t=margin_t,
         margin_b=0,
         margin_r=1,
         legend=dict(
-            orientation="v",
+            orientation="h",
             yanchor="top",
-            y=1.0,
+            y=y,
             xanchor="left",
-            x=0,
+            x=0.0,
             bgcolor="#E6E5E5",
             borderwidth=4,
             bordercolor="#E6E5E5",
+            title=title_text
         ),
         hoverlabel=dict(
             font_color="white",
@@ -307,20 +389,7 @@ def object_difference_lightcurve(
         textposition="middle right"
     ))
 
-    if forced:
-        title_text = "Forced Photometry Flux"
-        y=0.82
-    else:
-        title_text = "Standard Photometry Flux"
-        y=0.80
 
-    fig.update_layout(
-        title=dict(text=title_text, font=dict(size=20), y=y,
-                   x=0.5,
-                   xanchor='center',
-                   yanchor='top',
-                   font_color="#657b83",)
-    )
 
     htmlLightcurve = fig.to_html(
         config={
@@ -329,22 +398,7 @@ def object_difference_lightcurve(
             'modeBarButtonsToRemove': ['select2d', 'lasso2d'],
             'toImageButtonOptions': {'filename': objectData["diaObjectId"] + "_lasair_lc"},
             'responsive': True
-        },post_script="""
-            document.addEventListener("DOMContentLoaded", function() {
-                let scrollers = document.querySelectorAll('.x2y');
-                scrollers.forEach(function(scroller) {
-                    scroller.remove();
-                });
-                let plots = document.querySelectorAll('.js-plotly-plot');
-                plot.on('plotly_relayout', function(eventData) {
-                    let scrollers = document.querySelectorAll('.x2y');
-                    scrollers.forEach(function(scroller) {
-                        scroller.remove();
-                    });
-                });
-            });
-            
-        """)
+        })
 
     return htmlLightcurve, mergedDF
 
