@@ -85,9 +85,9 @@
 				{% elif key == "url" and object.url|length > 0 %}
                                     <td><a href={{ object.url }}>url</a></td>
 
-                                {% elif key in 'decmean' %}
+                                {% elif key in 'decl' %}
                                     <td>{{object|keyvalue:key|floatformat:6 }}</td>
-                                {% elif key in 'ramean' %}
+                                {% elif key in 'ra' %}
                                     <td>{{object|keyvalue:key|floatformat:5 }}</td>
                                 {% elif 'mjd' in key %}
                                     <td>{{object|keyvalue:key|floatformat:4 }}</td>
