@@ -23,10 +23,12 @@ import sys
 
 sys.path.append('../common')
 
+
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0:
         mag = 31.4 - 2.5 * math.log10(flux)
         return mag
+
 
 def index(request):
     """
@@ -53,7 +55,7 @@ def index(request):
        objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.nSources > 1
+       AND objects.nSources > 8
        AND sherlock_classifications.classification in (%s)
     ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
