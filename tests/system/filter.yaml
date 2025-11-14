@@ -31,7 +31,7 @@
         single_transaction: yes
     - name: Create tables
       shell:
-        cmd: "python3 3_make_create_table.py sql {{ schema }} {{ item }} | mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}'"
+        cmd: "python3 3_make_create_table.py sql {{ schema_mod }} {{ item }} | mysql --user='{{ mysql_db_user }}' --password='{{ mysql_db_password }}' '{{ mysql_db_name }}'"
         chdir: "{{ ansible_env.HOME }}/{{ git_name }}/common/schema"
       loop:
         - objects

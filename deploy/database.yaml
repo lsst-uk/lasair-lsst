@@ -2,7 +2,7 @@
 
 - hosts: localhost,db,frontend_db,backend_db,cluster_control
   gather_facts: true
-  tags: facts
+  tags: always
 
 - hosts: db,frontend_db,backend_db,cluster_control
   gather_facts: false
@@ -299,7 +299,7 @@
   vars_files:
     - settings.yaml
   vars:
-    schema: 7_4_A
+    schema: "9_0"
   tasks:
     - name: Create SQL files
       ansible.builtin.shell:
@@ -322,7 +322,7 @@
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     git_branch: "{{ lasair_version }}"
-    schema: 7_4_A
+    schema: "9_0"
   roles:
     - lasair_database
   tags: setup_database
