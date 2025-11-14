@@ -77,7 +77,7 @@ if __name__ == '__main__':
         sys.exit()
 
     module = '%s.%s' % (schema_version, table)
-    print('importing ', module)
+    #print('importing ', module)
     schema_package = importlib.import_module(module)
     schema = schema_package.schema
 
