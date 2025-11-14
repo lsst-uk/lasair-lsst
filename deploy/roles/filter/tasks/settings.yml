@@ -2,4 +2,6 @@
   template: 
     src: common/settings.py.j2
     dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py" 
+  tags: settings
+
 

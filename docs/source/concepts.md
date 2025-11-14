@@ -7,6 +7,11 @@ LSST uses filters u,g,r,i,z,y. The wavelengths of these are
 
 When a lot of sources are found in the same place in the sky (i.e. within 1.5 arcsec), the collection is called an object.  Thus an object is a star or similar that *does not move* in the sky.  Usually it is assumed that an object corresponds to a real astrophysical object, such as star or something extragalactic.
 
+Sometimes the aggregation process of coincident sources to an object does not work perfectly,
+and there may be multiple objects in the Lasair database that are really all the same astrophysical object.
+There is a button on Lasair's object page labelled **Coincident diaObjects** that can find such 
+extra objects that really should be collected together as one.
+
 The brightness of a source in a transient survey is actually a *difference* brightness.
 If an object is a variable star, then its optical flux was measured before the survey -- 
 a reference flux -- and the source detection is the difference, positive or negative, from this.
@@ -14,8 +19,7 @@ Unfortunately, the trust magnitude scale that astronomers has used for 2,000 yea
 unsuitable for difference flux; it is a logarithm of flux, and therefore cannot handle
 negative difference flux. 
 
-There are also solar-system objects and solar-system sources. Lasair does not handle these,
-rather hands off the data to a downstream system called Adler.
+There are also solar-system objects and solar-system sources, but Lasair does not handle these.
 ## Lightcurve
 
 A lightcurve is a record of the brightness of an astrophysical object with time, so it is a collection of (time, brightness) pairs. For LSST the brightness of sources are calibrated and provided in flux, in the units of nanoJanskies (nJ). The conversion formula is

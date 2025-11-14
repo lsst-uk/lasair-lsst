@@ -25,7 +25,7 @@
 
                 <a href="https://antares.noirlab.edu/loci?query=%7B%22currentPage%22%3A1,%22filters%22%3A%5B%7B%22type%22%3A%22query_string%22,%22field%22%3A%7B%22query%22%3A%22%2a{{data.diaObjectId}}%2a%22,%22fields%22%3A%5B%22properties.ztf_object_id%22,%22locus_id%22%5D%7D,%22value%22%3Anull,%22text%22%3A%22ID%20Lookup%3A%20{{data.diaObjectId}}%22%7D%5D,%22sortBy%22%3A%22properties.newest_alert_observation_time%22,%22sortDesc%22%3Atrue,%22perPage%22%3A25%7D" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Antares </a>
 
-                <a href="https://www.legacysurvey.org/viewer?ra={{ data.objectData.ramean }}&dec={{ data.objectData.decmean }}&zoom=16&mark={{ data.objectData.ra }},{{ data.objectData.decl }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0"> DECaLS </a>
+                <a href="https://www.legacysurvey.org/viewer?ra={{ data.objectData.ra }}&dec={{ data.objectData.decl }}&zoom=16&mark={{ data.objectData.ra }},{{ data.objectData.decl }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2  ms-0"> DECaLS </a>
 
 		<a href="https://lsst.fink-portal.org/{{data.diaObjectId}}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Fink </a>
 

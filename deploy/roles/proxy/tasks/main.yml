@@ -18,7 +18,7 @@
 
 - name: "Get certificate"
   become: true
-  command: "certbot certonly --non-interactive --nginx -m {{ admin_email }} -d {{ server_name }} --agree-tos"
+  command: "certbot certonly --non-interactive --nginx -m {{ admin_email }} -d {{ server_name }},api.{{ server_name }} --agree-tos"
   register: certoutput
   args:
     creates: "/etc/letsencrypt/live/{{ server_name }}"

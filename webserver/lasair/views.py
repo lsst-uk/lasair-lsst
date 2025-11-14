@@ -23,10 +23,12 @@ import sys
 
 sys.path.append('../common')
 
+
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0:
         mag = 31.4 - 2.5 * math.log10(flux)
         return mag
+
 
 def index(request):
     """
@@ -40,25 +42,25 @@ def index(request):
 
     query = """
     SELECT objects.diaObjectId,
-       objects.ra, objects.decl,
+       mjdnow()-objects.lastDiaSourceMjdTai AS "days ago",
+       sherlock_classifications.classification AS "predicted type",
+       objects.nSources,
+       objects.absMag,
        objects.u_psfFlux,
        objects.g_psfFlux,
        objects.r_psfFlux,
        objects.i_psfFlux,
        objects.z_psfFlux,
        objects.y_psfFlux,
-       mjdnow()-objects.lastDiaSourceMjdTai AS "last detected",
-       sherlock_classifications.classification AS "predicted type"
+       objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.nSources > 1
-       AND sherlock_classifications.classification in 
+       AND objects.nSources > 8
+       AND sherlock_classifications.classification in (%s)
+    ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
     S = ['"' + sherlock_class + '"' for sherlock_class in sherlock_classes]
-    query += '(' + ','.join(S) + ') LIMIT 5000'
-
-#    FRONT_PAGE_CACHE = '/home/ubuntu/front_page_cache.json'
-#    FRONT_PAGE_STALE = 1800
+    query = query % (','.join(S))
 
     table = None
     try:
@@ -85,16 +87,6 @@ def index(request):
         except:
             pass
 
-    # ADD SCHEMA
-    schema = get_schema_dict("objects")
-
-    if len(table):
-        for k in table[0].keys():
-            if k not in schema:
-                schema[k] = "custom column"
-    schema["last detected"] = "Days since last detection"
-    schema["predicted type"] = "Predicted classification based on contextual information"
-
     nclass = len(sherlock_classes)
     nage = 5
 
@@ -117,11 +109,12 @@ def index(request):
         for fluxband in ['u_psfFlux', 'g_psfFlux', 'r_psfFlux', 'i_psfFlux', 'z_psfFlux', 'y_psfFlux']:
             if row[fluxband] and row[fluxband] > flux:
                 flux = row[fluxband]
+        row['psfFlux'] = flux
         mag = flux2mag(flux)
 
         iclass = sherlock_classes.index(row["predicted type"])
 
-        age = row["last detected"]
+        age = row["days ago"]
         if   age <  4: iage = 0
         elif age < 10: iage = 1
         elif age < 20: iage = 2
@@ -130,7 +123,7 @@ def index(request):
 
         alerts[iclass][iage].append({
             'diaObjectId': str(row['diaObjectId']),
-            'age': row["last detected"],
+            'age': row["days ago"],
             'class': row["predicted type"],
             'mag': mag,
             'coordinates': [row['ra'], row['decl']]
@@ -146,12 +139,31 @@ def index(request):
     except:
         news = ''
 
+    schema = {}
+    schema['diaObjectId'] = 'Unique ID for this object'
+    schema['days ago']    = 'Days since last detection of this object'
+    schema['sherlock']    = 'Sherlock classification for this object'
+    schema['nSources']    = 'Number of detections of this object'
+    schema['psfFlux']     = 'Flux from most recent detection in nJ '
+    schema['absMag']      = 'Peak absolute magnitude, if known'
+
+    textTable = []
+    for t in table:
+        textTable.append({
+            'diaObjectId'    : t['diaObjectId'],
+            'days ago'       : '%.1f' % t['days ago'],
+            'sherlock'       : t['predicted type'],
+            'nSources'       : t['nSources'],
+            'psfFlux'        : '%.0f' % t['psfFlux'],
+            'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
+        })
+
     context = {
         'web_domain': lasair_settings.WEB_DOMAIN,
         'alerts': str(alerts),
         'colors': str(colors),
         'news': news,
-        'table': table,
-        'schema': schema
+        'table': textTable,
+        'schema': schema,
     }
     return render(request, 'index.html', context)

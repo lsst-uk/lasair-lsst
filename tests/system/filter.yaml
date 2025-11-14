@@ -6,9 +6,9 @@
   gather_facts: true
   serial: 1
   vars_files:
+    - system_test_settings.yaml
     - ../../deploy/settings.yaml
   vars:
-    schema: 7_4_A
     mysql_db_name: filter_test
     mysql_db_user: ztf
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
