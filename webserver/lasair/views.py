@@ -115,11 +115,11 @@ def index(request):
         iclass = sherlock_classes.index(row["predicted type"])
 
         age = row["days ago"]
-        if   age <  4: iage = 0
-        elif age < 10: iage = 1
-        elif age < 20: iage = 2
-        elif age < 30: iage = 3
-        else:          iage = 4
+        if   age < 1: iage = 0
+        elif age < 3: iage = 1
+        elif age < 5: iage = 2
+        elif age <10: iage = 3
+        else:         iage = 4
 
         alerts[iclass][iage].append({
             'diaObjectId': str(row['diaObjectId']),
