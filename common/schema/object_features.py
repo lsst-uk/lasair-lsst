@@ -81,7 +81,7 @@ schema = {
         "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
 {"section":"Counting and Reliability", "doc":"Counts of diaSources, median of R"},
-    {"name": "medianR", "type": "ifloat", "origin": "lasair",
+    {"name": "medianR", "type": "float", "origin": "lasair",
             "doc": "Median of reliability for the diaSources in this diaObject" },
     {"name": "nSources",  "type": "int", "origin": "lasair",
             "doc": "Number of diaSources associated with this diaObject", "extra": "NOT NULL"},
