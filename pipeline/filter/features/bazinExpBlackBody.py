@@ -45,10 +45,17 @@ class bazinExpBlackBody(FeatureGroup):
         BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
                 A=100, T=4, t0=6, kr=0.1, kf=0.01)
         fit =  BE.make_fit(self.alert)
+#        if fit:
+#            filename = '/home/ubuntu/lsst_alerts2/' + str(self.alert['diaObjectId']) + 'a'
+#            BE.plot(self.alert, fit, filename)
+
         if not fit:
             BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
                 A=1000, T=4, t0=-5, kr=0.01, kf=0.01)
             fit =  BE.make_fit(self.alert)
+#            if fit:
+#                filename = '/home/ubuntu/lsst_alerts2/' + str(self.alert['diaObjectId']) + 'b'
+#                BE.plot(self.alert, fit, filename)
         if not fit:
             return fdict
 

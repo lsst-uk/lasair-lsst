@@ -29,6 +29,14 @@ def getFluxTimeBand(alert):
     band = [s['band']           for s in sources]
     return (flux, time, band)
 
+def getReliability(alert):
+    # gets the flux,time for all non null fluxes in diaSources
+    sources = sorted(alert['diaSourcesList'], 
+        key=lambda source: source['midpointMjdTai'])
+    sources = [s for s in sources if s['psfFlux'] is not None]
+    reliability = [s['reliability']        for s in sources]
+    return reliability
+
 def getAllFluxTimeBand(alert):
     # gets the flux,time for all non null fluxes in diaSources and forcedSourceOnDiaObjects
     sources = []
