@@ -359,7 +359,7 @@ def filters(fltr):
 
 def fast_anotation_filters(fltr):
     """run_annotation_queries.
-    Pulls the recent content from the kafka topic 'ztf_annotations' 
+    Pulls the recent content from the kafka topic 'lsst_annotations' 
     Each message has an annotator/topic name, and the diaObjectId that was annotated.
     Queries that have that annotator should run against that object
     """

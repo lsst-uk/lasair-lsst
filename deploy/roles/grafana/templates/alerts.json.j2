@@ -80,20 +80,20 @@
       "targets": [
         {
           "exemplar": true,
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"ztf_ingest\"}[5m])) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"lsst_ingest\"}[5m])) * 60 / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "ztf_ingest",
+          "legendFormat": "lsst_ingest",
           "refId": "A"
         },
         {
           "exemplar": true,
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"ztf_sherlock\"}[5m])) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"lsst_sherlock\"}[5m])) * 60 / {{ replication_count }}",
           "interval": "",
-          "legendFormat": "ztf_sherlock",
+          "legendFormat": "lsst_sherlock",
           "refId": "B"
         },
         {
@@ -294,7 +294,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"ztf_ingest\"}[1m])) by (topic) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"lsst_ingest\"}[1m])) by (topic) * 60 / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -306,7 +306,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "ztf_ingest rate",
+      "title": "lsst_ingest rate",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -492,7 +492,7 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"ztf_sherlock\"}[1m])) by (topic) * 60 / {{ replication_count }}",
+          "expr": "sum(rate(kafka_log_log_value{name=\"LogEndOffset\", topic=\"lsst_sherlock\"}[1m])) by (topic) * 60 / {{ replication_count }}",
           "format": "time_series",
           "hide": false,
           "instant": false,
@@ -504,7 +504,7 @@
       ],
       "thresholds": [],
       "timeRegions": [],
-      "title": "ztf_sherlock rate",
+      "title": "lsst_sherlock rate",
       "tooltip": {
         "shared": true,
         "sort": 0,
