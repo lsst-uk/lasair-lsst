@@ -24,7 +24,7 @@ class counting(FeatureGroup):
         medianR = statistics.median(reliability)
         nSourcesGood = 0
         for r in reliability:
-            if r > 0.5
+            if r > 0.5:
                 nSourcesGood += 1
 
         nSource = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0}
