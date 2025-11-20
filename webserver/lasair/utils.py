@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.http import JsonResponse
-#from django.conf import settings as django_settings
+from django.conf import settings as django_settings
 
 import dateutil.parser as dp
 from datetime import datetime, timedelta
@@ -216,13 +216,16 @@ def objjson(diaObjectId, lite=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
-        diaSource['since_now'] = mjd - now
+        diaSource['since_now'] = since_now = now - mjd
         count_all_diaSources += 1
         diaSourceId = diaSource['diaSourceId']
         date = datetime.strptime("1858/11/17", "%Y/%m/%d")
         date += timedelta(mjd)
         diaSource['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
 
+        if since_now > lasair_settings.MAX_CUTOUT_DAYS: 
+            # cutouts after this time will be gone.
+            continue
         # ADD IMAGE URLS
         diaSource['image_urls'] = {}
         for cutoutType in ['Science', 'Template', 'Difference']:
