@@ -16,6 +16,7 @@ class counting(FeatureGroup):
         "niSources",
         "nzSources",
         "nySources",
+        "lastDiaSourceMjdTai",
     ]    
 
     def run(self):
@@ -45,5 +46,6 @@ class counting(FeatureGroup):
             "niSources":    nSource['i'],
             "nzSources":    nSource['z'],
             "nySources":    nSource['y'],
+            "lastDiaSourceMjdTai" : max(time)
         }
         return out

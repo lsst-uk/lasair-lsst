@@ -31,7 +31,7 @@ schema = {
 {"name":"u_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest u flux"},
 {"name":"u_psfFluxMean", "type":"float", "origin": "lsst",
-    "doc":"Weighted mean point-source model magnitude for u filter. (nJy)"},
+    "doc":"Weighted mean point-source model flux for u filter. (nJy)"},
 {"name":"u_psfFluxMeanErr", "type":"float", "origin": "lsst",
     "doc":"Standard error of u_psfFluxMean. (nJy)"},
 
@@ -40,7 +40,7 @@ schema = {
 {"name":"g_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest g flux"},
 {"name":"g_psfFluxMean", "type":"float", "origin": "lsst",
-    "doc":"Weighted mean point-source model magnitude for g filter. (nJy)"},
+    "doc":"Weighted mean point-source model flux for g filter. (nJy)"},
 {"name":"g_psfFluxMeanErr", "type":"float", "origin": "lsst",
     "doc":"Standard error of g_psfFluxMean. (nJy)"},
 
@@ -49,7 +49,7 @@ schema = {
 {"name":"r_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest r flux"},
 {"name":"r_psfFluxMean", "type":"float", "origin": "lsst",
-    "doc":"Weighted mean point-source model magnitude for r filter. (nJy)"},
+    "doc":"Weighted mean point-source model flux for r filter. (nJy)"},
 {"name":"r_psfFluxMeanErr", "type":"float", "origin": "lsst",
     "doc":"Standard error of r_psfFluxMean. (nJy)"},
 
@@ -58,7 +58,7 @@ schema = {
 {"name":"i_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest i flux"},
 {"name":"i_psfFluxMean", "type":"float", "origin": "lsst",
-    "doc":"Weighted mean point-source model magnitude for i filter. (nJy)"},
+    "doc":"Weighted mean point-source model flux for i filter. (nJy)"},
 {"name":"i_psfFluxMeanErr", "type":"float", "origin": "lsst",
     "doc":"Standard error of i_psfFluxMean. (nJy)"},
 
@@ -67,7 +67,7 @@ schema = {
 {"name":"z_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest z flux"},
 {"name":"z_psfFluxMean", "type":"float", "origin": "lsst",
-        "doc":"Weighted mean point-source model magnitude for z filter. (nJy)"},
+        "doc":"Weighted mean point-source model flux for z filter. (nJy)"},
 {"name":"z_psfFluxMeanErr", "type":"float", "origin": "lsst",
         "doc":"Standard error of z_psfFluxMean. (nJy)"},
 
@@ -76,7 +76,7 @@ schema = {
 {"name":"y_latestMJD", "type":"float", "origin": "lasair",
     "doc":"MJD of Latest y flux"},
 {"name":"y_psfFluxMean", "type":"float", "origin": "lsst",
-        "doc":"Weighted mean point-source model magnitude for y filter. (nJy)"},
+        "doc":"Weighted mean point-source model flux for y filter. (nJy)"},
 {"name":"y_psfFluxMeanErr", "type":"float", "origin": "lsst",
         "doc":"Standard error of y_psfFluxMean. (nJy)"},
 
@@ -119,11 +119,11 @@ schema = {
 {"name": "BBBTemp",      "type": "float", "origin": "lasair",
         "doc": "Fitted Bazin temperature, (kiloKelvins)" },
 {"name": "BBBPeakFlux",  "type": "float", "origin": "lasair",
-        "doc": "If Bazin fit, the peak flux (nJy)" },
+        "doc": "If Bazin fit, the peak flux (nJy), else NULL" },
 {"name": "BBBPeakMJD",   "type": "float", "origin": "lasair",
-        "doc": "If Bazin fit, the time of the peak brightness" },
+        "doc": "If Bazin fit, the time of the peak brightness, else NULL" },
 {"name": "BBBPeakAbsMag","type": "float", "origin": "lasair",
-        "doc": "If Bazin fit and Sherlock host with distance, the peak absolute magnitude" },
+        "doc": "If Bazin fit and Sherlock host with distance, the peak absolute magnitude, else NULL" },
 
 {"section":"Milky Way", "doc":"Galactic latitude and extinction"},
 {"name": "glat", "type": "float", "origin": "lasair",

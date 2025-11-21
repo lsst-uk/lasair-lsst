@@ -119,7 +119,7 @@ def reformat(old, lasair_added=True):
         lasairData['sherlock']    = old['sherlock']
         lasairData['TNS']         = old['TNS']
         lasairData['annotations'] = old['annotations']
-    diaSources = []
+    diaSourcesList = []
     imageUrls = []
     for ds in old['diaSources']:
         del ds['json']
@@ -131,13 +131,13 @@ def reformat(old, lasair_added=True):
         del ds['image_urls']
         iu['diaSourceId'] = ds['diaSourceId']
         imageUrls.append(iu)
-        diaSources.append(ds)
+        diaSourcesList.append(ds)
     if lasair_added:
         lasairData['imageUrls'] = imageUrls
         new['lasairData'] = lasairData
     new['diaObject'] = diaObject
-    new['diaSources'] = diaSources
-    new['diaForcedSources'] = old['diaForcedSources']
+    new['diaSourcesList'] = diaSourcesList
+    new['diaForcedSourcesList'] = old['diaForcedSources']
     return new
 
 class ObjectSerializer(serializers.Serializer):
@@ -175,18 +175,20 @@ class ObjectSerializer(serializers.Serializer):
             try:
                 if lite: 
                     (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite,
-                        reliabilityThreshold=reliabilityThreshold))
+                        reliabilityThreshold=reliabilityThreshold)
+
                     result = {
                         'diaObjectId':objectId, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
                 else:
-                    (diaObject, diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite,
+                        reliabilityThreshold=reliabilityThreshold)
                     result = {
                         'diaObjectId':objectId, 
                         'diaObject':diaObject, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
             except Exception as e:
                 result = {'error': str(e)}
             LF.close()

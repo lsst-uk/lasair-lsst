@@ -8,7 +8,7 @@
             </div>
             <div class="col-10 col-md-11 col-xl-10 pe-lg-2 ps-lg-5">
                 <div class="d-block">
-                    <h2 class="h6 text-gray-400 mb-0 ps-2">Transient Name Server{% include "includes/info_tooltip.html" with info="Classification and/or discovery reports frm the IAU Transient Name Server" position="auto" link="https://www.wis-tns.org/" %}</h2>
+                    <h2 class="h6 text-gray-400 mb-0 ps-2">Transient Name Server{% include "includes/info_tooltip.html" with info="Classification and/or discovery reports from the IAU Transient Name Server" position="auto" link="https://www.wis-tns.org/" %}</h2>
                     <h3 class="fw-extrabold mb-2 ps-2">{% if data.TNS.type %}{{ data.TNS.type }} {% endif %}
                         {% if data.TNS.tns_name %}<a href=https://www.wis-tns.org/object/{{ data.TNS.tns_name }}>{{ data.TNS.tns_prefix }}{{ data.TNS.tns_name }}</a></h3>{% endif %}
                     </div>
@@ -19,7 +19,7 @@
                     <small class="text-gray-500">
                         {% if data.TNS.tns_name %}
                             The transient was discovered on <b><em>{{ data.TNS.disc_date }}</em></b> (MJD {{ data.TNS.disc_date_mjd|floatformat:2 }}) by {{ data.TNS.source_group }} as {{ data.TNS.disc_int_name }} with a discovery magnitude of <b><em>{% if data.TNS.disc_mag_filter %}{{ data.TNS.disc_mag_filter }} = {% endif %}{{ data.TNS.disc_mag|floatformat:2 }}</em></b>.{% if data.TNS.type %} It was subsequently classified as a <b><em>{{ data.TNS.type }}</em></b>{% if data.TNS.z %} at <b><em>z = {{data.TNS.z|floatformat:3}}</em></b>{% endif %}{% endif %}.{% else %}
-                            This transient has probably not been reported to the TNS as yet. <a href="https://wis-tns.org/search?ra={{ data.objectData.ramean }}&decl={{ data.objectData.decmean }}&radius=5&coords_unit=arcsec">Check the TNS directly at this location.</a>
+                            This transient has probably not been reported to the TNS as yet. <a href="https://wis-tns.org/search?ra={{ data.objectData.ra }}&decl={{ data.objectData.decl }}&radius=5&coords_unit=arcsec">Check the TNS directly at this location.</a>
                         {% endif %}
 
                     </small>

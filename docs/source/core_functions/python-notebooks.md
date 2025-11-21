@@ -78,8 +78,25 @@ detection above its mean/sigms between 70 and 10 days ago.
 
 #### [features/5_pair.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/5_pair.ipynb)
 
-#### [features/6_bazinBlackBody.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody.ipynb)
-How to use the BBB package to analyse light curves
+#### [features/6_bazinBlackBody](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/introduction.ipynb)
+This is a set of 5 notebooks to explain and allow experimentation 
+with the BazinBlackbody fitting package. 
+It attempts two 2D fits: one models the flux as exponential in time and blackbody in wavelength, the other as bazin in time (exp rise and exp fall) and blackbody in wavelength. One (with exponential) is an explosion in the early stages, the other (with Bazin) is an explosion that is fading from its peak.
+Please read the introduction first, then try some of the notebooks that utilise the fitting library:
+
+- [introduction.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/introduction.ipynb):
+Introduction, explanation, and caveats.
+- [example.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/example.ipynb):
+A simulated supernova from the plassticc dataset, fit with bazin-blackbody with temperature 3,800 K, 
+rise rate and fall rate of 0.13 and  0.01 magnitudes per day respectively.
+- [monochrome.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/monochrome.ipynb):
+All filter bands except the g are removed from the above example, showing that the bazin-blackbody still
+converges even with no range in the wavelength direction.
+- [synthetic](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/synthetic.ipynb):
+a synthetic lightcurve is built with bazin-blackbody lightcurve of 10 points, and the fit converges correctly. This is a good
+way to experiment with fitting sparse lightcurves.
+- [api_plot_lsst](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/api_plot_lsst.ipynb):
+A useful way to visualise the lightcurve plot of an arbitrary Rubin object.
 
 #### [features/7_periodFinder.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/7_periodFinder.ipynb)
 Finding a period from a lightcurve

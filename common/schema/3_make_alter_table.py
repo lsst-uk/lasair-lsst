@@ -73,7 +73,7 @@ if __name__ == '__main__':
     else:
         print("Usage: 3_make_alter_table.py switch schema_ver_old schema_ver_new table")
         print("Where switch can be sql or cql")
-        print("and schema_version can be for example 704")
+        print("and schema_version can be for example 7_4")
         print("and table is one of objects, sherlock_classifications, etc")
         sys.exit()
 

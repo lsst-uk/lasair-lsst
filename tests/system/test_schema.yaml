@@ -1,0 +1,51 @@
+# Various tests to validate that Lasair is deployed correctly
+
+---
+
+# database tests
+- hosts: db, backend_db, frontend_db
+  gather_facts: false
+  tasks:
+    - name: db server listening on port 3306
+      wait_for:
+        port: 3306
+        timeout: 1
+      tags: net
+  tags: db
+- hosts: cluster_control
+  gather_facts: false
+  tasks:
+    - name: cluster control server listening on port 9001
+      wait_for:
+        port: 9001
+        timeout: 1
+      tags: net
+  tags: db
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - system_test_settings.yaml
+  vars:
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
+  tasks:
+    - name: validate object db schema
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --mod={{ schema_mod }}.objects"
+      loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
+      changed_when: false
+    - name: validate object db schema via load balancer
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --mod={{ schema_mod }}.objects"
+      loop: "{{ groups['cluster_control'] }}"
+      changed_when: false
+    - name: validate db functions
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_db_func.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306"
+      loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
+      changed_when: false
+  tags: db
+
