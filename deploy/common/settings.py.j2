@@ -33,7 +33,7 @@ PUBLIC_GROUP_ID        = 'test124'
 # Schema registry
 #################
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
-SCHEMA_VERSION = "9_0"
+SCHEMA_VERSION = "9_0_A"
 
 # Pipeline runtime
 ##################
@@ -137,6 +137,9 @@ API_TOKEN              = '{{ powerapi_token }}'
 GRAFANA_USERNAME       = 'ztf'
 GRAFANA_PASSWORD       = '{{ settings.grafana_password }}'
 LASAIR_GRAFANA_URL     = "https://{{ lasair_name }}-svc.{{ domain }}/d/iILmd8-Wz/alerts"
+
+# Time to live for cutouts
+MAX_CUTOUT_DAYS        = 42    
 
 # Watchlist and Area control
 ############################
