@@ -23,6 +23,6 @@ schema = {
 {'class': 'org.apache.cassandra.db.compaction.TimeWindowCompactionStrategy', 
 'compaction_window_size': '7', 
 'compaction_window_unit': 'DAYS'}
-AND default_time_to_live=1814400
+AND default_time_to_live=31536000
 """
 }
