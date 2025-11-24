@@ -48,7 +48,7 @@
     virtualenv_command: 'python3 -m venv'
     extra_args: "--no-use-pep517"
     name: 
-      - qub-sherlock==3.0.4
+      - qub-sherlock==3.0.6
 
 - name: "Copy app.py"
   get_url:
