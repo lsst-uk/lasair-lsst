@@ -48,6 +48,7 @@
                         <th>UTC</th>
                         <th>band</th>
                         <th>target diff flux</th>
+			<th>reliability</th>
                         <th>images</th>
                         <th>alert packet</th>
                     </tr></thead>
@@ -59,13 +60,14 @@
                             <td>{{ cand.utc }}</td>
 			    <td>{{ cand.band }}</td>
 			    <td>{{ cand.psfFlux|floatformat:0 }} &plusmn; {{ cand.psfFluxErr|floatformat:0 }}</td>
+			    <td>{{ cand.reliability|floatformat:2 }}</td>
                             <td>
 				    {% if cand.image_urls.Science %} <a href='javascript:JS9Popout("/fits/{{ cand.diaSourceId }}_cutoutScience");'><small>target</small></a> {% endif %}
 				    {% if cand.image_urls.Template %} <a href='javascript:JS9Popout("/fits/{{ cand.diaSourceId }}_cutoutTemplate");'><small>ref</small></a> {% endif %}
 				    {% if cand.image_urls.Difference %} <a href='javascript:JS9Popout("/fits/{{ cand.diaSourceId }}_cutoutDifference");'><small>diff</small></a> {% endif %}
                             </td>
 
-                            <td> <a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a></td>
+                            <td> <a tabindex="0" class="disable"  data-bs-html="true"  data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top" data-bs-content='<pre><code>{{cand.json}}</code></pre>'>data</a></td>
 
                         </tr>
 
