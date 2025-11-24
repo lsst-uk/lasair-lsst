@@ -15,7 +15,7 @@ Usage:
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
 """
 

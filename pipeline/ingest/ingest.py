@@ -17,7 +17,7 @@ Options:
     --group_id=GID     Group ID for kafka, default is from settings
     --topic_in=TIN     Kafka topic to use, or
     --nid=NID          ZTF night number to use (default today)
-    --topic_out=TOUT   Kafka topic for output [default:ztf_sherlock]
+    --topic_out=TOUT   Kafka topic for output [default:lsst_sherlock]
     --wait_time=TIME   Override default wait time (in seconds)
     --nocutouts        Do not attempt to save cutout images
 """
@@ -619,7 +619,7 @@ def run_ingest(args, log=None):
     else:
         topic_in = 'lsst-alerts-v9.0'
 
-    topic_out = args.get('--topic_out') or 'ztf_ingest'
+    topic_out = args.get('--topic_out') or 'lsst_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
     nocutouts = args.get('--nocutouts', False)
