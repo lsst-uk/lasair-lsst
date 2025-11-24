@@ -144,6 +144,7 @@ class ObjectSerializer(serializers.Serializer):
     objectId     = serializers.CharField(required=True)
     lite         = serializers.BooleanField(default=False)
     lasair_added = serializers.BooleanField(default=True)
+    reliabilityThreshold = serializers.FloatField(default=0)
 
     def save(self):
         objectId = self.validated_data['objectId']
@@ -168,17 +169,21 @@ class ObjectSerializer(serializers.Serializer):
             except Exception as e:
                 result = {'error': str(e)}
         else:
-            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
+            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD,
+                reliabilityThreshold=reliabilityThreshold)
 
             try:
                 if lite: 
-                    (diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
+                    (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite,
+                        reliabilityThreshold=reliabilityThreshold)
+
                     result = {
                         'diaObjectId':objectId, 
                         'diaSourcesList':diaSourcesList, 
                         'diaForcedSourcesList':diaForcedSourcesList}
                 else:
-                    (diaObject, diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite,
+                        reliabilityThreshold=reliabilityThreshold)
                     result = {
                         'diaObjectId':objectId, 
                         'diaObject':diaObject, 

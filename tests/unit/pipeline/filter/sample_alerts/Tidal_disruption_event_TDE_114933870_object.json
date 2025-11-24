@@ -120,5 +120,7 @@
   "penultimatePairMJD": null,
   "penultimatePairColourMag": null,
   "penultimatePairColourBands": null,
-  "penultimatePairColourTemp": null
+  "penultimatePairColourTemp": null,
+  "medianR": 0.0,
+  "nSourcesGood": 0
 }
