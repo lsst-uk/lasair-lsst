@@ -37,7 +37,8 @@ def object_detail(request, diaObjectId):
     ]
     ```           
     """
-    data = objjson(diaObjectId, lite=True)
+#    data = objjson(diaObjectId, lite=True)
+    data = objjson(diaObjectId, lite=False)
 
     # how to replace the real data with fake data
 #    with open('/home/ubuntu/fake.json', 'r') as f:
@@ -67,9 +68,12 @@ def object_detail(request, diaObjectId):
     else:
         lcData = data["diaSources"]
 
+    def my_json_encoder(obj):
+        return str(obj)
+
     return render(request, 'object/object_detail.html', {
         'data': data,
-        'json_data': json.dumps(data2),
+        'json_data': json.dumps(data2, default=my_json_encoder),
         'authenticated': request.user.is_authenticated,
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
