@@ -40,7 +40,6 @@ class counting(FeatureGroup):
         out = { 
             "medianR":      medianR,
             "latestR":      latestR,
-            "nSources":     nSources,
             "nSourcesGood": nSourcesGood,
             "nuSources":    nSource['u'],
             "ngSources":    nSource['g'],
