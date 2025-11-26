@@ -26,6 +26,9 @@ schema = {
     "doc": "Earliest MJD of a diaSource" },
 
 {"section":"Latest Flux", "doc":"Most recent fluxes with errors"},
+{"name":"latest_psfFlux", "type":"float", "origin": "lasair",
+    "doc":"Latest flux of any band (nJy)"},
+
 {"name":"u_psfFlux", "type":"float", "origin": "lasair",
     "doc":"Latest u flux (nJy)"},
 {"name":"u_latestMJD", "type":"float", "origin": "lasair",
@@ -83,8 +86,10 @@ schema = {
 {"section":"Counting and Reliability", "doc":"Counts of diaSources, median of R"},
     {"name": "medianR", "type": "float", "origin": "lasair",
             "doc": "Median of reliability for the diaSources in this diaObject" },
-    {"name": "nSources",  "type": "int", "origin": "lasair",
-            "doc": "Number of diaSources associated with this diaObject", "extra": "NOT NULL"},
+    {"name": "latestR", "type": "float", "origin": "lasair",
+            "doc": "Most recent reliability for the diaSources in this diaObject" },
+    {"name": "nDiaSources",  "type": "int", "origin": "lsst",
+            "doc": "Number of diaSources associated with this diaObject"},
     {"name": "nSourcesGood", "type": "int", "origin": "lasair",
             "doc": "Number sources with reliability > 0.5" },
     {"name": "nuSources", "type": "int", "origin": "lasair",
