@@ -35,12 +35,9 @@ class counting(FeatureGroup):
         if self.verbose:
             print('Found %d sources' % len(time))
 
-        nSources = len(time)
-
         out = { 
             "medianR":      medianR,
             "latestR":      latestR,
-            "nSources":     nSources,
             "nSourcesGood": nSourcesGood,
             "nuSources":    nSource['u'],
             "ngSources":    nSource['g'],
