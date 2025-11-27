@@ -260,6 +260,8 @@ def object_difference_lightcurve(
         step = 500
     elif rangeFlux > 500:
         step = 200
+    else:
+        step = 100
     tickvals = np.arange(fluxMinRounded-rangeFlux*5, fluxMaxRounded+rangeFlux*5,  step)
 
     # Convert tick values to the desired format
