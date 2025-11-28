@@ -144,7 +144,7 @@ annotated external to Lasair. You can also set up your own annotation service --
 Once you can build a filter with the web pages, you might want to run with python code instead of clicks.
 There is a client library for Lasair with methods for positional search, 
 running queries on the Lasair database, and other functions -- see 
-[here](core_functions/client.html). There is also a set of Jupyter notebooks illustrating use of the client [here](core_functions/python_notebooks.html).
+[here](core_functions/client.html). There is also a set of Jupyter notebooks illustrating use of the client [here](core_functions/python-notebooks.html).
 
 ### Kafka and Annotation
 Once you have a filter that produces the alerts you want, you might want to have your machine receive them and act on your behalf. This is explained [here](core_functions/alert-streams.html).
