@@ -133,7 +133,7 @@ def objjson(diaObjectId, lite=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     if lite:
-        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai,glat,ebv '
+        query = 'SELECT nDiaSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai,glat,ebv '
     else:
         query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
