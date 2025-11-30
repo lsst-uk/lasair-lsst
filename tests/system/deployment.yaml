@@ -72,6 +72,25 @@
       changed_when: false
   tags: db
 
+# cassandra tests
+- hosts: localhost
+  gather_facts: false
+  vars:
+    schemata:
+      - diaObjects
+      - diaSources
+      - diaForcedSources
+      - ssObjects
+      - ssSources
+  tasks:
+    - name: validate cassandra schemata
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --host=lasair-lsst-dev-cassandra-0 --port=9042 --mod={{ schema_mod }}.{{ item }}"
+      loop: "{{ schemata }}"
+      changed_when: false
+  tags: db
+
 # kafka tests
 - hosts: kafka, kafka_pub
   gather_facts: false
