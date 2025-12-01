@@ -8,7 +8,7 @@ class counting(FeatureGroup):
 
     _features = [
         "medianR",
-        "nSources",
+        "latestR",
         "nSourcesGood",
         "nuSources",
         "ngSources",
@@ -23,6 +23,7 @@ class counting(FeatureGroup):
         (flux, time, band) = getFluxTimeBand(self.alert)
         reliability = getReliability(self.alert)
         medianR = statistics.median(reliability)
+        latestR = reliability[-1]    # last one
         nSourcesGood = 0
         for r in reliability:
             if r > 0.5:
@@ -34,11 +35,9 @@ class counting(FeatureGroup):
         if self.verbose:
             print('Found %d sources' % len(time))
 
-        nSources = len(time)
-
         out = { 
             "medianR":      medianR,
-            "nSources":     nSources,
+            "latestR":      latestR,
             "nSourcesGood": nSourcesGood,
             "nuSources":    nSource['u'],
             "ngSources":    nSource['g'],

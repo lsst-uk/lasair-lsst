@@ -95,7 +95,7 @@ def filter_query_detail(request, mq_id, action=False):
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == filterQuery.user.id)
     is_public = (filterQuery.public > 0)
-    is_visible = is_owner or is_public
+    is_visible = is_owner or is_public or request.user.is_superuser
     if not is_visible:
         messages.error(request, "This filter is private and not visible to you")
         return render(request, 'error.html')

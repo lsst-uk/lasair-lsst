@@ -137,7 +137,7 @@ def watchmap_detail(request, ar_id):
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == watchmap.user.id)
     is_public = (watchmap.public and watchmap.public > 0)
-    is_visible = is_owner or is_public
+    is_visible = is_owner or is_public or request.user.is_superuser
     if not is_visible:
         messages.error(request, "This watchmap is private and not visible to you")
         return render(request, 'error.html')
