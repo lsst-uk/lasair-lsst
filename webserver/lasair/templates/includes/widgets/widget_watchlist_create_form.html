@@ -10,8 +10,7 @@
             </div>
             <div class="modal-body px-md-5">
                 <h2 class="h4 text-center">Create New Watchlist</h2>
-                <p class="text-center"><small class="text-gray-500">
-                    A Watchlist is composed of a set of locations in the sky, together with an association radius in arcseconds. These locations are presumably coordinates of sources of specific interest to you. Use a Watchlist to be alerted of transient events found in association with any of these sources. Your Watchlists will appear in the </em>My Watchlists</em> of the Watchlists index.
+                <p class="text-center"><small class="text-gray-500">A Watchlist is composed of a set of locations in the sky, together with an association radius in arcseconds. These locations are presumably coordinates of sources of specific interest to you. Use a Watchlist to be alerted of transient events found in association with any of these sources. Your Watchlists will appear in the </em>My Watchlists</em> of the Watchlists index.
             </small>
         </p>
 
@@ -46,7 +45,7 @@
             </div>
 
             <div class="form-group mb-4">
-                <label for="radius">Association radius (arcsec){% include "includes/info_tooltip.html" with info="The is the default search radius for your catalogue. If individual sources in your catalogue include their own association radii these will be used instead" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}</label>
+                <label for="radius">Association radius (arcsec){% include "includes/info_tooltip.html" with info="The is the default search radius for your catalogue. If individual sources in your catalogue include their own association radii these will be used instead. The maximum radius allowed is 1800 arcsec." position="auto" link=docroot|add:"/core_functions/watchlists.html" %}</label>
                 <div class="input-group">
                     {{ form.radius|add_class:"form-control" }}
                 </div>

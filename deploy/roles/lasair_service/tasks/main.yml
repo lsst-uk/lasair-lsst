@@ -33,6 +33,7 @@
       - fink-client
       - lasair
       - skytag
+      - tqdm
 
 - name: Install more python packages
   become: yes
