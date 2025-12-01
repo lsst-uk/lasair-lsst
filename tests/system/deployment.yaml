@@ -250,7 +250,7 @@
     - name: validate cassandra schemata
       ansible.builtin.command:
         chdir: ../../utility
-        cmd: "python3 check_schema.py --cassandra --host=lasair-lsst-dev-cassandranodes-0 --port=9042 --mod={{ schema_mod }}.{{ item }}"
+        cmd: "python3 check_schema.py --cassandra --host={{ groups['cassandranodes'][0] }} --port=9042 --mod={{ schema_mod }}.{{ item }}"
       loop: "{{ schemata }}"
       changed_when: false
   tags: cassandra
