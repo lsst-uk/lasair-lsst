@@ -72,25 +72,6 @@
       changed_when: false
   tags: db
 
-# cassandra tests
-- hosts: localhost
-  gather_facts: false
-  vars:
-    schemata:
-      - diaObjects
-      - diaSources
-      - diaForcedSources
-      - ssObjects
-      - ssSources
-  tasks:
-    - name: validate cassandra schemata
-      ansible.builtin.command:
-        chdir: ../../utility
-        cmd: "python3 check_schema.py --host=lasair-lsst-dev-cassandra-0 --port=9042 --mod={{ schema_mod }}.{{ item }}"
-      loop: "{{ schemata }}"
-      changed_when: false
-  tags: db
-
 # kafka tests
 - hosts: kafka, kafka_pub
   gather_facts: false
@@ -251,6 +232,27 @@
         port: 9042
         timeout: 1
       tags: net
+  tags: cassandra
+
+# cassandra schema test
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - system_test_settings.yaml
+  vars:
+    schemata:
+      - diaObjects
+      - diaSources
+      - diaForcedSources
+      - ssObjects
+      - ssSources
+  tasks:
+    - name: validate cassandra schemata
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --cassandra --host=lasair-lsst-dev-cassandranodes-0 --port=9042 --mod={{ schema_mod }}.{{ item }}"
+      loop: "{{ schemata }}"
+      changed_when: false
   tags: cassandra
 
 # cutout cassandra tests
