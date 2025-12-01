@@ -67,7 +67,7 @@ The upload form is shown here:
 Fill in the name and description of the watchlist. Choose a default value of the 
 radius to use in matching, in arcseconds. 
 Each line should be RA, Dec, ID, and may have a fourth entry, the radius to use in matching, 
-in arcseconds, if different from the default. Then click “Create”.
+in arcseconds, if different from the default. The maximum radius allowed is 1800 arcsec, and radii greater than this value will be reduced to 1800 arcsec. Then click “Create”.
 
 Here is a successful creation of a watchlist. Some messages – “Bad line” – because there were 
 some lines without data, but you can ignore these, and look for where it 
