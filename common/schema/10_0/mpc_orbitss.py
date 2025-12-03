@@ -1,5 +1,5 @@
 schema = {
-  'indexes':['PRIMARY KEY ("ssObjectId")'],
+  'indexes':['PRIMARY KEY ("designation")'],
   "name": "mpc_orbitss",
   "fields": [
     {
