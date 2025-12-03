@@ -48,7 +48,8 @@ def cql_create_table(schema):
             s += ' ' + f['extra']
         lines.append(s)
     
-    cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'] + '(\n'
+    # Cassaandra likes lower-case table names
+    cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'].lower() + '(\n'
     cql += ',\n'.join(lines)
 
     if 'indexes' in schema:             # add in the INDEX

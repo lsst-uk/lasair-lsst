@@ -266,7 +266,7 @@ class Ingester:
             if not diaObject:   # solar system
 #                print('ss alert')
                 ssSource = lsst_alert['ssSource']
-                mpc_orbits   = lsst_alert['mpc_orbits']
+                mpc_orbit   = lsst_alert['mpc_orbit']
                 if ssObject:
                     nSSObject += 1
                 nNoDiaObject += 1
@@ -274,7 +274,7 @@ class Ingester:
                     'diaSourcesList': diaSourcesList,
                     'ssObject'      : ssObject,
                     'ssSource'      : ssSource,
-                    'mpc_orbits'    : mpc_orbits,
+                    'mpc_orbit'    : mpc_orbit,
                 }
                 diaSource = diaSourcesList[0]
                 if 'dec' in diaSource:
@@ -415,7 +415,7 @@ class Ingester:
         diaNondetectionLimitsList = []
         ssObjects                 = []
         ssSources                 = []
-        mpc_orbitss               = []
+        mpc_orbits                = []
         for alert in alerts:
             diaSourcesList += alert['diaSourcesList']
 
@@ -426,7 +426,7 @@ class Ingester:
 
             if 'ssSource' in alert and alert['ssSource']:
                 ssSources.append(alert['ssSource'])
-                mpc_orbitss.append(alert['mpc_orbits'])
+                mpc_orbits.append(alert['mpc_orbit'])
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
 
@@ -456,9 +456,9 @@ class Ingester:
             for future in executeLoadAsync(self.cassandra_session, 'ssSources', ssSources):
                 self.futures.append({'future': future, 'msg': 'executeLoadAsync ssSources'})
 
-        if len(mpc_orbitss) > 0:
-            for future in executeLoadAsync(self.cassandra_session, 'mpc_orbitss', mpc_orbitss):
-                self.futures.append({'future': future, 'msg': 'executeLoadAsync mpc_orbitss'})
+        if len(mpc_orbits) > 0:
+            for future in executeLoadAsync(self.cassandra_session, 'mpc_orbits', mpc_orbits):
+                self.futures.append({'future': future, 'msg': 'executeLoadAsync mpc_orbits'})
 
     def _handle_alert(self, lsst_alert):
         """Handle a single alert"""
