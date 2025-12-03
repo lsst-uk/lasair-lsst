@@ -26,9 +26,15 @@ def read_from_github(schema_version, component, branch='main'):
         d = {'name':name}
 
         # forget the [type, null] possibility, the database defaults missing values to null
-        if type(field['type']) == list  : d['type'] = field['type'][1]
-        elif type(field['type']) == dict: d['type'] = field['type']['type']
-        else:                             d['type'] = field['type']
+        if type(field['type']) == list  : 
+            if type(field['type'][1]) == dict:
+                d['type'] = field['type'][1]['type']
+            else:
+                d['type'] = field['type'][1]
+        elif type(field['type']) == dict: 
+            d['type'] = field['type']['type']
+        else:
+            d['type'] = field['type']
 
         if 'doc' in field: d['doc'] = field['doc']
 

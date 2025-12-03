@@ -32,7 +32,8 @@ cql_indexes = {
     "ssObject"            :"PRIMARY KEY (\"ssObjectId\")",
 #    "ssSource"            :"PRIMARY KEY (\"ssSourceId\", \"diaObjectId\")", should be!
     "ssSource"            :"PRIMARY KEY (\"diaSourceId\")",
-    "MPCORB"              :"PRIMARY KEY (\"ssObjectId\")",
+#    "MPCORB"              :"PRIMARY KEY (\"ssObjectId\")",
+    "mpc_orbits"          :"PRIMARY KEY (\"ssObjectId\")",
 }
 
 for component,index in cql_indexes.items():
