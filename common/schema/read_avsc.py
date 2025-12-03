@@ -12,8 +12,15 @@ def read_from_github(schema_version, component, branch='main'):
 
     r = requests.get(baseUrl + component + '.avsc')
     rj = json.loads(r.text)
+
+    # remove the surplus s from mpc_orbits
+    if rj['name'] == 'mpc_orbits':
+        schema_name = rj['name']
+    else:
+        schema_name = rj['name'] + 's'
+
     rjj = {
-        'name': rj['name']+'s',
+        'name': schema_name,
         'fields':[]
     }
     fields = rj['fields']

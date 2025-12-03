@@ -31,7 +31,7 @@ cql_indexes = {
     "diaSource"           :"PRIMARY KEY (\"diaObjectId\", \"midpointMjdTai\", \"diaSourceId\")",
     "ssObject"            :"PRIMARY KEY (\"ssObjectId\")",
     "ssSource"            :"PRIMARY KEY (\"ssObjectId\", \"diaSourceId\")",
-    "mpc_orbits"          :"PRIMARY KEY (\"ssObjectId\")",
+    "mpc_orbits"          :"PRIMARY KEY (\"designation\")",
 }
 
 for component,index in cql_indexes.items():
