@@ -208,11 +208,11 @@ class Ingester:
         Args:
             lsst_alerts:
 
-        Returns: (nObject, nNoDiaObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+        Returns: (nObject, nSSSource, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
         """
         log = self.log
         nDiaObject       = 0
-        nNoDiaObject     = 0
+        nSSSource     = 0
         nSSObject        = 0
         nDiaSources      = 0
         nDiaSourcesDB    = 0
@@ -234,7 +234,10 @@ class Ingester:
             diaSourcesList = sorted(diaSourcesList, key=lambda x: x['midpointMjdTai'], reverse=True)
 
             diaObject = lsst_alert.get('diaObject', None)
-            ssObject  = lsst_alert.get('ssObject', None)
+            ssSource  = lsst_alert.get('ssSource', None)
+            if ssSource:
+                ssObject  = lsst_alert.get('ssObject', None)
+                mpc_orbit  = lsst_alert.get('mpc_orbit', None)
 
             # deal with images
             if not self.nocutouts and self.image_store.image_store:
@@ -263,13 +266,16 @@ class Ingester:
                     # This will happen if the list of sources is empty
                     log.debug("No latest detection so not storing cutouts")
 
-            if not diaObject:   # solar system
-#                print('ss alert')
-                ssSource = lsst_alert['ssSource']
-                mpc_orbit   = lsst_alert['mpc_orbit']
+            if ssSource:   # solar system
+                print('ssSource ', end='')    #HACK
+                if ssObject:
+                    print('ssObject ', end='')
+                if mpc_orbit:
+                    print('mpc_orbit ')
+
                 if ssObject:
                     nSSObject += 1
-                nNoDiaObject += 1
+                nSSSource += 1
                 alertDB = {
                     'diaSourcesList': diaSourcesList,
                     'ssObject'      : ssObject,
@@ -395,7 +401,7 @@ class Ingester:
                     raise e
         self.timers['ikproduce'].off()
 
-        return (nDiaObject, nNoDiaObject, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+        return (nDiaObject, nSSSource, nSSObject, nDiaSources, nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
 
     def _insert_cassandra(self, alert):
         """Inset a single alert into cassandra.
@@ -464,7 +470,7 @@ class Ingester:
         """Handle a single alert"""
         return self._handle_alerts([lsst_alert])
 
-    def _end_batch(self, nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
+    def _end_batch(self, nAlert, nDiaObject, nSSSource, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB):
         log = self.log
 
         # wait for any in-flight cassandra requests to complete
@@ -493,8 +499,8 @@ class Ingester:
         self.ms.add({
             'today_alert':nAlert, 
             'diaObject'        : nDiaObject,
-            'noDiaObject'      : nNoDiaObject,
-            'ssObject'         : nSSObject,
+            'nSSSource'      : nSSSource,
+            'nSSObject'         : nSSObject,
             'diaSource'        : nDiaSource,
             'diaSourceDB'      : nDiaSourceDB,
             'diaForcedSource'  : nDiaForcedSource,
@@ -503,7 +509,7 @@ class Ingester:
         for name,td in self.timers.items():
             td.add2ms(self.ms, nid)
 
-        log.info('%s %d alerts %d diaSource %d forcedSource %d noObject' % (self._now(), nAlert, nDiaSource, nDiaForcedSource, nNoDiaObject))
+        log.info('%s %d alerts %d diaSource %d forcedSource %d noObject' % (self._now(), nAlert, nDiaSource, nDiaForcedSource, nSSSource))
         sys.stdout.flush()
 
     def _poll(self, n):
@@ -541,7 +547,7 @@ class Ingester:
         nAlert = 0        # number not yet send to manage_status
         nTotalAlert = 0   # number since this program started
         nDiaObject = 0
-        nNoDiaObject = 0
+        nSSSource = 0
         nSSObject = 0
         nDiaSource = 0
         nDiaSourceDB = 0
@@ -570,9 +576,9 @@ class Ingester:
             nTotalAlert += n
 
             # process alerts
-            (iDiaObject, iNoDiaObject, iSSObject, iDiaSource, iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
+            (iDiaObject, iSSSource, iSSObject, iDiaSource, iDiaSourceDB, iDiaForcedSource, iDiaForcedSourceDB) = self._handle_alerts(alerts)
             nDiaObject += iDiaObject
-            nNoDiaObject += iNoDiaObject
+            nSSSource += iSSSource
             nSSObject += iSSObject
             nDiaSource += iDiaSource
             nDiaSourceDB += iDiaSourceDB
@@ -581,8 +587,8 @@ class Ingester:
 
             # partial alert batch case
             if n < mini_batch_size:
-                self._end_batch(nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
-                nDiaObject = nNoDiaObject = nSSObject = 0
+                self._end_batch(nAlert, nDiaObject, nSSSource, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nDiaObject = nSSSource = nSSObject = 0
                 nDiaSource = nDiaForcedSource = 0
                 nAlert = nDiaSourceDB = nDiaForcedSourceDB = 0
                 log.debug('no more messages ... sleeping %d seconds' % self.wait_time)
@@ -592,8 +598,8 @@ class Ingester:
     
             # every so often commit, flush, and update status
             if nAlert >= batch_size:
-                self._end_batch(nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
-                nDiaObject = nNoDiaObject = nSSObject = 0
+                self._end_batch(nAlert, nDiaObject, nSSSource, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+                nDiaObject = nSSSource = nSSObject = 0
                 nAlert = nDiaSource = nDiaForcedSource = 0
                 nDiaSourceDB = nDiaForcedSourceDB = 0
     
@@ -602,7 +608,7 @@ class Ingester:
         # if we exit this loop, clean up
         log.info('Shutting down')
     
-        self._end_batch(nAlert, nDiaObject, nNoDiaObject, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
+        self._end_batch(nAlert, nDiaObject, nSSSource, nSSObject, nDiaSource, nDiaSourceDB, nDiaForcedSource, nDiaForcedSourceDB)
     
         # shut down kafka consumer
         self.consumer.close()
@@ -617,7 +623,7 @@ def run_ingest(args, log=None):
     if args.get('--topic_in'):
         topic_in = args['--topic_in']
     else:
-        topic_in = 'lsst-alerts-v9.0'
+        topic_in = 'lsst-alerts-v10.0'
 
     topic_out = args.get('--topic_out') or 'lsst_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
