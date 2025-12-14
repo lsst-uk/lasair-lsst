@@ -28,6 +28,9 @@ parser.add_argument('--group_id',  type=str, default='LASAIR1', help='group id t
 # print one and exit, or count all to end of group_id
 parser.add_argument('--print_one', action="store_true", default=None, help='Prints one and exits')
 
+# print one and exit, or count all to end of group_id
+parser.add_argument('--histogram', action="store_true", default=None, help='make a histogram')
+
 # utilise schema registry
 parser.add_argument('--schema_reg', type=str, default=None, help='Fetches with schema registry')
 # example https://usdf-alert-schemas-dev.slac.stanford.edu
@@ -63,6 +66,8 @@ else:
     # content of given topic
     topic = q.get('topic')
     streamReader.subscribe([topic])
+
+    counts = {}
     while 1:
         msg = streamReader.poll(timeout=5)
         if msg == None: 
@@ -70,14 +75,30 @@ else:
         if msg.error():
             print('ERROR in ingest/poll: ' +  str(msg.error()))
             break
+        if q['histogram']:
+            alert = msg.value()
+            z = ''
+            for k,v in alert.items():
+                if k=='diaObject' and v: z += 'do '
+                if k=='diaSource' and v: z += 'ds '
+                if k=='prvDiaSource' and len(v)>0: z += 'pds '
+                if k=='prvDiaForcedSources' and len(v)>0: z += 'pdfs '
+                if k=='mpc_orbits' and v: z += 'm '
+                if k=='ssObject' and v: z += 'so '
+                if k=='ssSource' and v: z += 'ss '
+
+            if z in counts: counts[z] += 1
+            else:           counts[z] = 1
+
         if q['print_one']:
-#            print(msg.value())
             print_msg(msg.value())
-            #sys.exit()
             break
+
         nalert += 1
         if nalert%1000 == 0: print(nalert)
     print('final', nalert)
+    if q['histogram']:
+        print(counts)
 
 streamReader.close()
 
