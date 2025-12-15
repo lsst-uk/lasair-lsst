@@ -39,8 +39,8 @@ def tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius):
     cursor2.execute(query2)
     n_hits = 0
     for row in cursor2:
-        objectId = row['objectId']
-        arcsec = 3600*distance(myRA, myDecl, row['ramean'], row['decmean'])
+        objectId = row['diaObjectId']
+        arcsec = 3600*distance(myRA, myDecl, row['ra'], row['decl'])
         if arcsec > radius:
             continue
         n_hits += 1
