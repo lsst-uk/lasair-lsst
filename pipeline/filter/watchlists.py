@@ -93,8 +93,9 @@ def insert_tns_hits(fltr, hits):
     """
     query_template = 'UPDATE objects SET tns_name = "%s" WHERE diaObjectId=%d'
     for hit in hits:
-        if hit['wl_id'] == settings.TNS_WATCHLIST_ID:
-            query = query_template % (hit['name'], hit['diaObjectId'])
+        if hit['wl_id'] != settings.TNS_WATCHLIST_ID:
+            continue
+        query = query_template % (hit['name'], hit['diaObjectId'])
         try:
             fltr.execute_query(query)
         except Exception as err:
