@@ -23,6 +23,8 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
         if row['radius']:
             r = row['radius']
         n_hits += crossmatch(msl, wl_id, row['cone_id'], row['ra'], row['decl'], row['name'], r)
+        if n_cones%1000 == 0:
+            print("%d cones, %d hits" % (n_cones, n_hits))
     message = "%d cones, %d hits" % (n_cones, n_hits)
     return n_hits, message
 
