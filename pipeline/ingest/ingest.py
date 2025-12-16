@@ -267,7 +267,6 @@ class Ingester:
                     log.debug("No latest detection so not storing cutouts")
 
             if ssSource:   # solar system
-                print('ssSource ', end='')    #HACK
                 if ssObject:
                     print('ssObject ', end='')
                 if mpc_orbit:
