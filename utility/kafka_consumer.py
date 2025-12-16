@@ -81,8 +81,8 @@ else:
             for k,v in alert.items():
                 if k=='diaObject' and v: z += 'do '
                 if k=='diaSource' and v: z += 'ds '
-                if k=='prvDiaSource' and len(v)>0: z += 'pds '
-                if k=='prvDiaForcedSources' and len(v)>0: z += 'pdfs '
+                if k=='prvDiaSources' and v and len(v)>0: z += 'pds '
+                if k=='prvDiaForcedSources' and v and len(v)>0: z += 'pdfs '
                 if k=='mpc_orbits' and v: z += 'm '
                 if k=='ssObject' and v: z += 'so '
                 if k=='ssSource' and v: z += 'ss '
