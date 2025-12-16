@@ -432,6 +432,7 @@ class Ingester:
 
             if 'ssSource' in alert and alert['ssSource']:
                 ssSources.append(alert['ssSource'])
+            if 'mpc_orbits' in alert and alert['mpc_orbits']:
                 mpc_orbits.append(alert['mpc_orbit'])
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
