@@ -47,11 +47,15 @@ def moc_watchlist(watchlist, max_depth):
         lat = [de,     de+s*q,  de+s*q,   de,   de-s*q,   de-s*q] * u.deg
 
         # make a moc from the hexagon
-        newmoc = MOC.from_polygon(lon, lat, max_depth=max_depth)
+        try:
+            newmoc = MOC.from_polygon(lon, lat, max_depth=max_depth)
+            # union with previous hexagons
+            if moc: moc = moc.union(newmoc)
+            else:   moc = newmoc
+        except Exception as e:
+            print('make_watchlist_files: failed to make polygon')
+            print(str(e))
 
-        # union with previous hexagons
-        if moc: moc = moc.union(newmoc)
-        else:   moc = newmoc
     return moc
 
 def moc_watchlists(watchlist, max_depth, chk):
@@ -163,8 +167,8 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
     os.mkdir(watchlist_dir_new)
 
     # compute the list of mocs
+    print('Doing ', wl_id)
     moclist = moc_watchlists(cones, max_depth, chk)
-    print(wl_id)
     
     # write the watchlist.csv
     w = open(watchlist_dir_new + 'watchlist.csv', 'w')
