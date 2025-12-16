@@ -51,12 +51,12 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
             s["radius"] = radius
         if s["radius"] > 1800.:
             s["radius"] = 1800.
-        s["courseRadius"] = None
+        s["coarseRadius"] = None
         grouped_by_radius[s["radius"]].append(s)
     
     ## MAKE COARSER BINNING FOR HETROGENEOUS RADII
     if len(grouped_by_radius) > 10:
-        course = True
+        coarse = True
         grouped_by_radius = defaultdict(list)
         for s in wlCones:
             if not s["radius"]:
@@ -66,12 +66,12 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
             stages = [10, 100, 300, 500, 1000, 1500, 1800]
             for stage in stages:
                 if s["radius"] <= stage:
-                    s["courseRadius"] = math.ceil(s["radius"] / stage) * stage
+                    s["coarseRadius"] = math.ceil(s["radius"] / stage) * stage
                     break
-                s["courseRadius"] = math.ceil(s["radius"] / 1800) * 1800
-            grouped_by_radius[s["courseRadius"]].append(s)
+                s["coarseRadius"] = math.ceil(s["radius"] / 1800) * 1800
+            grouped_by_radius[s["coarseRadius"]].append(s)
     else:
-        course = False
+        coarse = False
 
     # CREATE BATCHES WHERE EACH BATCH CONTAINS ITEMS WITH THE SAME RADIUS
     batches_by_radius = []
@@ -102,7 +102,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     wlMatches = []
     from fundamentals import fmultiprocess
     results = fmultiprocess(log=emptyLogger(), function=run_crossmatch_batch,
-                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=False, progressBar=True, course=course)
+                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=False, progressBar=True, coarse=coarse)
     for result in results:
         if result:
             wlMatches.extend(result)
@@ -126,7 +126,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     return n_hits, message
 
 
-def run_crossmatch_batch(batch, log, course=False):
+def run_crossmatch_batch(batch, log, coarse=False):
     from HMpTy.mysql import conesearch
     from fundamentals.mysql import database
     dbSettings = {
@@ -144,7 +144,11 @@ def run_crossmatch_batch(batch, log, course=False):
 
     wlMatches = []
     # DO THE CONESEARCH
-    raList, decList, nameList, coneIdList, courseRadiusList, radiusList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"], s["courseRadius"], s["radius"]) for s in batch])
+    raList, decList, nameList, coneIdList, coarseRadiusList, radiusList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"], s["coarseRadius"], s["radius"]) for s in batch])
+    if coarse:
+        thisRadius = coarseRadiusList[0]
+    else:
+        thisRadius = radiusList[0]
     cs = conesearch(
         log=log,
         dbConn=dbConn,
@@ -154,7 +158,7 @@ def run_crossmatch_batch(batch, log, course=False):
         dec=decList,
         raCol="ra",
         decCol="decl",
-        radiusArcsec=courseRadiusList[0],
+        radiusArcsec=thisRadius,
         separations=True,
         distinct=False,
         sqlWhere="",
@@ -168,7 +172,7 @@ def run_crossmatch_batch(batch, log, course=False):
         # VALUES TO ADD TO DB
 
         for r, d, n, c, rad, m in zip(raList, decList, nameList, coneIdList, radiusList, matches.list):
-            if course and m["cmSepArcsec"] > rad:
+            if coarse and m["cmSepArcsec"] > rad:
                 continue
             keepDict = {
                 "wl_id": wl_id,
