@@ -13,9 +13,16 @@ There is an [accompanying set of jupyter notebooks](python-notebooks.md)
 
 #### Throttling of API Usage
 The client has a throttling system in the backend: users with an account get up to 100 calls per hour, but "power" users get up to 10,000 calls per hour. If you wish your account to be upgraded to power user, 
-[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user)
+please put answers to the following in an email to
+[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user):
+- Name and academic position  
+- Institute 
+- Institutional email (not gmail, hotmail, etc) 
+- Are you an LSST data rights holder ? 
+- Brief scientific description of what you want to do with Lasair (max 300 words)
+- Required rate of API calls in numbers per minute (or hour) and justification for the power user request (max 300 words). 
 
-**Note: WE ASK YOU TO PLEASE NOT SHARE THESE TOKENS.** If you share code that uses the Lasair API, please put the token in a separate, imported file or environment variable, that you do not share, and is not put in github.
+**Note: WE ASK YOU TO PLEASE NOT SHARE YOUR API TOKEN.** If you share code that uses the Lasair API, please put the token in a separate, imported file or environment variable, that you do not share, and is not put in github.
 
 ##### Authorisation Token
 

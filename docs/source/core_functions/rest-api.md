@@ -13,10 +13,18 @@ uses either HTTP GET or POST. Arguments can be passed in the query string, as JS
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
-**Throttling of API Usage**
+#### Throttling of API Usage
+The client has a throttling system in the backend: users with an account get up to 100 calls per hour, but "power" users get up to 10,000 calls per hour. If you wish your account to be upgraded to power user,
+please put answers to the following in an email to
+[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user):
+- Name and academic position
+- Institute
+- Institutional email (not gmail, hotmail, etc)
+- Are you an LSST data rights holder ?
+- Brief scientific description of what you want to do with Lasair (max 300 words)
+- Required rate of API calls in numbers per minute (or hour) and justification for the power user request (max 300 words). 
 
-The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
-
+The limits for these three categories of user are:
 *   User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.
 *   Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.
 
