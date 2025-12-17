@@ -44,7 +44,7 @@ def index(request):
     SELECT objects.diaObjectId,
        mjdnow()-objects.lastDiaSourceMjdTai AS "days ago",
        sherlock_classifications.classification AS "predicted type",
-       objects.nSources,
+       objects.nDiaSources,
        objects.absMag,
        objects.u_psfFlux,
        objects.g_psfFlux,
@@ -55,7 +55,7 @@ def index(request):
        objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.nSources > 8
+       AND objects.nDiaSources > 8
        AND sherlock_classifications.classification in (%s)
     ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
@@ -115,11 +115,11 @@ def index(request):
         iclass = sherlock_classes.index(row["predicted type"])
 
         age = row["days ago"]
-        if   age <  4: iage = 0
-        elif age < 10: iage = 1
-        elif age < 20: iage = 2
-        elif age < 30: iage = 3
-        else:          iage = 4
+        if   age < 1: iage = 0
+        elif age < 3: iage = 1
+        elif age < 5: iage = 2
+        elif age <10: iage = 3
+        else:         iage = 4
 
         alerts[iclass][iage].append({
             'diaObjectId': str(row['diaObjectId']),
@@ -143,7 +143,7 @@ def index(request):
     schema['diaObjectId'] = 'Unique ID for this object'
     schema['days ago']    = 'Days since last detection of this object'
     schema['sherlock']    = 'Sherlock classification for this object'
-    schema['nSources']    = 'Number of detections of this object'
+    schema['nDiaSources'] = 'Number of detections of this object'
     schema['psfFlux']     = 'Flux from most recent detection in nJ '
     schema['absMag']      = 'Peak absolute magnitude, if known'
 
@@ -153,7 +153,7 @@ def index(request):
             'diaObjectId'    : t['diaObjectId'],
             'days ago'       : '%.1f' % t['days ago'],
             'sherlock'       : t['predicted type'],
-            'nSources'       : t['nSources'],
+            'nDiaSources'    : t['nDiaSources'],
             'psfFlux'        : '%.0f' % t['psfFlux'],
             'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
         })

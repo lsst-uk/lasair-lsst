@@ -20,7 +20,7 @@ Options:
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use [default: ztf_sherlock]
+    --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
     --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
@@ -77,7 +77,7 @@ class Filter:
     """
 
     def __init__(self,
-                 topic_in: str = 'ztf_sherlock',
+                 topic_in: str = 'lsst_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
                  maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
                  local_db: str = None,
@@ -663,7 +663,7 @@ if __name__ == "__main__":
     log = logging.getLogger()
     args = docopt(__doc__)
 
-    topic_in = args.get('--topic_in') or 'ztf_sherlock'
+    topic_in = args.get('--topic_in') or 'lsst_sherlock'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)

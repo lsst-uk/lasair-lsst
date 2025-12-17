@@ -94,7 +94,6 @@
   "z_latestMJD": 59998.3902,
   "y_psfFlux": 35.664677,
   "y_latestMJD": 60008.3373,
-  "nSources": 23,
   "nuSources": 1,
   "ngSources": 2,
   "nrSources": 3,
@@ -120,5 +119,9 @@
   "penultimatePairMJD": null,
   "penultimatePairColourMag": null,
   "penultimatePairColourBands": null,
-  "penultimatePairColourTemp": null
+  "penultimatePairColourTemp": null,
+  "medianR": 0.0,
+  "latestR": 0.0,
+  "latest_psfFlux": 99.948372,
+  "nSourcesGood": 0
 }

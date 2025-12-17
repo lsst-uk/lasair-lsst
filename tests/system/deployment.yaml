@@ -234,6 +234,27 @@
       tags: net
   tags: cassandra
 
+# cassandra schema test
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - system_test_settings.yaml
+  vars:
+    schemata:
+      - diaObjects
+      - diaSources
+      - diaForcedSources
+      - ssObjects
+      - ssSources
+  tasks:
+    - name: validate cassandra schemata
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --cassandra --database=lasair --host={{ groups['cassandranodes'][0] }} --port=9042 --mod={{ schema_mod }}.{{ item }}"
+      loop: "{{ schemata }}"
+      changed_when: false
+  tags: cassandra
+
 # cutout cassandra tests
 - hosts: cutoutcass
   gather_facts: false

@@ -18,6 +18,7 @@ import os, sys, math, time, stat
 from mocpy import MOC
 from my_cmd import execute_cmd
 sys.path.append('../common')
+import settings
 import astropy.units as u
 from datetime import datetime
 from src import db_connect, slack_webhook
@@ -46,11 +47,15 @@ def moc_watchlist(watchlist, max_depth):
         lat = [de,     de+s*q,  de+s*q,   de,   de-s*q,   de-s*q] * u.deg
 
         # make a moc from the hexagon
-        newmoc = MOC.from_polygon(lon, lat, max_depth=max_depth)
+        try:
+            newmoc = MOC.from_polygon(lon, lat, max_depth=max_depth)
+            # union with previous hexagons
+            if moc: moc = moc.union(newmoc)
+            else:   moc = newmoc
+        except Exception as e:
+            print('make_watchlist_files: failed to make polygon')
+            print(str(e))
 
-        # union with previous hexagons
-        if moc: moc = moc.union(newmoc)
-        else:   moc = newmoc
     return moc
 
 def moc_watchlists(watchlist, max_depth, chk):
@@ -109,12 +114,15 @@ def fetch_active_watchlists(msl, cache_dir):
     """
     Go through the database and fetch the active watchlists
     Select those fresher than their cache and rebuild their cache.
+    The TNS watchlist is always refreshed
     """
     cursor = msl.cursor(buffered=True, dictionary=True)
 
     keep = []
     get  = []
-    cursor.execute('SELECT wl_id, name, radius, date_modified FROM watchlists WHERE active > 0 ')
+    query = 'SELECT wl_id, name, radius, date_modified FROM watchlists '
+    query += 'WHERE active > 0 OR wl_id = %d' % settings.TNS_WATCHLIST_ID
+    cursor.execute(query)
     for row in cursor:
         # unix time of last update from the database
         watchlist_timestamp = time.mktime(row['date_modified'].timetuple())
@@ -132,7 +140,7 @@ def fetch_active_watchlists(msl, cache_dir):
         # if the watchlist from the database is newer than the cache, rebuild it
         # print(row['wl_id'], 'watchlist newer by %d seconds'%newer)
         d = {'wl_id':row['wl_id'], 'name':row['name'],'radius':row['radius']}
-        if newer > 0:
+        if newer > 0 or row['wl_id'] == settings.TNS_WATCHLIST_ID:
             get.append(d)
             logf.write('Make %s\n' % d['name'])
         else:
@@ -159,6 +167,7 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
     os.mkdir(watchlist_dir_new)
 
     # compute the list of mocs
+    print('Doing ', wl_id)
     moclist = moc_watchlists(cones, max_depth, chk)
     
     # write the watchlist.csv
@@ -189,9 +198,9 @@ if __name__ == "__main__":
     import settings
     sys.path.append('../../common/src')
     import date_nid, slack_webhook, lasairLogging
+    slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
     lasairLogging.basicConfig(
         filename='/home/ubuntu/logs/svc.log',
-        slack_channel = getattr(settings, 'SLACK_CHANNEL', None),
         webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=slack_channel),
         merge=True
     )

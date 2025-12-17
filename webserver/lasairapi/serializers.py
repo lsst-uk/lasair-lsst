@@ -144,11 +144,13 @@ class ObjectSerializer(serializers.Serializer):
     objectId     = serializers.CharField(required=True)
     lite         = serializers.BooleanField(default=False)
     lasair_added = serializers.BooleanField(default=True)
+    reliabilityThreshold = serializers.FloatField(default=0)
 
     def save(self):
         objectId = self.validated_data['objectId']
         lite = self.validated_data['lite']
         lasair_added = self.validated_data['lasair_added']
+        reliabilityThreshold = self.validated_data['reliabilityThreshold']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -158,7 +160,8 @@ class ObjectSerializer(serializers.Serializer):
 
         if lasair_added:
             try:
-                result = objjson(objectId, lite=lite)
+                result = objjson(objectId, lite=lite, 
+                     reliabilityThreshold=reliabilityThreshold)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
@@ -168,11 +171,13 @@ class ObjectSerializer(serializers.Serializer):
             except Exception as e:
                 result = {'error': str(e)}
         else:
-            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
+            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD,
+                reliabilityThreshold=reliabilityThreshold)
 
             try:
                 if lite: 
                     (diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
+
                     result = {
                         'diaObjectId':objectId, 
                         'diaSourcesList':diaSourcesList, 

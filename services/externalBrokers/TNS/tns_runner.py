@@ -7,7 +7,7 @@ import os,sys, time
 sys.path.append('../../../common')
 import settings
 from src import date_nid
-from datetime import datetime
+import datetime
 sys.path.append('../../../common/src')
 sys.path.append('../..')
 from my_cmd import execute_cmd
@@ -16,12 +16,12 @@ import lasairLogging
 
 def now():
     # current UTC as string
-    return datetime.utcnow().strftime("%Y/%m/%dT%H:%M:%S")
+    return datetime.datetime.now(datetime.UTC).strftime("%Y/%m/%dT%H:%M:%S")
 
 if __name__ == "__main__":
+    slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
     lasairLogging.basicConfig(
         filename='/home/ubuntu/logs/svc.log',
-        slack_channel = getattr(settings, 'SLACK_CHANNEL', None),
         webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=slack_channel),
         merge=True
     )

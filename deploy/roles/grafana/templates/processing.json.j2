@@ -174,19 +174,19 @@
       "steppedLine": true,
       "targets": [
         {
-          "expr": "sum(rate(kafka_log_log_value{topic=\"ztf_ingest\"}[1m])) * 60 / 2",
+          "expr": "sum(rate(kafka_log_log_value{topic=\"lsst_ingest\"}[1m])) * 60 / 2",
           "format": "time_series",
           "hide": false,
           "instant": false,
           "interval": "",
           "intervalFactor": 1,
-          "legendFormat": "ztf_ingest",
+          "legendFormat": "lsst_ingest",
           "refId": "A"
         },
         {
-          "expr": "sum(rate(kafka_log_log_value{topic=\"ztf_sherlock\"}[5m])) * 60 / 2",
+          "expr": "sum(rate(kafka_log_log_value{topic=\"lsst_sherlock\"}[5m])) * 60 / 2",
           "interval": "",
-          "legendFormat": "ztf_sherlock",
+          "legendFormat": "lsst_sherlock",
           "refId": "B"
         }
       ],

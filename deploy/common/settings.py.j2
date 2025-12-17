@@ -33,7 +33,7 @@ PUBLIC_GROUP_ID        = 'test124'
 # Schema registry
 #################
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
-SCHEMA_VERSION = "9_0"
+SCHEMA_VERSION = "10_0"
 
 # Pipeline runtime
 ##################
@@ -44,7 +44,7 @@ LOCKFILE               = '/home/ubuntu/lockfile'
 KAFKA_MAXALERTS        = 10000
 
 # Number of the latest diaSources to put into database
-N_DIASOURCES_DB        = 4
+N_DIASOURCES_DB        = 1000
 
 # Time to wait between batches
 WAIT_TIME              = 30
@@ -105,7 +105,7 @@ MYSQL_BACKUP_DIR       = '/mnt/cephfs/lasair/mysql_backup'
 # Fast annotations
 ##################
 # Fast annotations cause immediate kafka output
-ANNOTATION_TOPIC       = 'ztf_annotations'
+ANNOTATION_TOPIC       = 'lsst_annotations'
 ANNOTATION_GROUP_ID    = 'test004'
 
 # Webserver control
@@ -137,6 +137,9 @@ API_TOKEN              = '{{ powerapi_token }}'
 GRAFANA_USERNAME       = 'ztf'
 GRAFANA_PASSWORD       = '{{ settings.grafana_password }}'
 LASAIR_GRAFANA_URL     = "https://{{ lasair_name }}-svc.{{ domain }}/d/iILmd8-Wz/alerts"
+
+# Time to live for cutouts
+MAX_CUTOUT_DAYS        = 365
 
 # Watchlist and Area control
 ############################

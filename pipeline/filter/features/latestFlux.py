@@ -9,6 +9,7 @@ class latestFlux(FeatureGroup):
         'i_psfFlux', 'i_latestMJD',
         'z_psfFlux', 'z_latestMJD',
         'y_psfFlux', 'y_latestMJD',
+        'latest_psfFlux'
     ]
 
     def run(self):
@@ -26,6 +27,7 @@ class latestFlux(FeatureGroup):
                 if lc_band[i] == band:
                     output[bandflux]  = lc_flux[i]
                     output[latestMJD] = lc_time[i]
+        output['latest_psfFlux'] = lc_flux[-1]
 
         return output
 

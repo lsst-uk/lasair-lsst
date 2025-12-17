@@ -75,6 +75,8 @@
           - fastavro
           - mysql.connector
           - parallel-ssh
+          - docopt
+          - cassandra-driver
         extra_args: "--break-system-packages"
 
   - name: Install vault snap

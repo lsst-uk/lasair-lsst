@@ -16,7 +16,7 @@ from django.shortcuts import get_object_or_404
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.context_processors import csrf
 from django.http import JsonResponse
-#from django.conf import settings as django_settings
+from django.conf import settings as django_settings
 
 import dateutil.parser as dp
 from datetime import datetime, timedelta
@@ -118,7 +118,7 @@ def decsex(de):
         return '-%02d:%02d:%.3f' % (d, m, s)
 
 
-def objjson(diaObjectId, lite=False):
+def objjson(diaObjectId, lite=False, reliabilityThreshold=0):
     """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`, `annotations`)
 
     **Usage:**
@@ -133,7 +133,7 @@ def objjson(diaObjectId, lite=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     if lite:
-        query = 'SELECT nSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai,glat,ebv '
+        query = 'SELECT nDiaSources, ra, decl, firstDiaSourceMjdTai, lastDiaSourceMjdTai,glat,ebv '
     else:
         query = 'SELECT * '
     query += 'FROM objects WHERE diaObjectId = %s' % diaObjectId
@@ -202,7 +202,8 @@ def objjson(diaObjectId, lite=False):
             elif v:
                 TNS[k] = v
 
-    LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
+    LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD, \
+            reliabilityThreshold=reliabilityThreshold)
     if lite:
         (diaSources, diaForcedSources) = LF.fetch(diaObjectId, lite=lite)
     else:
@@ -216,19 +217,22 @@ def objjson(diaObjectId, lite=False):
         json_formatted_str = json.dumps(diaSource, indent=2)
         diaSource['json'] = json_formatted_str[1:-1]
         diaSource['mjd'] = mjd = float(diaSource['midpointMjdTai'])
-        diaSource['since_now'] = mjd - now
+        diaSource['since_now'] = since_now = now - mjd
         count_all_diaSources += 1
         diaSourceId = diaSource['diaSourceId']
         date = datetime.strptime("1858/11/17", "%Y/%m/%d")
         date += timedelta(mjd)
         diaSource['utc'] = date.strftime("%Y-%m-%d %H:%M:%S")
 
+        if since_now > lasair_settings.MAX_CUTOUT_DAYS: 
+            # cutouts after this time will be gone.
+            continue
         # ADD IMAGE URLS
         diaSource['image_urls'] = {}
         for cutoutType in ['Science', 'Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            url = 'https://%s/fits/%d/%s'
-            url = url % (lasair_settings.LASAIR_URL, int(mjd), diaSourceId_cutoutType)
+            url = 'https://%s/fits/%s'
+            url = url % (lasair_settings.LASAIR_URL, diaSourceId_cutoutType)
             diaSource['image_urls'][cutoutType] = url
 
     if count_all_diaSources == 0:

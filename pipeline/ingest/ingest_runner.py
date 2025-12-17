@@ -18,7 +18,7 @@ Options:
     --group_id=GID       Group ID for kafka, default is from settings
     --topic_in=TIN       Kafka topic to use, or
     --nid=NID            ZTF night number to use (default today)
-    --topic_out=TOUT     Kafka topic for output [default:ztf_sherlock]
+    --topic_out=TOUT     Kafka topic for output [default:lsst_sherlock]
     --nocutouts          Do not attempt to save cutout images
 """
 import os

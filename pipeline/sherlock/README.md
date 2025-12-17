@@ -71,7 +71,7 @@ We can view the logs like this:
 ```
 ubuntu@sherlock3:~$ sudo docker logs 65c75ce6871e --tail 20
 Starting Sherlock wrapper.
-2021-07-13 10:16:54,185:INFO_:wrapper.py:subscribing to topic ztf_ingest
+2021-07-13 10:16:54,185:INFO_:wrapper.py:subscribing to topic lsst_ingest
 2021-07-13 10:16:59,238:INFO_:wrapper.py:consumed 790 alerts
 2021-07-13 10:16:59,338:INFO_:wrapper.py:running Sherlock classifier on 604 objects
 2021-07-13 10:17:09,041:INFO_:wrapper.py:got 604 classifications
