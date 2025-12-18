@@ -122,6 +122,7 @@ if __name__ == "__main__":
             execute_cmd('rm ' + area_file, logfile)
             logf.write('Area %s not active: %s' % (ar_id, message))
 
-    execute_cmd('rm -r %s'  % cache_dir, logfile)
+    if os.path.exists(cache_dir):
+        execute_cmd('rm -r %s'  % cache_dir, logfile)
     execute_cmd('mv %s %s' % (new_cache_dir, cache_dir), logfile)
     sys.exit(0)
