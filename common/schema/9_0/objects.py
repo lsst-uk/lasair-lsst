@@ -359,7 +359,7 @@ schema = {
       "name": "latestPairColourTemp",
       "type": "float",
       "origin": "lasair",
-      "doc": "Extinction corrected effective temperature from latest pair, kiloKelvin"
+      "doc": "Extinction corrected blackbody fit temperature from latest pair, kiloKelvin"
     },
     {
       "name": "penultimatePairMJD",
@@ -383,7 +383,7 @@ schema = {
       "name": "penultimatePairColourTemp",
       "type": "float",
       "origin": "lasair",
-      "doc": "Extinction corrected effective temperature from penultimate pair, kiloKelvin"
+      "doc": "Extinction corrected blackbody fit temperature from penultimate pair, kiloKelvin"
     },
     {
       "section": "Utility",
