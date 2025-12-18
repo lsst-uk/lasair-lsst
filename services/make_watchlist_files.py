@@ -17,6 +17,7 @@ files is the same as the list of cones associated with the watchlist.
 import os, sys, math, time, stat
 from mocpy import MOC
 from my_cmd import execute_cmd
+from replace_dir import replace_dir
 sys.path.append('../common')
 import settings
 import astropy.units as u
@@ -149,7 +150,7 @@ def fetch_active_watchlists(msl, cache_dir):
     # watchlists which will have their caches rebuilt
     return {'keep': keep, 'get':get}
 
-def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
+def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk, log=None):
     """rebuild_cache.
 
     Args:
@@ -189,8 +190,14 @@ def rebuild_cache(wl_id, name, cones, max_depth, cache_dir, chk):
             % (name, len(ralist), time.time() - t))
 
     # move the new stuff into the correct directory name
-    cmd = 'rm -r %s; mv %s %s' % (watchlist_dir, watchlist_dir_new, watchlist_dir)
-    execute_cmd(cmd, logfile)
+    try:
+        replace_dir(watchlist_dir_new, watchlist_dir)
+    except Exception as e:
+        if log:
+            log.error(str(e))
+        else:
+            logf.write("ERROR %s" % str(e))
+
 
 if __name__ == "__main__":
     import sys
@@ -204,7 +211,7 @@ if __name__ == "__main__":
         webhook=slack_webhook.SlackWebhook(url=settings.SLACK_URL, channel=slack_channel),
         merge=True
     )
-    log = lasairLogging.getLogger("ingest_runner")
+    log = lasairLogging.getLogger("make_watchlist_files")
 
     nid  = date_nid.nid_now()
     date = date_nid.nid_to_date(nid)
@@ -232,6 +239,6 @@ if __name__ == "__main__":
         # get the data from the database
         cones = fetch_watchlist(msl, watchlist['wl_id'], watchlist['radius'])
         rebuild_cache(watchlist['wl_id'], watchlist['name'], \
-            cones, max_depth, cache_dir, chk)
+            cones, max_depth, cache_dir, chk, log)
 
     sys.exit(0)
