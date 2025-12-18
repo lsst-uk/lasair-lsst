@@ -1,7 +1,7 @@
 import shutil
 from time import sleep
 
-def replace_dir(src: str, dst: str, max_errors=10: int):
+def replace_dir(src:str, dst:str, max_errors:int=10):
     """Rename a file or directory. If the destination already exists, attempt to
     delete it first. Pause and retry up to max_errors times before giving up in
     the event of an error."""
