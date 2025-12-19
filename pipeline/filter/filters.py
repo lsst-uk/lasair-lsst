@@ -221,6 +221,8 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
     f.write(digestdict_text)
     f.close()
 
+def tutc(s):
+    return datetime.datetime.strptime(s+' +0000', "%Y-%m-%d %H:%M:%S %z")
 
 def fetch_digest(topic_name):
     filename = settings.KAFKA_STREAMS + '/' + topic_name
@@ -233,10 +235,10 @@ def fetch_digest(topic_name):
         digest_file.close()
     except:
         digest = []
-        last_entry_text = "2017-01-01 00:00:00"
-        last_email_text = "2017-01-01 00:00:00"
-    last_entry = datetime.datetime.strptime(last_entry_text, "%Y-%m-%d %H:%M:%S")
-    last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
+        last_entry_text = "2017-01-01 00:00:00 +0000"
+        last_email_text = "2017-01-01 00:00:00 +0000"
+    last_entry = tutc(last_entry_text)
+    last_email = tutc(last_email_text)
     return digest, last_entry, last_email
 
 
