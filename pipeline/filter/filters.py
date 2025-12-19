@@ -235,8 +235,8 @@ def fetch_digest(topic_name):
         digest_file.close()
     except:
         digest = []
-        last_entry_text = "2017-01-01 00:00:00 +0000"
-        last_email_text = "2017-01-01 00:00:00 +0000"
+        last_entry_text = "2017-01-01 00:00:00"
+        last_email_text = "2017-01-01 00:00:00"
     last_entry = tutc(last_entry_text)
     last_email = tutc(last_email_text)
     return digest, last_entry, last_email
