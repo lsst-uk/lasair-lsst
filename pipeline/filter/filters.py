@@ -260,7 +260,7 @@ def dispose_email(allrecords, last_email, query, force=False):
     message = 'Your active query with Lasair on topic %s\n' % topic
     message_html = 'Your active query with Lasair on <a href=%s>%s</a><br/>' % (query_url, topic)
     for out in allrecords: 
-        out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
+        out_time = tutc(out['UTC'])
         # gather all records that have accumulated since last email
         if force or out_time > last_email:
             if 'diaObjectId' in out:
@@ -351,12 +351,12 @@ def filters(fltr):
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
-    try:
+    if 1:
         ntotal = run_queries(fltr, query_list)
         return ntotal
-    except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
-        return None
+#    except Exception as e:
+#        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
+#        return None
 
 
 def fast_anotation_filters(fltr):
