@@ -96,27 +96,32 @@ match existing objects. Here is the process step by step for adding cones.
 <hr/>
 First click the "Export" button on the existing watchlist, to get a file
 of all the cones, suitable for uploading. It will bein your "Downloads" folder.
+
 <img src="../_images/watchlist/wl1.png" width="400px"/>
 
 <hr/>
 Next, edit the file to add the new cones, with the format "RA, Dec, name", 
 and an optional radius in arc seconds:
+
 <img src="../_images/watchlist/wl2.png" width="400px"/>
 
 <hr/>
 Back at the Lasair website, copy the title and description to a new 
 watchlist, perhaps with versioning to show the changes you are making.
 It is best to give the new watchlist a different title from the old.
-The click the "Upload" option for the list of cones.
+Then click the "Upload" option for the list of cones.
+
 <img src="../_images/watchlist/wl3.png" width="400px"/>
 
 <hr/>
 Select the options you want for "active", where matching happens in real
 time as alerts arrive, and choose "public" or not.
+
 <img src="../_images/watchlist/wl4.png" width="400px"/>
 
 <hr/>
 Finally, click the "Rerun Watchlist" button to match with all previous
 Lasair objects. For a large watchlist, or one with large radii, this may 
 time out, so please email us for help as above.
+
 <img src="../_images/watchlist/wl5.png" width="400px"/>
