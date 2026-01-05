@@ -14,7 +14,7 @@ services:
             - /etc/mirror/consumer.config:/etc/mirror/consumer.config
             - /opt/jmx_exporter:/opt/jmx_exporter
         environment:
-            - "KAFKA_HEAP_OPTS=-Xmx1G"
+            - "KAFKA_HEAP_OPTS=-Xmx2G"
             - "KAFKA_OPTS=-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=0.0.0.0:8081:/opt/jmx_exporter/mirrormaker.yml"
         command: [
              "kafka-mirror-maker",
