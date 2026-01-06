@@ -102,7 +102,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     wlMatches = []
     from fundamentals import fmultiprocess
     results = fmultiprocess(log=emptyLogger(), function=run_crossmatch_batch,
-                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=False, progressBar=True, coarse=coarse)
+                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=False, progressBar=True, coarse=coarse, wl_id=wl_id)
     for result in results:
         if result:
             wlMatches.extend(result)
@@ -126,7 +126,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     return n_hits, message
 
 
-def run_crossmatch_batch(batch, log, coarse=False):
+def run_crossmatch_batch(batch, log, wl_id, coarse=False):
     from HMpTy.mysql import conesearch
     from fundamentals.mysql import database
     dbSettings = {
@@ -175,7 +175,7 @@ def run_crossmatch_batch(batch, log, coarse=False):
             if coarse and m["cmSepArcsec"] > rad:
                 continue
             keepDict = {
-                "wl_id": wl_id,
+                "wl_id": wl_idd,
                 "cone_id": c,
                 "arcsec": m["cmSepArcsec"],
                 "name": n,
