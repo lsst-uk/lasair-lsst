@@ -235,9 +235,10 @@ class Ingester:
 
             diaObject = lsst_alert.get('diaObject', None)
             ssSource  = lsst_alert.get('ssSource', None)
-            if ssSource:
-                ssObject  = lsst_alert.get('ssObject', None)
-                mpc_orbit  = lsst_alert.get('mpc_orbit', None)
+            ssObject  = lsst_alert.get('ssObject', None)
+            # LSST has put an 's' on this singular thing. 
+            # Lasair wants it to be singular so that a list of them has an 's'
+            mpc_orbit  = lsst_alert.get('mpc_orbits', None)
 
             # deal with images
             if not self.nocutouts and self.image_store.image_store:
@@ -266,33 +267,32 @@ class Ingester:
                     # This will happen if the list of sources is empty
                     log.debug("No latest detection so not storing cutouts")
 
-            if ssSource:   # solar system
-                if ssObject:
-                    print('ssObject ', end='')
-                if mpc_orbit:
-                    print('mpc_orbit ')
-
-                if ssObject:
-                    nSSObject += 1
+            if ssObject:
+                nSSObject += 1
+            if ssSource:
                 nSSSource += 1
+
+                diaSource = diaSourcesList[0]
+                if 'dec' in diaSource:
+                    diaSource['decl'] = diaSource['dec']
+                    del diaSource['dec']
+                if ssSource and 'dec' in ssSource:
+                    ssSource['decl'] = ssSource['dec']
+                    del ssSource['dec']
+                if ssSource and ssSource['diaSourceId'] is None:
+                    ssSource['diaSourceId'] = 0
+
                 alertDB = {
                     'diaSourcesList': diaSourcesList,
                     'ssObject'      : ssObject,
                     'ssSource'      : ssSource,
                     'mpc_orbit'    : mpc_orbit,
                 }
-                diaSource = diaSourcesList[0]
-                if 'dec' in diaSource:
-                    diaSource['decl'] = diaSource['dec']
-                    del diaSource['dec']
-                if ssSource['diaSourceId'] is None:
-                    ssSource['diaSourceId'] = 0
-                nDiaSources += 1
                 alertsDB.append(alertDB)
-                continue   # all done with this solar system alert
+            # end if ssSource
 
-            diaObject = lsst_alert['diaObject']
-#            print('==', diaObject['diaObjectId'])
+            if not diaObject:
+                continue
             nDiaObject += 1
 
             if 'prvDiaForcedSources' in lsst_alert and lsst_alert['prvDiaForcedSources']:
@@ -312,10 +312,10 @@ class Ingester:
                 del diaObject['dec']
 
             for diaSource in diaSourcesList:
-#                print('--', diaSource['diaSourceId'])
                 if 'dec' in diaSource:
                     diaSource['decl'] = diaSource['dec']
                     del diaSource['dec']
+
             for diaForcedSource in diaForcedSourcesList:
                 if 'dec' in diaForcedSource:
                     diaForcedSource['decl'] = diaForcedSource['dec']
@@ -339,21 +339,21 @@ class Ingester:
                 diaSourcesListDB = diaSourcesList[:nds]
                 fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
 
-                if len(diaForcedSourcesList) > 0:
-                    for i in range(len(diaForcedSourcesList)):
-                        if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaForcedSourcesListDB = diaForcedSourcesList[:i]
-                else:
-                    diaForcedSourcesListDB = []
-    
-                if len(diaNondetectionLimitsList) > 0:
-                    for i in range(len(diaNondetectionLimitsList)):
-                        if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
-                            break
-                    diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
-                else:
-                    diaNondetectionLimitsListDB = []
+            if len(diaForcedSourcesList) > 0:
+                for i in range(len(diaForcedSourcesList)):
+                    if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaForcedSourcesListDB = diaForcedSourcesList[:i]
+            else:
+                diaForcedSourcesListDB = []
+
+            if len(diaNondetectionLimitsList) > 0:
+                for i in range(len(diaNondetectionLimitsList)):
+                    if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
+                        break
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+            else:
+                diaNondetectionLimitsListDB = []
 
             alert = {
                 'diaObject': diaObject,
@@ -431,12 +431,12 @@ class Ingester:
 
             if 'ssSource' in alert and alert['ssSource']:
                 ssSources.append(alert['ssSource'])
-            if 'mpc_orbits' in alert and alert['mpc_orbits']:
+            if 'mpc_orbit' in alert and alert['mpc_orbit']:
                 mpc_orbits.append(alert['mpc_orbit'])
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
 
-#        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects))
+#        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects), len(mpc_orbits))
 
         if len(diaObjects) > 0:
             for future in executeLoadAsync(self.cassandra_session, 'diaObjects', diaObjects):
