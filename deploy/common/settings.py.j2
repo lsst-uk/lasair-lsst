@@ -12,7 +12,7 @@ KAFKA_SERVER           = "{{ (groups['kafka'] | join(':9092,') ) }}:9092"
 
 # Arbitrary Group ID for private Kafka, can be changed at will in an 
 # instantiated settings.py
-KAFKA_GROUPID          = 'LASAIR1'
+KAFKA_GROUPID          = '{{ lasair_name }}' + '01'
 
 # The server for the public kafka, where filter streams are prodced
 # with its username and password
