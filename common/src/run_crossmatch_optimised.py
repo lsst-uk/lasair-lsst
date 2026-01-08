@@ -175,7 +175,7 @@ def run_crossmatch_batch(batch, log, wl_id, coarse=False):
             if coarse and m["cmSepArcsec"] > rad:
                 continue
             keepDict = {
-                "wl_id": wl_idd,
+                "wl_id": wl_id,
                 "cone_id": c,
                 "arcsec": m["cmSepArcsec"],
                 "name": n,
