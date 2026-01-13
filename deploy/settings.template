@@ -2,7 +2,9 @@
 
 # DNS domain where this deployment lives
 domain: lsst.ac.uk
-# A name to distinguish *this* lasair deployment, typically the same as the first part of the domain
+# Public name of the web server, e.g. foo.lsst.ac.uk
+web_name: foo
+# A name to distinguish *this* lasair deployment, typically the same as the web name
 lasair_name: foo
 
 # Git tag to deploy
