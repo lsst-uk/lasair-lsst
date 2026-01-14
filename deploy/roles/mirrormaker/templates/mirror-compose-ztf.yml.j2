@@ -9,7 +9,7 @@ services:
         network_mode: host
         volumes:
             - /etc/mirror/producer.config:/etc/mirror/producer.config
-            - /etc/mirror/consumer.config:/etc/mirror/consumer.config
+            - /etc/mirror/consumer-ztf.config:/etc/mirror/consumer.config
             - /opt/jmx_exporter:/opt/jmx_exporter
         environment:
             - "KAFKA_HEAP_OPTS=-Xmx2G"
@@ -19,7 +19,7 @@ services:
              "--num.streams",
              "2",
              "--consumer.config",
-             "/etc/mirror/consumer-ztf.config",
+             "/etc/mirror/consumer.config",
              "--producer.config",
              "/etc/mirror/producer.config",
              "--whitelist",
