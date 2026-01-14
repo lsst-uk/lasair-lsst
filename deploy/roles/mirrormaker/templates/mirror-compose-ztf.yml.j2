@@ -1,0 +1,27 @@
+version: "3.2"
+
+services:
+
+    mirrormaker:
+
+        image:
+            "confluentinc/cp-kafka:7.9.5"
+        network_mode: host
+        volumes:
+            - /etc/mirror/producer.config:/etc/mirror/producer.config
+            - /etc/mirror/consumer.config:/etc/mirror/consumer.config
+            - /opt/jmx_exporter:/opt/jmx_exporter
+        environment:
+            - "KAFKA_HEAP_OPTS=-Xmx2G"
+            - "KAFKA_OPTS=-javaagent:/opt/jmx_exporter/jmx_prometheus_javaagent.jar=0.0.0.0:8081:/opt/jmx_exporter/mirrormaker.yml"
+        command: [
+             "kafka-mirror-maker",
+             "--num.streams",
+             "2",
+             "--consumer.config",
+             "/etc/mirror/consumer-ztf.config",
+             "--producer.config",
+             "/etc/mirror/producer.config",
+             "--whitelist",
+             "^ztf_[0-9]{8}_programid1"
+             ]
