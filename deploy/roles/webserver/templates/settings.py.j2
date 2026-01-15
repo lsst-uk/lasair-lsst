@@ -14,7 +14,7 @@ EMAIL_PORT = 25
 LASAIR_ROOT = '{{ ansible_env.HOME }}/'
 
 DEBUG          = False
-WEB_DOMAIN     = '{{ lasair_name }}'
+WEB_DOMAIN     = '{{ web_name }}'
 READONLY_USER  = '{{ settings.master_db_readonly_username }}'
 READONLY_PASS  = '{{ settings.master_db_readonly_password }}'
 
@@ -236,6 +236,6 @@ RECAPTCHA_PUBLIC_KEY= '{{ settings.recaptcha_public_key }}'
 RECAPTCHA_PRIVATE_KEY= '{{ settings.recaptcha_private_key }}'
 RECAPTCHA_REQUIRED_SCORE = 0.7
 
-CSRF_TRUSTED_ORIGINS = ['https://{{ lasair_name }}.{{ domain }}']
+CSRF_TRUSTED_ORIGINS = ['https://{{ web_name }}.{{ domain }}']
 LASAIR_GRAFANA_URL = "https://{{ lasair_name }}-svc.{{ domain }}/d/iILmd8-Wz/alerts"
 
