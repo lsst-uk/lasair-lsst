@@ -26,7 +26,7 @@ object page,
     * `lastDiaSourceMjdTai`: the Modified Julian Day (i.e.date and time) of the latest alert,
     * `mjdnow()`: an SQL function that returns the MJD now, so we can 
 subtract to get the age in days,
-    * `nSources`: number of alerts belonging to this object. 
+    * `nDiaSources`: number of alerts belonging to this object. 
 * From the sherlock_classifications table:
     * `classification`: [Sherlock class](core_functions/sherlock.html) according to the sky context.
 
@@ -82,7 +82,7 @@ There are a lot of 'orphans' in the Lasair database, meaning objects that
 have only one candidate (detection). Many of these are not worth looking at, 
 so we require the number of candidates to be greater than 1.
 ```
-AND objects.nSources > 1
+AND objects.nDiaSources > 1
 ```
 Finally, lets choose objects that have an associated host galaxy. 
 These codes are for the different Sherlock classifications: possible supernova, 

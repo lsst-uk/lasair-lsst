@@ -27,7 +27,7 @@ AND ((objects.magrmax- objects.magrmin) > 0.5)
 AND objects.dmdt_g >= 1.5
 ```
 Changes needed for Lasair-LSST are:
-* Change `ncand` to `nSources` (could also use `nuSources`, `ngSources`, `nrSources`, 
+* Change `ncand` to `nDiaSources` (could also use `nuSources`, `ngSources`, `nrSources`, 
 etc for the six bands)
 * Change `decmean` to `decl`
 * For the third line, aboout timing, change `jdgmax` to `g_latestMJD`, for the most
@@ -52,7 +52,7 @@ Perhaps we choose 0.2 magnitudes a day.
 So the clause looks like:
 ```
 sherlock_classifications.classification = "AGN"
-AND objects.nSources >= 1
+AND objects.nDiaSources >= 1
 AND objects.decl < 10
 AND objects.g_latestMJD > mjdnow() - 7
 AND (objects.r_psfFlux > 50000 OR objects.g_psfFlux > 50000)
