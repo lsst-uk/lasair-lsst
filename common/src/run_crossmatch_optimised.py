@@ -3,23 +3,27 @@ import sys
 sys.path.append('../common')
 import settings
 
-def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
+def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False, unittest=False):
     
     from fundamentals.logs import emptyLogger
     from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
     from collections import defaultdict
 
-    dbSettings = {
-        'host': settings.DB_HOST,
-        'user': settings.DB_USER_READWRITE,
-        'port': settings.DB_PORT,
-        'password': settings.DB_PASS_READWRITE,
-        'db': 'ztf'
-    }
-    dbConn = database(
-        log=emptyLogger(),
-        dbSettings=dbSettings
-    ).connect()
+    if not unittest:
+        dbSettings = {
+            'host': settings.DB_HOST,
+            'user': settings.DB_USER_READWRITE,
+            'port': settings.DB_PORT,
+            'password': settings.DB_PASS_READWRITE,
+            'db': 'ztf'
+        }
+        dbConn = database(
+            log=emptyLogger(),
+            dbSettings=dbSettings
+        ).connect()
+    else:
+        dbSettings = False
+        dbConn = msl
 
     # GRAB ALL SOURCES IN THE WATCHLIST
     sqlQuery = f"""
@@ -102,7 +106,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     wlMatches = []
     from fundamentals import fmultiprocess
     results = fmultiprocess(log=emptyLogger(), function=run_crossmatch_batch,
-                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=False, progressBar=True, coarse=coarse)
+                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=unittest, progressBar=True, coarse=coarse, wl_id=wl_id, unittest=unittest, msl=msl)
     for result in results:
         if result:
             wlMatches.extend(result)
@@ -126,20 +130,25 @@ def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False):
     return n_hits, message
 
 
-def run_crossmatch_batch(batch, log, coarse=False):
+def run_crossmatch_batch(batch, log, wl_id, coarse=False, unittest=False, msl=None):
     from HMpTy.mysql import conesearch
     from fundamentals.mysql import database
-    dbSettings = {
-        'host': settings.DB_HOST,
-        'user': settings.DB_USER_READWRITE,
-        'port': settings.DB_PORT,
-        'password': settings.DB_PASS_READWRITE,
-        'db': 'ztf'
-    }
-    dbConn = database(
-        log=log,
-        dbSettings=dbSettings
-    ).connect()
+
+    if not unittest:
+        dbSettings = {
+            'host': settings.DB_HOST,
+            'user': settings.DB_USER_READWRITE,
+            'port': settings.DB_PORT,
+            'password': settings.DB_PASS_READWRITE,
+            'db': 'ztf'
+        }
+        dbConn = database(
+            log=log,
+            dbSettings=dbSettings
+        ).connect()
+    else:
+        dbConn = msl
+
 
 
     wlMatches = []
