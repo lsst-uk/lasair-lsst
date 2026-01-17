@@ -44,16 +44,15 @@ SECRET_KEY = '{{ settings.django_secret_key }}'
 
 QUERY_CACHE = LASAIR_ROOT + 'query_cache'
 
-#CITIZEN_SCIENCE_USERID = 69
-#CITIZEN_SCIENCE_KEY    = 'oij2487hfwnjdoq8dhajfw87'
-
 BLOB_STORE_ROOT = '/mnt/cephfs/lasair'
 
 SHERLOCK_SERVICE = '{{ sherlock_svc_host }}'
 
-TNS_WATCHLIST_ID = 141
+# get the documentation main branch by default
+DEV_DOCS = False
 
-ACTIVE_EXPIRE = 180  # days fo expiry of active filter/watchlist/watchmap
+# days fo expiry of active filter/watchlist/watchmap
+ACTIVE_EXPIRE = 180  
 
 WATCHLIST_MAX            = 100000
 WATCHLIST_MAX_CROSSMATCH =  50000
