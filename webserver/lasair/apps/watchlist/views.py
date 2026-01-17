@@ -243,16 +243,12 @@ def watchlist_detail(request, wl_id, action=False):
             wl = newWl
 
             # COPY ALL CONES
-            query = f"""CREATE TEMPORARY TABLE watchlist{wl_id} AS SELECT * FROM watchlist_cones  WHERE wl_id = {wl_id};
-                ALTER TABLE watchlist{wl_id} MODIFY cone_id INT DEFAULT 0;
-                UPDATE watchlist{wl_id} SET cone_id=NULL, wl_id={wl.pk};
-                INSERT INTO watchlist_cones SELECT * FROM watchlist{wl_id};
-                drop TEMPORARY table if exists watchlist{wl_id};"""
+            query = f"""INSERT INTO watchlist_cones (name, ra, decl, radius, wl_id)
+                SELECT name, ra, decl, radius, {wl.pk} AS wl_id 
+                FROM watchlist_cones
+                WHERE wl_id = {wl_id}"""
 
-            queries = cursor.execute(query, multi=True)
-            # ITERATE OVER QUERIES
-            for i in queries:
-                pass
+            cursor.execute(query)
             msl.commit()
 
             wl_id = wl.pk
