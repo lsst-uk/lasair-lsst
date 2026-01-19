@@ -12,7 +12,7 @@
     - name: test query
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/query/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/query/"
         body:
           selected: "diaObjectId, ra, decl, g_psfFluxMean"
           tables: "objects"
@@ -24,7 +24,7 @@
     - name: test cone search
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/cone/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/cone/"
         body:
           ra: 279.23677285610523
           dec: -47.772983008485554
@@ -37,7 +37,7 @@
     - name: test lightcurves
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/object/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/object/"
         body:
           objectId: -99
         body_format: json
@@ -48,7 +48,7 @@
     - name: test malformed objectIds list
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/object/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/object/"
         body:
           objectId: "xyz"
         body_format: json
@@ -60,7 +60,7 @@
     - name: test sherlock position
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/sherlock/position/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/sherlock/position/"
         body:
           ra: 279.23677285610523
           dec: -47.772983008485554
@@ -72,7 +72,7 @@
     - name: test sherlock object
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/sherlock/object/"
         body:
           objectId: -99
         body_format: json
@@ -84,7 +84,7 @@
     - name: test invalid sherlock object
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/sherlock/object/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/sherlock/object/"
         body:
           objectId: thisisnotanobjectid
         body_format: json
@@ -96,7 +96,7 @@
     - name: test invalid token
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/cone/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/cone/"
         body:
           ra: 279.23677285610523
           dec: -47.772983008485554
@@ -111,7 +111,7 @@
     - name: test invalid method
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/notarealmethod/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/notarealmethod/"
         body:
           ra: 279.23677285610523
           dec: -47.772983008485554
@@ -124,7 +124,7 @@
     - name: test invalid ra and dec
       ansible.builtin.uri:
         method: POST
-        url: "https://api.{{ lasair_name }}.{{ domain }}/api/cone/"
+        url: "https://api.{{ web_name }}.{{ domain }}/api/cone/"
         body:
           ra: -29.23677285610523
           dec: 200.0
