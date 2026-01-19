@@ -91,12 +91,12 @@ def watchmap_index(request):
         form = WatchmapForm(request=request)
 
     # PUBLIC WATCHMAPS
-    publicWatchmaps = Watchmap.objects.filter(public__gte=1)
+    publicWatchmaps = Watchmap.objects.filter(public__gte=1).order_by('-active', 'name')
     publicWatchmaps = add_watchmap_metadata(publicWatchmaps, remove_duplicates=True)
 
     # USER WATCHMAPS
     if request.user.is_authenticated:
-        myWatchmaps = Watchmap.objects.filter(user=request.user)
+        myWatchmaps = Watchmap.objects.filter(user=request.user).order_by('-active', 'name')
         myWatchmaps = add_watchmap_metadata(myWatchmaps)
     else:
         myWatchmaps = None
@@ -137,7 +137,7 @@ def watchmap_detail(request, ar_id):
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == watchmap.user.id)
     is_public = (watchmap.public and watchmap.public > 0)
-    is_visible = is_owner or is_public
+    is_visible = is_owner or is_public or request.user.is_superuser
     if not is_visible:
         messages.error(request, "This watchmap is private and not visible to you")
         return render(request, 'error.html')
@@ -202,7 +202,7 @@ def watchmap_detail(request, ar_id):
     # GRAB ALL WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, o.ra,o.decl, mjdnow()-o.lastDiaSourceMJD as "last detected (days ago)"
+o.diaObjectId, o.ra,o.decl, mjdnow()-o.lastDiaSourceMjdTai as "last detected (days ago)"
 FROM area_hits as h, objects AS o
 WHERE h.ar_id={ar_id}
 AND o.diaObjectId=h.diaObjectId

@@ -5,7 +5,7 @@ schema = {
     {
       "name": "diaObjectId",
       "type": "long",
-      "doc": "ZTF object identifier"
+      "doc": "LSST object identifier"
     },
     {
       "name": "ar_id",

@@ -46,6 +46,9 @@
         - python3-hvac
         - python3-openstackclient
         - python3-manilaclient
+        - python3-httpx
+        - python3-cachetools
+        - python3-authlib
         # mysql.connector package is broken in ubuntu 24.04
         #- python3-mysql.connector
         - python3-dev
@@ -67,8 +70,13 @@
     pip:
         executable: pip3
         name:
+          # not sure why this specific version is required
+          - confluent-kafka==2.10.0
+          - fastavro
           - mysql.connector
           - parallel-ssh
+          - docopt
+          - cassandra-driver
         extra_args: "--break-system-packages"
 
   - name: Install vault snap

@@ -11,7 +11,7 @@ class lightcurve_fetcher_error(Exception):
 
 
 class lightcurve_fetcher():
-    def __init__(self, cassandra_hosts):
+    def __init__(self, cassandra_hosts, reliabilityThreshold=0):
         self.using_cassandra = True
         self.cluster = Cluster(cassandra_hosts)
         self.session = self.cluster.connect()
@@ -19,18 +19,21 @@ class lightcurve_fetcher():
         # the data returned will be in the form of object properties.
         self.session.row_factory = dict_factory
         self.session.set_keyspace('lasair')
+        self.reliabilityThreshold = reliabilityThreshold
 
     def fetch(self, diaObjectId, lite=True):
         # fetch the diaSources from Cassandra
         if lite:
-            query = 'SELECT "diaSourceId", "midpointMjdTai", band, "psfFlux", "psfFluxErr" '
+            query = 'SELECT "diaSourceId", "midpointMjdTai", band, "psfFlux", "psfFluxErr", reliability '
         else:
             query = 'SELECT * '
-        query += 'from diaSources where "diaObjectId" = %s' % diaObjectId
+        query += 'FROM diaSources WHERE "diaObjectId" = %s' % diaObjectId
+
         ret = self.session.execute(query)
         diaSources = []
         for diaSource in ret:
-            if not math.isnan(diaSource['psfFlux']):
+            if not math.isnan(diaSource['psfFlux'] and \
+                    diaSource['reliability'] > self.reliabilityThreshold):
                 diaSources.append(diaSource)
 
         # fetch the diaForcedSources from Cassandra

@@ -14,8 +14,8 @@ import settings
 import os
 import sys
 from astropy.time import Time
-from lasair.utils import mjd_now, ecliptic, rasex, decsex, objjson
-from .utils import object_difference_lightcurve, object_difference_lightcurve_forcedphot
+from lasair.utils import mjd_now, ecliptic_and_galactic, rasex, decsex, objjson
+from .utils import object_difference_lightcurve
 sys.path.append('../common')
 
 
@@ -37,7 +37,8 @@ def object_detail(request, diaObjectId):
     ]
     ```           
     """
-    data = objjson(diaObjectId, lite=True)
+#    data = objjson(diaObjectId, lite=True)
+    data = objjson(diaObjectId, lite=False)
 
     # how to replace the real data with fake data
 #    with open('/home/ubuntu/fake.json', 'r') as f:
@@ -60,18 +61,22 @@ def object_detail(request, diaObjectId):
     if 'sherlock' in data2:
         data2.pop('sherlock')
 
-    lightcurveHtml, mergedDF = object_difference_lightcurve(data)
-    fplightcurveHtml, mergedDF = object_difference_lightcurve_forcedphot(data)
+    lightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=False)
+    fplightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=True)
     if mergedDF is not None:
         lcData = mergedDF.to_dict('records')
     else:
         lcData = data["diaSources"]
 
+    def my_json_encoder(obj):
+        return str(obj)
+
     return render(request, 'object/object_detail.html', {
         'data': data,
-        'json_data': json.dumps(data2),
+        'json_data': json.dumps(data2, default=my_json_encoder),
         'authenticated': request.user.is_authenticated,
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
-        'lcData': lcData
+        'lcData': lcData,
+        'lasair_url': settings.LASAIR_URL,
     })

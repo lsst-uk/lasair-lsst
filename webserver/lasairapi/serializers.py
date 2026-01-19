@@ -119,7 +119,7 @@ def reformat(old, lasair_added=True):
         lasairData['sherlock']    = old['sherlock']
         lasairData['TNS']         = old['TNS']
         lasairData['annotations'] = old['annotations']
-    diaSources = []
+    diaSourcesList = []
     imageUrls = []
     for ds in old['diaSources']:
         del ds['json']
@@ -131,24 +131,26 @@ def reformat(old, lasair_added=True):
         del ds['image_urls']
         iu['diaSourceId'] = ds['diaSourceId']
         imageUrls.append(iu)
-        diaSources.append(ds)
+        diaSourcesList.append(ds)
     if lasair_added:
         lasairData['imageUrls'] = imageUrls
         new['lasairData'] = lasairData
     new['diaObject'] = diaObject
-    new['diaSources'] = diaSources
-    new['diaForcedSources'] = old['diaForcedSources']
+    new['diaSourcesList'] = diaSourcesList
+    new['diaForcedSourcesList'] = old['diaForcedSources']
     return new
 
 class ObjectSerializer(serializers.Serializer):
     objectId     = serializers.CharField(required=True)
     lite         = serializers.BooleanField(default=False)
     lasair_added = serializers.BooleanField(default=True)
+    reliabilityThreshold = serializers.FloatField(default=0)
 
     def save(self):
         objectId = self.validated_data['objectId']
         lite = self.validated_data['lite']
         lasair_added = self.validated_data['lasair_added']
+        reliabilityThreshold = self.validated_data['reliabilityThreshold']
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
@@ -158,7 +160,8 @@ class ObjectSerializer(serializers.Serializer):
 
         if lasair_added:
             try:
-                result = objjson(objectId, lite=lite)
+                result = objjson(objectId, lite=lite, 
+                     reliabilityThreshold=reliabilityThreshold)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
@@ -168,22 +171,24 @@ class ObjectSerializer(serializers.Serializer):
             except Exception as e:
                 result = {'error': str(e)}
         else:
-            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD)
+            LF = lightcurve_fetcher(cassandra_hosts=lasair_settings.CASSANDRA_HEAD,
+                reliabilityThreshold=reliabilityThreshold)
 
             try:
                 if lite: 
-                    (diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    (diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
+
                     result = {
                         'diaObjectId':objectId, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
                 else:
-                    (diaObject, diaSources, diaForcedSources) = LF.fetch(objectId, lite=lite)
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = LF.fetch(objectId, lite=lite)
                     result = {
                         'diaObjectId':objectId, 
                         'diaObject':diaObject, 
-                        'diaSources':diaSources, 
-                        'diaForcedSources':diaForcedSources}
+                        'diaSourcesList':diaSourcesList, 
+                        'diaForcedSourcesList':diaForcedSourcesList}
             except Exception as e:
                 result = {'error': str(e)}
             LF.close()

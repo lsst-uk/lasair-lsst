@@ -48,7 +48,8 @@ def cql_create_table(schema):
             s += ' ' + f['extra']
         lines.append(s)
     
-    cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'] + '(\n'
+    # Cassaandra likes lower-case table names
+    cql = 'CREATE TABLE IF NOT EXISTS ' + schema['name'].lower() + '(\n'
     cql += ',\n'.join(lines)
 
     if 'indexes' in schema:             # add in the INDEX
@@ -72,12 +73,12 @@ if __name__ == '__main__':
     else:
         print("Usage: 3_make_create_table.py switch schema_version table")
         print("Where switch can be sql or cql")
-        print("and schema_verrsion can be for example 704")
+        print("and schema_verrsion can be for example 7_4")
         print("and table is one of objects, sherlock_classifications, etc")
         sys.exit()
 
     module = '%s.%s' % (schema_version, table)
-    print('importing ', module)
+    #print('importing ', module)
     schema_package = importlib.import_module(module)
     schema = schema_package.schema
 

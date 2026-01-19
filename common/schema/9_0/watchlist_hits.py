@@ -5,7 +5,7 @@ schema = {
     {
       "name": "diaObjectId",
       "type": "long",
-      "doc": "ZTF object identifier"
+      "doc": "LSST object identifier"
     },
     {
       "name": "wl_id",
@@ -20,7 +20,7 @@ schema = {
     {
       "name": "arcsec",
       "type": "float",
-      "doc": "Distance between ZTF and watchlist source (arcsec)"
+      "doc": "Distance between LSST and watchlist source (arcsec)"
     },
     {
       "name": "name",

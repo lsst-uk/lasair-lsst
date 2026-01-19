@@ -2,6 +2,7 @@
 
 - import_tasks: prometheus_exporter.yml 
 - import_tasks: mirrormaker.yml
+- import_tasks: mirrormaker-ztf.yml
 
 # cron job is no longer used - see https://github.com/lsst-uk/lasair-deploy/issues/142
 #- import_tasks: cron.yml

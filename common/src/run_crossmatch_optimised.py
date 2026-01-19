@@ -1,31 +1,33 @@
 import math
 import sys
-sys.path.append('..')
+sys.path.append('../common')
 import settings
 
-def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
-    """ Delete all the hits and remake.
-    """
-
-    from HMpTy.mysql import conesearch
+def run_crossmatch(msl, radius, wl_id, batchSize=50000, wlMax=False, unittest=False):
+    
     from fundamentals.logs import emptyLogger
     from fundamentals.mysql import database, readquery, writequery, insert_list_of_dictionaries_into_database_tables
+    from collections import defaultdict
 
-    dbSettings = {
-        'host': settings.DB_HOST,
-        'user': settings.DB_USER_READWRITE,
-        'port': settings.DB_PORT,
-        'password': settings.DB_PASS_READWRITE,
-        'db': 'ztf'
-    }
-    dbConn = database(
-        log=emptyLogger(),
-        dbSettings=dbSettings
-    ).connect()
+    if not unittest:
+        dbSettings = {
+            'host': settings.DB_HOST,
+            'user': settings.DB_USER_READWRITE,
+            'port': settings.DB_PORT,
+            'password': settings.DB_PASS_READWRITE,
+            'db': 'ztf'
+        }
+        dbConn = database(
+            log=emptyLogger(),
+            dbSettings=dbSettings
+        ).connect()
+    else:
+        dbSettings = False
+        dbConn = msl
 
     # GRAB ALL SOURCES IN THE WATCHLIST
     sqlQuery = f"""
-        SELECT cone_id, ra,decl, name FROM watchlist_cones WHERE wl_id={wl_id}
+        SELECT cone_id, ra,decl, name, radius  FROM watchlist_cones WHERE wl_id={wl_id}
     """
     wlCones = readquery(
         log=emptyLogger(),
@@ -46,60 +48,69 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
         dbConn=dbConn
     )
 
-    total = len(wlCones[1:])
-    batches = int(total / batchSize)
+    # GROUP SOURCES BY RADIUS
+    grouped_by_radius = defaultdict(list)
+    for s in wlCones:
+        if not s["radius"]:
+            s["radius"] = radius
+        if s["radius"] > 1800.:
+            s["radius"] = 1800.
+        s["coarseRadius"] = None
+        grouped_by_radius[s["radius"]].append(s)
+    
+    ## MAKE COARSER BINNING FOR HETROGENEOUS RADII
+    if len(grouped_by_radius) > 10:
+        coarse = True
+        grouped_by_radius = defaultdict(list)
+        for s in wlCones:
+            if not s["radius"]:
+                s["radius"] = radius
+            if s["radius"] > 1800.:
+                s["radius"] = 1800.
+            stages = [10, 100, 300, 500, 1000, 1500, 1800]
+            for stage in stages:
+                if s["radius"] <= stage:
+                    s["coarseRadius"] = math.ceil(s["radius"] / stage) * stage
+                    break
+                s["coarseRadius"] = math.ceil(s["radius"] / 1800) * 1800
+            grouped_by_radius[s["coarseRadius"]].append(s)
+    else:
+        coarse = False
 
-    start = 0
-    end = 0
+    # CREATE BATCHES WHERE EACH BATCH CONTAINS ITEMS WITH THE SAME RADIUS
+    batches_by_radius = []
+    for radius, sources in grouped_by_radius.items():
+        for i in range(0, len(sources), batchSize):
+            batch = sources[i:i + batchSize]
+            batches_by_radius.append((radius, batch))
+
+
+    # SPLIT INTO BATCHES
     theseBatches = []
-    for i in range(batches + 1):
-        end = end + batchSize
-        start = i * batchSize
-        thisBatch = wlCones[start:end]
-        theseBatches.append(thisBatch)
+    for radius, groupbatch in batches_by_radius:
+        gbTotal = len(groupbatch)
+        batchSize = int(5e7 // (radius * radius))
+        if batchSize > 50000:
+            batchSize = 50000
+        gbBatches = int(gbTotal / batchSize)
+        start = 0
+        end = 0
+        for i in range(gbBatches + 1):
+            end = end + batchSize
+            start = i * batchSize
+            thisBatch = groupbatch[start:end]
+            if len(thisBatch):
+                theseBatches.append(thisBatch)
 
     n_hits = 0
     wlMatches = []
-    for batch in theseBatches:
-        # DO THE CONESEARCH
-        raList, decList, nameList, coneIdList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"]) for s in batch])
-        cs = conesearch(
-            log=emptyLogger(),
-            dbConn=dbConn,
-            tableName="objects",
-            columns="diaObjectId",
-            ra=raList,
-            dec=decList,
-            raCol="ra",
-            decCol="decl",
-            radiusArcsec=radius,
-            separations=True,
-            distinct=False,
-            sqlWhere="",
-            closest=False,
-            htmColumns="htm16"
-        )
-        matchIndies, matches = cs.search()
-
-        if len(matchIndies):
-            n_hits += len(matchIndies)
-
-            # ADD IN ORIGINAL DATA TO LIST OF MATCHES
-            raList, decList, nameList, coneIdList = zip(*[(raList[i], decList[i], nameList[i], coneIdList[i]) for i in matchIndies])
-            # VALUES TO ADD TO DB
-
-            for r, d, n, c, m in zip(raList, decList, nameList, coneIdList, matches.list):
-                keepDict = {
-                    "wl_id": wl_id,
-                    "cone_id": c,
-                    "arcsec": m["cmSepArcsec"],
-                    "name": n,
-                    "diaObjectId": m["diaObjectId"]
-                }
-                wlMatches.append(keepDict)
-
-            # tableData = matches.table(filepath=None)
-            # print(tableData)
+    from fundamentals import fmultiprocess
+    results = fmultiprocess(log=emptyLogger(), function=run_crossmatch_batch,
+                          inputArray=theseBatches, poolSize=False, timeout=300, turnOffMP=unittest, progressBar=True, coarse=coarse, wl_id=wl_id, unittest=unittest, msl=msl)
+    for result in results:
+        if result:
+            wlMatches.extend(result)
+            n_hits += len(result)
 
     if len(wlMatches):
         # USE dbSettings TO ACTIVATE MULTIPROCESSING - INSERT LIST OF DICTIONARIES INTO DATABASE
@@ -110,6 +121,7 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
             dbTableName="watchlist_hits",
             dateCreated=False,
             batchSize=200000,
+            replace=True,
             dbSettings=dbSettings
         )
 
@@ -117,6 +129,69 @@ def run_crossmatch(msl, radius, wl_id, batchSize=5000, wlMax=False):
     print(message)
     return n_hits, message
 
+
+def run_crossmatch_batch(batch, log, wl_id, coarse=False, unittest=False, msl=None):
+    from HMpTy.mysql import conesearch
+    from fundamentals.mysql import database
+
+    if not unittest:
+        dbSettings = {
+            'host': settings.DB_HOST,
+            'user': settings.DB_USER_READWRITE,
+            'port': settings.DB_PORT,
+            'password': settings.DB_PASS_READWRITE,
+            'db': 'ztf'
+        }
+        dbConn = database(
+            log=log,
+            dbSettings=dbSettings
+        ).connect()
+    else:
+        dbConn = msl
+
+
+
+    wlMatches = []
+    # DO THE CONESEARCH
+    raList, decList, nameList, coneIdList, coarseRadiusList, radiusList = zip(*[(s["ra"], s["decl"], s["name"], s["cone_id"], s["coarseRadius"], s["radius"]) for s in batch])
+    if coarse:
+        thisRadius = coarseRadiusList[0]
+    else:
+        thisRadius = radiusList[0]
+    cs = conesearch(
+        log=log,
+        dbConn=dbConn,
+        tableName="objects",
+        columns="diaObjectId",
+        ra=raList,
+        dec=decList,
+        raCol="ra",
+        decCol="decl",
+        radiusArcsec=thisRadius,
+        separations=True,
+        distinct=False,
+        sqlWhere="",
+        closest=False,
+        htmColumns="htm16"
+    )
+    matchIndies, matches = cs.search()
+    if len(matchIndies):
+        # ADD IN ORIGINAL DATA TO LIST OF MATCHES
+        raList, decList, nameList, coneIdList, radiusList = zip(*[(raList[i], decList[i], nameList[i], coneIdList[i], radiusList[i]) for i in matchIndies])
+        # VALUES TO ADD TO DB
+
+        for r, d, n, c, rad, m in zip(raList, decList, nameList, coneIdList, radiusList, matches.list):
+            if coarse and m["cmSepArcsec"] > rad:
+                continue
+            keepDict = {
+                "wl_id": wl_id,
+                "cone_id": c,
+                "arcsec": m["cmSepArcsec"],
+                "name": n,
+                "diaObjectId": m["diaObjectId"]
+            }
+            wlMatches.append(keepDict)
+    return wlMatches
 
 if __name__ == "__main__":
     try:
@@ -129,4 +204,3 @@ if __name__ == "__main__":
     # SETUP ALL DATABASE CONNECTIONS
 
     run_crossmatch(None, radius, wl_id)
-

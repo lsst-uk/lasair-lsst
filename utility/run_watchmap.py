@@ -25,7 +25,7 @@ def run_watchmap(batch, ar_id):
     print('Found MOC for watchmap %d' % ar_id)
 
     # runs out of memory with the whole database
-    npage = 1000000
+    npage = 100000
     for ipage in range(100):
         alertlist = fetch_alerts(batch, limit=npage, offset=ipage*npage)
         nalert = len(alertlist['obj'])

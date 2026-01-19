@@ -94,7 +94,7 @@ def register(request):
             messages.error(request, "Form is not valid")
     else:
         form = UserRegisterForm()
-        return render(request, 'users/register.html', {'form': form})
+    return render(request, 'users/register.html', {'form': form})
 
 
 def activate(request):

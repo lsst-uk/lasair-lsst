@@ -125,12 +125,12 @@ def watchlist_index(request):
         form = WatchlistForm(request=request)
 
     # PUBLIC WATCHLISTS
-    publicWatchlists = Watchlist.objects.filter(public__gte=1)
+    publicWatchlists = Watchlist.objects.filter(public__gte=1).order_by('-active', 'name')
     publicWatchlists = add_watchlist_metadata(publicWatchlists, remove_duplicates=True)
 
     # USER WATCHLISTS
     if request.user.is_authenticated:
-        myWatchlists = Watchlist.objects.filter(user=request.user)
+        myWatchlists = Watchlist.objects.filter(user=request.user).order_by('-active', 'name')
         myWatchlists = add_watchlist_metadata(myWatchlists)
     else:
         myWatchlists = None
@@ -170,7 +170,7 @@ def watchlist_detail(request, wl_id, action=False):
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == watchlist.user.id)
     is_public = (watchlist.public and watchlist.public > 0)
-    is_visible = is_owner or is_public
+    is_visible = is_owner or is_public or request.user.is_superuser
     if not is_visible:
         messages.error(request, "This watchlist is private and not visible to you")
         return render(request, 'error.html')
@@ -243,16 +243,12 @@ def watchlist_detail(request, wl_id, action=False):
             wl = newWl
 
             # COPY ALL CONES
-            query = f"""CREATE TEMPORARY TABLE watchlist{wl_id} AS SELECT * FROM watchlist_cones  WHERE wl_id = {wl_id};
-                ALTER TABLE watchlist{wl_id} MODIFY cone_id INT DEFAULT 0;
-                UPDATE watchlist{wl_id} SET cone_id=NULL, wl_id={wl.pk};
-                INSERT INTO watchlist_cones SELECT * FROM watchlist{wl_id};
-                drop TEMPORARY table if exists watchlist{wl_id};"""
+            query = f"""INSERT INTO watchlist_cones (name, ra, decl, radius, wl_id)
+                SELECT name, ra, decl, radius, {wl.pk} AS wl_id 
+                FROM watchlist_cones
+                WHERE wl_id = {wl_id}"""
 
-            queries = cursor.execute(query, multi=True)
-            # ITERATE OVER QUERIES
-            for i in queries:
-                pass
+            cursor.execute(query)
             msl.commit()
 
             wl_id = wl.pk

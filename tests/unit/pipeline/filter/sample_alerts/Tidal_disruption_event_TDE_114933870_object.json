@@ -2,7 +2,7 @@
   "diaObjectId": 2814340794498666331,
   "ra": 193.59855902070723,
   "decl": -9.92704035644642,
-  "lastDiaSourceMjdTai": 0.0,
+  "lastDiaSourceMjdTai": 60102.2511,
   "firstDiaSourceMjdTai": 0.0,
   "u_psfFluxMean": 0.0,
   "u_psfFluxMeanErr": 0.0,
@@ -94,7 +94,6 @@
   "z_latestMJD": 59998.3902,
   "y_psfFlux": 35.664677,
   "y_latestMJD": 60008.3373,
-  "nSources": 23,
   "nuSources": 1,
   "ngSources": 2,
   "nrSources": 3,
@@ -120,5 +119,9 @@
   "penultimatePairMJD": null,
   "penultimatePairColourMag": null,
   "penultimatePairColourBands": null,
-  "penultimatePairColourTemp": null
+  "penultimatePairColourTemp": null,
+  "medianR": 0.0,
+  "latestR": 0.0,
+  "latest_psfFlux": 99.948372,
+  "nSourcesGood": 0
 }

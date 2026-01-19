@@ -221,6 +221,8 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
     f.write(digestdict_text)
     f.close()
 
+def tutc(s):
+    return datetime.datetime.strptime(s+' +0000', "%Y-%m-%d %H:%M:%S %z")
 
 def fetch_digest(topic_name):
     filename = settings.KAFKA_STREAMS + '/' + topic_name
@@ -235,8 +237,8 @@ def fetch_digest(topic_name):
         digest = []
         last_entry_text = "2017-01-01 00:00:00"
         last_email_text = "2017-01-01 00:00:00"
-    last_entry = datetime.datetime.strptime(last_entry_text, "%Y-%m-%d %H:%M:%S")
-    last_email = datetime.datetime.strptime(last_email_text, "%Y-%m-%d %H:%M:%S")
+    last_entry = tutc(last_entry_text)
+    last_email = tutc(last_email_text)
     return digest, last_entry, last_email
 
 
@@ -258,7 +260,7 @@ def dispose_email(allrecords, last_email, query, force=False):
     message = 'Your active query with Lasair on topic %s\n' % topic
     message_html = 'Your active query with Lasair on <a href=%s>%s</a><br/>' % (query_url, topic)
     for out in allrecords: 
-        out_time = datetime.datetime.strptime(out['UTC'], "%Y-%m-%d %H:%M:%S")
+        out_time = tutc(out['UTC'])
         # gather all records that have accumulated since last email
         if force or out_time > last_email:
             if 'diaObjectId' in out:
@@ -349,17 +351,17 @@ def filters(fltr):
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
-    try:
+    if 1:
         ntotal = run_queries(fltr, query_list)
         return ntotal
-    except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
-        return None
+#    except Exception as e:
+#        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
+#        return None
 
 
 def fast_anotation_filters(fltr):
     """run_annotation_queries.
-    Pulls the recent content from the kafka topic 'ztf_annotations' 
+    Pulls the recent content from the kafka topic 'lsst_annotations' 
     Each message has an annotator/topic name, and the diaObjectId that was annotated.
     Queries that have that annotator should run against that object
     """

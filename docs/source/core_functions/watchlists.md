@@ -9,6 +9,9 @@ alerted when a transient is coincident with a watchlist source. Here, the word c
 within the radius of the source.
 An "Active" watchlist is one that is run every day, so that it is up to date with the latest objects.
 
+First we cover to the creation of a new watchlist from Vizier, then some workarounds for large
+watchlists.
+
 ## Create new watchlist
 
 You can create a watchlist of sources by preparing a text file, where each 
@@ -64,11 +67,19 @@ The upload form is shown here:
 Fill in the name and description of the watchlist. Choose a default value of the 
 radius to use in matching, in arcseconds. 
 Each line should be RA, Dec, ID, and may have a fourth entry, the radius to use in matching, 
-in arcseconds, if different from the default. Then click “Create”.
+in arcseconds, if different from the default. The maximum radius allowed is 1800 arcsec, and radii greater than this value will be reduced to 1800 arcsec. Then click “Create”.
 
 Here is a successful creation of a watchlist. Some messages – “Bad line” – because there were 
 some lines without data, but you can ignore these, and look for where it 
 says “Watchlist created successfully”. You can now find it in the list of “My Watchlists”.
+
+## Large Watchlists
+
+If you try to ingest a large watchlist, there may be a **"Gateway Timeout"** on the web server after 60 seconds or so. This is because of the way webservers are designed. However, a member of the Lasair team can ingest your watchlist from the command line. First create an empty watchlist with the web app: fill in all the fields but without any cones. Then send us the watchlist ID of your empty list, together with your file with the list of cones, either email or dropbox or the like. Send us email at [Email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=watchlist)
+
+## About "Rerun Watchlist"
+
+Watchlists are made for real time matching with the alert stream: click on "settings", then set it to "active" and save. This means that future alerts will be matched as they flow through Lasair. However, users often want to know about past alerts that match their watchlist, hence the "Rerun watchlist" button. However, if your watchlist is too large, or the association radii are too large, there will not be enough time for the webserver to compute, and you will get a **"Gateway Timeout"**. In this case, you can email the Lasair team at [Email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=watchlist), and we can do this on the command line, matching your watchlist with existing Lasair objects.
 
 ## Find outbursts from my watchlist
 
@@ -77,3 +88,40 @@ something unusual – outburst for example – happens to one of your sources.
 Thus we combine a watchlist with a query on magnitude that detects fast rise. 
 For the watch list see Build a Watchlist of your sources, and for the query we 
 utilise the moving averages of apparent magnitudes that Lasair provides. 
+
+## Adding cones to a watchlist
+Modifying a watchlist is not easy; in most cases it is best to build a 
+new one and delete the old, then click the "Rerun watchlist" button to 
+match existing objects. Here is the process step by step for adding cones.
+<hr/>
+First click the "Export" button on the existing watchlist, to get a file
+of all the cones, suitable for uploading. It will bein your "Downloads" folder.
+
+<img src="../_images/watchlist/wl1.png" width="400px"/>
+
+<hr/>
+Next, edit the file to add the new cones, with the format "RA, Dec, name", 
+and an optional radius in arc seconds:
+
+<img src="../_images/watchlist/wl2.png" width="400px"/>
+
+<hr/>
+Back at the Lasair website, copy the title and description to a new 
+watchlist, perhaps with versioning to show the changes you are making.
+It is best to give the new watchlist a different title from the old.
+Then click the "Upload" option for the list of cones.
+
+<img src="../_images/watchlist/wl3.png" width="400px"/>
+
+<hr/>
+Select the options you want for "active", where matching happens in real
+time as alerts arrive, and choose "public" or not.
+
+<img src="../_images/watchlist/wl4.png" width="400px"/>
+
+<hr/>
+Finally, click the "Rerun Watchlist" button to match with all previous
+Lasair objects. For a large watchlist, or one with large radii, this may 
+time out, so please email us for help as above.
+
+<img src="../_images/watchlist/wl5.png" width="400px"/>

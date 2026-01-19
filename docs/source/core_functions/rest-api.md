@@ -13,10 +13,24 @@ uses either HTTP GET or POST. Arguments can be passed in the query string, as JS
 
 The examples below show how to drive the API with either GET URL, POST curl or python with the 'lasair' package. The URL should be pasted into a web browser. The curl script pasted into a terminal window, and the python code copied into a file and executed as a python program.
 
-**Throttling of API Usage**
+#### Throttling of API Usage
+The client has a throttling system in the backend: users with an account get up to 100 calls per hour, but "power" users get up to 10,000 calls per hour. If you wish your account to be upgraded to power user,
+please put answers to the following in an email to
+[email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=power user):
 
-The Lasair API counts numbers of calls on a per-user basis, and restricts the number that can be executed in any hour time period. There are also restrictions on the number of rows that can be returned by the 'query' method. To use the API with less throttling, please get your own token from your Lasair account, as explained below "Get Your Token". If you would like to use the system for serious work, please [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the "Power Users" category. The limits for these three categories of user are:
+- Name and academic position
 
+- Institute
+
+- Institutional email (not gmail, hotmail, etc)
+
+- Are you an LSST data rights holder ?
+
+- Brief scientific description of what you want to do with Lasair (max 300 words)
+
+- Required rate of API calls in numbers per minute (or hour) and justification for the power user request (max 300 words). 
+
+The limits for these three categories of user are:
 *   User token (see 'Get Your Token') below: 100 API calls per hour, maximum 10,000 rows from query.
 *   Power user token (on request): 10,000 API calls per hour, maximum 1,000,000 rows from query.
 
@@ -54,17 +68,17 @@ This method runs a cone search on all the objects in the Lasair database. The ar
 
 GET URL Example
 ```
-https://lasair-ztf.lsst.ac.uk/api/cone/?&ra=194.494&dec=48.851&radius=240.0&requestType=all&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+https://api.lasair.lsst.ac.uk/api/cone/?&ra=194.494&dec=48.851&radius=240.0&requestType=all&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
 ```
 Curl Example: The API key (token) goes in the header of the request, and the data in the data section.
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "ra=194.494&dec=48.851&radius=240.0&requestType=all" https://lasair-ztf.lsst.ac.uk/api/cone/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "ra=194.494&dec=48.851&radius=240.0&requestType=all" https://api.lasair.lsst.ac.uk/api/cone/
 ```
 The return has object identifiers, and their separations in arcseconds, something like:
 ```
 [
     {
-        "object": "ZTF17aaajmtw",
+        "object": "12345678901234",
         "separation": 2.393511865261539
     }
 ]
@@ -81,22 +95,22 @@ This method runs a query on the Lasair database. There is an [interactive query 
 
 GET URL Example
 ```
-https://lasair-ztf.lsst.ac.uk/api/query/?selected=objectId%2Cgmag&tables=objects&conditions=gmag%3C12.0&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+https://api.lasair.lsst.ac.uk/api/query/?selected=objectId%2Cgmag&tables=objects&conditions=gmag%3C12.0&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
 ```
 Curl Example: The authorization token goes in the header of the request, and the data in the data section.
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "selected=objectId,gmag&tables=objects&conditions=gmag<12.0&limit=3" https://lasair-ztf.lsst.ac.uk/api/query/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "selected=objectId,gmag&tables=objects&conditions=gmag<12.0&limit=3" https://api.lasair.lsst.ac.uk/api/query/
 ```
 and the return is something like:
 ```
 status= 200
 [
   {
-    "objectId": "ZTF17aaagaie",
+    "objectId": "12345678901234",
     "gmag": 11.4319
   },
   {
-    "objectId": "ZTF18aaadvxy",
+    "objectId": "12345678901234",
     "gmag": 11.8582
   },
 .... ]
@@ -110,29 +124,25 @@ This method returns a machine-readable version of the information on a named obj
 
 GET URL Example
 ```
-https://lasair-ztf.lsst.ac.uk/api/object/?objectId=ZTF18abdphvf&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+https://api.lasair.lsst.ac.uk/api/object/?objectId=12345678901234&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
 ```
 Curl Example: The API key goes in the header of the request, and the data in the data section.
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectId=ZTF18abdphvf" https://lasair-ztf.lsst.ac.uk/api/object/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectId=12345678901234" https://api.lasair.lsst.ac.uk/api/object/
 ```
 and the return something like this:
 ```
 status= 200
-{"objectId":"ZTF18abdphvf",
+{"objectId":"12345678901234",
 "objectData":{
     "ncand":8,
-    "ramean":293.54591006249996,
-    "decmean":49.429229975,
-    "glonmean":81.77021010499132,
-    "glatmean":13.829346704017533,
+    "ra":293.54591006249996,
+    "decl":49.429229975,
 .... }
 }
 ```
 
-The data includes everything on the object page, including the object and candidates, as well as the Sherlock and TNS information. The candidate section has bot detections, that have a `candid` attribute, and the much smaller non-detections (upper limits). Each candidate 
-has links to the cutout images that are shown on the object web page. A complete example
-is [shown here](ZTF23aabplmy.html).
+The data includes everything on the object page, including the object and candidates, as well as the Sherlock and TNS information. The candidate section has bot detections, that have a `candid` attribute, and the much smaller non-detections (upper limits). Each candidate has links to the cutout images that are shown on the object web page. A complete example from the ZTF survey is [shown here](ZTF23aabplmy.html).
 
 ### <a name="sherlockobject"></a>/api/sherlock/object/
 
@@ -143,18 +153,18 @@ This method returns Sherlock information for a named objects, either the "lite" 
 
 GET URL Example with object
 ```
-https://lasair-ztf.lsst.ac.uk/api/sherlock/object/?objectId=ZTF20acpwljl&token=xxxxxxxxxxxxxxxxxxxxxxxx&lite=true&format=json
+https://api.lasair.lsst.ac.uk/api/sherlock/object/?objectId=123456789012345&token=xxxxxxxxxxxxxxxxxxxxxxxx&lite=true&format=json
 ```
 Curl Example with list of objects: The authorization token goes in the header of the request, and the data in the data section.
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectId=ZTF20acpwljl&lite=True" https://lasair-ztf.lsst.ac.uk/api/sherlock/object/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "objectId=123456789012345&lite=True" https://api.lasair.lsst.ac.uk/api/sherlock/object/
 ```
 and the return is something like:
 ```
 {
-    "ZTF20acpwljl": {
+    "123456789012345": {
         "classifications": {
-            "ZTF20acpwljl": [
+            "123456789012345": [
                 "SN",
                 "The transient is possibly associated with <em><a href='http://skyserver.sdss.org/dr12/en/tools/explore/Summary.aspx?id=1237673709862061782'>SDSS J081931-060114.9</a></em>; a J=17.01 mag galaxy found in the SDSS/2MASS/PS1 catalogues. It's located 1.09 arcsec N, 1.11 arcsec W from the galaxy centre."
             ]
@@ -178,11 +188,11 @@ This method returns Sherlock information for an arbitrary position in the sky, e
 
 GET URL Example
 ```
-https://lasair-ztf.lsst.ac.uk/api/sherlock/position/?ra=16.851866&dec=34.53307&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
+https://api.lasair.lsst.ac.uk/api/sherlock/position/?ra=16.851866&dec=34.53307&token=xxxxxxxxxxxxxxxxxxxxxxxx&format=json
 ```
 
 Curl Example: The authorization token goes in the header of the request, and the data in the data section.
 
 ```
-curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "ra=16.851866&dec=34.53307" https://lasair-ztf.lsst.ac.uk/api/sherlock/position/
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "ra=16.851866&dec=34.53307" https://api.lasair.lsst.ac.uk/api/sherlock/position/
 ```

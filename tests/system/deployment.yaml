@@ -48,19 +48,20 @@
   gather_facts: false
   vars_files:
     - settings.yaml
+    - system_test_settings.yaml
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
   tasks:
     - name: validate object db schema
       ansible.builtin.command:
         chdir: ../../utility
-        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --mod=7_4_A.objects"
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=3306 --mod={{ schema_mod }}.objects"
       loop: "{{ groups['db'] + groups['backend_db'] + groups['frontend_db'] }}"
       changed_when: false
     - name: validate object db schema via load balancer
       ansible.builtin.command:
         chdir: ../../utility
-        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --mod=7_4_A.objects"
+        cmd: "python3 check_schema.py --user={{ settings.master_db_readonly_username }} --password={{ settings.master_db_readonly_password }} --host={{ item }} --port=9001 --mod={{ schema_mod }}.objects"
       loop: "{{ groups['cluster_control'] }}"
       changed_when: false
     - name: validate db functions
@@ -233,6 +234,27 @@
       tags: net
   tags: cassandra
 
+# cassandra schema test
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - system_test_settings.yaml
+  vars:
+    schemata:
+      - diaObjects
+      - diaSources
+      - diaForcedSources
+      - ssObjects
+      - ssSources
+  tasks:
+    - name: validate cassandra schemata
+      ansible.builtin.command:
+        chdir: ../../utility
+        cmd: "python3 check_schema.py --cassandra --database=lasair --host={{ groups['cassandranodes'][0] }} --port=9042 --mod={{ schema_mod }}.{{ item }}"
+      loop: "{{ schemata }}"
+      changed_when: false
+  tags: cassandra
+
 # cutout cassandra tests
 - hosts: cutoutcass
   gather_facts: false
@@ -325,12 +347,22 @@
 # filter service
 - hosts: filter
   gather_facts: false
+  vars_files:
+    - settings.yaml
+    - system_test_settings.yaml
+  vars:
+    settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
   tasks:
+    - name: validate filter db schema
+      ansible.builtin.command:
+        chdir: lasair-lsst/utility
+        cmd: "/opt/lasair_venv/bin/python3 check_schema.py --user=ztf --password={{ settings.local_db_password }} --host=localhost --port=3306 --mod={{ schema_mod }}.objects"
+      changed_when: false
     - name: filter service running
       ansible.builtin.assert:
         that: ansible_facts.services['lasair-filter.service'].state == "running"
         fail_msg: Filter service not running
         success_msg: Filter service running
         quiet: true
-  ignore_errors: true
+      ignore_errors: true
   tags: filter

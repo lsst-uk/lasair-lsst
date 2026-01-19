@@ -49,3 +49,25 @@ python3 1_fetch_avsc.py 7_4
 ```
 python3 3_make_all_alter_table.py 7_3 7_4
 ```
+
+## Updating and checking the nodes
+(1) Run the command 
+```
+cd common/schema
+python3 3_make_create_table.py sql 9_0 objects
+```
+Check that `show create table objects` returns the same as this on main and both filter MySQL databases.
+Check other tables in the same way.
+
+(2) 
+Run the commands 
+```
+python3 3_make_create_table.py cql 9_0 diaObjects
+python3 3_make_create_table.py cql 9_0 diaSources
+```
+Check that the Cassandra tables match the schema with `show create table "diaObjects"` in `cqlsh`.
+Check other tables in the same way.
+
+(3) The value of SCHEMA_VERSION should be up to date in `/common/settings.py` for both ingest nodes, 
+both filters, and web. In fact, it would be great to simply replace all the local copies of 
+`settings.py` from the template in the bootstrap node. 

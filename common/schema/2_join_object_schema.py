@@ -14,7 +14,7 @@ import read_avsc
 lasair_schema = object_features.schema
 
 if len(sys.argv) < 2:
-    print('Usage: join_object_schema.py <schema_version> ... example 704')
+    print('Usage: join_object_schema.py <schema_version> ... example 7_4')
     sys.exit()
 schema_version = sys.argv[1]
 if len(sys.argv) >= 3:

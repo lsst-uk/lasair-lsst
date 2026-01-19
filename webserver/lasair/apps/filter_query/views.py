@@ -50,12 +50,12 @@ def filter_query_index(request):
     """
 
     # PUBLIC FILTERS
-    publicFilters = filter_query.objects.filter(public__gte=1)
+    publicFilters = filter_query.objects.filter(public__gte=1).order_by('-active', 'name')
     publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True)
 
     # USER FILTERS
     if request.user.is_authenticated:
-        myFilters = filter_query.objects.filter(user=request.user)
+        myFilters = filter_query.objects.filter(user=request.user).order_by('-active', 'name')
         myFilters = add_filter_query_metadata(myFilters)
     else:
         myFilters = None
@@ -95,7 +95,7 @@ def filter_query_detail(request, mq_id, action=False):
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == filterQuery.user.id)
     is_public = (filterQuery.public > 0)
-    is_visible = is_owner or is_public
+    is_visible = is_owner or is_public or request.user.is_superuser
     if not is_visible:
         messages.error(request, "This filter is private and not visible to you")
         return render(request, 'error.html')

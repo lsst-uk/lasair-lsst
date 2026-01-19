@@ -18,7 +18,7 @@ else:
     sys.exit()
 
 topic_in = ''
-topic_out = 'ztf_ingest'
+topic_out = 'lsst_ingest'
 group_id = ''
 maxalert = 1000
 logging.basicConfig(level=logging.INFO)

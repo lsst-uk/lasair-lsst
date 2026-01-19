@@ -249,6 +249,7 @@ def getTNSData(opts, conn):
 
             if doingAll:
                 if rowsAdded % 1000 == 0:
+                    conn.commit()
                     print(rowsAdded)
             else:
                 print("Object %s has been added" % row_dict['name'])

@@ -78,6 +78,7 @@
       template:
         src: common/settings.py.j2
         dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
+      tags: settings
 
 - hosts: svc
   gather_facts: false
@@ -162,7 +163,7 @@
     - settings.yaml
     - exports.yaml
   vars:
-    schema: 7_4_A
+    schema: "9_0"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
@@ -262,7 +263,7 @@
   vars_files:
     - settings.yaml
   vars:
-    schema: 7_4_A
+    schema: "9_0"
   roles:
     - lasair_cassandra
   tags: cassandra
@@ -271,7 +272,7 @@
   vars_files:
     - settings.yaml
   vars:
-    schema: 7_4_A
+    schema: "9_0"
   roles:
     - lasair_cutoutcass
   tags: cutoutcass

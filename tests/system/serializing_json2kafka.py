@@ -9,7 +9,7 @@ SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
 # use sr_client.get_subjects() 
 SCHEMA_SUBJECT = "alert-packet"
 # use sr_client.get_versions('alert-packet')
-SCHEMA_VERSION = 704
+SCHEMA_VERSION = 900
 
 def subject_name(context, string):
     return SCHEMA_SUBJECT

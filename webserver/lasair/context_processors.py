@@ -18,7 +18,7 @@ def cfg_assets_root(request):
 
 
 def global_vars(request):
-    if settings.DEBUG:
+    if settings.DEV_DOCS:
         docroot = "https://lasair-lsst.readthedocs.io/en/develop"
     else:
         docroot = "https://lasair-lsst.readthedocs.io/en/main"

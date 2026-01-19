@@ -5,7 +5,7 @@ schema = {
     {
       "name": "diaObjectId",
       "type": "long",
-      "doc": "ZTF object identifier, also known as transient_object_id"
+      "doc": "LSST object identifier, also known as transient_object_id"
     },
     {
       "name": "classification",

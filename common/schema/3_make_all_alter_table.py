@@ -43,5 +43,7 @@ s = 'python3 3_make_alter_table.py cql %s %s diaSources'
 os.system(s % (schema_ver_old, schema_ver_new))
 s = 'python3 3_make_alter_table.py cql %s %s ssObjects'
 os.system(s % (schema_ver_old, schema_ver_new))
+s = 'python3 3_make_alter_table.py cql %s %s ssSources'
+os.system(s % (schema_ver_old, schema_ver_new))
 
 

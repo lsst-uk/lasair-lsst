@@ -26,7 +26,7 @@ object page,
     * `lastDiaSourceMjdTai`: the Modified Julian Day (i.e.date and time) of the latest alert,
     * `mjdnow()`: an SQL function that returns the MJD now, so we can 
 subtract to get the age in days,
-    * `nSources`: number of alerts belonging to this object. 
+    * `nDiaSources`: number of alerts belonging to this object. 
 * From the sherlock_classifications table:
     * `classification`: [Sherlock class](core_functions/sherlock.html) according to the sky context.
 
@@ -82,7 +82,7 @@ There are a lot of 'orphans' in the Lasair database, meaning objects that
 have only one candidate (detection). Many of these are not worth looking at, 
 so we require the number of candidates to be greater than 1.
 ```
-AND objects.nSources > 1
+AND objects.nDiaSources > 1
 ```
 Finally, lets choose objects that have an associated host galaxy. 
 These codes are for the different Sherlock classifications: possible supernova, 
@@ -144,7 +144,7 @@ annotated external to Lasair. You can also set up your own annotation service --
 Once you can build a filter with the web pages, you might want to run with python code instead of clicks.
 There is a client library for Lasair with methods for positional search, 
 running queries on the Lasair database, and other functions -- see 
-[here](core_functions/client.html). There is also a set of Jupyter notebooks illustrating use of the client [here](core_functions/python_notebooks.html).
+[here](core_functions/client.html). There is also a set of Jupyter notebooks illustrating use of the client [here](core_functions/python-notebooks.html).
 
 ### Kafka and Annotation
 Once you have a filter that produces the alerts you want, you might want to have your machine receive them and act on your behalf. This is explained [here](core_functions/alert-streams.html).

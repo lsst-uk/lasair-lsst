@@ -56,6 +56,8 @@ if __name__ == '__main__':
     attrs = ['midpointMjdTai', 'ra', 'dec', 'band', 'psfFlux', 'psfFluxErr']
     for file in os.listdir(indir):
         inalert = json.loads(open(indir +'/'+ file).read())
+        if not 'objectId' in inalert:
+            inalert['objectId'] = str(random.randrange(1000000))
         numerical_objectId = abs(hash(inalert['objectId']))
         print('converting %s --> %d' % (inalert['objectId'], numerical_objectId))
         cands = inalert['candidates']
@@ -76,9 +78,9 @@ if __name__ == '__main__':
         dobj['ra'] = sum(ralist)/len(ralist)
         dobj['dec'] = sum(declist)/len(declist)
         alert = {
-            'diaObjectId': numerical_objectId,
-#            'observation_reason': inalert['observation_reason'][:16],
-#            'target_name': inalert['target_name'][:16],
+            'diaSourceId': dslist[-1]['diaSourceId'],
+            'observation_reason': inalert['observation_reason'][:16],
+            'target_name': inalert['target_name'][:16],
             'diaObject': dobj,
             'diaSource': dslist[-1],
             'prvDiaSources': dslist[:-1],

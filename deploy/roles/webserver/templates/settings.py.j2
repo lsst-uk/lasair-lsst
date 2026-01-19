@@ -14,7 +14,7 @@ EMAIL_PORT = 25
 LASAIR_ROOT = '{{ ansible_env.HOME }}/'
 
 DEBUG          = False
-WEB_DOMAIN     = '{{ lasair_name }}'
+WEB_DOMAIN     = '{{ web_name }}'
 READONLY_USER  = '{{ settings.master_db_readonly_username }}'
 READONLY_PASS  = '{{ settings.master_db_readonly_password }}'
 
@@ -35,7 +35,7 @@ PUBLIC_KAFKA_PRODUCER   = 'kafka-pub:29092'
 PUBLIC_KAFKA_PASSWORD   = '{{ settings.kafka_password }}'
 
 INTERNAL_KAFKA_PRODUCER = '{{ settings.kafka_producer }}:9092'
-ANNOTATION_TOPIC_OUT    = 'ztf_annotations'
+ANNOTATION_TOPIC_OUT    = 'lsst_annotations'
 
 DATA_UPLOAD_MAX_MEMORY_SIZE = 26214400
 
@@ -44,16 +44,15 @@ SECRET_KEY = '{{ settings.django_secret_key }}'
 
 QUERY_CACHE = LASAIR_ROOT + 'query_cache'
 
-#CITIZEN_SCIENCE_USERID = 69
-#CITIZEN_SCIENCE_KEY    = 'oij2487hfwnjdoq8dhajfw87'
-
 BLOB_STORE_ROOT = '/mnt/cephfs/lasair'
 
 SHERLOCK_SERVICE = '{{ sherlock_svc_host }}'
 
-TNS_WATCHLIST_ID = 141
+# get the documentation main branch by default
+DEV_DOCS = False
 
-ACTIVE_EXPIRE = 180  # days fo expiry of active filter/watchlist/watchmap
+# days fo expiry of active filter/watchlist/watchmap
+ACTIVE_EXPIRE = 180  
 
 WATCHLIST_MAX            = 100000
 WATCHLIST_MAX_CROSSMATCH =  50000
@@ -236,6 +235,6 @@ RECAPTCHA_PUBLIC_KEY= '{{ settings.recaptcha_public_key }}'
 RECAPTCHA_PRIVATE_KEY= '{{ settings.recaptcha_private_key }}'
 RECAPTCHA_REQUIRED_SCORE = 0.7
 
-CSRF_TRUSTED_ORIGINS = ['https://{{ lasair_name }}.{{ domain }}']
+CSRF_TRUSTED_ORIGINS = ['https://{{ web_name }}.{{ domain }}']
 LASAIR_GRAFANA_URL = "https://{{ lasair_name }}-svc.{{ domain }}/d/iILmd8-Wz/alerts"
 

@@ -1,11 +1,11 @@
 ---
 # vars file for roles/mirrormaker
 
-numstreams: 15
-#source: "public.alerts.ztf.uw.edu:9092"
+numstreams: 3
 group_id: "lasair-idfint-{{ lasair_name }}"
 client_id: "{{ inventory_hostname_short }}.{{ domain }}"
 target: "{{ groups['kafka'] | join(':9092,') }}:9092"
 topiclist: [ "topicname" ]
 
+ztf_source: "public.alerts.ztf.uw.edu:9092"
 

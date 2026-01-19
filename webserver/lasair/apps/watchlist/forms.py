@@ -32,9 +32,11 @@ class WatchlistForm(forms.ModelForm):
         cleaned_data = super(WatchlistForm, self).clean()
         conetext = cleaned_data.get("cones_textarea")
         conefile = cleaned_data.get("cones_file")
-        if not conetext and not conefile:
-            msg = "Please either paste your catalogue contents or upload a catalogue file."
-            self.add_error('cones_textarea', msg)
+
+#  to allow a user to make an empty watchlist that will be filled via command line
+#        if not conetext and not conefile:
+#            msg = "Please either paste your catalogue contents or upload a catalogue file."
+#            self.add_error('cones_textarea', msg)
 
         if conetext:
             cone_list = []

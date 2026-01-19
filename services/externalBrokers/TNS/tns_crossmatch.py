@@ -1,15 +1,16 @@
+from gkhtm import _gkhtm as htmCircle
+import settings
+import math
+from src import db_connect
 import sys
 sys.path.append('../../../common')
-from src import db_connect
-import math
-import settings
 
-from gkhtm import _gkhtm as htmCircle
 
 def distance(ra1, de1, ra2, de2):
     dra = (ra1 - ra2)*math.cos(de1*math.pi/180)
     dde = (de1 - de2)
     return math.sqrt(dra*dra + dde*dde)
+
 
 def tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius):
     cursor2 = msl.cursor(buffered=True, dictionary=True)
@@ -38,13 +39,14 @@ def tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius):
     cursor2.execute(query2)
     n_hits = 0
     for row in cursor2:
-        objectId = row['objectId']
-        arcsec = 3600*distance(myRA, myDecl, row['ramean'], row['decmean'])
+        objectId = row['diaObjectId']
+        arcsec = 3600*distance(myRA, myDecl, row['ra'], row['decl'])
         if arcsec > radius:
             continue
         n_hits += 1
         query3 = "INSERT INTO watchlist_hits (wl_id, cone_id, objectId, arcsec, name) VALUES\n"
-        query3 += ' (%d, %d, "%s", %.2f, "%s")' % (settings.TNS_WATCHLIST_ID, cone_id, objectId, arcsec, tns_name)
+        query3 += ' (%d, %d, "%s", %.2f, "%s")' % (settings.TNS_WATCHLIST_ID,
+                                                   cone_id, objectId, arcsec, tns_name)
         try:
             cursor3.execute(query3)
             msl.commit()
