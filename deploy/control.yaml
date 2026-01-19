@@ -154,6 +154,34 @@
       when: command == "stop"
   tags: mirror, pipeline
 
+- hosts: kafka
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Mirrormaker
+      community.docker.docker_compose:
+        project_name: mirrormaker-ztf
+        project_src: '.'
+        files:
+          - mirror-compose-ztf.yml
+        services:
+          - mirrormaker
+        state: present
+        stopped: false
+      when: command == "start"
+    - name: Stop Mirrormaker
+      community.docker.docker_compose:
+        project_name: mirrormaker-ztf
+        project_src: '.'
+        files:
+          - mirror-compose-ztf.yml
+        services:
+          - mirrormaker
+        state: present 
+        stopped: true
+      when: command == "stop"
+  tags: ztf_mirror
+
 - hosts: kafka_pub
   gather_facts: false
   become: true
