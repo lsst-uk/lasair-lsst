@@ -17,6 +17,7 @@ class counting(FeatureGroup):
         "nzSources",
         "nySources",
         "lastDiaSourceMjdTai",
+        "firstDiaSourceMjdTai",
     ]    
 
     def run(self):
@@ -45,6 +46,11 @@ class counting(FeatureGroup):
             "niSources":    nSource['i'],
             "nzSources":    nSource['z'],
             "nySources":    nSource['y'],
-            "lastDiaSourceMjdTai" : max(time)
+            "lastDiaSourceMjdTai" : max(time),
         }
+
+        # if rubin didn't set this, just use the first that we have in the lightcurve
+        if not "firstDiaSourceMjdTai" in self.alert or math.isnan(self.alert["firstDiaSourceMjdTai"]):
+            out["firstDiaSourceMjdTai"] = min(time)
+
         return out
