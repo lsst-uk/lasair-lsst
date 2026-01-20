@@ -248,20 +248,15 @@ def object_difference_lightcurve(
     fluxMaxRounded = round((fluxMax) / 1000) * 1000
     fluxMinRounded = round((fluxMin) / 1000) * 1000
     rangeFlux = fluxMaxRounded - fluxMinRounded
-    if rangeFlux > 20000:
-        step = 5000
-    elif rangeFlux > 10000:
-        step = 3000
-    elif rangeFlux > 7000:
-        step = 1500
-    elif rangeFlux > 3000:
-        step = 1000
-    elif rangeFlux > 1000:
-        step = 500
-    elif rangeFlux > 500:
-        step = 200
-    else:
-        step = 100
+
+    # round value of step for any range
+    (fr, ir) = math.modf(math.log10(rangeFlux))
+    yr = math.pow(10.0, ir-1)
+    zr = math.pow(10.0, fr)
+    if   zr > 5: step = 5*yr
+    elif zr > 2: step = 2*yr
+    else:        step =   yr
+
     tickvals = np.arange(fluxMinRounded-rangeFlux*5, fluxMaxRounded+rangeFlux*5,  step)
 
     # Convert tick values to the desired format
