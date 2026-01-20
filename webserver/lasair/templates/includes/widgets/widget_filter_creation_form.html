@@ -92,7 +92,7 @@
 
                             {% include "includes/help_popover.html" with title="WHERE Help" position="right" content="In the WHERE box, you can further filter results to return only sources you are interested in. Use the standard MySQL operators to write the criteria for your filter." %}
                             <div id="where_div" class="input-group">
-                                <textarea name="conditions" class="prism-live language-sql fill prism-live-source"  id="id_conditions" spellcheck="false">{{ form.conditions.value|default_if_none:"objects.nSources > 2" }}</textarea>
+                                <textarea name="conditions" class="prism-live language-sql fill prism-live-source"  id="id_conditions" spellcheck="false">{{ form.conditions.value|default_if_none:"objects.nDiaSources > 2" }}</textarea>
 
                             </div>
                         </div>
