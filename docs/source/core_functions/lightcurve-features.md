@@ -18,16 +18,12 @@ the date of that detection, and the mean and its standard deviation of that flux
 and six counts for the number of sources of each band.
 
 ----
-- **Nearest objects**: Name from TNS, if any, and nearest LSST object.
-This will not be properly populated until after the first LSST data release.
-
-----
-- **Absolute magnitude**: peak extincton corrected absolute magnitude, 
+- [Absolute Magnitude IDs](#absMag): peak extinction corrected absolute magnitude, 
 and the MJD of that peak. For more information, see 
 [Absolute Magnitude](cookbook.html#absolute-magnitude) in the Cookbook.
 
 ----
-- **Bazin black body**: A two-dimensional fit with blackbody in the 
+- [Bazin black body](#BBB): A two-dimensional fit with blackbody in the 
 spectral dimension and either exponential flux rise or Bazin model for flux.
 In the example below, the Bazin model has rise rate of 0.45 magnitudes per day, 
 and a fall rate of 0.1 per day. The fitted temperature is 6,000 Kelvin.
@@ -35,13 +31,13 @@ and a fall rate of 0.1 per day. The fitted temperature is 6,000 Kelvin.
 <img src="../_images/BBB/99999999999_e.png" width="250"/>
 <img src="../_images/BBB/99999999999_b.png" width="250"/>
 
-See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody.ipynb) for more information.
+See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/Introduction.ipynb) for more information.
 
 ----
 - **Milky way**: Galactic latitude and E(B-V) extinction.
 
 ----
-- **Jump detector**: Finds the number of sigma the latest detection (time T)
+- [Jump detector](#jump): Finds the number of sigma the latest detection (time T)
  deviates from a mean in the interval [T-70,T-10] days. 
 
 <img src="../_images/jump/jump_image.png" width="450"/>
@@ -49,7 +45,7 @@ See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebook
 See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb) for more information.
 
 ----
-- **Pair colours**: The LSST survey cadence has many close pairs of diaSources
+- [Pair colours](#pair): The LSST survey cadence has many close pairs of diaSources
 only 30 minutes apart. Each of these allows a colour measurement to be made.
 Lasair allows filters on the basic properties: magnitude difference and 
 which filters were involved, for example g-r=0.5. But there are many 

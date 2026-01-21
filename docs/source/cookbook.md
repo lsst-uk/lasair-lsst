@@ -87,48 +87,24 @@ lets see if we can find any outbursts amongst the Gaia catalogue of White Dwarfs
 There are a million of them in [GaiaWhiteDwarfsDR3](https://lasair-ztf.lsst.ac.uk/watchlists/1021/).
 Let's start by looking at all alerts coincident with the watchlist 
 (in Lasair: click Filters/Create New/Select watchlist/Run Filter/Save Filter). 
-Already included in the sample filter is `objects.jdmax > jdnow()-365` which means 
+Already included in the sample filter is `objects.lastDiaSourceMjdTai > mjdnow()-365` which means 
 there must have been a detection in the last year. So we can keep that.
 
-Let's require a lightcurve with more than a few detections, say 10. For ZTF, we can utilise
-the lightcurve shape attributes `dmdt_g` and `dmdt_r`. All you need for the SELECT is the `objectId`,
+Let's require a lightcurve with more than a few detections, say 10. We can utilise
+the lightcurve shape attributes `jump1` and `jump2`. 
+All you need for the SELECT is the `objectId`,
 than you can click on the link to see the lightcurve.
 The WHERE section is then:
 
 ```
-objects.jdmax > jdnow()-365
-and (objects.dmdt_g > 0.2 OR objects.dmdt_r > 0.2)
-and objects.ncandgp > 10
+objects.lastDiaSourceMjdTai > mjdnow()-365
+and objects.jump1 > 5 
+and objects.nDiaSources > 10
 ```
-Here are a few lightcurves I noticed.
 
-- g-band brightess falling for 10 days while r brightness rising
-[ZTF20acvedsk](https://lasair-ztf.lsst.ac.uk/objects/ZTF20acvedsk/)
-
-- In the Gaia WD catalogue. Sherlock says CV. 
-Long slow rise over a year then a fall over a year.
-[ZTF18abvgcbb](https://lasair-ztf.lsst.ac.uk/objects/ZTF18abvgcbb/)
-
-- Was fainter than it was at reference, brighter than references 2024-11-20
-[ZTF17aaaikoz](https://lasair-ztf.lsst.ac.uk/objects/ZTF17aaaikoz/)
-
-**Moving to LSST**
-
-For the equivalent LSST filter, 
-it would be perhaps g-flux compared to the mean.
-More comprehensively, the 
-Bazin-Black-Body (BBB) set of attibutes is an attempt to fit the 2D spectro-lightcurve 
-with an explosive model (exponential in flux, linear in magnitude). 
-That attribute would be `BBBRiseRate`, an e-folding rate, 
-which is approximately the same as magnitudes per day.
-The BBB also tries to fit a Bazin in the time direction 
--- exponential rise then exponential fall in flux.
-
-Another way to do it is `jump1` or `jump2` which compare the latest diaSources, in all 6 bands,
+These "jump" parameters compare the latest diaSources, in all 6 bands,
 with a baseline history between 70 and 10 days ago. The jump statistics are each number
 of sigma for two wavebands. 
-
-
 
 ---
 ### Absolute magnitude
@@ -207,13 +183,13 @@ We want objects with a rapid initial rise, and nothing there before. We can make
 ```
     mjdnow() - objects.lastDiaSourceMjdTai < 7   # must be diaSource in last 7 days
 AND mjdnow() - objects.firstDiaSourceMjdTai < 30 # nothing before 30 days ago
-AND objects.BBBRiseRate > 0.2                 # magnitudes per day
+AND objects.BBBRiseRate > 0.2                    # magnitudes per day
 ```
 The first two lines are about epochs of first and last diaSources in this diaObject:
 we want a recent brightening, and nothing there before
 The last line refers to the `bazinBlackBody` parametric fit, and here we are requiring
 not only that the parameter-fitting was successful, but also the rise rate is
-rapid -- 2 mags in 10 days.
+rapid -- 2 mags in 10 days. For more information see (Bazin Balck Body)[core_functions/lightcurve-features.md#BBB].
 
 #### Blue
 The LSST survey that Lasair reports makes many "paired" observation, meaning only 30 minutes 
@@ -240,9 +216,10 @@ these categories
 - BS and VS (known bright star and known variable star), 
 - AGN (known Active Galactic Nucleus), 
 - CV (known cataclysmic variable), 
+- HPMS means High Proper Motion Star
 - SN and NT (in the skirts of / in the centre of a galaxy)
 
-It is this latter pair that we use to find TDEs. 
+It is this last pair that we use to find TDEs. 
 We could also be more restrictive and just require the 'NT' classification.
 Here is the SQL
 ```
@@ -254,7 +231,7 @@ reports with a host galaxy -- that is SN and NT -- and therefore has a distance
 measurement (z or photo-z). In this case, the lightcurve is corrected for extinction
 and the highest flux selected, then converted to absolute magnitude.
 ```
-AND peakExtCorrAbsMag < -19                  # peak extinction corrected absolute magnitude
+AND absMag < -19                  # peak extinction corrected absolute magnitude
 ```
 #### Watchlist
 A further cut for this type of alert might be a [publication of French and Zabludoff](https://ui.adsabs.harvard.edu/abs/2018ApJ...868...99F/abstract): 
@@ -262,8 +239,8 @@ Identifying Tidal Disruption Events via Prior Photometric Selection of Their Pre
 The catalogue of 57,000 galaxies [is available from Vizier](https://vizier.cds.unistra.fr/viz-bin/VizieR-3?-source=J/ApJ/868/99/table5), and there are (instructions)[core_functions/watchlists.html] 
 for how to ingest this into Lasair.
 
-In order to filter alerts based on a watchlist: in the filter builder web form, select 
-the watchlist called "F+Z galaxy".
+In order to filter alerts based on a watchlist: in the filter builder web form, 
+select "E+A Galaxies".
 
 #### Bright enough 
 If we are to request follow-up facility for this alert, it must be bright enough,
