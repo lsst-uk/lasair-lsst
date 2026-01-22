@@ -245,19 +245,27 @@ def object_difference_lightcurve(
     )
 
     # Define the tick values for the secondary y-axis
-    fluxMaxRounded = round((fluxMax) / 1000) * 1000
-    fluxMinRounded = round((fluxMin) / 1000) * 1000
-    rangeFlux = fluxMaxRounded - fluxMinRounded
+    rangeFlux = fluxMax - fluxMin
 
     # round value of step for any range
-    (fr, ir) = math.modf(math.log10(rangeFlux))
-    yr = math.pow(10.0, ir-1)
-    zr = math.pow(10.0, fr)
-    if   zr > 5: step = 5*yr
-    elif zr > 2: step = 2*yr
-    else:        step =   yr
+    def roundme(f, down=True):
+        (fr, ir) = math.modf(math.log10(f))
+        pow10 = math.pow(10.0, ir)
+        fac   = math.pow(10.0, fr)
+        if down:
+            if   fac > 5: rnd = 5*pow10
+            elif fac > 2: rnd = 2*pow10
+            else:         rnd =   pow10
+        else:
+            if   fac > 5: rnd =10*pow10
+            elif fac > 2: rnd = 5*pow10
+            else:         rnd = 2*pow10
+        return rnd
 
-    tickvals = np.arange(fluxMinRounded-rangeFlux*5, fluxMaxRounded+rangeFlux*5,  step)
+    fluxMinRounded = roundme(fluxMin,  down=True)
+    fluxMaxRounded = roundme(fluxMax,  down=False)
+    step =       0.1*roundme(rangeFlux,down=False)
+    tickvals = np.arange(fluxMinRounded, fluxMaxRounded,  step)
 
     # Convert tick values to the desired format
     ticktext = [f'{flux2mag(val):.2f}' if val > 0 else '' for val in tickvals]
