@@ -249,6 +249,8 @@ def object_difference_lightcurve(
 
     # round value of step for any range
     def roundme(f, down=True):
+        if f < 0.0:
+            return -roundme(-f, down=not down)
         (fr, ir) = math.modf(math.log10(f))
         pow10 = math.pow(10.0, ir)
         fac   = math.pow(10.0, fr)
