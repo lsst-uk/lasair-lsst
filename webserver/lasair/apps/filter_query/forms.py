@@ -108,7 +108,8 @@ class filterQueryForm(forms.ModelForm):
         notificationTypes = (
             (0, 'muted'),
             (1, 'email stream (daily)'),
-            (2, 'kafka stream')
+            (2, 'kafka stream'),
+            (3, 'kafka stream with lightcurves'),
         )
         model = filter_query
         widgets = {
@@ -196,7 +197,8 @@ class UpdateFilterQueryForm(forms.ModelForm):
         notificationTypes = (
             (0, 'muted'),
             (1, 'email stream (daily)'),
-            (2, 'kafka stream')
+            (2, 'kafka stream'),
+            (3, 'kafka stream with lightcurves'),
         )
         model = filter_query
         widgets = {
@@ -242,7 +244,8 @@ class DuplicateFilterQueryForm(forms.ModelForm):
         notificationTypes = (
             (0, 'muted'),
             (1, 'email stream (daily)'),
-            (2, 'kafka stream')
+            (2, 'kafka stream'),
+            (3, 'kafka stream with lightcurves'),
         )
         model = filter_query
         widgets = {
