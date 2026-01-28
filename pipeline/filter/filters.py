@@ -220,12 +220,18 @@ def dispose_query_results(query, query_results, fltr=None):
         if not fltr or fltr.send_kafka:
             if active == 3:   # append lightcurve lite
                 for q in query_results:
-                    diaObjectId = q['diaObjectId']
-                    q['alert'] = lightcurve_lite(fltr.alert_dict[diaObjectId])
+                    try:
+                        diaObjectId = q['diaObjectId']
+                        q['alert'] = lightcurve_lite(fltr.alert_dict[diaObjectId])
+                    except:
+                        pass
             if active == 4:   # append full alert
                 for q in query_results:
-                    diaObjectId = q['diaObjectId']
-                    q['alert'] = fltr.alert_dict[diaObjectId]
+                    try:
+                        diaObjectId = q['diaObjectId']
+                        q['alert'] = fltr.alert_dict[diaObjectId]
+                    except:
+                        pass
             dispose_kafka(query_results, query['topic_name'])
 
     utcnow = datetime.datetime.now(datetime.UTC)
