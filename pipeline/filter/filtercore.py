@@ -71,24 +71,6 @@ sys.path.append('features/BBB')
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
-def lightcurve_lite(alert):
-    d = {
-        'psfFlux':[], 
-        'psfFluxErr':[], 
-        'midpointMjdTai':[], 
-        'band':[], 
-        'reliability':[]}
-    sources = sorted(alert['diaSourcesList'], 
-        key=lambda source: source['midpointMjdTai'])
-    sources = [s for s in sources if s['psfFlux'] is not None]
-    for s in sources:
-        d['psfFlux']       .append(s['psfFlux'])
-        d['psfFluxErr']    .append(s['psfFluxErr'])
-        d['midpointMjdTai'].append(s['midpointMjdTai'])
-        d['band']          .append(s['band'])
-        d['reliability']   .append(s['reliability'])
-    return d
-
 class Filter:
     """Filter orchestrates the filter pipeline stage.
     """
@@ -114,7 +96,7 @@ class Filter:
         self.stats = stats
         self.verbose = verbose
         self.sfd = None
-        self.lightcurve_dict = {}
+        self.alert_dict = {}
 
         self.consumer = None
         self.database = None
@@ -392,7 +374,7 @@ class Filter:
             nalert_in += 1
             alertList.append(alert)
             diaObjectId = alert['diaObject']['diaObjectId']
-            self.lightcurve_dict[diaObjectId] = lightcurve_lite(alert)
+            self.alert_dict[diaObjectId] = alert
 
             if nalert_in % 1000 == 0:
                 d = self.handle_alert_list(alertList)

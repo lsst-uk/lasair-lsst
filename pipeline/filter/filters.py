@@ -179,6 +179,27 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
 
     return query_results
 
+def lightcurve_lite(alert):
+    attrList = ['psfFlux', 'psfFluxErr', 'midpointMjdTai', 'band', 'reliability']
+    diaSourcesList = []
+    for ds in alert['diaSourcesList']:
+        diaSource = {}
+        for attr in attrList:
+            diaSource[attr] = ds[attr]
+        diaSourcesList.append(diaSource)
+
+    attrList = ['psfFlux', 'psfFluxErr', 'midpointMjdTai', 'band']
+    diaForcedSourcesList = []
+    for ds in alert['diaForcedSourcesList']:
+        diaForcedSource = {}
+        for attr in attrList:
+            diaForcedSource[attr] = ds[attr]
+        diaForcedSourcesList.append(diaForcedSource)
+
+    return {
+        "diaSourcesList": diaSourcesList,
+        "diaForcedSourcesList": diaForcedSourcesList,
+    }
 
 def dispose_query_results(query, query_results, fltr=None):
     """ Send out the query results by email or kafka, and ipdate the digest file
@@ -197,10 +218,14 @@ def dispose_query_results(query, query_results, fltr=None):
     if active > 2:
         # send results by kafka on given topic
         if not fltr or fltr.send_kafka:
-            if active == 3:
+            if active == 3:   # append lightcurve lite
                 for q in query_results:
                     diaObjectId = q['diaObjectId']
-                    q['lightcurve'] = fltr.lightcurve_dict[diaObjectId]
+                    q['alert'] = lightcurve_lite(fltr.alert_dict[diaObjectId])
+            if active == 4:   # append full alert
+                for q in query_results:
+                    diaObjectId = q['diaObjectId']
+                    q['alert'] = fltr.alert_dict[diaObjectId]
             dispose_kafka(query_results, query['topic_name'])
 
     utcnow = datetime.datetime.now(datetime.UTC)
