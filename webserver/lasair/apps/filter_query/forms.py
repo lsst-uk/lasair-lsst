@@ -109,7 +109,8 @@ class filterQueryForm(forms.ModelForm):
             (0, 'muted'),
             (1, 'email stream (daily)'),
             (2, 'kafka stream'),
-            (3, 'kafka stream with lightcurves'),
+            (3, 'kafka stream with lite lightcurves'),
+            (4, 'kafka stream with full lightcurves'),
         )
         model = filter_query
         widgets = {
@@ -198,7 +199,8 @@ class UpdateFilterQueryForm(forms.ModelForm):
             (0, 'muted'),
             (1, 'email stream (daily)'),
             (2, 'kafka stream'),
-            (3, 'kafka stream with lightcurves'),
+            (3, 'kafka stream with lite lightcurves'),
+            (4, 'kafka stream with full lightcurves'),
         )
         model = filter_query
         widgets = {
@@ -245,7 +247,8 @@ class DuplicateFilterQueryForm(forms.ModelForm):
             (0, 'muted'),
             (1, 'email stream (daily)'),
             (2, 'kafka stream'),
-            (3, 'kafka stream with lightcurves'),
+            (3, 'kafka stream with lite lightcurves'),
+            (4, 'kafka stream with full lightcurves'),
         )
         model = filter_query
         widgets = {
