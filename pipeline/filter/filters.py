@@ -190,10 +190,10 @@ def lightcurve_lite(alert):
 
     attrList = ['psfFlux', 'psfFluxErr', 'midpointMjdTai', 'band']
     diaForcedSourcesList = []
-    for ds in alert['diaForcedSourcesList']:
+    for dfs in alert['diaForcedSourcesList']:
         diaForcedSource = {}
         for attr in attrList:
-            diaForcedSource[attr] = ds[attr]
+            diaForcedSource[attr] = dfs[attr]
         diaForcedSourcesList.append(diaForcedSource)
 
     return {
