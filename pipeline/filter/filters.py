@@ -194,10 +194,10 @@ def dispose_query_results(query, query_results, fltr=None):
         if not fltr or fltr.send_email:
             last_email = dispose_email(allrecords, last_email, query)
 
-    if active == 2:
+    if active > 2:
         # send results by kafka on given topic
         if not fltr or fltr.send_kafka:
-            if fltr.active = 3:
+            if active == 3:
                 for q in query_results:
                     diaObjectId = q['diaObjectId']
                     q['lightcurve'] = fltr.lightcurve_dict[diaObjectId]
