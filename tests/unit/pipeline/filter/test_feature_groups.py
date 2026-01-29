@@ -94,6 +94,8 @@ class FeatureTest(TestCase):
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 
+  # This tests is not actually part of feature groups
+  # Should be moved to filters once those tests exist
   def test5_lightcurve_lite(self):
     """Test the lightcurve_lite method"""
     from filters import lightcurve_lite
