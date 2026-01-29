@@ -94,6 +94,15 @@ class FeatureTest(TestCase):
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 
+  def test5_run_all(self):
+    """Test the lightcurve_lite method"""
+    from filters import lightcurve_lite
+    with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_lite.json"%sample) as f_out:
+      alert = modify(json.load(f_in))
+      output = lightcurve_lite(alert)
+      sample_output = json.load(f_out)
+      self.assertEqual(output, sample_output)
+
 if __name__ == '__main__':
   import xmlrunner
   runner = xmlrunner.XMLTestRunner(output='test-reports')
