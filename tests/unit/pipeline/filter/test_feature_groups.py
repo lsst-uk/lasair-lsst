@@ -94,7 +94,7 @@ class FeatureTest(TestCase):
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 
-  def test5_run_all(self):
+  def test5_lightcurve_lite(self):
     """Test the lightcurve_lite method"""
     from filters import lightcurve_lite
     with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_lite.json"%sample) as f_out:
