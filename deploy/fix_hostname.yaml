@@ -1,0 +1,12 @@
+# Ansible playbook to fix up the localhost entry in /etc/hosts if it has not been set correctly for some reason
+---
+- hosts: all:!localhost
+  gather_facts: true
+  become: true
+  tasks:
+    - name: Set hostname
+      lineinfile:
+        dest: /etc/hosts
+        regexp: '^127.0.0.1 localhost$'
+        line: "127.0.0.1 localhost {{ ansible_hostname }}"
+        state: present
