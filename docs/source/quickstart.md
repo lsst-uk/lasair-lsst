@@ -15,7 +15,7 @@ a popup with a link to the full object page, the age of the most recent alert,
 its magnitude, and its class.
 
 **NOTE**: Even if you have an account on the Lasair-ZTF system, you will need a
-new one to use Lasair-lsst. Register [here](https://lasair-lsst.lsst.ac.uk/register/).
+new one to use Lasair-lsst. Register [here]({%lasairurl%}/register/).
 
 To get started we will focus on a few properties (columns) of a Lasair object recorded in two of the most commonly used tables:
 

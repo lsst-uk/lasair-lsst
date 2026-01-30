@@ -74,7 +74,7 @@ get the filtered alert stream.
 ---
 ### Poking about in Gaia with ZTF
 There is a lot of data available at [Lasair ZTF](https://lasair-ztf.lsst.ac.uk/), 
-and not very much at [Lasair LSST](https://lasair-lsst.lsst.ac.uk/).
+and not very much at [Lasair LSST](https://lasair.lsst.ac.uk/).
 Let's look at the tools available in the 2-band ZTF object table, 
 versus the object table of the 6-band LSST object table. In the former case, we can ask about 
 each band separately, but for 6 bands we have tried to make features that give a 

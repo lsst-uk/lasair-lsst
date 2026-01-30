@@ -76,7 +76,13 @@ coincident objects.
 
 The Watchmap is a specification of an area on the sky, expressed though a
 MOC file.
-## Coding with Lasair
+## Real time filter results
+Users create a **filter** by combining the elements desctibed above, using the SQL syntax: for more information see the [Quick Start](quickstart.html). A filter can be executed from the the Lasair web, or from the API (see below), but crucially the filter can be made **active**, meaning that a real-time machine-readable stream is generated of those alerts that are selected by the filter. A filter is built on the web page, and the following selection is presented:
+<img src="_images/active_filter_choices.png" width="300px"/>
+
+The "muted" choice means no real-time notification; the "email" stream means an email notification of filter output, then there are three kafka options: "kafka stream" means just the selected attributes from the SQL filter; the lite lightcurve also includes the flux, time, and band from the lightcurve, and the "full alert" is a large packet with the entire LSST alert that triggered the filter. For mor information abour utilising the Kafka streams, see the [Alert Streams section](core_functions/alert-streams.html)
+
+## Lasair API and client
 
 The recommended way to write code against the Lasair database is by
 the [python client for Lasair ](https://pypi.org/project/lasair/):

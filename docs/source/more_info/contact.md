@@ -33,6 +33,6 @@ There will be occasional meetings, tutorials, and hackathons about using Lasair.
 These will be announced at the Lasair blog, so please follow!
 
 ### The Lasair Team
-* University of Edinburgh: Gareth Francis, Andy Lawrence, Terry Sloan, Roy Williams
+* University of Edinburgh: Gareth Francis, Andy Lawrence, Roy Williams
 * Queen's University Belfast: Dave Young
-* University of Oxford: Stephen Smartt, Ken Smith
+* University of Oxford: Stephen Smartt, Ken Smith, Heloise Stevance
