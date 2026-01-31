@@ -8,7 +8,8 @@ This page is about how to get machine-readable push records from your active fil
 You can also get alert by email, although obviously the numbers will be limited.
 
 ### Resources
-- See the "Test_Consumers" notebook in the [Lasair API Examples notebooks](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/Test_Consumers.ipynb)
+- See the [Test_Consumers notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/Test_Consumers.ipynb) for basic consumption of an active stream.
+- Copy and modify the [LSST_consume_plot notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/LSST_consume_plot.ipynb) to consume a stream with a light curve and plot it.
 - Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
 - Copy and modify the program at the bottom of this page to fetch your own Kafka records.
 
@@ -42,7 +43,7 @@ In order to run the consumer code, you need the "topic name" corresponding to yo
 filter, which is derived from the name you gave it in the settings. In this case the 
 topic name is `lasair_2Hasabsmag`.
 
-#### Types of Kafka Streams
+### Types of Kafka Streams
 The plain kafka stream offers just the attributes you selected in your filter query.
 Supoose your SQL SELECT says `objects.diaObjectId,  objects.decl, objects.ra`, 
 then your plain Kafka output would be just these, with a timestamp added for
@@ -118,7 +119,7 @@ that would be terabytes per night. In any case, Kafka records are deleted after 
 so you will need to be running a consumer either frequently or constantly to get 
 everything.
 
-#### Kafka consumer code
+### Kafka consumer code
 To run the code below, install
 [Confluent Kafka](https://pypi.org/project/confluent-kafka/), 
 the python install being `pip install confluent_kafka`.
@@ -174,14 +175,14 @@ while n < 10:
 print('No more messages available')
 ```
 
-#### Example notebook
+### Example notebook
 
 There is a jupyter notebook that shows how to read from an active filter (like the code above), as well as make a plot including the `diaSourceList` and `diaForcedSourceList`.
 It assumes the filter has been saved with the 'lite lightcurve' option.
 
 [**See LSST_consume_plot.ipynb**](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/LSST_consume_plot.ipynb).
 
-#### Email Streaming
+### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 
 filters that do not pass many alerts 
