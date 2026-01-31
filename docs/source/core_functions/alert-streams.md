@@ -174,6 +174,13 @@ while n < 10:
 print('No more messages available')
 ```
 
+#### Example notebook
+
+There is a jupyter notebook that shows how to read from an active filter (like the code above), as well as make a plot including the `diaSourceList` and `diaForcedSourceList`.
+It assumes the filter has been saved with the 'lite lightcurve' option.
+
+[**See LSST_consume_plot.ipynb**](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/LSST_consume_plot.ipynb).
+
 #### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 

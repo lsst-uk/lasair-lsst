@@ -53,7 +53,7 @@ Next is the time since the object was last observed.
 Notice the arithmetic and renaming that is part of the SQL language. 
 The function `mjdnow()` is the modified Julian Day (time) now.
 ```
-mjdnow()-objects.lastDiaSourceMJD AS age,
+mjdnow()-objects.lastDiaSourceMjdTai AS age,
 ```
 This attribute is from a different table, the Sherlock classification of the object. 
 The long name is renamed as the much simpler `class`.
@@ -70,7 +70,7 @@ what passes through and what does not.
 We select only those objects whose most recent alert has been in the last 7 days.
 Type these lines into the **WHERE** box:
 ```
-mjdnow() - objects.lastDiaSourceMJD < 7
+mjdnow() - objects.lastDiaSourceMjdTai < 7
 ```
 We want bright objects only, mostly to cut the numbers being drawn on the Lasair front page. 
 A flux of 100,000 nanoJanskies is about magnitude 19. Lets select g and r band fluxes.
@@ -78,7 +78,7 @@ Don't forget the `AND` at the beginning.
 ```
 AND (objects.g_psfFlux > 100000 OR objects.r_psfFlux > 100000)
 ```
-There are a lot of 'orphans' in the Lasair database, meaning objects that 
+There are a lot of 'singletons' in the Lasair database, meaning objects that 
 have only one candidate (detection). Many of these are not worth looking at, 
 so we require the number of candidates to be greater than 1.
 ```
@@ -97,28 +97,8 @@ red button 'Run Filter'. You should see a table of the recent alerts,
 the same set as are on the Lasair front page.
 You can click on the column headers to sort, and click on the `objectId` to go 
 to the detail for any of the objects. You can also add 
-`ORDER BY lastDiaSourceMJD DESC` in the WHERE area to get the results 
+`ORDER BY lastDiaSourceMjdTai DESC` in the WHERE area to get the results 
 with most recent first.
-
-### Save your filter
-But doing more with Lasair requires an account -- its just a simple 
-matter of entering your valid email address -- see 
-[here to register]({%lasairurl%}/register).
-
-Click the black button 'Save' on the create filter page, then fill in the 
-details: Name and Description, and you can choose to make it public, so that it 
-appears in the [Public Gallery]({%lasairurl%}/filters). Once its shared like 
-this, others can use it, or copy and modify it. Another option in the Save 
-dialogue has three choices:
-
-* muted: The filter is saved, and you can run it and edit it
-* email stream (daily): Means that you receive an email -- at the address of 
-your Lasair account -- 
-whenever an alert causes an object to pass through the filter. 
-This is restricted to one email in 24 hours.
-* kafka stream: The substream induced by the filter becomes a 
-[kafka stream](core_functions/alert-streams.html). You can use 
-[lasair client](core_functions/client.html) to consume this in your own machine.
 
 Other options on the filter page bring in other tables in addition to the
 `objects` table 
@@ -140,6 +120,27 @@ that you or someone else has uploaded -- see [here](core_functions/watchmaps.htm
 annotated external to Lasair. You can also set up your own annotation service -- see 
 [here](concepts.html#annotations).
 
+### Save your filter
+But doing more with Lasair requires an account -- its just a simple 
+matter of entering your valid email address -- see 
+[here to register]({%lasairurl%}/register).
+
+Click the black button 'Save' on the create filter page, then fill in the 
+details: Name and Description, and you can choose to make it public, so that it 
+appears in the [Public Gallery]({%lasairurl%}/filters). Once its shared like 
+this, others can use it, or copy and modify it. Another option in the Save 
+dialogue has three choices:
+
+* muted: The filter is saved, and you can run it and edit it
+* email stream (daily): Means that you receive an email -- at the address of 
+your Lasair account -- 
+whenever an alert causes an object to pass through the filter. 
+This is restricted to one email in 24 hours.
+* kafka stream: The substream induced by the filter becomes a 
+[kafka stream](core_functions/alert-streams.html). You can use 
+* kafka stream with lite lightcurve: in addition to the attributes in the SELECT, there is a lightweight version of the lightcurve: flux, band, time, and reliability
+* kafka stream with full alert: the attributes from SELECT plus the full alert from Rubin, that may be quite large.
+
 ### Lasair client and notebooks
 Once you can build a filter with the web pages, you might want to run with python code instead of clicks.
 There is a client library for Lasair with methods for positional search, 
@@ -149,4 +150,4 @@ running queries on the Lasair database, and other functions -- see
 ### Kafka and Annotation
 Once you have a filter that produces the alerts you want, you might want to have your machine receive them and act on your behalf. This is explained [here](core_functions/alert-streams.html).
 
-You can add information to the Lasair database, with your own classification algorithm or other added value. This in the annotation process: see [here](core_functions/alert-streams.html) for more information.
+You can add information to the Lasair database, with your own classification algorithm or other added value. This is the *annotation* process: see [here](core_functions/alert-streams.html) for more information.
