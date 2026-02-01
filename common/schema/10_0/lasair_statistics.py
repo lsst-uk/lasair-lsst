@@ -9,7 +9,7 @@ schema = {
     },
     {
       "name": "name",
-      "type": "bigstring",
+      "type": "string",
       "doc": "Which statistic"
     },
     {
