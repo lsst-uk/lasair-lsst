@@ -53,6 +53,9 @@ WAIT_TIME              = 30
 SLACK_URL              = 'https://hooks.slack.com/services/{{ settings.slack_url_urlhook }}'
 SLACK_CHANNEL          = '{{ lasair_name }}'
 
+# Max bytes in public kafka for any filter per night
+MAX_KAFKA_BYTES_PER_FILTER = 100000000  # 100 Mbyte
+
 # Relational database mysql/galera
 ##################################
 DB_HOST                = '{{ db_host }}'
