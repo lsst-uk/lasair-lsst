@@ -4,15 +4,16 @@ Fetch them from database, construct SQL, execute, produce kafka
 (1) fetch_queries(): 
 gets all the queries from the database
 
-(2) run_annotation_queries(query_list): 
-may be called to get all the recent fast annotations 
+# (2) run_annotation_queries(query_list): 
+# may be called to get all the recent fast annotations 
 
 (3) run_queries(batch, query_list, annotation_list=None):
 Uses query_list and possibly annotation_list and runs all the queries against 
-local, or those involving annotator against main databaase
+local, 
+# or those involving annotator against main databaase
 
-(4) query_for_object(query, diaObjectId):
-If doing fast annotations, convert a given query with specific diaObjectId
+# (4) query_for_object(query, diaObjectId):
+# If doing fast annotations, convert a given query with specific diaObjectId
 
 (5) run_query(query, msl, annotator=None, diaObjectId=None):
 Run a specific query and return query_results
@@ -42,15 +43,13 @@ from email.mime.text import MIMEText
 
 sys.path.append('../../common')
 import settings
-from src import db_connect
+from src import db_connect, manage_status, date_nid
 
 
-def fetch_queries():
+def fetch_queries(msl_remote, ms, nid):
     """fetch_queries.
     Get all the stored queries from the main database
     """
-    # first get the user queries from the database that the webserver uses
-    msl_remote = db_connect.remote()
 
     # Fetch all the stored queries from the main database
     cursor = msl_remote.cursor(buffered=True, dictionary=True)
@@ -70,11 +69,16 @@ def fetch_queries():
             'real_sql':  query['real_sql'],
             'topic_name':query['topic_name'],
         }
+        # Lets see if some kafka has produced on this filter
+        nbytesname = query['topic_name'] + '_bytes_produced'
+        status = ms.read(nid)
+        if nbytesname in status:
+            query_dict['bytes_produced'] = status[nbytesname]
+
         query_list.append(query_dict)
     return query_list
 
-
-def run_queries(fltr, query_list, annotation_list=None):
+def run_queries(fltr, query_list, annotation_list=None, ms=None, nid=None):
     """
     When annotation_list is None, it runs all the queries against the local database
     When not None, runs some queires agains a specific object, using the main database
@@ -88,17 +92,17 @@ def run_queries(fltr, query_list, annotation_list=None):
         # normal case of streaming queries
         if annotation_list is None:
             query_results = run_query(query, fltr.database, fltr=fltr)
-            n += dispose_query_results(query, query_results, fltr)
+            n += dispose_query_results(query, query_results, fltr, ms, nid)
 
         # immediate response to active=2 annotators
-        else:
-            for ann in annotation_list:  
-                # msl_remote = db_connect.remote()
-                query_results = run_query(query, fltr.database,
-                                          ann['annotator'], ann['diaObjectId'], fltr=fltr)
-                print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
-                print('results:', query_results)
-                n += dispose_query_results(query, query_results, fltr)
+#        else:
+#            for ann in annotation_list:  
+#                # msl_remote = db_connect.remote()
+#                query_results = run_query(query, fltr.database,
+#                                          ann['annotator'], ann['diaObjectId'], fltr=fltr)
+#                print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
+#                print('results:', query_results)
+#                n += dispose_query_results(query, query_results, fltr, ms, nid)
 
         t = time.time() - t
         if n > 0:
@@ -108,22 +112,22 @@ def run_queries(fltr, query_list, annotation_list=None):
     return ntotal
 
 
-def query_for_object(query, diaObjectId):
-    """ modifies an existing query to add a new constraint for a specific object.
-    We already know this query comes from multiple tables: objects and annotators,
-    so we know there is an existing WHERE clause. Can add the new constraint to the end,
-    unless there is an ORDER BY, in which case it comes before that.
-
-    Args:
-        query: the original query, as generated from the Lasair query builder
-        diaObjectId: the object that is the new constraint
-    """
-    tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
-    query = tok[0] + (' AND objects.diaObjectId=%s ' % str(diaObjectId))
-    if len(tok) == 2: # has order clause, add it back
-        query += ' ORDER BY ' + tok[1]
-    return query
-
+#def query_for_object(query, diaObjectId):
+#    """ modifies an existing query to add a new constraint for a specific object.
+#    We already know this query comes from multiple tables: objects and annotators,
+#    so we know there is an existing WHERE clause. Can add the new constraint to the end,
+#    unless there is an ORDER BY, in which case it comes before that.
+#
+#    Args:
+#        query: the original query, as generated from the Lasair query builder
+#        diaObjectId: the object that is the new constraint
+#    """
+#    tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
+#    query = tok[0] + (' AND objects.diaObjectId=%s ' % str(diaObjectId))
+#    if len(tok) == 2: # has order clause, add it back
+#        query += ' ORDER BY ' + tok[1]
+#    return query
+#
 
 def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     """run_query. Two cases here: 
@@ -144,12 +148,12 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     limit = 1000
 
     sqlquery_real = query['real_sql']
-    if annotator:
-        # if the annotator does not appear in the query tables, then we don't need to run it
-        if query['tables'] not in annotator:
-            return []
-        # run the query against main for this specific object that has been annotated
-        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
+#    if annotator:
+#        # if the annotator does not appear in the query tables, then we don't need to run it
+#        if query['tables'] not in annotator:
+#            return []
+#        # run the query against main for this specific object that has been annotated
+#        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
@@ -201,19 +205,21 @@ def lightcurve_lite(alert):
         "diaForcedSourcesList": diaForcedSourcesList,
     }
 
-def dispose_query_results(query, query_results, fltr=None):
+def dispose_query_results(query, query_results, fltr=None, ms=None, nid=None):
     """ Send out the query results by email or kafka, and ipdate the digest file
     """
     if len(query_results) == 0:
         return 0
     active = query['active']
-    digest, last_entry, last_email = fetch_digest(query['topic_name'])
-    allrecords = (query_results + digest)[:10000]
 
     if active == 1:
         # send results by email if 24 hours has passed, returns time of last email send
+        digest, last_entry, last_email = fetch_digest(query['topic_name'])
+        allrecords = (query_results + digest)[:10000]
         if not fltr or fltr.send_email:
             last_email = dispose_email(allrecords, last_email, query)
+        utcnow = datetime.datetime.now(datetime.UTC)
+        write_digest(allrecords, query['topic_name'], utcnow, last_email)
 
     if active > 2:
         # send results by kafka on given topic
@@ -232,12 +238,9 @@ def dispose_query_results(query, query_results, fltr=None):
                         q['alert'] = fltr.alert_dict[diaObjectId]
                     except:
                         pass
-            dispose_kafka(query_results, query['topic_name'])
+            dispose_kafka(query_results, query, ms, nid)
 
-    utcnow = datetime.datetime.now(datetime.UTC)
-    write_digest(allrecords, query['topic_name'], utcnow, last_email)
     return len(query_results)
-
 
 def write_digest(allrecords, topic_name, last_entry, last_email):
     # update the digest file
@@ -338,9 +341,15 @@ def send_email(email, topic, message, message_html=''):
     s.quit()
 
 
-def dispose_kafka(query_results, topic):
+def dispose_kafka(query_results, query, ms, nid):
     """ Send out query results by kafka to the given topic.
     """
+    topic_name = query['topic_name']
+    # First decide if this filter has already produced enough
+    bp = query.get('bytes_produced', 0)
+    will_produce = (bp < settings.MAX_KAFKA_BYTES_PER_FILTER)
+
+    # Kafka produce config
     conf = {
         'bootstrap.servers': settings.PUBLIC_KAFKA_SERVER,
         'security.protocol': 'SASL_PLAINTEXT',
@@ -349,11 +358,16 @@ def dispose_kafka(query_results, topic):
         'sasl.password': settings.PUBLIC_KAFKA_PASSWORD
     }
 
+    nbytes = 0
+    nalert = 0
     try:
         p = Producer(conf)
         for out in query_results: 
             jsonout = json.dumps(out, default=datetime_converter)
-            p.produce(topic, value=jsonout, callback=kafka_ack)
+            nbytes += len(jsonout)
+            nalert += 1
+            if will_produce:
+                p.produce(topic_name, value=jsonout, callback=kafka_ack)
         p.flush(10.0)   # 10 second timeout
     except Exception as e:
         rtxt = "ERROR in filter/run_active_queries: cannot produce to public kafka"
@@ -362,6 +376,17 @@ def dispose_kafka(query_results, topic):
         print(rtxt)
         sys.stdout.flush()
 
+    # Record this as produced or rejected
+    if will_produce:
+        ms.add({
+            topic_name+'_bytes_produced' : nbytes,
+            topic_name+'_alerts_produced': nalert,
+        }, nid)
+    else:
+        ms.add({
+            topic_name+'_bytes_rejected' : nbytes,
+            topic_name+'_alerts_rejected': nalert,
+        }, nid)
 
 def datetime_converter(o):
     """datetime_converter.
@@ -380,52 +405,59 @@ def kafka_ack(err, msg):
 
 
 def filters(fltr):
+    # first get the user queries from the database that the webserver uses
+    msl_remote = db_connect.remote()
+
+    # how many bytes has each filter already produced
+    ms = manage_status.manage_status(msl=msl_remote)
+    nid = date_nid.nid_now()
+
     try:
-        query_list = fetch_queries()
+        query_list = fetch_queries(msl_remote, ms, nid)
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
     if 1:
-        ntotal = run_queries(fltr, query_list)
+        ntotal = run_queries(fltr, query_list, annotation_list=None, ms=ms, nid=nid)
         return ntotal
 #    except Exception as e:
 #        fltr.log.error("ERROR in filter/run_active_queries.run_queries" + str(e))
 #        return None
 
 
-def fast_anotation_filters(fltr):
-    """run_annotation_queries.
-    Pulls the recent content from the kafka topic 'lsst_annotations' 
-    Each message has an annotator/topic name, and the diaObjectId that was annotated.
-    Queries that have that annotator should run against that object
-    """
-    try:
-        query_list = fetch_queries()
-    except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
-        return None
-
-    annotation_list = []
-    conf = {
-        'bootstrap.servers':   settings.KAFKA_SERVER,
-        'group.id':            settings.ANNOTATION_GROUP_ID,
-        'default.topic.config': {'auto.offset.reset': 'earliest'}
-    }
-    streamReader = Consumer(conf)
-    topic = settings.ANNOTATION_TOPIC
-    streamReader.subscribe([topic])
-    while 1:
-        msg = streamReader.poll(timeout=5)
-        if msg == None: break
-        try:
-            ann = json.loads(msg.value())
-            annotation_list.append(ann)
-        except:
-            continue
-    streamReader.close()
-    ntotal = run_queries(fltr, query_list, annotation_list)
-    return ntotal
+#def fast_annotation_filters(fltr):
+#    """run_annotation_queries.
+#    Pulls the recent content from the kafka topic 'lsst_annotations' 
+#    Each message has an annotator/topic name, and the diaObjectId that was annotated.
+#    Queries that have that annotator should run against that object
+#    """
+#    try:
+#        query_list = fetch_queries()
+#    except Exception as e:
+#        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+#        return None
+#
+#    annotation_list = []
+#    conf = {
+#        'bootstrap.servers':   settings.KAFKA_SERVER,
+#        'group.id':            settings.ANNOTATION_GROUP_ID,
+#        'default.topic.config': {'auto.offset.reset': 'earliest'}
+#    }
+#    streamReader = Consumer(conf)
+#    topic = settings.ANNOTATION_TOPIC
+#    streamReader.subscribe([topic])
+#    while 1:
+#        msg = streamReader.poll(timeout=5)
+#        if msg == None: break
+#        try:
+#            ann = json.loads(msg.value())
+#            annotation_list.append(ann)
+#        except:
+#            continue
+#    streamReader.close()
+#    ntotal = run_queries(fltr, query_list, annotation_list)
+#    return ntotal
 
 
 # if __name__ == "__main__":
