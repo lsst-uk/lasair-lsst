@@ -74,7 +74,7 @@ get the filtered alert stream.
 ---
 ### Poking about in Gaia with ZTF
 There is a lot of data available at [Lasair ZTF](https://lasair-ztf.lsst.ac.uk/), 
-and not very much at [Lasair LSST](https://lasair-lsst.lsst.ac.uk/).
+and not very much at [Lasair LSST](https://lasair.lsst.ac.uk/).
 Let's look at the tools available in the 2-band ZTF object table, 
 versus the object table of the 6-band LSST object table. In the former case, we can ask about 
 each band separately, but for 6 bands we have tried to make features that give a 
@@ -104,7 +104,8 @@ and objects.nDiaSources > 10
 
 These "jump" parameters compare the latest diaSources, in all 6 bands,
 with a baseline history between 70 and 10 days ago. The jump statistics are each number
-of sigma for two wavebands. 
+of sigma for two wavebands. A full explanation can be found in the
+[jupyter notebook jumpFromMean](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb).
 
 ---
 ### Absolute magnitude
@@ -266,7 +267,7 @@ AND peakExtCorrAbsMag < -19
 ```
 with the watchlist **F+Z galaxies** chosen.
 
-The idea of Lasair is that you build and share filters made from the sttributes listed in
+The idea of Lasair is that you build and share filters made from the attributes listed in
 [the schema browser]({%lasairurl%}/schema). The above sections give an idea of how ideas
 can be converted to filters, and you should choose the sub-filters and parameters yourself.
 
