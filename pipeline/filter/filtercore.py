@@ -71,7 +71,6 @@ sys.path.append('features/BBB')
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
-
 class Filter:
     """Filter orchestrates the filter pipeline stage.
     """
@@ -97,6 +96,7 @@ class Filter:
         self.stats = stats
         self.verbose = verbose
         self.sfd = None
+        self.alert_dict = {}
 
         self.consumer = None
         self.database = None
@@ -373,6 +373,8 @@ class Filter:
 
             nalert_in += 1
             alertList.append(alert)
+            diaObjectId = alert['diaObject']['diaObjectId']
+            self.alert_dict[diaObjectId] = alert
 
             if nalert_in % 1000 == 0:
                 d = self.handle_alert_list(alertList)

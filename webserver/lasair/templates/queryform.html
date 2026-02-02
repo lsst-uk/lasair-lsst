@@ -68,7 +68,9 @@ is_owner means 2.1
                                 This query is:<br/>
                                 &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="0" {% if myquery.active == 0 or new %}checked{% endif %}> Not a streaming filter<br/>
                                 &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="1" {% if myquery.active == 1 %}checked{% endif %}> Convert to filter and Email to {{ email }} (max once a day) and log <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="2" {% if myquery.active == 2 %}checked{% endif %}> Convert to Filter and produce Kafka and log <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="2" {% if myquery.active == 2 %}checked{% endif %}> Convert to Filter and produce Kafka <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="3" {% if myquery.active == 3 %}checked{% endif %}> Convert to Filter and produce Kafka and lite lightcurve <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="4" {% if myquery.active == 4 %}checked{% endif %}> Convert to Filter and produce Kafka and full alert <br/>
 
                                 A 'Filter' will run real time as alerts come in.
                                 Results can be sent, also in real time, via email or Kafka.

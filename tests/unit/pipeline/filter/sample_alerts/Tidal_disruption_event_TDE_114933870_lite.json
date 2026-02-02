@@ -1,0 +1,166 @@
+{
+  "diaSourcesList": [
+    {
+      "psfFlux": 99.948372,
+      "psfFluxErr": 11.974789,
+      "midpointMjdTai": 60102.2511,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 4.337743,
+      "psfFluxErr": 11.536114,
+      "midpointMjdTai": 59998.3902,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 35.664677,
+      "psfFluxErr": 55.362003,
+      "midpointMjdTai": 60008.3373,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 13.662395,
+      "psfFluxErr": 9.703589,
+      "midpointMjdTai": 60012.376,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": -5.406483,
+      "psfFluxErr": 10.790968,
+      "midpointMjdTai": 60013.3903,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 6.498031,
+      "psfFluxErr": 16.970562,
+      "midpointMjdTai": 60014.3992,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 5.635691,
+      "psfFluxErr": 14.052308,
+      "midpointMjdTai": 60021.4093,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 0.496679,
+      "psfFluxErr": 2.638094,
+      "midpointMjdTai": 60022.3448,
+      "band": "g",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 120.486488,
+      "psfFluxErr": 11.407612,
+      "midpointMjdTai": 60027.2841,
+      "band": "u",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 143.287079,
+      "psfFluxErr": 17.636774,
+      "midpointMjdTai": 60037.255,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 160.419266,
+      "psfFluxErr": 31.153305,
+      "midpointMjdTai": 60039.2729,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 210.949493,
+      "psfFluxErr": 11.304659,
+      "midpointMjdTai": 60042.3635,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 403.491211,
+      "psfFluxErr": 7.155134,
+      "midpointMjdTai": 60051.2632,
+      "band": "r",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 336.098511,
+      "psfFluxErr": 7.576153,
+      "midpointMjdTai": 60059.3095,
+      "band": "i",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 342.084045,
+      "psfFluxErr": 6.997466,
+      "midpointMjdTai": 60061.3037,
+      "band": "i",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 436.266937,
+      "psfFluxErr": 8.663075,
+      "midpointMjdTai": 60062.2128,
+      "band": "r",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 338.922699,
+      "psfFluxErr": 9.903556,
+      "midpointMjdTai": 60064.2821,
+      "band": "i",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 255.319992,
+      "psfFluxErr": 28.849985,
+      "midpointMjdTai": 60068.2526,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 256.866913,
+      "psfFluxErr": 12.630905,
+      "midpointMjdTai": 60069.2683,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 268.823151,
+      "psfFluxErr": 12.982125,
+      "midpointMjdTai": 60070.2925,
+      "band": "z",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 215.283203,
+      "psfFluxErr": 29.700726,
+      "midpointMjdTai": 60071.2999,
+      "band": "y",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 531.107239,
+      "psfFluxErr": 13.407353,
+      "midpointMjdTai": 60077.2146,
+      "band": "g",
+      "reliability": 0.0
+    },
+    {
+      "psfFlux": 346.082886,
+      "psfFluxErr": 6.836234,
+      "midpointMjdTai": 60083.2617,
+      "band": "r",
+      "reliability": 0.0
+    }
+  ],
+  "diaForcedSourcesList": []
+}
