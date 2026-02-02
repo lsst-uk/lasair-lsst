@@ -224,7 +224,9 @@ def filter_query_detail(request, mq_id, action=False):
         br = status.get(topic_name+'_bytes_rejected', 0)
         ap = status.get(topic_name+'_alerts_produced', 0)
         ar = status.get(topic_name+'_alerts_rejected', 0)
-        kafka_message = f'Your kafka stream has produced {ap} alerts today ({bp} bytes) and rejected {ar} alerts.'
+        kafka_message = f'Your kafka stream has produced {ap} alerts today ({bp} bytes)'
+        if ar > 0:
+            kafka_message += ' and rejected {ar} alerts for being over quota'
     else:
         kafka_message = ''
 
