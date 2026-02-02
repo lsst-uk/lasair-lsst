@@ -151,6 +151,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
         newFil.active = request.POST.get('active')
+        newFil.topic_name = topic_name(newFil.name)
 
         if request.POST.get('public'):
             newFil.public = True
