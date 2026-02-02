@@ -633,14 +633,6 @@ class Filter:
             else:
                 self.log.error("ERROR in filter/filters")
 
-            # run the annotation queries
-#            self.log.info('ANNOTATION FILTERS start %s' % now())
-#            ntotal = filters.fast_annotation_filters(self)
-#            if ntotal is not None:
-#                self.log.info('ANNOTATION FILTERS got %d' % ntotal)
-#            else:
-#                self.log.error("ERROR in filter/fast_annotation_filters")
-
             # build CSV file with local database and transfer to main
             if self.transfer:
                 timers['ftransfer'].on()

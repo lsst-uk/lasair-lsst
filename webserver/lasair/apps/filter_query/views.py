@@ -220,10 +220,10 @@ def filter_query_detail(request, mq_id, action=False):
         ms = manage_status.manage_status(msl)
         nid = date_nid.nid_now()
         status = ms.read(nid)
-        bp = status.get(topic_name+'_bytes_produced', 0)
-        br = status.get(topic_name+'_bytes_rejected', 0)
-        ap = status.get(topic_name+'_alerts_produced', 0)
-        ar = status.get(topic_name+'_alerts_rejected', 0)
+        bp = int(status.get(topic_name+'_bytes_produced', 0))
+        br = int(status.get(topic_name+'_bytes_rejected', 0))
+        ap = int(status.get(topic_name+'_alerts_produced', 0))
+        ar = int(status.get(topic_name+'_alerts_rejected', 0))
         kafka_message = f'Your kafka stream has produced {ap} alerts today ({bp} bytes)'
         if ar > 0:
             kafka_message += ' and rejected {ar} alerts for being over quota'
