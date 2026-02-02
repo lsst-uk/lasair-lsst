@@ -1,7 +1,7 @@
 from src.topic_name import topic_name
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
-from src import date_nid, db_connect
+from src import date_nid, db_connect, manage_status
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -214,6 +214,20 @@ def filter_query_detail(request, mq_id, action=False):
     else:
         sortTable = True
 
+    # info about kafka records produced and rejected
+    if filterQuery.active >= 2:
+        topic_name = filterQuery.topic_name
+        ms = manage_status.manage_status(msl)
+        nid = date_nid.nid_now()
+        status = ms.read(nid)
+        bp = status.get(topic_name+'_bytes_produced', 0)
+        br = status.get(topic_name+'_bytes_rejected', 0)
+        ap = status.get(topic_name+'_alerts_produced', 0)
+        ar = status.get(topic_name+'_alerts_rejected', 0)
+        kafka_message = f'Your kafka stream has produced {ap} alerts today ({bp} bytes) and rejected {ar} alerts.'
+    else:
+        kafka_message = ''
+
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
@@ -222,9 +236,9 @@ def filter_query_detail(request, mq_id, action=False):
         "form": form,
         "duplicateForm": duplicateForm,
         'limit': str(limit),
-        'sortTable': sortTable
+        'sortTable': sortTable,
+        'kafka_message': kafka_message,
     })
-
 
 @login_required
 def filter_query_create(request, mq_id=False):
