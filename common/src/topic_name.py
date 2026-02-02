@@ -11,5 +11,7 @@ def topic_name(userid, name):
     # Make sure name is shorter than 128 characters
     if len(name) > 128:
         nname = name[0:64]+name[-64:]
+    else:
+        nname = name
     return 'lasair_' + str(userid) + nname
 
