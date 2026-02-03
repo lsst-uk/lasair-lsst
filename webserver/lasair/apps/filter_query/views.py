@@ -1,4 +1,6 @@
-from src.topic_name import topic_name
+import sys
+sys.path.append('../common')
+from src.topic_name import topic_name as topicName
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
 from src import date_nid, db_connect, manage_status
@@ -23,11 +25,9 @@ import time
 import datetime
 from django.contrib import messages
 import os
-import sys
 import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-sys.path.append('../common')
 
 
 @csrf_exempt
@@ -126,7 +126,7 @@ def filter_query_detail(request, mq_id, action=False):
                 datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
-            tn = topic_name(request.user.id, filterQuery.name)
+            tn = topicName(request.user.id, filterQuery.name)
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
@@ -151,7 +151,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
         newFil.active = request.POST.get('active')
-        newFil.topic_name = topic_name(request.user.id, newFil.name)
+        newFil.topic_name = topicName(request.user.id, newFil.name)
 
         if request.POST.get('public'):
             newFil.public = True
@@ -386,14 +386,14 @@ def filter_query_create(request, mq_id=False):
                 filterQuery.conditions = conditions
                 filterQuery.real_sql = sqlquery_real
                 # REFRESH STREAM
-                tn = topic_name(request.user.id, filterQuery.name)
+                tn = topicName(request.user.id, filterQuery.name)
                 filterQuery.topic_name = tn
                 delete_stream_file(request, filterQuery.name)
                 verb = "updated"
 
             else:
                 sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
-                tn = topic_name(request.user.id, name)
+                tn = topicName(request.user.id, name)
                 filterQuery = filter_query(user=request.user,
                                            name=name, description=description,
                                            public=public, active=active,
