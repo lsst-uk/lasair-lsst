@@ -1,5 +1,6 @@
 import sys
 sys.path.append('../common')
+import settings as lasair_settings
 from src.topic_name import topic_name as topicName
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
@@ -151,6 +152,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
         newFil.active = request.POST.get('active')
+        newFil.byte_query = lasair_settings.MAX_KAFKA_BYTES_PER_FILTER
         newFil.topic_name = topicName(request.user.id, newFil.name)
 
         if request.POST.get('public'):
@@ -384,6 +386,7 @@ def filter_query_create(request, mq_id=False):
                 filterQuery.selected = selected
                 filterQuery.tables = tables
                 filterQuery.conditions = conditions
+                filterQuery.byte_quota = lasair_settings.MAX_KAFKA_BYTES_PER_FILTER
                 filterQuery.real_sql = sqlquery_real
                 # REFRESH STREAM
                 tn = topicName(request.user.id, filterQuery.name)
