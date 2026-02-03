@@ -4,26 +4,26 @@ Fetch them from database, construct SQL, execute, produce kafka
 (1) fetch_queries(msl_remote, ms, nid) 
 gets all the queries from the remote database. ms is manage_status and nid is today.
 
-(3) run_queries(batch, query_list, ms, nid):
+(2) run_queries(batch, query_list, ms, nid):
 Uses query_list runs all the queries against local database
 
-(5) run_query(query, msl, fltr)
+(3) run_query(query, msl, fltr)
 Run a specific query and return query_results
 
-(6) dispose_query_results(query, query_results, fltr, ms, nid)
+(4) dispose_query_results(query, query_results, fltr, ms, nid)
 Deal with the query results
 
-(6a) fetch_digest(topic_name):
+(4a) fetch_digest(topic_name):
     Get the digest file from shared storage
 
-(6b) dispose_email(allrecords, last_email, query):
+(4b) dispose_email(allrecords, last_email, query):
     Deal with outgoing emails, it calls this to actually send
     send_email(email, topic, message, message_html):
 
-(6c) dispose_kafka(query_results, query, ms, nid):
+(4c) dispose_kafka(query_results, query, ms, nid):
     Produce Kafka output to public stream
 
-(6d) write_digest(allrecords, topic_name, last_email):
+(4d) write_digest(allrecords, topic_name, last_email):
     Write the digest file for this topic
 
 """
@@ -60,6 +60,7 @@ def fetch_queries(msl_remote, ms, nid):
             'tables':    query['tables'],
             'real_sql':  query['real_sql'],
             'topic_name':query['topic_name'],
+            'byte_quota':query['byte_quota'],
         }
         # Lets see if some kafka has produced on this filter
         nbytesname = query['topic_name'] + '_bytes_produced'
@@ -297,7 +298,8 @@ def dispose_kafka(query_results, query, ms, nid):
     topic_name = query['topic_name']
     # First decide if this filter has already produced enough
     bp = query.get('bytes_produced', 0)
-    will_produce = (bp < settings.MAX_KAFKA_BYTES_PER_FILTER)
+    bq = query.get('byte_quota', settings.MAX_KAFKA_BYTES_PER_FILTER)
+    will_produce = (bp < bq)
 
     # Kafka produce config
     conf = {
