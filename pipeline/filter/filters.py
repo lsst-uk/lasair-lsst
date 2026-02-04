@@ -45,7 +45,7 @@ def fetch_queries(msl_remote, ms, nid):
 
     # Fetch all the stored queries from the main database
     cursor = msl_remote.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mq_id, user, name, email, tables, active, real_sql, topic_name '
+    query = 'SELECT mq_id, user, name, email, tables, active, byte_quota, real_sql, topic_name '
     query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND active > 0'
     cursor.execute(query)
 
