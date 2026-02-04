@@ -127,6 +127,7 @@ def run_query(query, msl):
                  "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
         print(error)
         print(sqlquery_real)
+        send_email(email, topic, error)
         return []
 
     return query_results
