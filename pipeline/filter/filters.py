@@ -296,7 +296,7 @@ def dispose_kafka(query_results, query, ms, nid):
     topic_name = query['topic_name']
     # First decide if this filter has already produced enough
     bp = query.get('bytes_produced', 0)
-    bq = query.get('byte_quota', settings.MAX_KAFKA_BYTES_PER_FILTER)
+    bq = query['byte_quota']
     will_produce = (bp < bq)
 
     # Kafka produce config
