@@ -179,14 +179,14 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                         diaObjectId = q['diaObjectId']
                         q['alert'] = lightcurve_lite(fltr.alert_dict[diaObjectId])
                     except:
-                        pass
+                        fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
             if active == 4:   # append full alert
                 for q in query_results:
                     try:
                         diaObjectId = q['diaObjectId']
                         q['alert'] = fltr.alert_dict[diaObjectId]
                     except:
-                        pass
+                        fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
         dispose_kafka(query_results, query, ms, nid)
 
     return len(query_results)
