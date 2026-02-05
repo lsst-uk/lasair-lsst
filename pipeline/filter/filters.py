@@ -7,7 +7,7 @@ gets all the queries from the remote database. ms is manage_status and nid is to
 (2) run_queries(batch, query_list, ms, nid):
 Uses query_list runs all the queries against local database
 
-(3) run_query(query, msl, fltr)
+(3) run_query(query, msl)
 Run a specific query and return query_results
 
 (4) dispose_query_results(query, query_results, fltr, ms, nid)
@@ -81,7 +81,7 @@ def run_queries(fltr, query_list, ms, nid):
     for query in query_list:
         n = 0
         t = time.time()
-        query_results = run_query(query, fltr.database, fltr)
+        query_results = run_query(query, fltr.database)
         n += dispose_query_results(query, query_results, fltr, ms, nid)
         t = time.time() - t
         if n > 0:
@@ -90,14 +90,13 @@ def run_queries(fltr, query_list, ms, nid):
         ntotal += n
     return ntotal
 
-def run_query(query, msl, fltr):
+def run_query(query, msl):
     """run_query.
         runs the query against the local database
 
     Args:
         query:
         msl:
-        fltr:
     """
     active = query['active']
     email = query['email']
@@ -128,8 +127,7 @@ def run_query(query, msl, fltr):
                  "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
         print(error)
         print(sqlquery_real)
-#        if fltr.send_email:
-#            send_email(email, topic, error)
+        send_email(email, topic, error)
         return []
 
     return query_results
