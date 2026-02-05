@@ -299,7 +299,7 @@
   vars_files:
     - settings.yaml
   vars:
-    schema: "9_0"
+    schema: "10_0"
   tasks:
     - name: Create SQL files
       ansible.builtin.shell:
