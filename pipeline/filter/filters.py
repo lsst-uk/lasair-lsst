@@ -313,6 +313,7 @@ def dispose_kafka(query_results, query, ms, nid):
     try:
         p = Producer(conf)
         for out in query_results: 
+            out.pop('annotations', None)   # extra Lasair stuff
             jsonout = json.dumps(out, default=datetime_converter)
             nbytes += len(jsonout)
             nalert += 1
