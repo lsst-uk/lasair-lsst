@@ -181,6 +181,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                     except:
                         fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
             if active == 4:   # append full alert
+
                 for q in query_results:
                     try:
                         diaObjectId = q['diaObjectId']
@@ -200,7 +201,7 @@ def write_digest(allrecords, topic_name, last_entry, last_email):
             'last_email': last_email_text, 
             'digest': allrecords
             }
-    digestdict_text = json.dumps(digest_dict, indent=2, default=datetime_converter)
+    digestdict_text = json.dumps(digest_dict, indent=2, default=crap_converter)
 
     filename = settings.KAFKA_STREAMS + '/' + topic_name
     f = open(filename, 'w')
@@ -255,7 +256,7 @@ def dispose_email(allrecords, last_email, query, force=False):
                 message += diaObjectId + '\n'
                 message_html += '<a href="%s/objects/%s/">%s</a><br/> \n' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
             else:
-                jsonout = json.dumps(out, default=datetime_converter)
+                jsonout = json.dumps(out, default=crap_converter)
                 message += jsonout + '\n'
     try:
         send_email(query['email'], topic, message, message_html)
@@ -313,8 +314,9 @@ def dispose_kafka(query_results, query, ms, nid):
     try:
         p = Producer(conf)
         for out in query_results: 
-            out.pop('annotations', None)   # extra Lasair stuff
-            jsonout = json.dumps(out, default=datetime_converter)
+            if 'alert' in out:
+                out['alert'].pop('annotations', None)   # extra Lasair stuff
+            jsonout = json.dumps(out, default=crap_converter)
             nbytes += len(jsonout)
             nalert += 1
             if will_produce:
@@ -339,16 +341,15 @@ def dispose_kafka(query_results, query, ms, nid):
             topic_name+'_alerts_rejected': nalert,
         }, nid)
 
-def datetime_converter(o):
-    """datetime_converter.
+def crap_converter(o):
+    """crap_converter.
 
     Args:
         o:
     """
 # used by json encoder when it gets a type it doesn't understand
-    if isinstance(o, datetime.datetime):
+    if isinstance(o, datetime.datetime) or type(o).__module__ == 'numpy':
         return o.__str__()
-
 
 def kafka_ack(err, msg):
     if err is not None:
