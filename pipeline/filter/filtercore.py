@@ -99,6 +99,7 @@ class Filter:
         self.alert_dict = {}
 
         self.consumer = None
+        self.producer = None
         self.database = None
 
         self.log = log or lasairLogging.getLogger("filter")
@@ -116,6 +117,10 @@ class Filter:
         # set up the Kafka consumer now
         if not self.consumer:
             self.consumer = self.make_kafka_consumer()
+
+        # set up the Kafka producer now
+        if not self.producer:
+            self.producer = self.make_kafka_producer()
 
         # set up the link to the local database
         if not self.database or not self.database.is_connected():
@@ -195,7 +200,26 @@ class Filter:
             consumer.subscribe([self.topic_in])
             return consumer
         except Exception as e:
-            self.log.error('ERROR cannot connect to kafka' + str(e))
+            self.log.error('ERROR cannot make kafka consumer' + str(e))
+
+    def make_kafka_producer(self):
+        """ Make a kafka producer.
+        """
+        conf = {
+            'bootstrap.servers': settings.PUBLIC_KAFKA_SERVER,
+            'security.protocol': 'SASL_PLAINTEXT',
+            'sasl.mechanisms': 'SCRAM-SHA-256',
+            'sasl.username': settings.PUBLIC_KAFKA_USERNAME,
+            'sasl.password': settings.PUBLIC_KAFKA_PASSWORD
+        }
+
+        self.log.info(str(conf))
+        self.log.info('Topic in = %s' % self.topic_in)
+        try:
+            producer = confluent_kafka.Producer(conf)
+            return producer
+        except Exception as e:
+            self.log.error('ERROR cannot make kafka producer' + str(e))
 
     @staticmethod
     def create_insert_sherlock(ann: dict):

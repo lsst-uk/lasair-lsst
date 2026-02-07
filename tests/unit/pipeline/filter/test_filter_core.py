@@ -203,6 +203,25 @@ class FilterTest(unittest.TestCase):
         mock_manage_status.assert_called_once()
         mock_manage_status.return_value.add.assert_called_once()
 
+
+    @patch('filtercore.manage_status')
+    def test_dispose_kafka(self, mock_manage_status)
+
+
+        mock_producer = unittest.mock.MagicMock()
+        query_results = [{'apple':1, 'pear':2}]
+        query = {'bytes_produced': 100, 'byte_quota':200, 'topic_name':'tpc'}
+        nid = 0
+        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid)
+
+
+        expect_produce = ({'tpc_bytes_produced': 50, 'tpc_alerts_produced':1}, 0))
+        mock_manage_status.add.assert_called_with(expect_produce)
+
+
+
+
+
     @patch('filtercore.Filter.execute_query')
     def test_transfer_to_main_local_error(self, mock_execute_query):
         """Test that an error when building the CSV causes transfer_to_main to return None"""

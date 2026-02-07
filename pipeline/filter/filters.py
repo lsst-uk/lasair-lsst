@@ -188,7 +188,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                         q['alert'] = fltr.alert_dict[diaObjectId]
                     except:
                         fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
-        dispose_kafka(query_results, query, ms, nid)
+        dispose_kafka(fltr.producer, query_results, query, ms, nid)
 
     return len(query_results)
 
@@ -291,7 +291,7 @@ def send_email(email, topic, message, message_html=''):
     s.quit()
 
 
-def dispose_kafka(query_results, query, ms, nid):
+def dispose_kafka(producer, query_results, query, ms, nid):
     """ Send out query results by kafka to the given topic.
     """
     topic_name = query['topic_name']
@@ -300,19 +300,9 @@ def dispose_kafka(query_results, query, ms, nid):
     bq = query['byte_quota']
     will_produce = (bp < bq)
 
-    # Kafka produce config
-    conf = {
-        'bootstrap.servers': settings.PUBLIC_KAFKA_SERVER,
-        'security.protocol': 'SASL_PLAINTEXT',
-        'sasl.mechanisms': 'SCRAM-SHA-256',
-        'sasl.username': settings.PUBLIC_KAFKA_USERNAME,
-        'sasl.password': settings.PUBLIC_KAFKA_PASSWORD
-    }
-
     nbytes = 0
     nalert = 0
     try:
-        p = Producer(conf)
         for out in query_results: 
             if 'alert' in out:
                 out['alert'].pop('annotations', None)   # extra Lasair stuff
@@ -320,8 +310,8 @@ def dispose_kafka(query_results, query, ms, nid):
             nbytes += len(jsonout)
             nalert += 1
             if will_produce:
-                p.produce(topic_name, value=jsonout, callback=kafka_ack)
-        p.flush(10.0)   # 10 second timeout
+                producer.produce(topic_name, value=jsonout, callback=kafka_ack)
+        producer.flush(10.0)   # 10 second timeout
     except Exception as e:
         rtxt = "ERROR in filter/run_active_queries: cannot produce to public kafka"
         rtxt += str(e)
@@ -342,7 +332,7 @@ def dispose_kafka(query_results, query, ms, nid):
         }, nid)
 
 def crap_converter(o):
-    """crap_converter.
+    """crap_converter. Deal with the things that JSON can't encode.
 
     Args:
         o:
