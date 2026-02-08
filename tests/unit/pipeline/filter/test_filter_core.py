@@ -1,10 +1,13 @@
 import unittest, unittest.mock
 from unittest.mock import patch
 
+import datetime, json
+import numpy as np
 import psutil
 import context
 from filtercore import Filter
 from filters import dispose_kafka
+from filters import crap_converter
 import re
 
 
@@ -204,6 +207,19 @@ class FilterTest(unittest.TestCase):
         mock_manage_status.assert_called_once()
         mock_manage_status.return_value.add.assert_called_once()
 
+    def test_crap_converter(self):
+        """ Make sure that JSO can't reject the odd types it may get """
+        c = {
+            'date': datetime.datetime(2026, 2, 8, 9, 19, 19),
+            'np1': np.float32(1.5),
+            'np2': np.float64(1.5),
+            'np3': np.int32(10),
+            'np4': np.int64(10),
+            'none': None,
+        }
+        expect = '{"date": "2026-02-08 09:19:19", "np1": "1.5", "np2": 1.5, "np3": "10", "np4": "10", "none": null}'
+        out = json.dumps(c, default=crap_converter)
+        self.assertEqual(out, expect)
 
     @patch('filtercore.manage_status')
     def test_dispose_kafka_produce(self, mock_manage_status):
