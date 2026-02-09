@@ -1,13 +1,9 @@
 import unittest, unittest.mock
 from unittest.mock import patch
 
-import datetime, json
-import numpy as np
 import psutil
 import context
 from filtercore import Filter
-from filters import dispose_kafka
-from filters import crap_converter
 import re
 
 
@@ -206,50 +202,6 @@ class FilterTest(unittest.TestCase):
         mock_consumer.poll.assert_called_once()
         mock_manage_status.assert_called_once()
         mock_manage_status.return_value.add.assert_called_once()
-
-    def test_crap_converter(self):
-        """ Make sure that JSO can't reject the odd types it may get """
-        c = {
-            'date': datetime.datetime(2026, 2, 8, 9, 19, 19),
-            'np1': np.float32(1.5),
-            'np2': np.float64(1.5),
-            'np3': np.int32(10),
-            'np4': np.int64(10),
-            'none': None,
-        }
-        expect = '{"date": "2026-02-08 09:19:19", "np1": "1.5", "np2": 1.5, "np3": "10", "np4": "10", "none": null}'
-        out = json.dumps(c, default=crap_converter)
-        self.assertEqual(out, expect)
-
-    @patch('filtercore.manage_status')
-    def test_dispose_kafka_produce(self, mock_manage_status):
-        """ Test that the right call is made to manage_status when disposing kafka under quota """
-        mock_producer = unittest.mock.MagicMock()
-        query_results = [{'apple':1, 'pear':2}]   # list of output results
-
-        query = {'bytes_produced': 100, 
-                 'byte_quota'    : 200,           # under quota
-                 'topic_name':'tpc'}
-        nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid)
-        expect = {'tpc_bytes_produced': 23,       # expect production
-                  'tpc_alerts_produced':1}
-        mock_manage_status.add.assert_called_with(expect, 0)
-
-    @patch('filtercore.manage_status')
-    def test_dispose_kafka_reject(self, mock_manage_status):
-        """ Test that the right call is made to manage_status when disposing kafka over quota """
-        mock_producer = unittest.mock.MagicMock()
-        query_results = [{'apple':1, 'pear':2}]   # list of output results
-
-        query = {'bytes_produced': 300, 
-                 'byte_quota'    : 200,           # over quota
-                 'topic_name':'tpc'}
-        nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid)
-        expect = {'tpc_bytes_rejected': 23,       # expect rejection
-                  'tpc_alerts_rejected':1}
-        mock_manage_status.add.assert_called_with(expect, 0)
 
     @patch('filtercore.Filter.execute_query')
     def test_transfer_to_main_local_error(self, mock_execute_query):

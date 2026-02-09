@@ -340,6 +340,8 @@ def crap_converter(o):
 # used by json encoder when it gets a type it doesn't understand
     if isinstance(o, datetime.datetime) or type(o).__module__ == 'numpy':
         return o.__str__()
+    else:
+        return 'Unexpected type in json.dumps:' + str(type(o))
 
 def kafka_ack(err, msg):
     if err is not None:
