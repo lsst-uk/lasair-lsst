@@ -121,6 +121,10 @@
   vars:
     internal_only: false
     dns_lookup: false # disable dns checks for testing
+    # increase default retention to 30 days
+    retention_ms: "{{ 30 * 24 * 60 * 60 * 1000 }}"
+    # set a retention size limit of 1GB
+    retention_bytes: 1073741824
   roles:
     - kafka
   tags: kafka_pub
