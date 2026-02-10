@@ -4,7 +4,7 @@
   ansible.builtin.lineinfile:
     path: /etc/systemd/system/timers.target.wants/apt-daily.timer
     regexp: '^OnCalendar='
-    line: "OnCalendar=*-*-* {{ apt-daily_time }}"
+    line: "OnCalendar=*-*-* {{ apt_daily_time }}"
 
 - name: "Set apt-daily delay"
   become: true
@@ -18,7 +18,7 @@
   ansible.builtin.lineinfile:
     path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
     regexp: '^OnCalendar='
-    line: "OnCalendar=*-*-* {{ apt-daily-upgrade_time }}"
+    line: "OnCalendar=*-*-* {{ apt_daily_upgrade_time }}"
 
 - name: "Set apt-daily-upgrade delay"
   become: true

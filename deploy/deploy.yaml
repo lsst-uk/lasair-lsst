@@ -308,41 +308,41 @@
   gather_facts: false
   become: true
   vars:
-    apt-daily_time: 17:00
-    apt-daily-upgrade_time: 20:00    
+    apt_daily_time: 17:00
+    apt_daily_upgrade_time: 20:00    
   roles:
     - apt_timer
   tags: apt_timer
 
 # cassandra non-seed nodes
-- hosts: cassandranodes:!cassandranodes[0]:!cassandranodes[2]:!cutoutcass[0]:!cutoutcass[2]
+- hosts: cassandranodes:cutoutcass:!cassandranodes[0]:!cassandranodes[2]:!cutoutcass[0]:!cutoutcass[2]
   gather_facts: false
   become: true
   vars: 
-    apt-daily_time: 19:00
-    apt-daily-upgrade_time: 22:00
+    apt_daily_time: 19:00
+    apt_daily_upgrade_time: 22:00
   roles:
     - apt_timer
   tags: apt_timer
 
 # frontend database
-- hosts: 
+- hosts: frontend_db
   gather_facts: false
   become: true
   vars:
-    apt-daily_time: 17:00
-    apt-daily-upgrade_time: 20:00
+    apt_daily_time: 17:00
+    apt_daily_upgrade_time: 20:00
   roles:
     - apt_timer
   tags: apt_timer
 
 # backend database
-- hosts: 
+- hosts: backend_db
   gather_facts: false
   become: true
   vars:
-    apt-daily_time: 19:00
-    apt-daily-upgrade_time: 22:00
+    apt_daily_time: 19:00
+    apt_daily_upgrade_time: 22:00
   roles:
     - apt_timer
   tags: apt_timer
