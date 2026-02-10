@@ -167,7 +167,7 @@
     - settings.yaml
     - exports.yaml
   vars:
-    schema: "9_0"
+    schema: "10_0"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"

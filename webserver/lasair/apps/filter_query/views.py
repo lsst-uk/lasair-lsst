@@ -1,7 +1,9 @@
-from src.topic_name import topic_name
+import sys
+sys.path.append('../common')
+from src.topic_name import topic_name as topicName
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
-from src import date_nid, db_connect
+from src import date_nid, db_connect, manage_status
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -23,11 +25,9 @@ import time
 import datetime
 from django.contrib import messages
 import os
-import sys
 import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
-sys.path.append('../common')
 
 
 @csrf_exempt
@@ -126,7 +126,7 @@ def filter_query_detail(request, mq_id, action=False):
                 datetime.datetime.now(tz=timezone.utc) + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
 
             # REFRESH STREAM
-            tn = topic_name(request.user.id, filterQuery.name)
+            tn = topicName(request.user.id, filterQuery.name)
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
@@ -151,6 +151,8 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
         newFil.active = request.POST.get('active')
+        newFil.byte_query = settings.KAFKA_BYTE_QUOTA
+        newFil.topic_name = topicName(request.user.id, newFil.name)
 
         if request.POST.get('public'):
             newFil.public = True
@@ -213,6 +215,22 @@ def filter_query_detail(request, mq_id, action=False):
     else:
         sortTable = True
 
+    # info about kafka records produced and rejected
+    if filterQuery.active >= 2:
+        topic_name = filterQuery.topic_name
+        ms = manage_status.manage_status(msl)
+        nid = date_nid.nid_now()
+        status = ms.read(nid)
+        bp = int(status.get(topic_name+'_bytes_produced', 0))
+        br = int(status.get(topic_name+'_bytes_rejected', 0))
+        ap = int(status.get(topic_name+'_alerts_produced', 0))
+        ar = int(status.get(topic_name+'_alerts_rejected', 0))
+        kafka_message = f'Your kafka stream has produced {ap:,} alerts today ({bp:,} bytes of your quota of {filterQuery.byte_quota:,})'
+        if ar > 0:
+            kafka_message += f' and rejected {ar:,} alerts for being over quota'
+    else:
+        kafka_message = ''
+
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
@@ -221,9 +239,9 @@ def filter_query_detail(request, mq_id, action=False):
         "form": form,
         "duplicateForm": duplicateForm,
         'limit': str(limit),
-        'sortTable': sortTable
+        'sortTable': sortTable,
+        'kafka_message': kafka_message,
     })
-
 
 @login_required
 def filter_query_create(request, mq_id=False):
@@ -367,19 +385,21 @@ def filter_query_create(request, mq_id=False):
                 filterQuery.selected = selected
                 filterQuery.tables = tables
                 filterQuery.conditions = conditions
+                filterQuery.byte_quota = settings.KAFKA_BYTE_QUOTA
                 filterQuery.real_sql = sqlquery_real
                 # REFRESH STREAM
-                tn = topic_name(request.user.id, filterQuery.name)
+                tn = topicName(request.user.id, filterQuery.name)
                 filterQuery.topic_name = tn
                 delete_stream_file(request, filterQuery.name)
                 verb = "updated"
 
             else:
                 sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
-                tn = topic_name(request.user.id, name)
+                tn = topicName(request.user.id, name)
                 filterQuery = filter_query(user=request.user,
                                            name=name, description=description,
                                            public=public, active=active,
+                                           byte_quota = settings.KAFKA_BYTE_QUOTA,
                                            selected=selected, conditions=conditions, tables=tables,
                                            real_sql=sqlquery_real, topic_name=tn)
                 verb = "created"

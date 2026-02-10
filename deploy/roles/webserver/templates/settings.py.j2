@@ -34,6 +34,9 @@ DB_PORT        = {{ db_port }}
 PUBLIC_KAFKA_PRODUCER   = 'kafka-pub:29092'
 PUBLIC_KAFKA_PASSWORD   = '{{ settings.kafka_password }}'
 
+# Quota per filter per day
+KAFKA_BYTE_QUOTA       = 100000000  # 100 Mbyte
+
 INTERNAL_KAFKA_PRODUCER = '{{ settings.kafka_producer }}:9092'
 ANNOTATION_TOPIC_OUT    = 'lsst_annotations'
 

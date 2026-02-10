@@ -67,7 +67,10 @@
                 </small>
                 <small class="text-gray-500">
                     The filter is <b>{% if not filterQ.active %}not active{% elif filterQ.active == 1%} streamed via email {% elif filterQ.active == 2%} streamed via kafka</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% elif filterQ.active == 3%} streamed via kafka with lite lightcurve</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% elif filterQ.active == 4%} streamed via kafka with full alert</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% endif %}.</b> {% include "includes/info_tooltip.html" with info="when active, a filter will be dynamically matched against new transient alerts and the results streamed via email or kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
-                </small>
+		</small><br/>
+		<small>
+		{{ kafka_message }}
+		</small>
             </div>
 
 
@@ -102,10 +105,6 @@
 
 
                 {% if "filter/log/" not in request.path %}
-                    <a class="btn btn-sm btn-gray-600 border-white align-middle" href='{% url "filter_query_log" filterQ.topic_name %}' data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="listing all transients passing filter since its creation">
-
-                        {% include "includes/icons/icon_history.html" %}
-                        <span class="align-middle  d-none d-md-inline"  >History</span></a>
 
                     {% if user.is_authenticated and user.id == filterQ.user.id %}
 
