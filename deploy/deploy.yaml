@@ -308,8 +308,8 @@
   gather_facts: false
   become: true
   vars:
-    apt_daily_time: 17:00
-    apt_daily_upgrade_time: 20:00    
+    apt_daily_time: "17:00"
+    apt_daily_upgrade_time: "20:00"    
   roles:
     - apt_timer
   tags: apt_timer
@@ -319,8 +319,8 @@
   gather_facts: false
   become: true
   vars: 
-    apt_daily_time: 19:00
-    apt_daily_upgrade_time: 22:00
+    apt_daily_time: "19:00"
+    apt_daily_upgrade_time: "22:00"
   roles:
     - apt_timer
   tags: apt_timer
@@ -330,8 +330,8 @@
   gather_facts: false
   become: true
   vars:
-    apt_daily_time: 17:00
-    apt_daily_upgrade_time: 20:00
+    apt_daily_time: "17:00"
+    apt_daily_upgrade_time: "20:00"
   roles:
     - apt_timer
   tags: apt_timer
@@ -341,8 +341,8 @@
   gather_facts: false
   become: true
   vars:
-    apt_daily_time: 19:00
-    apt_daily_upgrade_time: 22:00
+    apt_daily_time: "19:00"
+    apt_daily_upgrade_time: "22:00"
   roles:
     - apt_timer
   tags: apt_timer
