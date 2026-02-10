@@ -293,3 +293,56 @@
     - role: parallel_ssh
       when: instances.parallel_ssh.started
   tags: parallel_ssh
+
+# set apt update/upgrade to run in the evening by default
+# exclude database and cassandra as we have more specific times for those
+- hosts: all:!db:!frontend_db:!backend_db:!cassandranodes:!cutoutcass
+  gather_facts: false
+  become: true
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# cassandra seed nodes
+- hosts: cassandranodes[0]:cassandranodes[2]:cutoutcass[0]:cutoutcass[2]
+  gather_facts: false
+  become: true
+  vars:
+    apt-daily_time: 17:00
+    apt-daily-upgrade_time: 20:00    
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# cassandra non-seed nodes
+- hosts: cassandranodes:!cassandranodes[0]:!cassandranodes[2]:!cutoutcass[0]:!cutoutcass[2]
+  gather_facts: false
+  become: true
+  vars: 
+    apt-daily_time: 19:00
+    apt-daily-upgrade_time: 22:00
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# frontend database
+- hosts: 
+  gather_facts: false
+  become: true
+  vars:
+    apt-daily_time: 17:00
+    apt-daily-upgrade_time: 20:00
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# backend database
+- hosts: 
+  gather_facts: false
+  become: true
+  vars:
+    apt-daily_time: 19:00
+    apt-daily-upgrade_time: 22:00
+  roles:
+    - apt_timer
+  tags: apt_timer

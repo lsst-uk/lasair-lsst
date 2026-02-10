@@ -1,0 +1,29 @@
+---
+- name: "Set apt-daily time"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/timers.target.wants/apt-daily.timer
+    regexp: '^OnCalendar='
+    line: "OnCalendar=*-*-* {{ apt-daily_time }}"
+
+- name: "Set apt-daily delay"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/timers.target.wants/apt-daily.timer
+    regexp: '^RandomizedDelaySec='
+    line: "RandomizedDelaySec=2h"
+
+- name: "Set apt-daily-upgrade time"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
+    regexp: '^OnCalendar='
+    line: "OnCalendar=*-*-* {{ apt-daily-upgrade_time }}"
+
+- name: "Set apt-daily-upgrade delay"
+  become: true
+  ansible.builtin.lineinfile:
+    path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
+    regexp: '^RandomizedDelaySec='
+    line: "RandomizedDelaySec=60m"
+
