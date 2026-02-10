@@ -5,6 +5,8 @@
     path: /etc/systemd/system/timers.target.wants/apt-daily.timer
     regexp: '^OnCalendar='
     line: "OnCalendar=*-*-* {{ apt_daily_time }}"
+  notify:
+    - Reload units
 
 - name: "Set apt-daily delay"
   become: true
@@ -12,6 +14,8 @@
     path: /etc/systemd/system/timers.target.wants/apt-daily.timer
     regexp: '^RandomizedDelaySec='
     line: "RandomizedDelaySec=2h"
+  notify:
+    - Reload units
 
 - name: "Set apt-daily-upgrade time"
   become: true
@@ -19,6 +23,8 @@
     path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
     regexp: '^OnCalendar='
     line: "OnCalendar=*-*-* {{ apt_daily_upgrade_time }}"
+  notify:
+    - Reload units
 
 - name: "Set apt-daily-upgrade delay"
   become: true
@@ -26,4 +32,6 @@
     path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
     regexp: '^RandomizedDelaySec='
     line: "RandomizedDelaySec=60m"
+  notify:
+    - Reload units
 

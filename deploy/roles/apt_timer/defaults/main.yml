@@ -1,7 +1,7 @@
 ---
 # time for apt download
-apt_daily_time: 18:00
+apt_daily_time: "18:00"
 
 # time for upgrade and clean
-apt_daily_upgrade_time: 21:00
+apt_daily_upgrade_time: "21:00"
 
