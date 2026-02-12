@@ -407,8 +407,15 @@ def fast_anotation_filters(fltr):
     Each message has an annotator/topic name, and the diaObjectId that was annotated.
     Queries that have that annotator should run against that object
     """
+    msl_remote = db_connect.remote()
+
+    # how many bytes has each filter already produced
+    ms = manage_status.manage_status(msl=msl_remote)
+    nid = date_nid.nid_now()
+
+    # first get the user queries from the database that the webserver uses
     try:
-        query_list = fetch_queries()
+        query_list = fetch_queries(msl_remote, ms, nid)
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
@@ -431,7 +438,7 @@ def fast_anotation_filters(fltr):
         except:
             continue
     streamReader.close()
-    ntotal = run_queries(fltr, query_list, annotation_list)
+    ntotal = run_queries(fltr, query_list, ms, nid, annotation_list)
     return ntotal
 
 # if __name__ == "__main__":
