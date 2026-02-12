@@ -83,12 +83,48 @@ def run_queries(fltr, query_list, ms, nid):
         t = time.time()
         query_results = run_query(query, fltr.database)
         n += dispose_query_results(query, query_results, fltr, ms, nid)
+
+# immediate response to active=2 annotators
+# annotation_list is list of fresh annotations
+#            for ann in annotation_list:
+#                # msl_remote = db_connect.remote()
+#                query_results = run_query(query, fltr.database,
+#                                          ann['annotator'], ann['diaObjectId'], fltr=fltr)
+#                print('fast annotator %s on object %s' % (ann['annotator'], ann['diaObjectId']))
+#                print('results:', query_results)
+#                n += dispose_query_results(query, query_results, fltr)
+
+
+
         t = time.time() - t
         if n > 0:
             print('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
             sys.stdout.flush()
         ntotal += n
     return ntotal
+
+#def query_for_object(query, diaObjectId):
+#    """ modifies an existing query to add a new constraint for a specific object.
+#    We already know this query comes from multiple tables: objects and annotators,
+#    so we know there is an existing WHERE clause. Can add the new constraint to the end,
+#    unless there is an ORDER BY, in which case it comes before that.
+#    Args:
+#        query: the original query, as generated from the Lasair query builder
+#        diaObjectId: the object that is the new constraint
+#    """
+#    tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
+#    query = tok[0] + (' AND objects.diaObjectId=%s ' % str(diaObjectId))
+#    if len(tok) == 2: # has order clause, add it back
+#        query += ' ORDER BY ' + tok[1]
+#    return query
+#
+#
+#def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
+#    """run_query. Two cases here:
+#    if annotator=None, runs the query against the local database
+#    if annotator and diaObjectId, checks if the query involves the annotator,
+#        and if so, runs the query for the given object on main database
+
 
 def run_query(query, msl):
     """run_query.
@@ -104,6 +140,14 @@ def run_query(query, msl):
     limit = 1000
 
     sqlquery_real = query['real_sql']
+
+# special way to run query if there are fresh annotations
+#    if annotator:
+#        # if the annotator does not appear in the query tables, then we don't need to run it
+#        if query['tables'] not in annotator:
+#            return []
+#        # run the query against main for this specific object that has been annotated
+#        sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
@@ -364,6 +408,41 @@ def filters(fltr):
 
     ntotal = run_queries(fltr, query_list, ms=ms, nid=nid)
     return ntotal
+
+#def fast_anotation_filters(fltr):
+#    """run_annotation_queries.
+#    Pulls the recent content from the kafka topic 'lsst_annotations' 
+#    Each message has an annotator/topic name, and the diaObjectId that was annotated.
+#    Queries that have that annotator should run against that object
+#    """
+#    try:
+#        query_list = fetch_queries()
+#    except Exception as e:
+#        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+#        return None
+#
+#    annotation_list = []
+#    conf = {
+#        'bootstrap.servers':   settings.KAFKA_SERVER,
+#        'group.id':            settings.ANNOTATION_GROUP_ID,
+#        'default.topic.config': {'auto.offset.reset': 'earliest'}
+#    }
+#    streamReader = Consumer(conf)
+#    topic = settings.ANNOTATION_TOPIC
+#    streamReader.subscribe([topic])
+#    while 1:
+#        msg = streamReader.poll(timeout=5)
+#        if msg == None: break
+#        try:
+#            ann = json.loads(msg.value())
+#            annotation_list.append(ann)
+#        except:
+#            continue
+#    streamReader.close()
+#    ntotal = run_queries(fltr, query_list, annotation_list)
+#    return ntotal
+
+
 
 # if __name__ == "__main__":
 #     from src import slack_webhook
