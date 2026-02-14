@@ -37,10 +37,11 @@ class bazinExpBlackBody(FeatureGroup):
         # only run the expensive BBB fit on some
         try:
             sherlock = self.alert['annotations']['sherlock'][0]
-            if not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
-                return fdict
         except:
             sherlock = None
+
+        if not sherlock or sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+            return fdict
 
         BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
                 A=100, T=4, t0=6, kr=0.1, kf=0.01)
