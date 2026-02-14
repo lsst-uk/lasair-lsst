@@ -12,7 +12,7 @@ import features
 from features import *
 from modify_alert import modify
 
-sample = 'Tidal_disruption_event_TDE_114933870'
+sample = '313637921267122191'
 
 class FeatureTest(TestCase):
   def test0_get_features(self):
