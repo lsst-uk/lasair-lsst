@@ -2410,5 +2410,12 @@
       "dec": 4.204334751076871
     }
   ]
+  "annotations": {
+      "sherlock": [
+	  {
+              "classification":"SN"
+          }
+      ]
+  }
 }
 
