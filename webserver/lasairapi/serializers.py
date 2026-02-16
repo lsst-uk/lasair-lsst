@@ -402,4 +402,22 @@ class AnnotateSerializer(serializers.Serializer):
         except Exception as e:
             return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
 
-        return {'status': 'success', 'query': query}
+        if active < 2:
+            return {'status': 'success', 'query': query}
+
+        # when active=2, we push a kafka message to make sure queries are run immediately
+        message = {'diaObjectId': diaObjectId, 'annotator': topic}
+        conf = {
+            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
+            'client.id': 'client-1',
+        }
+        producer = Producer(conf)
+        topicout = lasair_settings.ANNOTATION_TOPIC
+        try:
+            s = json.dumps(message)
+            producer.produce(topicout, s)
+        except Exception as e:
+            return {'error': "Kafka production failed: %s\n" % e}
+        producer.flush()
+
+        return {'status': 'success', 'query': query, 'annotation_topic': topicout, 'message': s}

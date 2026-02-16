@@ -7,7 +7,6 @@ Usage:
               [--maxtotal=MAX]
               [--group_id=GID]
               [--topic_in=TIN]
-              [--local_db=NAME]
               [--send_email=BOOL]
               [--send_kafka=BOOL]
               [--transfer=BOOL]
@@ -21,7 +20,6 @@ Options:
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
-    --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
     --transfer=BOOL    Transfer results to main [default: True]
@@ -79,7 +77,6 @@ class Filter:
                  topic_in: str = 'lsst_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
                  maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
-                 local_db: str = None,
                  send_email: bool = True,
                  send_kafka: bool = True,
                  transfer: bool = True,
@@ -89,7 +86,6 @@ class Filter:
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
-        self.local_db = local_db or 'ztf'
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
@@ -100,7 +96,8 @@ class Filter:
 
         self.consumer = None
         self.producer = None
-        self.database = None
+        self.database_local  = None
+        self.database_remote = None
 
         self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
@@ -123,11 +120,17 @@ class Filter:
             self.producer = self.make_kafka_producer()
 
         # set up the link to the local database
-        if not self.database or not self.database.is_connected():
+        if not self.database_local or not self.database_local.is_connected():
             try:
-                self.database = db_connect.local(self.local_db)
+                self.database_local = db_connect.local()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+        # set up the link to the remote database
+        if not self.database_remote or not self.database_remote.is_connected():
+            try:
+                self.database_remote = db_connect.remote()
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
 
         # get the order of the attributes for all tables transferred by CSV
         table_list = [
@@ -164,10 +167,10 @@ class Filter:
         """ execute_query: run a query and close it, and compalin to slack if failure.
         """
         try:
-            cursor = self.database.cursor(buffered=True)
+            cursor = self.database_local.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()
-            self.database.commit()
+            self.database_local.commit()
         except Exception as e:
             self.log.error('ERROR filter/execute_query: %s' % str(e))
             self.log.info(query)
@@ -409,7 +412,7 @@ class Filter:
                 sys.stdout.flush()
                 # refresh the database every 1000 alerts
                 # make sure everything is committed
-                self.database.commit()
+                self.database_local.commit()
 
         d = self.handle_alert_list(alertList)
         nalert_out += d
@@ -439,7 +442,7 @@ class Filter:
 
         for table_name, attrs in self.csv_attrs.items():
             try:
-                transfer_csv(self.database, main_database, attrs, table_name, table_name, log=self.log)
+                transfer_csv(self.database_local, main_database, attrs, table_name, table_name, log=self.log)
                 self.log.info('%s ingested to main db' % table_name)
             except Exception as e:
                 self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
@@ -657,6 +660,14 @@ class Filter:
             else:
                 self.log.error("ERROR in filter/filters")
 
+            # run the annotation queries
+            self.log.info('ANNOTATION FILTERS start %s' % now())
+            ntotal = filters.fast_anotation_filters(self)
+            if ntotal is not None:
+                self.log.info('ANNOTATION FILTERS got %d' % ntotal)
+            else:
+                self.log.error("ERROR in filter/fast_annotation_filters")
+
             # build CSV file with local database and transfer to main
             if self.transfer:
                 timers['ftransfer'].on()
@@ -686,7 +697,6 @@ if __name__ == "__main__":
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
-    local_db = args.get('--local_db')
     send_email = args.get('--send_email') in ['True', 'true', 'Yes', 'yes']
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
@@ -697,7 +707,7 @@ if __name__ == "__main__":
         wait_time = getattr(settings, 'WAIT_TIME', 60)
     verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
+    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert,
                   send_email=send_email, send_kafka=send_kafka, transfer=transfer, 
                   stats=stats, verbose=verbose)
 
