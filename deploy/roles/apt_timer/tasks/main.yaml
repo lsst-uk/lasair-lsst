@@ -31,7 +31,7 @@
   ansible.builtin.lineinfile:
     path: /etc/systemd/system/timers.target.wants/apt-daily-upgrade.timer
     regexp: '^RandomizedDelaySec='
-    line: "RandomizedDelaySec=60m"
+    line: "RandomizedDelaySec=45m"
   notify:
     - Reload units
 
