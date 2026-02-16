@@ -40,7 +40,7 @@ class bazinExpBlackBody(FeatureGroup):
         except:
             sherlock = None
 
-        if not sherlock or sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
+        if not sherlock or not sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
             return fdict
 
         BE = BBB('LSST', nforced=4, ebv=self.alert['ebv'], \
