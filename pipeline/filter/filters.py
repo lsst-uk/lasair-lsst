@@ -140,7 +140,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
             return []
         # run the query against main for this specific object that has been annotated
         sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
-        fltr.log.info('FAnnQ', sqlquery_real)
+        fltr.log.info('FAnnQ: ' + sqlquery_real)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
