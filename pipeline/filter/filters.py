@@ -150,21 +150,20 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
     n = 0
     query_results = []
     utc = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
-    if 1:
+    try:
         cursor.execute(sqlquery_real)
         for record in cursor:
             recorddict = dict(record)
             recorddict['UTC'] = utc
             query_results.append(recorddict)
             n += 1
-#    except Exception as e:
-
-#        error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
-#                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
-#        print(error)
-#        print(sqlquery_real)
-#        send_email(email, topic, error)
-#        return []
+    except Exception as e:
+        error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
+                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
+        print(error)
+        print(sqlquery_real)
+        send_email(email, topic, error)
+        return []
 
     return query_results
 
