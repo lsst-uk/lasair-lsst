@@ -1,0 +1,61 @@
+{
+  "diaSourcesList": [
+    {
+      "psfFlux": 24162.1953125,
+      "psfFluxErr": 703.4738159179688,
+      "midpointMjdTai": 60983.20685446523,
+      "band": "i",
+      "reliability": 0.9944129586219788
+    },
+    {
+      "psfFlux": 23042.134765625,
+      "psfFluxErr": 757.2080688476562,
+      "midpointMjdTai": 60983.206418750524,
+      "band": "i",
+      "reliability": 0.9944597482681274
+    },
+    {
+      "psfFlux": 21958.970703125,
+      "psfFluxErr": 744.5821533203125,
+      "midpointMjdTai": 60983.20595989166,
+      "band": "i",
+      "reliability": 0.9933706521987915
+    },
+    {
+      "psfFlux": 21893.673828125,
+      "psfFluxErr": 716.6043701171875,
+      "midpointMjdTai": 60983.20552398381,
+      "band": "i",
+      "reliability": 0.9834191799163818
+    },
+    {
+      "psfFlux": 10804.8056640625,
+      "psfFluxErr": 615.524658203125,
+      "midpointMjdTai": 60983.202726822914,
+      "band": "g",
+      "reliability": 0.998518168926239
+    },
+    {
+      "psfFlux": 11081.1904296875,
+      "psfFluxErr": 647.723876953125,
+      "midpointMjdTai": 60983.20228719452,
+      "band": "g",
+      "reliability": 0.9987643957138062
+    },
+    {
+      "psfFlux": 29371.9765625,
+      "psfFluxErr": 412.68896484375,
+      "midpointMjdTai": 60975.15370186785,
+      "band": "i",
+      "reliability": 0.9999997615814209
+    },
+    {
+      "psfFlux": 28702.109375,
+      "psfFluxErr": 450.0915832519531,
+      "midpointMjdTai": 60975.153260584724,
+      "band": "i",
+      "reliability": 0.9999991655349731
+    }
+  ],
+  "diaForcedSourcesList": []
+}

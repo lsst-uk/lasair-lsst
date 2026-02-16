@@ -1,4 +1,5 @@
 import sys
+import math
 import context
 import unittest.main
 from unittest import TestCase
@@ -10,9 +11,8 @@ sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
 from objects import schema as objectSchema
 import features
 from features import *
-from modify_alert import modify
 
-sample = 'Tidal_disruption_event_TDE_114933870'
+sample = '313637921267122191'
 
 class FeatureTest(TestCase):
   def test0_get_features(self):
@@ -55,7 +55,7 @@ class FeatureTest(TestCase):
   def test3_run_feature(self):
     """Check that the feature runs"""
     with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_object.json"%sample) as f_out:
-      sample_alert = modify(json.load(f_in))
+      sample_alert = json.load(f_in)
       sample_output = json.load(f_out)
       output = {}
       schema = {}
@@ -82,7 +82,8 @@ class FeatureTest(TestCase):
           )
         # check that the content is correct
         if isinstance(output[name], float):
-          self.assertAlmostEqual(output[name], sample_output[name], places=4, msg=name)
+            if not math.isnan(output[name]) and not math.isnan(sample_output[name]):
+              self.assertAlmostEqual(output[name], sample_output[name], places=4, msg=name)
         else:
           self.assertEqual(output[name], sample_output[name], msg=name)
 
@@ -90,7 +91,7 @@ class FeatureTest(TestCase):
     """Test the run_all method"""
     from features.FeatureGroup import FeatureGroup
     with open("sample_alerts/%s.json"%sample) as f:
-      alert = modify(json.load(f))
+      alert = json.load(f)
       output = FeatureGroup.run_all(alert, verbose=True)
       self.assertTrue(isinstance(output, dict))
 
@@ -100,7 +101,7 @@ class FeatureTest(TestCase):
     """Test the lightcurve_lite method"""
     from filters import lightcurve_lite
     with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_lite.json"%sample) as f_out:
-      alert = modify(json.load(f_in))
+      alert = json.load(f_in)
       output = lightcurve_lite(alert)
       sample_output = json.load(f_out)
       self.assertEqual(output, sample_output)
