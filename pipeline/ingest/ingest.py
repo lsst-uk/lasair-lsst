@@ -345,7 +345,7 @@ class Ingester:
                 for i in range(len(diaForcedSourcesList)):
                     if diaForcedSourcesList[i]['midpointMjdTai'] < fourthMJD:
                         break
-                diaForcedSourcesListDB = diaForcedSourcesList[:i]
+                diaForcedSourcesListDB = diaForcedSourcesList[:i+1]
             else:
                 diaForcedSourcesListDB = []
 
@@ -353,7 +353,7 @@ class Ingester:
                 for i in range(len(diaNondetectionLimitsList)):
                     if diaNondetectionLimitsList[i]['midpointMjdTai'] < fourthMJD:
                         break
-                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i]
+                diaNondetectionLimitsListDB = diaNondetectionLimitsList[:i+1]
             else:
                 diaNondetectionLimitsListDB = []
 
