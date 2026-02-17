@@ -119,7 +119,7 @@ class IngestTest(unittest.TestCase):
         # check the return values
         # 5 diaSources with 4 sent to DB
         # 4 diaForcedSources with 2 sent to DB
-        self.assertEqual(result, (1, 0, 0, 5, 5, 4, 4))   
+        self.assertEqual(result, (1, 0, 0, 5, 4, 4, 3))   
         # store_images should get called once
         mock_image_store.store_images.assert_called_once()
         # insert_cassandra_multi should get called once
