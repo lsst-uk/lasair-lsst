@@ -49,7 +49,7 @@ def object_difference_lightcurve(
     # CREATE DATA FRAME FOR LC
     forcedDF, unforcedDF, mergedDF = convert_objectdata_to_dataframes(objectData)
     
-    if forced and not forcedDF:
+    if forced and forcedDF is None:
         return None, None
 
     if forced:
@@ -92,7 +92,8 @@ def object_difference_lightcurve(
             error_y = {'type': 'data', 'array': data["nanojanskyerr"], 'visible': True}
             fig.add_trace(
                 go.Scatter(
-                    x=data["mjd"],
+#                    x=data["mjd"],   # no mjd for forced phot 
+                    x=data["midpointMjdTai"],
                     y=data["nanojansky"],
                     customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     error_y=error_y,
@@ -118,7 +119,8 @@ def object_difference_lightcurve(
             ## REPLOT THE SAME DATA ON THE RHS AXIS (BUT HIDDEN)
             fig.add_trace(
                 go.Scatter(
-                    x=data["mjd"],
+#                    x=data["mjd"],   # no mjd for forced phot 
+                    x=data["midpointMjdTai"],
                     y=data["nanojansky"],
                     customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     mode='markers',
@@ -137,7 +139,7 @@ def object_difference_lightcurve(
             )
             # REPLOT FOR THE TOP X-AXIS
             fig.add_traces(
-                go.Scatter(x=data["mjd"],
+                go.Scatter(x=data["midpointMjdTai"],   # no mjd for forced
                            y=data["nanojansky"],    
                            showlegend=False,
                            opacity=0,
