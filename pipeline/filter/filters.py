@@ -16,7 +16,7 @@ Deal with the query results
 (4a) fetch_digest(topic_name):
     Get the digest file from shared storage
 
-(4b) dispose_email(allrecords, last_email, query):
+(4b) dispose_email(fltr, allrecords, last_email, query):
     Deal with outgoing emails, it calls this to actually send
     send_email(email, topic, message, message_html):
 
@@ -201,7 +201,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
         digest, last_entry, last_email = fetch_digest(query['topic_name'])
         allrecords = (query_results + digest)[:10000]
         if fltr.send_email:
-            last_email = dispose_email(allrecords, last_email, query)
+            last_email = dispose_email(fltr, allrecords, last_email, query)
         utcnow = datetime.datetime.now(datetime.UTC)
         write_digest(allrecords, query['topic_name'], utcnow, last_email)
 
@@ -265,7 +265,7 @@ def fetch_digest(topic_name):
     return digest, last_entry, last_email
 
 
-def dispose_email(allrecords, last_email, query, force=False):
+def dispose_email(fltr, allrecords, last_email, query, force=False):
     """ Send out email notifications
     """
     utcnow = datetime.datetime.now(datetime.UTC)

@@ -147,7 +147,7 @@ def fetch_alerts(fltr, jd=None, limit=None, offset=None):
         limit:
         jd:
     """
-    cursor = fltr.database.cursor(buffered=True, dictionary=True)
+    cursor = fltr.database_local.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     if jd:
@@ -173,7 +173,7 @@ def insert_watchmap_hits(fltr, hits):
         fltr:
         hits:
     """
-    cursor = fltr.database.cursor(buffered=True, dictionary=True)
+    cursor = fltr.database_local.cursor(buffered=True, dictionary=True)
 
     query = "REPLACE into area_hits (ar_id, diaObjectId) VALUES\n"
     hitlist = []
@@ -186,5 +186,5 @@ def insert_watchmap_hits(fltr, hits):
     except mysql.connector.Error as err:
         print('ERROR in filter/check_alerts_watchmaps cannot insert watchmaps_hits: %s' % str(err))
         sys.stdout.flush()
-    fltr.database.commit()
+    fltr.database_local.commit()
 

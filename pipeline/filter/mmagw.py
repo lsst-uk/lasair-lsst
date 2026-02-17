@@ -35,10 +35,10 @@ def mmagw(fltr, minmjd=None, maxmjd=None, verbose=False):
 
     totalnhits = 0
     for gw in skymaplist:
-        skymaphits = skymaps.get_skymap_hits(fltr.database, gw, minmjd, maxmjd, verbose)
+        skymaphits = skymaps.get_skymap_hits(fltr.database_local, gw, minmjd, maxmjd, verbose)
         nhits = len(skymaphits['diaObjectId'])
         if nhits > 0:
-            skymaps.insert_skymap_hits(fltr.database, gw, skymaphits, verbose)
+            skymaps.insert_skymap_hits(fltr.database_local, gw, skymaphits, verbose)
         totalnhits += nhits
 
     return totalnhits
