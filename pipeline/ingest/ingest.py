@@ -335,6 +335,8 @@ class Ingester:
                 diaSourcesListDB            = diaSourcesList
                 diaForcedSourcesListDB      = diaForcedSourcesList
                 diaNondetectionLimitsListDB = diaNondetectionLimitsList
+                # if we take all the diaSources,lets take all the forced too
+                fourthMJD = 40000
             else:
                 diaSourcesListDB = diaSourcesList[:nds]
                 fourthMJD = diaSourcesList[nds-1]['midpointMjdTai']
