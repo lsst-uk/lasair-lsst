@@ -102,12 +102,6 @@ ANNOTATIONS_DUMP       = '/mnt/cephfs/lasair/annotations'
 CROSSMATCH_TNS_DUMP    = '/mnt/cephfs/lasair/crossmatch_tns'
 MYSQL_BACKUP_DIR       = '/mnt/cephfs/lasair/mysql_backup'
 
-# Fast annotations
-##################
-# Fast annotations cause immediate kafka output
-ANNOTATION_TOPIC       = 'lsst_annotations'
-ANNOTATION_GROUP_ID    = 'test004'
-
 # Webserver control
 ###################
 # Can have different web look and feel for different clusters
@@ -146,6 +140,10 @@ MAX_CUTOUT_DAYS        = 365
 WATCHLIST_CHUNK        = 50000
 WATCHLIST_MAX_DEPTH    = 13
 AREA_MAX_DEPTH         = 13
+
+# fast annotators
+ANNOTATION_TOPIC       = 'fast_annotations'
+ANNOTATION_GROUP_ID    = 'test123'
 
 # External brokers
 ###################

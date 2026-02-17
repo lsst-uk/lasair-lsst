@@ -280,7 +280,7 @@ def fetch_alerts(batch):
     Args:
         batch:
     """
-    cursor = batch.database.cursor(buffered=True, dictionary=True)
+    cursor = batch.database_local.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId, ra, decl from objects'
     cursor.execute(query)

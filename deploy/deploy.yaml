@@ -121,6 +121,10 @@
   vars:
     internal_only: false
     dns_lookup: false # disable dns checks for testing
+    # increase default retention to 30 days
+    retention_ms: "{{ 30 * 24 * 60 * 60 * 1000 }}"
+    # set a retention size limit of 1GB
+    retention_bytes: 1073741824
   roles:
     - kafka
   tags: kafka_pub
@@ -163,7 +167,7 @@
     - settings.yaml
     - exports.yaml
   vars:
-    schema: "9_0"
+    schema: "10_0"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
@@ -289,3 +293,78 @@
     - role: parallel_ssh
       when: instances.parallel_ssh.started
   tags: parallel_ssh
+
+# set apt update/upgrade to run in the evening by default
+# exclude database and cassandra as we have more specific times for those
+- hosts: all:!db:!frontend_db:!backend_db:!cassandranodes:!cutoutcass
+  gather_facts: false
+  become: true
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# 1st cassandra seed node
+- hosts: cassandranodes[0]:cutoutcass[0]
+  gather_facts: false
+  become: true
+  vars:
+    apt_daily_time: "17:00"
+    apt_daily_upgrade_time: "20:00"    
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# 2nd cassandra seed node
+- hosts: cassandranodes[2]:cutoutcass[2]
+  gather_facts: false
+  become: true
+  vars:
+    apt_daily_time: "18:00"
+    apt_daily_upgrade_time: "21:00"    
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# cassandra non-seed nodes
+- hosts: cassandranodes:cutoutcass:!cassandranodes[0]:!cassandranodes[2]:!cutoutcass[0]:!cutoutcass[2]
+  gather_facts: false
+  become: true
+  vars: 
+    apt_daily_time: "19:00"
+    apt_daily_upgrade_time: "22:00"
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# frontend database
+- hosts: frontend_db
+  gather_facts: false
+  become: true
+  vars:
+    apt_daily_time: "17:00"
+    apt_daily_upgrade_time: "20:00"
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# 1st backend database
+- hosts: backend_db[0]
+  gather_facts: false
+  become: true
+  vars:
+    apt_daily_time: "18:00"
+    apt_daily_upgrade_time: "21:00"
+  roles:
+    - apt_timer
+  tags: apt_timer
+
+# remaining backend databases
+- hosts: backend_db:!backend_db[0]
+  gather_facts: false
+  become: true
+  vars:
+    apt_daily_time: "19:00"
+    apt_daily_upgrade_time: "22:00"
+  roles:
+    - apt_timer
+  tags: apt_timer
