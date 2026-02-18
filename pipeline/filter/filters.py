@@ -218,6 +218,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
             if 'diaObjectId' in q:
                 diaObjectId = q['diaObjectId']
                 # see if its in the cache of this batch
+                alert = None
                 if diaObjectId in fltr.alert_dict:
                     alert = fltr.alert_dict[diaObjectId]
                 else:
