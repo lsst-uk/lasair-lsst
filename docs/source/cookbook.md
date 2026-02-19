@@ -105,7 +105,7 @@ and objects.nDiaSources > 10
 These "jump" parameters compare the latest diaSources, in all 6 bands,
 with a baseline history between 70 and 10 days ago. The jump statistics are each number
 of sigma for two wavebands. A full explanation can be found in the
-[jupyter notebook jumpFromMean](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb).
+[jupyter notebook jumpFromMean](https://github.com/lsst-uk/lasair-examples/blob/main/features/3_jumpFromMean.ipynb).
 
 ---
 ### Absolute magnitude
@@ -152,7 +152,7 @@ $\lambda_R = \lambda_O/(1+z)$
 We can compute distance modulus $\mu$ from redshift $z$ following Ned Wright's
 [cosmology calculator](https://www.astro.ucla.edu/~wright/cosmo_02.htm#DL).
 For the code that computes absolute magnitude, see the 
-[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/4_milky_way.ipynb).
+[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/4_milky_way.ipynb).
 
 Error on $M_R$:
 Sum the variances of the sources of error:
