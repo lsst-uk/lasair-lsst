@@ -56,8 +56,11 @@ class lightcurve_fetcher():
         else:
             query = 'SELECT * from diaObjects where "diaObjectId" = %s' % diaObjectId
             ret = self.session.execute(query)
-            diaObject = ret[0]
-            return (diaObject, diaSources, diaForcedSources)
+            try:
+                diaObject = ret[0]
+                return (diaObject, diaSources, diaForcedSources)
+            except:
+                return (None, [], [])
 
     def close(self):
         if self.session:
