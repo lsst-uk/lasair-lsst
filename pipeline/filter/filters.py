@@ -77,8 +77,8 @@ def run_queries(fltr, query_list, ms, nid, annotation_list=None):
     When not None, runs some queires agains a specific object, using the main database
     """
 
-    if annotation_list and len(annotation_list) > 0:
-        fltr.log.info(annotation_list)
+#    if annotation_list and len(annotation_list) > 0:
+#        fltr.log.info(annotation_list)
     ntotal = 0
     for query in query_list:
         n = 0
@@ -140,7 +140,7 @@ def run_query(query, msl, annotator=None, diaObjectId=None, fltr=None):
             return []
         # run the query against main for this specific object that has been annotated
         sqlquery_real = query_for_object(sqlquery_real, diaObjectId)
-        fltr.log.info('FAnnQ: ' + sqlquery_real)
+#        fltr.log.info('FAnnQ: ' + sqlquery_real)
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
@@ -205,26 +205,33 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
         utcnow = datetime.datetime.now(datetime.UTC)
         write_digest(allrecords, query['topic_name'], utcnow, last_email)
 
-    if active >= 2:
-        # send results by kafka on given topic
-        if fltr.send_kafka:
-            if active == 3:   # append lightcurve lite
-                for q in query_results:
-                    try:
-                        diaObjectId = q['diaObjectId']
-                        q['alert'] = lightcurve_lite(fltr.alert_dict[diaObjectId])
-                    except:
-                        fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
-            if active == 4:   # append full alert
+    # send results by kafka on given topic
+    BASIC_KAFKA     = 2
+    LIGHTCURVE_LITE = 3
+    LIGHTCURVE_FULL = 4
+    if not fltr.send_kafka or active < BASIC_KAFKA:
+        return len(query_results)
 
-                for q in query_results:
-                    try:
-                        diaObjectId = q['diaObjectId']
-                        q['alert'] = fltr.alert_dict[diaObjectId]
-                    except:
-                        fltr.log.error(f'ERROR in filter/dispose_query_results {diaObjectId} not found in alert_dict')
-        dispose_kafka(fltr.producer, query_results, query, ms, nid)
+    # try to append the lightcurve info
+    if active >= LIGHTCURVE_LITE:
+        for q in query_results:
+            if 'diaObjectId' in q:
+                diaObjectId = q['diaObjectId']
+                # see if its in the cache of this batch
+                alert = None
+                if diaObjectId in fltr.alert_dict:
+                    alert = fltr.alert_dict[diaObjectId]
+                else:
+                    # try to fetch it from cassandra, not yet implemented!
+                    fltr.log.info('Cannot find lightcurve {diaObjectId} in alert cache')
 
+                if alert:
+                    if active == LIGHTCURVE_LITE:
+                        q['alert'] = lightcurve_lite(alert)
+                    if active == LIGHTCURVE_FULL:
+                        q['alert'] = alert
+
+    dispose_kafka(fltr.producer, query_results, query, ms, nid)
     return len(query_results)
 
 def write_digest(allrecords, topic_name, last_entry, last_email):

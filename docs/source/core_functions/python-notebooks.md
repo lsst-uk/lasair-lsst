@@ -22,7 +22,7 @@ account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that
 explains how to do this, or just go [here]({%lasairurl%}/register). 
 Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
-* You can go to `notebooks/API_lsst` or `notebooks/features`.
+* You can go to `notebooks/API_lsst` or `features`.
 * Look in the repo for the `settings_template.py` and copy it to 
 `settings.py` then edit it with your own token.
 
@@ -56,7 +56,7 @@ They are described below.
 #### [API_lsst/Query_Watchlist.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Query_Watchlist.ipynb)
 * Illustrates how to write a query in the API that includes a watchlist
 
-#### [features/1_whatIsAnObject.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/1_whatIsAnObject.ipynb)
+#### [features/1_whatIsAnObject.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/1_whatIsAnObject.ipynb)
 * From the alert packet sent through the Lasair system,
 the 3 cutout images are removed, and the remainder converted to JSON. 
 All the original content is preserved. Here we see some examples of the three main data packets:
@@ -65,46 +65,41 @@ All the original content is preserved. Here we see some examples of the three ma
     * diaSource: Each represents a detection of an object that is >5 sigma from the reference
     * diaForcedSource; Each represents a detection of an object
 
-#### [features/2_sherlock.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/2_sherlock.ipynb)
+#### [features/2_sherlock.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/2_sherlock.ipynb)
 
-#### [features/3_jumpFromMean.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb)
+#### [features/3_jumpFromMean.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/3_jumpFromMean.ipynb)
 Shows the construction of a "jump finder". Number of sigma for latest
 detection above its mean/sigms between 70 and 10 days ago.
 
-#### [features/4_milky_way.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/4_milky_way.ipynb)
+#### [features/4_milky_way.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/4_milky_way.ipynb)
 * Galactic latitude
 * E(B-V) extinction
 * Absolute magnitude
 
-#### [features/5_pair.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/5_pair.ipynb)
+#### [features/5_pair.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/5_pair.ipynb)
 
-#### [features/6_bazinBlackBody](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/introduction.ipynb)
+#### [features/6_bazinBlackBody](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/introduction.ipynb)
 This is a set of 5 notebooks to explain and allow experimentation 
 with the BazinBlackbody fitting package. 
 It attempts two 2D fits: one models the flux as exponential in time and blackbody in wavelength, the other as bazin in time (exp rise and exp fall) and blackbody in wavelength. One (with exponential) is an explosion in the early stages, the other (with Bazin) is an explosion that is fading from its peak.
 Please read the introduction first, then try some of the notebooks that utilise the fitting library:
 
-- [introduction.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/introduction.ipynb):
+- [introduction.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/introduction.ipynb):
 Introduction, explanation, and caveats.
-- [example.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/example.ipynb):
+- [example.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/example.ipynb):
 A simulated supernova from the plassticc dataset, fit with bazin-blackbody with temperature 3,800 K, 
 rise rate and fall rate of 0.13 and  0.01 magnitudes per day respectively.
-- [monochrome.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/monochrome.ipynb):
+- [monochrome.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/monochrome.ipynb):
 All filter bands except the g are removed from the above example, showing that the bazin-blackbody still
 converges even with no range in the wavelength direction.
-- [synthetic](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/synthetic.ipynb):
+- [synthetic](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/synthetic.ipynb):
 a synthetic lightcurve is built with bazin-blackbody lightcurve of 10 points, and the fit converges correctly. This is a good
 way to experiment with fitting sparse lightcurves.
-- [api_plot_lsst](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/api_plot_lsst.ipynb):
+- [api_plot_lsst](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/api_plot_lsst.ipynb):
 A useful way to visualise the lightcurve plot of an arbitrary Rubin object.
 
-#### [features/7_periodFinder.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/7_periodFinder.ipynb)
+#### [features/7_periodFinder.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/7_periodFinder.ipynb)
 Finding a period from a lightcurve
-
-#### [marshall/Marshall.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/marshall/Marshall.ipynb)
-This Jupyter notebook allows you to view the output from a Lasair filter, to link to more information, and to either make it a favourite or veto it so it won't be shown again.
-The brief instructions for using the Marshall are [at the github page](https://github.com/lsst-uk/lasair-examples/tree/main/notebooks/marshall), and 
-[there is a video](https://youtu.be/sgH5cQk-TDU) about how to use it.
 
 #### [Test_Consumers.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/Test_Consumers.ipynb)
 Illustrates how to consume a stream that is the output of an active
