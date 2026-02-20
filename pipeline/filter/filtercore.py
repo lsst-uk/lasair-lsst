@@ -679,6 +679,9 @@ class Filter:
         else:
             self.log.error("ERROR in filter/fast_annotation_filters")
 
+        # Clean up
+        self.alert_dict.clear()
+        
         # Write stats for the batch
         timers['ftotal'].off()
         self.write_stats(timers, nalerts)
@@ -715,8 +718,6 @@ if __name__ == "__main__":
     total_alerts = 0
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
-        # clear out the alert cache
-        fltr.alert_dict = {}
 
         n_batch += 1
         total_alerts += n_alerts 
