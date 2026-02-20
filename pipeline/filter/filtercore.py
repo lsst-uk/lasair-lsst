@@ -715,6 +715,9 @@ if __name__ == "__main__":
     total_alerts = 0
     while not fltr.sigterm_raised:
         n_alerts = fltr.run_batch()
+        # clear out the alert cache
+        fltr.alert_dict = {}
+
         n_batch += 1
         total_alerts += n_alerts 
         if n_batch == maxbatch:
