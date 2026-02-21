@@ -441,11 +441,10 @@ class Filter:
             return False
 
         for table_name, attrs in self.csv_attrs.items():
-            try:
-                transfer_csv(self.database_local, main_database, attrs, table_name, table_name, log=self.log)
+            success = transfer_csv(self.database_local, main_database, attrs, table_name, table_name, log=self.log)
+            if success:
                 self.log.info('%s ingested to main db' % table_name)
-            except Exception as e:
-                self.log.error('ERROR in filter/transfer_to_main: cannot push %s local to main database: %s' % (table_name, str(e)))
+            else:
                 return False
 
         self.consumer.commit()
@@ -668,7 +667,6 @@ class Filter:
                 self.log.info('Batch ended')
                 if not commit:
                     self.log.info('Transfer to main failed, no commit')
-                    time.sleep(600)
                     return 0
 
         # run the annotation queries
