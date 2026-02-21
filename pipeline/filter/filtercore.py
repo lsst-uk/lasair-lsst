@@ -434,10 +434,14 @@ class Filter:
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        try:
-            main_database = db_connect.remote(allow_infile=True)
-        except Exception as e:
-            self.log.error('ERROR filter/transfer_to_main: %s' % str(e))
+        for count in range(5):
+            try:
+                main_database = db_connect.remote(allow_infile=True)
+                break
+            except Exception as e:
+                self.log.error(f'ERROR filter/transfer_to_main count {count}: ' + str(e))
+                time.sleep(60)
+        else:
             return False
 
         for table_name, attrs in self.csv_attrs.items():
