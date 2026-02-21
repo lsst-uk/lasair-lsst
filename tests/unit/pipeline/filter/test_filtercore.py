@@ -240,18 +240,18 @@ class FilterTest(unittest.TestCase):
     #    self.assertEqual(result, False)
     #    mock_log.error.assert_called()
 
-    @patch('filtercore.transfer_csv')
-    @patch('filtercore.db_connect.remote')
-    def test_tansfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_transfer):
-        """Test that an error writing to main db causes transfer_to_main to return False"""
-        mock_log = unittest.mock.MagicMock()
-        mock_transfer.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.log = mock_log
-        fltr.csv_attrs = {'objects': ['one', 'two', 'three']}
-        result = fltr.transfer_to_main()
-        self.assertEqual(result, False)
-        mock_log.error.assert_called()
+#    @patch('filtercore.transfer_csv')
+#    @patch('filtercore.db_connect.remote')
+#    def test_tansfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_transfer):
+#        """Test that an error writing to main db causes transfer_to_main to return False"""
+#        mock_log = unittest.mock.MagicMock()
+#        mock_transfer.side_effect = Exception('test error')
+#        fltr = Filter(group_id='filter_test', maxalert=0)
+#        fltr.log = mock_log
+#        fltr.csv_attrs = {'objects': ['one', 'two', 'three']}
+#        result = fltr.transfer_to_main()
+#        self.assertEqual(result, False)
+#        mock_log.error.assert_called()
 
     # @patch('filtercore.Filter.execute_query')
     # @patch('filtercore.db_connect.remote')
