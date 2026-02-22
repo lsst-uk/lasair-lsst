@@ -18,12 +18,13 @@ the date of that detection, and the mean and its standard deviation of that flux
 and six counts for the number of sources of each band.
 
 ----
-- [Absolute Magnitude IDs](#absMag): peak extinction corrected absolute magnitude, 
+- Absolute Magnitude: peak extinction corrected absolute magnitude, 
 and the MJD of that peak. For more information, see 
-[Absolute Magnitude](cookbook.html#absolute-magnitude) in the Cookbook.
+[Absolute Magnitude](cookbook.html#absolute-magnitude) in the Cookbook,
+and its computation [here](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/milky_way.ipynb).
 
 ----
-- [Bazin black body](#BBB): A two-dimensional fit with blackbody in the 
+- Bazin black body: A two-dimensional fit with blackbody in the 
 spectral dimension and either exponential flux rise or Bazin model for flux.
 In the example below, the Bazin model has rise rate of 0.45 magnitudes per day, 
 and a fall rate of 0.1 per day. The fitted temperature is 6,000 Kelvin.
@@ -37,7 +38,7 @@ See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/
 - **Milky way**: Galactic latitude and E(B-V) extinction.
 
 ----
-- [Jump detector](#jump): Finds the number of sigma the latest detection (time T)
+- Jump detector: Finds the number of sigma the latest detection (time T)
  deviates from a mean in the interval [T-70,T-10] days. 
 
 <img src="../_images/jump/jump_image.png" width="450"/>
@@ -45,7 +46,7 @@ See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/
 See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/jump.ipynb) for more information.
 
 ----
-- [Pair colours](#pair): The LSST survey cadence has many close pairs of diaSources
+- Pair colours: The LSST survey cadence has many close pairs of diaSources
 only 30 minutes apart. Each of these allows a colour measurement to be made.
 Lasair allows filters on the basic properties: magnitude difference and 
 which filters were involved, for example g-r=0.5. But there are many 
