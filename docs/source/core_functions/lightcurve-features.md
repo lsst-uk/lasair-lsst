@@ -31,7 +31,7 @@ and a fall rate of 0.1 per day. The fitted temperature is 6,000 Kelvin.
 <img src="../_images/BBB/99999999999_e.png" width="250"/>
 <img src="../_images/BBB/99999999999_b.png" width="250"/>
 
-See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/6_bazinBlackBody/Introduction.ipynb) for more information.
+See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/bazinBlackBody) for more information.
 
 ----
 - **Milky way**: Galactic latitude and E(B-V) extinction.
@@ -42,7 +42,7 @@ See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebook
 
 <img src="../_images/jump/jump_image.png" width="450"/>
 
-See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/3_jumpFromMean.ipynb) for more information.
+See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/jump.ipynb) for more information.
 
 ----
 - [Pair colours](#pair): The LSST survey cadence has many close pairs of diaSources
@@ -56,11 +56,12 @@ we can get an effective temperature of 6,880 Kelvin.
 
 <img src="../_images/pair/u_r.png" width="350"/>
 
-For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/5_pair.ipynb).
+For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/pair_analysis.ipynb).
 
 ### Sherlock table
 Intelligent crossmatch from multiple catalogues.
-For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/features/2_sherlock.ipynb), or
+For more information see the [notebook on API usage](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/sherlock_api.ipynb),
+or the [notebook on choosing crossmatches](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/sherlock_feature.ipynb), or
 [Sherlock writeup](core_functions/sherlock.html).
 
 ### TNS table
