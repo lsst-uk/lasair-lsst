@@ -340,7 +340,7 @@ def dispose_kafka(producer, query_results, query, ms, nid):
     # First decide if this filter has already produced enough
     bp = query.get('bytes_produced', 0)
     bq = query['byte_quota']
-    will_produce = (bp < bq) or (bq == 0)
+    will_produce = (bp < bq) or (bq == -1)
 
     nbytes = 0
     nalert = 0
