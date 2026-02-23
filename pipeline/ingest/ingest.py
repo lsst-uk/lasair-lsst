@@ -43,9 +43,6 @@ import manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
 
-import re
-crap_remover = re.compile(r'[^a-zA-Z0-9:_", \.{}\[\]()+-/]')
-
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
     common interface."""
@@ -438,10 +435,7 @@ class Ingester:
                 ssSources.append(alert['ssSource'])
             if 'mpc_orbit' in alert and alert['mpc_orbit']:
                 m = alert['mpc_orbit']
-                moj = m['mpc_orb_jsonb']
-                newmoj = crap_remover.sub('', moj)
-#                json.loads(newmoj)    # test to make sure we still have valid JSON
-                m['mpc_orb_jsonb'] = newmoj
+                m['mpc_orb_jsonb'] = ''   # This has crap in it
                 mpc_orbits.append(m)
 
             if 'ssObject' in alert and alert['ssObject']:
