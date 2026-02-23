@@ -23,6 +23,7 @@ Options:
 """
 
 import sys
+import re
 import json
 from docopt import docopt
 import datetime
@@ -434,7 +435,13 @@ class Ingester:
             if 'ssSource' in alert and alert['ssSource']:
                 ssSources.append(alert['ssSource'])
             if 'mpc_orbit' in alert and alert['mpc_orbit']:
-                mpc_orbits.append(alert['mpc_orbit'])
+                m = alert['mpc_orbit']
+                moj = m['mpc_orb_jsonb']
+                newmoj = re.sub(r'[^a-zA-Z0-9:_", \.{}\[\]]', '', moj)
+#                json.loads(newmoj)    # test to make sure we still have valid JSON
+                m['mpc_orb_jsonb'] = newmoj
+                mpc_orbits.append(m)
+
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
 
