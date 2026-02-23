@@ -2,17 +2,18 @@
 The core filter module. Usually run as a service using filter_runner, but can also be run from the command line.
 
 Usage:
-    ingest.py [--maxalert=MAX]
-              [--maxbatch=MAX]
-              [--maxtotal=MAX]
-              [--group_id=GID]
-              [--topic_in=TIN]
-              [--send_email=BOOL]
-              [--send_kafka=BOOL]
-              [--transfer=BOOL]
-              [--stats=BOOL]
-              [--wait_time=TIME]
-              [--verbose=BOOL]
+    filtercore.py [--maxalert=MAX]
+                  [--maxbatch=MAX]
+                  [--maxtotal=MAX]
+                  [--group_id=GID]
+                  [--topic_in=TIN]
+                  [--local_db=NAME]
+                  [--send_email=BOOL]
+                  [--send_kafka=BOOL]
+                  [--transfer=BOOL]
+                  [--stats=BOOL]
+                  [--wait_time=TIME]
+                  [--verbose=BOOL]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
@@ -20,6 +21,7 @@ Options:
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
+    --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
     --transfer=BOOL    Transfer results to main [default: True]
@@ -66,8 +68,10 @@ from features.FeatureGroup import FeatureGroup
 
 sys.path.append('features/BBB')
 
+
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
+
 
 class Filter:
     """Filter orchestrates the filter pipeline stage.
@@ -78,6 +82,7 @@ class Filter:
                  group_id: str = settings.KAFKA_GROUPID,
                  maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
                  send_email: bool = True,
+                 local_db: str = None,
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
@@ -86,6 +91,7 @@ class Filter:
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxalert = int(maxalert)
+        self.local_db = local_db or 'ztf'
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
@@ -96,7 +102,7 @@ class Filter:
 
         self.consumer = None
         self.producer = None
-        self.database_local  = None
+        self.database_local = None
         self.database_remote = None
 
         self.log = log or lasairLogging.getLogger("filter")
@@ -122,7 +128,7 @@ class Filter:
         # set up the link to the local database
         if not self.database_local or not self.database_local.is_connected():
             try:
-                self.database_local = db_connect.local()
+                self.database_local = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
         # set up the link to the remote database
@@ -713,6 +719,7 @@ if __name__ == "__main__":
     maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
+    local_db = args.get('--local_db')
     send_email = args.get('--send_email') in ['True', 'true', 'Yes', 'yes']
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
@@ -723,8 +730,8 @@ if __name__ == "__main__":
         wait_time = getattr(settings, 'WAIT_TIME', 60)
     verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer, 
+    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
+                  send_email=send_email, send_kafka=send_kafka, transfer=transfer,
                   stats=stats, verbose=verbose)
 
     n_batch = 0
