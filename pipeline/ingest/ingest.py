@@ -44,7 +44,7 @@ import cutoutStore
 import logging, lasairLogging
 
 import re
-crap_remover = re.compile(r'[^a-zA-Z0-9:_", \.{}\[\]]')
+crap_remover = re.compile(r'[^a-zA-Z0-9:_", \.{}\[\]()+-/]')
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
