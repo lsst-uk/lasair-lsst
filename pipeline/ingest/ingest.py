@@ -23,7 +23,6 @@ Options:
 """
 
 import sys
-import re
 import json
 from docopt import docopt
 import datetime
@@ -43,6 +42,9 @@ sys.path.append('../../common/src')
 import manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
+
+import re
+crap_remover = re.compile(r'[^a-zA-Z0-9:_", \.{}\[\]]')
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
@@ -437,7 +439,7 @@ class Ingester:
             if 'mpc_orbit' in alert and alert['mpc_orbit']:
                 m = alert['mpc_orbit']
                 moj = m['mpc_orb_jsonb']
-                newmoj = re.sub(r'[^a-zA-Z0-9:_", \.{}\[\]]', '', moj)
+                newmoj = crap_remover.sub('', moj)
 #                json.loads(newmoj)    # test to make sure we still have valid JSON
                 m['mpc_orb_jsonb'] = newmoj
                 mpc_orbits.append(m)
