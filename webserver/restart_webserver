@@ -18,6 +18,6 @@ mod_wsgi-express setup-server \
 --application-type module lasair.wsgi \
 --server-root $APACHEPATH \
 --port $PORT \
---mount-point /
+--processes 1 --threads 5 --mount-point /
 
 $APACHEPATH/apachectl start

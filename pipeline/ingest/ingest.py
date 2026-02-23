@@ -434,7 +434,10 @@ class Ingester:
             if 'ssSource' in alert and alert['ssSource']:
                 ssSources.append(alert['ssSource'])
             if 'mpc_orbit' in alert and alert['mpc_orbit']:
-                mpc_orbits.append(alert['mpc_orbit'])
+                m = alert['mpc_orbit']
+                m['mpc_orb_jsonb'] = ''   # This has crap in it
+                mpc_orbits.append(m)
+
             if 'ssObject' in alert and alert['ssObject']:
                 ssObjects += alert['ssObject']
 

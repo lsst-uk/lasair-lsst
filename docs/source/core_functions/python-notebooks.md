@@ -30,85 +30,54 @@ Then log in to the Lasair website.
 Install the lasair client with `pip3 install lasair`.
 Install matplotlib with `pip3 install matplotlib`.
 
-### 4. When will the alerts start?
-As of this writing (May 2025), LSST has not begun operation, and there is only
-fake data, and not much of that. Many of the filters will return nothing. 
-Come back after the data starts flowing.
-
 ----
 Now you can run the notebooks with your favourite Jupyter client. 
+The root of the treea is [here](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks).
 They are described below.
 
-#### [API_lsst/BrightSNe.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/BrightSNe.ipynb)
-* Pulls out alerts with a Sherlock host galaxy, and plots lightcurves.
-
-#### [API_lsst/Cone_Search.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Cone_Search.ipynb)
-* Uses the Lasair cone_search method to find objects near a given point in the sky.
-
-#### [API_lsst/ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/ObjectAPI.ipynb)
-* Shows the different amounts of data from the `object` API call, the result of the two flags:
-    * `lasair_added`: Content added by Lasair
-    * `lite`: Just the essentials
-
-#### [API_lsst/Query_NEEDLE_Annotations.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Query_NEEDLE_Annotations.ipynb)
-* Illustrates the use of the `JSON_EXTRACT` clause in SQL.
-
-#### [API_lsst/Query_Watchlist.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Query_Watchlist.ipynb)
-* Illustrates how to write a query in the API that includes a watchlist
-
-#### [features/1_whatIsAnObject.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/1_whatIsAnObject.ipynb)
-* From the alert packet sent through the Lasair system,
-the 3 cutout images are removed, and the remainder converted to JSON. 
-All the original content is preserved. Here we see some examples of the three main data packets:
-
-    * diaObject: Properties of the astrophysical object such as lightcurve features and proper motion
-    * diaSource: Each represents a detection of an object that is >5 sigma from the reference
-    * diaForcedSource; Each represents a detection of an object
-
-#### [features/2_sherlock.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/2_sherlock.ipynb)
-
-#### [features/3_jumpFromMean.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/3_jumpFromMean.ipynb)
-Shows the construction of a "jump finder". Number of sigma for latest
-detection above its mean/sigms between 70 and 10 days ago.
-
-#### [features/4_milky_way.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/4_milky_way.ipynb)
-* Galactic latitude
-* E(B-V) extinction
-* Absolute magnitude
-
-#### [features/5_pair.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/5_pair.ipynb)
-
-#### [features/6_bazinBlackBody](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/introduction.ipynb)
-This is a set of 5 notebooks to explain and allow experimentation 
-with the BazinBlackbody fitting package. 
-It attempts two 2D fits: one models the flux as exponential in time and blackbody in wavelength, the other as bazin in time (exp rise and exp fall) and blackbody in wavelength. One (with exponential) is an explosion in the early stages, the other (with Bazin) is an explosion that is fading from its peak.
-Please read the introduction first, then try some of the notebooks that utilise the fitting library:
-
-- [introduction.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/introduction.ipynb):
-Introduction, explanation, and caveats.
-- [example.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/example.ipynb):
-A simulated supernova from the plassticc dataset, fit with bazin-blackbody with temperature 3,800 K, 
-rise rate and fall rate of 0.13 and  0.01 magnitudes per day respectively.
-- [monochrome.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/monochrome.ipynb):
-All filter bands except the g are removed from the above example, showing that the bazin-blackbody still
-converges even with no range in the wavelength direction.
-- [synthetic](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/synthetic.ipynb):
-a synthetic lightcurve is built with bazin-blackbody lightcurve of 10 points, and the fit converges correctly. This is a good
-way to experiment with fitting sparse lightcurves.
-- [api_plot_lsst](https://github.com/lsst-uk/lasair-examples/blob/main/features/6_bazinBlackBody/api_plot_lsst.ipynb):
-A useful way to visualise the lightcurve plot of an arbitrary Rubin object.
-
-#### [features/7_periodFinder.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/features/7_periodFinder.ipynb)
-Finding a period from a lightcurve
-
-#### [Test_Consumers.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/Test_Consumers.ipynb)
-Illustrates how to consume a stream that is the output of an active
-Lasair filter.
-
-#### [Test_Query_Methods.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/Test_Query_Methods.ipynb)
-Illustrates how to consume a stream that is the output of an active
-Lasair filter.
-
-Usage of the Lasair API is throttled by default to 10 requests per hour. If you get an error message about this, you can [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the “Power Users” category. 
+## [api](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/api)
+Shows how to use the Lasair API.
+Please note that usage of the Lasair API is throttled by default to 10 requests per hour. If you get an error message about this, you can [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the “Power Users” category. 
+### [api/cone.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/cone.ipynb)
+The cone search method of the API finds objects within a cone, i.e. a point in the sky and radius in arcseconds. It can return:
+- A count of the number in the cone
+- - The nearest of those in the cone
+All of those in the cone
+### [api/object.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/object.ipynb)
+For a given object, identified by its diaObjectId, the object API call has two additional arguments:
+`lasair_added`: True if you want the attributes that Lasair computes the attributes in the schema, as well as the Sherlock association, TNS crossmatch, and links to all the image cutouts.
+`lite`: True if you want the simplified version that is usually sufficient, or False if you want the large number of attributes that Rubin has supplied.
+### [api/query.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/query.ipynb)
+This notebook runs a Lasair filter using three strings: selected, 'tables', and 'conditions', as in the web interface. In this case we just fina a few objects that have a Sherlock host association.
+### [api/sherlock_api](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/sherlock_api.ipynb)
+Demonstrates the two Sherlock calls: one by diaObjectId and the other by sky position ra, dec.
+### [api/watchlist](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/watchlist.ipynb)
+This notebook runs a Lasair filter that includes a watchlist.
+## [Kafka](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/kafka)
+Shows how to consume Kafka from your active filter.
+### [kafka/consume.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/kafka/consume.ipynb)
+Shows how to consume Kafka and print the results. You will need to change the topic to the one listed in the webpage for your active filter.
+### [kafka/consume_plot.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/kafka/consume_plot.ipynb)
+Shows how to consume Kafka and plot the results. We assume the filter is saved with the option 'lightcurve_lite'. You will need to change the topic to the one listed in the webpage for your active filter.
+## [features](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features)
+Shows how some of the Lasair added value is made.
+### [features/jump.ipynb](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/jump.ipynb)
+This simple feature is to filter out lightcurves with a significant change in brightness. The mean and standard deviation are computed from the time between 70 days ago and 10 days ago. Then the difference between the latest flux and the mean is divided by the standard deviation: this is jump1. The same is computed for the other 5 flux bands: this is jump2. If there is a true jump in brightness, we can expect both jump1 and jump2 to be larger than several sigma.
+### [features/milky_way.ipynb](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/milky_way.ipynb)
+Calculation of the extinction E(B-V) and the galactic latitude. To run this notebook, you will need to install the dustmaps package that puts a 64 Mbyte file on your system.
+### [features/pair_analysis.ipynb](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/pair_analysis.ipynb)
+The Rubin cadence includes the same object in different wavebands only ~30 minutes apart, so it is possible to separate rapid brightening from colour. While the actual colour is reported (eg magnitude difference is 0.99 between filters g and r), this is also converted to an effective temperature using the blackbody model.
+### [features/sherlock_feature.ipynb](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/sherlock_feature.ipynb)
+The Sherlock system classifies each Lasair alert based on its location in the sky, finding previously catalogued objects such as variable stars and host galaxy. In this notebook, we see all the crossmatches that sherlock finds, and plots them in position relative to the original alert.
+### [features/bazinBlackBody](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/bazinBlackBody)
+For alerts with a Sherlock host galaxy, a two-dimensional fit is made in both time and wavelength to look for fast risers and discern their colour. There are several notebooks in the directory.
+#### [features/bazinBlackBody/introduction.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/bazinBlackBody/introduction.ipynb)
+Start here to see what precisely this code it doing. It is fitting a 2D surface to the lightcurve, with time in one dimension and wavelength in the other. The fit to the flux can be either exponential in time (linear in magnitude), or with a Bazin explosion model -- exponential rise in flux then exponential fall.
+#### [features/bazinBlackBody/example.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/bazinBlackBody/example.ipynb)
+This notebook reads a simulated supernova lightcurve from a file, then fits it and plots the result.
+#### [features/bazinBlackBody/synthetic.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/bazinBlackBody/synthetic.ipynb)
+This notebook creates a BazinBlackbody lightcurve surface, then fits it and plots the result.
+#### [features/bazinBlackBody/api_plot_lsst.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/bazinBlackBody/api_plot_lsst.ipynb)
+This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
 
 Please also [Contact us](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks) with any notebooks that you would like to share.
