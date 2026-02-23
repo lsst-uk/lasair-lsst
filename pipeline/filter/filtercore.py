@@ -428,28 +428,39 @@ class Filter:
 
         return nalert_out
 
-    def transfer_to_main(self):
+    def transfer_to_main(self, retry=5, delay=60):
         """ Transfer the local database to the main database.
+        retry: number of times to retry before giving up
+        delay: delay between retries in seconds
         """
         cmd = 'sudo --non-interactive rm /data/mysql/*.txt'
         os.system(cmd)
 
-        for count in range(5):
+        for count in range(1, retry+1):
             try:
                 main_database = db_connect.remote(allow_infile=True)
                 break
             except Exception as e:
-                self.log.error(f'ERROR filter/transfer_to_main count {count}: ' + str(e))
-                time.sleep(60)
-        else:
-            return False
+                self.log.warning(f'filter/transfer_to_main failed to connect (attempt {count}/{retry}): ' + str(e))
+                if count < retry:
+                    time.sleep(delay)
+                else:
+                    self.log.error(f'filter/transfer_to_main failed to connect after {retry} attempts: ' + str(e))
+                    return False
 
         for table_name, attrs in self.csv_attrs.items():
-            success = transfer_csv(self.database_local, main_database, attrs, table_name, table_name, log=self.log)
-            if success:
-                self.log.info('%s ingested to main db' % table_name)
-            else:
-                return False
+            for count in range(1, retry + 1):
+                try:
+                    transfer_csv(self.database_local, main_database, attrs, table_name, table_name, log=self.log)
+                    self.log.info(f'{table_name} ingested to main db')
+                    break
+                except Exception as e:
+                    self.log.warning(f'filter/transfer_to_main failed transfer (attempt {count}/{retry}): ' + str(e))
+                    if count < retry:
+                        time.sleep(delay)
+                    else:
+                        self.log.error(f'filter/transfer_to_main: cannot push {table_name} local to main database: ' + str(e))
+                        return False
 
         self.consumer.commit()
         self.log.info('Kafka committed for this batch')
