@@ -137,5 +137,4 @@ def status(request, nid):
         'nid': nid,
         'mjd': int(mjd),
         'prettyDate': prettyDate,
-#        'lasair_grafana_url': settings.LASAIR_GRAFANA_URL})
-        'lasair_grafana_url': 'https://lasair-lsst-dev-svc.lsst.ac.uk/d/iILmd8-Wz/alerts'})    # HACK
+        'lasair_grafana_url': settings.LASAIR_GRAFANA_URL})
