@@ -2,7 +2,7 @@
 # First it gets the attributes from the main database in order
 # Then is makes the CSV file, and transfers it over
 
-import time
+import os, time
 
 
 def fetch_attrs(msl_remote, table_name, log=None):
@@ -30,13 +30,15 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
     # os.system('sudo --non-interactive rm /data/mysql/%s.txt' % table_name)
 
     # make the CSV file in the order wanted by the main database
+    filename = '/data/mysql/%s.txt' % table_from
     make_csv = 'SELECT '
     make_csv += ','.join(attrs)
-    make_csv += " FROM %s INTO OUTFILE '/data/mysql/%s.txt' " % (table_from, table_from)
+    make_csv += " FROM %s INTO OUTFILE '%s' " % (table_from, filename)
     make_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
     try:
-        cursor_local = msl_local.cursor(buffered=True, dictionary=True)
-        cursor_local.execute(make_csv)
+        if not os.path.isfile(filename):
+            cursor_local = msl_local.cursor(buffered=True, dictionary=True)
+            cursor_local.execute(make_csv)
         # push the CSV to the main database
         cursor_remote = msl_remote.cursor(buffered=True, dictionary=True)
         push_csv = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table_from
@@ -50,45 +52,6 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
         #    log.warning('Transfer CSV failed:' + str(e))
         raise e
     return True
-
-#
-# def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
-#     # delete the old file (might be done elsewhere)
-#     # os.system('sudo --non-interactive rm /data/mysql/%s.txt' % table_name)
-#
-#     # make the CSV file in the order wanted by the main database
-#     make_csv = 'SELECT '
-#     make_csv += ','.join(attrs)
-#     make_csv += " FROM %s INTO OUTFILE '/data/mysql/%s.txt' " % (table_from, table_from)
-#     make_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
-#     try:
-#         cursor_local = msl_local.cursor(buffered=True, dictionary=True)
-#         cursor_local.execute(make_csv)
-#     except:
-#         log.error(f'ERROR in filter/transfer_to_main: cannot connect to local database')
-#
-#     # push to remote
-#     push_csv = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table_from
-#     push_csv += "REPLACE INTO TABLE %s " % table_to
-#     push_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
-#
-#     for count in range(5):
-#         success = False
-#         try:
-#             cursor_remote = msl_remote.cursor(buffered=True, dictionary=True)
-#             cursor_remote.execute(push_csv)
-#             msl_remote.commit()
-#             success = True
-#         except Exception as e:
-#             msg = f'Transfer {count} CSV failed:' + str(e)
-#             if log: log.info(msg)
-#             else:   print(msg)
-#             time.sleep(60)
-#         if success:
-#             return True
-#     log.error(f'ERROR in filter/transfer_to_main: cannot push {table_name} to  main db')
-#     return False
-
 
 def main():
     import os
