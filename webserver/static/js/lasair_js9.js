@@ -10,26 +10,27 @@ document.addEventListener('DOMContentLoaded', function() {
     JS9.globalOpts.lightWinClose = "close";
     JS9.globalOpts.helperType = "none";
     JS9.globalOpts.helperPort = 3333;
+    JS9.globalOpts.rotationCenter = "current";
 
     JS9.imageOpts = {
-        inherit: false, // inherit props from previous image?
-        contrast: 1.0, // default color contrast
-        bias: 0.5, // default color bias
+        // inherit: false, // inherit props from previous image?
+        contrast: 0.5, // default color contrast
+        bias: 0.1, // default color bias
         invert: false, // default colormap invert
         exp: 1000, // default exp value for scaling
-        colormap: "heat", // default color map
-        overlay: true, // display png/jpeg overlay?
+        colormap: "grey", // default color map
+        overlay: false, // display png/jpeg overlay?
         scale: "linear", // default scale algorithm
-        scaleclipping: "dataminmax", // "dataminmax", "zscale", or "user" (when scalemin, scalemax is supplied)
-        scalemin: Number.NaN, // default scale min is undefined
-        scalemax: Number.NaN, // default scale max is undefined
-        flip: "y", // default flip state
+        scaleclipping: "zscale", // "dataminmax", "zscale", or "user" (when scalemin, scalemax is supplied)
+        // scalemin: Number.NaN, // default scale min is undefined
+        // scalemax: Number.NaN, // default scale max is undefined
+        // flip: "y", // default flip state
         rot90: 0, // default 90 deg rotation state
         rotate: 0, // default rotation state
         zscalecontrast: 0.25, // default from ds9
         zscalesamples: 600, // default from ds9
         zscaleline: 120, // default from ds9
-        wcssys: "native", // default WCS sys
+        wcssys: "FK4", // default WCS sys
         lcs: "physical", // default logical coordinate system
         valpos: false, // whether to display value/position
         sigma: "none", // gauss blur sigma or none
@@ -44,7 +45,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }, // static color map no color
         // xcen: 0,                         // default x center pos to pan to
         // ycen: 0,                         // default y center pos to pan to
-        zoom: "toFit", // default zoom factor
+        zoom: "ToFit", // default zoom factor
         zooms: 6, // how many zooms in each direction?
         topZooms: 2, // how many zooms are at top level?
         wcsalign: true, // align image using wcs after reproj?
@@ -154,9 +155,6 @@ function loadFitsImages(next) {
         fits.parentNode.replaceChild(newItem, fits);
 
         JS9.Preload(fitsScr, {
-            scale: 'linear',
-            zoom: 'toFit',
-            flip: 'y',
             onload: setDefaultParams
         }, {
             display: uuid
@@ -177,24 +175,30 @@ function collapseJS9Extras(next) {
 
 function setDefaultParams(display) {
 
-    JS9.SetZoom('ToFit', {
-        display: display
+    let rotpa = JS9.GetImageData()['header']['ROTPA'] || 0.;
+
+    const commands1 = [
+        { fn: JS9.SetRotate, args: [rotpa, { display: display }] },
+        
+        { fn: JS9.SetZoom, args: ['ToFit', { display: display }] }
+    ];
+
+    const commands2 = [
+        { fn: JS9.SetRotate, args: [rotpa, { display: display }] },
+        { fn: JS9.AddRegions, args: ["circle", { radius: 10 }, { display: display }] },
+        { fn: JS9.SetZoom, args: ['ToFit', { display: display }] }
+    ];
+
+    commands1.forEach(cmd => {
+        cmd.fn(...cmd.args);
     });
-    JS9.SetColormap('grey', {
-        display: display
-    });
-    JS9.SetScale('dataminmax', {
-        display: display
-    });
-    JS9.AddRegions("circle", {
-        radius: 10
-    }, {
-        display: display
-    });
-    // JS9.SetOpacity(opacity, floorvalue, flooropacity);
-    // JS9.SetFlip(flip);
-    // JS9.SetRotate(rot);
-    // JS9.SetParam(param, value);
+    // DO IT AGAIN IN 2 SECONDS TO FIX ANY JS9 PLUGINS THAT MIGHT NOT HAVE LOADED IN TIME
+    setTimeout(() => {
+        commands2.forEach(cmd => {
+            cmd.fn(...cmd.args);
+        });
+    }, 2000);
+
 
 }
 
@@ -219,9 +223,9 @@ function JS9Popout(file, opts) {
     var myopts = opts || {};
     myopts.onload = setDefaultParams;
     myopts.id = "Stamp";
-    myopts.flip = "y";
+    let rotpa = JS9.GetImageData()['header']['ROTPA']-180. || 0.;
+    myopts.rotate = rotpa;
     if (dobj == null) {
-
         lastid = JS9.LoadWindow(file, myopts, "light");
     } else {
         JS9.RefreshImage(file, myopts, {

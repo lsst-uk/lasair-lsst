@@ -3,7 +3,7 @@ var JS9Prefs = {
         "helperType": "none",
         "helperPort": 2718,
         "helperCGI": "./cgi-bin/js9/js9Helper.cgi",
-        "debug": 0,
+        "debug": 1,
         "loadProxy": true,
         "workDir": "./tmp",
         "workDirQuota": 100,
@@ -12,8 +12,12 @@ var JS9Prefs = {
         "analysisWrappers": "./analysis-wrappers"
     },
     "imageOpts": {
-        "colormap": "grey",
+        "colormap": "magma",
         "scale": "linear",
-        "flip": "y"
+        "scaleclipping": "zscale",
+        "zscalecontrast": 0.2, // default from ds9
+        "zscalesamples": 600, // default from ds9
+        "zscaleline": 120, // default from ds9
+        "contrast": 0.5, // default color contrast
     }
 }

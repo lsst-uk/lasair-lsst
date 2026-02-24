@@ -301,3 +301,16 @@ select, input[type=number], input[type=text] {
     white-space: pre-wrap;
 }
 
+
+a, .text-action {
+	color: $link-color;
+	transition: $transition-base;
+	&:hover{
+		color: $link-hover-color;
+		cursor: pointer;
+	}
+    &:visited{
+		color: $link-visited-color;
+		cursor: pointer;
+	}
+}
