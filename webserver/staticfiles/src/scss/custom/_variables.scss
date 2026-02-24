@@ -84,6 +84,7 @@ $lasair-yellow: #F0A202;
 $lasair-black: #262626;
 $lasair-white: #FFFFF0;
 $lasair-grey: #878E88;
+$lasair-purple: #9B5DE5;
 
 $success: $green !default;
 $info   : $lasair-blue !default;
@@ -103,6 +104,10 @@ $primary: $lasair-blue;
 $secondary: $lasair-yellow;
 $tertiary: $lasair-red;
 $link-color: $lasair-red;
+$link-decoration                        : none !default;
+$link-hover-color                       : darken($link-color, 50%) !default;
+$link-visited-color                     : $lasair-purple !default;
+$link-hover-decoration                  : none !default;
 
 $gray-800: $lasair-black;
 
@@ -210,3 +215,6 @@ $border-color      : $gray-200 !default;
 $popover-border-width       : $border-width !default;
 $popover-border-color       : $gray-400 !default;
 $popover-max-width: 500px;
+
+
+$transition-base     : all .2s ease !default;

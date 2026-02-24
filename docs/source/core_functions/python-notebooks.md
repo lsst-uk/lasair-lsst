@@ -12,8 +12,9 @@ There is a separate Lasair repo for jupyter notebooks. To begin, download the re
 git clone https://github.com/lsst-uk/lasair-examples.git
 ```
 One branch is a set of notebooks showing how the Lasair client works 
-(the API), and the other is a "Marshall" to enable viewing, 
-vetoing and favouriting objects that pass through a kafka-enabled filter.
+(the API), another shows how to use the real-time Kafka output from 
+active filters, and another shows how the lightcurve features are 
+built that can be used to make a Lasair filter.
 
 ### 2. Get your token
 
@@ -22,7 +23,7 @@ account](https://www.youtube.com/watch?v=ekjl5DpLV_Q) that
 explains how to do this, or just go [here]({%lasairurl%}/register). 
 Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
-* You can go to `notebooks/API_lsst` or `features`.
+* You can go to `notebook/API_lsst` or `features`.
 * Look in the repo for the `settings_template.py` and copy it to 
 `settings.py` then edit it with your own token.
 
@@ -32,7 +33,7 @@ Install matplotlib with `pip3 install matplotlib`.
 
 ----
 Now you can run the notebooks with your favourite Jupyter client. 
-The root of the treea is [here](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks).
+The root of the tree is [here](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks).
 They are described below.
 
 ## [api](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/api)
