@@ -219,7 +219,8 @@ class Filter:
             'security.protocol': 'SASL_PLAINTEXT',
             'sasl.mechanisms': 'SCRAM-SHA-256',
             'sasl.username': settings.PUBLIC_KAFKA_USERNAME,
-            'sasl.password': settings.PUBLIC_KAFKA_PASSWORD
+            'sasl.password': settings.PUBLIC_KAFKA_PASSWORD,
+            'message.max.bytes': 10000000
         }
 
         self.log.info(str(conf))
