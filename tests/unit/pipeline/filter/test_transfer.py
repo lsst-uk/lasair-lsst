@@ -41,8 +41,7 @@ class TransferTest(unittest.TestCase):
         self.assertTrue(result)
 
     def test_transfer_error(self):
-        """Test that an error on transfer csv returns false and logs an error"""
-        mock_log = MagicMock()
+        """Test that an error on transfer csv raises an exception"""
         mock_msl_local = MagicMock()
         mock_msl_local.cursor.return_value.execute.side_effect = Exception('test exception')
         with self.assertRaises(Exception):
@@ -51,9 +50,7 @@ class TransferTest(unittest.TestCase):
                 MagicMock(name='msl_remote'),
                 ['attr', 'list'],
                 'table_from',
-                'table_to',
-                log=mock_log)
-            mock_log.error.assert_called()
+                'table_to')
 
     @patch('db_connect.remote')
     @patch('db_connect.local')

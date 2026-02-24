@@ -2,6 +2,9 @@
 # First it gets the attributes from the main database in order
 # Then is makes the CSV file, and transfers it over
 
+import os, time
+
+
 def fetch_attrs(msl_remote, table_name, log=None):
     # fetch the attributes from the main database in correct order
     fetch_attrs_sql = "SELECT column_name FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = '%s' "
@@ -27,13 +30,15 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
     # os.system('sudo --non-interactive rm /data/mysql/%s.txt' % table_name)
 
     # make the CSV file in the order wanted by the main database
+    filename = '/data/mysql/%s.txt' % table_from
     make_csv = 'SELECT '
     make_csv += ','.join(attrs)
-    make_csv += " FROM %s INTO OUTFILE '/data/mysql/%s.txt' " % (table_from, table_from)
+    make_csv += " FROM %s INTO OUTFILE '%s' " % (table_from, filename)
     make_csv += "FIELDS TERMINATED BY ',' ENCLOSED BY '\"' LINES TERMINATED BY '\\n'"
     try:
-        cursor_local = msl_local.cursor(buffered=True, dictionary=True)
-        cursor_local.execute(make_csv)
+        if not os.path.isfile(filename):
+            cursor_local = msl_local.cursor(buffered=True, dictionary=True)
+            cursor_local.execute(make_csv)
         # push the CSV to the main database
         cursor_remote = msl_remote.cursor(buffered=True, dictionary=True)
         push_csv = "LOAD DATA LOCAL INFILE '/data/mysql/%s.txt' " % table_from
@@ -42,11 +47,11 @@ def transfer_csv(msl_local, msl_remote, attrs, table_from, table_to, log=None):
         cursor_remote.execute(push_csv)
         msl_remote.commit()
     except Exception as e:
-        if log:
-            log.error('Transfer CSV failed:' + str(e))
+        # logging should now be handled by caller
+        #if log:
+        #    log.warning('Transfer CSV failed:' + str(e))
         raise e
     return True
-
 
 def main():
     import os

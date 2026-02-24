@@ -49,6 +49,12 @@ class lightcurve_fetcher():
             if not math.isnan(diaForcedSource['psfFlux']):
                 diaForcedSources.append(diaForcedSource)
 
+        ff = open('/home/ubuntu/qq', 'a')
+        ff.write('--------\n' + query + '\n')
+        ff.write('==' + json.dumps(diaSources))
+        ff.write('--' +  json.dumps(diaForcedSources))
+        ff.close()
+
         # fetch the diaObject from Cassandra
         # Note: return is two obj if lite else three obj
         if lite:

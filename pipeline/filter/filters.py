@@ -223,7 +223,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                     alert = fltr.alert_dict[diaObjectId]
                 else:
                     # try to fetch it from cassandra, not yet implemented!
-                    fltr.log.info('Cannot find lightcurve {diaObjectId} in alert cache')
+                    fltr.log.info(f'Cannot find lightcurve {diaObjectId} in alert cache')
 
                 if alert:
                     if active == LIGHTCURVE_LITE:
@@ -340,7 +340,7 @@ def dispose_kafka(producer, query_results, query, ms, nid):
     # First decide if this filter has already produced enough
     bp = query.get('bytes_produced', 0)
     bq = query['byte_quota']
-    will_produce = (bp < bq)
+    will_produce = (bp < bq) or (bq == -1)
 
     nbytes = 0
     nalert = 0
