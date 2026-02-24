@@ -15,7 +15,7 @@ var JS9Prefs = {
         "colormap": "magma",
         "scale": "linear",
         "scaleclipping": "zscale",
-        "zscalecontrast": 0.2, // default from ds9
+        "zscalecontrast": 0.25, // default from ds9
         "zscalesamples": 600, // default from ds9
         "zscaleline": 120, // default from ds9
         "contrast": 0.5, // default color contrast

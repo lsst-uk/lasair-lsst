@@ -175,11 +175,10 @@ function collapseJS9Extras(next) {
 
 function setDefaultParams(display) {
 
-    let rotpa = JS9.GetImageData()['header']['ROTPA'] || 0.;
+    let rotpa = JS9.GetImageData({display: display})['header']['ROTPA'] || 0.;
 
     const commands1 = [
         { fn: JS9.SetRotate, args: [rotpa, { display: display }] },
-        
         { fn: JS9.SetZoom, args: ['ToFit', { display: display }] }
     ];
 
@@ -197,7 +196,7 @@ function setDefaultParams(display) {
         commands2.forEach(cmd => {
             cmd.fn(...cmd.args);
         });
-    }, 2000);
+    }, 1000);
 
 
 }
@@ -218,20 +217,29 @@ function toggleJS9Menus() {
 
 function JS9Popout(file, opts) {
     var dobj = JS9.LookupDisplay("Stamp", false);
+    
     loadtype = "light";
-    var id, did, head, body, html, doc;
     var myopts = opts || {};
-    myopts.onload = setDefaultParams;
     myopts.id = "Stamp";
-    let rotpa = JS9.GetImageData()['header']['ROTPA']-180. || 0.;
-    myopts.rotate = rotpa;
-    if (dobj == null) {
+    myopts.display = "Stamp";
+    myopts.onload = setDefaultParams();
+    // let rotpa = JS9.GetImageData()['header']['ROTPA'] || 0.;
+    // myopts.rotate = rotpa;
+    if (dobj === null) {
         lastid = JS9.LoadWindow(file, myopts, "light");
-    } else {
+    } 
+
+    setTimeout(() => {
+        var dobj = JS9.LookupDisplay("Stamp", false);
         JS9.RefreshImage(file, myopts, {
             display: dobj
-        })
-    }
+        });
+    }, 100);
+
+    setTimeout(() => {
+        var dobj = JS9.LookupDisplay("Stamp", false);
+        setDefaultParams(dobj);
+    }, 500);
 
 }
 
