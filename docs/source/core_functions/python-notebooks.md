@@ -48,6 +48,8 @@ All of those in the cone
 For a given object, identified by its diaObjectId, the object API call has two additional arguments:
 `lasair_added`: True if you want the attributes that Lasair computes the attributes in the schema, as well as the Sherlock association, TNS crossmatch, and links to all the image cutouts.
 `lite`: True if you want the simplified version that is usually sufficient, or False if you want the large number of attributes that Rubin has supplied.
+### [api/cutouts.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/cutouts.ipynb)
+Finds an object, then displays all the cutout images that come with it.
 ### [api/query.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/query.ipynb)
 This notebook runs a Lasair filter using three strings: selected, 'tables', and 'conditions', as in the web interface. In this case we just fina a few objects that have a Sherlock host association.
 ### [api/sherlock_api](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/sherlock_api.ipynb)
