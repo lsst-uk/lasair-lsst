@@ -24,93 +24,49 @@ Then log in to the Lasair website.
 Install the lasair client with `pip3 install lasair`.
 Install matplotlib with `pip3 install matplotlib`.
 
-----
 Now you can run the notebooks with your favourite Jupyter client. 
 The root of the tree is [here](https://github.com/lsst-uk/lasair-examples/tree/main).
 They are described below.
 
 ### Learn Lasair
-    &bull; tutorials/API_recipes.ipynb
-Learn how to use the Lasair API.
-
-    &bull; tutorials/KAFKA_Listen_to_Alerts.ipynb
-Learn how to consume Kafka from an active filter
-
-    &bull; tutorials/What_is_an_Object.ipynb
-Learn about the data associated with a Lasair object.
+- tutorials/API_recipes.ipynb: Learn how to use the Lasair API.
+- tutorials/KAFKA_Listen_to_Alerts.ipynb: Learn how to consume Kafka from an active filter
+- tutorials/What_is_an_Object.ipynb: Learn about the data associated with a Lasair object.
 
 ### Inspect object
-    &bull; notebooks/cutouts.ipynb
-Shows all the cutout images for a given object in Lasair
-
-    &bull; features/bazinBlackBody/api_plot_lsst.ipynb
-This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
+- notebooks/cutouts.ipynb: Shows all the cutout images for a given object in Lasair
+- features/bazinBlackBody/api_plot_lsst.ipynb: This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
 
 ### Little notebooks
-    &bull; notebooks/cone.ipynb
-The cone search method of the API finds objects within a cone, i.e. a point in the sky and radius in arcseconds. It can return:
-    - &bull; A count of the number in the cone
-    - &bull; The nearest of those in the cone
-    - &bull; All of those in the cone
-
-    &bull; notebooks/cutouts.ipynb
-Shows all the cutout images for a given object in Lasair
-
-    &bull; notebooks/object.ipynb
-For a given object, identified by its diaObjectId, the object API call has two additional arguments:
-    - &bull; `lasair_added`: True if you want the attributes that Lasair computes the attributes in the schema, as well as the Sherlock association, TNS crossmatch, and links to all the image cutouts.
-    - &bull; `lite`: True if you want the simplified version that is usually sufficient, or False if you want the large number of attributes that Rubin has supplied.
-
-    &bull; notebooks/query.ipynb
-This notebook runs a Lasair filter using three strings: selected, 'tables', and 'conditions', as in the web interface. In this case we just fina a few objects that have a Sherlock host association.
-
-    &bull; notebooks/sherlock_api.ipynb
-Demonstrates the two Sherlock calls: one by diaObjectId and the other by sky position ra, dec.
-
-    &bull; notebooks/watchlist.ipynb
-This notebook runs a Lasair filter that includes a watchlist.
-
-    &bull; notebooks/consume_kafka.ipynb
-Shows how to consume Kafka from your active filter.
-
-    &bull; notebooks/consume_kafka_plot.ipynb
-Shows how to consume Kafka and print the results. You will need to change the topic to the one listed in the webpage for your active filter.
+- notebooks/cone.ipynb: The cone search method of the API finds objects within a cone, i.e. a point in the sky and radius in arcseconds. It can return:
+    - A count of the number in the cone
+    - The nearest of those in the cone
+    - All of those in the cone
+- notebooks/cutouts.ipynb: Shows all the cutout images for a given object in Lasair
+- notebooks/object.ipynb: For a given object, identified by its diaObjectId, the object API call has two additional arguments:
+    - `lasair_added`: True if you want the attributes that Lasair computes the attributes in the schema, as well as the Sherlock association, TNS crossmatch, and links to all the image cutouts.
+    - `lite`: True if you want the simplified version that is usually sufficient, or False if you want the large number of attributes that Rubin has supplied.
+- notebooks/query.ipynb: This notebook runs a Lasair filter using three strings: selected, 'tables', and 'conditions', as in the web interface. In this case we just fina a few objects that have a Sherlock host association.
+- notebooks/sherlock_api.ipynb: Demonstrates the two Sherlock calls: one by diaObjectId and the other by sky position ra, dec.
+- notebooks/watchlist.ipynb: This notebook runs a Lasair filter that includes a watchlist.
+- notebooks/consume_kafka.ipynb: Shows how to consume Kafka from your active filter.
+- notebooks/consume_kafka_plot.ipynb: Shows how to consume Kafka and print the results. You will need to change the topic to the one listed in the webpage for your active filter.
 
 ### Little scripts
-    &bull; scripts/kafka_consumer.py
-Small python code to consume (read) a kafka stream from an active filter
-
-    &bull; scripts/annotator.py
-Small python code to consume (read) a kafka stream from an active filter that has the `lightcurve_lite` mode, an plot the lightcurve.
+- scripts/kafka_consumer.py: Small python code to consume (read) a kafka stream from an active filter
+- scripts/annotator.py: Small python code to consume (read) a kafka stream from an active filter that has the `lightcurve_lite` mode, an plot the lightcurve.
 
 ### Lasair Features
 Shows how some of the Lasair added value is made.
-
-    &bull; features/jump.ipynb
+- features/jump.ipynb:
 This simple feature is to filter out lightcurves with a significant change in brightness. The mean and standard deviation are computed from the time between 70 days ago and 10 days ago. Then the difference between the latest flux and the mean is divided by the standard deviation: this is jump1. The same is computed for the other 5 flux bands: this is jump2. If there is a true jump in brightness, we can expect both jump1 and jump2 to be larger than several sigma.
-
-    &bull; features/milky_way.ipynb
-Calculation of the extinction E(B-V) and the galactic latitude. To run this notebook, you will need to install the dustmaps package that puts a 64 Mbyte file on your system.
-
-    &bull; features/pair_analysis.ipynb
-The Rubin cadence includes the same object in different wavebands only ~30 minutes apart, so it is possible to separate rapid brightening from colour. While the actual colour is reported (eg magnitude difference is 0.99 between filters g and r), this is also converted to an effective temperature using the blackbody model.
-
-    &bull; features/sherlock_feature.ipynb
-The Sherlock system classifies each Lasair alert based on its location in the sky, finding previously catalogued objects such as variable stars and host galaxy. In this notebook, we see all the crossmatches that sherlock finds, and plots them in position relative to the original alert.
-
-    &bull; features/bazinBlackBody
-For alerts with a Sherlock host galaxy, a two-dimensional fit is made in both time and wavelength to look for fast risers and discern their colour. There are several notebooks in the directory.
-
-   - &bull; features/bazinBlackBody/introduction.ipynb
-Start here to see what precisely this code it doing. It is fitting a 2D surface to the lightcurve, with time in one dimension and wavelength in the other. The fit to the flux can be either exponential in time (linear in magnitude), or with a Bazin explosion model -- exponential rise in flux then exponential fall.
-
-   - &bull; features/bazinBlackBody/example.ipynb
-This notebook creates a BazinBlackbody lightcurve surface, then fits it and plots the result.
-
-   - &bull; features/bazinBlackBody/synthetic.ipynb
-This notebook reads a simulated supernova lightcurve from a file, then fits it and plots the result.
-
-   - &bull; features/bazinBlackBody/api_plot_lsst.ipynb
-This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
+- features/milky_way.ipynb: Calculation of the extinction E(B-V) and the galactic latitude. To run this notebook, you will need to install the dustmaps package that puts a 64 Mbyte file on your system.
+- features/pair_analysis.ipynb: The Rubin cadence includes the same object in different wavebands only ~30 minutes apart, so it is possible to separate rapid brightening from colour. While the actual colour is reported (eg magnitude difference is 0.99 between filters g and r), this is also converted to an effective temperature using the blackbody model.
+- features/sherlock_feature.ipynb: The Sherlock system classifies each Lasair alert based on its location in the sky, finding previously catalogued objects such as variable stars and host galaxy. In this notebook, we see all the crossmatches that sherlock finds, and plots them in position relative to the original alert.
+- features/bazinBlackBody: For alerts with a Sherlock host galaxy, a two-dimensional fit is made in both time and wavelength to look for fast risers and discern their colour. There are several notebooks in the directory.
+   -features/bazinBlackBody/introduction.ipynb: Start here to see what precisely this code it doing. It is fitting a 2D surface to the lightcurve, with time in one dimension and wavelength in the other. The fit to the flux can be either exponential in time (linear in magnitude), or with a Bazin explosion model -- exponential rise in flux then exponential fall.
+   - features/bazinBlackBody/example.ipynb: This notebook creates a BazinBlackbody lightcurve surface, then fits it and plots the result.
+   - features/bazinBlackBody/synthetic.ipynb: This notebook reads a simulated supernova lightcurve from a file, then fits it and plots the result.
+   - features/bazinBlackBody/api_plot_lsst.ipynb: This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
 
 Please also [Contact us](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks) with any notebooks that you would like to share.
