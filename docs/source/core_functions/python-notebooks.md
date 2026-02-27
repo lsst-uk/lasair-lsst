@@ -20,14 +20,13 @@ Then log in to the Lasair website.
 * Click on your username at the top right and select "My Profile", then copy the token.
 * Put your token into your Unix environment as `LASAIR_LSST_TOKEN`. Run the `env` command to make sure its there.
 
-### 3. Libraries
-Install the lasair client with `pip3 install lasair`.
-Install matplotlib with `pip3 install matplotlib`.
-
-Now you can run the notebooks with your favourite Jupyter client. 
+- Libraries
+    - Install the lasair client with `pip3 install lasair`.
+    - Install matplotlib with `pip3 install matplotlib`.
+    - Now you can run the notebooks with your favourite Jupyter client. 
 The root of the tree is [here](https://github.com/lsst-uk/lasair-examples/tree/main).
 They are described below.
-
+----
 ### Learn Lasair
 - tutorials/API_recipes.ipynb: Learn how to use the Lasair API.
 - tutorials/KAFKA_Listen_to_Alerts.ipynb: Learn how to consume Kafka from an active filter
