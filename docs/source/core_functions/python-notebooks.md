@@ -28,9 +28,9 @@ The root of the tree is [here](https://github.com/lsst-uk/lasair-examples/blob/m
 They are described below.
 ----
 ### Learn Lasair
-- [Using the Lasair API](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/tutorials/API_recipes.ipynb): **Learn how to use the Lasair API.**
+- [Using the Lasair API](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/tutorials/API_recipes.ipynb): Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
-- [Using the Lasair Kafka system](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/tutorials/KAFKA_Listen_to_Alerts.ipynb): **Learn how to consume Kafka from an active filter.**
+- [Using the Lasair Kafka system](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/tutorials/KAFKA_Listen_to_Alerts.ipynb): Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
 
 - [What is a Lasair Object](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/tutorials/What_is_an_Object.ipynb): Learn about the data associated with a Lasair object.
 
