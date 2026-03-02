@@ -53,19 +53,31 @@ They are described below.
 
 - [notebooks/sherlock_api.ipynb](Two Sherlock methds): Demonstrates the two Sherlock calls: one by diaObjectId and the other by sky position ra, dec.
 
-- [Query with watchlist](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/notebooks/watchlist.ipynb): This notebook runs a Lasair filter that includes a watchlist.
-
-- [Consume Kafak](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/notebooks/consume_kafka.ipynb): Shows how to consume Kafka from your active filter.
-
-- [Consume Kafka and plot](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/notebooks/consume_kafka_plot.ipynb): Shows how to consume Kafka and print the results. You will need to change the topic to the one listed in the webpage for your active filter.
-
-
-### Little scripts
-- [Consume Kafka](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/scripts/kafka_consumer.py): Small python code to consume (read) a kafka stream from an active filter
-
-- [Annotate](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/scripts/annotator.py): Small python code to consume (read) a kafka stream from an active filter that has the `lightcurve_lite` mode, an plot the lightcurve.
-
-### Lasair Features
+## [api](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/api)
+Shows how to use the Lasair API.
+Please note that usage of the Lasair API is throttled by default to 10 requests per hour. If you get an error message about this, you can [email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=throttling problem), explain what you are doing, and you will be put into the “Power Users” category. 
+### [api/cone.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/cone.ipynb)
+The cone search method of the API finds objects within a cone, i.e. a point in the sky and radius in arcseconds. It can return:
+- A count of the number in the cone
+- - The nearest of those in the cone
+All of those in the cone
+### [api/object.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/object.ipynb)
+For a given object, identified by its diaObjectId, the object API call has two additional arguments:
+`lasair_added`: True if you want the attributes that Lasair computes the attributes in the schema, as well as the Sherlock association, TNS crossmatch, and links to all the image cutouts.
+`lite`: True if you want the simplified version that is usually sufficient, or False if you want the large number of attributes that Rubin has supplied.
+### [api/query.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/query.ipynb)
+This notebook runs a Lasair filter using three strings: selected, 'tables', and 'conditions', as in the web interface. In this case we just fina a few objects that have a Sherlock host association.
+### [api/sherlock_api](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/sherlock_api.ipynb)
+Demonstrates the two Sherlock calls: one by diaObjectId and the other by sky position ra, dec.
+### [api/watchlist](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/watchlist.ipynb)
+This notebook runs a Lasair filter that includes a watchlist.
+## [Kafka](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/kafka)
+Shows how to consume Kafka from your active filter.
+### [kafka/consume.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/kafka/consume.ipynb)
+Shows how to consume Kafka and print the results. You will need to change the topic to the one listed in the webpage for your active filter.
+### [kafka/consume_plot.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/kafka/consume_plot.ipynb)
+Shows how to consume Kafka and plot the results. We assume the filter is saved with the option 'lightcurve_lite'. You will need to change the topic to the one listed in the webpage for your active filter.
+## [features](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features)
 Shows how some of the Lasair added value is made.
 
 - [Jump Feature](https://github.com/lsst-uk/lasair-examples/blob/merge/HS/features/jump.ipynb):
