@@ -33,7 +33,7 @@ They are described below.
 - [Using the Lasair Kafka system](https://github.com/lsst-uk/lasair-lsst-examples/blob/main/tutorials/KAFKA_Listen_to_Alerts.ipynb): **Learn how to consume Kafka from an active filter.**
 
 ### Inspect object
-- [Examine and Object](https://github.com/lsst-uk/lasair-examples/blob/main/examine_object.ipynb): Learn about the data associated with a Lasair object.
+- [Examine and Object](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/examine_object.ipynb): Learn about the data associated with a Lasair object.
 
 - [See all the cutouts](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/cutouts.ipynb): Shows all the cutout images for a given object in Lasair.
 
@@ -78,9 +78,13 @@ This simple feature is to filter out lightcurves with a significant change in br
 - [Sherlock dive](https://github.com/lsst-uk/lasair-examples/blob/main/features/sherlock_feature.ipynb): The Sherlock system classifies each Lasair alert based on its location in the sky, finding previously catalogued objects such as variable stars and host galaxy. In this notebook, we see all the crossmatches that sherlock finds, and plots them in position relative to the original alert.
 
 - [Bazin black body fitting](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody): For alerts with a Sherlock host galaxy, a two-dimensional fit is made in both time and wavelength to look for fast risers and discern their colour. There are several notebooks in the directory.
-   - [Introduction](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/introduction.ipynb): Start here to see what precisely this code it doing. It is fitting a 2D surface to the lightcurve, with time in one dimension and wavelength in the other. The fit to the flux can be either exponential in time (linear in magnitude), or with a Bazin explosion model -- exponential rise in flux then exponential fall.
-   - [Example](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/example.ipynb): This notebook creates a BazinBlackbody lightcurve surface, then fits it and plots the result.
-   - [Synthetic light curve](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/synthetic.ipynb): This notebook reads a simulated supernova lightcurve from a file, then fits it and plots the result.
-   - [Plot for arbitrary object](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/api_plot_lsst.ipynb): This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
+
+    - [Introduction](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/introduction.ipynb): Start here to see what precisely this code it doing. It is fitting a 2D surface to the lightcurve, with time in one dimension and wavelength in the other. The fit to the flux can be either exponential in time (linear in magnitude), or with a Bazin explosion model -- exponential rise in flux then exponential fall.
+
+    - [Example](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/example.ipynb): This notebook creates a BazinBlackbody lightcurve surface, then fits it and plots the result.
+
+    - [Synthetic light curve](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/synthetic.ipynb): This notebook reads a simulated supernova lightcurve from a file, then fits it and plots the result.
+
+    - [Plot for arbitrary object](https://github.com/lsst-uk/lasair-examples/blob/main/features/bazinBlackBody/api_plot_lsst.ipynb): This notebook runs the fit for an arbitrary object in the Lasair database. To see the result for another object, change the 2nd last line of the notebook where it says `diaObjectId = ...` to the `diaObjectId` of your chosen object.
 
 Please also [Contact us](mailto:lasair-help@mlist.is.ed.ac.uk?subject=Notebooks) with any notebooks that you would like to share.
