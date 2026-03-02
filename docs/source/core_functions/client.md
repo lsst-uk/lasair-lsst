@@ -137,7 +137,7 @@ L = lasair.lasair_client(token)
 c = L.object(objectId, lasair_added=True, lite=True)
 print(c)
 ```
-There is a notebook in github, [ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/ObjectAPI.ipynb) which illustrates the flags `lasair_added` and `lite`.
+There is a notebook in github, [ObjectAPI.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/object.ipynb) which illustrates the flags `lasair_added` and `lite`.
 This is how to see exactly what the flags do.
 
 With the arguments above, the `lasairData` section of the dictionary will have 

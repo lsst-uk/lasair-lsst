@@ -61,7 +61,7 @@ For more information see the [notebook](https://github.com/lsst-uk/lasair-exampl
 
 ### Sherlock table
 Intelligent crossmatch from multiple catalogues.
-For more information see the [notebook on API usage](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/api/sherlock_api.ipynb),
+For more information see the [notebook on API usage](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/sherlock_api.ipynb),
 or the [notebook on choosing crossmatches](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/sherlock_feature.ipynb), or
 [Sherlock writeup](core_functions/sherlock.html).
 
