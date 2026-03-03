@@ -29,7 +29,8 @@ class sherlock(FeatureGroup):
             if 'direct_distance' in sherlock:
                 # Mpc to pc
                 dpc = 1000000*sherlock['direct_distance']
-                distanceModulus = 5*log10(dpc) - 5
+                # https://en.wikipedia.org/wiki/Distance_modulus
+                distanceModulus = 5*math.log10(dpc) - 5
 
             # else use measured redshift
             elif 'z' in sherlock:
