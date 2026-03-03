@@ -20,7 +20,7 @@ and six counts for the number of sources of each band.
 ----
 **Absolute Magnitude**: peak extinction corrected absolute magnitude, 
 and the MJD of that peak. For more information, see 
-[Absolute Magnitude](cookbook.html#absolute-magnitude) in the Cookbook,
+[Absolute Magnitude](../cookbook.html#absolute-magnitude) in the Cookbook,
 and its computation [here](https://github.com/lsst-uk/lasair-examples/blob/main/features/milky_way.ipynb).
 
 ----
