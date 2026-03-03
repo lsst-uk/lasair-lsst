@@ -27,7 +27,9 @@ class sherlock(FeatureGroup):
         if sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
             # use this if present
             if 'direct_distance' in sherlock:
-                distanceModulus = sherlock['direct_distance']
+                # Mpc to pc
+                dpc = 1000000*sherlock['direct_distance']
+                distanceModulus = 5*log10(dpc) - 5
 
             # else use measured redshift
             elif 'z' in sherlock:
