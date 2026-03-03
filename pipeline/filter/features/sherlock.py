@@ -23,18 +23,28 @@ class sherlock(FeatureGroup):
             return nothing
 
         z = None
+        distanceModulus = None
         if sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
-            if 'z' in sherlock:
+            # use this if present
+            if 'direct_distance' in sherlock:
+                distanceModulus = sherlock['direct_distance']
+
+            # else use measured redshift
+            elif 'z' in sherlock:
                 z = sherlock['z']
+
+            # else photoZ
             elif 'photoz' in sherlock:
                 z = sherlock['photoz']
-        if not z:
-            return nothing
 
-        # combine z and apparent mag to get absolute mag
-        # using Ken Smith code from Atlas for distance modulus
-        distances = redshiftToDistance(z)
-        distanceModulus = distances['dmod']
+            if z:
+                # combine z and apparent mag to get absolute mag
+                # using Ken Smith code from Atlas for distance modulus
+                distances = redshiftToDistance(z)
+                distanceModulus = distances['dmod']
+
+        if not distanceModulus:
+            return nothing
 
         # extinction corrected lightcurve
         (lc_ecflux, lc_time, lc_band) = getECFluxTimeBand(self.alert)
@@ -46,7 +56,7 @@ class sherlock(FeatureGroup):
                 ecMag = 31.4 - 2.5*math.log10(lc_ecflux[i])
             except:
                 continue
-            absMag = ecMag - distanceModulus + 2.5*math.log(1+z)
+            absMag = ecMag - distanceModulus + 2.5*math.log10(1+z)
             if absMag < peakAbsMag:
                 peakAbsMag = absMag
                 peakMJD = lc_time[i]
