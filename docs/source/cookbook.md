@@ -66,25 +66,19 @@ Then the file can be ingested using the Lasair web: Watchlists/Create New.
 Then make a filter based on the watchlist:
 - Filter-builder web page: go to "Filters", then select your watchlist. 
 - With the API
-there is a notebook [Query objects coincident with a watchlist](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/API_lsst/Query_Watchlist.ipynb) that shows the steps.
+there is a notebook [Query objects coincident with a watchlist](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/watchlist.ipynb) that shows the steps.
 
 When you Save the filter, you can enable streaming processing, so that you get alerts 
 as soon as possible. Lasair supports email/batch and kafka, so thet your machine can 
 get the filtered alert stream.
 ---
-### Poking about in Gaia with ZTF
-There is a lot of data available at [Lasair ZTF](https://lasair-ztf.lsst.ac.uk/), 
-and not very much at [Lasair LSST](https://lasair.lsst.ac.uk/).
-Let's look at the tools available in the 2-band ZTF object table, 
-versus the object table of the 6-band LSST object table. In the former case, we can ask about 
-each band separately, but for 6 bands we have tried to make features that give a 
-comprehensive picture.
+### Poking about in Gaia
 
-**Filtering Lasair-ZTF**
+**Filtering Lasair**
 
 To illustrate,
 lets see if we can find any outbursts amongst the Gaia catalogue of White Dwarfs.
-There are a million of them in [GaiaWhiteDwarfsDR3](https://lasair-ztf.lsst.ac.uk/watchlists/1021/).
+There are a million of them in [GaiaWhiteDwarfsDR3](https://lasair.lsst.ac.uk/watchlists/6/).
 Let's start by looking at all alerts coincident with the watchlist 
 (in Lasair: click Filters/Create New/Select watchlist/Run Filter/Save Filter). 
 Already included in the sample filter is `objects.lastDiaSourceMjdTai > mjdnow()-365` which means 
@@ -105,7 +99,7 @@ and objects.nDiaSources > 10
 These "jump" parameters compare the latest diaSources, in all 6 bands,
 with a baseline history between 70 and 10 days ago. The jump statistics are each number
 of sigma for two wavebands. A full explanation can be found in the
-[jupyter notebook jumpFromMean](https://github.com/lsst-uk/lasair-examples/blob/main/features/3_jumpFromMean.ipynb).
+[jupyter notebook jumpFromMean](https://github.com/lsst-uk/lasair-examples/blob/main/features/jump.ipynb).
 
 ---
 ### Absolute magnitude
