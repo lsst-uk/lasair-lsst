@@ -152,7 +152,7 @@ $\lambda_R = \lambda_O/(1+z)$
 We can compute distance modulus $\mu$ from redshift $z$ following Ned Wright's
 [cosmology calculator](https://www.astro.ucla.edu/~wright/cosmo_02.htm#DL).
 For the code that computes absolute magnitude, see the 
-[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/4_milky_way.ipynb).
+[milky way notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/milky_way.ipynb).
 
 Error on $M_R$:
 Sum the variances of the sources of error:
