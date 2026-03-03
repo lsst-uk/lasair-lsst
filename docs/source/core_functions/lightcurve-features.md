@@ -21,7 +21,7 @@ and six counts for the number of sources of each band.
 **Absolute Magnitude**: peak extinction corrected absolute magnitude, 
 and the MJD of that peak. For more information, see 
 [Absolute Magnitude](cookbook.html#absolute-magnitude) in the Cookbook,
-and its computation [here](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/milky_way.ipynb).
+and its computation [here](https://github.com/lsst-uk/lasair-examples/blob/main/features/milky_way.ipynb).
 
 ----
 **Bazin black body**: A two-dimensional fit with blackbody in the 
@@ -32,7 +32,7 @@ and a fall rate of 0.1 per day. The fitted temperature is 6,000 Kelvin.
 <img src="../_images/BBB/99999999999_e.png" width="250"/>
 <img src="../_images/BBB/99999999999_b.png" width="250"/>
 
-See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/lsst_notebooks/features/bazinBlackBody) for more information.
+See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/features/bazinBlackBody) for more information.
 
 ----
 **Milky way**: Galactic latitude and E(B-V) extinction.
@@ -43,7 +43,7 @@ See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/
 
 <img src="../_images/jump/jump_image.png" width="450"/>
 
-See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/jump.ipynb) for more information.
+See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/jump.ipynb) for more information.
 
 ----
 **Pair colours**: The LSST survey cadence has many close pairs of diaSources
@@ -57,12 +57,12 @@ we can get an effective temperature of 6,880 Kelvin.
 
 <img src="../_images/pair/u_r.png" width="350"/>
 
-For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/pair_analysis.ipynb).
+For more information see the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/pair_analysis.ipynb).
 
 ### Sherlock table
 Intelligent crossmatch from multiple catalogues.
 For more information see the [notebook on API usage](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/sherlock_api.ipynb),
-or the [notebook on choosing crossmatches](https://github.com/lsst-uk/lasair-examples/blob/main/lsst_notebooks/features/sherlock_feature.ipynb), or
+or the [notebook on choosing crossmatches](https://github.com/lsst-uk/lasair-examples/blob/main/features/sherlock_feature.ipynb), or
 [Sherlock writeup](core_functions/sherlock.html).
 
 ### TNS table
