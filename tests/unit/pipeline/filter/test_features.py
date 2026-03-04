@@ -13,25 +13,25 @@ import features
 from features import sherlock
 #from features.FeatureGroup import FeatureGroup
 
-alert = {
-    'ebv': 0.0,
-    'diaSourcesList': [
-        {
-            'psfFlux':100000,    # mag is 18.9
-            'midpointMjdTai': 60000,
-            'band': 'g',
-        },
-    ],
-    'annotations': {
-        'sherlock': [ { } ],
-    }
-}
 
 class FeatureTest(TestCase):
     def test0_sherlock(self):
-        alert['annotations']['sherlock'][0] = {
-            'classification': 'SN',
-            'direct_distance' : 100  # 100 Mpc
+        # direct distance test
+        alert = {
+            'ebv': 0.0,
+            'diaSourcesList': [
+                {
+                    'psfFlux':100000,    # mag is 18.9
+                    'midpointMjdTai': 60000,
+                    'band': 'g',
+                },
+            ],
+            'annotations': {
+                'sherlock': [ {
+                    'classification': 'SN',
+                    'direct_distance' : 100  # 100 Mpc
+                } ]
+            }
         }
         groupModule = features.sherlock
         groupClass = groupModule.sherlock
@@ -40,15 +40,53 @@ class FeatureTest(TestCase):
         self.assertAlmostEqual(ret['absMag'], -16.1, places=4)
 
     def test1_sherlock(self):
-        alert['annotations']['sherlock'][0] = {
-            'classification': 'SN',
-            'z'             : 0.1
+        # redshift z test
+        alert = {
+            'ebv': 0.0,
+            'diaSourcesList': [
+                {
+                    'psfFlux':100000,    # mag is 18.9
+                    'midpointMjdTai': 60000,
+                    'band': 'g',
+                },
+            ],
+            'annotations': {
+                'sherlock': [ {
+                    'classification': 'SN',
+                    'z'             : 0.1
+                } ]
+            }
         }
         groupModule = features.sherlock
         groupClass = groupModule.sherlock
         groupInst = groupClass(alert, verbose=True)
         ret = groupInst.run()
         self.assertAlmostEqual(ret['absMag'], -19.518675881388, places=4)
+
+    def test2_sherlock(self):
+        # negative flux test
+        alert = {
+            'ebv': 0.0,
+            'diaSourcesList': [
+                {
+                    'psfFlux':-100000,
+                    'midpointMjdTai': 60000,
+                    'band': 'g',
+                },
+            ],
+            'annotations': {
+                'sherlock': [ {
+                    'classification': 'SN',
+                    'z'             : 0.1
+                } ]
+            }
+        }
+        groupModule = features.sherlock
+        groupClass = groupModule.sherlock
+        groupInst = groupClass(alert, verbose=True)
+        ret = groupInst.run()
+        print(ret)
+        self.assertIsNone(ret['absMag'])
 
 if __name__ == '__main__':
     import xmlrunner

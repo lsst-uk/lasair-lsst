@@ -62,16 +62,17 @@ class sherlock(FeatureGroup):
 
         print('flux', lc_ecflux)
 
-        peakAbsMag = 99
-        peakMJD    = 99
+        peakAbsMag = None
+        peakMJD    = None
+        absMag     = None
         for i in range(len(lc_ecflux)):
             # flux in nanoJ
             try:
                 ecMag = 31.4 - 2.5*math.log10(lc_ecflux[i])
+                absMag = ecMag - distanceModulusK
             except:
                 continue
-            absMag = ecMag - distanceModulusK
-            if absMag < peakAbsMag:
+            if not peakAbsMag or  absMag < peakAbsMag:
                 peakAbsMag = absMag
                 peakMJD = lc_time[i]
 
