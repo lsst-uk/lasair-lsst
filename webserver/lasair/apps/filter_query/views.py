@@ -173,6 +173,10 @@ def filter_query_detail(request, mq_id, action=False):
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
 
     filterQuery.real_sql = build_query(filterQuery.selected, filterQuery.tables, filterQuery.conditions)
+    filterQuery.display_sql = \
+            'SELECT COLUMNS:\n' + filterQuery.selected + \
+            '\nFROM:\n'         + filterQuery.tables + \
+            '\nWHERE:\n'        + filterQuery.conditions
 
     cursor.execute(f'SELECT name, selected, tables, conditions, real_sql FROM myqueries WHERE mq_id={mq_id}')
     for row in cursor:
