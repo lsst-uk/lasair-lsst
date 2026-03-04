@@ -47,6 +47,8 @@ class sherlock(FeatureGroup):
                 # combine z and apparent mag to get absolute mag
                 # using Ken Smith code from Atlas for distance modulus
                 distances = redshiftToDistance(z)
+                if self.verbose:
+                    print(distances)
                 distanceModulusK = distances['dmod'] + 2.5*math.log10(1+z)
         
         if self.verbose:
