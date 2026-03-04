@@ -75,7 +75,7 @@ and the return has object identifiers, and their separations in arcseconds, some
 ```
 ### <a name="query"></a>query
 
-This method runs a query on the Lasair database. There is an [interactive query builder](https://lasair.lsst.ac.uk/filter/create)(must be logged in), and a [schema description](https://lasair.lsst.ac.uk/schema). The arguments are:
+This method runs a query on the Lasair database. There is an [interactive query builder](https://lasair.lsst.ac.uk/filters/create)(must be logged in), and a [schema description](https://lasair.lsst.ac.uk/schema). The arguments are:
 
 *   `selected`: (string) the list of attributes to be returned,
 *   `tables`: (string) the list of tables to be joined,
