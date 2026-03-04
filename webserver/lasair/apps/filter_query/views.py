@@ -51,7 +51,7 @@ def filter_query_index(request):
 
     # PUBLIC FILTERS
     publicFilters = filter_query.objects.filter(public__gte=1).order_by('-active', 'name')
-    publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True)
+    publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=False)
 
     # USER FILTERS
     if request.user.is_authenticated:
