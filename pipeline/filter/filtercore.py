@@ -559,9 +559,9 @@ class Filter:
         msl_local = db_connect.local()
         cursor = msl_local.cursor(buffered=True, dictionary=True)
         query = 'SELECT '
-        query += 'mjdnow()-max(maxTai) AS min_delay, '
-        query += 'mjdnow()-avg(maxTai) AS avg_delay, '
-        query += 'mjdnow()-min(maxTai) AS max_delay '
+        query += 'mjdnow()-max(lastDiaSourceMjdTai) AS min_delay, '
+        query += 'mjdnow()-avg(lastDiaSourceMjdTai) AS avg_delay, '
+        query += 'mjdnow()-min(lastDiaSourceMjdTai) AS max_delay '
         query += 'FROM objects'
         try:
             cursor.execute(query)
