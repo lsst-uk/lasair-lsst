@@ -17,7 +17,7 @@ objects.g_psfFlux > 200000
 ```
 
 If you click "Run Filter", all the alerts will be returned that are brighter than
-200,000 nJ -- approx 18th magnitudes. See [formula and conversion table here](concepts.html#lightcurve).
+200,000 nJ -- approx 18th magnitudes. See [formula and conversion table here](../concepts.html#lightcurve).
 Note that the word "alert" means brightness five-sigma brighter or fainter than the reference sky.
 
 Perhaps you would like to see the objects with the most recent alerts first:

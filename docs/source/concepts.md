@@ -28,7 +28,7 @@ magnitude = 31.4 - 2.5&nbsp; log_{10}(flux)
 ```
 <img src="_images/fluxMag.png" width="200px"/>
 
-Note that the values in the lightcurve are *difference* fluxes, as defined in [Objects and Sources](objects_sources.html).
+Note that the values in the lightcurve are *difference* fluxes, which can be negative as well as positive.
 
 Since each source brightness is measured for a specific optical filter, there may be several lightcurves for a given object, for example the g-lightcurve and r-lightcurve will be derived from the detections in the g filter and r filter respectively.
 
@@ -95,11 +95,11 @@ the [python client for Lasair ](https://pypi.org/project/lasair/):
 ```
 pip3 install lasair
 ```
-The documentation is in the page [Lasair Client](../core_functions/client.html).
+The documentation is in the page [Lasair Client](core_functions/client.html).
 The client also has methods to consume alerts from an active filter -- [see here](core_functions/alert-streams.html).
-There are a number of [python notebooks](../core_functions/python-notebooks.html) that show how to use the Lasair client.
+There are a number of [python notebooks](core_functions/python-notebooks.html) that show how to use the Lasair client.
 
-The underlying REST API explained in the page [Lasair API](../core_functions/rest-api.html).
+The underlying REST API explained in the page [Lasair API](core_functions/rest-api.html).
 
 ## Annotations
 
