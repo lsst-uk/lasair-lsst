@@ -27,13 +27,9 @@ Then log in to the Lasair website.
 The root of the tree is [here](https://github.com/lsst-uk/lasair-examples/blob/main/).
 They are described below.
 ----
-### Learn Lasair
-- [Using the Lasair API](https://github.com/lsst-uk/lasair-lsst-examples/blob/main/tutorials/API_recipes.ipynb): **Learn how to use the Lasair API.**
-
-- [Using the Lasair Kafka system](https://github.com/lsst-uk/lasair-lsst-examples/blob/main/tutorials/KAFKA_Listen_to_Alerts.ipynb): **Learn how to consume Kafka from an active filter.**
 
 ### Inspect object
-- [Examine and Object](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/examine_object.ipynb): Learn about the data associated with a Lasair object.
+- [Examine an Object](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/examine_object.ipynb): Learn about the data associated with a Lasair object.
 
 - [See all the cutouts](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/cutouts.ipynb): Shows all the cutout images for a given object in Lasair.
 

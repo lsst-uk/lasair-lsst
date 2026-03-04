@@ -9,7 +9,7 @@ You can also get alert by email, although obviously the numbers will be limited.
 
 ### Resources
 - See the [Consume Kafka notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafka.ipynb) for basic consumption of an active stream.
-- Copy and modify the [Consume Kafka Plot notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafla_plot.ipynb) to consume a stream with a light curve and plot it.
+- Copy and modify the [Consume Kafka Plot notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafka_plot.ipynb) to consume a stream with a light curve and plot it.
 - Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
 - Copy and modify the program at the bottom of this page to fetch your own Kafka records.
 
@@ -180,7 +180,7 @@ print('No more messages available')
 There is a jupyter notebook that shows how to read from an active filter (like the code above), as well as make a plot including the `diaSourceList` and `diaForcedSourceList`.
 It assumes the filter has been saved with the 'lite lightcurve' option.
 
-[**See LSST_consume_plot.ipynb**](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafla_plot.ipynb).
+[See consume_kafka_plot.ipynb](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafka_plot.ipynb).
 
 ### Email Streaming
 

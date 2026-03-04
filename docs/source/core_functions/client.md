@@ -75,7 +75,7 @@ and the return has object identifiers, and their separations in arcseconds, some
 ```
 ### <a name="query"></a>query
 
-This method runs a query on the Lasair database. There is an [interactive query builder](https://lasair.lsst.ac.uk/query), and a [schema description](https://lasair.lsst.ac.uk/schema). The arguments are:
+This method runs a query on the Lasair database. There is an [interactive query builder](https://lasair.lsst.ac.uk/filter/create)(must be logged in), and a [schema description](https://lasair.lsst.ac.uk/schema). The arguments are:
 
 *   `selected`: (string) the list of attributes to be returned,
 *   `tables`: (string) the list of tables to be joined,
@@ -109,7 +109,7 @@ and the return is something like:
 ```
 
 In order to make an API query that involves a watchlist (or watchmap), first find its ID, the number at the end of the URL when you click through to your watchlist.
-For example [watchlist 139](https://lasair-ztf.lsst.ac.uk/watchlists/139/) is named 'E+A galaxies'. Now add to the `selected` and `tables` variables like this:
+For example [watchlist 8](https://lasair.lsst.ac.uk/watchlists/8/) is named 'E+A galaxies'. Now add to the `selected` and `tables` variables like this:
 ```
 selected = 'objects.objectId, watchlist_hits.name, watchlist_hits.arcsec'
 tables   = 'objects,watchlists:139'

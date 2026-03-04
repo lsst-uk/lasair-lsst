@@ -63,7 +63,7 @@ For more information see the [notebook](https://github.com/lsst-uk/lasair-exampl
 Intelligent crossmatch from multiple catalogues.
 For more information see the [notebook on API usage](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/sherlock_api.ipynb),
 or the [notebook on choosing crossmatches](https://github.com/lsst-uk/lasair-examples/blob/main/features/sherlock_feature.ipynb), or
-[Sherlock writeup](core_functions/sherlock.html).
+[Sherlock writeup](sherlock.html).
 
 ### TNS table
 Lasair keeps an up-to-date clone of the TNS database of ~100,000 supernovae, 
