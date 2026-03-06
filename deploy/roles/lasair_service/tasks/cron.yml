@@ -13,6 +13,26 @@
     name:  cron
     state: started
 
+# Run limited database dump daily
+- name: "Crontab for mysqlbackup-web"
+  cron:
+    name:   "mysqlbackup-web"
+    user:   "{{ ansible_env.USER }}"
+    minute: '0'
+    hour:   '23'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; {{ venv_path }}/bin/python3 mysqlbackup-web.py)"
+
+# Run full database dump weekly
+- name: "Crontab for mysqlbackup"
+  cron:
+    name:   "mysqlbackup"
+    user:   "{{ ansible_env.USER }}"
+    minute: '20'
+    hour:   '23'
+    weekday: 6   
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; {{ venv_path }}/bin/python3 mysqlbackup.py)"
+
+
 # Polls the TNS for new entries (22 past midnight)
 - name: "Crontab for TNS"
   cron:
