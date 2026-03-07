@@ -1,5 +1,5 @@
 """ annotationStatistics
-    Print out the statistics for the lvra system
+    Print out the statistics for complex annotators
 """
 import sys
 sys.path.append('../common')
@@ -7,6 +7,7 @@ from src import date_nid
 import src.db_connect as db_connect
 
 def bytes_out(cursor, query_name):
+    # How many bytes output on public Kafka by this filter, for the last 7 days
     nid = date_nid.nid_now()
     query = 'SELECT name,value,nid FROM lasair_statistics WHERE nid>%d AND name LIKE "%%%s_bytes%%"'
     query = query % (nid-7, query_name)
@@ -17,6 +18,7 @@ def bytes_out(cursor, query_name):
         print('%s %10.0f' % (date_nid.nid_to_date(row['nid']), (row['value']/1000000)))
 
 def annotations_in(cursor, ann_name):
+    # How many annotations contributed by this annotator, for the last 7 days
     query = "SELECT count(*) AS nann, DATE(timestamp) as date FROM annotations "
     query += "WHERE topic='%s' AND timestamp > DATE(NOW() - INTERVAL 7 DAY) "
     query += "GROUP BY DAY(timestamp), MONTH(timestamp), YEAR(timestamp)"
@@ -28,6 +30,7 @@ def annotations_in(cursor, ann_name):
         print('%s %8d' % (row['date'], row['nann']))
 
 def fast_filters(cursor, ann_name):
+    # List of active filters that are immediately run as a result of the fast annotator
     query = " SELECT last_name, active, name FROM myqueries JOIN auth_user ON user=id "
     query += "WHERE tables LIKE '%%%s%%' and active > 0 ORDER BY last_name"
     query = query % ann_name
