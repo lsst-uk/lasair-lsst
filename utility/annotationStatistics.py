@@ -41,7 +41,7 @@ def bytes_out(cursor, filter_name):
     query = query % (nid-7, filter_name)
     cursor.execute(query)
     print('\n** Bytes out by Kafka to  %s' % filter_name)
-    print(' date    Mbytes')
+    print(' date    bytes')
     for row in cursor:
         date = date_nid.nid_to_date(row['nid'])
         bytes = f'{int(row["value"]):,}'
