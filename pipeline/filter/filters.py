@@ -231,7 +231,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                     if active == LIGHTCURVE_FULL:
                         q['alert'] = alert
 
-    dispose_kafka(fltr.producer, query_results, query, ms, nid)
+    dispose_kafka(fltr.producer, query_results, query, ms, nid, log=fltr.log)
     return len(query_results)
 
 def write_digest(allrecords, topic_name, last_entry, last_email):
@@ -333,7 +333,7 @@ def send_email(email, topic, message, message_html=''):
     s.quit()
 
 
-def dispose_kafka(producer, query_results, query, ms, nid):
+def dispose_kafka(producer, query_results, query, ms, nid, log):
     """ Send out query results by kafka to the given topic.
     """
     topic_name = query['topic_name']
@@ -353,11 +353,13 @@ def dispose_kafka(producer, query_results, query, ms, nid):
             nalert += 1
             if will_produce:
                 producer.produce(topic_name, value=jsonout, callback=kafka_ack)
+                if nalert % 100 == 0:
+                    producer.flush()
         producer.flush(10.0)   # 10 second timeout
     except Exception as e:
         rtxt = "ERROR in filter/run_active_queries: cannot produce to public kafka"
         rtxt += str(e)
-        slack_webhook.send(settings.SLACK_URL, rtxt)
+        log.error(settings.SLACK_URL, rtxt)
         print(rtxt)
         sys.stdout.flush()
 
