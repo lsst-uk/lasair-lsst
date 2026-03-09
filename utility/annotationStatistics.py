@@ -30,13 +30,14 @@ def fast_filters(cursor, ann_name):
     query = query % ann_name
     cursor.execute(query)
     s = ''
-    s += '\n** Fast annotation filters resulting from %s\n' % ann_name
-    s += '   Last name  active  Filter name\n'
-    n = 0
+    n_filter = 0
     for row in cursor:
-        n += 1
+        n_filter += 1
         s += '%15s %d %s\n' % (row['last_name'], row['active'], row['name'])
-    return (n, s)
+
+    print('\n** %s is a FAST ANNOTATOR with %d filters:' % (ann_name, n_filter))
+    print('   Last name  active  Filter name')
+    print(s)
 
 def bytes_out(cursor, filter_name):
     # How many bytes output on public Kafka by this filter, for the last 7 days
@@ -70,11 +71,9 @@ if __name__ == "__main__":
 
     active = annotations_in(cursor, ann_name)
     if active  == 1:
-        print('\nNORMAL ANNOTATOR')
+        print('\n**%s is a NORMAL ANNOTATOR' % ann_name)
     else:
-        (n_filter, list_filter) = fast_filters  (cursor, ann_name)
-        print('\nFAST ANNOTATOR with %d filters:' % n_filter)
-        print(list_filter)
+        fast_filters  (cursor, ann_name)
 
     if feeder_name:
         bytes_out     (cursor, feeder_name)
