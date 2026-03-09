@@ -134,12 +134,15 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
             mock_kafka_consumer.poll.return_value.error.return_value = e
             mock_kafka_consumer.poll.return_value.value.return_value = example_input_data
             alerts = []
+            mock_log = unittest.mock.MagicMock()
             # consume should report consuming 0 alerts
-            self.assertEqual(wrapper.consume(self.conf, log, alerts, mock_kafka_consumer), 0)
+            self.assertEqual(wrapper.consume(self.conf, mock_log, alerts, mock_kafka_consumer), 0)
             # alerts should be empty
             self.assertEqual(alerts, [])
             # poll should have been called once with timeout 1
             mock_kafka_consumer.poll.assert_called_once_with(1)
+            # should log error
+            mock_log.error.assert_called_once()
 
     def test_non_fatal_error(self):
         """test that a non-fatal error is non-fatal"""
@@ -151,14 +154,17 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     # poll returns None when no messages left to consume
                     mock_kafka_consumer.poll = non_fatal_error_on_1st_call
                     alerts = []
+                    mock_log = unittest.mock.MagicMock()
                     # consume should report consuming 0 alerts
-                    self.assertEqual(wrapper.consume(self.conf, log, alerts, mock_kafka_consumer), 5)
+                    self.assertEqual(wrapper.consume(self.conf, mock_log, alerts, mock_kafka_consumer), 5)
                     # alerts should have len 5
                     self.assertEqual(len(alerts), 5)
                     # content of alerts should be as expected
                     self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
                     # poll should have been called 6 times
                     self.assertEqual(nfe_call_count, 6)
+                    # should log warning (rather than error)
+                    mock_log.warning.assert_called_once()
 
     def test_max_errors(self):
         """test max non-fatal errors"""
@@ -206,6 +212,7 @@ class SherlockWrapperConsumerTest(unittest.TestCase):
                     self.assertEqual(len(alerts), 5)
                     # content of alerts should be as expected
                     self.assertEqual(alerts[0]['diaObject']['ra'], 155.06611633096068)
+
 
     def test_fatal_failed_commit(self):
         """test (fatal) failure on commit"""
