@@ -123,7 +123,7 @@
                 <a class="btn btn-sm btn-gray-600 border-white align-middle" data-bs-toggle="tooltip" data-bs-placement="bottom" data-bs-title="show the SQL query used to generate this filter"><?xml version="1.0" encoding="UTF-8"?>
                     <span class="align-middle" data-bs-toggle="collapse" data-bs-target="#collapseOne" aria-expanded="false" aria-controls="collapseOne">
                         {% include "includes/icons/icon_sql.html" %}
-                        <span class="align-middle  d-none d-md-inline" >Show Query</span></span></a>
+                        <span class="align-middle  d-none d-md-inline" >Show Filter</span></span></a>
 
 
                 {# </div> #}
@@ -138,13 +138,13 @@
 
 
     <div class="row d-block d-xl-flex">
-        {% if real_sql %}
+        {% if display_sql %}
             <div class="accordion accordion-flush" id="accordionExample">
                 <div class="accordion-item">
 
                     <div id="collapseOne" class="accordion-collapse collapse" aria-labelledby="headinOne" data-bs-parent="#accordionExample">
                         <div class="accordion-body p-0 ">
-                            <p><pre><code class="language-sql">{{real_sql}}</code></pre></p>
+                            <p><pre><code class="language-sql">{{ display_sql }}</code></pre></p>
                         </div>
                     </div>
                 </div>
