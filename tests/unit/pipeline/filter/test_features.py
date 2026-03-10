@@ -85,7 +85,6 @@ class FeatureTest(TestCase):
         groupClass = groupModule.sherlock
         groupInst = groupClass(alert, verbose=True)
         ret = groupInst.run()
-        print(ret)
         self.assertIsNone(ret['absMag'])
 
 if __name__ == '__main__':

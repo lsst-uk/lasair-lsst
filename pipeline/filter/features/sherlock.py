@@ -60,8 +60,6 @@ class sherlock(FeatureGroup):
         # extinction corrected lightcurve
         (lc_ecflux, lc_time, lc_band) = getECFluxTimeBand(self.alert)
 
-        print('flux', lc_ecflux)
-
         peakAbsMag = None
         peakMJD    = None
         absMag     = None
