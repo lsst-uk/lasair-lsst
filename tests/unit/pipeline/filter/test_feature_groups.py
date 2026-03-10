@@ -14,7 +14,7 @@ from features import *
 
 sample = '313637921267122191'
 
-class FeatureTest(TestCase):
+class FeatureGroupTest(TestCase):
   def test0_get_features(self):
     """Check that for every feature in the schema an implementing class exists."""
     impl_features = set()
