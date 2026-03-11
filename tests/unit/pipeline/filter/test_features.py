@@ -29,7 +29,7 @@ class FeatureTest(TestCase):
             'annotations': {
                 'sherlock': [ {
                     'classification': 'SN',
-                    'direct_distance' : 100  # 100 Mpc
+                    'best_distance' : 100  # 100 Mpc
                 } ]
             }
         }
