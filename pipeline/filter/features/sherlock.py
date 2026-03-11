@@ -29,7 +29,7 @@ class sherlock(FeatureGroup):
         distanceModulusK = None
         if sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
             # use this if present
-            if 'best_distance' in sherlock:
+            if 'best_distance' in sherlock and sherlock['best_distance'] is not None:
                 # Mpc to pc
                 dpc = 1000000*sherlock['best_distance']
                 # https://en.wikipedia.org/wiki/Distance_modulus
