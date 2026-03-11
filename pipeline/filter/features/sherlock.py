@@ -29,9 +29,9 @@ class sherlock(FeatureGroup):
         distanceModulusK = None
         if sherlock['classification'] in ['SN', 'NT', 'ORPHAN']:
             # use this if present
-            if 'direct_distance' in sherlock:
+            if 'best_distance' in sherlock:
                 # Mpc to pc
-                dpc = 1000000*sherlock['direct_distance']
+                dpc = 1000000*sherlock['best_distance']
                 # https://en.wikipedia.org/wiki/Distance_modulus
                 distanceModulusK = 5*math.log10(dpc) - 5
 

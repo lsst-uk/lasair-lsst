@@ -10,6 +10,8 @@ class counting(FeatureGroup):
         "medianR",
         "latestR",
         "nSourcesGood",
+        "nPosDiaSources",
+        "nPosDiaSourcesNights",
         "nuSources",
         "ngSources",
         "nrSources",
@@ -25,10 +27,24 @@ class counting(FeatureGroup):
         reliability = getReliability(self.alert)
         medianR = statistics.median(reliability)
         latestR = reliability[-1]    # last one
+
         nSourcesGood = 0
         for r in reliability:
             if r > 0.5:
                 nSourcesGood += 1
+
+        nPosDiaSources = 0
+        for f in flux:
+            if f > 0:
+                nPosDiaSources += 1
+
+        got_night = []
+        for (f,t) in zip(flux,time):
+            if f > 0:
+                itime = int(time+0.5)   # want it to be noon to noon
+                if not itime in got_night:
+                    got_night.append(itime)
+        nPosDiaSourcesNights = len(got_night)
 
         nSource = {'u':0, 'g':0, 'r':0, 'i':0, 'z':0, 'y':0}
 
@@ -39,7 +55,9 @@ class counting(FeatureGroup):
         out = { 
             "medianR":      medianR,
             "latestR":      latestR,
-            "nSourcesGood": nSourcesGood,
+            "nSourcesGood"        : nSourcesGood,
+            "nPosDiaSources"      : nPosDiaSources,
+            "nPosDiaSourcesNights": nPosDiaSourcesNights,
             "nuSources":    nSource['u'],
             "ngSources":    nSource['g'],
             "nrSources":    nSource['r'],
