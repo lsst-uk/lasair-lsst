@@ -38,10 +38,13 @@
 - hosts: cluster_control
   gather_facts: false
   tasks:
-    - name: cluster control server listening on port 9001
+    - name: cluster control server listening on LB ports
       wait_for:
-        port: 9001
+        port: "{{item}}"
         timeout: 1
+      loop:
+        - 9001
+        - 9002
       tags: net
   tags: db
 - hosts: localhost
