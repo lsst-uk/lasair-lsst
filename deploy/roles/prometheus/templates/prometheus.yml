@@ -89,6 +89,7 @@ scrape_configs:
        {% endfor -%}
        {% for host in (groups['cluster_control']) -%}
         - "{{ host }}:9001"
+        - "{{ host }}:9002"
        {% endfor %}
 
     relabel_configs:
