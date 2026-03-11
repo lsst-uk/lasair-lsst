@@ -41,7 +41,7 @@ class counting(FeatureGroup):
         got_night = []
         for (f,t) in zip(flux,time):
             if f > 0:
-                itime = int(time+0.5)   # want it to be noon to noon
+                itime = int(t+0.5)   # want it to be noon to noon
                 if not itime in got_night:
                     got_night.append(itime)
         nPosDiaSourcesNights = len(got_night)

@@ -92,7 +92,7 @@ schema = {
             "doc": "Number of diaSources associated with this diaObject"},
     {"name": "nPosDiaSources",  "type": "int", "origin": "lasair",
             "doc": "Number of diaSources with positive flux associated with this diaObject"},
-    {"name": "nPosDiaSourceNights",  "type": "int", "origin": "lasair",
+    {"name": "nPosDiaSourcesNights",  "type": "int", "origin": "lasair",
             "doc": "Number of nights on which this object was detected with positive flux"},
     {"name": "nSourcesGood", "type": "int", "origin": "lasair",
             "doc": "Number sources with reliability > 0.5" },
