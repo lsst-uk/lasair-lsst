@@ -257,6 +257,9 @@ class Filter:
             "physical_separation_kpc",
             "direct_distance",
             "distance",
+            "best_distance",
+            "best_distance_flag",
+            "best_distance_source",
             "z",
             "photoZ",
             "photoZErr",
@@ -276,6 +279,11 @@ class Filter:
         for key, value in ann.items():
             if key in attrs and value:
                 sets[key] = value
+
+        # this hack adds back in the deprecated 'distance' as 'best_distance'
+        if 'best_distance' in ann:
+            sets['distance'] = ann['best_distance']
+
         if 'description' in attrs and 'description' not in ann:
             sets['description'] = 'no description'
         # Build the query
