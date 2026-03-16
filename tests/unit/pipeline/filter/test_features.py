@@ -61,7 +61,7 @@ class FeatureTest(TestCase):
         groupClass = groupModule.sherlock
         groupInst = groupClass(alert, verbose=True)
         ret = groupInst.run()
-        self.assertAlmostEqual(ret['absMag'], -19.518675881388, places=4)
+        self.assertAlmostEqual(ret['absMag'], -19.31171245559691, places=4)
 
     def test2_sherlock(self):
         # negative flux test
