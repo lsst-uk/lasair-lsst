@@ -51,6 +51,5 @@ def tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius):
             cursor3.execute(query3)
             msl.commit()
         except:
-            s = '     matches %s' % objectId
-            print(s)
+            pass
     return n_hits
