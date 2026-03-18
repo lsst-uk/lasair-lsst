@@ -1,5 +1,5 @@
 """
-Utility to completely rebuild the TSBN is Lasair, including 3 tables;
+Utility to completely rebuild the TNS in Lasair, including 3 tables;
 crossmatch_tns
 watchlist_cones
 watchlist_hits
