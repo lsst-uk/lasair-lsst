@@ -20,7 +20,7 @@ def fink_content(message):
 fink_config = {
     'username':          settings.FINK_USERNAME ,
     'bootstrap.servers': settings.FINK_SERVERS,
-    'group_id':          settings.FINK_GROUP_ID
+    'group.id':          settings.FINK_GROUP_ID
 }
 
 # Instantiate a consumer
