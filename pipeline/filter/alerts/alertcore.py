@@ -1,3 +1,15 @@
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
+import sherlock
+import filters
+import watchlists
+import watchmaps
+import mmagw
+
+class AlertFilter(Filter):
+    def __init__(self, *args):
+        super().__init__(*args)
+
     def run_batch(self):
         """Top level method that processes an alert batch.
 
@@ -96,9 +108,6 @@
         self.write_stats(timers, nalerts)
         self.log.info('%d alerts processed\n' % nalerts)
         return nalerts
-
-
-
 
     def create_insert_query(alert: dict):
         """create_insert_query.

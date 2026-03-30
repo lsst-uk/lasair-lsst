@@ -45,8 +45,6 @@ import numbers
 import confluent_kafka
 import datetime
 from docopt import docopt
-from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
 
 sys.path.append('../../common')
 import settings
@@ -57,10 +55,6 @@ import db_connect
 import manage_status
 import lasairLogging
 import logging
-import filters
-import watchlists
-import watchmaps
-import mmagw
 from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
@@ -98,7 +92,7 @@ class Filter:
         self.stats = stats
         self.verbose = verbose
         self.sfd = None
-        self.alert_dict = {}
+        self.message_dict = {}
 
         self.consumer = None
         self.producer = None
@@ -182,14 +176,6 @@ class Filter:
             self.log.info(query)
             raise
 
-    def truncate_local_database(self):
-        """ Truncate all the tables in the local database.
-        """
-        self.execute_query('TRUNCATE TABLE objects')
-        self.execute_query('TRUNCATE TABLE sherlock_classifications')
-        self.execute_query('TRUNCATE TABLE watchlist_hits')
-        self.execute_query('TRUNCATE TABLE area_hits')
-
     def make_kafka_consumer(self):
         """ Make a kafka consumer.
         """
@@ -234,70 +220,6 @@ class Filter:
             self.log.error('ERROR cannot make kafka producer' + str(e))
 
     @staticmethod
-    def create_insert_sherlock(ann: dict):
-        """create_insert_sherlock.
-        Makes the insert query for the sherlock classification
-
-        Args:
-            ann:
-        """
-        # all the sherlock attrs that we want for the database
-        attrs = [
-            "classification",
-            "diaObjectId",
-            "association_type",
-            "catalogue_table_name",
-            "catalogue_object_id",
-            "catalogue_object_type",
-            "raDeg",
-            "decDeg",
-            "separationArcsec",
-            "northSeparationArcsec",
-            "eastSeparationArcsec",
-            "physical_separation_kpc",
-            "direct_distance",
-            "distance",
-            "best_distance",
-            "best_distance_flag",
-            "best_distance_source",
-            "z",
-            "photoZ",
-            "photoZErr",
-            "Mag",
-            "MagFilter",
-            "MagErr",
-            "classificationReliability",
-            "major_axis_arcsec",
-            "annotator",
-            "additional_output",
-            "description",
-            "summary",
-        ]
-        sets = {}
-        for key in attrs:
-            sets[key] = None
-        for key, value in ann.items():
-            if key in attrs and value:
-                sets[key] = value
-
-        # this hack adds back in the deprecated 'distance' as 'best_distance'
-        if 'best_distance' in ann:
-            sets['distance'] = ann['best_distance']
-
-        if 'description' in attrs and 'description' not in ann:
-            sets['description'] = 'no description'
-        # Build the query
-        query_list = []
-        query = 'REPLACE INTO sherlock_classifications SET '
-        for key, value in sets.items():
-            if value is None:
-                query_list.append(key + '=NULL')
-            else:
-                query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
-        query += ',\n'.join(query_list)
-        return query
-
-    @staticmethod
     def create_insert_query(alert: dict):
         """create_insert_query.
         Creates an insert sql statement for building the object and
@@ -328,56 +250,6 @@ class Filter:
                 query_list.append(key + '=' + str(value))
         query += ',\n'.join(query_list)
         return query
-
-    def handle_alert_list(self, alertList):
-        """alert_filter: handle a list of alerts
-        """
-        raList   = []
-        declList = []
-        for alert in alertList:
-            raList  .append(alert['diaObject']['ra'])
-            declList.append(alert['diaObject']['decl'])
-        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
-        ebvList = self.sfd(c)
-        nalert = 0
-        for ebv, alert in zip(ebvList, alertList):
-            alert['ebv'] = ebv
-            nalert += self.handle_alert(alert)
-        if self.verbose:
-            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
-        return nalert
-
-    def handle_alert(self, alert):
-        # Filter to apply to each alert.
-        diaObjectId = alert['diaObject']['diaObjectId']
-
-        # really not interested in alerts that have no detections!
-        if len(alert['diaSourcesList']) == 0:
-            if self.verbose:
-                print('No diaSources')
-            return 0
-
-        # build the insert query for this object.
-        # if not wanted, returns 0
-        query = Filter.create_insert_query(alert)
-        if not query:
-            if self.verbose:
-                print('Failed to make insert query')
-                print(json.dumps(alert, indent=2))
-            return 0
-        self.execute_query(query)
-
-        # now ingest the sherlock_classifications
-        if 'annotations' in alert:
-            annotations = alert['annotations']
-            if 'sherlock' in annotations:
-                for ann in annotations['sherlock']:
-                    if "transient_object_id" in ann:
-                        ann.pop('transient_object_id')
-                    ann['diaObjectId'] = diaObjectId
-                    query = Filter.create_insert_sherlock(ann)
-                    self.execute_query(query)
-        return 1
 
     def consume_alerts(self):
         """Consume a batch of alerts from Kafka.
@@ -416,12 +288,13 @@ class Filter:
                 continue
 
             nalert_in += 1
-            alertList.append(alert)
+            alertList.append(message)
             diaObjectId = alert['diaObject']['diaObjectId']
-            self.alert_dict[diaObjectId] = alert
+            self.message_dict[diaObjectId] = message
 
+import alerts
             if nalert_in % 1000 == 0:
-                d = self.handle_alert_list(alertList)
+                d = alerts.handle_message_list(alertList)    ### export
                 alertList = []
                 nalert_out += d
                 self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
@@ -431,7 +304,7 @@ class Filter:
                 # make sure everything is committed
                 self.database_local.commit()
 
-        d = self.handle_alert_list(alertList)
+        d = alerts.handle_message_list(alertList)    ### export
         nalert_out += d
         self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
 
@@ -618,106 +491,6 @@ class Filter:
 #            today_candidates_ztf = -1
         today_candidates_ztf = 0
         return today_candidates_ztf
-
-    def run_batch(self):
-        """Top level method that processes an alert batch.
-
-        Does the following:
-         - Consume alerts from Kafka
-         - Run watchlists
-         - Run watchmaps
-         - Run user filters
-         - Run annotation queries
-         - Build CSV file
-         - Transfer to main database"""
-
-        self.setup()
-
-        # set up the timers
-        timers = {}
-        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', \
-                'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
-            timers[name] = manage_status.timer(name)
-
-        self.truncate_local_database()
-
-        timers['ftotal'].on()
-        self.log.info('FILTER batch start %s' % now())
-        self.log.info("Topic is %s" % self.topic_in)
-
-        # consume the alerts from Kafka
-        timers['ffeatures'].on()
-        nalerts = self.consume_alerts()
-        timers['ffeatures'].off()
-
-        if nalerts > 0:
-            # run the watchlists
-            self.log.info('WATCHLIST start %s' % now())
-            timers['fwatchlist'].on()
-            nhits = watchlists.watchlists(self)
-            timers['fwatchlist'].off()
-            if nhits is not None:
-                self.log.info('WATCHLISTS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchlists")
-
-            # run the watchmaps
-            self.log.info('WATCHMAP start %s' % now())
-            timers['fwatchmap'].on()
-            nhits = watchmaps.watchmaps(self)
-            timers['fwatchmap'].off()
-            if nhits is not None:
-                self.log.info('WATCHMAPS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchmaps")
-
-            # run the MMA/GW events
-            self.log.info('MMA/GW start %s' % now())
-            timers['fmmagw'].on()
-            nhits = mmagw.mmagw(self)
-            timers['fmmagw'].off()
-            if nhits is not None:
-                self.log.info('MMA/GW got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/mmagw")
-
-            # run the user filters
-            self.log.info('Filters start %s' % now())
-            timers['ffilters'].on()
-            ntotal = filters.filters(self)
-            timers['ffilters'].off()
-            if ntotal is not None:
-                self.log.info('FILTERS got %d' % ntotal)
-            else:
-                self.log.error("ERROR in filter/filters")
-
-            # build CSV file with local database and transfer to main
-            if self.transfer:
-                timers['ftransfer'].on()
-                commit = self.transfer_to_main()
-                timers['ftransfer'].off()
-                self.log.info('Batch ended')
-                if not commit:
-                    self.log.info('Transfer to main failed, no commit')
-                    return 0
-
-        # run the annotation queries
-        self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.fast_anotation_filters(self)
-        if ntotal is not None:
-            self.log.info('ANNOTATION FILTERS got %d' % ntotal)
-        else:
-            self.log.error("ERROR in filter/fast_annotation_filters")
-
-        # Clean up
-        self.alert_dict.clear()
-        
-        # Write stats for the batch
-        timers['ftotal'].off()
-        self.write_stats(timers, nalerts)
-        self.log.info('%d alerts processed\n' % nalerts)
-        return nalerts
-
 
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)

@@ -32,11 +32,25 @@ import os, sys, time, json, datetime, smtplib
 from confluent_kafka import Consumer, Producer, KafkaError
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
+
+import filters
+import watchlists
+import watchmaps
+import mmagw
 
 sys.path.append('../../common')
 import settings
 from src import db_connect, manage_status, date_nid
 
+def truncate_local_database(fltr):
+    """ Truncate all the tables in the local database.
+    """
+    fltr.execute_query('TRUNCATE TABLE objects')
+    fltr.execute_query('TRUNCATE TABLE sherlock_classifications')
+    fltr.execute_query('TRUNCATE TABLE watchlist_hits')
+    fltr.execute_query('TRUNCATE TABLE area_hits')
 
 def fetch_queries(msl_remote, ms, nid):
     """fetch_queries.
