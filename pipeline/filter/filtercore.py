@@ -456,30 +456,35 @@ if __name__ == "__main__":
         wait_time = getattr(settings, 'WAIT_TIME', 60)
     verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
+    n_batch = 0
+    total_messages = 0
+
 ############### choose which type of message, are they alerts or annotations ########
     from alerts import alertcore
     fltr = alertf = alertcore.AlertFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
-    alertf.setup()
-########################################################################
 
-    n_batch = 0
-    total_messages = 0
+    # set up database connections, etc
+    alertf.setup()
     while not fltr.sigterm_raised:
 
         # the subclass is handed a list of messages (alerts or annotations)
         alertf.setup_batch()
 
-        # calls handle_message_list for subclass
+        # ingest_message_list ingests a set of alerts, computes 
+        # light curve features, inserts to a local database
+        # it is the handler for the message consumer
         iml = alertf.ingest_message_list
         n_messages = fltr.consume_messages(iml)
 
+        # after ingesting, do the watchlists, filters etc
         if n_messages > 0:
             alertf.post_ingest(n_messages)
+########################################################################
 
-        # keep a cache
+        # clear the cache
         fltr.message_dict.clear()
 
         n_batch += 1
