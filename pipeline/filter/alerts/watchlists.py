@@ -79,7 +79,7 @@ def insert_watchlist_hits(fltr, hits):
     query += ',\n'.join(list)
 
     try:
-        fltr.execute_query(query)
+        fltr.execute_local_query(query)
     except Exception as err:
         fltr.log.error('ERROR in watchlists/insert_watchlist_hits: insert watchlist_hit failed: %s' % str(err))
 
@@ -97,7 +97,7 @@ def insert_tns_hits(fltr, hits):
             continue
         query = query_template % (hit['name'], hit['diaObjectId'])
         try:
-            fltr.execute_query(query)
+            fltr.execute_local_query(query)
         except Exception as err:
             fltr.log.error('ERROR in watchlists/insert_tns_hits: insert tns_hit failed: %s' % str(err))
 

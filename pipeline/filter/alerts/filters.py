@@ -47,10 +47,10 @@ from src import db_connect, manage_status, date_nid
 def truncate_local_database(fltr):
     """ Truncate all the tables in the local database.
     """
-    fltr.execute_query('TRUNCATE TABLE objects')
-    fltr.execute_query('TRUNCATE TABLE sherlock_classifications')
-    fltr.execute_query('TRUNCATE TABLE watchlist_hits')
-    fltr.execute_query('TRUNCATE TABLE area_hits')
+    fltr.execute_local_query('TRUNCATE TABLE objects')
+    fltr.execute_local_query('TRUNCATE TABLE sherlock_classifications')
+    fltr.execute_local_query('TRUNCATE TABLE watchlist_hits')
+    fltr.execute_local_query('TRUNCATE TABLE area_hits')
 
 def fetch_queries(msl_remote, ms, nid):
     """fetch_queries.

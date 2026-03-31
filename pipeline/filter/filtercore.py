@@ -136,8 +136,8 @@ class Filter:
         if self.prv_sigterm_handler is not signal.SIG_DFL and not None:
             self.prv_sigterm_handler(signum, frame)
 
-    def execute_query(self, query: str):
-        """ execute_query: run a query and close it, and compalin to slack if failure.
+    def execute_local_query(self, query: str):
+        """ execute_local_query: run a query and close it, and compalin to slack if failure.
         """
         try:
             cursor = self.database_local.cursor(buffered=True)
@@ -145,7 +145,7 @@ class Filter:
             cursor.close()
             self.database_local.commit()
         except Exception as e:
-            self.log.error('ERROR filter/execute_query: %s' % str(e))
+            self.log.error('ERROR filter/execute_local_query: %s' % str(e))
             self.log.info(query)
             raise
 
@@ -470,7 +470,13 @@ if __name__ == "__main__":
     while not fltr.sigterm_raised:
 
         # the subclass is handed a list of messages (alerts or annotations)
-        n_messages = fltr.run_batch()
+        fltr.setup_batch()
+
+        # calls handle_message_list for subclass
+        n_messages = fltr.consume_messages()
+
+        if n_messages > 0:
+            fltr.run_batch(n_messages)
 
         # keep a cache
         fltr.message_dict.clear()

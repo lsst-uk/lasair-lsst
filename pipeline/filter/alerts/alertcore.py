@@ -6,6 +6,7 @@ from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
 
 from filtercore import Filter
+from transfer import fetch_attrs
 from alerts.features.FeatureGroup import FeatureGroup
 
 sys.path.append('../../common')
@@ -63,7 +64,25 @@ class AlertFilter(Filter):
 
 
     # this method will be called from above when a batch of messages is ready
-    def run_batch(self):
+    def setup_batch(self):
+        # truncate local databases
+        self.execute_local_query('TRUNCATE TABLE objects')
+        self.execute_local_query('TRUNCATE TABLE sherlock_classifications')
+        self.execute_local_query('TRUNCATE TABLE watchlist_hits')
+        self.execute_local_query('TRUNCATE TABLE area_hits')
+
+        # set up the timers
+        self.timers = {}
+        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', \
+                'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
+            self.timers[name] = manage_status.timer(name)
+
+        self.timers['ftotal'].on()
+        self.log.info('FILTER batch start %s' % now())
+        self.log.info("Topic is %s" % self.topic_in)
+
+
+    def run_batch(self, n_messages):
         """Top level method that processes an alert batch.
 
         Does the following:
@@ -77,77 +96,61 @@ class AlertFilter(Filter):
 
         self.setup()
 
-        # set up the timers
-        timers = {}
-        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', \
-                'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
-            timers[name] = manage_status.timer(name)
-
-        # truncate local databases
-        self.execute_query('TRUNCATE TABLE objects')
-        self.execute_query('TRUNCATE TABLE sherlock_classifications')
-        self.execute_query('TRUNCATE TABLE watchlist_hits')
-        self.execute_query('TRUNCATE TABLE area_hits')
-
-        timers['ftotal'].on()
-        self.log.info('FILTER batch start %s' % now())
-        self.log.info("Topic is %s" % self.topic_in)
-
         # consume the alerts from Kafka
-        timers['ffeatures'].on()
-        nalerts = self.consume_messages()
-        timers['ffeatures'].off()
+        # ask the superclass to get these
+#        self.timers['ffeatures'].on()
+#        nalerts = self.consume_messages()
+#        self.timers['ffeatures'].off()
 
-        if nalerts > 0:
-            # run the watchlists
-            self.log.info('WATCHLIST start %s' % now())
-            timers['fwatchlist'].on()
-            nhits = watchlists.watchlists(self)
-            timers['fwatchlist'].off()
-            if nhits is not None:
-                self.log.info('WATCHLISTS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchlists")
+        # run the watchlists
+        self.log.info('WATCHLIST start %s' % now())
+        self.timers['fwatchlist'].on()
+        nhits = watchlists.watchlists(self)
+        self.timers['fwatchlist'].off()
+        if nhits is not None:
+            self.log.info('WATCHLISTS got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/watchlists")
 
-            # run the watchmaps
-            self.log.info('WATCHMAP start %s' % now())
-            timers['fwatchmap'].on()
-            nhits = watchmaps.watchmaps(self)
-            timers['fwatchmap'].off()
-            if nhits is not None:
-                self.log.info('WATCHMAPS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchmaps")
+        # run the watchmaps
+        self.log.info('WATCHMAP start %s' % now())
+        self.timers['fwatchmap'].on()
+        nhits = watchmaps.watchmaps(self)
+        self.timers['fwatchmap'].off()
+        if nhits is not None:
+            self.log.info('WATCHMAPS got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/watchmaps")
 
-            # run the MMA/GW events
-            self.log.info('MMA/GW start %s' % now())
-            timers['fmmagw'].on()
-            nhits = mmagw.mmagw(self)
-            timers['fmmagw'].off()
-            if nhits is not None:
-                self.log.info('MMA/GW got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/mmagw")
+        # run the MMA/GW events
+        self.log.info('MMA/GW start %s' % now())
+        self.timers['fmmagw'].on()
+        nhits = mmagw.mmagw(self)
+        self.timers['fmmagw'].off()
+        if nhits is not None:
+            self.log.info('MMA/GW got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/mmagw")
 
-            # run the user filters
-            self.log.info('Filters start %s' % now())
-            timers['ffilters'].on()
-            ntotal = filters.filters(self)
-            timers['ffilters'].off()
-            if ntotal is not None:
-                self.log.info('FILTERS got %d' % ntotal)
-            else:
-                self.log.error("ERROR in filter/filters")
+        # run the user filters
+        self.log.info('Filters start %s' % now())
+        self.timers['ffilters'].on()
+        ntotal = filters.filters(self)
+        self.timers['ffilters'].off()
+        if ntotal is not None:
+            self.log.info('FILTERS got %d' % ntotal)
+        else:
+            self.log.error("ERROR in filter/filters")
 
-            # build CSV file with local database and transfer to main
-            if self.transfer:
-                timers['ftransfer'].on()
-                commit = self.transfer_to_main()
-                timers['ftransfer'].off()
-                self.log.info('Batch ended')
-                if not commit:
-                    self.log.info('Transfer to main failed, no commit')
-                    return 0
+        # build CSV file with local database and transfer to main
+        if self.transfer:
+            self.timers['ftransfer'].on()
+            commit = self.transfer_to_main()
+            self.timers['ftransfer'].off()
+            self.log.info('Batch ended')
+            if not commit:
+                self.log.info('Transfer to main failed, no commit')
+                return 0
 
         # run the annotation queries
         self.log.info('ANNOTATION FILTERS start %s' % now())
@@ -158,10 +161,10 @@ class AlertFilter(Filter):
             self.log.error("ERROR in filter/fast_annotation_filters")
 
         # Write stats for the batch
-        timers['ftotal'].off()
-        self.write_stats(timers, nalerts)
-        self.log.info('%d alerts processed\n' % nalerts)
-        return nalerts
+        self.timers['ftotal'].off()
+        self.write_stats(self.timers, n_messages)
+        self.log.info('%d alerts processed\n' % n_messages)
+        return n_messages
 
     def handle_message_list(self, alertList):
         """alert_filter: handle a list of alerts
@@ -199,7 +202,7 @@ class AlertFilter(Filter):
                 print('Failed to make insert query')
                 print(json.dumps(alert, indent=2))
             return 0
-        self.execute_query(query)
+        self.execute_local_query(query)
 
         # now ingest the sherlock_classifications
         if 'annotations' in alert:
@@ -210,7 +213,7 @@ class AlertFilter(Filter):
                         ann.pop('transient_object_id')
                     ann['diaObjectId'] = diaObjectId
                     query = self.create_insert_sherlock(ann)
-                    self.execute_query(query)
+                    self.execute_local_query(query)
         return 1
 
     @staticmethod
