@@ -1,15 +1,68 @@
+import sys
+import datetime
+import numbers
+import math
 from dustmaps.sfd import SFDQuery
 from astropy.coordinates import SkyCoord
+
+from filtercore import Filter
+from alerts.features.FeatureGroup import FeatureGroup
+
+sys.path.append('../../common')
+import settings
+
+sys.path.append('../../common/src')
+import date_nid
+import db_connect
+import manage_status
+
+
+sys.path.append('alerts')
 import sherlock
 import filters
 import watchlists
 import watchmaps
 import mmagw
 
-class AlertFilter(Filter):
-    def __init__(self, *args):
-        super().__init__(*args)
+def now():
+    return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
+class AlertFilter(Filter):
+    ### AlertFilter is subclass of Filter
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.sfd = None
+        self.csv_attrs = {}
+
+    ### set up an AlertFilter, after setting up the Filter
+    def setup(self):
+        # get the Filter object set up 
+        super().setup()
+
+        # get the order of the attributes for all tables transferred by CSV
+        table_list = [
+            'objects',
+            'sherlock_classifications',
+            'watchlist_hits',
+            'area_hits',
+            'mma_area_hits',
+        ]
+        try:
+            main_database = db_connect.remote(allow_infile=True)
+            for table_name in table_list:
+                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
+        except Exception as e:
+            self.log.error('ERROR connecting to main database: %s' % str(e))
+
+        # set up the extinction factory
+        if not self.sfd:
+            try:
+                self.sfd = SFDQuery()
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
+
+
+    # this method will be called from above when a batch of messages is ready
     def run_batch(self):
         """Top level method that processes an alert batch.
 
@@ -30,7 +83,11 @@ class AlertFilter(Filter):
                 'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
             timers[name] = manage_status.timer(name)
 
-        self.truncate_local_database()
+        # truncate local databases
+        self.execute_query('TRUNCATE TABLE objects')
+        self.execute_query('TRUNCATE TABLE sherlock_classifications')
+        self.execute_query('TRUNCATE TABLE watchlist_hits')
+        self.execute_query('TRUNCATE TABLE area_hits')
 
         timers['ftotal'].on()
         self.log.info('FILTER batch start %s' % now())
@@ -38,7 +95,7 @@ class AlertFilter(Filter):
 
         # consume the alerts from Kafka
         timers['ffeatures'].on()
-        nalerts = self.consume_alerts()
+        nalerts = self.consume_messages()
         timers['ffeatures'].off()
 
         if nalerts > 0:
@@ -100,15 +157,63 @@ class AlertFilter(Filter):
         else:
             self.log.error("ERROR in filter/fast_annotation_filters")
 
-        # Clean up
-        self.alert_dict.clear()
-
         # Write stats for the batch
         timers['ftotal'].off()
         self.write_stats(timers, nalerts)
         self.log.info('%d alerts processed\n' % nalerts)
         return nalerts
 
+    def handle_message_list(self, alertList):
+        """alert_filter: handle a list of alerts
+        """
+        raList   = []
+        declList = []
+        for alert in alertList:
+            raList  .append(alert['diaObject']['ra'])
+            declList.append(alert['diaObject']['decl'])
+        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
+        ebvList = self.sfd(c)
+        nalert = 0
+        for ebv, alert in zip(ebvList, alertList):
+            alert['ebv'] = ebv
+            nalert += self.handle_alert(alert)
+        if self.verbose:
+            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
+        return nalert
+
+    def handle_alert(self, alert):
+        # Filter to apply to each alert.
+        diaObjectId = alert['diaObject']['diaObjectId']
+
+        # really not interested in alerts that have no detections!
+        if len(alert['diaSourcesList']) == 0:
+            if self.verbose:
+                print('No diaSources')
+            return 0
+
+        # build the insert query for this object.
+        # if not wanted, returns 0
+        query = self.create_insert_query(alert)
+        if not query:
+            if self.verbose:
+                print('Failed to make insert query')
+                print(json.dumps(alert, indent=2))
+            return 0
+        self.execute_query(query)
+
+        # now ingest the sherlock_classifications
+        if 'annotations' in alert:
+            annotations = alert['annotations']
+            if 'sherlock' in annotations:
+                for ann in annotations['sherlock']:
+                    if "transient_object_id" in ann:
+                        ann.pop('transient_object_id')
+                    ann['diaObjectId'] = diaObjectId
+                    query = self.create_insert_sherlock(ann)
+                    self.execute_query(query)
+        return 1
+
+    @staticmethod
     def create_insert_query(alert: dict):
         """create_insert_query.
         Creates an insert sql statement for building the object and
@@ -140,54 +245,67 @@ class AlertFilter(Filter):
         query += ',\n'.join(query_list)
         return query
 
-
-    def handle_alert_list(self, alertList):
-        """alert_filter: handle a list of alerts
+    @staticmethod
+    def create_insert_sherlock(ann: dict):
+        """create_insert_sherlock.
+        Makes the insert query for the sherlock classification
+    
+        Args:
+            ann:
         """
-        raList   = []
-        declList = []
-        for alert in alertList:
-            raList  .append(alert['diaObject']['ra'])
-            declList.append(alert['diaObject']['decl'])
-        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
-        ebvList = self.sfd(c)
-        nalert = 0
-        for ebv, alert in zip(ebvList, alertList):
-            alert['ebv'] = ebv
-            nalert += self.handle_alert(alert)
-        if self.verbose:
-            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
-        return nalert
-
-    def handle_alert(self, alert):
-        # Filter to apply to each alert.
-        diaObjectId = alert['diaObject']['diaObjectId']
-
-        # really not interested in alerts that have no detections!
-        if len(alert['diaSourcesList']) == 0:
-            if self.verbose:
-                print('No diaSources')
-            return 0
-
-        # build the insert query for this object.
-        # if not wanted, returns 0
-        query = Filter.create_insert_query(alert)
-        if not query:
-            if self.verbose:
-                print('Failed to make insert query')
-                print(json.dumps(alert, indent=2))
-            return 0
-        self.execute_query(query)
-
-        # now ingest the sherlock_classifications
-        if 'annotations' in alert:
-            annotations = alert['annotations']
-            if 'sherlock' in annotations:
-                for ann in annotations['sherlock']:
-                    if "transient_object_id" in ann:
-                        ann.pop('transient_object_id')
-                    ann['diaObjectId'] = diaObjectId
-                    query = Filter.create_insert_sherlock(ann)
-                    self.execute_query(query)
-        return 1
+        # all the sherlock attrs that we want for the database
+        attrs = [
+            "classification",
+            "diaObjectId",
+            "association_type",
+            "catalogue_table_name",
+            "catalogue_object_id",
+            "catalogue_object_type",
+            "raDeg",
+            "decDeg",
+            "separationArcsec",
+            "northSeparationArcsec",
+            "eastSeparationArcsec",
+            "physical_separation_kpc",
+            "direct_distance",
+            "distance",
+            "best_distance",
+            "best_distance_flag",
+            "best_distance_source",
+            "z",
+            "photoZ",
+            "photoZErr",
+            "Mag",
+            "MagFilter",
+            "MagErr",
+            "classificationReliability",
+            "major_axis_arcsec",
+            "annotator",
+            "additional_output",
+            "description",
+            "summary",
+        ]
+        sets = {}
+        for key in attrs:
+            sets[key] = None
+        for key, value in ann.items():
+            if key in attrs and value:
+                sets[key] = value
+    
+        # this hack adds back in the deprecated 'distance' as 'best_distance'
+        if 'best_distance' in ann:
+            sets['distance'] = ann['best_distance']
+    
+        if 'description' in attrs and 'description' not in ann:
+            sets['description'] = 'no description'
+        # Build the query
+        query_list = []
+        query = 'REPLACE INTO sherlock_classifications SET '
+        for key, value in sets.items():
+            if value is None:
+                query_list.append(key + '=NULL')
+            else:
+                query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
+        query += ',\n'.join(query_list)
+        return query
 

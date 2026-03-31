@@ -233,8 +233,8 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                 diaObjectId = q['diaObjectId']
                 # see if its in the cache of this batch
                 alert = None
-                if diaObjectId in fltr.alert_dict:
-                    alert = fltr.alert_dict[diaObjectId]
+                if diaObjectId in fltr.message_dict:
+                    alert = fltr.message_dict[diaObjectId]
                 else:
                     # try to fetch it from cassandra, not yet implemented!
                     fltr.log.info(f'Cannot find lightcurve {diaObjectId} in alert cache')

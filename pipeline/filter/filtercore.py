@@ -2,7 +2,8 @@
 The core filter module. Usually run as a service using filter_runner, but can also be run from the command line.
 
 Usage:
-    filtercore.py [--maxalert=MAX]
+    filtercore.py [--maxmessage=MAX]
+                  [--maxalert=MAX]
                   [--maxbatch=MAX]
                   [--maxtotal=MAX]
                   [--group_id=GID]
@@ -16,7 +17,8 @@ Usage:
                   [--verbose=BOOL]
 
 Options:
-    --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxmessage=MAX   Messages to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxalert=MAX     Same as maxmessage
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
@@ -37,14 +39,13 @@ import json
 import tempfile
 import math
 from typing import Union
-
 import requests
 import urllib
 import urllib.parse
-import numbers
 import confluent_kafka
 import datetime
 from docopt import docopt
+
 
 sys.path.append('../../common')
 import settings
@@ -58,10 +59,6 @@ import logging
 from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
-from features.FeatureGroup import FeatureGroup
-
-sys.path.append('features/BBB')
-
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -74,7 +71,7 @@ class Filter:
     def __init__(self,
                  topic_in: str = 'lsst_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
-                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 maxmessage: (Union[int, str]) = settings.KAFKA_MAXALERTS,
                  send_email: bool = True,
                  local_db: str = None,
                  send_kafka: bool = True,
@@ -84,14 +81,13 @@ class Filter:
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
-        self.maxalert = int(maxalert)
+        self.maxmessage = int(maxmessage)
         self.local_db = local_db or 'ztf'
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
         self.verbose = verbose
-        self.sfd = None
         self.message_dict = {}
 
         self.consumer = None
@@ -100,8 +96,7 @@ class Filter:
         self.database_remote = None
 
         self.log = log or lasairLogging.getLogger("filter")
-        self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
-        self.csv_attrs = {}
+        self.log.info('Topic_in=%s, group_id=%s, maxmessage=%d' % (self.topic_in, self.group_id, self.maxmessage))
 
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
@@ -131,28 +126,6 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
-
-        # get the order of the attributes for all tables transferred by CSV
-        table_list = [
-            'objects',
-            'sherlock_classifications',
-            'watchlist_hits',
-            'area_hits',
-            'mma_area_hits',
-        ]
-        try:
-            main_database = db_connect.remote(allow_infile=True)
-            for table_name in table_list:
-                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
-        except Exception as e:
-            self.log.error('ERROR connecting to main database: %s' % str(e))
-
-        # set up the extinction factory
-        if not self.sfd:
-            try:
-                self.sfd = SFDQuery()
-            except Exception as e:
-                self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -219,53 +192,21 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR cannot make kafka producer' + str(e))
 
-    @staticmethod
-    def create_insert_query(alert: dict):
-        """create_insert_query.
-        Creates an insert sql statement for building the object and
-        a query for inserting it.
-
-        Args:
-            alert:
+    def consume_messages(self):
+        """Consume a batch of messages from Kafka.
         """
-
-        lasair_features = FeatureGroup.run_all(alert)
-        if not lasair_features:
-            if self.verbose:
-                print('Features did not run')
-                print(json.dumps(alert, indent=2))
-            return None
-
-        # Make the query
-        query_list = []
-        query = 'REPLACE INTO objects SET '
-        for key, value in lasair_features.items():
-            if value is None:
-                query_list.append(key + '=NULL')
-            elif isinstance(value, numbers.Number) and (math.isnan(value) or math.isinf(value)):
-                query_list.append(key + '=NULL')
-            elif isinstance(value, str):
-                query_list.append(key + '="' + str(value) + '"')
-            else:
-                query_list.append(key + '=' + str(value))
-        query += ',\n'.join(query_list)
-        return query
-
-    def consume_alerts(self):
-        """Consume a batch of alerts from Kafka.
-        """
-        nalert_in = nalert_out = 0
+        nmessage_in = nmessage_out = 0
         startt = time.time()
         errors = 0
 
-        alertList = []
-        while nalert_in < self.maxalert:
+        messageList = []
+        while nmessage_in < self.maxmessage:
             if self.sigterm_raised:
                 # clean shutdown - stop the consumer
                 self.log.info("Caught SIGTERM, aborting.")
                 break
 
-            # Here we get the next alert by kafka
+            # Here we get the next message by kafka
             msg = self.consumer.poll(timeout=20)
             if msg is None:
                 print('message is null')
@@ -279,44 +220,45 @@ class Filter:
             if msg.value() is None:
                 print('message value is null')
                 continue
-            # Apply filter to each alert
-            alert = json.loads(msg.value())
+            # Apply filter to each message
+            message = json.loads(msg.value())
 
-            # don't know what to do with these
-            if 'diaObject' not in alert or not alert['diaObject']:
-                if self.verbose: print('No diaObject')
-                continue
+#            # don't know what to do with these
+#            if 'diaObject' not in alert or not alert['diaObject']:
+#                if self.verbose: print('No diaObject')
+#                continue
 
-            nalert_in += 1
-            alertList.append(message)
-            diaObjectId = alert['diaObject']['diaObjectId']
+            nmessage_in += 1
+            messageList.append(message)
+
+            # caching for fat kafka
+            diaObjectId = message['diaObject']['diaObjectId']
             self.message_dict[diaObjectId] = message
 
-import alerts
-            if nalert_in % 1000 == 0:
-                d = alerts.handle_message_list(alertList)    ### export
-                alertList = []
-                nalert_out += d
-                self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
-                              (nalert_in, nalert_out, time.time() - startt))
+            if nmessage_in % 1000 == 0:
+                d = self.handle_message_list(messageList)
+                messageList = []
+                nmessage_out += d
+                self.log.info('nmessage_in %d nmessage_out  %d time %.1f' % \
+                              (nmessage_in, nmessage_out, time.time() - startt))
                 sys.stdout.flush()
-                # refresh the database every 1000 alerts
+                # refresh the database every 1000 messages
                 # make sure everything is committed
                 self.database_local.commit()
 
-        d = alerts.handle_message_list(alertList)    ### export
-        nalert_out += d
-        self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
+        d = self.handle_message_list(messageList)
+        nmessage_out += d
+        self.log.info('finished %d in, %d out' % (nmessage_in, nmessage_out))
 
         if self.stats:
             ms = manage_status.manage_status(log=self.log)
             nid = date_nid.nid_now()
             ms.add({
-                'today_filter': nalert_in,
-                'today_filter_out': nalert_out,
+                'today_filter': nmessage_in,
+                'today_filter_out': nmessage_out,
             }, nid)
 
-        return nalert_out
+        return nmessage_out
 
     def transfer_to_main(self, retry=5, delay=60):
         """ Transfer the local database to the main database.
@@ -356,7 +298,7 @@ import alerts
         self.log.info('Kafka committed for this batch')
         return True
 
-    def write_stats(self, timers: dict, nalerts: int):
+    def write_stats(self, timers: dict, nmessages: int):
         """ Write the statistics to lasair status and to prometheus.
         """
         if not self.stats:
@@ -369,13 +311,13 @@ import alerts
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
-            'min_delay': d['since'],  # hours since most recent alert
+            'min_delay': d['since'],  # hours since most recent message
             'nid': nid},
             nid)
         for name, td in timers.items():
             td.add2ms(ms, nid)
 
-        if nalerts > 0:
+        if nmessages > 0:
             min_str = "{:d}".format(int(d['min_delay'] * 60))
             avg_str = "{:d}".format(int(d['avg_delay'] * 60))
             max_str = "{:d}".format(int(d['max_delay'] * 60))
@@ -500,7 +442,7 @@ if __name__ == "__main__":
 
     topic_in = args.get('--topic_in') or 'lsst_sherlock'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
+    maxmessage = int(args.get('--maxmessage') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
     local_db = args.get('--local_db')
@@ -514,23 +456,33 @@ if __name__ == "__main__":
         wait_time = getattr(settings, 'WAIT_TIME', 60)
     verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer,
-                  stats=stats, verbose=verbose)
+############### choose which type of message, are they alerts or annotations ########
+    from alerts import alertcore
+    fltr = alertcore.AlertFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
+    fltr.setup()
+########################################################################
 
     n_batch = 0
-    total_alerts = 0
+    total_messages = 0
     while not fltr.sigterm_raised:
-        n_alerts = fltr.run_batch()
+
+        # the subclass is handed a list of messages (alerts or annotations)
+        n_messages = fltr.run_batch()
+
+        # keep a cache
+        fltr.message_dict.clear()
 
         n_batch += 1
-        total_alerts += n_alerts 
+        total_messages += n_messages 
         if n_batch == maxbatch:
             log.info(f"Exiting after {n_batch} batches")
             sys.exit(0)
-        if maxtotal and total_alerts >= maxtotal:
-            log.info(f"Exiting after {total_alerts} alerts")
+        if maxtotal and total_messages >= maxtotal:
+            log.info(f"Exiting after {total_messages} messages")
             sys.exit(0)
-        if n_alerts == 0:  # process got no alerts, so sleep a few minutes
-            log.info('Waiting for more alerts ....')
+        if n_messages == 0:  # process got no messages, so sleep a few minutes
+            log.info('Waiting for more messages ....')
             time.sleep(wait_time)

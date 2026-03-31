@@ -1,4 +1,4 @@
-import features
+import alerts.features as features
 import sys
 import settings
 from importlib import import_module
@@ -33,7 +33,7 @@ class FeatureGroup:
              collate the output."""
         output = {}
         for group in features.__all__:
-            import_module(f"features.{group}")
+            import_module(f"alerts.features.{group}")
             groupModule = getattr(features, group)
             groupClass = getattr(groupModule, group)
             groupInst = groupClass(alert, verbose)
