@@ -473,11 +473,11 @@ if __name__ == "__main__":
         alertf.setup_batch()
 
         # calls handle_message_list for subclass
-        hml = alertf.handle_message_list
-        n_messages = fltr.consume_messages(hml)
+        iml = alertf.ingest_message_list
+        n_messages = fltr.consume_messages(iml)
 
         if n_messages > 0:
-            alertf.run_batch(n_messages)
+            alertf.post_ingest(n_messages)
 
         # keep a cache
         fltr.message_dict.clear()

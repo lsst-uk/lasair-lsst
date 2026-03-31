@@ -82,7 +82,7 @@ class AlertFilter(Filter):
         self.log.info("Topic is %s" % self.topic_in)
 
 
-    def run_batch(self, n_messages):
+    def post_ingest(self, n_messages):
         """Top level method that processes an alert batch.
 
         Does the following:
@@ -166,7 +166,7 @@ class AlertFilter(Filter):
         self.log.info('%d alerts processed\n' % n_messages)
         return n_messages
 
-    def handle_message_list(self, alertList):
+    def ingest_message_list(self, alertList):
         """alert_filter: handle a list of alerts
         """
         raList   = []
@@ -179,12 +179,12 @@ class AlertFilter(Filter):
         nalert = 0
         for ebv, alert in zip(ebvList, alertList):
             alert['ebv'] = ebv
-            nalert += self.handle_alert(alert)
+            nalert += self.ingest_alert(alert)
         if self.verbose:
-            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
+            print('ingest_alert_list: %d in %d out' % (len(alertList), nalert))
         return nalert
 
-    def handle_alert(self, alert):
+    def ingest_alert(self, alert):
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
