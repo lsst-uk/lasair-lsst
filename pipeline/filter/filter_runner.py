@@ -43,10 +43,13 @@ signal.signal(signal.SIGTERM, sigterm_handler)
 def run(args, log):
     topic_in = args.get('--topic_in')
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxalert = args.get('--maxalert') or settings.KAFKA_MAXALERTS
+    maxmessage = args.get('--maxalert') or settings.KAFKA_MAXALERTS
     maxbatch = int(args.get('--maxbatch') or -1)
 
-    fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+#### This runner is set up for alerts
+    from alerts import alertcore
+    fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    fltr.setup()
 
     batch = 0
     while not stop:

@@ -434,6 +434,21 @@ class Filter:
         today_candidates_ztf = 0
         return today_candidates_ztf
 
+    def run_batch(self):
+        # the subclass is handed a list of messages (alerts or annotations)
+        self.setup_batch()
+
+        # ingest_message_list ingests a set of alerts, computes
+        # light curve features, inserts to a local database
+        # it is the handler for the message consumer
+        iml = self.ingest_message_list
+        n_messages = self.consume_messages(iml)
+
+        # after ingesting, do the watchlists, filters etc
+        if n_messages > 0:
+            self.post_ingest(n_messages)
+        return n_messages
+
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)
     logging.basicConfig(level=logging.DEBUG)
@@ -461,27 +476,15 @@ if __name__ == "__main__":
 
 ############### choose which type of message, are they alerts or annotations ########
     from alerts import alertcore
-    fltr = alertf = alertcore.AlertFilter(
+    fltr = alertcore.AlertFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
 
     # set up database connections, etc
-    alertf.setup()
+    fltr.setup()
     while not fltr.sigterm_raised:
-
-        # the subclass is handed a list of messages (alerts or annotations)
-        alertf.setup_batch()
-
-        # ingest_message_list ingests a set of alerts, computes 
-        # light curve features, inserts to a local database
-        # it is the handler for the message consumer
-        iml = alertf.ingest_message_list
-        n_messages = fltr.consume_messages(iml)
-
-        # after ingesting, do the watchlists, filters etc
-        if n_messages > 0:
-            alertf.post_ingest(n_messages)
+        n_messages = fltr.run_batch()
 ########################################################################
 
         # clear the cache
