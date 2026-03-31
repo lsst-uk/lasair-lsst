@@ -192,7 +192,7 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR cannot make kafka producer' + str(e))
 
-    def consume_messages(self):
+    def consume_messages(self, handler):
         """Consume a batch of messages from Kafka.
         """
         nmessage_in = nmessage_out = 0
@@ -236,7 +236,7 @@ class Filter:
             self.message_dict[diaObjectId] = message
 
             if nmessage_in % 1000 == 0:
-                d = self.handle_message_list(messageList)
+                d = handler(messageList)
                 messageList = []
                 nmessage_out += d
                 self.log.info('nmessage_in %d nmessage_out  %d time %.1f' % \
@@ -246,7 +246,7 @@ class Filter:
                 # make sure everything is committed
                 self.database_local.commit()
 
-        d = self.handle_message_list(messageList)
+        d = handler(messageList)
         nmessage_out += d
         self.log.info('finished %d in, %d out' % (nmessage_in, nmessage_out))
 
@@ -458,11 +458,11 @@ if __name__ == "__main__":
 
 ############### choose which type of message, are they alerts or annotations ########
     from alerts import alertcore
-    fltr = alertcore.AlertFilter(
+    fltr = alertf = alertcore.AlertFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
-    fltr.setup()
+    alertf.setup()
 ########################################################################
 
     n_batch = 0
@@ -470,13 +470,14 @@ if __name__ == "__main__":
     while not fltr.sigterm_raised:
 
         # the subclass is handed a list of messages (alerts or annotations)
-        fltr.setup_batch()
+        alertf.setup_batch()
 
         # calls handle_message_list for subclass
-        n_messages = fltr.consume_messages()
+        hml = alertf.handle_message_list
+        n_messages = fltr.consume_messages(hml)
 
         if n_messages > 0:
-            fltr.run_batch(n_messages)
+            alertf.run_batch(n_messages)
 
         # keep a cache
         fltr.message_dict.clear()
