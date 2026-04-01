@@ -495,6 +495,12 @@ if __name__ == "__main__":
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
+    elif grist == 'tests' or grist == 'test':
+        from tests import testcore
+        fltr = testcore.TestFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
     else:
         print('Unknown grist for filter node', grist)
         sys.exit()
