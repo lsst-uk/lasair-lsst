@@ -14,11 +14,12 @@ Usage:
                   [--transfer=BOOL]
                   [--stats=BOOL]
                   [--wait_time=TIME]
+                  [--grist=NAME]
                   [--verbose=BOOL]
 
 Options:
     --maxmessage=MAX   Messages to process per batch, default is defined in settings.KAFKA_MAXALERTS
-    --maxalert=MAX     Same as maxmessage
+    --maxalert=MAX     Deprecated. Use maxmessage
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
@@ -29,6 +30,7 @@ Options:
     --transfer=BOOL    Transfer results to main [default: True]
     --stats=BOOL       Write stats [default: True]
     --wait_time=TIME   Override default wait time (in seconds)
+    --grist=NAME Can be 'alerts' or 'annotations'
 """
 
 import os
@@ -72,21 +74,25 @@ class Filter:
                  topic_in: str = 'lsst_sherlock',
                  group_id: str = settings.KAFKA_GROUPID,
                  maxmessage: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 maxalert: int = 0,
                  send_email: bool = True,
                  local_db: str = None,
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
+                 grist: str = None,
                  verbose: bool = False,
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
         self.maxmessage = int(maxmessage)
+        self.maxalert = int(maxalert)
         self.local_db = local_db or 'ztf'
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.grist = grist
         self.verbose = verbose
         self.message_dict = {}
 
@@ -457,7 +463,7 @@ if __name__ == "__main__":
 
     topic_in = args.get('--topic_in') or 'lsst_sherlock'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxmessage = int(args.get('--maxmessage') or settings.KAFKA_MAXALERTS)
+    maxmessage = int(args.get('--maxmessage')) or int(args.get('--maxalert')) or settings.KAFKA_MAXALERTS
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
     local_db = args.get('--local_db')
@@ -465,6 +471,7 @@ if __name__ == "__main__":
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
+    grist = args.get('--grist')
     if args['--wait_time']:
         wait_time = int(args['--wait_time'])
     else: 
@@ -475,29 +482,40 @@ if __name__ == "__main__":
     total_messages = 0
 
 ############### choose which type of message, are they alerts or annotations ########
-    from alerts import alertcore
-    fltr = alertcore.AlertFilter(
+    if grist == 'alerts':
+        from alerts import alertcore
+        fltr = alertcore.AlertFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
+
+    elif grist == 'annotations':
+        from annotations import annotationcore
+        fltr = annotationcore.AnnnotationFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
+    else:
+        print('Unknown grist for filter node', grist)
+        sys.exit()
+########################################################################
 
     # set up database connections, etc
     fltr.setup()
     while not fltr.sigterm_raised:
         n_messages = fltr.run_batch()
-########################################################################
 
-        # clear the cache
-        fltr.message_dict.clear()
+    # clear the cache
+    fltr.message_dict.clear()
 
-        n_batch += 1
-        total_messages += n_messages 
-        if n_batch == maxbatch:
-            log.info(f"Exiting after {n_batch} batches")
-            sys.exit(0)
-        if maxtotal and total_messages >= maxtotal:
-            log.info(f"Exiting after {total_messages} messages")
-            sys.exit(0)
-        if n_messages == 0:  # process got no messages, so sleep a few minutes
-            log.info('Waiting for more messages ....')
-            time.sleep(wait_time)
+    n_batch += 1
+    total_messages += n_messages 
+    if n_batch == maxbatch:
+        log.info(f"Exiting after {n_batch} batches")
+        sys.exit(0)
+    if maxtotal and total_messages >= maxtotal:
+        log.info(f"Exiting after {total_messages} messages")
+        sys.exit(0)
+    if n_messages == 0:  # process got no messages, so sleep a few minutes
+        log.info('Waiting for more messages ....')
+        time.sleep(wait_time)
