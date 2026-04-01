@@ -8,6 +8,7 @@ from astropy.coordinates import SkyCoord
 from filtercore import Filter
 from transfer import fetch_attrs
 from alerts.features.FeatureGroup import FeatureGroup
+import util
 
 sys.path.append('../../common')
 import settings
@@ -96,12 +97,6 @@ class AlertFilter(Filter):
 
         self.setup()
 
-        # consume the alerts from Kafka
-        # ask the superclass to get these
-#        self.timers['ffeatures'].on()
-#        nalerts = self.consume_messages()
-#        self.timers['ffeatures'].off()
-
         # run the watchlists
         self.log.info('WATCHLIST start %s' % now())
         self.timers['fwatchlist'].on()
@@ -151,14 +146,6 @@ class AlertFilter(Filter):
             if not commit:
                 self.log.info('Transfer to main failed, no commit')
                 return 0
-
-        # run the annotation queries
-        self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.fast_anotation_filters(self)
-        if ntotal is not None:
-            self.log.info('ANNOTATION FILTERS got %d' % ntotal)
-        else:
-            self.log.error("ERROR in filter/fast_annotation_filters")
 
         # Write stats for the batch
         self.timers['ftotal'].off()
@@ -311,4 +298,79 @@ class AlertFilter(Filter):
                 query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
         query += ',\n'.join(query_list)
         return query
+
+import os, sys, time, json, datetime, smtplib
+from confluent_kafka import Consumer, Producer, KafkaError
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from dustmaps.sfd import SFDQuery
+from astropy.coordinates import SkyCoord
+
+import watchlists
+import watchmaps
+import mmagw
+
+sys.path.append('../../common')
+import settings
+from src import db_connect, manage_status, date_nid
+
+def run_queries(fltr, query_list, ms, nid):
+    """
+    When annotation_list is None, it runs all the queries against the local database
+    When not None, runs some queires agains a specific object, using the main database
+    """
+
+#    if annotation_list and len(annotation_list) > 0:
+#        fltr.log.info(annotation_list)
+    ntotal = 0
+    for query in query_list:
+        n = 0
+        t = time.time()
+        msl = db_connect.local()
+        query_results = run_query(query, fltr.database_local)
+        n += dispose_query_results(query, query_results, fltr, ms, nid)
+        t = time.time() - t
+        if n > 0:
+            fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
+            sys.stdout.flush()
+        ntotal += n
+    return ntotal
+
+def run_query(query, msl):
+    """run_query. Two cases here:
+
+    Args:
+        query:
+        msl:
+    """
+    active = query['active']
+    email = query['email']
+    topic = query['topic_name']
+    limit = 1000
+    sqlquery_real = query['real_sql']
+
+    # in any case, 10 second timeout and limit the output
+    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
+                     (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
+
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    n = 0
+    query_results = []
+    utc = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        cursor.execute(sqlquery_real)
+        for record in cursor:
+            recorddict = dict(record)
+            recorddict['UTC'] = utc
+            query_results.append(recorddict)
+            n += 1
+    except Exception as e:
+        error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
+                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
+        print(error)
+        print(sqlquery_real)
+        send_email(email, topic, error)
+        return []
+
+    return query_results
 

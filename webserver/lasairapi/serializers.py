@@ -387,26 +387,34 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
+# inseting into database in the annotations node
         # form the insert query
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (diaObjectId, topic, version, classification, explanation, classdict, url)
-
-        try:
-            cursor = msl.cursor(dictionary=True)
-            cursor.execute(query)
-            cursor.close()
-            msl.commit()
-        except Exception as e:
-            return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
+#        query = 'REPLACE INTO annotations ('
+#        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
+#        query += ') VALUES ('
+#        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+#        query = query % (diaObjectId, topic, version, classification, explanation, classdict, url)
+#
+#        try:
+#            cursor = msl.cursor(dictionary=True)
+#            cursor.execute(query)
+#            cursor.close()
+#            msl.commit()
+#        except Exception as e:
+#            return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
 
         if active < 2:
             return {'status': 'success', 'query': query}
 
         # when active=2, we push a kafka message to make sure queries are run immediately
-        message = {'diaObjectId': diaObjectId, 'annotator': topic}
+        message = {'diaObjectId'   : diaObjectId, 
+                   'topic'         : topic,
+                   'classification': classification,
+                   'version'       : version,
+                   'explanation'   : explanation,
+                   'classdict'     : classdict,
+                   'url'           : url
+                   }
         conf = {
             'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
             'client.id': 'client-1',
