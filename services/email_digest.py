@@ -8,19 +8,28 @@ Options:
     --help     Show usage information
 """
 
+import sys
+sys.path.append('../common')
 from docopt import docopt
 from src import db_connect
+from confluent_kafka import Consumer
+import settings
 
 
-def main():
-    msl = db_connect.remote()
-    cursor = msl.cursor(buffered=True, dictionary=True)
-    query = f"SELECT * FROM myqueries WHERE active>0"
-    cursor.execute(query)
-    for row in cursor:
-        print(row)
+args = docopt(__doc__)
 
+consumer_conf = {
+    'bootstrap.servers': '',
+    'default.topic.config': {'auto.offset.reset': 'earliest'},
+    'client.id': 'client-1',
+    'group.id': '',
+    'enable.auto.commit': False,
+}
 
-if __name__ == '__main__':
-    args = docopt(__doc__)
-    main()
+msl = db_connect.remote()
+cursor = msl.cursor(buffered=True, dictionary=True)
+query = f"SELECT topic_name, first_name, last_name, email FROM myqueries, auth_user WHERE auth_user.id=user AND active=1"
+cursor.execute(query)
+for row in cursor:
+    print(row)
+
