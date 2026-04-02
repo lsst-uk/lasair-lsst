@@ -27,8 +27,6 @@ class AnnotationFilter(Filter):
         # get the Filter object set up 
         super().setup()
 
-        ]
-
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
         self.diaObjectIdList = []

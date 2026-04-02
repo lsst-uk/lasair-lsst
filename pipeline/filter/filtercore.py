@@ -30,7 +30,7 @@ Options:
     --transfer=BOOL    Transfer results to main [default: True]
     --stats=BOOL       Write stats [default: True]
     --wait_time=TIME   Override default wait time (in seconds)
-    --grist=NAME Can be 'alerts' or 'annotations'
+    --grist=NAME Can be 'alert' or 'annotation' or 'test'
 """
 
 import os
@@ -482,27 +482,27 @@ if __name__ == "__main__":
     total_messages = 0
 
 ############### choose which type of message, are they alerts or annotations ########
-    if grist == 'alerts':
-        from alerts import alertcore
+    if grist == 'alert':
+        from alert import alertcore
         fltr = alertcore.AlertFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
 
-    elif grist == 'annotations':
-        from annotations import annotationcore
+    elif grist == 'annotation':
+        from annotation import annotationcore
         fltr = annotationcore.AnnnotationFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
-    elif grist == 'tests' or grist == 'test':
-        from tests import testcore
+    elif grist == 'test':
+        from test import testcore
         fltr = testcore.TestFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
     else:
-        print('Unknown grist for filter node', grist)
+        print('Unknown grist for filter node, must be alert, annotation, or test')
         sys.exit()
 ########################################################################
 

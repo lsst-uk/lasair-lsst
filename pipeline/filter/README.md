@@ -12,8 +12,8 @@ Manages the local database connection and Kafka consumer and generally orchestra
 * `ingest_message_list`
 Ingests the messages into a database.
 
-* `post_ingest
-Runs all the filters.
+* `post_ingest`
+For both alerts and annotations: runs all the filters.
 For alerts, also finds coincidences with watchlists, runs query/filters on them, 
 then pushes the local MySQL to the global relational database, via CSV files.
 

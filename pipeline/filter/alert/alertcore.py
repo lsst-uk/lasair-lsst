@@ -83,76 +83,6 @@ class AlertFilter(Filter):
         self.log.info("Topic is %s" % self.topic_in)
 
 
-    def post_ingest(self, n_messages):
-        """Top level method that processes an alert batch.
-
-        Does the following:
-         - Consume alerts from Kafka
-         - Run watchlists
-         - Run watchmaps
-         - Run user filters
-         - Run annotation queries
-         - Build CSV file
-         - Transfer to main database"""
-
-        self.setup()
-
-        # run the watchlists
-        self.log.info('WATCHLIST start %s' % now())
-        self.timers['fwatchlist'].on()
-        nhits = watchlists.watchlists(self)
-        self.timers['fwatchlist'].off()
-        if nhits is not None:
-            self.log.info('WATCHLISTS got %d' % nhits)
-        else:
-            self.log.error("ERROR in filter/watchlists")
-
-        # run the watchmaps
-        self.log.info('WATCHMAP start %s' % now())
-        self.timers['fwatchmap'].on()
-        nhits = watchmaps.watchmaps(self)
-        self.timers['fwatchmap'].off()
-        if nhits is not None:
-            self.log.info('WATCHMAPS got %d' % nhits)
-        else:
-            self.log.error("ERROR in filter/watchmaps")
-
-        # run the MMA/GW events
-        self.log.info('MMA/GW start %s' % now())
-        self.timers['fmmagw'].on()
-        nhits = mmagw.mmagw(self)
-        self.timers['fmmagw'].off()
-        if nhits is not None:
-            self.log.info('MMA/GW got %d' % nhits)
-        else:
-            self.log.error("ERROR in filter/mmagw")
-
-        # run the user filters
-        self.log.info('Filters start %s' % now())
-        self.timers['ffilters'].on()
-        ntotal = filters.filters(self)
-        self.timers['ffilters'].off()
-        if ntotal is not None:
-            self.log.info('FILTERS got %d' % ntotal)
-        else:
-            self.log.error("ERROR in filter/filters")
-
-        # build CSV file with local database and transfer to main
-        if self.transfer:
-            self.timers['ftransfer'].on()
-            commit = self.transfer_to_main()
-            self.timers['ftransfer'].off()
-            self.log.info('Batch ended')
-            if not commit:
-                self.log.info('Transfer to main failed, no commit')
-                return 0
-
-        # Write stats for the batch
-        self.timers['ftotal'].off()
-        self.write_stats(self.timers, n_messages)
-        self.log.info('%d alerts processed\n' % n_messages)
-        return n_messages
-
     def ingest_message_list(self, alertList):
         """alert_filter: handle a list of alerts
         """
@@ -299,78 +229,73 @@ class AlertFilter(Filter):
         query += ',\n'.join(query_list)
         return query
 
-import os, sys, time, json, datetime, smtplib
-from confluent_kafka import Consumer, Producer, KafkaError
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
+    def post_ingest(self, n_messages):
+        """Top level method that processes an alert batch.
 
-import watchlists
-import watchmaps
-import mmagw
+        Does the following:
+         - Consume alerts from Kafka
+         - Run watchlists
+         - Run watchmaps
+         - Run user filters
+         - Run annotation queries
+         - Build CSV file
+         - Transfer to main database"""
 
-sys.path.append('../../common')
-import settings
-from src import db_connect, manage_status, date_nid
+        self.setup()
 
-def run_queries(fltr, query_list, ms, nid):
-    """
-    When annotation_list is None, it runs all the queries against the local database
-    When not None, runs some queires agains a specific object, using the main database
-    """
+        # run the watchlists
+        self.log.info('WATCHLIST start %s' % now())
+        self.timers['fwatchlist'].on()
+        nhits = watchlists.watchlists(self)
+        self.timers['fwatchlist'].off()
+        if nhits is not None:
+            self.log.info('WATCHLISTS got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/watchlists")
 
-#    if annotation_list and len(annotation_list) > 0:
-#        fltr.log.info(annotation_list)
-    ntotal = 0
-    for query in query_list:
-        n = 0
-        t = time.time()
-        msl = db_connect.local()
-        query_results = run_query(query, fltr.database_local)
-        n += dispose_query_results(query, query_results, fltr, ms, nid)
-        t = time.time() - t
-        if n > 0:
-            fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
-            sys.stdout.flush()
-        ntotal += n
-    return ntotal
+        # run the watchmaps
+        self.log.info('WATCHMAP start %s' % now())
+        self.timers['fwatchmap'].on()
+        nhits = watchmaps.watchmaps(self)
+        self.timers['fwatchmap'].off()
+        if nhits is not None:
+            self.log.info('WATCHMAPS got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/watchmaps")
 
-def run_query(query, msl):
-    """run_query. Two cases here:
+        # run the MMA/GW events
+        self.log.info('MMA/GW start %s' % now())
+        self.timers['fmmagw'].on()
+        nhits = mmagw.mmagw(self)
+        self.timers['fmmagw'].off()
+        if nhits is not None:
+            self.log.info('MMA/GW got %d' % nhits)
+        else:
+            self.log.error("ERROR in filter/mmagw")
 
-    Args:
-        query:
-        msl:
-    """
-    active = query['active']
-    email = query['email']
-    topic = query['topic_name']
-    limit = 1000
-    sqlquery_real = query['real_sql']
+        # run the user filters
+        self.log.info('Filters start %s' % now())
+        self.timers['ffilters'].on()
+        ntotal = filters.filters(self)
+        self.timers['ffilters'].off()
+        if ntotal is not None:
+            self.log.info('FILTERS got %d' % ntotal)
+        else:
+            self.log.error("ERROR in filter/filters")
 
-    # in any case, 10 second timeout and limit the output
-    sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
-                     (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
+        # build CSV file with local database and transfer to main
+        if self.transfer:
+            self.timers['ftransfer'].on()
+            commit = self.transfer_to_main()
+            self.timers['ftransfer'].off()
+            self.log.info('Batch ended')
+            if not commit:
+                self.log.info('Transfer to main failed, no commit')
+                return 0
 
-    cursor = msl.cursor(buffered=True, dictionary=True)
-    n = 0
-    query_results = []
-    utc = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
-    try:
-        cursor.execute(sqlquery_real)
-        for record in cursor:
-            recorddict = dict(record)
-            recorddict['UTC'] = utc
-            query_results.append(recorddict)
-            n += 1
-    except Exception as e:
-        error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
-                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
-        print(error)
-        print(sqlquery_real)
-        send_email(email, topic, error)
-        return []
-
-    return query_results
+        # Write stats for the batch
+        self.timers['ftotal'].off()
+        self.write_stats(self.timers, n_messages)
+        self.log.info('%d alerts processed\n' % n_messages)
+        return n_messages
 
