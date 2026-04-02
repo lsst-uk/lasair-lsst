@@ -196,14 +196,14 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
         return 0
     active = query['active']
 
-    if active == 1:
-        # send results by email if 24 hours has passed, returns time of last email send
-        digest, last_entry, last_email = fetch_digest(query['topic_name'])
-        allrecords = (query_results + digest)[:10000]
-        if fltr.send_email:
-            last_email = dispose_email(fltr, allrecords, last_email, query)
-        utcnow = datetime.datetime.now(datetime.UTC)
-        write_digest(allrecords, query['topic_name'], utcnow, last_email)
+    # if active == 1:
+    #     # send results by email if 24 hours has passed, returns time of last email send
+    #     digest, last_entry, last_email = fetch_digest(query['topic_name'])
+    #     allrecords = (query_results + digest)[:10000]
+    #     if fltr.send_email:
+    #         last_email = dispose_email(fltr, allrecords, last_email, query)
+    #     utcnow = datetime.datetime.now(datetime.UTC)
+    #     write_digest(allrecords, query['topic_name'], utcnow, last_email)
 
     # send results by kafka on given topic
     BASIC_KAFKA     = 2
