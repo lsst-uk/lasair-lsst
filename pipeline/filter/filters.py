@@ -209,7 +209,8 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
     BASIC_KAFKA     = 2
     LIGHTCURVE_LITE = 3
     LIGHTCURVE_FULL = 4
-    if not fltr.send_kafka or active < BASIC_KAFKA:
+    # note that email digest also requires Kafka output
+    if not fltr.send_kafka or active < 1:
         return len(query_results)
 
     # try to append the lightcurve info
