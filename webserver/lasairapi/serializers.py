@@ -349,10 +349,11 @@ class AnnotateSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
     def create(self, validated_data):
-        self.validated_data = validated_data
-        self.save()
+        self.save(validated_data)
 
-    def save(self):
+    def save(self, validated_data=None):
+        if not validated_data:
+            validated_data = self.validated_data
         topic = self.validated_data['topic']
         diaObjectId = self.validated_data['objectId']
         classification = self.validated_data['classification']
