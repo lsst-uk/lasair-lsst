@@ -23,12 +23,18 @@ then pushes the local MySQL to the global relational database, via CSV files.
 
 Some example scripts:
 - To look at the stream
-`python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=testing`
-`python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=testing --verbose=True`
+```
+python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=testing
+python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=testing --verbose=True
+```
 
 - Responding to a stream of annotations
-`python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=annotation`
+```
+python3 filtercore.py --maxmessage=10 --maxbatch=1 --topic_in=fast_annotations --group_id=bla46 --grist=annotation
+```
 
 - Responding to a Rubin-Sherlock alert stream
-`python3 filtercore.py --maxmessage=10 --maxbatch=1 --group_id=bla46 --grist=alert`
+```
+python3 filtercore.py --maxmessage=10 --maxbatch=1 --group_id=bla46 --grist=alert
+```
 
