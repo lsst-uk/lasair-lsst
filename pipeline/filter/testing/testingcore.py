@@ -17,11 +17,11 @@ def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
 class TestFilter(Filter):
-    ### TestFilter is subclass of Filter
+    ### TestingFilter is subclass of Filter
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-    ### set up an AnnotationFilter, after setting up the Filter
+    ### set up an TestingFilter, after setting up the Filter
     def setup(self):
         # get the Filter object set up 
         super().setup()
@@ -42,10 +42,7 @@ class TestFilter(Filter):
             }  # histogram of types
         return
 
-    def post_ingest(self, n_messages):
-        print(f'At post_ingest after {n_messages}')
-        print(json.dumps(self.h, indent=2))
-
+    # this method is triggered by arrival of a batch of messages
     def ingest_message_list(self, messageList):
         print('Annotation ingestion starting for ', len(messageList))
         nmessage = 0
@@ -54,6 +51,8 @@ class TestFilter(Filter):
         return nmessage
 
     def ingest_message(self, message):
+        if self.verbose:
+            print(f'Ingesting message\n{message}')
         if 'diaObject' in message:
             self.h['alert']['diaObjects'] += 1
             if 'diaSourcesList' in message:
@@ -62,9 +61,17 @@ class TestFilter(Filter):
                 self.h['alert']['diaForcedSources'] += len(message['diaForcedSourcesList'])
 
         if 'annotations' in message:
-            for key,val in message['annotations'].items():
+            print('found annotations')
+            for key,vallist in message['annotations'].items():
+                print(key)
                 if key in self.h['annotations']:
-                    self.h['annotations'][key] += 1
+                    self.h['annotations'][key] += len(vallist)
                 else:
-                    self.h['annotations'][key] = 1
+                    self.h['annotations'][key] = len(vallist)
         return 1
+
+    # things that need doing after the batch of messages is done
+    def post_ingest(self, n_messages):
+        print(f'At post_ingest after {n_messages}')
+        print(json.dumps(self.h, indent=2))
+

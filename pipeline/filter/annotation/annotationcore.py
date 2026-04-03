@@ -2,7 +2,9 @@ import sys
 import datetime
 import numbers
 import math
+import json
 
+from annotation import filters
 from filtercore import Filter
 from transfer import fetch_attrs
 
@@ -29,46 +31,30 @@ class AnnotationFilter(Filter):
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
-        self.diaObjectIdList = []
+        self.diaObject_ann = {}
         return
 
-    def post_ingest(self, n_messages):
-        """Top level method that processes an alert batch.
-
-        Does the following:
-         - Consume alerts from Kafka
-         - Run annotation queries
-        """
-
-        self.setup()
-
-        # run the annotation queries
-        self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.fast_anotation_filters(self)
-        if ntotal is not None:
-            self.log.info('ANNOTATION FILTERS got %d' % ntotal)
-        else:
-            self.log.error("ERROR in filter/fast_annotation_filters")
-
-        # Write stats for the batch
-        self.timers['ftotal'].off()
-        self.write_stats(self.timers, n_messages)
-        self.log.info('%d annotationss processed\n' % n_messages)
-        return n_messages
-
-    def ingest_message_list(self, annotationsList):
+    def ingest_message_list(self, wrappedAnnotationList):
         """insert_message_list: handle a list of annotations
         """
         nannotation = 0
-        for annotation in annotationList:
-            nannotation += self.ingest_annotation(annotation)
+        for wrappedAnnotation in wrappedAnnotationList:
+            if not 'annotators' in wrappedAnnotation:
+                continue
+            for topic,annList in wrappedAnnotation['annotators'].items():
+                for ann in annList:
+                    nannotation += self.ingest_annotation(ann)
         if self.verbose:
             print('ingest_annotation_list: %d in %d out' % (len(annotationList), nannotation))
         return nannotation
 
     def ingest_annotation(self, annotation):
         # keep list of all objectId in this batch
-        self.diaObjectIdList.append(annotation['diaObjectId'])
+        annotator = annotation['topic']
+        if annotator in self.diaObject_ann:
+            self.diaObject_ann[annotator].append(annotation['diaObjectId'])
+        else:
+            self.diaObject_ann[annotator] = [annotation['diaObjectId']]
 
         # put the annotation in the database
         query = 'REPLACE INTO annotations ('
@@ -81,7 +67,7 @@ class AnnotationFilter(Filter):
                 annotation['version'], 
                 annotation['classification'], 
                 annotation['explanation'], 
-                annotation['classdict'], 
+                json.dumps(annotation['classdict']), 
                 annotation['url'])
 
         try:
@@ -91,5 +77,30 @@ class AnnotationFilter(Filter):
             self.database_remote.commit()
             return 1
         except Exception as e:
-            return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
+            print ("Query failed %d: %s\n" % (e.args[0], e.args[1]))
+            return 0
+
+    def post_ingest(self, n_messages):
+        """Top level method that processes an alert batch.
+
+        Does the following:
+         - Consume alerts from Kafka
+         - Run annotation queries
+        """
+        if self.verbose:
+            print('List of annotations:', self.diaObject_ann)
+
+        # run the annotation queries
+        self.log.info('ANNOTATION FILTERS start %s' % now())
+        ntotal = filters.annotation_filters(self)
+        if ntotal is not None:
+            self.log.info('ANNOTATION FILTERS got %d' % ntotal)
+        else:
+            self.log.error("ERROR in filter/fast_annotation_filters")
+
+        # Write stats for the batch
+#        self.timers['ftotal'].off()
+#        self.write_stats(self.timers, n_messages)
+        self.log.info('%d annotationss processed\n' % n_messages)
+        return ntotal
 

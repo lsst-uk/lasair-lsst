@@ -30,7 +30,7 @@ Options:
     --transfer=BOOL    Transfer results to main [default: True]
     --stats=BOOL       Write stats [default: True]
     --wait_time=TIME   Override default wait time (in seconds)
-    --grist=NAME Can be 'alert' or 'annotation' or 'test'
+    --grist=NAME Can be 'alert' or 'annotation' or 'testing'
 """
 
 import os
@@ -237,9 +237,12 @@ class Filter:
             nmessage_in += 1
             messageList.append(message)
 
-            # caching for fat kafka
-            diaObjectId = message['diaObject']['diaObjectId']
-            self.message_dict[diaObjectId] = message
+            # caching for fat kafka  SORT OUT LATER HACK
+            try:
+                diaObjectId = message['diaObject']['diaObjectId']
+                self.message_dict[diaObjectId] = message
+            except:
+                pass
 
             if nmessage_in % 1000 == 0:
                 d = handler(messageList)
@@ -482,6 +485,7 @@ if __name__ == "__main__":
     total_messages = 0
 
 ############### choose which type of message, are they alerts or annotations ########
+    print('Grist is ', grist)
     if grist == 'alert':
         from alert import alertcore
         fltr = alertcore.AlertFilter(
@@ -491,25 +495,27 @@ if __name__ == "__main__":
 
     elif grist == 'annotation':
         from annotation import annotationcore
-        fltr = annotationcore.AnnnotationFilter(
+        fltr = annotationcore.AnnotationFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
-    elif grist == 'test':
-        from test import testcore
-        fltr = testcore.TestFilter(
+
+    elif grist == 'testing':
+        from testing import testingcore
+        fltr = testingcore.TestFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)
     else:
-        print('Unknown grist for filter node, must be alert, annotation, or test')
+        print('Unknown grist for filter node, must be alert, annotation, or testing')
         sys.exit()
 ########################################################################
 
     # set up database connections, etc
     fltr.setup()
-    while not fltr.sigterm_raised:
+    while not fltr.sigterm_raised and n_batch < maxbatch:
         n_messages = fltr.run_batch()
+        n_batch += 1
 
     # clear the cache
     fltr.message_dict.clear()
