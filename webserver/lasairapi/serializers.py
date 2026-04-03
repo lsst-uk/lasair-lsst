@@ -432,5 +432,8 @@ class AnnotateListSerializer(serializers.Serializer):
         for a in annotations:
             serializer = AnnotateSerializer(data=a, context={'request': request})
             serializer.is_valid(raise_exception=True)
-            serializer.save()
+            message = serializer.save()
+            if 'error' in message:
+                return message
 
+        return {'status': 'success', 'n': len(annotations)}
