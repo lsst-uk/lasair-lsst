@@ -118,3 +118,14 @@ class AnnotateView(APIView):
             message = serializer.save()
             return Response(message, status=retcode(message))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+class AnnotateListView(APIView):
+    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        serializer = AnnotateSerializer(data=request.data, context={'request': request}, many=True)
+        if serializer.is_valid():
+            message = serializer.save()
+            return Response(message, status=retcode(message))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
