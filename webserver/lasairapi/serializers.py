@@ -430,7 +430,7 @@ class AnnotateListSerializer(serializers.Serializer):
         request = self.context.get("request")
 
         for a in annotations:
-            serializer = AnnotateSerializer(data=a)
-            serializer.is_valid(raise_exception=True, context={'request': request})
+            serializer = AnnotateSerializer(data=a, context={'request': request})
+            serializer.is_valid(raise_exception=True)
             serializer.save()
 
