@@ -1,20 +1,23 @@
-import sys
+import sys, os
+import datetime
+import json
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 sys.path.append('../../common')
 import settings
 sys.path.append('../../common/src')
-import date_nid
-import db_connect
-import manage_status
 import lasairLogging
 import logging
 
-def fetch_queries(msl_remote, ms, nid):
+def fetch_queries(fltr):
     """fetch_queries.
     Get all the stored queries from the main database
     """
 
     # Fetch all the stored queries from the main database
-    cursor = msl_remote.cursor(buffered=True, dictionary=True)
+    cursor = fltr.database_remote.cursor(buffered=True, dictionary=True)
     query = 'SELECT mq_id, user, name, email, tables, active, byte_quota, real_sql, topic_name '
     query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND active > 0'
     cursor.execute(query)
@@ -34,7 +37,7 @@ def fetch_queries(msl_remote, ms, nid):
         }
         # Lets see if some kafka has produced on this filter
         nbytesname = query['topic_name'] + '_bytes_produced'
-        status = ms.read(nid)
+        status = fltr.ms.read(fltr.nid)
         if nbytesname in status:
             query_dict['bytes_produced'] = status[nbytesname]
 
@@ -63,7 +66,7 @@ def lightcurve_lite(alert):
         "diaForcedSourcesList": diaForcedSourcesList,
     }
 
-def dispose_query_results(query, query_results, fltr, ms, nid):
+def dispose_query_results(fltr, query, query_results):
     """ Send out the query results by email or kafka, and ipdate the digest file
     """
     if len(query_results) == 0:
@@ -105,7 +108,7 @@ def dispose_query_results(query, query_results, fltr, ms, nid):
                     if active == LIGHTCURVE_FULL:
                         q['alert'] = alert
 
-    dispose_kafka(fltr.producer, query_results, query, ms, nid, log=fltr.log)
+    dispose_kafka(fltr, query_results, query)
     return len(query_results)
 
 def write_digest(allrecords, topic_name, last_entry, last_email):
@@ -207,9 +210,11 @@ def send_email(email, topic, message, message_html=''):
     s.quit()
 
 
-def dispose_kafka(producer, query_results, query, ms, nid, log):
+def dispose_kafka(fltr, query_results, query):
     """ Send out query results by kafka to the given topic.
     """
+    producer = fltr.producer
+    log = fltr.log
     topic_name = query['topic_name']
     # First decide if this filter has already produced enough
     bp = query.get('bytes_produced', 0)
@@ -239,15 +244,15 @@ def dispose_kafka(producer, query_results, query, ms, nid, log):
 
     # Record this as produced or rejected
     if will_produce:
-        ms.add({
+        fltr.ms.add({
             topic_name+'_bytes_produced' : nbytes,
             topic_name+'_alerts_produced': nalert,
-        }, nid)
+        }, fltr.nid)
     else:
-        ms.add({
+        fltr.ms.add({
             topic_name+'_bytes_rejected' : nbytes,
             topic_name+'_alerts_rejected': nalert,
-        }, nid)
+        }, fltr.nid)
 
 def crap_converter(o):
     """crap_converter. Deal with the things that JSON can't encode.

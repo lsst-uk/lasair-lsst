@@ -7,7 +7,7 @@ from astropy.coordinates import SkyCoord
 
 from filtercore import Filter
 from transfer import fetch_attrs
-from alerts.features.FeatureGroup import FeatureGroup
+from alert.features.FeatureGroup import FeatureGroup
 import util
 
 sys.path.append('../../common')
@@ -19,7 +19,7 @@ import db_connect
 import manage_status
 
 
-sys.path.append('alerts')
+sys.path.append('alert')
 import sherlock
 import filters
 import watchlists

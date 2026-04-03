@@ -132,6 +132,9 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
+        # set up lasair statistics
+        self.ms = manage_status.manage_status(log=self.log)
+        self.nid = date_nid.nid_now()
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -204,6 +207,7 @@ class Filter:
         nmessage_in = nmessage_out = 0
         startt = time.time()
         errors = 0
+        self.nid = date_nid.nid_now()
 
         messageList = []
         while nmessage_in < self.maxmessage:
@@ -260,12 +264,10 @@ class Filter:
         self.log.info('finished %d in, %d out' % (nmessage_in, nmessage_out))
 
         if self.stats:
-            ms = manage_status.manage_status(log=self.log)
-            nid = date_nid.nid_now()
-            ms.add({
+            self.ms.add({
                 'today_filter': nmessage_in,
                 'today_filter_out': nmessage_out,
-            }, nid)
+            }, self.nid)
 
         return nmessage_out
 
@@ -313,18 +315,17 @@ class Filter:
         if not self.stats:
             return
 
-        ms = manage_status.manage_status(log=self.log)
-        nid = date_nid.nid_now()
+        self.nid = date_nid.nid_now()
         d = Filter.batch_statistics(self.log)
-        ms.set({
+        self.ms.set({
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
             'min_delay': d['since'],  # hours since most recent message
-            'nid': nid},
-            nid)
+            'nid': self.nid},
+            self.nid)
         for name, td in timers.items():
-            td.add2ms(ms, nid)
+            td.add2ms(self.ms, self.nid)
 
         if nmessages > 0:
             min_str = "{:d}".format(int(d['min_delay'] * 60))

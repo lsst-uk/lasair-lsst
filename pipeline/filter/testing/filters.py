@@ -13,19 +13,18 @@ from src import db_connect, manage_status, date_nid
 
 def filters(fltr):
     # how many bytes has each filter already produced
-    ms = manage_status.manage_status(msl=fltr.database_remote)
-    nid = date_nid.nid_now()
+    self.nid = date_nid.nid_now()
 
     try:
-        query_list = fetch_queries(fltr.database_remote, ms, nid)
+        query_list = fetch_queries(fltr)
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
 
-    ntotal = run_queries(fltr, query_list, ms=ms, nid=nid)
+    ntotal = run_queries(fltr, query_list)
     return ntotal
 
-def run_queries(fltr, query_list, ms, nid, annotation_list=None):
+def run_queries(fltr, query_list, annotation_list):
     """
     When annotation_list is None, it runs all the queries against the local database
     When not None, runs some queires agains a specific object, using the main database
@@ -40,7 +39,7 @@ def run_queries(fltr, query_list, ms, nid, annotation_list=None):
         for ann in annotation_list:
             query_results = run_query(query, fltr.database_remote,
                ann['annotator'], ann['diaObjectId'], fltr=fltr)
-            n += dispose_query_results(query, query_results, fltr, ms, nid)
+            n += dispose_query_results(fltr, query, query_results)
 
         t = time.time() - t
         if n > 0:
@@ -122,13 +121,9 @@ def fast_anotation_filters(fltr):
     Queries that have that annotator should run against that object
     """
 
-    # how many bytes has each filter already produced
-    ms = manage_status.manage_status(msl=fltr.database_remote)
-    nid = date_nid.nid_now()
-
     # first get the user queries from the database that the webserver uses
     try:
-        query_list = fetch_queries(fltr.database_remote, ms, nid)
+        query_list = fetch_queries(fltr)
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return None
@@ -152,5 +147,5 @@ def fast_anotation_filters(fltr):
             continue
     streamReader.close()
     fltr.log.info('fast annotations: ' + str(annotation_list))
-    ntotal = run_queries(fltr, query_list, ms, nid, annotation_list)
+    ntotal = run_queries(fltr, query_list, annotation_list)
     return ntotal

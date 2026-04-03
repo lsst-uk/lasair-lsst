@@ -1,10 +1,11 @@
-import os, sys, time, json, datetime, smtplib
+import os, sys, time, json, datetime
 
+# some help from upstairs
 from util import fetch_queries, dispose_query_results
 
 sys.path.append('../../common')
 import settings
-from src import db_connect, manage_status, date_nid
+from src import db_connect
 
 def annotation_filters(fltr):
     """run_annotation_queries.
@@ -13,29 +14,25 @@ def annotation_filters(fltr):
     Queries that have that annotator should run against that object
     """
 
-    # how many bytes has each filter already produced
-    ms = manage_status.manage_status(msl=fltr.database_remote)
-    nid = date_nid.nid_now()
-
     # first get the user queries from the database that the webserver uses
-    #try:
     try:
-        query_list = fetch_queries(fltr.database_remote, ms, nid)
+        query_list = fetch_queries(fltr)
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        return 0
     obj_list = fltr.diaObject_ann
     fltr.log.info('fast annotations: ' + str(obj_list))
-    ntotal = run_queries(fltr, query_list, ms, nid)
+    ntotal = run_queries(fltr, query_list)
     return ntotal
 
-def run_queries(fltr, query_list, ms, nid):
+def run_queries(fltr, query_list):
     ntotal = 0
     for query in query_list:
         n = 0
         t = time.time()
         for ann,objList in fltr.diaObject_ann.items():
             query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
-            n += dispose_query_results(query, query_results, fltr, ms, nid)
+            n += dispose_query_results(fltr, query, query_results)
 
         t = time.time() - t
         if n > 0:
