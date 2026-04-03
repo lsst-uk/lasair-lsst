@@ -427,9 +427,10 @@ class AnnotateListSerializer(serializers.Serializer):
 
     def save(self):
         annotations = self.validated_data['annotations']
+        request = self.context.get("request")
 
         for a in annotations:
-            serializer = AnnotateSerializer(a)
-            serializer.is_valid(raise_exception=True)
+            serializer = AnnotateSerializer(data=a)
+            serializer.is_valid(raise_exception=True, context={'request': request})
             serializer.save()
 
