@@ -348,6 +348,9 @@ class AnnotateSerializer(serializers.Serializer):
     classdict = serializers.CharField(max_length=4096, required=True)
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
+    def create(self):
+        self.save()
+
     def save(self):
         topic = self.validated_data['topic']
         diaObjectId = self.validated_data['objectId']
