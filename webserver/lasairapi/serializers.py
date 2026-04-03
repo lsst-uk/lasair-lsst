@@ -349,7 +349,7 @@ class AnnotateSerializer(serializers.Serializer):
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
     def create(self, validated_data):
-        validated_data.is_valid(raise_exception=True)
+        self.is_valid(raise_exception=True)
         self.save(validated_data)
 
     def save(self, validated_data=None):
