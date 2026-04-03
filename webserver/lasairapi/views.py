@@ -4,7 +4,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import ConeSerializer, QuerySerializer, ObjectSerializer
 from .serializers import SherlockObjectSerializer, SherlockPositionSerializer
-from .serializers import AnnotateSerializer
+from .serializers import AnnotateSerializer, AnnotateListSerializer
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .query_auth import QueryAuthentication
@@ -105,9 +105,6 @@ class SherlockPositionView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
 class AnnotateView(APIView):
     authentication_classes = [TokenAuthentication, QueryAuthentication]
     permission_classes = [IsAuthenticated]
@@ -119,12 +116,13 @@ class AnnotateView(APIView):
             return Response(message, status=retcode(message))
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 class AnnotateListView(APIView):
     authentication_classes = [TokenAuthentication, QueryAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
-        serializer = AnnotateSerializer(data=request.data, context={'request': request}, many=True)
+        serializer = AnnotateListSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))

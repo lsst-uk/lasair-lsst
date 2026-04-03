@@ -338,7 +338,6 @@ class QuerySerializer(serializers.Serializer):
             return {"error": error}
 
 
-
 class AnnotateSerializer(serializers.Serializer):
     topic = serializers.CharField(max_length=255, required=True)
     objectId = serializers.IntegerField(required=True)
@@ -348,13 +347,7 @@ class AnnotateSerializer(serializers.Serializer):
     classdict = serializers.CharField(max_length=4096, required=True)
     url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
-    def create(self, validated_data):
-        self.is_valid(raise_exception=True)
-        self.save(validated_data)
-
-    def save(self, validated_data=None):
-        if not validated_data:
-            validated_data = self.validated_data
+    def save(self):
         topic = self.validated_data['topic']
         diaObjectId = self.validated_data['objectId']
         classification = self.validated_data['classification']
@@ -427,3 +420,15 @@ class AnnotateSerializer(serializers.Serializer):
         producer.flush()
 
         return {'status': 'success', 'query': query, 'annotation_topic': topicout, 'message': s}
+
+
+class AnnotateListSerializer(serializers.Serializer):
+    annotations = AnnotateSerializer(many=True)
+
+    def save(self):
+        annotations = self.validated_data['annotations']
+
+        for a in annotations:
+            if a.is_valid():
+                a.save()
+
