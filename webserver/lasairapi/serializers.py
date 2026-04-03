@@ -429,6 +429,7 @@ class AnnotateListSerializer(serializers.Serializer):
         annotations = self.validated_data['annotations']
 
         for a in annotations:
-            if a.is_valid():
-                a.save()
+            serializer = AnnotateSerializer(a)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
