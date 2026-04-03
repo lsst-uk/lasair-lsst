@@ -31,7 +31,7 @@ class AnnotationFilter(Filter):
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
-        self.diaObject_ann = {}
+        self.ann_diaObjectId = {}
         return
 
     def ingest_message_list(self, wrappedAnnotationList):
@@ -51,10 +51,10 @@ class AnnotationFilter(Filter):
     def ingest_annotation(self, annotation):
         # keep list of all objectId in this batch
         annotator = annotation['topic']
-        if annotator in self.diaObject_ann:
-            self.diaObject_ann[annotator].append(annotation['diaObjectId'])
+        if annotator in self.ann_diaObjectId:
+            self.ann_diaObjectId[annotator].append(annotation['diaObjectId'])
         else:
-            self.diaObject_ann[annotator] = [annotation['diaObjectId']]
+            self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
         # put the annotation in the database
         query = 'REPLACE INTO annotations ('
@@ -88,7 +88,7 @@ class AnnotationFilter(Filter):
          - Run annotation queries
         """
         if self.verbose:
-            print('List of annotations:', self.diaObject_ann)
+            print('List of annotations:', self.ann_diaObjectId)
 
         # run the annotation queries
         self.log.info('ANNOTATION FILTERS start %s' % now())

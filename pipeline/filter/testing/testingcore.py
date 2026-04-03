@@ -37,7 +37,7 @@ class TestFilter(Filter):
                 'diaSources':0,
                 'diaForcedSources':0, 
                 },
-            'annotations':{
+            'annotators':{
                 }
             }  # histogram of types
         return
@@ -60,14 +60,14 @@ class TestFilter(Filter):
             if 'diaForcedSourcesList' in message:
                 self.h['alert']['diaForcedSources'] += len(message['diaForcedSourcesList'])
 
-        if 'annotations' in message:
-            print('found annotations')
-            for key,vallist in message['annotations'].items():
+        if 'annotators' in message:
+            print('found annotators')
+            for key,vallist in message['annotators'].items():
                 print(key)
-                if key in self.h['annotations']:
-                    self.h['annotations'][key] += len(vallist)
+                if key in self.h['annotators']:
+                    self.h['annotators'][key] += len(vallist)
                 else:
-                    self.h['annotations'][key] = len(vallist)
+                    self.h['annotators'][key] = len(vallist)
         return 1
 
     # things that need doing after the batch of messages is done

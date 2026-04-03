@@ -20,7 +20,7 @@ def annotation_filters(fltr):
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return 0
-    obj_list = fltr.diaObject_ann
+    obj_list = fltr.ann_diaObjectId
     fltr.log.info('fast annotations: ' + str(obj_list))
     ntotal = run_queries(fltr, query_list)
     return ntotal
@@ -30,7 +30,7 @@ def run_queries(fltr, query_list):
     for query in query_list:
         n = 0
         t = time.time()
-        for ann,objList in fltr.diaObject_ann.items():
+        for ann,objList in fltr.ann_diaObjectId.items():
             query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
             n += dispose_query_results(fltr, query, query_results)
 
