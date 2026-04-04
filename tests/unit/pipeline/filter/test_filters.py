@@ -4,8 +4,8 @@ from unittest.mock import patch
 import context
 import datetime, json
 import numpy as np
-from filters import dispose_kafka
-from filters import crap_converter
+from util import dispose_kafka
+from util import crap_converter
 
 
 class FilterTest(unittest.TestCase):
