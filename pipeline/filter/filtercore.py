@@ -467,7 +467,7 @@ if __name__ == "__main__":
 
     topic_in = args.get('--topic_in') or 'lsst_sherlock'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxmessage = int(args.get('--maxmessage')) or int(args.get('--maxalert')) or settings.KAFKA_MAXALERTS
+    maxmessage = int(args.get('--maxmessage') or args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
     local_db = args.get('--local_db')
@@ -513,22 +513,23 @@ if __name__ == "__main__":
 ########################################################################
 
     # set up database connections, etc
+    n_messages = 0
+    n_batch = 0
     fltr.setup()
-    while not fltr.sigterm_raised and n_batch < maxbatch:
+    while not fltr.sigterm_raised:
         n_messages = fltr.run_batch()
         n_batch += 1
 
-    # clear the cache
-    fltr.message_dict.clear()
+        # clear the cache
+        fltr.message_dict.clear()
 
-    n_batch += 1
-    total_messages += n_messages 
-    if n_batch == maxbatch:
-        log.info(f"Exiting after {n_batch} batches")
-        sys.exit(0)
-    if maxtotal and total_messages >= maxtotal:
-        log.info(f"Exiting after {total_messages} messages")
-        sys.exit(0)
-    if n_messages == 0:  # process got no messages, so sleep a few minutes
-        log.info('Waiting for more messages ....')
-        time.sleep(wait_time)
+        total_messages += n_messages 
+        if n_batch == maxbatch:
+            log.info(f"Exiting after {n_batch} batches")
+            sys.exit(0)
+        if maxtotal and total_messages >= maxtotal:
+            log.info(f"Exiting after {total_messages} messages")
+            sys.exit(0)
+        if n_messages == 0:  # process got no messages, so sleep a few minutes
+            log.info('Waiting for more messages ....')
+            time.sleep(wait_time)
