@@ -2,8 +2,6 @@ import sys, os
 import datetime
 import json
 import smtplib
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
 
 sys.path.append('../../common')
 import settings
@@ -73,20 +71,15 @@ def dispose_query_results(fltr, query, query_results):
         return 0
     active = query['active']
 
-    if active == 1:
-        # send results by email if 24 hours has passed, returns time of last email send
-        digest, last_entry, last_email = fetch_digest(query['topic_name'])
-        allrecords = (query_results + digest)[:10000]
-        if fltr.send_email:
-            last_email = dispose_email(fltr, allrecords, last_email, query)
-        utcnow = datetime.datetime.now(datetime.UTC)
-        write_digest(allrecords, query['topic_name'], utcnow, last_email)
-
-    # send results by kafka on given topic
+    BASIC_EMAIL     = 1
     BASIC_KAFKA     = 2
     LIGHTCURVE_LITE = 3
     LIGHTCURVE_FULL = 4
-    if not fltr.send_kafka or active < BASIC_KAFKA:
+
+    if active == BASIC_EMAIL:
+        return 0
+
+    if not fltr.send_kafka:
         return len(query_results)
 
     # try to append the lightcurve info
@@ -110,105 +103,6 @@ def dispose_query_results(fltr, query, query_results):
 
     dispose_kafka(fltr, query_results, query)
     return len(query_results)
-
-def write_digest(allrecords, topic_name, last_entry, last_email):
-    # update the digest file
-    last_email_text = last_email.strftime("%Y-%m-%d %H:%M:%S")
-    last_entry_text = last_entry.strftime("%Y-%m-%d %H:%M:%S")
-    digest_dict = {
-            'last_entry': last_entry_text, 
-            'last_email': last_email_text, 
-            'digest': allrecords
-            }
-    digestdict_text = json.dumps(digest_dict, indent=2, default=crap_converter)
-
-    filename = settings.KAFKA_STREAMS + '/' + topic_name
-    f = open(filename, 'w')
-    os.chmod(filename, 0O666)
-    f.write(digestdict_text)
-    f.close()
-
-def tutc(s):
-    return datetime.datetime.strptime(s+' +0000', "%Y-%m-%d %H:%M:%S %z")
-
-def fetch_digest(topic_name):
-    filename = settings.KAFKA_STREAMS + '/' + topic_name
-    try:
-        digest_file = open(filename, 'r')
-        digest_dict = json.loads(digest_file.read())
-        digest = digest_dict['digest']
-        last_entry_text = digest_dict['last_entry']
-        last_email_text = digest_dict['last_email']
-        digest_file.close()
-    except:
-        digest = []
-        last_entry_text = "2017-01-01 00:00:00"
-        last_email_text = "2017-01-01 00:00:00"
-    last_entry = tutc(last_entry_text)
-    last_email = tutc(last_email_text)
-    return digest, last_entry, last_email
-
-
-def dispose_email(fltr, allrecords, last_email, query, force=False):
-    """ Send out email notifications
-    """
-    utcnow = datetime.datetime.now(datetime.UTC)
-    if not force:
-        delta = (utcnow - last_email)
-        delta = delta.days + delta.seconds/86400.0
-        # send a message at most every 24 hours
-        # delta is number of days since last email went out
-        if delta < 1.0:
-            return last_email
-    fltr.log.info('   --- send email to %s' % query['email'])
-    topic = query['topic_name']
-    sys.stdout.flush()
-    query_url = '/query/%d/' % (query['mq_id'])
-    message = 'Your active query with Lasair on topic %s\n' % topic
-    message_html = 'Your active query with Lasair on <a href=%s>%s</a><br/>' % (query_url, topic)
-    for out in allrecords: 
-        out_time = tutc(out['UTC'])
-        # gather all records that have accumulated since last email
-        if force or out_time > last_email:
-            if 'diaObjectId' in out:
-                diaObjectId = str(out['diaObjectId'])
-                message += diaObjectId + '\n'
-                message_html += '<a href="%s/objects/%s/">%s</a><br/> \n' % (settings.LASAIR_URL, diaObjectId, diaObjectId)
-            else:
-                jsonout = json.dumps(out, default=crap_converter)
-                message += jsonout + '\n'
-    try:
-        send_email(query['email'], topic, message, message_html)
-        return utcnow
-    except Exception as e:
-        print('ERROR in filter/run_active_queries: Cannot send email!' + str(e))
-        print(e)
-        sys.stdout.flush()
-        return last_email
-
-
-def send_email(email, topic, message, message_html=''):
-    """send_email.
-
-    Args:
-        email:
-        topic:
-        message:
-        message_html:
-    """
-    msg = MIMEMultipart('alternative')
-
-    msg['Subject'] = 'Lasair query ' + topic
-    msg['From'] = settings.LASAIR_EMAIL
-    msg['To'] = email
-
-    msg.attach(MIMEText(message, 'plain'))
-    if len(message_html) > 0:
-        msg.attach(MIMEText(message_html, 'html'))
-    s = smtplib.SMTP('localhost')
-    s.sendmail(settings.LASAIR_EMAIL, email, msg.as_string())
-    s.quit()
-
 
 def dispose_kafka(fltr, query_results, query):
     """ Send out query results by kafka to the given topic.
