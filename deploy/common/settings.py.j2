@@ -33,7 +33,7 @@ PUBLIC_GROUP_ID        = 'test124'
 # Schema registry
 #################
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
-SCHEMA_VERSION = "10_0"
+SCHEMA_VERSION = "10_0_A"
 
 # Pipeline runtime
 ##################
@@ -105,14 +105,14 @@ MYSQL_BACKUP_DIR       = '/mnt/cephfs/lasair/mysql_backup'
 # Webserver control
 ###################
 # Can have different web look and feel for different clusters
-WEB_DOMAIN             = '{{ lasair_name }}'
+WEB_DOMAIN             = '{{ web_name }}'
 
 # Make the register and passwordchange secure
 HASH_SALT              = '{{ settings.hash_salt }}'
 
 # To include links in emails of filter results
 #LASAIR_URL             = 'lasair-iris.roe.ac.uk'
-LASAIR_URL             = '{{ lasair_name }}.{{ domain }}'
+LASAIR_URL             = '{{ web_name }}.{{ domain }}'
 
 # Default from address to use when sending emails
 LASAIR_EMAIL           = '{{ lasair_email }}'

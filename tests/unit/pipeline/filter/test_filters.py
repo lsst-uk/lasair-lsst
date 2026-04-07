@@ -34,7 +34,7 @@ class FilterTest(unittest.TestCase):
                  'byte_quota'    : 200,           # under quota
                  'topic_name':'tpc'}
         nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid)
+        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid, log=None)
         expect = {'tpc_bytes_produced': 23,       # expect production
                   'tpc_alerts_produced':1}
         mock_manage_status.add.assert_called_with(expect, 0)
@@ -49,10 +49,11 @@ class FilterTest(unittest.TestCase):
                  'byte_quota'    : 200,           # over quota
                  'topic_name':'tpc'}
         nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid)
+        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid, log=None)
         expect = {'tpc_bytes_rejected': 23,       # expect rejection
                   'tpc_alerts_rejected':1}
         mock_manage_status.add.assert_called_with(expect, 0)
+
 
 if __name__ == '__main__':
     import xmlrunner 

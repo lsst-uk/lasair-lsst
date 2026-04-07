@@ -123,5 +123,7 @@
   "penultimatePairMJD": null,
   "penultimatePairColourMag": null,
   "penultimatePairColourBands": null,
-  "penultimatePairColourTemp": null
+  "penultimatePairColourTemp": null,
+  "nPosDiaSources": 8,
+  "nPosDiaSourcesNights": 2
 }

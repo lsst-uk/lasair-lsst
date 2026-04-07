@@ -1,5 +1,10 @@
 ## Videos
 
+### Rubin Science Assembly: The Lasair Broker
+An overview of Lasair and tutorial by Heloise Stevance, 45 minutes, 26 February 2026.
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/YroJO0QrXz0" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+
 ### Finding Alerts is like Buying a House
 This tongue-in-cheek video explains the Lasair filter by analogy with the rapidnotifications available at a property website.
 

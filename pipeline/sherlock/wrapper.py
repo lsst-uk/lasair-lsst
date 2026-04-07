@@ -280,6 +280,8 @@ def produce(conf, log, alerts):
     settings = {
         'bootstrap.servers': conf['broker'],
         'message.max.bytes': 10000000,
+        "queue.buffering.max.messages": 10000000,
+        "queue.buffering.max.kbytes": 4194304,
     }
     p = Producer(settings, logger=log)
 
@@ -291,6 +293,8 @@ def produce(conf, log, alerts):
             p.produce(conf['output_topic'], value=json.dumps(alert))
             log.debug("produced output:\n{}".format(json.dumps(alert, indent=2)))
             n += 1
+            if n % 100 == 0:
+                p.flush()
     finally:
         p.flush()
     log.log(logging.INFO_, "produced {:d} alerts".format(n))

@@ -220,7 +220,9 @@ class Filter:
             'sasl.mechanisms': 'SCRAM-SHA-256',
             'sasl.username': settings.PUBLIC_KAFKA_USERNAME,
             'sasl.password': settings.PUBLIC_KAFKA_PASSWORD,
-            'message.max.bytes': 10000000
+            'message.max.bytes': 10000000,
+            'queue.buffering.max.messages': 10000000,
+            'queue.buffering.max.kbytes': 2097152
         }
 
         self.log.info(str(conf))
@@ -255,6 +257,9 @@ class Filter:
             "physical_separation_kpc",
             "direct_distance",
             "distance",
+            "best_distance",
+            "best_distance_flag",
+            "best_distance_source",
             "z",
             "photoZ",
             "photoZErr",
@@ -274,6 +279,11 @@ class Filter:
         for key, value in ann.items():
             if key in attrs and value:
                 sets[key] = value
+
+        # this hack adds back in the deprecated 'distance' as 'best_distance'
+        if 'best_distance' in ann:
+            sets['distance'] = ann['best_distance']
+
         if 'description' in attrs and 'description' not in ann:
             sets['description'] = 'no description'
         # Build the query
@@ -559,9 +569,9 @@ class Filter:
         msl_local = db_connect.local()
         cursor = msl_local.cursor(buffered=True, dictionary=True)
         query = 'SELECT '
-        query += 'mjdnow()-max(maxTai) AS min_delay, '
-        query += 'mjdnow()-avg(maxTai) AS avg_delay, '
-        query += 'mjdnow()-min(maxTai) AS max_delay '
+        query += 'mjdnow()-max(lastDiaSourceMjdTai) AS min_delay, '
+        query += 'mjdnow()-avg(lastDiaSourceMjdTai) AS avg_delay, '
+        query += 'mjdnow()-min(lastDiaSourceMjdTai) AS max_delay '
         query += 'FROM objects'
         try:
             cursor.execute(query)
