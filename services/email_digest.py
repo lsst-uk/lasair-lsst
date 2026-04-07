@@ -17,7 +17,9 @@ import settings
 from time import sleep
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.mime.application import MIMEApplication
 import smtplib
+import json
 
 
 consumer_conf = {
@@ -29,7 +31,7 @@ consumer_conf = {
 }
 
 
-def send_email(to_addr: str, subject: str, message: str, message_html: str = None):
+def send_email(to_addr: str, subject: str, message: str, message_html: str = None, message_json: str = None):
     msg = MIMEMultipart('alternative')
 
     msg['Subject'] = subject
@@ -39,8 +41,34 @@ def send_email(to_addr: str, subject: str, message: str, message_html: str = Non
     msg.attach(MIMEText(message, 'plain'))
     if message_html:
         msg.attach(MIMEText(message_html, 'html'))
+    if message_json:
+        msg.attach(MIMEApplication(message_json, 'json'))
     s = smtplib.SMTP('localhost')
     s.sendmail('lasair@lsst.ac.uk', to_addr, msg.as_string())
+
+
+def format_line(alert):
+    text = ' '.join(str(value) for key, value in alert.items()) + "\n"
+    html = "<tr>"
+    for key, value in alert.items():
+        if key == 'objectId':
+            html += f"<td><a href=\"https://{settings.LASAIR_URL}/objects/{str(value)}\">{str(value)}</a></td>"
+        else:
+            html += str(value)
+    html += "</tr>\n"
+    return text, html
+
+
+def format_message(fname, alerts):
+    text = f"Lasair alert digest for filter {fname}\n\n"
+    html = f"<html><head><title>Lasair alert digest for filter {fname}</title></head><body><table>\n"
+    for alert in alerts:
+        line_text, line_html = format_line(alert)
+        text += line_text
+        html += line_html
+    text += "\n"
+    html += "</table></body></html>"
+    return text, html
 
 
 def main():
@@ -67,15 +95,14 @@ def main():
             if msg.error():
                 print('ERROR polling for alerts: ' + str(msg.error()))
                 break
-            alerts.append(msg.value())
+            alerts.append(json.loads(msg.value()))
         consumer.close()
 
         # Create and send digest email
         if len(alerts) > 0:
-            digest = f"Lasair alert digest for filter {f['name']}\n\n"
-            for alert in alerts:
-                digest += alert + '\n'
-            send_email(f['email'], f"Lasair query {f['name']}", digest)
+            text, html = format_message(f['name'], alerts)
+            json_str = json.dumps(alerts, indent=2)
+            send_email(f['email'], f"Lasair query {f['name']}", text, html, json_str)
 
 
 if __name__ == "__main__":
