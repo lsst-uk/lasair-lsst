@@ -79,13 +79,17 @@ def main(to_addr, groupid, fname):
     # Get a list of filters
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = ("SELECT name, topic_name, first_name, last_name, email"
-             "FROM myqueries, auth_user"
-             "WHERE auth_user.id=user AND active=1")
+    query = ("SELECT name, topic_name, first_name, last_name, email "
+             "FROM myqueries, auth_user "
+             "WHERE auth_user.id=user ")
     if fname:
-        query += f" AND myqueries.name={fname}"
+        # get a specific query (for testing)
+        query += f"AND myqueries.name='{fname}'"
+    else:
+        # get all active=1 queries
+        query += "AND active=1"
     cursor.execute(query)
-    filters = cursor.items()
+    filters = cursor.fetchall()
 
     for f in filters:
         # Get any new alerts
