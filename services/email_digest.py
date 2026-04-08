@@ -2,10 +2,13 @@
 For each filter with email output, checks the associated Kafka topic for new alerts,
 builds a digest email and sends it. Intended to be run as a daily cronjob.
 Usage:
-    email_digest.py
+    email_digest.py [--email=<address> --group=<id>] [--filter=<name>]
 
 Options:
-    --help     Show usage information
+    --help             Show usage information
+    --email=<address>  Send all alerts here instead of to users (for testing)
+    --group=<id>       Group ID (for testing)
+    --filter=<name>    Limit to a single filter (for testing)
 """
 
 import sys
@@ -20,15 +23,6 @@ from email.mime.text import MIMEText
 from email.mime.application import MIMEApplication
 import smtplib
 import json
-
-
-consumer_conf = {
-    'bootstrap.servers': settings.PUBLIC_KAFKA_READONLY,
-    'default.topic.config': {'auto.offset.reset': 'earliest'},
-    'client.id': 'email_digest',
-    'group.id': 'email_digest',
-    'enable.auto.commit': True,
-}
 
 
 def send_email(to_addr: str, subject: str, message: str, message_html: str = None, message_json: str = None):
@@ -71,13 +65,25 @@ def format_message(fname, alerts):
     return text, html
 
 
-def main():
+def main(to_addr, groupid, fname):
+    if not groupid:
+        groupid = 'email_digest'
+    consumer_conf = {
+        'bootstrap.servers': settings.PUBLIC_KAFKA_READONLY,
+        'default.topic.config': {'auto.offset.reset': 'earliest'},
+        'client.id': 'email_digest',
+        'group.id': groupid,
+        'enable.auto.commit': True,
+    }
+
     # Get a list of filters
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
     query = ("SELECT name, topic_name, first_name, last_name, email"
              "FROM myqueries, auth_user"
              "WHERE auth_user.id=user AND active=1")
+    if fname:
+        query += f" AND myqueries.name={fname}"
     cursor.execute(query)
     filters = cursor.items()
 
@@ -100,14 +106,22 @@ def main():
 
         # Create and send digest email
         if len(alerts) > 0:
+            if not to_addr:
+                to_addr = f['email']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
-            send_email(f['email'], f"Lasair query {f['name']}", text, html, json_str)
+            send_email(to_addr, f"Lasair query {f['name']}", text, html, json_str)
 
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    main()
+    email = args.get('--email')
+    group = args.get('--group')
+    filter_name = args.get('--filter')
+    if email and not group or group and not email:
+        print('Either both email and group options must be set, or neither.')
+        sys.exit(1)
+    main(email, group, filter_name)
 
 
 
