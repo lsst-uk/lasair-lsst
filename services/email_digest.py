@@ -25,10 +25,10 @@ import smtplib
 import json
 
 
-def send_email(to_addr: str, subject: str, message: str, message_html: str = None, message_json: str = None):
+def send_email(to_addr: str, fname: str, message: str, message_html: str = None, message_json: str = None):
     msg = MIMEMultipart('alternative')
 
-    msg['Subject'] = subject
+    msg['Subject'] = f"Lasair query {fname}"
     msg['From'] = settings.LASAIR_EMAIL
     msg['To'] = to_addr
 
@@ -36,7 +36,9 @@ def send_email(to_addr: str, subject: str, message: str, message_html: str = Non
     if message_html:
         msg.attach(MIMEText(message_html, 'html'))
     if message_json:
-        msg.attach(MIMEApplication(message_json, 'json'))
+        attachment = MIMEApplication(message_json, 'json', Name=f"{fname}.json")
+        attachment.add_header('Content-Disposition', 'attachment', filename=f"{fname}.json")
+        msg.attach(attachment)
     s = smtplib.SMTP('localhost')
     s.sendmail('lasair@lsst.ac.uk', to_addr, msg.as_string())
 
@@ -45,10 +47,10 @@ def format_line(alert):
     text = ' '.join(str(value) for key, value in alert.items()) + "\n"
     html = "<tr>"
     for key, value in alert.items():
-        if key == 'objectId':
+        if key == 'diaObjectId':
             html += f"<td><a href=\"https://{settings.LASAIR_URL}/objects/{str(value)}\">{str(value)}</a></td>"
         else:
-            html += str(value)
+            html += f"<td>{key} {str(value)}</td>"
     html += "</tr>\n"
     return text, html
 
@@ -56,6 +58,12 @@ def format_line(alert):
 def format_message(fname, alerts):
     text = f"Lasair alert digest for filter {fname}\n\n"
     html = f"<html><head><title>Lasair alert digest for filter {fname}</title></head><body><table>\n"
+    if len(alerts) > 0:
+        text += ' | '.join(alerts[0].keys()) + "\n"
+        html += "<tr>"
+        for key in alerts[0]:
+            html += f"<th>{key}</th>"
+        html += "</tr>\n"
     for alert in alerts:
         line_text, line_html = format_line(alert)
         text += line_text
@@ -96,10 +104,12 @@ def main(to_addr, groupid, fname):
         consumer = Consumer(consumer_conf)
         consumer.subscribe([f['topic_name']])
         alerts = []
-        for i in range(10):
+        i = 0
+        while i < 10:
             msg = consumer.poll(timeout=1)
             if msg is None:
                 # no messages available
+                i += 1
                 sleep(1)
                 continue
             if msg.error():
@@ -114,7 +124,7 @@ def main(to_addr, groupid, fname):
                 to_addr = f['email']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
-            send_email(to_addr, f"Lasair query {f['name']}", text, html, json_str)
+            send_email(to_addr, f['name'], text, html, json_str)
 
 
 if __name__ == "__main__":
