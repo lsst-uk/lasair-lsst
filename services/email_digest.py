@@ -26,15 +26,17 @@ import json
 
 
 def send_email(to_addr: str, fname: str, message: str, message_html: str = None, message_json: str = None):
-    msg = MIMEMultipart('alternative')
+    msg = MIMEMultipart('mixed')
+    body = MIMEMultipart('alternative')
 
     msg['Subject'] = f"Lasair query {fname}"
     msg['From'] = settings.LASAIR_EMAIL
     msg['To'] = to_addr
 
-    msg.attach(MIMEText(message, 'plain'))
+    body.attach(MIMEText(message, 'plain'))
     if message_html:
-        msg.attach(MIMEText(message_html, 'html'))
+        body.attach(MIMEText(message_html, 'html'))
+    msg.attach(body)
     if message_json:
         attachment = MIMEApplication(message_json, 'json', Name=f"{fname}.json")
         attachment.add_header('Content-Disposition', 'attachment', filename=f"{fname}.json")
@@ -50,7 +52,7 @@ def format_line(alert):
         if key == 'diaObjectId':
             html += f"<td><a href=\"https://{settings.LASAIR_URL}/objects/{str(value)}\">{str(value)}</a></td>"
         else:
-            html += f"<td>{key} {str(value)}</td>"
+            html += f"<td>{str(value)}</td>"
     html += "</tr>\n"
     return text, html
 
