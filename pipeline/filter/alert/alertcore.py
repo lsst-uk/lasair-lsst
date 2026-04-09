@@ -1,4 +1,5 @@
 import sys
+import json
 import datetime
 import numbers
 import math
@@ -145,9 +146,8 @@ class AlertFilter(Filter):
 
         lasair_features = FeatureGroup.run_all(alert)
         if not lasair_features:
-            if self.verbose:
-                print('Features did not run')
-                print(json.dumps(alert, indent=2))
+            print('Features did not run')
+            print(json.dumps(alert, indent=2))
             return None
 
         # Make the query
