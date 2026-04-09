@@ -3,16 +3,17 @@ from unittest.mock import patch
 
 import psutil
 import context
-#from filtercore import Filter
-from alertcore import AlertFilter as Filter
+from alertcore import AlertFilter
 import re
 
+def test_message_handler(message_list):
+    return len(message_list)
 
 class FilterTest(unittest.TestCase):
 
     def test_sigterm_handler(self):
         """Test that the sigterm handler sets sigterm raised correctly"""
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         self.assertFalse(fltr.sigterm_raised)
         psutil.Process().terminate()
         self.assertTrue(fltr.sigterm_raised)
@@ -61,7 +62,7 @@ class FilterTest(unittest.TestCase):
             "description='This is a description'",
             "summary=NULL"
             ]
-        result = Filter.create_insert_sherlock(test_ann)
+        result = AlertFilter.create_insert_sherlock(test_ann)
         result = re.sub("\n",'', result)
 
         # check that query starts OK
@@ -73,7 +74,7 @@ class FilterTest(unittest.TestCase):
         for item in result.split(','):
             self.assertIn(item, expected_results)
 
-    @patch('filtercore.FeatureGroup')
+    @patch('alert.features.FeatureGroup')
     def test_insert_query(self, mock_FeatureGroup):
         """Test that the method for constructing the object table insert gives the expected output given a dict of
         features."""
@@ -81,7 +82,7 @@ class FilterTest(unittest.TestCase):
             "strFeature": "A string", "floatFeature": 0.123, "nanFeature": float("nan"), "missingFeature": None}
         expected_results = [
             'strFeature="A string"', 'floatFeature=0.123', 'nanFeature=NULL', 'missingFeature=NULL']
-        result = Filter.create_insert_query({})
+        result = AlertFilter.create_insert_query({'diaObject':{}})
         result = re.sub("\n",'', result)
 
         # check that query starts OK
@@ -98,7 +99,7 @@ class FilterTest(unittest.TestCase):
         test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra': 0.0, 'decl': 0.0},
                       'diaSourcesList': []}
         mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.sfd = mock_sfd
         result = fltr.ingest_alert(test_alert)
         self.assertEqual(result, 0)
@@ -108,26 +109,26 @@ class FilterTest(unittest.TestCase):
         test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra': 0.0, 'decl': 0.0},
                       'diaSourcesList': []}
         mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.sfd = mock_sfd
         result = fltr.ingest_message_list([test_alert])
         self.assertEqual(result, 0)
 
-    @patch('filtercore.alert.AlertFilter.create_insert_query')
+    @patch('alertcore.AlertFilter.create_insert_query')
     @patch('filtercore.Filter.execute_local_query')
     def test_ingest_alert(self, mock_execute_local_query, mock_create_insert_query):
         """Test that handle_alert method returns 1 for an alert with sources."""
         mock_create_insert_query.return_value = "QUERY"
         test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': ['']}
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        result = fltr.handle_alert(test_alert)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
+        result = fltr.ingest_alert(test_alert)
         self.assertEqual(result, 1)
         mock_create_insert_query.assert_called_once()
         mock_execute_local_query.assert_called_once()
 
-    @patch('filtercore.alert.AlertFilter.create_insert_sherlock')
-    @patch('filtercore.alert.filter.create_insert_query')
+    @patch('alertcore.AlertFilter.create_insert_sherlock')
+    @patch('alertcore.AlertFilter.create_insert_query')
     @patch('filtercore.Filter.execute_local_query')
     def test_handle_alert_sherlock(self, mock_execute_local_query, mock_create_insert_query, mock_create_insert_sherlock):
         """Test that handle_alert method works with a sherlock annotation."""
@@ -136,7 +137,7 @@ class FilterTest(unittest.TestCase):
         test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
                       'diaSourcesList': [''],
                       'annotations': {'sherlock': [{}]}}
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         result = fltr.ingest_alert(test_alert)
         self.assertEqual(result, 1)
         mock_create_insert_query.assert_called_once()
@@ -148,15 +149,14 @@ class FilterTest(unittest.TestCase):
     def test_consume_messages_sigterm(self, mock_manage_status):
         """Test that consume alerts stops when sigterm raised"""
         mock_consumer = unittest.mock.MagicMock()
+        mock_sfd      = unittest.mock.MagicMock()
         mock_consumer.poll.return_value = None
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
+        fltr = AlertFilter(group_id='filter_test', maxalert=1)
+        fltr.ms       = mock_manage_status
         fltr.consumer = mock_consumer
-        fltr.sfd = mock_sfd
+        fltr.sfd      = mock_sfd
         fltr.sigterm_raised = True
-        iml = fltr.ingest_message_list
-        result = fltr.consume_messages(iml)
-
+        result = fltr.consume_messages(test_message_handler)
         self.assertEqual(result, 0)
         mock_consumer.poll.assert_not_called()
 
@@ -164,12 +164,15 @@ class FilterTest(unittest.TestCase):
     def test_consume_messages_none(self, mock_manage_status):
         """Test that consume alerts returns 0 when poll returns None"""
         mock_consumer = unittest.mock.MagicMock()
+        mock_log      = unittest.mock.MagicMock()
+        mock_sfd      = unittest.mock.MagicMock()
         mock_consumer.poll.return_value = None
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
+        fltr = AlertFilter(group_id='filter_test', maxalert=1)
+        fltr.ms       = mock_manage_status
         fltr.consumer = mock_consumer
-        fltr.sfd = mock_sfd
-        result = fltr.consume_messages()
+        fltr.log      = mock_log
+        fltr.sfd      = mock_sfd
+        result = fltr.consume_messages(test_message_handler)
         self.assertEqual(result, 0)
         mock_consumer.poll.assert_called_once()
 
@@ -177,37 +180,40 @@ class FilterTest(unittest.TestCase):
     def test_consume_messages_error(self, mock_manage_status):
         """Test consume alerts when poll returns error"""
         mock_consumer = unittest.mock.MagicMock()
+        mock_log      = unittest.mock.MagicMock()
+        mock_sfd      = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = "test error"
-        mock_log = unittest.mock.MagicMock()
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
+        fltr = AlertFilter(group_id='filter_test', maxalert=1)
+        fltr.ms       = mock_manage_status
         fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        fltr.sfd = mock_sfd
-        result = fltr.consume_messages()
+        fltr.log      = mock_log
+        fltr.sfd      = mock_sfd
+        result = fltr.consume_messages(test_message_handler)
         self.assertEqual(result, 0)
         self.assertEqual(mock_consumer.poll.call_count, 101)
 
-    @patch('filtercore.Filter.alert.ingest_alert')
-    @patch('filtercore.manage_status.manage_status')
-    def test_consume_messages(self, mock_manage_status, mock_handle_alert):
+    @patch('alertcore.AlertFilter.ingest_alert')
+    @patch('alertcore.AlertFilter.ingest_message_list')
+    def test_consume_messages(self, mock_ingest_alert, mock_ingest_message_list):
         """Test consume alerts"""
-        mock_consumer = unittest.mock.MagicMock()
-        mock_log = unittest.mock.MagicMock()
-        mock_sfd = unittest.mock.MagicMock()
+        mock_consumer      = unittest.mock.MagicMock()
+        mock_log           = unittest.mock.MagicMock()
+        mock_sfd           = unittest.mock.MagicMock()
+        mock_manage_status = unittest.mock.MagicMock()
         mock_sfd.return_value = [0]
         mock_consumer.poll.return_value.error.return_value = None
         mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123, "ra":23, "decl":23}}'
-        mock_ingest_alert.return_value = 1
-        fltr = Filter(group_id='filter_test', maxalert=1)
+#        mock_ingest_alert.return_value = 1
+        fltr = AlertFilter(group_id='filter_test', maxalert=1)
+        fltr.ms       = mock_manage_status
         fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        fltr.sfd = mock_sfd
-        result = fltr.consume_messages()
+        fltr.log      = mock_log
+        fltr.sfd      = mock_sfd
+        fltr.nid      = 0
+        result = fltr.consume_messages(test_message_handler)
         self.assertEqual(result, 1)
         mock_consumer.poll.assert_called_once()
-        mock_manage_status.assert_called_once()
-        mock_manage_status.return_value.add.assert_called_once()
+        mock_manage_status.add.assert_called_once()
 
     @patch('os.system')
     @patch('filtercore.Filter.execute_local_query')
@@ -216,7 +222,7 @@ class FilterTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_execute_local_query.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.consumer = mock_consumer
         fltr.log = mock_log
         result = fltr.transfer_to_main(retry=2, delay=0)
@@ -233,7 +239,7 @@ class FilterTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_db_connect_remote.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.consumer = mock_consumer
         fltr.log = mock_log
         result = fltr.transfer_to_main(retry=2, delay=0)
@@ -243,22 +249,6 @@ class FilterTest(unittest.TestCase):
         mock_log.error.assert_called_once()
         mock_consumer.commit.assert_not_called()
 
-    # @patch('filtercore.Filter.execute_local_query')
-    # @patch('filtercore.db_connect.remote')
-    # @patch('os.system')
-    # def test_transfer_to_main_remote_cli_error(self, mock_system, mock_db_connect_remote, mock_execute_local_query):
-    #     """Test that an error writing to main db using the cli causes transfer_to_main to return None"""
-    #     mock_consumer = unittest.mock.MagicMock()
-    #     mock_log = unittest.mock.MagicMock()
-    #     mock_system.return_value = 1
-    #     fltr = Filter(group_id='filter_test', maxalert=0)
-    #     fltr.consumer = mock_consumer
-    #     fltr.log = mock_log
-    #     result = fltr.transfer_to_main(retry=1, delay=0)
-    #     self.assertEqual(result, False)
-    #     mock_log.error.assert_called()
-    #     mock_consumer.commit.assert_not_called()
-
     @patch('os.system')
     @patch('filtercore.transfer_csv')
     @patch('filtercore.db_connect.remote')
@@ -267,7 +257,7 @@ class FilterTest(unittest.TestCase):
         mock_consumer = unittest.mock.MagicMock()
         mock_log = unittest.mock.MagicMock()
         mock_transfer.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.consumer = mock_consumer
         fltr.log = mock_log
         fltr.csv_attrs = {'objects': ['one', 'two', 'three']}
@@ -277,20 +267,6 @@ class FilterTest(unittest.TestCase):
         mock_log.error.assert_called()
         mock_consumer.commit.assert_not_called()
 
-    # @patch('filtercore.Filter.execute_local_query')
-    # @patch('filtercore.db_connect.remote')
-    # @patch('os.system')
-    # def test_transfer_to_main_cli_normal_flow(self, mock_system, mock_db_connect_remote, mock_execute_local_query):
-    #     """Test transfer to main normal flow using the cli"""
-    #     mock_log = unittest.mock.MagicMock()
-    #     mock_system.return_value = 0
-    #     mock_consumer = unittest.mock.MagicMock()
-    #     fltr = Filter(group_id='filter_test', maxalert=0)
-    #     fltr.log = mock_log
-    #     fltr.consumer = mock_consumer
-    #     result = fltr.transfer_to_main()
-    #     self.assertEqual(result, True)
-
     @patch('os.system')
     @patch('filtercore.transfer_csv')
     @patch('filtercore.db_connect.remote')
@@ -298,7 +274,7 @@ class FilterTest(unittest.TestCase):
         """Test transfer to main normal flow"""
         mock_log = unittest.mock.MagicMock()
         mock_consumer = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
+        fltr = AlertFilter(group_id='filter_test', maxalert=0)
         fltr.log = mock_log
         fltr.consumer = mock_consumer
         fltr.csv_attrs = {'this': ['one', 'two'], 'that': ['three', 'four']}

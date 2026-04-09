@@ -47,7 +47,7 @@ def run(args, log):
     maxbatch = int(args.get('--maxbatch') or -1)
 
 #### This runner is set up for alerts
-    from alerts import alertcore
+    from alert import alertcore
     fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
     fltr.setup()
 

@@ -26,30 +26,34 @@ class FilterTest(unittest.TestCase):
 
     def test_dispose_kafka_produce(self):
         """ Test that the right call is made to manage_status when disposing kafka under quota """
-        mock_producer      = unittest.mock.MagicMock()
+        mock_Filter        = unittest.mock.MagicMock()
         mock_manage_status = unittest.mock.MagicMock()
+        mock_Filter.ms = mock_manage_status
+        mock_Filter.nid = 0
         query_results = [{'apple':1, 'pear':2}]   # list of output results
 
         query = {'bytes_produced': 100,
                  'byte_quota'    : 200,           # under quota
                  'topic_name':'tpc'}
         nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid, log=None)
+        dispose_kafka(mock_Filter, query_results, query)
         expect = {'tpc_bytes_produced': 23,       # expect production
                   'tpc_alerts_produced':1}
         mock_manage_status.add.assert_called_with(expect, 0)
 
     def test_dispose_kafka_reject(self):
         """ Test that the right call is made to manage_status when disposing kafka over quota """
-        mock_producer      = unittest.mock.MagicMock()
+        mock_Filter      = unittest.mock.MagicMock()
         mock_manage_status = unittest.mock.MagicMock()
+        mock_Filter.ms = mock_manage_status
+        mock_Filter.nid = 0
         query_results = [{'apple':1, 'pear':2}]   # list of output results
 
         query = {'bytes_produced': 300,
                  'byte_quota'    : 200,           # over quota
                  'topic_name':'tpc'}
         nid = 0
-        dispose_kafka(mock_producer, query_results, query, mock_manage_status, nid, log=None)
+        dispose_kafka(mock_Filter, query_results, query)
         expect = {'tpc_bytes_rejected': 23,       # expect rejection
                   'tpc_alerts_rejected':1}
         mock_manage_status.add.assert_called_with(expect, 0)
