@@ -9,7 +9,10 @@ import mysql.connector
 from mysql.connector.errors import *
 sys.path.append('../../../../common')
 import settings
+sys.path.append('../../../../common/src')
+import lasairLogging
 sys.path.append('../../../../pipeline/filter')
+sys.path.append('../../../../pipeline/filter/alert')
 from filters import run_query
 
 config = {
