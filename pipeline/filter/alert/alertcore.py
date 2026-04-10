@@ -106,6 +106,9 @@ class AlertFilter(Filter):
         # Filter to apply to each alert.
         diaObjectId = alert['diaObject']['diaObjectId']
 
+        # store alerts in the cache
+        self.message_dict[diaObjectId] = alert
+
         # really not interested in alerts that have no detections!
         if len(alert['diaSourcesList']) == 0:
             if self.verbose:

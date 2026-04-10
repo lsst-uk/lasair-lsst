@@ -241,13 +241,6 @@ class Filter:
             nmessage_in += 1
             messageList.append(message)
 
-            # caching for fat kafka  SORT OUT LATER HACK
-            try:
-                diaObjectId = message['diaObject']['diaObjectId']
-                self.message_dict[diaObjectId] = message
-            except:
-                pass
-
             if nmessage_in % 1000 == 0:
                 d = handler(messageList)
                 messageList = []

@@ -30,15 +30,12 @@ import filtercore
 # if this is True, the runner stops when it can and exits
 stop = False
 
-
 def sigterm_handler(signum, frame):
     global stop
     print('Stopping by SIGTERM')
     stop = True
 
-
 signal.signal(signal.SIGTERM, sigterm_handler)
-
 
 def run(args, log):
     topic_in = args.get('--topic_in')
@@ -69,7 +66,6 @@ def run(args, log):
             sys.exit(1)
 
     log.info('Exiting filter runner')
-
 
 if __name__ == '__main__':
 
