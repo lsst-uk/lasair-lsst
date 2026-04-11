@@ -158,6 +158,18 @@ class Filter:
             self.log.info(query)
             raise
 
+    def execute_remote_query(self, query: str):
+        """ execute_remote_query: run a query and close it, and compalin to slack if failure.
+        """
+        try:
+            cursor = self.database_remote.cursor(buffered=True)
+            cursor.execute(query)
+            cursor.close()
+            self.database_remote.commit()
+        except Exception as e:
+            self.log.error('ERROR filter/execute_remote_query: %s' % str(e))
+            self.log.info(query)
+
     def make_kafka_consumer(self):
         """ Make a kafka consumer.
         """

@@ -58,11 +58,10 @@ def query_for_object(query, objList):
     return query
 
 def run_query(query, msl, annotator, objList, fltr):
-    """run_query. Two cases here:
-    if annotator=None, runs the query against the local database
-    if annotator and diaObjectId, checks if the query involves the annotator,
+    """run_query. 
+        checks if the query involves the annotator,
         and if so, runs the query for the given object on main database
-        runs the query against the local database
+        runs the query against the remote database
 
     Args:
         query:
@@ -81,14 +80,12 @@ def run_query(query, msl, annotator, objList, fltr):
         return []
     # run the query against main for this specific object that has been annotated
     sqlquery_real = query_for_object(sqlquery_real, objList)
-#    fltr.log.info('FAnnQ: ' + sqlquery_real) 
 
     # in any case, 10 second timeout and limit the output
     sqlquery_real = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %d' %
                      (settings.MAX_STATEMENT_TIME, sqlquery_real, limit))
 
     cursor = msl.cursor(buffered=True, dictionary=True)
-    n = 0
     query_results = []
     utc = datetime.datetime.now(datetime.UTC).strftime("%Y-%m-%d %H:%M:%S")
     try:
@@ -97,10 +94,9 @@ def run_query(query, msl, annotator, objList, fltr):
             recorddict = dict(record)
             recorddict['UTC'] = utc
             query_results.append(recorddict)
-            n += 1
     except Exception as e:
         error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
-                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
+                 "and write to lasair-help@mlist.is.ed.ac.uk if you want help." % (utc, topic, str(e)))
         fltr.log.info(error)
         fltr.log.info(sqlquery_real)
         send_email(email, topic, error)

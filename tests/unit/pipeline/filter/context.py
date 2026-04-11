@@ -11,3 +11,4 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../common/schema/' + settings.SCHEMA_VERSION)))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter/alert')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../pipeline/filter/annotation')))

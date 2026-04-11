@@ -76,7 +76,7 @@ def run_query(query, msl):
             n += 1
     except Exception as e:
         error = ("%s UTC: Your streaming query %s didn't run, the error is: %s, please check it,"
-                 "and write to lasair-help@roe.ac.uk if you want help." % (utc, topic, str(e)))
+                 "and write to lasair-help@mlist.is.ed.ac.uk if you want help." % (utc, topic, str(e)))
         print(error)
         print(sqlquery_real)
         send_email(email, topic, error)

@@ -37,18 +37,22 @@ class FilterTest(unittest.TestCase):
 #        for item in result.split(','):
 #            self.assertIn(item, expected_results)
 
-    @patch('annotationcore.AnnotationFilter.create_insert_query')
-    @patch('filtercore.Filter.execute_local_query')
-    def test_ingest_annotation(self, mock_execute_local_query, mock_create_insert_query):
+    @patch('filtercore.Filter.execute_remote_query')
+    def test_ingest_annotation(self, mock_execute_remote_query):
         """Test that handle_annotation method returns 1 for an annotation with sources."""
-        mock_create_insert_query.return_value = "QUERY"
-        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},     ### HACK
-                      'diaSourcesList': ['']}
+        test_annotation = {'diaObjectId': 123, 
+                 'topic':'test_topic', 
+                 'version': '0.1',
+                 'classification':'fruit',
+                 'explanation': 'fruity',
+                 'classdict':{'apple':0.9, 'pear': 0.1},
+                 'url': '',
+                }
         fltr = AnnotationFilter(group_id='filter_test', maxmessage=0)
+        fltr.ann_diaObjectId = {}
         result = fltr.ingest_annotation(test_annotation)
         self.assertEqual(result, 1)
-        mock_create_insert_query.assert_called_once()
-        mock_execute_local_query.assert_called_once()
+        mock_execute_remote_query.assert_called_once()
 
     @patch('annotationcore.AnnotationFilter.ingest_annotation')
     @patch('annotationcore.AnnotationFilter.ingest_message_list')

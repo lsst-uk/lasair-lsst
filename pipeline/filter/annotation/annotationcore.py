@@ -31,11 +31,17 @@ class AnnotationFilter(Filter):
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
+        # this is the cache of all the annotated diaObjectIds
+        # it is used to modify the filters when they run
         self.ann_diaObjectId = {}
         return
 
     def ingest_message_list(self, wrappedAnnotationList):
-        """insert_message_list: handle a list of annotations
+        """insert_message_list: handle a list of annotations of the form
+        {'annotations': {
+            'topic1':[{ann1}, {ann2}, ...], 
+            'topic2':[..] 
+        }}
         """
         nannotation = 0
         for wrappedAnnotation in wrappedAnnotationList:
@@ -51,6 +57,10 @@ class AnnotationFilter(Filter):
     def ingest_annotation(self, annotation):
         # keep list of all objectId in this batch
         annotator = annotation['topic']
+
+        # self.ann_diaObjectId = {
+        #     'topic1':[oid1, oid2, ...], 
+        #     'topic2':[...] }
         if annotator in self.ann_diaObjectId:
             self.ann_diaObjectId[annotator].append(annotation['diaObjectId'])
         else:
@@ -70,15 +80,8 @@ class AnnotationFilter(Filter):
                 json.dumps(annotation['classdict']), 
                 annotation['url'])
 
-        try:
-            cursor = self.database_remote.cursor(dictionary=True)
-            cursor.execute(query)
-            cursor.close()
-            self.database_remote.commit()
-            return 1
-        except Exception as e:
-            print ("Query failed %d: %s\n" % (e.args[0], e.args[1]))
-            return 0
+        self.execute_remote_query(query)
+        return 1
 
     def post_ingest(self, n_messages):
         """Top level method that processes an alert batch.
@@ -97,10 +100,3 @@ class AnnotationFilter(Filter):
             self.log.info('ANNOTATION FILTERS got %d' % ntotal)
         else:
             self.log.error("ERROR in filter/fast_annotation_filters")
-
-        # Write stats for the batch
-#        self.timers['ftotal'].off()
-#        self.write_stats(self.timers, n_messages)
-        self.log.info('%d annotationss processed\n' % n_messages)
-        return ntotal
-
