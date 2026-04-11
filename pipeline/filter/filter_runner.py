@@ -11,12 +11,14 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN]
               [--maxbatch=MAX]
+              [--grist=MESSAGE_TYPE]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
+    --grist=MESSAGE_TYPE     Type of alerts to filter: can be alert, annotation, testing
 """
 
 import sys, time, signal
@@ -38,16 +40,27 @@ def sigterm_handler(signum, frame):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 def run(args, log):
-    topic_in = args.get('--topic_in')
-    group_id = args.get('--group_id') or settings.KAFKA_GROUPID
+    topic_in   = args.get('--topic_in')
+    group_id   = args.get('--group_id') or settings.KAFKA_GROUPID
     maxmessage = args.get('--maxalert') or settings.KAFKA_MAXALERTS
-    maxbatch = int(args.get('--maxbatch') or -1)
+    maxbatch   = int(args.get('--maxbatch') or -1)
+    grist      = int(args.get('--grist') or 'alert')
 
 #### This runner is set up for alerts
-    from alert import alertcore
-    fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
-    fltr.setup()
+    if grist == 'alert':
+        from alert import alertcore
+        fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    elif grist == 'annotation':
+        from annotation import annotationcore
+        fltr = annotationcore.AnnotationFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    elif grist == 'testing':
+        from testing import testingcore
+        fltr = testingcore.TestFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    else:
+        print('Unknown grist for filter node, must be alert, annotation, or testing')
+        sys.exit()
 
+    fltr.setup()
     batch = 0
     while not stop:
         if batch == maxbatch:
@@ -56,9 +69,9 @@ def run(args, log):
         log.info('------------- filter_runner running batch')
         try:
             nalerts = fltr.run_batch()
-            log.debug(f'Filter batch processed {nalerts} alerts')
-            if nalerts == 0:   # process got no alerts, so sleep a few minutes
-                log.info('Waiting for more alerts ....')
+            log.debug(f'Filter batch processed {nalerts} messages')
+            if nalerts == 0:   # process got no messages, so sleep a few minutes
+                log.info('Waiting for more messages ....')
                 time.sleep(settings.WAIT_TIME)
         except Exception as e:
             log.exception('Exception')

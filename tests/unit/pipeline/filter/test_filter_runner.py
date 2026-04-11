@@ -19,7 +19,7 @@ class RunnerTest(unittest.TestCase):
 
     @patch('filter_runner.filtercore.Filter.run_batch')
     @patch('filtercore.Filter.setup')
-    def test_batch_with_alerts(self, mock_setup, mock_run_batch):
+    def test_batch_with_messages(self, mock_setup, mock_run_batch):
         """Test that when run_batch returns positive we end the loop after running maxbatch batches"""
         mock_log = unittest.mock.MagicMock()
         mock_run_batch.return_value = 3
@@ -29,12 +29,12 @@ class RunnerTest(unittest.TestCase):
 
     @patch('filter_runner.filtercore.Filter.run_batch')
     @patch('filtercore.Filter.setup')
-    def test_batch_no_alerts(self, mock_setup, mock_run_batch):
-        """Test that when run_batch returns 0 we wait for more alerts"""
+    def test_batch_no_messages(self, mock_setup, mock_run_batch):
+        """Test that when run_batch returns 0 we wait for more messages"""
         mock_log = unittest.mock.MagicMock()
         mock_run_batch.return_value = 0
         filter_runner.run({'--maxbatch': 1}, mock_log)
-        self.assertIn(unittest.mock.call('Waiting for more alerts ....'), mock_log.info.call_args_list)
+        self.assertIn(unittest.mock.call('Waiting for more messages ....'), mock_log.info.call_args_list)
 
     @patch('filter_runner.filtercore.Filter.run_batch')
     @patch('filtercore.Filter.setup')
