@@ -44,7 +44,7 @@ def run(args, log):
     group_id   = args.get('--group_id') or settings.KAFKA_GROUPID
     maxmessage = args.get('--maxalert') or settings.KAFKA_MAXALERTS
     maxbatch   = int(args.get('--maxbatch') or -1)
-    grist      = int(args.get('--grist') or 'alert')
+    grist      = args.get('--grist') or 'alert'
 
 #### This runner is set up for alerts
     if grist == 'alert':
