@@ -508,7 +508,7 @@ if __name__ == "__main__":
 
     elif grist == 'testing':
         from testing import testingcore
-        fltr = testingcore.TestFilter(
+        fltr = testingcore.TestingFilter(
             topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
             local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
             transfer=transfer, stats=stats, verbose=verbose)

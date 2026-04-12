@@ -55,7 +55,7 @@ def run(args, log):
         fltr = annotationcore.AnnotationFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
     elif grist == 'testing':
         from testing import testingcore
-        fltr = testingcore.TestFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+        fltr = testingcore.TestingFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
     else:
         print('Unknown grist for filter node, must be alert, annotation, or testing')
         sys.exit()

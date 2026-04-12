@@ -16,7 +16,7 @@ import db_connect
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
-class TestFilter(Filter):
+class TestingFilter(Filter):
     ### TestingFilter is subclass of Filter
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
