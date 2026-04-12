@@ -28,7 +28,6 @@ class TestFilter(Filter):
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
-        print('Running setup_batch')
 
         self.diaObjectIdList = []
         self.h = {
@@ -37,14 +36,14 @@ class TestFilter(Filter):
                 'diaSources':0,
                 'diaForcedSources':0, 
                 },
-            'annotators':{
-                }
+            'annotator':{},
+            'unknown':0
             }  # histogram of types
         return
 
     # this method is triggered by arrival of a batch of messages
     def ingest_message_list(self, messageList):
-        print('Annotation ingestion starting for ', len(messageList))
+        print('Testing with %d messages' % len(messageList))
         nmessage = 0
         for message in messageList:
             nmessage += self.ingest_message(message)
@@ -53,6 +52,8 @@ class TestFilter(Filter):
     def ingest_message(self, message):
         if self.verbose:
             print(f'Ingesting message\n{message}')
+
+        # all we are doing in making a summary of what came in
         if 'diaObject' in message:
             self.h['alert']['diaObjects'] += 1
             if 'diaSourcesList' in message:
@@ -60,14 +61,14 @@ class TestFilter(Filter):
             if 'diaForcedSourcesList' in message:
                 self.h['alert']['diaForcedSources'] += len(message['diaForcedSourcesList'])
 
-        if 'annotators' in message:
-            print('found annotators')
-            for key,vallist in message['annotators'].items():
-                print(key)
-                if key in self.h['annotators']:
-                    self.h['annotators'][key] += len(vallist)
-                else:
-                    self.h['annotators'][key] = len(vallist)
+        elif 'topic' in message:
+            topic = message['topic']
+            if topic in self.h['annotator']:
+                self.h['annotator'][topic] += 1
+            else:
+                self.h['annotator'][topic] = 1
+        else:
+            self.h['unknown'] += 1
         return 1
 
     # things that need doing after the batch of messages is done

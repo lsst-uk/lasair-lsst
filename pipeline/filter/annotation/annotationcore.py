@@ -36,27 +36,23 @@ class AnnotationFilter(Filter):
         self.ann_diaObjectId = {}
         return
 
-    def ingest_message_list(self, wrappedAnnotationList):
+    def ingest_message_list(self, annotationList):
         """insert_message_list: handle a list of annotations of the form
-        {'annotations': {
-            'topic1':[{ann1}, {ann2}, ...], 
-            'topic2':[..] 
-        }}
+        [ann1, ann2, ....]
         """
         nannotation = 0
-        for wrappedAnnotation in wrappedAnnotationList:
-            if not 'annotators' in wrappedAnnotation:
-                continue
-            for topic,annList in wrappedAnnotation['annotators'].items():
-                for ann in annList:
-                    nannotation += self.ingest_annotation(ann)
+        for ann in annotationList:
+            nannotation += self.ingest_annotation(ann)
         if self.verbose:
             print('ingest_annotation_list: %d in %d out' % (len(annotationList), nannotation))
         return nannotation
 
     def ingest_annotation(self, annotation):
         # keep list of all objectId in this batch
-        annotator = annotation['topic']
+        if 'topic' in annotation:
+            annotator = annotation['topic']
+        else:
+            return 0
 
         # self.ann_diaObjectId = {
         #     'topic1':[oid1, oid2, ...], 
@@ -77,7 +73,7 @@ class AnnotationFilter(Filter):
                 annotation['version'], 
                 annotation['classification'], 
                 annotation['explanation'], 
-                json.dumps(annotation['classdict']), 
+                annotation['classdict'], 
                 annotation['url'])
 
         self.execute_remote_query(query)

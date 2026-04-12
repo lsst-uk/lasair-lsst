@@ -76,9 +76,6 @@ def dispose_query_results(fltr, query, query_results):
     LIGHTCURVE_LITE = 3
     LIGHTCURVE_FULL = 4
 
-    if active == BASIC_EMAIL:
-        return 0
-
     if not fltr.send_kafka:
         return len(query_results)
 
