@@ -242,8 +242,6 @@ class AlertFilter(Filter):
          - Build CSV file
          - Transfer to main database"""
 
-        self.setup()
-
         # run the watchlists
         self.log.info('WATCHLIST start %s' % now())
         self.timers['fwatchlist'].on()
