@@ -5,6 +5,8 @@ syntax-specific services in subdirectories/subclasses.
 The new concept is "grist", what kind of data is being processed by the filter infrastructure.
 There are implementations for Rubin alerts, annotations, and testing.
 
+![Screenshot](annotationArchitecture.png)
+
 * `filter_runner.py`
 Runs the filter.py regularly, intended primarily to be invoked by the filter service
 
