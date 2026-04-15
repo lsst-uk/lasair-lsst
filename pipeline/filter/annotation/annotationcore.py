@@ -11,11 +11,6 @@ from transfer import fetch_attrs
 sys.path.append('../../common')
 import settings
 
-sys.path.append('../../common/src')
-import date_nid
-import db_connect
-import manage_status
-
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 

@@ -5,7 +5,6 @@ from util import fetch_queries, dispose_query_results
 
 sys.path.append('../../common')
 import settings
-from src import db_connect
 
 def annotation_filters(fltr):
     """run_annotation_queries.

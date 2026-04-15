@@ -11,7 +11,6 @@ import settings
 
 sys.path.append('../../common/src')
 import date_nid
-import db_connect
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")

@@ -12,7 +12,6 @@ import mmagw
 
 sys.path.append('../../common')
 import settings
-from src import db_connect
 
 def filters(fltr):
     try:
@@ -36,7 +35,6 @@ def run_queries(fltr, query_list):
     for query in query_list:
         n = 0
         t = time.time()
-        msl = db_connect.local()
         query_results = run_query(query, fltr.database_local)
         n += dispose_query_results(fltr, query, query_results)
         t = time.time() - t

@@ -16,7 +16,6 @@ import settings
 
 sys.path.append('../../common/src')
 import date_nid
-import db_connect
 import manage_status
 
 
@@ -51,9 +50,8 @@ class AlertFilter(Filter):
             'mma_area_hits',
         ]
         try:
-            main_database = db_connect.remote(allow_infile=True)
             for table_name in table_list:
-                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
+                self.csv_attrs[table_name] = fetch_attrs(self.database_remote, table_name, log=self.log)
         except Exception as e:
             self.log.error('ERROR connecting to main database: %s' % str(e))
 
