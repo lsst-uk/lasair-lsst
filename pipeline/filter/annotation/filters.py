@@ -19,8 +19,14 @@ def annotation_filters(fltr):
     except Exception as e:
         fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
         return 0
-    obj_list = fltr.ann_diaObjectId
-    fltr.log.info('fast annotations: ' + str(obj_list))
+    msg = ''
+    for topic, ann_list in fltr.ann_diaObjectId.items():
+        if len(ann_list) > 5:
+            msg += '%s --> %s ...\n' % (topic, ann_list[:5])
+        else:
+            msg += '%s --> %s\n' % (topic, ann_list)
+    fltr.log.info('annotated objects: ' + msg)
+
     ntotal = run_queries(fltr, query_list)
     return ntotal
 
