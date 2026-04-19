@@ -71,7 +71,7 @@ class Filter:
     """
 
     def __init__(self,
-                 topic_in: str,
+                 topic_in: str = None,
                  group_id: str = settings.KAFKA_GROUPID,
                  maxmessage: (Union[int, str]) = settings.KAFKA_MAXALERTS,
                  maxalert: int = 0,
