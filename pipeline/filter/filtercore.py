@@ -23,7 +23,7 @@ Options:
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
+    --topic_in=TIN     Kafka topic to use 
     --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
@@ -71,7 +71,7 @@ class Filter:
     """
 
     def __init__(self,
-                 topic_in: str = 'lsst_sherlock',
+                 topic_in: str,
                  group_id: str = settings.KAFKA_GROUPID,
                  maxmessage: (Union[int, str]) = settings.KAFKA_MAXALERTS,
                  maxalert: int = 0,
@@ -470,7 +470,7 @@ if __name__ == "__main__":
     log = logging.getLogger()
     args = docopt(__doc__)
 
-    topic_in = args.get('--topic_in') or 'lsst_sherlock'
+    topic_in = args.get('--topic_in') or None
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxmessage = int(args.get('--maxmessage') or args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
@@ -481,6 +481,12 @@ if __name__ == "__main__":
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
     grist = args.get('--grist')
+
+    # default topics depending on grist
+    if not topic_in:
+        if grist == 'alert'     : topic_in = 'lsst_sherlock'
+        if grist == 'annotation': topic_in = settings.ANNOTATION_TOPIC
+
     if args['--wait_time']:
         wait_time = int(args['--wait_time'])
     else: 
