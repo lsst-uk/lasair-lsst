@@ -18,8 +18,10 @@ KAFKA_GROUPID          = '{{ lasair_name }}' + '01'
 # with its username and password
 {% if groups['kafka_pub'] is defined and groups['kafka_pub']|length > 0 %}
 PUBLIC_KAFKA_SERVER    = "{{ groups['kafka_pub'][0] }}:29092"
+PUBLIC_KAFKA_READONLY  = "{{ groups['kafka_pub'][0] }}:9092"
 {% else %}
 PUBLIC_KAFKA_SERVER    = None
+PUBLIC_KAFKA_READONLY  = None
 {% endif %}
 PUBLIC_KAFKA_USERNAME  = "{{ kafka_secret.admin_username }}"
 PUBLIC_KAFKA_PASSWORD  = "{{ kafka_secret.admin_password }}"
