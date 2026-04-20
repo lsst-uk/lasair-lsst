@@ -414,7 +414,6 @@ class AnnotateSerializer(serializers.Serializer):
         return {'status': 'success', 'annotation_topic': topicout, 'message': s}
 
 class AnnotateListSerializer(serializers.Serializer):
-#    annotations = AnnotateSerializer(many=True)
     annotations = serializers.ListField()
 
     def save(self):

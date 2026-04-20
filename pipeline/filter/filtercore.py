@@ -2,7 +2,8 @@
 The core filter module. Usually run as a service using filter_runner, but can also be run from the command line.
 
 Usage:
-    filtercore.py [--maxalert=MAX]
+    filtercore.py [--maxmessage=MAX]
+                  [--maxalert=MAX]
                   [--maxbatch=MAX]
                   [--maxtotal=MAX]
                   [--group_id=GID]
@@ -13,20 +14,23 @@ Usage:
                   [--transfer=BOOL]
                   [--stats=BOOL]
                   [--wait_time=TIME]
+                  [--grist=NAME]
                   [--verbose=BOOL]
 
 Options:
-    --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxmessage=MAX   Messages to process per batch, default is defined in settings.KAFKA_MAXALERTS
+    --maxalert=MAX     Deprecated. Use maxmessage
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --maxtotal=MAX     Maximum total alerts to process, default is unlimited
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
+    --topic_in=TIN     Kafka topic to use 
     --local_db=NAME    Name of local database to use [default: ztf]
     --send_email=BOOL  Send email [default: True]
     --send_kafka=BOOL  Send kafka [default: True]
     --transfer=BOOL    Transfer results to main [default: True]
     --stats=BOOL       Write stats [default: True]
     --wait_time=TIME   Override default wait time (in seconds)
+    --grist=NAME Can be 'alert' or 'annotation' or 'testing'
 """
 
 import os
@@ -37,16 +41,13 @@ import json
 import tempfile
 import math
 from typing import Union
-
 import requests
 import urllib
 import urllib.parse
-import numbers
 import confluent_kafka
 import datetime
 from docopt import docopt
-from dustmaps.sfd import SFDQuery
-from astropy.coordinates import SkyCoord
+
 
 sys.path.append('../../common')
 import settings
@@ -57,17 +58,9 @@ import db_connect
 import manage_status
 import lasairLogging
 import logging
-import filters
-import watchlists
-import watchmaps
-import mmagw
 from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
-from features.FeatureGroup import FeatureGroup
-
-sys.path.append('features/BBB')
-
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -78,27 +71,30 @@ class Filter:
     """
 
     def __init__(self,
-                 topic_in: str = 'lsst_sherlock',
+                 topic_in: str = None,
                  group_id: str = settings.KAFKA_GROUPID,
-                 maxalert: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 maxmessage: (Union[int, str]) = settings.KAFKA_MAXALERTS,
+                 maxalert: int = 0,
                  send_email: bool = True,
                  local_db: str = None,
                  send_kafka: bool = True,
                  transfer: bool = True,
                  stats: bool = True,
+                 grist: str = None,
                  verbose: bool = False,
                  log=None):
         self.topic_in = topic_in
         self.group_id = group_id
+        self.maxmessage = int(maxmessage)
         self.maxalert = int(maxalert)
         self.local_db = local_db or 'ztf'
         self.send_email = send_email
         self.send_kafka = send_kafka
         self.transfer = transfer
         self.stats = stats
+        self.grist = grist
         self.verbose = verbose
-        self.sfd = None
-        self.alert_dict = {}
+        self.message_dict = {}
 
         self.consumer = None
         self.producer = None
@@ -106,8 +102,7 @@ class Filter:
         self.database_remote = None
 
         self.log = log or lasairLogging.getLogger("filter")
-        self.log.info('Topic_in=%s, group_id=%s, maxalert=%d' % (self.topic_in, self.group_id, self.maxalert))
-        self.csv_attrs = {}
+        self.log.info('Topic_in=%s, group_id=%s, maxmessage=%d' % (self.topic_in, self.group_id, self.maxmessage))
 
         # catch SIGTERM so that we can finish processing cleanly
         self.prv_sigterm_handler = signal.signal(signal.SIGTERM, self._sigterm_handler)
@@ -137,28 +132,9 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
-
-        # get the order of the attributes for all tables transferred by CSV
-        table_list = [
-            'objects',
-            'sherlock_classifications',
-            'watchlist_hits',
-            'area_hits',
-            'mma_area_hits',
-        ]
-        try:
-            main_database = db_connect.remote(allow_infile=True)
-            for table_name in table_list:
-                self.csv_attrs[table_name] = fetch_attrs(main_database, table_name, log=self.log)
-        except Exception as e:
-            self.log.error('ERROR connecting to main database: %s' % str(e))
-
-        # set up the extinction factory
-        if not self.sfd:
-            try:
-                self.sfd = SFDQuery()
-            except Exception as e:
-                self.log.error('ERROR in Filter: cannot set up SFDQuery extinction' + str(e))
+        # set up lasair statistics
+        self.ms = manage_status.manage_status(log=self.log)
+        self.nid = date_nid.nid_now()
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -169,8 +145,8 @@ class Filter:
         if self.prv_sigterm_handler is not signal.SIG_DFL and not None:
             self.prv_sigterm_handler(signum, frame)
 
-    def execute_query(self, query: str):
-        """ execute_query: run a query and close it, and compalin to slack if failure.
+    def execute_local_query(self, query: str):
+        """ execute_local_query: run a query and close it, and compalin to slack if failure.
         """
         try:
             cursor = self.database_local.cursor(buffered=True)
@@ -178,17 +154,21 @@ class Filter:
             cursor.close()
             self.database_local.commit()
         except Exception as e:
-            self.log.error('ERROR filter/execute_query: %s' % str(e))
+            self.log.error('ERROR filter/execute_local_query: %s' % str(e))
             self.log.info(query)
             raise
 
-    def truncate_local_database(self):
-        """ Truncate all the tables in the local database.
+    def execute_remote_query(self, query: str):
+        """ execute_remote_query: run a query and close it, and compalin to slack if failure.
         """
-        self.execute_query('TRUNCATE TABLE objects')
-        self.execute_query('TRUNCATE TABLE sherlock_classifications')
-        self.execute_query('TRUNCATE TABLE watchlist_hits')
-        self.execute_query('TRUNCATE TABLE area_hits')
+        try:
+            cursor = self.database_remote.cursor(buffered=True)
+            cursor.execute(query)
+            cursor.close()
+            self.database_remote.commit()
+        except Exception as e:
+            self.log.error('ERROR filter/execute_remote_query: %s' % str(e))
+            self.log.info(query)
 
     def make_kafka_consumer(self):
         """ Make a kafka consumer.
@@ -233,167 +213,22 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR cannot make kafka producer' + str(e))
 
-    @staticmethod
-    def create_insert_sherlock(ann: dict):
-        """create_insert_sherlock.
-        Makes the insert query for the sherlock classification
-
-        Args:
-            ann:
+    def consume_messages(self, handler):
+        """Consume a batch of messages from Kafka.
         """
-        # all the sherlock attrs that we want for the database
-        attrs = [
-            "classification",
-            "diaObjectId",
-            "association_type",
-            "catalogue_table_name",
-            "catalogue_object_id",
-            "catalogue_object_type",
-            "raDeg",
-            "decDeg",
-            "separationArcsec",
-            "northSeparationArcsec",
-            "eastSeparationArcsec",
-            "physical_separation_kpc",
-            "direct_distance",
-            "distance",
-            "best_distance",
-            "best_distance_flag",
-            "best_distance_source",
-            "z",
-            "photoZ",
-            "photoZErr",
-            "Mag",
-            "MagFilter",
-            "MagErr",
-            "classificationReliability",
-            "major_axis_arcsec",
-            "annotator",
-            "additional_output",
-            "description",
-            "summary",
-        ]
-        sets = {}
-        for key in attrs:
-            sets[key] = None
-        for key, value in ann.items():
-            if key in attrs and value:
-                sets[key] = value
-
-        # this hack adds back in the deprecated 'distance' as 'best_distance'
-        if 'best_distance' in ann:
-            sets['distance'] = ann['best_distance']
-
-        if 'description' in attrs and 'description' not in ann:
-            sets['description'] = 'no description'
-        # Build the query
-        query_list = []
-        query = 'REPLACE INTO sherlock_classifications SET '
-        for key, value in sets.items():
-            if value is None:
-                query_list.append(key + '=NULL')
-            else:
-                query_list.append(key + '=' + "'" + str(value).replace("'", '') + "'")
-        query += ',\n'.join(query_list)
-        return query
-
-    @staticmethod
-    def create_insert_query(alert: dict):
-        """create_insert_query.
-        Creates an insert sql statement for building the object and
-        a query for inserting it.
-
-        Args:
-            alert:
-        """
-
-        lasair_features = FeatureGroup.run_all(alert)
-        if not lasair_features:
-            if self.verbose:
-                print('Features did not run')
-                print(json.dumps(alert, indent=2))
-            return None
-
-        # Make the query
-        query_list = []
-        query = 'REPLACE INTO objects SET '
-        for key, value in lasair_features.items():
-            if value is None:
-                query_list.append(key + '=NULL')
-            elif isinstance(value, numbers.Number) and (math.isnan(value) or math.isinf(value)):
-                query_list.append(key + '=NULL')
-            elif isinstance(value, str):
-                query_list.append(key + '="' + str(value) + '"')
-            else:
-                query_list.append(key + '=' + str(value))
-        query += ',\n'.join(query_list)
-        return query
-
-    def handle_alert_list(self, alertList):
-        """alert_filter: handle a list of alerts
-        """
-        raList   = []
-        declList = []
-        for alert in alertList:
-            raList  .append(alert['diaObject']['ra'])
-            declList.append(alert['diaObject']['decl'])
-        c = SkyCoord(raList, declList, unit="deg", frame='icrs')
-        ebvList = self.sfd(c)
-        nalert = 0
-        for ebv, alert in zip(ebvList, alertList):
-            alert['ebv'] = ebv
-            nalert += self.handle_alert(alert)
-        if self.verbose:
-            print('handle_alert_list: %d in %d out' % (len(alertList), nalert))
-        return nalert
-
-    def handle_alert(self, alert):
-        # Filter to apply to each alert.
-        diaObjectId = alert['diaObject']['diaObjectId']
-
-        # really not interested in alerts that have no detections!
-        if len(alert['diaSourcesList']) == 0:
-            if self.verbose:
-                print('No diaSources')
-            return 0
-
-        # build the insert query for this object.
-        # if not wanted, returns 0
-        query = Filter.create_insert_query(alert)
-        if not query:
-            if self.verbose:
-                print('Failed to make insert query')
-                print(json.dumps(alert, indent=2))
-            return 0
-        self.execute_query(query)
-
-        # now ingest the sherlock_classifications
-        if 'annotations' in alert:
-            annotations = alert['annotations']
-            if 'sherlock' in annotations:
-                for ann in annotations['sherlock']:
-                    if "transient_object_id" in ann:
-                        ann.pop('transient_object_id')
-                    ann['diaObjectId'] = diaObjectId
-                    query = Filter.create_insert_sherlock(ann)
-                    self.execute_query(query)
-        return 1
-
-    def consume_alerts(self):
-        """Consume a batch of alerts from Kafka.
-        """
-        nalert_in = nalert_out = 0
+        nmessage_in = nmessage_out = 0
         startt = time.time()
         errors = 0
+        self.nid = date_nid.nid_now()
 
-        alertList = []
-        while nalert_in < self.maxalert:
+        messageList = []
+        while nmessage_in < self.maxmessage:
             if self.sigterm_raised:
                 # clean shutdown - stop the consumer
                 self.log.info("Caught SIGTERM, aborting.")
                 break
 
-            # Here we get the next alert by kafka
+            # Here we get the next message by kafka
             msg = self.consumer.poll(timeout=20)
             if msg is None:
                 print('message is null')
@@ -407,43 +242,39 @@ class Filter:
             if msg.value() is None:
                 print('message value is null')
                 continue
-            # Apply filter to each alert
-            alert = json.loads(msg.value())
+            # Apply filter to each message
+            message = json.loads(msg.value())
 
-            # don't know what to do with these
-            if 'diaObject' not in alert or not alert['diaObject']:
-                if self.verbose: print('No diaObject')
-                continue
+#            # don't know what to do with these
+#            if 'diaObject' not in alert or not alert['diaObject']:
+#                if self.verbose: print('No diaObject')
+#                continue
 
-            nalert_in += 1
-            alertList.append(alert)
-            diaObjectId = alert['diaObject']['diaObjectId']
-            self.alert_dict[diaObjectId] = alert
+            nmessage_in += 1
+            messageList.append(message)
 
-            if nalert_in % 1000 == 0:
-                d = self.handle_alert_list(alertList)
-                alertList = []
-                nalert_out += d
-                self.log.info('nalert_in %d nalert_out  %d time %.1f' % \
-                              (nalert_in, nalert_out, time.time() - startt))
+            if nmessage_in % 1000 == 0:
+                d = handler(messageList)
+                messageList = []
+                nmessage_out += d
+                self.log.info('nmessage_in %d nmessage_out  %d time %.1f' % \
+                              (nmessage_in, nmessage_out, time.time() - startt))
                 sys.stdout.flush()
-                # refresh the database every 1000 alerts
+                # refresh the database every 1000 messages
                 # make sure everything is committed
                 self.database_local.commit()
 
-        d = self.handle_alert_list(alertList)
-        nalert_out += d
-        self.log.info('finished %d in, %d out' % (nalert_in, nalert_out))
+        d = handler(messageList)
+        nmessage_out += d
+        self.log.info('finished %d in, %d out' % (nmessage_in, nmessage_out))
 
         if self.stats:
-            ms = manage_status.manage_status(log=self.log)
-            nid = date_nid.nid_now()
-            ms.add({
-                'today_filter': nalert_in,
-                'today_filter_out': nalert_out,
-            }, nid)
+            self.ms.add({
+                'today_filter': nmessage_in,
+                'today_filter_out': nmessage_out,
+            }, self.nid)
 
-        return nalert_out
+        return nmessage_out
 
     def transfer_to_main(self, retry=5, delay=60):
         """ Transfer the local database to the main database.
@@ -483,26 +314,25 @@ class Filter:
         self.log.info('Kafka committed for this batch')
         return True
 
-    def write_stats(self, timers: dict, nalerts: int):
+    def write_stats(self, timers: dict, nmessages: int):
         """ Write the statistics to lasair status and to prometheus.
         """
         if not self.stats:
             return
 
-        ms = manage_status.manage_status(log=self.log)
-        nid = date_nid.nid_now()
+        self.nid = date_nid.nid_now()
         d = Filter.batch_statistics(self.log)
-        ms.set({
+        self.ms.set({
             'today_lsst': Filter.grafana_today(),
             'today_database': d['count'],
             'total_count': d['total_count'],
-            'min_delay': d['since'],  # hours since most recent alert
-            'nid': nid},
-            nid)
+            'min_delay': d['since'],  # hours since most recent message
+            'nid': self.nid},
+            self.nid)
         for name, td in timers.items():
-            td.add2ms(ms, nid)
+            td.add2ms(self.ms, self.nid)
 
-        if nalerts > 0:
+        if nmessages > 0:
             min_str = "{:d}".format(int(d['min_delay'] * 60))
             avg_str = "{:d}".format(int(d['avg_delay'] * 60))
             max_str = "{:d}".format(int(d['max_delay'] * 60))
@@ -620,104 +450,19 @@ class Filter:
         return today_candidates_ztf
 
     def run_batch(self):
-        """Top level method that processes an alert batch.
+        # the subclass is handed a list of messages (alerts or annotations)
+        self.setup_batch()
 
-        Does the following:
-         - Consume alerts from Kafka
-         - Run watchlists
-         - Run watchmaps
-         - Run user filters
-         - Run annotation queries
-         - Build CSV file
-         - Transfer to main database"""
+        # ingest_message_list ingests a set of alerts, computes
+        # light curve features, inserts to a local database
+        # it is the handler for the message consumer
+        iml = self.ingest_message_list
+        n_messages = self.consume_messages(iml)
 
-        self.setup()
-
-        # set up the timers
-        timers = {}
-        for name in ['ffeatures', 'fwatchlist', 'fwatchmap', \
-                'fmmagw', 'ffilters', 'ftransfer', 'ftotal']:
-            timers[name] = manage_status.timer(name)
-
-        self.truncate_local_database()
-
-        timers['ftotal'].on()
-        self.log.info('FILTER batch start %s' % now())
-        self.log.info("Topic is %s" % self.topic_in)
-
-        # consume the alerts from Kafka
-        timers['ffeatures'].on()
-        nalerts = self.consume_alerts()
-        timers['ffeatures'].off()
-
-        if nalerts > 0:
-            # run the watchlists
-            self.log.info('WATCHLIST start %s' % now())
-            timers['fwatchlist'].on()
-            nhits = watchlists.watchlists(self)
-            timers['fwatchlist'].off()
-            if nhits is not None:
-                self.log.info('WATCHLISTS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchlists")
-
-            # run the watchmaps
-            self.log.info('WATCHMAP start %s' % now())
-            timers['fwatchmap'].on()
-            nhits = watchmaps.watchmaps(self)
-            timers['fwatchmap'].off()
-            if nhits is not None:
-                self.log.info('WATCHMAPS got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/watchmaps")
-
-            # run the MMA/GW events
-            self.log.info('MMA/GW start %s' % now())
-            timers['fmmagw'].on()
-            nhits = mmagw.mmagw(self)
-            timers['fmmagw'].off()
-            if nhits is not None:
-                self.log.info('MMA/GW got %d' % nhits)
-            else:
-                self.log.error("ERROR in filter/mmagw")
-
-            # run the user filters
-            self.log.info('Filters start %s' % now())
-            timers['ffilters'].on()
-            ntotal = filters.filters(self)
-            timers['ffilters'].off()
-            if ntotal is not None:
-                self.log.info('FILTERS got %d' % ntotal)
-            else:
-                self.log.error("ERROR in filter/filters")
-
-            # build CSV file with local database and transfer to main
-            if self.transfer:
-                timers['ftransfer'].on()
-                commit = self.transfer_to_main()
-                timers['ftransfer'].off()
-                self.log.info('Batch ended')
-                if not commit:
-                    self.log.info('Transfer to main failed, no commit')
-                    return 0
-
-        # run the annotation queries
-        self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.fast_anotation_filters(self)
-        if ntotal is not None:
-            self.log.info('ANNOTATION FILTERS got %d' % ntotal)
-        else:
-            self.log.error("ERROR in filter/fast_annotation_filters")
-
-        # Clean up
-        self.alert_dict.clear()
-        
-        # Write stats for the batch
-        timers['ftotal'].off()
-        self.write_stats(timers, nalerts)
-        self.log.info('%d alerts processed\n' % nalerts)
-        return nalerts
-
+        # after ingesting, do the watchlists, filters etc
+        if n_messages > 0:
+            self.post_ingest(n_messages)
+        return n_messages
 
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)
@@ -725,9 +470,9 @@ if __name__ == "__main__":
     log = logging.getLogger()
     args = docopt(__doc__)
 
-    topic_in = args.get('--topic_in') or 'lsst_sherlock'
+    topic_in = args.get('--topic_in') or None
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxalert = int(args.get('--maxalert') or settings.KAFKA_MAXALERTS)
+    maxmessage = int(args.get('--maxmessage') or args.get('--maxalert') or settings.KAFKA_MAXALERTS)
     maxbatch = int(args.get('--maxbatch') or -1)
     maxtotal = int(args.get('--maxtotal') or 0)
     local_db = args.get('--local_db')
@@ -735,29 +480,67 @@ if __name__ == "__main__":
     send_kafka = args.get('--send_kafka') in ['True', 'true', 'Yes', 'yes']
     transfer = args.get('--transfer') in ['True', 'true', 'Yes', 'yes']
     stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
+    grist = args.get('--grist')
+
+    # default topics depending on grist
+    if not topic_in:
+        if grist == 'alert'     : topic_in = 'lsst_sherlock'
+        if grist == 'annotation': topic_in = settings.ANNOTATION_TOPIC
+
     if args['--wait_time']:
         wait_time = int(args['--wait_time'])
     else: 
         wait_time = getattr(settings, 'WAIT_TIME', 60)
     verbose = args.get('--verbose') in ['True', 'true', 'Yes', 'yes']
 
-    fltr = Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert, local_db=local_db,
-                  send_email=send_email, send_kafka=send_kafka, transfer=transfer,
-                  stats=stats, verbose=verbose)
-
     n_batch = 0
-    total_alerts = 0
-    while not fltr.sigterm_raised:
-        n_alerts = fltr.run_batch()
+    total_messages = 0
 
+############### choose which type of message, are they alerts or annotations ########
+    print('Grist is ', grist)
+    if grist == 'alert':
+        from alert import alertcore
+        fltr = alertcore.AlertFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
+
+    elif grist == 'annotation':
+        from annotation import annotationcore
+        fltr = annotationcore.AnnotationFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
+
+    elif grist == 'testing':
+        from testing import testingcore
+        fltr = testingcore.TestingFilter(
+            topic_in=topic_in, group_id=group_id, maxmessage=maxmessage, 
+            local_db=local_db, send_email=send_email, send_kafka=send_kafka, 
+            transfer=transfer, stats=stats, verbose=verbose)
+    else:
+        print('Unknown grist for filter node, must be alert, annotation, or testing')
+        sys.exit()
+########################################################################
+
+    # set up database connections, etc
+    n_messages = 0
+    n_batch = 0
+    fltr.setup()
+    while not fltr.sigterm_raised:
+        n_messages = fltr.run_batch()
         n_batch += 1
-        total_alerts += n_alerts 
+
+        # clear the cache
+        fltr.message_dict.clear()
+
+        total_messages += n_messages 
         if n_batch == maxbatch:
             log.info(f"Exiting after {n_batch} batches")
             sys.exit(0)
-        if maxtotal and total_alerts >= maxtotal:
-            log.info(f"Exiting after {total_alerts} alerts")
+        if maxtotal and total_messages >= maxtotal:
+            log.info(f"Exiting after {total_messages} messages")
             sys.exit(0)
-        if n_alerts == 0:  # process got no alerts, so sleep a few minutes
-            log.info('Waiting for more alerts ....')
+        if n_messages == 0:  # process got no messages, so sleep a few minutes
+            log.info('Waiting for more messages ....')
             time.sleep(wait_time)

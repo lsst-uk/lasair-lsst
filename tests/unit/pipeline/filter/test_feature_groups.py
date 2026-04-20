@@ -6,11 +6,13 @@ from unittest import TestCase
 import json
 sys.path.append('../../../../common')
 import settings
-sys.path.append('../../../../pipeline/filter')
-sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
-from objects import schema as objectSchema
+
+sys.path.append('../../../../pipeline/filter/alert')
 import features
 from features import *
+
+sys.path.append('../../../../common/schema/' + settings.SCHEMA_VERSION)
+from objects import schema as objectSchema
 
 sample = '313637921267122191'
 
@@ -99,7 +101,7 @@ class FeatureGroupTest(TestCase):
   # Should be moved to filters once those tests exist
   def test5_lightcurve_lite(self):
     """Test the lightcurve_lite method"""
-    from filters import lightcurve_lite
+    from util import lightcurve_lite
     with open("sample_alerts/%s.json"%sample) as f_in, open("sample_alerts/%s_lite.json"%sample) as f_out:
       alert = json.load(f_in)
       output = lightcurve_lite(alert)
