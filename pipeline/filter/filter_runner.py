@@ -40,18 +40,11 @@ def sigterm_handler(signum, frame):
 signal.signal(signal.SIGTERM, sigterm_handler)
 
 def run(args, log):
-<<<<<<< HEAD
     topic_in = args.get('--topic_in')
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = args.get('--maxalert') or or args.get('--maxmessage') or settings.KAFKA_MAXALERTS
     maxbatch = int(args.get('--maxbatch') or -1)
-=======
-    topic_in   = args.get('--topic_in')
-    group_id   = args.get('--group_id') or settings.KAFKA_GROUPID
-    maxmessage = args.get('--maxalert') or settings.KAFKA_MAXALERTS
-    maxbatch   = int(args.get('--maxbatch') or -1)
     grist      = args.get('--grist') or 'alert'
->>>>>>> 597e85e5a102c43f7abae9ffe05d5b89a3a9a38b
 
 #### This runner is set up for alerts
     if grist == 'alert':
