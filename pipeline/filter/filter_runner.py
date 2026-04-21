@@ -11,12 +11,14 @@ Usage:
               [--group_id=GID]
               [--topic_in=TIN]
               [--maxbatch=MAX]
+              [--grist=MESSAGE_TYPE]
 
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
     --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
+    --grist=MESSAGE_TYPE     Type of alerts to filter: can be alert, annotation, testing
 """
 
 import sys, time, signal
@@ -30,24 +32,42 @@ import filtercore
 # if this is True, the runner stops when it can and exits
 stop = False
 
-
 def sigterm_handler(signum, frame):
     global stop
     print('Stopping by SIGTERM')
     stop = True
 
-
 signal.signal(signal.SIGTERM, sigterm_handler)
 
-
 def run(args, log):
+<<<<<<< HEAD
     topic_in = args.get('--topic_in')
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = args.get('--maxalert') or or args.get('--maxmessage') or settings.KAFKA_MAXALERTS
     maxbatch = int(args.get('--maxbatch') or -1)
+=======
+    topic_in   = args.get('--topic_in')
+    group_id   = args.get('--group_id') or settings.KAFKA_GROUPID
+    maxmessage = args.get('--maxalert') or settings.KAFKA_MAXALERTS
+    maxbatch   = int(args.get('--maxbatch') or -1)
+    grist      = args.get('--grist') or 'alert'
+>>>>>>> 597e85e5a102c43f7abae9ffe05d5b89a3a9a38b
 
-    fltr = filtercore.Filter(topic_in=topic_in, group_id=group_id, maxalert=maxalert)
+#### This runner is set up for alerts
+    if grist == 'alert':
+        from alert import alertcore
+        fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    elif grist == 'annotation':
+        from annotation import annotationcore
+        fltr = annotationcore.AnnotationFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    elif grist == 'testing':
+        from testing import testingcore
+        fltr = testingcore.TestingFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+    else:
+        print('Unknown grist for filter node, must be alert, annotation, or testing')
+        sys.exit()
 
+    fltr.setup()
     batch = 0
     while not stop:
         if batch == maxbatch:
@@ -56,9 +76,9 @@ def run(args, log):
         log.info('------------- filter_runner running batch')
         try:
             nalerts = fltr.run_batch()
-            log.debug(f'Filter batch processed {nalerts} alerts')
-            if nalerts == 0:   # process got no alerts, so sleep a few minutes
-                log.info('Waiting for more alerts ....')
+            log.debug(f'Filter batch processed {nalerts} messages')
+            if nalerts == 0:   # process got no messages, so sleep a few minutes
+                log.info('Waiting for more messages ....')
                 time.sleep(settings.WAIT_TIME)
         except Exception as e:
             log.exception('Exception')
@@ -66,7 +86,6 @@ def run(args, log):
             sys.exit(1)
 
     log.info('Exiting filter runner')
-
 
 if __name__ == '__main__':
     # Deal with arguments
