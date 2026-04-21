@@ -48,7 +48,6 @@ import confluent_kafka
 import datetime
 from docopt import docopt
 
-
 sys.path.append('../../common')
 import settings
 
@@ -59,6 +58,9 @@ import manage_status
 import lasairLogging
 import logging
 from transfer import fetch_attrs, transfer_csv
+
+sys.path.append('../../webserver/lasair')
+from lightcurves import lightcurve_fetcher
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 
@@ -126,12 +128,22 @@ class Filter:
                 self.database_local = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+
         # set up the link to the remote database
         if not self.database_remote or not self.database_remote.is_connected():
             try:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
+
+        # set up cassandra lightcurve fetcher
+        try:
+            self.lightcurve = lightcurve_fetcher(\
+                    cassandra_hosts=settings.CASSANDRA_HEAD,
+                    reliabilityThreshold=0.5)
+        except Exception as e:
+            self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
+
         # set up lasair statistics
         self.ms = manage_status.manage_status(log=self.log)
         self.nid = date_nid.nid_now()

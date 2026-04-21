@@ -107,5 +107,25 @@ def run_query(query, msl, annotator, objList, fltr):
         send_email(email, topic, error)
         return []
 
+    # fetch the lite or full lightcurve from cassandra if wanted
+    if active == 3:
+        (diaSourcesList, diaForcedSourcesList) = \
+                fltr.lightcurve.fetch(diaObjectId, lite=True)
+        result = {
+            'diaObjectId':diaObjectId,
+            'diaSourcesList':diaSourcesList,
+            'diaForcedSourcesList':diaForcedSourcesList}
+        query_results['alert'] = result
+
+    if active == 4:
+        (diaObject, diaSourcesList, diaForcedSourcesList) = \
+                fltr.lightcurve.fetch(diaObjectId, lite=False)
+        result = {
+            'diaObjectId':diaObjectId,
+            'diaObject':diaObject,
+            'diaSourcesList':diaSourcesList,
+            'diaForcedSourcesList':diaForcedSourcesList}
+        query_results['alert'] = result
+
     return query_results
 
