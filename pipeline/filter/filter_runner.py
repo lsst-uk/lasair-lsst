@@ -27,17 +27,19 @@ sys.path.append('../../common')
 import settings
 sys.path.append('../../common/src')
 import slack_webhook, lasairLogging
-import filtercore
 
 # if this is True, the runner stops when it can and exits
 stop = False
+
 
 def sigterm_handler(signum, frame):
     global stop
     print('Stopping by SIGTERM')
     stop = True
 
+
 signal.signal(signal.SIGTERM, sigterm_handler)
+
 
 def run(args, log):
     topic_in   = args.get('--topic_in')
@@ -46,7 +48,6 @@ def run(args, log):
     maxbatch   = int(args.get('--maxbatch') or -1)
     grist      = args.get('--grist') or 'alert'
 
-#### This runner is set up for alerts
     if grist == 'alert':
         from alert import alertcore
         fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
@@ -79,6 +80,7 @@ def run(args, log):
             sys.exit(1)
 
     log.info('Exiting filter runner')
+
 
 if __name__ == '__main__':
     # Deal with arguments
