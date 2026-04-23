@@ -231,7 +231,6 @@ class Filter:
             # Here we get the next message by kafka
             msg = self.consumer.poll(timeout=20)
             if msg is None:
-                print('message is null')
                 break
             if msg.error():
                 self.log.error("ERROR polling Kafka: " + str(msg.error()))
