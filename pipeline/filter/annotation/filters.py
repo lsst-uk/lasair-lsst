@@ -109,23 +109,25 @@ def run_query(query, msl, annotator, objList, fltr):
 
     # fetch the lite or full lightcurve from cassandra if wanted
     if active == 3:
-        (diaSourcesList, diaForcedSourcesList) = \
+        for q in query_results:
+            diaObjectId = q['diaObjectId']
+            (diaSourcesList, diaForcedSourcesList) = \
                 fltr.lightcurve.fetch(diaObjectId, lite=True)
-        result = {
-            'diaObjectId':diaObjectId,
-            'diaSourcesList':diaSourcesList,
-            'diaForcedSourcesList':diaForcedSourcesList}
-        query_results['alert'] = result
+            fltr.message_dict[diaObjectId] = {
+                'diaObjectId':diaObjectId,
+                'diaSourcesList':diaSourcesList,
+                'diaForcedSourcesList':diaForcedSourcesList}
 
     if active == 4:
-        (diaObject, diaSourcesList, diaForcedSourcesList) = \
+        for q in query_results:
+            diaObjectId = q['diaObjectId']
+            (diaObject, diaSourcesList, diaForcedSourcesList) = \
                 fltr.lightcurve.fetch(diaObjectId, lite=False)
-        result = {
+        fltr.message_dict[diaObjectId] = {
             'diaObjectId':diaObjectId,
             'diaObject':diaObject,
             'diaSourcesList':diaSourcesList,
             'diaForcedSourcesList':diaForcedSourcesList}
-        query_results['alert'] = result
 
     return query_results
 

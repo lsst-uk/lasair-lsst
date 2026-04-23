@@ -59,9 +59,6 @@ import lasairLogging
 import logging
 from transfer import fetch_attrs, transfer_csv
 
-sys.path.append('../../webserver/lasair')
-from lightcurves import lightcurve_fetcher
-
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 
 def now():
@@ -135,14 +132,6 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
-
-        # set up cassandra lightcurve fetcher
-        try:
-            self.lightcurve = lightcurve_fetcher(\
-                    cassandra_hosts=settings.CASSANDRA_HEAD,
-                    reliabilityThreshold=0.5)
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
 
         # set up lasair statistics
         self.ms = manage_status.manage_status(log=self.log)
@@ -243,7 +232,6 @@ class Filter:
             # Here we get the next message by kafka
             msg = self.consumer.poll(timeout=20)
             if msg is None:
-                print('message is null')
                 break
             if msg.error():
                 self.log.error("ERROR polling Kafka: " + str(msg.error()))
