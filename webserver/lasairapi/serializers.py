@@ -314,7 +314,11 @@ class QuerySerializer(serializers.Serializer):
         else:
             offset = int(offset)
 
-        error = check_query(selected, tables, conditions, user=userId)
+        try:
+            error = check_query(selected, tables, conditions, user=userId)
+        except Exception as e:
+            error = str(e)
+
         if error:
             return {"error": error}
 
