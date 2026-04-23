@@ -12,6 +12,7 @@ sys.path.append('../../common')
 import settings
 
 sys.path.append('../../webserver/lasair')
+sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
 
 def now():
