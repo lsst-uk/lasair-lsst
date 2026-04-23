@@ -17,31 +17,28 @@ class RunnerTest(unittest.TestCase):
         psutil.Process().terminate()
         self.assertTrue(filter_runner.stop)
 
-    @patch('filter_runner.filtercore.Filter.run_batch')
-    @patch('filtercore.Filter.setup')
-    def test_batch_with_messages(self, mock_setup, mock_run_batch):
+    @patch('alert.alertcore.AlertFilter')
+    def test_batch_with_messages(self, mock_filter):
         """Test that when run_batch returns positive we end the loop after running maxbatch batches"""
         mock_log = unittest.mock.MagicMock()
-        mock_run_batch.return_value = 3
-        filter_runner.run({'--maxbatch': 2}, mock_log)
+        mock_filter.return_value.run_batch.return_value = 4
+        filter_runner.run({'--maxbatch': 2, '--grist': 'alert'}, mock_log)
         mock_log.info.assert_called_with('Exiting filter runner')
-        self.assertEqual(mock_run_batch.call_count, 2)
+        self.assertEqual(mock_filter.return_value.run_batch.call_count, 2)
 
-    @patch('filter_runner.filtercore.Filter.run_batch')
-    @patch('filtercore.Filter.setup')
-    def test_batch_no_messages(self, mock_setup, mock_run_batch):
+    @patch('annotation.annotationcore.AnnotationFilter')
+    def test_batch_no_messages(self, mock_filter):
         """Test that when run_batch returns 0 we wait for more messages"""
         mock_log = unittest.mock.MagicMock()
-        mock_run_batch.return_value = 0
-        filter_runner.run({'--maxbatch': 1}, mock_log)
+        mock_filter.return_value.run_batch.return_value = 0
+        filter_runner.run({'--maxbatch': 1, '--grist': 'annotation'}, mock_log)
         self.assertIn(unittest.mock.call('Waiting for more messages ....'), mock_log.info.call_args_list)
 
-    @patch('filter_runner.filtercore.Filter.run_batch')
-    @patch('filtercore.Filter.setup')
-    def test_batch_exception(self, mock_setup, mock_run_batch):
+    @patch('alert.alertcore.AlertFilter')
+    def test_batch_exception(self, mock_filter):
         """Test handling of exception on run"""
         mock_log = unittest.mock.MagicMock()
-        mock_run_batch.side_effect = Exception('Test error')
+        mock_filter.return_value.run_batch.side_effect = Exception('Test error')
         # Check that sys.exit is called when an exception happens
         with self.assertRaises(SystemExit) as cm:
             filter_runner.run({'--maxbatch': 1}, mock_log)
@@ -51,6 +48,7 @@ class RunnerTest(unittest.TestCase):
         mock_log.exception.assert_called()
         # check the exception got logged
         mock_log.critical.assert_called_with('Unrecoverable error in filter batch: Test error')
+
 
 if __name__ == '__main__':
     import xmlrunner 
