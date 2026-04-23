@@ -4,7 +4,7 @@ import numbers
 import math
 import json
 
-from annotation import filters
+from annotation import ann_filters
 from filtercore import Filter
 from transfer import fetch_attrs
 
@@ -99,7 +99,7 @@ class AnnotationFilter(Filter):
 
         # run the annotation queries
         self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.annotation_filters(self)
+        ntotal = ann_filters.annotation_filters(self)
         if ntotal is not None:
             self.log.info('ANNOTATION FILTERS got %d' % ntotal)
         else:
