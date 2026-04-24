@@ -62,6 +62,26 @@ def query_for_object(query, objList):
         query += ' ORDER BY ' + tok[1]
     return query
 
+def append_lightcurve(fltr, query_results):
+    """ fetch the full lightcurve from cassandra if wanted
+        put it into the lightcurve cache fltr.message_dict
+        that will be further processed in the dispose_kafka method in ../util.py
+    """
+    for q in query_results:
+        diaObjectId = q['diaObjectId']
+        # don't fetch if we already have it
+        if diaObjectId in fltr.message_dict:
+            continue
+
+        (diaObject, diaSourcesList, diaForcedSourcesList) = \
+            fltr.lightcurve.fetch(diaObjectId, lite=False)
+
+        fltr.message_dict[diaObjectId] = {
+            'diaObjectId':diaObjectId,
+            'diaObject':diaObject,
+            'diaSourcesList':diaSourcesList,
+            'diaForcedSourcesList':diaForcedSourcesList}
+
 def run_query(query, msl, annotator, objList, fltr):
     """run_query. 
         checks if the query involves the annotator,
@@ -108,26 +128,7 @@ def run_query(query, msl, annotator, objList, fltr):
         return []
 
     # fetch the lite or full lightcurve from cassandra if wanted
-    if active == 3:
-        for q in query_results:
-            diaObjectId = q['diaObjectId']
-            (diaSourcesList, diaForcedSourcesList) = \
-                fltr.lightcurve.fetch(diaObjectId, lite=True)
-            fltr.message_dict[diaObjectId] = {
-                'diaObjectId':diaObjectId,
-                'diaSourcesList':diaSourcesList,
-                'diaForcedSourcesList':diaForcedSourcesList}
-
-    if active == 4:
-        for q in query_results:
-            diaObjectId = q['diaObjectId']
-            (diaObject, diaSourcesList, diaForcedSourcesList) = \
-                fltr.lightcurve.fetch(diaObjectId, lite=False)
-        fltr.message_dict[diaObjectId] = {
-            'diaObjectId':diaObjectId,
-            'diaObject':diaObject,
-            'diaSourcesList':diaSourcesList,
-            'diaForcedSourcesList':diaForcedSourcesList}
+    if active >= 3:
+        append_lightcurve(fltr, query_results)
 
     return query_results
-

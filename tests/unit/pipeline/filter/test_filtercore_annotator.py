@@ -77,6 +77,38 @@ class FilterTest(unittest.TestCase):
         mock_consumer.poll.assert_called_once()
         mock_manage_status.add.assert_called_once()
 
+    def test_append_lightcurve(mock_fltr, mock_query_results):
+        fltr = AnnotationFilter(group_id='filter_test', maxmessage=1)
+        fltr.message_dict = {}
+
+        def fetch_side_effect(diaObjectId, lite=False):
+            return (f"obj_{diaObjectId}", [f"src_{diaObjectId}"], [f"forced_{diaObjectId}"])
+        self.mock_fltr.lightcurve.fetch.side_effect = fetch_side_effect
+
+        query_results = [
+            {'diaObjectId': 1234},
+            {'diaObjectId': 5678}
+        ]
+
+        append_lightcurve(self.mock_fltr, query_results)
+
+        self.assertEqual(len(self.mock_fltr.message_dict), 2)
+        self.assertEqual(self.mock_fltr.message_dict[1234]['diaObject'], "obj_1234")
+        self.assertEqual(self.mock_fltr.message_dict[1234]['diaSourcesList'], ["src_1234"])
+        self.assertEqual(self.mock_fltr.message_dict[1234]['diaForcedSourcesList'], ["forced_1234"])
+        self.assertEqual(self.mock_fltr.message_dict[5678]['diaObject'], "obj_5678")
+        self.assertEqual(self.mock_fltr.message_dict[1234]['diaSourcesList'], ["src_5678"])
+        self.assertEqual(self.mock_fltr.message_dict[1234]['diaForcedSourcesList'], ["forced_5678"])
+        self.assertEqual(self.mock_fltr.lightcurve.fetch.call_count, 2)
+        self.mock_fltr.lightcurve.fetch.assert_any_call(1234, lite=False)
+        self.mock_fltr.lightcurve.fetch.assert_any_call(5678, lite=False)
+
+    def test_append_lightcurve_empty_input(self):
+        """Verify the function handles an empty results list without error."""
+        append_lightcurve(self.mock_fltr, [])
+        self.assertEqual(len(self.mock_fltr.message_dict), 0)
+        self.mock_fltr.lightcurve.fetch.assert_not_called()
+
 if __name__ == '__main__':
     import xmlrunner 
     runner = xmlrunner.XMLTestRunner(output='test-reports')
