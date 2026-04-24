@@ -121,3 +121,31 @@ while n_alert < max_alert:
 
 print('Annotated %d of %d objects' % (n_annotate, n_alert))
 ```
+
+### Annotating a Batch
+
+The following is a skeleton code for sending a batch of annotations all
+at the same time. As above, each annotation must have the `objectId`, `topic`, 
+and `classification` entries, where `topic` is the name of the annotator, which must 
+be owned by the user that owns the `API_TOKEN` used to make the Lasair client instance.
+The other attributes 
+are optional. The method `annotate_list` can be used to submit a batch of these.
+
+```
+topic = my_annotator_name
+ann_list = []
+for diaObjectId in diaObjectList:
+    # a single, short word
+    classification = ....
+    ann = {
+        'objectId'      : diaObjectId,
+        'topic'         : topic_out,
+        'classification': classification,
+        'version'       :'0.1',     # optional
+        'explanation'   :'.....',   # optional
+        'classdict'     :classdict, # optional
+        'url'           :'.....'    # optional
+    }
+    ann_list.append(ann)
+L.annotate_list(ann_list)
+```
