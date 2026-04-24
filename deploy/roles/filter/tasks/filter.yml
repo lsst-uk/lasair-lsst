@@ -67,6 +67,7 @@
     repo: "{{ git_url }}"
     dest: "{{ ansible_env.HOME }}/{{ git_name }}"
     version: "{{ lasair_version }}"
+  when: not ansible_check_mode
 
 - name: Setup Lasair database
   community.mysql.mysql_query:

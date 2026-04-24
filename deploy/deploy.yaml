@@ -62,6 +62,11 @@
     - name: Set API token
       ansible.builtin.set_fact:
         powerapi_token: "{{ api_token_response.json.token }}"
+      when: not ansible_check_mode
+    - name: Set dummy API token
+      ansible.builtin.set_fact:
+        powerapi_token: "dummy_api_token"
+      when: ansible_check_mode
   tags:
     - always
 
