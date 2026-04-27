@@ -104,10 +104,15 @@ class filterQueryForm(forms.ModelForm):
         self.fields['conditions'].widget.required = False
 
     class Meta:
-
+        triggerTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
             (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (1, 'email (daily)'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -120,9 +125,10 @@ class filterQueryForm(forms.ModelForm):
             'selected': forms.Textarea(),
             'conditions': forms.Textarea(),
             'real_sql': forms.Textarea(),
-            'active': forms.Select(choices=notificationTypes)
+            'trigger': forms.Select(choices=triggerTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
+        fields = ['name', 'description', 'trigger', 'output', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
 
     def clean(self):
 
@@ -195,9 +201,15 @@ class filterQueryForm(forms.ModelForm):
 class UpdateFilterQueryForm(forms.ModelForm):
 
     class Meta:
+        triggerTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
             (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (1, 'email (daily)'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -207,9 +219,10 @@ class UpdateFilterQueryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'active': forms.Select(choices=notificationTypes)
+            'trigger': forms.Select(choices=triggerTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['name', 'description', 'trigger', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(UpdateFilterQueryForm, self).clean()
@@ -243,9 +256,15 @@ class UpdateFilterQueryForm(forms.ModelForm):
 class DuplicateFilterQueryForm(forms.ModelForm):
 
     class Meta:
+        triggerTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
             (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (1, 'email (daily)'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -255,9 +274,10 @@ class DuplicateFilterQueryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'active': forms.Select(choices=notificationTypes)
+            'trigger': forms.Select(choices=triggerTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['name', 'description', 'trigger', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(DuplicateFilterQueryForm, self).clean()

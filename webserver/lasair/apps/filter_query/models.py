@@ -15,6 +15,8 @@ class filter_query(models.Model):
     tables = models.CharField(max_length=4096, blank=True, null=True)
     public = models.BooleanField(blank=True, null=True)
     active = models.IntegerField(blank=True, null=True)
+    trigger = models.IntegerField(blank=True, null=True)
+    output = models.IntegerField(blank=True, null=True)
     byte_quota = models.IntegerField(blank=True, null=True)
     topic_name = models.CharField(max_length=256, blank=True, null=True)
     real_sql = models.CharField(max_length=4096, blank=True, null=True)

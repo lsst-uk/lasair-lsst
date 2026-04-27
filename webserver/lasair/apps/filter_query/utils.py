@@ -217,7 +217,7 @@ def topic_refresh(real_sql, topic, limit=10):
         p.flush(10.0)   # 10 second timeout
         message += '%d records inserted into kafka %s' % (len(query_results), topic)
     except Exception as e:
-        message += "ERROR in filter/run_active_queries: cannot produce to public kafka: %s" % str(e)
+        message += "ERROR: cannot produce to public kafka: %s" % str(e)
 
     return message
 
