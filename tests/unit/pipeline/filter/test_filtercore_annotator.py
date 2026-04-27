@@ -78,10 +78,8 @@ class FilterTest(unittest.TestCase):
         mock_consumer.poll.assert_called_once()
         mock_manage_status.add.assert_called_once()
 
-    @patch('annotationcore.AnnotationFilter')
-    def test_append_lightcurve(self, mock_fltr):
-        fltr = AnnotationFilter(group_id='filter_test', maxmessage=1)
-
+    def test_append_lightcurve(self):
+        mock_fltr = unittest.mock.MagicMock()
         def fetch_side_effect(diaObjectId, lite=False):
             return (f"obj_{diaObjectId}", [f"src_{diaObjectId}"], [f"forced_{diaObjectId}"])
         mock_fltr.lightcurve = unittest.mock.MagicMock()
@@ -106,9 +104,9 @@ class FilterTest(unittest.TestCase):
         mock_fltr.lightcurve.fetch.assert_any_call(1234, lite=False)
         mock_fltr.lightcurve.fetch.assert_any_call(5678, lite=False)
 
-    @patch('annotationcore.AnnotationFilter')
-    def test_append_lightcurve_empty_input(self, mock_fltr):
+    def test_append_lightcurve_empty_input(self):
         """Verify the function handles an empty results list without error."""
+        mock_fltr = unittest.mock.MagicMock()
         mock_fltr.lightcurve = unittest.mock.MagicMock()
         mock_fltr.message_dict = {}
         ann_filters.append_lightcurve(mock_fltr, [])
