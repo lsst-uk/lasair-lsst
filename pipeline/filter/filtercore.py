@@ -48,7 +48,6 @@ import confluent_kafka
 import datetime
 from docopt import docopt
 
-
 sys.path.append('../../common')
 import settings
 
@@ -126,12 +125,14 @@ class Filter:
                 self.database_local = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+
         # set up the link to the remote database
         if not self.database_remote or not self.database_remote.is_connected():
             try:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
+
         # set up lasair statistics
         self.ms = manage_status.manage_status(log=self.log)
         self.nid = date_nid.nid_now()

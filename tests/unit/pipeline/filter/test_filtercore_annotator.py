@@ -4,6 +4,7 @@ from unittest.mock import patch
 import psutil
 import context
 from annotationcore import AnnotationFilter
+import ann_filters
 import re
 
 def test_message_handler(message_list):
@@ -76,6 +77,41 @@ class FilterTest(unittest.TestCase):
         self.assertEqual(result, 1)
         mock_consumer.poll.assert_called_once()
         mock_manage_status.add.assert_called_once()
+
+    def test_append_lightcurve(self):
+        mock_fltr = unittest.mock.MagicMock()
+        def fetch_side_effect(diaObjectId, lite=False):
+            return (f"obj_{diaObjectId}", [f"src_{diaObjectId}"], [f"forced_{diaObjectId}"])
+        mock_fltr.lightcurve = unittest.mock.MagicMock()
+        mock_fltr.lightcurve.fetch.side_effect = fetch_side_effect
+        mock_fltr.message_dict = {}
+
+        query_results = [
+            {'diaObjectId': 1234},
+            {'diaObjectId': 5678}
+        ]
+
+        ann_filters.append_lightcurve(mock_fltr, query_results)
+
+        self.assertEqual(len(mock_fltr.message_dict), 2)
+        self.assertEqual(mock_fltr.message_dict[1234]['diaObject'], "obj_1234")
+        self.assertEqual(mock_fltr.message_dict[1234]['diaSourcesList'], ["src_1234"])
+        self.assertEqual(mock_fltr.message_dict[1234]['diaForcedSourcesList'], ["forced_1234"])
+        self.assertEqual(mock_fltr.message_dict[5678]['diaObject'], "obj_5678")
+        self.assertEqual(mock_fltr.message_dict[5678]['diaSourcesList'], ["src_5678"])
+        self.assertEqual(mock_fltr.message_dict[5678]['diaForcedSourcesList'], ["forced_5678"])
+        self.assertEqual(mock_fltr.lightcurve.fetch.call_count, 2)
+        mock_fltr.lightcurve.fetch.assert_any_call(1234, lite=False)
+        mock_fltr.lightcurve.fetch.assert_any_call(5678, lite=False)
+
+    def test_append_lightcurve_empty_input(self):
+        """Verify the function handles an empty results list without error."""
+        mock_fltr = unittest.mock.MagicMock()
+        mock_fltr.lightcurve = unittest.mock.MagicMock()
+        mock_fltr.message_dict = {}
+        ann_filters.append_lightcurve(mock_fltr, [])
+        self.assertEqual(len(mock_fltr.message_dict), 0)
+        mock_fltr.lightcurve.fetch.assert_not_called()
 
 if __name__ == '__main__':
     import xmlrunner 

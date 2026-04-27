@@ -4,12 +4,16 @@ import numbers
 import math
 import json
 
-from annotation import filters
+from annotation import ann_filters
 from filtercore import Filter
 from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
+
+sys.path.append('../../webserver/lasair')
+sys.path.append('../../../../webserver/lasair')
+from lightcurves import lightcurve_fetcher
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -23,6 +27,15 @@ class AnnotationFilter(Filter):
     def setup(self):
         # get the Filter object set up 
         super().setup()
+
+        # set up cassandra lightcurve fetcher
+        try:
+            self.lightcurve = lightcurve_fetcher(\
+                    cassandra_hosts=settings.CASSANDRA_HEAD,
+                    reliabilityThreshold=0.5)
+        except Exception as e:
+            self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
+
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
@@ -86,8 +99,11 @@ class AnnotationFilter(Filter):
 
         # run the annotation queries
         self.log.info('ANNOTATION FILTERS start %s' % now())
-        ntotal = filters.annotation_filters(self)
+        ntotal = ann_filters.annotation_filters(self)
         if ntotal is not None:
             self.log.info('ANNOTATION FILTERS got %d' % ntotal)
         else:
             self.log.error("ERROR in filter/fast_annotation_filters")
+
+        # commit the kafka
+        self.consumer.commit()
