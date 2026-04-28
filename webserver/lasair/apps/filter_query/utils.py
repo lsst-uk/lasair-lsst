@@ -189,8 +189,7 @@ def topic_refresh(real_sql, topic, limit=10):
         time.sleep(1)
         message += 'Topic %s deleted<br/>' % topic
     except Exception as e:
-        message += 'Topic is ' + topic + '<br/>'
-        message += str(e) + '<br/>'
+        pass
 
     timeout = 30
 
