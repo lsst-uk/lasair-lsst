@@ -130,9 +130,10 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
-            if filterQuery.active >= 2:
+            active = int(filterQuery.active)
+            if active >= 2:
                 try:
-                    message = topic_refresh(filterQuery.real_sql, tn, limit=10)
+                    message = topic_refresh(filterQuery.real_sql, tn, active, limit=10)
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
             filterQuery.save()
@@ -165,9 +166,10 @@ def filter_query_detail(request, mq_id, action=False):
         mq_id = filterQuery.pk
 
         message = ''
-        if newFil.active >= 2:
+        active = int(newFil.active)
+        if active >= 2:
             try:
-                message += topic_refresh(newFil.real_sql, tn, limit=10) + '<br/>'
+                message += topic_refresh(newFil.real_sql, tn, active, limit=10) + '<br/>'
             except Exception as e:
                 messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
 
@@ -422,9 +424,10 @@ def filter_query_create(request, mq_id=False):
             message = ''
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
-            if int(filterQuery.active) >= 2:
+            active = int(filterQuery.active)
+            if active >= 2:
                 try:
-                    message += topic_refresh(filterQuery.real_sql, tn, limit=10) + '<br/>'
+                    message += topic_refresh(filterQuery.real_sql, tn, active, limit=10) + '<br/>'
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
 
