@@ -135,7 +135,7 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
-            if filterQuery.output >= 2:
+            if filterQuery.output and filterQuery.output >= 2:
                 try:
                     message = topic_refresh(filterQuery.real_sql, tn, limit=10)
                 except Exception as e:
@@ -226,7 +226,7 @@ def filter_query_detail(request, mq_id, action=False):
         sortTable = True
 
     # info about kafka records produced and rejected
-    if filterQuery.output >= 2:
+    if filterQuery.output and filterQuery.output >= 2:
         topic_name = filterQuery.topic_name
         ms = manage_status.manage_status(msl)
         nid = date_nid.nid_now()
@@ -425,7 +425,7 @@ def filter_query_create(request, mq_id=False):
             filterQuery.save()
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
-            if filterQuery.output >= 2:
+            if filterQuery.output and filterQuery.output >= 2:
                 try:
                     message += topic_refresh(filterQuery.real_sql, tn, limit=10)
                 except Exception as e:
