@@ -206,7 +206,7 @@ def topic_refresh(real_sql, topic, active, limit=10):
     if active >= 3:
         lightcurve = lightcurve_fetcher(\
             cassandra_hosts=settings.CASSANDRA_HEAD,
-            reliabilityThreshold=0.5)
+            reliabilityThreshold=0.0)
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
