@@ -216,19 +216,22 @@ def topic_refresh(real_sql, topic, active, limit=10):
         for record in cursor:
             recorddict = dict(record)
 
-            # fetch lightcurve from cassandra
-            if 'diaObjectId' in recorddict and active >= 3:
-                diaObjectId = recorddict['diaObjectId']
-                (diaObject, diaSourcesList, diaForcedSourcesList) = \
-                    lightcurve.fetch(diaObjectId, lite=False)
-                alert = {
-                    'diaObjectId':diaObjectId,
-                    'diaObject':diaObject,
-                    'diaSourcesList':diaSourcesList,
-                    'diaForcedSourcesList':diaForcedSourcesList}
-                if active == 3:
-                    alert = lightcurve_lite(alert)
-                recorddict['alert'] = alert
+            if active >= 3:
+                # fetch lightcurve from cassandra
+                if 'diaObjectId' in recorddict and active >= 3:
+                    diaObjectId = recorddict['diaObjectId']
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = \
+                        lightcurve.fetch(diaObjectId, lite=False)
+                    alert = {
+                        'diaObjectId':diaObjectId,
+                        'diaObject':diaObject,
+                        'diaSourcesList':diaSourcesList,
+                        'diaForcedSourcesList':diaForcedSourcesList}
+
+                    # convert to lite version if active == 3
+                    if active == 3: alert = lightcurve_lite(alert)
+
+                    recorddict['alert'] = alert
 
             query_results.append(recorddict)
     except Exception as e:
