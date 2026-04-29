@@ -4,12 +4,18 @@ from src.topic_name import topic_name
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from lasair.utils import datetime_converter
 import settings
-import os
+import os, sys
 import json
 import time
 from datetime import datetime
 from confluent_kafka import admin, Producer
 
+sys.path.append('lasair')
+from lightcurves import lightcurve_fetcher
+
+sys.path.append('../pipeline/filter')
+sys.path.append('../common/src')
+from util import lightcurve_lite
 
 def add_filter_query_metadata(
         filter_queries,
@@ -154,7 +160,7 @@ def check_query_zero_limit(real_sql):
         return message
 
 
-def topic_refresh(real_sql, topic, limit=10):
+def topic_refresh(real_sql, topic, active, limit=10):
     """*refresh a kafka topic on creation or update of a filter*
 
     **Key Arguments:**
@@ -189,13 +195,18 @@ def topic_refresh(real_sql, topic, limit=10):
         time.sleep(1)
         message += 'Topic %s deleted<br/>' % topic
     except Exception as e:
-        message += 'Topic is ' + topic + '<br/>'
-        message += str(e) + '<br/>'
+        pass
 
     timeout = 30
 
     query = ('SET STATEMENT max_statement_time=%d FOR %s LIMIT %s'
              % (timeout, real_sql, limit))
+
+    # connect to cassandra to fetch lightcurves
+    if active >= 3:
+        lightcurve = lightcurve_fetcher(\
+            cassandra_hosts=settings.CASSANDRA_HEAD,
+            reliabilityThreshold=0.0)
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
@@ -204,6 +215,24 @@ def topic_refresh(real_sql, topic, limit=10):
         cursor.execute(query)
         for record in cursor:
             recorddict = dict(record)
+
+            if active >= 3:
+                # fetch lightcurve from cassandra
+                if 'diaObjectId' in recorddict and active >= 3:
+                    diaObjectId = recorddict['diaObjectId']
+                    (diaObject, diaSourcesList, diaForcedSourcesList) = \
+                        lightcurve.fetch(diaObjectId, lite=False)
+                    alert = {
+                        'diaObjectId':diaObjectId,
+                        'diaObject':diaObject,
+                        'diaSourcesList':diaSourcesList,
+                        'diaForcedSourcesList':diaForcedSourcesList}
+
+                    # convert to lite version if active == 3
+                    if active == 3: alert = lightcurve_lite(alert)
+
+                    recorddict['alert'] = alert
+
             query_results.append(recorddict)
     except Exception as e:
         message += "SQL error for %s: %s" % (topic, str(e))
