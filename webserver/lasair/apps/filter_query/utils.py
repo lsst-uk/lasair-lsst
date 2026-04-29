@@ -160,7 +160,7 @@ def check_query_zero_limit(real_sql):
         return message
 
 
-def topic_refresh(real_sql, topic, active, limit=10):
+def topic_refresh(real_sql, topic, output, limit=10):
     """*refresh a kafka topic on creation or update of a filter*
 
     **Key Arguments:**
@@ -203,7 +203,7 @@ def topic_refresh(real_sql, topic, active, limit=10):
              % (timeout, real_sql, limit))
 
     # connect to cassandra to fetch lightcurves
-    if active >= 3:
+    if output >= 3:
         lightcurve = lightcurve_fetcher(\
             cassandra_hosts=settings.CASSANDRA_HEAD,
             reliabilityThreshold=0.0)
@@ -216,9 +216,9 @@ def topic_refresh(real_sql, topic, active, limit=10):
         for record in cursor:
             recorddict = dict(record)
 
-            if active >= 3:
+            if output >= 3:
                 # fetch lightcurve from cassandra
-                if 'diaObjectId' in recorddict and active >= 3:
+                if 'diaObjectId' in recorddict and output >= 3:
                     diaObjectId = recorddict['diaObjectId']
                     (diaObject, diaSourcesList, diaForcedSourcesList) = \
                         lightcurve.fetch(diaObjectId, lite=False)
@@ -228,8 +228,8 @@ def topic_refresh(real_sql, topic, active, limit=10):
                         'diaSourcesList':diaSourcesList,
                         'diaForcedSourcesList':diaForcedSourcesList}
 
-                    # convert to lite version if active == 3
-                    if active == 3: alert = lightcurve_lite(alert)
+                    # convert to lite version if output == 3
+                    if output == 3: alert = lightcurve_lite(alert)
 
                     recorddict['alert'] = alert
 
