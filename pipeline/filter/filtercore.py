@@ -466,7 +466,7 @@ class Filter:
 
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
     args = docopt(__doc__)
 
