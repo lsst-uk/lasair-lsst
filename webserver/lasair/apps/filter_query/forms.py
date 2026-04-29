@@ -105,7 +105,7 @@ class filterQueryForm(forms.ModelForm):
 
     class Meta:
         triggerTypes = (
-            (0, 'not active'),
+            (0, 'only manually'),
             (1, 'on new alert'),
             (2, 'on updated annotation'),
             (3, 'both')

@@ -41,13 +41,21 @@
 
                 <div class="form-group mb-4">
 
-                    <label for="active">Streaming</label>
-                    <small class="d-flex align-items-center text-gray-500 mb-2">How would you like to be notified of new alerts matching your filter?</small>
-                    {{ form.active|add_class:"form-select" }}
+                    <label for="trigger">Trigger</label>
+                    <small class="d-flex align-items-center text-gray-500 mb-2">When would you like your filter to run?</small>
+                    {{ form.trigger|add_class:"form-select" }}
 
                     <span class="text-error">{{ form.active.errors }}</span>
                 </div>
 
+                <div class="form-group mb-4">
+
+                    <label for="output">Output</label>
+                    <small class="d-flex align-items-center text-gray-500 mb-2">What output would you like your filter to produce?</small>
+                    {{ form.output|add_class:"form-select" }}
+
+                    <span class="text-error">{{ form.active.errors }}</span>
+                </div>
                 <div class="form-group mb-4">
                     <div class="form-check form-switch">
                         <label for="public">public</label>
