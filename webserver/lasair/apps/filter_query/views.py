@@ -151,7 +151,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.user = request.user
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
-        newFil.active = int(request.POST.get('active'))
+        newFil.active = request.POST.get('active')
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
         newFil.topic_name = tn = topicName(request.user.id, newFil.name)
 
