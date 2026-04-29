@@ -33,7 +33,7 @@
                             {% for mq in promoted_queries %}
                                 <tr>
                                     <td> <a href="/query/{{ mq.mq_id }}"><b>{{ mq.name }}</b></a> </br>
-                                        {% if mq.active %}
+                                        {% if mq.output %}
                                             <i><a href={{ mq.streamlink|safe }}>Filter Log</a></i>
                                         {% endif %}
                                     </td>
@@ -63,7 +63,7 @@
                         </thead>
                         {% for mq in myqueries %}
                             <tr><td><b> <a href="/query/{{ mq.mq_id }}/">{{ mq.name }}</a></b><br/>
-                                {% if mq.active %}
+                                {% if mq.output %}
                                     <i><a href={{ mq.streamlink|safe }}>Filter Log</a></i>
                                 {% endif %}
                             </td>
@@ -99,7 +99,7 @@
                             {% if mp.public != 0 %}
                             {% endif %}
                             <p>
-                                {% if mq.active %}
+                                {% if mq.output %}
                                     <i><a href={{ mq.streamlink|safe }}>Filter Log</a></i>
                                 {% endif %}
                             </td>

@@ -62,7 +62,8 @@
                     {% if type == "my" %}
                         <tr>
                             <th>Name</th>
-                            <th>Active</th>
+                            <th>Trigger</th>
+                            <th>Output</th>
                             <th>Description</th>
                             <th>Created</th>
                         </tr></thead>
@@ -90,7 +91,8 @@
 
 
                                     <b><a href="{% url 'filter_query_detail' fq.mq_id %}">{{ fq.name }}</a></b></td>
-					<td>{% if fq.active > 0 %}&#10003;{% endif %}</td>
+					                <td>{% if fq.trigger > 0 %}&#10003;{% endif %}</td>
+                                    <td>{% if fq.output > 0 %}&#10003;{% endif %}</td>
                                     <td  style="white-space: normal;" >{% if fq.description|length > 60 %}
                                         {{ fq.description|slice:"0:60" }} ...
 
@@ -103,7 +105,8 @@
                     {% else %}
                         <tr>
                             <th>Name</th>
-			    <th>Active</th>
+			                <th>Trigger</th>
+			                <th>Output</th>
                             <th>Owner</th>
                             <th>Description</th>
                             <th>Created</th>
@@ -114,7 +117,8 @@
 
 
                                     <b><a href="{% url 'filter_query_detail' fq.mq_id %}">{{ fq.name }}</a></b></td>
-					<td>{% if fq.active > 0 %}&#10003;{% endif %}</td>
+					                <td>{% if fq.trigger > 0 %}&#10003;{% endif %}</td>
+                                    <td>{% if fq.output > 0 %}&#10003;{% endif %}</td>
                                     <td><img alt="Image placeholder" src="data:image/png;base64,{{ fq.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ fq.user }}</td>
                                     <td  style="white-space: normal;">{% if fq.description|length > 60 %}
                                         {{ fq.description|slice:"0:60" }} ...

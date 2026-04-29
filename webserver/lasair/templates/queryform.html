@@ -65,12 +65,19 @@ is_owner means 2.1
                                 <textarea name="description" rows=4 cols=80>{{ myquery.description }}</textarea><br/>
 
                                 Public: <input type="checkbox" name="public" {% if myquery.public > 0 %}checked{% endif %}><br/>
-                                This query is:<br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="0" {% if myquery.active == 0 or new %}checked{% endif %}> Not a streaming filter<br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="1" {% if myquery.active == 1 %}checked{% endif %}> Convert to filter and Email to {{ email }} (max once a day) and log <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="2" {% if myquery.active == 2 %}checked{% endif %}> Convert to Filter and produce Kafka <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="3" {% if myquery.active == 3 %}checked{% endif %}> Convert to Filter and produce Kafka and lite lightcurve <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="active" value="4" {% if myquery.active == 4 %}checked{% endif %}> Convert to Filter and produce Kafka and full alert <br/>
+
+                                This query is triggered on:<br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="0" {% if myquery.trigger == 0 or new %}checked{% endif %}> Manually only <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="1" {% if myquery.trigger == 1 %}checked{% endif %}> On alert <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="2" {% if myquery.trigger == 2 %}checked{% endif %}> On annotation <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="3" {% if myquery.trigger == 3 %}checked{% endif %}> Both <br/>
+
+                                This query produces<br />
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="0" {% if myquery.output == 0 or new %}checked{% endif %}> Not a streaming filter <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="1" {% if myquery.output == 1 %}checked{% endif %}> Convert to filter and Email to {{ email }} (max once a day) and log <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="2" {% if myquery.output == 2 %}checked{% endif %}> Convert to Filter and produce Kafka <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="3" {% if myquery.output == 3 %}checked{% endif %}> Convert to Filter and produce Kafka and lite lightcurve <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="4" {% if myquery.output == 4 %}checked{% endif %}> Convert to Filter and produce Kafka and full alert <br/>
 
                                 A 'Filter' will run real time as alerts come in.
                                 Results can be sent, also in real time, via email or Kafka.
@@ -79,7 +86,7 @@ is_owner means 2.1
                                 {% endif %}
 
                             {% endif %} <!-- newandloggedin or is_owner -->
-                            {% if topic and myquery.active %}
+                            {% if topic and myquery.output %}
                                 Click here for <a href=/streams/{{ topic }}>existing stream log</a>.
                             {% endif %}
                             <hr/>
@@ -215,8 +222,7 @@ is_owner means 2.1
                                     <tr><td>Selected</td><td><tt>{{ myquery.selected }}</tt></td></tr>
                                     <tr><td>Tables</td><td><tt>{{ myquery.tables }}</tt></td></tr>
                                     <tr><td>Conditions</td><td><tt>{{ myquery.conditions }}</tt></td></tr>
-                                    <tr><td>Active</td><td>{% if myquery.active == 1 %}yes{% else %}no{% endif %}
-                                        <tr><td>Public</td><td>{% if myquery.public == 1 %}yes{% else %}no{% endif %}</td></tr>
+                                    <tr><td>Public</td><td>{% if myquery.public == 1 %}yes{% else %}no{% endif %}</td></tr>
                                     </table>
                                         <input name='selected'   type='hidden' value='{{ myquery.selected }}'/>
                                         <input name='tables'     type='hidden' value='{{ myquery.tables }}'/>
@@ -241,7 +247,7 @@ is_owner means 2.1
                                     <td>
                                         <input type="submit" class="button" style="color: blue; background-color: #EEEEFF;"
                                             value=" Save query" value=" Save this Query"
-                                            {% if myquery.active == 2 %}Onclick="ConfirmSave(){% endif %}">
+                                            {% if myquery.output == 2 %}Onclick="ConfirmSave(){% endif %}">
                                     </td>
                                 {% endif %} <!-- newandloggedin or is_owner -->
 
