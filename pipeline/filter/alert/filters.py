@@ -18,7 +18,7 @@ def filters(fltr):
     try:
         query_list = fetch_queries(fltr)
     except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        fltr.log.error("ERROR: " + str(e))
         return None
 
     ntotal = run_queries(fltr, query_list)

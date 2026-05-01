@@ -15,27 +15,30 @@ sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
 
+
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
+
 class AnnotationFilter(Filter):
-    ### AnnotationFilter is subclass of Filter
+    # AnnotationFilter is subclass of Filter
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.ann_diaObjectId = None
+        self.lightcurve = None
 
-    ### set up an AnnotationFilter, after setting up the Filter
+    # set up an AnnotationFilter, after setting up the Filter
     def setup(self):
         # get the Filter object set up 
         super().setup()
 
         # set up cassandra lightcurve fetcher
         try:
-            self.lightcurve = lightcurve_fetcher(\
+            self.lightcurve = lightcurve_fetcher(
                     cassandra_hosts=settings.CASSANDRA_HEAD,
                     reliabilityThreshold=0.5)
         except Exception as e:
             self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
-
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):
@@ -44,15 +47,15 @@ class AnnotationFilter(Filter):
         self.ann_diaObjectId = {}
         return
 
-    def ingest_message_list(self, annotationList):
+    def ingest_message_list(self, annotation_list):
         """insert_message_list: handle a list of annotations of the form
         [ann1, ann2, ....]
         """
         nannotation = 0
-        for ann in annotationList:
+        for ann in annotation_list:
             nannotation += self.ingest_annotation(ann)
         if self.verbose:
-            print('ingest_annotation_list: %d in %d out' % (len(annotationList), nannotation))
+            print('ingest_annotation_list: %d in %d out' % (len(annotation_list), nannotation))
         return nannotation
 
     def ingest_annotation(self, annotation):

@@ -6,6 +6,7 @@ from util import fetch_queries, dispose_query_results
 sys.path.append('../../common')
 import settings
 
+
 def annotation_filters(fltr):
     """run_annotation_queries.
     Pulls the recent content from the kafka topic 'lsst_annotations' 
@@ -17,7 +18,7 @@ def annotation_filters(fltr):
     try:
         query_list = fetch_queries(fltr)
     except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        fltr.log.error("ERROR: " + str(e))
         return 0
     msg = ''
     for topic, ann_list in fltr.ann_diaObjectId.items():
@@ -30,21 +31,27 @@ def annotation_filters(fltr):
     ntotal = run_queries(fltr, query_list)
     return ntotal
 
+
 def run_queries(fltr, query_list):
+    """
+    Run all the queries (set to run on annotation or both) against the local database
+    """
     ntotal = 0
     for query in query_list:
-        n = 0
-        t = time.time()
-        for ann,objList in fltr.ann_diaObjectId.items():
-            query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
-            n += dispose_query_results(fltr, query, query_results)
+        if query['run'] == 2 or query['run'] == 3:  # 1 = annotation, 3 = both
+            n = 0
+            t = time.time()
+            for ann, objList in fltr.ann_diaObjectId.items():
+                query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
+                n += dispose_query_results(fltr, query, query_results)
 
-        t = time.time() - t
-        if n > 0:
-            fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
-            sys.stdout.flush()
-        ntotal += n
+            t = time.time() - t
+            if n > 0:
+                fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['output'], n, t))
+                sys.stdout.flush()
+            ntotal += n
     return ntotal
+
 
 def query_for_object(query, objList):
     """ modifies an existing query to add a new constraint for a list of objects
@@ -61,6 +68,7 @@ def query_for_object(query, objList):
     if len(tok) == 2: # has order clause, add it back
         query += ' ORDER BY ' + tok[1]
     return query
+
 
 def append_lightcurve(fltr, query_results):
     """ fetch the full lightcurve from cassandra if wanted
@@ -82,6 +90,7 @@ def append_lightcurve(fltr, query_results):
             'diaSourcesList':diaSourcesList,
             'diaForcedSourcesList':diaForcedSourcesList}
 
+
 def run_query(query, msl, annotator, objList, fltr):
     """run_query. 
         checks if the query involves the annotator,
@@ -92,7 +101,7 @@ def run_query(query, msl, annotator, objList, fltr):
         query:
         msl:
     """
-    active = query['active']
+    output = query['output']
     email = query['email']
     topic = query['topic_name']
     limit = 1000
@@ -128,7 +137,7 @@ def run_query(query, msl, annotator, objList, fltr):
         return []
 
     # fetch the lite or full lightcurve from cassandra if wanted
-    if active >= 3:
+    if output >= 3:
         append_lightcurve(fltr, query_results)
 
     return query_results
