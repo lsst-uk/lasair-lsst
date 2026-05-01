@@ -67,7 +67,7 @@
                 </small>
                 <small class="text-gray-500">
                     The filter is <b>
-                        {% if filterQ.trigger %}active{% else %}not active{% endif %}</b>
+                        {% if filterQ.run %}active{% else %}not active{% endif %}</b>
                         {% if filterQ.output == 1%}and <b>streamed via email
                         {% elif filterQ.output == 2%}and <b>streamed via kafka</b> with the topic name <code>{{filterQ.topic_name}}</code><b>
                         {% elif filterQ.output == 3%}and <b>streamed via kafka with lite lightcurve</b> with the topic name <code>{{filterQ.topic_name}}</code><b>

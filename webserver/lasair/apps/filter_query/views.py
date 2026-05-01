@@ -113,10 +113,10 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.name = request.POST.get('name')
             filterQuery.description = request.POST.get('description')
 
-            if request.POST.get('trigger'):
-                filterQuery.trigger = int(request.POST.get('trigger'))
+            if request.POST.get('run'):
+                filterQuery.run = int(request.POST.get('run'))
             else:
-                filterQuery.trigger = 0
+                filterQuery.run = 0
 
             if request.POST.get('output'):
                 filterQuery.output = int(request.POST.get('output'))
@@ -156,7 +156,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.user = request.user
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
-        newFil.trigger = request.POST.get('trigger')
+        newFil.run = request.POST.get('run')
         newFil.output = request.POST.get('output')
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
         newFil.topic_name = tn = topicName(request.user.id, newFil.name)
@@ -319,7 +319,7 @@ def filter_query_create(request, mq_id=False):
                 public = 1
             else:
                 public = 0
-            trigger = request.POST.get('trigger')
+            run = request.POST.get('run')
             output = request.POST.get('output')
 
         elif request.method != 'POST' and mq_id:
@@ -344,7 +344,7 @@ def filter_query_create(request, mq_id=False):
             name = form.fields['name'].widget.attrs['value']
             description = form.fields['description'].widget.attrs['value']
             public = form.initial["public"]
-            trigger = form.initial["trigger"]
+            run = form.initial["run"]
             output = form.initial["output"]
 
         # EXTRA DEFAULTS
@@ -395,10 +395,10 @@ def filter_query_create(request, mq_id=False):
             if filterQuery:
                 filterQuery.name = name
                 filterQuery.description = description
-                if request.POST.get('trigger'):
-                    filterQuery.trigger = int(request.POST.get('trigger'))
+                if request.POST.get('run'):
+                    filterQuery.run = int(request.POST.get('run'))
                 else:
-                    filterQuery.trigger = 0
+                    filterQuery.run = 0
                 if request.POST.get('output'):
                     filterQuery.output = int(request.POST.get('output'))
                 else:
@@ -424,7 +424,7 @@ def filter_query_create(request, mq_id=False):
                 tn = topicName(request.user.id, name)
                 filterQuery = filter_query(user=request.user,
                                            name=name, description=description,
-                                           public=public, trigger=trigger, output=output,
+                                           public=public, run=run, output=output,
                                            byte_quota = settings.KAFKA_BYTE_QUOTA,
                                            selected=selected, conditions=conditions, tables=tables,
                                            real_sql=sqlquery_real, topic_name=tn)

@@ -66,11 +66,11 @@ is_owner means 2.1
 
                                 Public: <input type="checkbox" name="public" {% if myquery.public > 0 %}checked{% endif %}><br/>
 
-                                This query is triggered on:<br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="0" {% if myquery.trigger == 0 or new %}checked{% endif %}> Manually only <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="1" {% if myquery.trigger == 1 %}checked{% endif %}> On alert <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="2" {% if myquery.trigger == 2 %}checked{% endif %}> On annotation <br/>
-                                &nbsp;&nbsp;&nbsp;<input type="radio" name="trigger" value="3" {% if myquery.trigger == 3 %}checked{% endif %}> Both <br/>
+                                This query runs:<br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="run" value="0" {% if myquery.run == 0 or new %}checked{% endif %}> Manually only <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="run" value="1" {% if myquery.run == 1 %}checked{% endif %}> On alert <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="run" value="2" {% if myquery.run == 2 %}checked{% endif %}> On annotation <br/>
+                                &nbsp;&nbsp;&nbsp;<input type="radio" name="run" value="3" {% if myquery.run == 3 %}checked{% endif %}> Both <br/>
 
                                 This query produces<br />
                                 &nbsp;&nbsp;&nbsp;<input type="radio" name="output" value="0" {% if myquery.output == 0 or new %}checked{% endif %}> Not a streaming filter <br/>

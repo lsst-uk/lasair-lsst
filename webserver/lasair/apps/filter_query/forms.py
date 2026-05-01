@@ -104,7 +104,7 @@ class filterQueryForm(forms.ModelForm):
         self.fields['conditions'].widget.required = False
 
     class Meta:
-        triggerTypes = (
+        runTypes = (
             (0, 'only manually'),
             (1, 'on new alert'),
             (2, 'on updated annotation'),
@@ -125,10 +125,10 @@ class filterQueryForm(forms.ModelForm):
             'selected': forms.Textarea(),
             'conditions': forms.Textarea(),
             'real_sql': forms.Textarea(),
-            'trigger': forms.Select(choices=triggerTypes),
+            'run': forms.Select(choices=runTypes),
             'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'trigger', 'output', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
+        fields = ['name', 'description', 'run', 'output', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
 
     def clean(self):
 
@@ -201,7 +201,7 @@ class filterQueryForm(forms.ModelForm):
 class UpdateFilterQueryForm(forms.ModelForm):
 
     class Meta:
-        triggerTypes = (
+        runTypes = (
             (0, 'not active'),
             (1, 'on new alert'),
             (2, 'on updated annotation'),
@@ -219,10 +219,10 @@ class UpdateFilterQueryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'trigger': forms.Select(choices=triggerTypes),
+            'run': forms.Select(choices=runTypes),
             'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'trigger', 'output', 'public']
+        fields = ['name', 'description', 'run', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(UpdateFilterQueryForm, self).clean()
@@ -256,7 +256,7 @@ class UpdateFilterQueryForm(forms.ModelForm):
 class DuplicateFilterQueryForm(forms.ModelForm):
 
     class Meta:
-        triggerTypes = (
+        runTypes = (
             (0, 'not active'),
             (1, 'on new alert'),
             (2, 'on updated annotation'),
@@ -274,10 +274,10 @@ class DuplicateFilterQueryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'trigger': forms.Select(choices=triggerTypes),
+            'run': forms.Select(choices=runTypes),
             'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'trigger', 'output', 'public']
+        fields = ['name', 'description', 'run', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(DuplicateFilterQueryForm, self).clean()

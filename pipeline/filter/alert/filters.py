@@ -13,6 +13,7 @@ import mmagw
 sys.path.append('../../common')
 import settings
 
+
 def filters(fltr):
     try:
         query_list = fetch_queries(fltr)
@@ -23,26 +24,25 @@ def filters(fltr):
     ntotal = run_queries(fltr, query_list)
     return ntotal
 
+
 def run_queries(fltr, query_list):
     """
-    When annotation_list is None, it runs all the queries against the local database
-    When not None, runs some queires agains a specific object, using the main database
+    Run all the queries (set to run on alert or both) against the local database
     """
-
-#    if annotation_list and len(annotation_list) > 0:
-#        fltr.log.info(annotation_list)
     ntotal = 0
-    for query in query_list:
-        n = 0
-        t = time.time()
-        query_results = run_query(query, fltr.database_local)
-        n += dispose_query_results(fltr, query, query_results)
-        t = time.time() - t
-        if n > 0:
-            fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
-            sys.stdout.flush()
-        ntotal += n
+    for query in query_list:        # only run
+        if query['run'] == 1 or query['run'] == 3:  # 1 = alert, 3 = both
+            n = 0
+            t = time.time()
+            query_results = run_query(query, fltr.database_local)
+            n += dispose_query_results(fltr, query, query_results)
+            t = time.time() - t
+            if n > 0:
+                fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['output'], n, t))
+                sys.stdout.flush()
+            ntotal += n
     return ntotal
+
 
 def run_query(query, msl):
     """run_query. Two cases here:
@@ -51,7 +51,6 @@ def run_query(query, msl):
         query:
         msl:
     """
-    active = query['active']
     email = query['email']
     topic = query['topic_name']
     limit = 1000
