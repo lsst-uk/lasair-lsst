@@ -7,6 +7,7 @@ MariaDB [test]> desc objects;
 | diaObjectId | bigint(20) | NO   | PRI | NULL    |       |
 | ra          | double     | YES  |     | NULL    |       |
 | decl        | double     | YES  |     | NULL    |       |
+| htm16       | bigint(20) | NO   |     | NULL    |       |
 
 MariaDB [test]> desc watchlist_cones;
 | cone_id | int(11)     | NO   | PRI | NULL    | auto_increment |
@@ -28,13 +29,12 @@ MariaDB [test]> desc watchlists;
 | date_modified | datetime(6) | YES  |     | NULL    |                |
 """
 
-#import settings
-
 import sys
-sys.path.insert(0, '../../../../common')
-print(sys.path)
-import settings as real_settings
 import mysql.connector
+
+sys.path.insert(0, '../../../../common')
+import settings as real_settings
+
 sys.path.append('..')
 from tns_crossmatch import tns_name_crossmatch
 
@@ -47,11 +47,42 @@ if __name__ == "__main__":
         'database': 'test'
     }
     msl =  mysql.connector.connect(**config)
+    cursor = msl.cursor(buffered=True, dictionary=True)
 
     tns_name = 'apple'
-    myRA = 170.0
-    myDecl = 20.0
-    radius = 5.0
-    tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius)
+    myRA    = 53.090594
+    myDecl  = -29.651906
+    myHTM16 = 38585371763
+    myName  = 'roy'
+    myWl_id = 1
+    radius  = 5.0
+
+    cleanup = True
+
+    query = 'REPLACE INTO objects (diaObjectId, ra, decl, htm16) '
+    query += f'VALUES (1, {myRA}, {myDecl}, {myHTM16})' 
+    #print(query)
+    cursor.execute(query)
+
+    query = 'REPLACE INTO watchlist_cones (name, ra, decl, radius, wl_id) '
+    query += f'VALUES ("{myName}", {myRA}, {myDecl}, {radius}, {myWl_id})'
+    #print(query)
+    cursor.execute(query)
+    msl.commit()
+
+    nhit = tns_name_crossmatch(msl, tns_name, myRA, myDecl, radius)
+    print(f'Found {nhit} hits')
+
+    if cleanup:
+        query = 'DELETE FROM watchlist_cones WHERE wl_id = 1'
+        cursor.execute(query)
+        query = 'DELETE FROM objects WHERE diaObjectId = 1'
+        cursor.execute(query)
+        query = 'DELETE FROM watchlist_hits WHERE name="{myName}"'
+        cursor.execute(query)
+        msl.commit()
+
+
+
 
 
