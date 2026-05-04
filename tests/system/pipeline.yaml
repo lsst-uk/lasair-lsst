@@ -1,4 +1,4 @@
-# End to end test of as much of the Lasair pipeline as possible
+# Remove test topics and databases
 
 ---
 
@@ -13,6 +13,9 @@
 
 - name: Filter
   import_playbook: filter.yaml
+
+- name: Annotations
+  import_playbook: annotations.yaml
 
 - name: Clean
   import_playbook: clean.yaml
