@@ -87,7 +87,8 @@ class AnnotationFilter(Filter):
                 annotation['classdict'], 
                 annotation['url'])
 
-        self.execute_remote_query(query)
+        if self.transfer:
+            self.execute_remote_query(query)
         return 1
 
     def post_ingest(self, n_messages):
