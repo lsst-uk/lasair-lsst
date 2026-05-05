@@ -9,6 +9,7 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, HttpResponse
+from rest_framework.authtoken.models import Token
 from src import db_connect
 import settings
 import os
@@ -70,6 +71,12 @@ def object_detail(request, diaObjectId):
 
     def my_json_encoder(obj):
         return str(obj)
+    
+    if request.user.is_authenticated:
+        token, created = Token.objects.get_or_create(user=request.user)
+        token = token.key
+    else:
+        token = None
 
     return render(request, 'object/object_detail.html', {
         'data': data,
@@ -79,4 +86,7 @@ def object_detail(request, diaObjectId):
         'fplightcurveHtml': fplightcurveHtml,
         'lcData': lcData,
         'lasair_url': settings.LASAIR_URL,
+        'token': token if request.user.is_authenticated else None,
     })
+
+
