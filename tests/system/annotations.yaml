@@ -48,7 +48,7 @@
         - area_hits
         - watchlist_hits
         - annotations
-    - name: Run filter
+    - name: Run annotations
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/filter
         cmd: "/opt/lasair_venv/bin/python3 filtercore.py --grist=annotation --maxalert=1 --maxtotal=1 --maxbatch=5 --group_id=filter_test_1 --topic_in=annotation_test --local_db={{ mysql_db_name }} --send_email=False --send_kafka=False --transfer=False --stats=False --wait_time=4 --verbose=True"

@@ -5,6 +5,13 @@
 - name: Clean
   import_playbook: clean.yaml
 
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Pause for 10 seconds
+      ansible.builtin.pause:
+        seconds: 10
+
 - name: Ingest
   import_playbook: ingest.yaml
 
