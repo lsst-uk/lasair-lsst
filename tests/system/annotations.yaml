@@ -8,7 +8,8 @@
     - system_test_settings.yaml
   tasks:
     - name: Send test alerts
-      ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_annotation.json annotation_test {{ (groups['filter'] | length) }}"
+      ansible.builtin.shell: "kcat -b {{ groups['kafka'][0] }}:9092 -P -t annotation_test sample_annotation.json"
+      with_sequence: count="{{(groups['filter'] | length)}}"
 
 - hosts: filter
   gather_facts: true
