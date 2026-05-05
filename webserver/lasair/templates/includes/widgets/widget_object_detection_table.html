@@ -30,7 +30,7 @@
                         <li><a class="dropdown-item export" data-table="exportLightcurve" data-type="csv" data-filename="{{data.diaObjectId}}_difference_photometry">CSV</a></li>
                         {% if user.is_authenticated %}
                             <li><a class="dropdown-item export" data-table="exportLightcurve" data-type="json" data-filename="{{data.diaObjectId}}_difference_photometry">JSON</a></li>
-                            <li><a class="dropdown-item export" href="/api/object/?objectId={{data.diaObjectId}}&format=api&token={{ token }}">API</a></li>
+                            <li><a class="dropdown-item export" href="/api/object/?objectId={{data.diaObjectId}}">API</a></li>
                         {% else %}
                             <li><a class="dropdown-item export" data-table="exportLightcurve" data-type="json" data-filename="{{data.diaObjectId}}_difference_photometry">JSON</a></li>
                         {% endif %}

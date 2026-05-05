@@ -71,12 +71,7 @@ def object_detail(request, diaObjectId):
 
     def my_json_encoder(obj):
         return str(obj)
-    
-    token = None
-    if request.user.is_authenticated:
-        existing_token = Token.objects.filter(user=request.user).first()
-        if existing_token is not None:
-            token = existing_token.key
+
 
     return render(request, 'object/object_detail.html', {
         'data': data,
@@ -85,8 +80,7 @@ def object_detail(request, diaObjectId):
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
         'lcData': lcData,
-        'lasair_url': settings.LASAIR_URL,
-        'token': token if request.user.is_authenticated else None,
+        'lasair_url': settings.LASAIR_URL
     })
 
 
