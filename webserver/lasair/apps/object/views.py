@@ -72,11 +72,11 @@ def object_detail(request, diaObjectId):
     def my_json_encoder(obj):
         return str(obj)
     
+    token = None
     if request.user.is_authenticated:
-        token, created = Token.objects.get_or_create(user=request.user)
-        token = token.key
-    else:
-        token = None
+        existing_token = Token.objects.filter(user=request.user).first()
+        if existing_token is not None:
+            token = existing_token.key
 
     return render(request, 'object/object_detail.html', {
         'data': data,
