@@ -25,9 +25,6 @@
     - name: Delete annotation_test topic
       ansible.builtin.shell: "python3 ../../utility/delete_topic.py -b  {{ groups['kafka'][0] }}:9092 -t annotation_test"
       ignore_errors: true
-    - name: Pause for 10 seconds
-      ansible.builtin.pause:
-        seconds: 10
 
 - hosts: filter
   gather_facts: false
