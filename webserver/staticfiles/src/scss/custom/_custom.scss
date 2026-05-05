@@ -302,7 +302,9 @@ select, input[type=number], input[type=text] {
 }
 
 
-a:not(.btn), .text-action:not(.btn) {
+
+td > a:not(.btn),
+td > .text-action:not(.btn) {
     color: $link-color;
     transition: $transition-base;
 
