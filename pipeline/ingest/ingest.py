@@ -24,6 +24,7 @@ Options:
 
 import sys
 import json
+import importlib
 from docopt import docopt
 import datetime
 from confluent_kafka import Consumer, Producer, KafkaError
@@ -42,6 +43,11 @@ sys.path.append('../../common/src')
 import manage_status, date_nid, slack_webhook
 import cutoutStore
 import logging, lasairLogging
+
+components = [
+        'diaObjects', 'diaSources', 'diaForcedSources', 'diaNondetectionLimits',
+        'ssObjects', 'ssSources', 'mpc_orbits'
+        ]
 
 class ImageStore:
     """Class to wrap the cassandra and file system image stores and give them a
@@ -122,6 +128,36 @@ class Ingester:
         
         # list of future objects for in-flight cassandra requests
         self.futures = []
+
+        # lists of all the expected attribute sets for the 7 components
+        # the surplus_attrs will be sets of attributes that should be trimmed off
+        # if surplus_attrs is None, it hasn't been built yet
+        schema_version = settings.SCHEMA_VERSION
+        self.attrs = {}
+        self.surplus_attrs = {}
+        for component in components:
+            path = f'schema.{schema_version}.{component}'
+            schema_package = importlib.import_module(path)
+            schema = schema_package.schema
+            attr = set()
+            for field in schema['fields']:
+                attr.add(field['name'])
+            self.attrs[component] = attr
+            self.surplus_attrs[component] = None
+
+    def trim_surplus_attrs(self, component, obj):
+        if obj is None:
+            return None
+
+        # if None, rebuild first
+        if self.surplus_attrs[component] is None:
+            obj_attr = set(obj.keys())
+            self.surplus_attrs[component] = obj_attr.difference(self.attrs[component])
+            print(f'Surplus attr for {component} is', self.surplus_attrs[component])   # remove
+
+        for attr in self.surplus_attrs[component]:
+            obj.pop(attr)
+        return obj
 
     def setup_cassandra(self):
         """Setup connections to Cassandra, Kafka, etc."""
@@ -424,21 +460,34 @@ class Ingester:
         ssSources                 = []
         mpc_orbits                = []
         for alert in alerts:
+            for diaSource in alert['diaSourcesList']:
+                diaSource = self.trim_surplus_attrs('diaSources', diaSource)  # TRIM
             diaSourcesList += alert['diaSourcesList']
 
             if 'diaObject' in alert:
+                alert['diaObject'] = self.trim_surplus_attrs('diaObjects', alert['diaObject']) # TRIM
                 diaObjects.append(alert['diaObject'])
+
+                for diaForcedSource in alert['diaForcedSourcesList']:
+                    diaForcedSource = self.trim_surplus_attrs('diaForcedSources', diaForcedSource)  # TRIM
                 diaForcedSourcesList += alert['diaForcedSourcesList']
+
+                for diaNondetectionLimit in alert['diaNondetectionLimitsList']:
+                    diaNondetectionLimit = self.trim_surplus_attrs('diaNondetectionLimits', diaNondetectionLimit)  # TRIM
                 diaNondetectionLimitsList += alert['diaNondetectionLimitsList']
 
             if 'ssSource' in alert and alert['ssSource']:
+                alert['ssSource'] = self.trim_surplus_attrs('ssSources', alert['ssSource'])  # TRIM
                 ssSources.append(alert['ssSource'])
+
             if 'mpc_orbit' in alert and alert['mpc_orbit']:
                 m = alert['mpc_orbit']
                 m['mpc_orb_jsonb'] = ''   # This has crap in it
+                m = self.trim_surplus_attrs('mpc_orbits', m)   # TRIM
                 mpc_orbits.append(m)
 
             if 'ssObject' in alert and alert['ssObject']:
+                alert['ssObject'] = self.trim_surplus_attrs('ssObject', alert['ssObject'])  #TRIM
                 ssObjects += alert['ssObject']
 
 #        print(len(diaObjects), len(diaSourcesList), len(diaForcedSourcesList), len(diaNondetectionLimitsList), len(ssObjects), len(mpc_orbits))
@@ -498,6 +547,10 @@ class Ingester:
         if self.consumer:
             self.consumer.commit()
         self.timers['ikconsume'].off()
+
+        # force rebuild of the surplus_attrs to be removed
+        for component in components:
+            self.surplus_attrs[component] = None
 
         # update the status page
         nid = date_nid.nid_now()
