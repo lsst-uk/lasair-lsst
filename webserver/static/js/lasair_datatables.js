@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let searchable = true;
             let paging = true;
-            let bottom = "{select}{info}{pager}"
             if (dataTableEl.hasAttribute('datatable-vanilla')) {
                 searchable = false;
                 paging = false;
