@@ -14,12 +14,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 perPage = parseInt(dataTableEl.getAttribute('data-perPage'));
             }
 
-            if (dataTableEl.hasAttribute('vanilla')) {
-                top = ""
-                bottom = ""
-            } else {
-                top = "{search}"
-                bottom = "{select}{info}{pager}"
+            let searchable = true;
+            let paging = true;
+            let bottom = "{select}{info}{pager}"
+            if (dataTableEl.hasAttribute('datatable-vanilla')) {
+                searchable = false;
+                paging = false;
             }
 
             const dataTable = new simpleDatatables.DataTable(dataTableEl, {
@@ -29,9 +29,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     noRows: "No objects found",
                     info: "Showing {start} to {end} of {rows} rows",
                 },
+                searchable: searchable,
+                paging: paging,
                 layout: {
-                    top: top,
-                    bottom: bottom
+                    top: "{search}",
+                    bottom: "{select}{info}{pager}"
                 },
                 perPage: perPage,
                 perPageSelect: [5, 10, 50, 100, 500, 10000]
@@ -71,6 +73,18 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (type === "json") {
                             data.replacer = null;
                             data.space = 4;
+                        }
+
+                        // REMOVE target, ref, diff and data columns if they exist, as these are not needed in the export and can cause problems with some formats
+                        const removeCols = ["target", "ref", "diff", "data"];
+                        const colIdxsToRemove = [];
+                        dataTable.columns().dt.labels.forEach(function(label, idx) {
+                            if (removeCols.includes(label)) {
+                                colIdxsToRemove.push(idx);
+                            }
+                        });
+                        if (colIdxsToRemove.length > 0) {
+                            data.columns = dataTable.columns().remove(colIdxsToRemove).data();
                         }
 
                         dataTable.export(data);

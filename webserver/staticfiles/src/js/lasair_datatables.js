@@ -75,6 +75,18 @@ document.addEventListener('DOMContentLoaded', function() {
                             data.space = 4;
                         }
 
+                        // REMOVE TARGET, REF, DIFF AND DATA COLUMNS IF THEY EXIST, AS THESE ARE NOT NEEDED IN THE EXPORT AND CAN CAUSE PROBLEMS WITH SOME FORMATS
+                        const removeCols = ["images", "alert packet"];
+                        const colIdxsToRemove = [];
+                        dataTable.columns().dt.labels.forEach(function(label, idx) {
+                            if (removeCols.includes(label)) {
+                                colIdxsToRemove.push(idx);
+                            }
+                        });
+                        if (colIdxsToRemove.length > 0) {
+                            data.columns = dataTable.columns().remove(colIdxsToRemove).data();
+                        }
+
                         dataTable.export(data);
                     });
                 });
