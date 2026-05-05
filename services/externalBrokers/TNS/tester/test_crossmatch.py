@@ -82,6 +82,9 @@ if __name__ == "__main__":
         cursor.execute(query)
         msl.commit()
 
+    if nhit == 1: exit(0)   # success, found the hit
+    if nhit == 0: exit(1)   # fail
+
 
 
 
