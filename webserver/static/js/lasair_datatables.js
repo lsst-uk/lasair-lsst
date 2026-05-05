@@ -75,16 +75,23 @@ document.addEventListener('DOMContentLoaded', function() {
                             data.space = 4;
                         }
 
-                        // REMOVE target, ref, diff and data columns if they exist, as these are not needed in the export and can cause problems with some formats
-                        const removeCols = ["target", "ref", "diff", "data"];
+                        // REMOVE TARGET, REF, DIFF AND DATA COLUMNS IF THEY EXIST, AS THESE ARE NOT NEEDED IN THE EXPORT 
+                        const removeCols = ["images", "alert packet"];
                         const colIdxsToRemove = [];
                         dataTable.columns().dt.labels.forEach(function(label, idx) {
                             if (removeCols.includes(label)) {
                                 colIdxsToRemove.push(idx);
                             }
                         });
-                        if (colIdxsToRemove.length > 0) {
-                            data.columns = dataTable.columns().remove(colIdxsToRemove).data();
+                        if (type === "csv") {
+                            data.columnDelimiter = ",";
+                            data.skipColumn = colIdxsToRemove; 
+                        }
+
+                        if (type === "json") {
+                            data.replacer = null;
+                            data.space = 4;
+                            data.skipColumn = colIdxsToRemove; 
                         }
 
                         dataTable.export(data);
