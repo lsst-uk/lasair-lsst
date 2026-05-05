@@ -308,13 +308,13 @@ td > .text-action:not(.btn) {
     color: $link-color;
     transition: $transition-base;
 
-    &:hover {
-        color: $link-hover-color;
+    &:visited {
+        color: $link-visited-color;
         cursor: pointer;
     }
 
-    &:visited {
-        color: $link-visited-color;
+    &:hover {
+        color: $link-hover-color;
         cursor: pointer;
     }
 }
