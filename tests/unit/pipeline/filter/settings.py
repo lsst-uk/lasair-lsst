@@ -18,3 +18,4 @@ PUBLIC_KAFKA_SERVER="lasair-lsst-dev-kafka_pub:29092"
 PUBLIC_KAFKA_USERNAME='blabla'
 PUBLIC_KAFKA_PASSWORD='junk'
 ANNOTATION_TOPIC='fast_annotations'
+
