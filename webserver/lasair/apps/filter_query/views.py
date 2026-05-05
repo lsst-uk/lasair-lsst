@@ -130,9 +130,10 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
-            if filterQuery.active == 2:
+            active = int(filterQuery.active)
+            if active >= 2:
                 try:
-                    message = topic_refresh(filterQuery.real_sql, tn, limit=10)
+                    message = topic_refresh(filterQuery.real_sql, tn, active, limit=10)
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
             filterQuery.save()
@@ -152,7 +153,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.description = request.POST.get('description')
         newFil.active = request.POST.get('active')
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
-        newFil.topic_name = topicName(request.user.id, newFil.name)
+        newFil.topic_name = tn = topicName(request.user.id, newFil.name)
 
         if request.POST.get('public'):
             newFil.public = True
@@ -164,7 +165,16 @@ def filter_query_detail(request, mq_id, action=False):
         filterQuery = newFil
         mq_id = filterQuery.pk
 
-        messages.success(request, f'You have successfully copied the "{oldName}" filter to My Filters. The results table is initially empty, but should start to fill as new transient detections match against your filter.')
+        message = ''
+        active = int(newFil.active)
+        if active >= 2:
+            try:
+                message += topic_refresh(newFil.real_sql, tn, active, limit=10) + '<br/>'
+            except Exception as e:
+                messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
+
+        message += f'You have successfully copied the "{oldName}" filter to My Filters.'
+        messages.success(request, message)
         return redirect(f'filter_query_detail', mq_id)
     else:
         form = UpdateFilterQueryForm(instance=filterQuery, request=request)
@@ -411,17 +421,19 @@ def filter_query_create(request, mq_id=False):
             filterQuery.date_expire = \
                 datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             filterQuery.save()
+            message = ''
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
-            if filterQuery.active == 2:
+            active = int(filterQuery.active)
+            if active >= 2:
                 try:
-                    message += topic_refresh(filterQuery.real_sql, tn, limit=10)
+                    message += topic_refresh(filterQuery.real_sql, tn, active, limit=10) + '<br/>'
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
 
             filtername = form.cleaned_data.get('name')
-#            messages.success(request, f'The "{filtername}" filter has been successfully {verb}')
-            messages.success(request, message)  # hack hack
+            message += f'The "{filtername}" filter has been successfully {verb}'
+            messages.success(request, message)
             return redirect(f'filter_query_detail', filterQuery.pk)
 
     else:
