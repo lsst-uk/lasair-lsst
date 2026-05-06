@@ -49,12 +49,17 @@
     {% endif %}
 
 
-    <div class="card-body pt-0">
+    
+    <div class="card-body pt-0" >
 
         {% if table|length > 0 %}
 
+            
+            <div id="top-scroll" style="overflow-x: scroll; height: 20px; margin-top: 10px; margin-bottom: 10px;">
+                <div id="top-dummy" style="height: 1px;"></div>
+            </div>
 
-            <div class="table-responsive p-1 pt-0">
+            <div class="table-responsive p-1 pt-0" id="objectlist-table">
 
 	        {% if sortTable is None or sortTable != False %}
                     <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
@@ -92,14 +97,18 @@
                                 {% elif 'mjd' in key %}
                                     <td>{{object|keyvalue:key|floatformat:4 }}</td>
                                 {% elif 'mag' in key %}
-                                    <td>{{object|keyvalue:key|floatformat:3 }}</td>
+                                    <td>{{ object|keyvalue:key|floatformat:3 }}</td>
+                                
                                 {% elif 'last detected' in key %}
                                     <td>{{object|keyvalue:key|floatformat:1 }}</td>
                                 {% elif key in 'UTC' %}
                                     <td data-type="date" data-format="YYYY-MMM-DD hh:mm:ss">{{object|keyvalue:key }} UTC</td>
                                 {% elif key in 'classdict' %}
                                     <td><code>{{object|keyvalue:key }}</code></td>
-
+                                {% elif object|keyvalue:key|is_float %}
+                                    <td>{{ object|keyvalue:key|floatformat:3 }}</td>
+                                {% elif object|keyvalue:key == None or object|keyvalue:key == "None" %}
+                                    <td>-</td>
                                 {%else%}
 				   <td>{{ object|keyvalue:key }}</td>
                                 {% endif %}
@@ -122,3 +131,20 @@
     </div>
 </div>
 
+{% block javascripts %}
+
+    {% if table|length > 0 %}
+        <script>
+            const topBar = document.getElementById('top-scroll');
+            const content = document.getElementById('objectlist-table');
+
+            // Match dummy width to content's scroll width
+            document.getElementById('top-dummy').style.width = content.scrollWidth + 'px';
+
+            // Sync scroll positions
+            topBar.addEventListener('scroll', () => content.scrollLeft = topBar.scrollLeft);
+            content.addEventListener('scroll', () => topBar.scrollLeft = content.scrollLeft);
+        </script>
+    {% endif %}
+
+{% endblock javascripts %}
