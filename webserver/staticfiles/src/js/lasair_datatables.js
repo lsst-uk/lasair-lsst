@@ -16,7 +16,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             let searchable = true;
             let paging = true;
-            let bottom = "{select}{info}{pager}"
             if (dataTableEl.hasAttribute('datatable-vanilla')) {
                 searchable = false;
                 paging = false;
@@ -53,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tableId !== null) {
                 document.querySelectorAll(`a[data-table=${CSS.escape(tableId)}]`).forEach(function(el) {
                     el.addEventListener("click", function(e) {
+                        e.preventDefault();
 
                         var type = el.dataset.type;
                         var filename = el.dataset.filename;
@@ -66,13 +66,24 @@ document.addEventListener('DOMContentLoaded', function() {
                             filename: filename,
                         };
 
+                        // REMOVE IMAGES AND ALERT PACKET COLUMNS IF THEY EXIST, AS THESE ARE NOT NEEDED IN THE EXPORT
+                        const removeCols = ["images", "alert packet"];
+                        const colIdxsToRemove = [];
+                        dataTable.columns().dt.labels.forEach(function(label, idx) {
+                            if (removeCols.includes(label)) {
+                                colIdxsToRemove.push(idx);
+                            }
+                        });
+
                         if (type === "csv") {
                             data.columnDelimiter = ",";
+                            data.skipColumn = colIdxsToRemove;
                         }
 
                         if (type === "json") {
                             data.replacer = null;
                             data.space = 4;
+                            data.skipColumn = colIdxsToRemove;
                         }
 
                         dataTable.export(data);

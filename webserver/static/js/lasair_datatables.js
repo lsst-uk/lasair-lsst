@@ -14,12 +14,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 perPage = parseInt(dataTableEl.getAttribute('data-perPage'));
             }
 
-            if (dataTableEl.hasAttribute('vanilla')) {
-                top = ""
-                bottom = ""
-            } else {
-                top = "{search}"
-                bottom = "{select}{info}{pager}"
+            let searchable = true;
+            let paging = true;
+            if (dataTableEl.hasAttribute('datatable-vanilla')) {
+                searchable = false;
+                paging = false;
             }
 
             const dataTable = new simpleDatatables.DataTable(dataTableEl, {
@@ -29,9 +28,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     noRows: "No objects found",
                     info: "Showing {start} to {end} of {rows} rows",
                 },
+                searchable: searchable,
+                paging: paging,
                 layout: {
-                    top: top,
-                    bottom: bottom
+                    top: "{search}",
+                    bottom: "{select}{info}{pager}"
                 },
                 perPage: perPage,
                 perPageSelect: [5, 10, 50, 100, 500, 10000]
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (tableId !== null) {
                 document.querySelectorAll(`a[data-table=${CSS.escape(tableId)}]`).forEach(function(el) {
                     el.addEventListener("click", function(e) {
+                        e.preventDefault();
 
                         var type = el.dataset.type;
                         var filename = el.dataset.filename;
@@ -64,13 +66,24 @@ document.addEventListener('DOMContentLoaded', function() {
                             filename: filename,
                         };
 
+                        // REMOVE IMAGES AND ALERT PACKET COLUMNS IF THEY EXIST, AS THESE ARE NOT NEEDED IN THE EXPORT
+                        const removeCols = ["images", "alert packet"];
+                        const colIdxsToRemove = [];
+                        dataTable.columns().dt.labels.forEach(function(label, idx) {
+                            if (removeCols.includes(label)) {
+                                colIdxsToRemove.push(idx);
+                            }
+                        });
+
                         if (type === "csv") {
                             data.columnDelimiter = ",";
+                            data.skipColumn = colIdxsToRemove;
                         }
 
                         if (type === "json") {
                             data.replacer = null;
                             data.space = 4;
+                            data.skipColumn = colIdxsToRemove;
                         }
 
                         dataTable.export(data);
