@@ -109,8 +109,6 @@
                                     <td>{{ object|keyvalue:key|floatformat:3 }}</td>
                                 {% elif object|keyvalue:key == None or object|keyvalue:key == "None" %}
                                     <td>-</td>
-                                {% elif object|keyvalue:key|is_float %}
-                                    <td>{{ object|keyvalue:key|floatformat:3 }}</td>
                                 {%else%}
 				   <td>{{ object|keyvalue:key }}</td>
                                 {% endif %}
