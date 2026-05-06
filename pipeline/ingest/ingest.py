@@ -156,7 +156,8 @@ class Ingester:
             print(f'Surplus attr for {component} is', self.surplus_attrs[component])   # remove
 
         for attr in self.surplus_attrs[component]:
-            obj.pop(attr)
+            if attr in obj:
+                obj.pop(attr)
         return obj
 
     def setup_cassandra(self):
