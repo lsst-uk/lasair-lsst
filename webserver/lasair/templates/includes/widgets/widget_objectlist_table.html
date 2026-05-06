@@ -133,16 +133,18 @@
 
 {% block javascripts %}
 
-    <script>
-        const topBar = document.getElementById('top-scroll');
-        const content = document.getElementById('objectlist-table');
+    {% if table|length > 0 %}
+        <script>
+            const topBar = document.getElementById('top-scroll');
+            const content = document.getElementById('objectlist-table');
 
-        // Match dummy width to content's scroll width
-        document.getElementById('top-dummy').style.width = content.scrollWidth + 'px';
+            // Match dummy width to content's scroll width
+            document.getElementById('top-dummy').style.width = content.scrollWidth + 'px';
 
-        // Sync scroll positions
-        topBar.addEventListener('scroll', () => content.scrollLeft = topBar.scrollLeft);
-        content.addEventListener('scroll', () => topBar.scrollLeft = content.scrollLeft);
-    </script>
+            // Sync scroll positions
+            topBar.addEventListener('scroll', () => content.scrollLeft = topBar.scrollLeft);
+            content.addEventListener('scroll', () => topBar.scrollLeft = content.scrollLeft);
+        </script>
+    {% endif %}
 
 {% endblock javascripts %}
