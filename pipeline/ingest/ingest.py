@@ -153,7 +153,8 @@ class Ingester:
         if self.surplus_attrs[component] is None:
             obj_attr = set(obj.keys())
             self.surplus_attrs[component] = obj_attr.difference(self.attrs[component])
-            print(f'Surplus attr for {component} is', self.surplus_attrs[component])   # remove
+            if len(self.surplus_attrs[component]) > 0:
+                self.log.warning(f'Surplus attr found for {component} is' + str(self.surplus_attrs[component]))
 
         for attr in self.surplus_attrs[component]:
             if attr in obj:
