@@ -628,7 +628,7 @@ def run_ingest(args, log=None):
     if args.get('--topic_in'):
         topic_in = args['--topic_in']
     else:
-        topic_in = 'lsst-alerts-v10.0'
+        topic_in = 'lsst-alerts-v11'
 
     topic_out = args.get('--topic_out') or 'lsst_ingest'
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
