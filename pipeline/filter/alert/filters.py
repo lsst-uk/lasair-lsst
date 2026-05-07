@@ -31,7 +31,8 @@ def run_queries(fltr, query_list):
     """
     ntotal = 0
     for query in query_list:        # only run
-        if query['run'] == 1 or query['run'] == 3:  # 1 = alert, 3 = both
+        if query['run'] == settings.RUN_ALERT \
+        or query['run'] == settings.RUN_BOTH:
             n = 0
             t = time.time()
             query_results = run_query(query, fltr.database_local)

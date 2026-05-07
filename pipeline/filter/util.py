@@ -15,10 +15,10 @@ def fetch_queries(fltr):
     Get all the stored queries from the main database
     """
 
-    # Fetch all the stored queries from the main database (that run on alert)
+    # Fetch all the stored queries from the main database that are active
     cursor = fltr.database_remote.cursor(buffered=True, dictionary=True)
     query = 'SELECT mq_id, user, name, email, tables, run, output, byte_quota, real_sql, topic_name '
-    query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND run > 1'
+    query += f'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND run > {settings.RUN_MUTED}'
     cursor.execute(query)
 
     query_list = []
@@ -43,7 +43,6 @@ def fetch_queries(fltr):
 
         query_list.append(query_dict)
     return query_list
-
 
 def lightcurve_lite(alert):
     attrList = ['psfFlux', 'psfFluxErr', 'midpointMjdTai', 'band', 'reliability']
@@ -74,18 +73,17 @@ def dispose_query_results(fltr, query, query_results):
     if len(query_results) == 0:
         return 0
     output = query['output']
-
-    LIGHTCURVE_LITE = 3
-    LIGHTCURVE_FULL = 4
+    run    = query['run']
 
     if not fltr.send_kafka:
         return len(query_results)
 
-    if output == 0:  # muted
+    if run == settings.RUN_MUTED:
         return len(query_results)
+    # else: output must be >= OUTPUT_EMAIL
 
     # try to append the lightcurve info
-    if output >= LIGHTCURVE_LITE:
+    if output >= settings.OUTPUT_LITE:  # lightcurve required
         for q in query_results:
             if 'diaObjectId' in q:
                 diaObjectId = q['diaObjectId']
@@ -98,9 +96,9 @@ def dispose_query_results(fltr, query, query_results):
                     fltr.log.info(f'Cannot find lightcurve {diaObjectId} in alert cache')
 
                 if alert:
-                    if output == LIGHTCURVE_LITE:
+                    if output == settings.OUTPUT_LITE:
                         q['alert'] = lightcurve_lite(alert)
-                    if output == LIGHTCURVE_FULL:
+                    if output == settings.OUTPUT_FULL:
                         q['alert'] = alert
 
     dispose_kafka(fltr, query_results, query)

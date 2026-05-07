@@ -143,9 +143,21 @@ WATCHLIST_CHUNK        = 50000
 WATCHLIST_MAX_DEPTH    = 13
 AREA_MAX_DEPTH         = 13
 
-# fast annotators
+# Filter controls and annotations
+############################
 ANNOTATION_TOPIC       = 'fast_annotations'
 ANNOTATION_GROUP_ID    = 'test123'
+
+RUN_MUTED              = 0
+RUN_ALERT              = 1
+RUN_ANNOTATION         = 2
+RUN_BOTH               = 3
+
+# don't care about this attr unless run > RUN_MUTED
+OUTPUT_EMAIL           = 1
+OUTPUT_PLAIN           = 2
+OUTPUT_LITE            = 3
+OUTPUT_FULL            = 4
 
 # External brokers
 ###################

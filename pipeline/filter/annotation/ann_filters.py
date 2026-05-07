@@ -38,7 +38,8 @@ def run_queries(fltr, query_list):
     """
     ntotal = 0
     for query in query_list:
-        if query['run'] == 2 or query['run'] == 3:  # 1 = annotation, 3 = both
+        if query['run'] == settings.RUN_ANNOTATION 
+        or query['run'] == settings.RUN_BOTH:
             n = 0
             t = time.time()
             for ann, objList in fltr.ann_diaObjectId.items():
@@ -137,7 +138,7 @@ def run_query(query, msl, annotator, objList, fltr):
         return []
 
     # fetch the lite or full lightcurve from cassandra if wanted
-    if output >= 3:
+    if output >= settings.OUTPUT_LITE:   # a lightcurve is needed
         append_lightcurve(fltr, query_results)
 
     return query_results

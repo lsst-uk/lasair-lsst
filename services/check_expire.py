@@ -33,9 +33,9 @@ from src import db_connect
 
 # What we should call the resource, then the database name of it, then the name of the identifier
 resources = {
-    'filter':    {'dbname':'myqueries',  'rid': 'mq_id'},
-    'watchlist': {'dbname':'watchlists', 'rid': 'wl_id'},
-    'watchmap':  {'dbname':'areas',      'rid': 'ar_id'},
+    'filter':    {'dbname':'myqueries',  activity:'run',    'rid': 'mq_id'},
+    'watchlist': {'dbname':'watchlists', activity:'active', 'rid': 'wl_id'},
+    'watchmap':  {'dbname':'areas',      activity:'active', 'rid': 'ar_id'},
 }
 
 # The emails we can send out
@@ -91,7 +91,8 @@ def list_resources(msl):
     for rname,resource in resources.items():
         print('Active ', rname)
         query = 'SELECT %s as id, name, first_name, last_name, email, date_expire ' % resource['rid'] 
-        query += 'FROM %s,auth_user WHERE auth_user.id=user AND active>0 ' % resource['dbname']
+        query += 'FROM %s,auth_user WHERE auth_user.id=user ' % resource['dbname']
+        query += 'AND %s > 0 ' % resource['activity']
         query += 'ORDER BY  date_expire'
         cursor.execute(query)
         for row in cursor:
@@ -120,8 +121,8 @@ def make_inactive(msl, resource, rid):
     The actual teeth of the thing. Switches the given resource to inactive.
     """
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'UPDATE %s SET active=0 where %s=%s'
-    query = query % (resource['dbname'], resource['rid'], rid)
+    query = 'UPDATE %s SET %s=0 where %s=%s'
+    query = query % (resource['dbname'], resource['activity'], resource['rid'], rid)
     cursor.execute(query)
     msl.commit()
     log('Made %s:%s inactive' % (resource['dbname'], rid))
@@ -142,7 +143,7 @@ def check_and_action(msl, rname, resource, action, daysAhead, rid=None):
     timelimit = datetime.datetime.now() + datetime.timedelta(days=daysAhead)
     cursor = msl.cursor(buffered=True, dictionary=True)
     query = 'SELECT %s as id, name, first_name, last_name, email, date_expire ' % resource['rid'] 
-    query += 'FROM %s,auth_user WHERE auth_user.id=user AND active>0 ' % resource['dbname']
+    query += 'FROM %s,auth_user WHERE auth_user.id=user AND %s>0 ' % (resource['activity'], resource['dbname'])
     if rid:
         query += 'AND %s=%s' % (resource['rid'], rid)
     cursor.execute(query)
