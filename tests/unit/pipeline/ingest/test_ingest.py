@@ -61,7 +61,7 @@ class IngestTest(unittest.TestCase):
         with self.assertRaises(SystemExit) as cm:
             imageStore = ingest.ImageStore(log=mock_log)
             # check that the exit code was not 0
-            self.assertNotEqual(cm.exception.code, 0)    HACK
+            self.assertNotEqual(cm.exception.code, 0)
         mock_log.error.assert_called_with('ERROR: Cannot store cutouts')
 
     def test_store_images_error(self):
