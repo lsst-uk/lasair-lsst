@@ -14,7 +14,6 @@ class filter_query(models.Model):
     conditions = models.CharField(max_length=4096, blank=True, null=True)
     tables = models.CharField(max_length=4096, blank=True, null=True)
     public = models.BooleanField(blank=True, null=True)
-    active = models.IntegerField(blank=True, null=True)  # DEPRECATED
     run = models.IntegerField(blank=True, null=True)
     output = models.IntegerField(blank=True, null=True)
     byte_quota = models.IntegerField(blank=True, null=True)
