@@ -129,38 +129,6 @@ class Ingester:
         # list of future objects for in-flight cassandra requests
         self.futures = []
 
-        # lists of all the expected attribute sets for the 7 components
-        # the surplus_attrs will be sets of attributes that should be trimmed off
-        # if surplus_attrs is None, it hasn't been built yet
-        schema_version = settings.SCHEMA_VERSION
-        self.attrs = {}
-        self.surplus_attrs = {}
-        for component in components:
-            path = f'schema.{schema_version}.{component}'
-            schema_package = importlib.import_module(path)
-            schema = schema_package.schema
-            attr = set()
-            for field in schema['fields']:
-                attr.add(field['name'])
-            self.attrs[component] = attr
-            self.surplus_attrs[component] = None
-
-    def trim_surplus_attrs(self, component, obj):
-        if obj is None:
-            return None
-
-        # if None, rebuild first
-        if self.surplus_attrs[component] is None:
-            obj_attr = set(obj.keys())
-            self.surplus_attrs[component] = obj_attr.difference(self.attrs[component])
-            if len(self.surplus_attrs[component]) > 0:
-                self.log.warning(f'Surplus attr found for {component} is' + str(self.surplus_attrs[component]))
-
-        for attr in self.surplus_attrs[component]:
-            if attr in obj:
-                obj.pop(attr)
-        return obj
-
     def setup_cassandra(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
@@ -226,6 +194,38 @@ class Ingester:
         self.setup_consumer()
         self.setup_producer()
         self.setup_cassandra()
+
+        # lists of all the expected attribute sets for the 7 components
+        # the surplus_attrs will be sets of attributes that should be trimmed off
+        # if surplus_attrs is None, it hasn't been built yet
+        schema_version = settings.SCHEMA_VERSION
+        self.attrs = {}
+        self.surplus_attrs = {}
+        for component in components:
+            path = f'schema.{schema_version}.{component}'
+            schema_package = importlib.import_module(path)
+            schema = schema_package.schema
+            attr = set()
+            for field in schema['fields']:
+                attr.add(field['name'])
+            self.attrs[component] = attr
+            self.surplus_attrs[component] = None
+
+    def trim_surplus_attrs(self, component, obj):
+        if obj is None:
+            return None
+
+        # if None, rebuild first
+        if not component in self.surplus_attrs or self.surplus_attrs[component] is None:
+            obj_attr = set(obj.keys())
+            self.surplus_attrs[component] = obj_attr.difference(self.attrs[component])
+            if len(self.surplus_attrs[component]) > 0:
+                self.log.warning(f'Surplus attr found for {component} is' + str(self.surplus_attrs[component]))
+
+        for attr in self.surplus_attrs[component]:
+            if attr in obj:
+                obj.pop(attr)
+        return obj
 
     # end of class Ingester
     
@@ -600,9 +600,7 @@ class Ingester:
         mini_batch_size = getattr(settings, 'INGEST_MINI_BATCH_SIZE', 10)
 
         # setup connections to Kafka, Cassandra, etc.
-        self.setup_cassandra()
-        self.setup_consumer()
-        self.setup_producer()
+        self.setup()
     
         nAlert = 0        # number not yet send to manage_status
         nTotalAlert = 0   # number since this program started
