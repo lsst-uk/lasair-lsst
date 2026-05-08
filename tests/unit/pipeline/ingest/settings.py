@@ -1,6 +1,6 @@
 SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
 SCHEMA = '../../../../common/schema/dp02.avsc'
-SCHEMA_VERSION = '11_0'
+SCHEMA_VERSION = '10_0'
 CASSANDRA_HEAD = ''
 KAFKA_SERVER=''
 WAIT_TIME=60
