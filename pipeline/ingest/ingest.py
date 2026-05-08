@@ -129,6 +129,9 @@ class Ingester:
         # list of future objects for in-flight cassandra requests
         self.futures = []
 
+        # for removing unknown attributes after minor schema update
+        self.surplus_attrs = {}
+
     def setup_cassandra(self):
         """Setup connections to Cassandra, Kafka, etc."""
         log = self.log
