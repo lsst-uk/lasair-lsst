@@ -53,9 +53,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 document.querySelectorAll(`a[data-table=${CSS.escape(tableId)}]`).forEach(function(el) {
                     el.addEventListener("click", function(e) {
                         e.preventDefault();
+                        e.stopPropagation();
+                        e.stopImmediatePropagation();
 
-                        var type = el.dataset.type;
-                        var filename = el.dataset.filename;
+                        const anchor = e.currentTarget;
+
+                        var type = anchor.dataset.type;
+                        var filename = anchor.dataset.filename;
 
                         if (filename == null) {
                             filename = "lasair-export";
