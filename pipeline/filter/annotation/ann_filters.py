@@ -38,8 +38,7 @@ def run_queries(fltr, query_list):
     """
     ntotal = 0
     for query in query_list:
-        if query['run'] == settings.RUN_ANNOTATION 
-        or query['run'] == settings.RUN_BOTH:
+        if query['run'] == settings.RUN_ANNOTATION or query['run'] == settings.RUN_BOTH:
             n = 0
             t = time.time()
             for ann, objList in fltr.ann_diaObjectId.items():
