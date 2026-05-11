@@ -138,6 +138,7 @@ def reformat(old, lasair_added=True):
     new['diaObject'] = diaObject
     new['diaSourcesList'] = diaSourcesList
     new['diaForcedSourcesList'] = old['diaForcedSources']
+
     return new
 
 class ObjectSerializer(serializers.Serializer):
