@@ -5,6 +5,7 @@
     - name: Get current git branch
       ansible.builtin.command: git branch --show-current
       register: git_tag
+      check_mode: false
   tags: always
 
 - hosts: all 
