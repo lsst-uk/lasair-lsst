@@ -26,7 +26,7 @@
           - CREATE FUNCTION IF NOT EXISTS mjdnow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
           - CREATE FUNCTION IF NOT EXISTS flux2mag(flux FLOAT) RETURNS FLOAT RETURN (IF(flux>0, -2.5*log10(flux)+31.4, NULL));
           - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.mjdnow TO '{{ mysql_db_user }}'@'localhost';
-          - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.flux2mag TO '{{ msql_db_user }}'@'localhost';
+          - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.flux2mag TO '{{ mysql_db_user }}'@'localhost';
         login_host: 127.0.0.1
         login_user: root
         login_password: "{{ mysql_root_password }}"
