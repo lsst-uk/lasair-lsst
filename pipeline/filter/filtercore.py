@@ -178,9 +178,9 @@ class Filter:
         """
         try:
             # if we've lost the connection, try reconnecting
-            if not self.database_local.is_connected():
+            if not self.database_remote.is_connected():
                 self.log.warning('database connection lost, trying to reconnect')
-                self.database_local = db_connect.local(self.local_db)
+                self.database_local = db_connect.remote(self.local_db)
             cursor = self.database_remote.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()

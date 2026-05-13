@@ -7,10 +7,12 @@ from annotationcore import AnnotationFilter
 import ann_filters
 import re
 
+
 def test_message_handler(message_list):
     return len(message_list)
 
-class FilterTest(unittest.TestCase):
+
+class AnnotationFilterTest(unittest.TestCase):
 
     def test_sigterm_handler(self):
         """Test that the sigterm handler sets sigterm raised correctly"""
