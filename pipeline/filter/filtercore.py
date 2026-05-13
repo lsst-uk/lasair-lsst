@@ -125,6 +125,7 @@ class Filter:
                 self.database_local = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+                raise
 
         # set up the link to the remote database
         if not self.database_remote or not self.database_remote.is_connected():
@@ -132,6 +133,7 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
+                raise
 
         # set up lasair statistics
         self.ms = manage_status.manage_status(log=self.log)
@@ -150,6 +152,10 @@ class Filter:
         """ execute_local_query: run a query and close it, and compalin to slack if failure.
         """
         try:
+            # if we've lost the connection, try reconnecting
+            if not self.database_local.is_connected():
+                self.log.warning('database connection lost, trying to reconnect')
+                self.database_local = db_connect.local(self.local_db)
             cursor = self.database_local.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()
@@ -163,6 +169,10 @@ class Filter:
         """ execute_remote_query: run a query and close it, and compalin to slack if failure.
         """
         try:
+            # if we've lost the connection, try reconnecting
+            if not self.database_local.is_connected():
+                self.log.warning('database connection lost, trying to reconnect')
+                self.database_local = db_connect.local(self.local_db)
             cursor = self.database_remote.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()
@@ -170,6 +180,7 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR filter/execute_remote_query: %s' % str(e))
             self.log.info(query)
+            raise
 
     def make_kafka_consumer(self):
         """ Make a kafka consumer.
@@ -191,6 +202,7 @@ class Filter:
             return consumer
         except Exception as e:
             self.log.error('ERROR cannot make kafka consumer' + str(e))
+            raise
 
     def make_kafka_producer(self):
         """ Make a kafka producer.
@@ -213,6 +225,7 @@ class Filter:
             return producer
         except Exception as e:
             self.log.error('ERROR cannot make kafka producer' + str(e))
+            raise
 
     def consume_messages(self, handler):
         """Consume a batch of messages from Kafka.
@@ -463,6 +476,7 @@ class Filter:
         if n_messages > 0:
             self.post_ingest(n_messages)
         return n_messages
+
 
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)
