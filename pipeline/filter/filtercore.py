@@ -61,6 +61,7 @@ from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 
+
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
@@ -100,6 +101,9 @@ class Filter:
         self.database_local = None
         self.database_remote = None
 
+        self.ms = None
+        self.nid = date_nid.nid_now()
+
         self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxmessage=%d' % (self.topic_in, self.group_id, self.maxmessage))
 
@@ -136,8 +140,12 @@ class Filter:
                 raise
 
         # set up lasair statistics
-        self.ms = manage_status.manage_status(log=self.log)
-        self.nid = date_nid.nid_now()
+        if not self.ms:
+            self.ms = manage_status.manage_status(log=self.log)
+
+    def setup_batch(self):
+        """Per batch setup tasks. Does nothing by default, but can be overridden by subclasses."""
+        return
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -463,7 +471,8 @@ class Filter:
         return today_candidates_ztf
 
     def run_batch(self):
-        # the subclass is handed a list of messages (alerts or annotations)
+        """the subclass is handed a list of messages (alerts or annotations)"""
+        self.setup()
         self.setup_batch()
 
         # ingest_message_list ingests a set of alerts, computes
@@ -475,6 +484,14 @@ class Filter:
         # after ingesting, do the watchlists, filters etc
         if n_messages > 0:
             self.post_ingest(n_messages)
+
+        # clean up database connections
+        try:
+            self.database_local.close()
+            self.database_remote.close()
+        except Exception as e:
+            self.log.warning('Error closing database connection: ' + str(e))
+
         return n_messages
 
 
