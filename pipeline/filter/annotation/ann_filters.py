@@ -5,6 +5,8 @@ from util import fetch_queries, dispose_query_results
 
 sys.path.append('../../common')
 import settings
+from src import send_email
+
 
 def annotation_filters(fltr):
     """run_annotation_queries.
@@ -30,6 +32,7 @@ def annotation_filters(fltr):
     ntotal = run_queries(fltr, query_list)
     return ntotal
 
+
 def run_queries(fltr, query_list):
     ntotal = 0
     for query in query_list:
@@ -46,6 +49,7 @@ def run_queries(fltr, query_list):
         ntotal += n
     return ntotal
 
+
 def query_for_object(query, objList):
     """ modifies an existing query to add a new constraint for a list of objects
     We already know this query comes from multiple tables: objects and annotators,
@@ -61,6 +65,7 @@ def query_for_object(query, objList):
     if len(tok) == 2: # has order clause, add it back
         query += ' ORDER BY ' + tok[1]
     return query
+
 
 def append_lightcurve(fltr, query_results):
     """ fetch the full lightcurve from cassandra if wanted
@@ -81,6 +86,7 @@ def append_lightcurve(fltr, query_results):
             'diaObject':diaObject,
             'diaSourcesList':diaSourcesList,
             'diaForcedSourcesList':diaForcedSourcesList}
+
 
 def run_query(query, msl, annotator, objList, fltr):
     """run_query. 
