@@ -22,6 +22,7 @@ class AnnotationFilter(Filter):
     ### AnnotationFilter is subclass of Filter
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self.lightcurve = None
 
     ### set up an AnnotationFilter, after setting up the Filter
     def setup(self):
@@ -29,13 +30,14 @@ class AnnotationFilter(Filter):
         super().setup()
 
         # set up cassandra lightcurve fetcher
-        try:
-            self.lightcurve = lightcurve_fetcher(\
-                    cassandra_hosts=settings.CASSANDRA_HEAD,
-                    reliabilityThreshold=0.5)
-        except Exception as e:
-            self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
-
+        if not self.lightcurve:
+            try:
+                self.lightcurve = lightcurve_fetcher(
+                        cassandra_hosts=settings.CASSANDRA_HEAD,
+                        reliabilityThreshold=0.5)
+            except Exception as e:
+                self.log.error('ERROR in Filter: cannot connect to cassandra' + str(e))
+                raise
 
     # this method will be called from above when a batch of messages is ready
     def setup_batch(self):

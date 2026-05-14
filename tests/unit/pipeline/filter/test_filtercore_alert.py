@@ -6,10 +6,12 @@ import context
 from alertcore import AlertFilter
 import re
 
+
 def test_message_handler(message_list):
     return len(message_list)
 
-class FilterTest(unittest.TestCase):
+
+class AlertFilterTest(unittest.TestCase):
 
     def test_sigterm_handler(self):
         """Test that the sigterm handler sets sigterm raised correctly"""
