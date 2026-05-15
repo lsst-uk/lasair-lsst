@@ -12,6 +12,8 @@ import mmagw
 
 sys.path.append('../../common')
 import settings
+from src.send_email import send_email
+
 
 def filters(fltr):
     try:
@@ -22,6 +24,7 @@ def filters(fltr):
 
     ntotal = run_queries(fltr, query_list)
     return ntotal
+
 
 def run_queries(fltr, query_list):
     """
@@ -43,6 +46,7 @@ def run_queries(fltr, query_list):
             sys.stdout.flush()
         ntotal += n
     return ntotal
+
 
 def run_query(query, msl):
     """run_query. Two cases here:
