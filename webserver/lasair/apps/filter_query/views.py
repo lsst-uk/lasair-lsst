@@ -112,9 +112,23 @@ def filter_query_detail(request, mq_id, action=False):
             # UPDATING SETTINGS?
             filterQuery.name = request.POST.get('name')
             filterQuery.description = request.POST.get('description')
+            
+            runOnAlert = request.POST.get('runOnAlert')
+            runOnAnnotation = request.POST.get('runOnAnnotation')
 
-            if request.POST.get('run'):
-                filterQuery.run = int(request.POST.get('run'))
+            # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
+            # runTypes = (
+            #     (0, 'not active'),
+            #     (1, 'on new alert'),
+            #     (2, 'on updated annotation'),
+            #     (3, 'both')
+            # )
+            if runOnAlert and runOnAnnotation:
+                filterQuery.run = 3
+            elif runOnAlert:
+                filterQuery.run = 1
+            elif runOnAnnotation:
+                filterQuery.run = 2
             else:
                 filterQuery.run = 0
 
@@ -156,10 +170,28 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.user = request.user
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
-        newFil.run = request.POST.get('run')
         newFil.output = request.POST.get('output')
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
         newFil.topic_name = tn = topicName(request.user.id, newFil.name)
+
+        runOnAlert = request.POST.get('runOnAlert')
+        runOnAnnotation = request.POST.get('runOnAnnotation')
+
+        # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
+        # runTypes = (
+        #     (0, 'not active'),
+        #     (1, 'on new alert'),
+        #     (2, 'on updated annotation'),
+        #     (3, 'both')
+        # )
+        if runOnAlert and runOnAnnotation:
+            newFil.run = 3
+        elif runOnAlert:
+            newFil.run = 1
+        elif runOnAnnotation:
+            newFil.run = 2
+        else:
+            newFil.run = 0
 
         if request.POST.get('public'):
             newFil.public = True
