@@ -302,15 +302,19 @@ select, input[type=number], input[type=text] {
 }
 
 
-a, .text-action {
-	color: $link-color;
-	transition: $transition-base;
-	&:hover{
-		color: $link-hover-color;
-		cursor: pointer;
-	}
-    &:visited{
-		color: $link-visited-color;
-		cursor: pointer;
-	}
+
+td > a:not(.btn),
+td > .text-action:not(.btn) {
+    color: $link-color;
+    transition: $transition-base;
+
+    &:visited {
+        color: $link-visited-color;
+        cursor: pointer;
+    }
+
+    &:hover {
+        color: $link-hover-color;
+        cursor: pointer;
+    }
 }

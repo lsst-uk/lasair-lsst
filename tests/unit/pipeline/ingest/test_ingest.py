@@ -9,20 +9,20 @@ test_alert = {
     'diaObject': {'diaObjectId': 1998903343203749723, 'ra':123, 'dec':23},
 
     # 3 diaSources
-    'diaSource': {'diaSourceId': 181071530527032103, 'midpointMjdTai': 57075.0, 'ra':123, 'dec':23},
+    'diaSource': {'diaSourceId': 181071530527032103, 'midpointMjdTai': 57075.0, 'ra':123, 'decl':23},
     'prvDiaSources': [
-        {'diaSourceId': 176891668354564642, 'midpointMjdTai': 57074.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176546782480695887, 'midpointMjdTai': 57071.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176891668354564642, 'midpointMjdTai': 57074.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176891668354564641, 'midpointMjdTai': 57072.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176546782480695887, 'midpointMjdTai': 57071.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57070.0, 'ra':123, 'decl':23},
         ],
 
     # zero of these
     'prvDiaForcedSources': [
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57074.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57073.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57069.0, 'ra':123, 'dec':23},
-        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57067.0, 'ra':123, 'dec':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57074.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57073.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57069.0, 'ra':123, 'decl':23},
+        {'diaSourceId': 176546782480695886, 'midpointMjdTai': 57067.0, 'ra':123, 'decl':23},
         ],
     'prvDiaNondetectionLimits': [],
     'ssObject': {},
@@ -115,6 +115,9 @@ class IngestTest(unittest.TestCase):
         mock_image_store = unittest.mock.MagicMock()
         mock_producer = unittest.mock.MagicMock()
         ingester = ingest.Ingester('', '', '', 1, image_store=mock_image_store, producer=mock_producer, ms=True)
+        # result is nDiaObject, nSSSource, nSSObject, nDiaSources, 
+        #    nDiaSourcesDB, nForcedSources, nForcedSourcesDB)
+        #    it depends on N_DIASOURCES_DB that is in the settings.py
         result = ingester._handle_alert(test_alert)
         # check the return values
         # 5 diaSources with 4 sent to DB
@@ -126,6 +129,36 @@ class IngestTest(unittest.TestCase):
         mock_insert_cassandra_multi.assert_called_once()
         # producer.produce should get called once
         mock_producer.produce.assert_called_once()
+
+    @patch('ingest.Ingester._insert_cassandra_multi')
+    def test_trim_surplus_diaObject(self, mock_insert_cassandra_multi):
+        component = 'diaObject'
+        ingester = ingest.Ingester('', '', '', 1, ms=True)
+        ingester.surplus_attrs[component] = None
+
+        # this is a mock for what should come from the schema
+        ingester.attrs[component] = ['diaObjectId', 'ra', 'decl']
+
+        # add surplus and see if it gets trimmed off
+        test_alert[component]['appleObj'] = 12
+
+        trimmedComponent = ingester.trim_surplus_attrs(component, test_alert[component])
+        assert(len(trimmedComponent) == len(test_alert[component]))
+
+    @patch('ingest.Ingester._insert_cassandra_multi')
+    def test_trim_surplus_diaSource(self, mock_insert_cassandra_multi):
+        component = 'diaSource'
+        ingester = ingest.Ingester('', '', '', 1, ms=True)
+        ingester.surplus_attrs[component] = None
+
+        # this is a mock for what should come from the schema
+        ingester.attrs[component] = ['diaSourceId', 'midpointMjdTai', 'ra', 'decl']
+
+        # add surplus and see if it gets trimmed off
+        test_alert[component]['appleSource'] = 12
+
+        trimmedComponent = ingester.trim_surplus_attrs(component, test_alert[component])
+        assert(len(trimmedComponent) == len(test_alert[component]))
 
     def test_end_batch(self):
         mock_log = unittest.mock.MagicMock()

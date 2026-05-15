@@ -251,6 +251,7 @@ class AlertFilter(Filter):
             self.log.info('WATCHLISTS got %d' % nhits)
         else:
             self.log.error("ERROR in filter/watchlists")
+            return 0
 
         # run the watchmaps
         self.log.info('WATCHMAP start %s' % now())
@@ -261,6 +262,7 @@ class AlertFilter(Filter):
             self.log.info('WATCHMAPS got %d' % nhits)
         else:
             self.log.error("ERROR in filter/watchmaps")
+            return 0
 
         # run the MMA/GW events
         self.log.info('MMA/GW start %s' % now())
@@ -271,6 +273,7 @@ class AlertFilter(Filter):
             self.log.info('MMA/GW got %d' % nhits)
         else:
             self.log.error("ERROR in filter/mmagw")
+            return 0
 
         # run the user filters
         self.log.info('Filters start %s' % now())
@@ -281,6 +284,7 @@ class AlertFilter(Filter):
             self.log.info('FILTERS got %d' % ntotal)
         else:
             self.log.error("ERROR in filter/filters")
+            return 0
 
         # build CSV file with local database and transfer to main
         if self.transfer:

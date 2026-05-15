@@ -61,6 +61,7 @@ from transfer import fetch_attrs, transfer_csv
 
 sys.path.append('../../common/schema/' + settings.SCHEMA_VERSION)
 
+
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
 
@@ -100,6 +101,9 @@ class Filter:
         self.database_local = None
         self.database_remote = None
 
+        self.ms = None
+        self.nid = date_nid.nid_now()
+
         self.log = log or lasairLogging.getLogger("filter")
         self.log.info('Topic_in=%s, group_id=%s, maxmessage=%d' % (self.topic_in, self.group_id, self.maxmessage))
 
@@ -125,6 +129,7 @@ class Filter:
                 self.database_local = db_connect.local(self.local_db)
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to local database' + str(e))
+                raise
 
         # set up the link to the remote database
         if not self.database_remote or not self.database_remote.is_connected():
@@ -132,10 +137,15 @@ class Filter:
                 self.database_remote = db_connect.remote()
             except Exception as e:
                 self.log.error('ERROR in Filter: cannot connect to remote database' + str(e))
+                raise
 
         # set up lasair statistics
-        self.ms = manage_status.manage_status(log=self.log)
-        self.nid = date_nid.nid_now()
+        if not self.ms:
+            self.ms = manage_status.manage_status(log=self.log)
+
+    def setup_batch(self):
+        """Per batch setup tasks. Does nothing by default, but can be overridden by subclasses."""
+        return
 
     def _sigterm_handler(self, signum, frame):
         """Handle SIGTERM by raising a flag that can be checked during the poll/process loop.
@@ -150,6 +160,10 @@ class Filter:
         """ execute_local_query: run a query and close it, and compalin to slack if failure.
         """
         try:
+            # if we've lost the connection, try reconnecting
+            if not self.database_local.is_connected():
+                self.log.warning('database connection lost, trying to reconnect')
+                self.database_local = db_connect.local(self.local_db)
             cursor = self.database_local.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()
@@ -163,6 +177,10 @@ class Filter:
         """ execute_remote_query: run a query and close it, and compalin to slack if failure.
         """
         try:
+            # if we've lost the connection, try reconnecting
+            if not self.database_remote.is_connected():
+                self.log.warning('database connection lost, trying to reconnect')
+                self.database_local = db_connect.remote(self.local_db)
             cursor = self.database_remote.cursor(buffered=True)
             cursor.execute(query)
             cursor.close()
@@ -170,6 +188,7 @@ class Filter:
         except Exception as e:
             self.log.error('ERROR filter/execute_remote_query: %s' % str(e))
             self.log.info(query)
+            raise
 
     def make_kafka_consumer(self):
         """ Make a kafka consumer.
@@ -191,6 +210,7 @@ class Filter:
             return consumer
         except Exception as e:
             self.log.error('ERROR cannot make kafka consumer' + str(e))
+            raise
 
     def make_kafka_producer(self):
         """ Make a kafka producer.
@@ -213,6 +233,7 @@ class Filter:
             return producer
         except Exception as e:
             self.log.error('ERROR cannot make kafka producer' + str(e))
+            raise
 
     def consume_messages(self, handler):
         """Consume a batch of messages from Kafka.
@@ -450,7 +471,8 @@ class Filter:
         return today_candidates_ztf
 
     def run_batch(self):
-        # the subclass is handed a list of messages (alerts or annotations)
+        """the subclass is handed a list of messages (alerts or annotations)"""
+        self.setup()
         self.setup_batch()
 
         # ingest_message_list ingests a set of alerts, computes
@@ -462,11 +484,20 @@ class Filter:
         # after ingesting, do the watchlists, filters etc
         if n_messages > 0:
             self.post_ingest(n_messages)
+
+        # clean up database connections
+        try:
+            self.database_local.close()
+            self.database_remote.close()
+        except Exception as e:
+            self.log.warning('Error closing database connection: ' + str(e))
+
         return n_messages
+
 
 if __name__ == "__main__":
     #lasairLogging.basicConfig(stream=sys.stdout)
-    logging.basicConfig(level=logging.DEBUG)
+    logging.basicConfig(level=logging.INFO)
     log = logging.getLogger()
     args = docopt(__doc__)
 

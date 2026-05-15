@@ -16,7 +16,7 @@ Usage:
 Options:
     --maxalert=MAX     Number of alerts to process per batch, default is defined in settings.KAFKA_MAXALERTS
     --group_id=GID     Group ID for kafka, default is defined in settings.KAFKA_GROUPID
-    --topic_in=TIN     Kafka topic to use [default: lsst_sherlock]
+    --topic_in=TIN     Kafka topic to use 
     --maxbatch=MAX     Maximum number of batches to process, default is unlimited
     --grist=MESSAGE_TYPE     Type of alerts to filter: can be alert, annotation, testing
 """
@@ -49,11 +49,17 @@ def run(args, log):
     grist      = args.get('--grist') or 'alert'
 
     if grist == 'alert':
+        if not topic_in:
+            topic_in = 'lsst_sherlock'
         from alert import alertcore
         fltr = alertcore.AlertFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+
     elif grist == 'annotation':
+        if not topic_in:
+            topic_in = settings.ANNOTATION_TOPIC
         from annotation import annotationcore
         fltr = annotationcore.AnnotationFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
+
     elif grist == 'testing':
         from testing import testingcore
         fltr = testingcore.TestingFilter(topic_in=topic_in, group_id=group_id, maxmessage=maxmessage)
