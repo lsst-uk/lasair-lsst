@@ -12,7 +12,7 @@ import mmagw
 
 sys.path.append('../../common')
 import settings
-from src import send_email
+from src.send_email import send_email
 
 
 def filters(fltr):
