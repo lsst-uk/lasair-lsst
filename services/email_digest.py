@@ -15,7 +15,7 @@ import sys
 sys.path.append('../common')
 from docopt import docopt
 from src import db_connect
-from src import send_email
+from src.send_email import send_email
 from confluent_kafka import Consumer
 import settings
 from time import sleep
