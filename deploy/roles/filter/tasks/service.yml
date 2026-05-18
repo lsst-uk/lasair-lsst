@@ -2,18 +2,33 @@
 
 # Set up filter as a systemd service
 
-- name: Create systemd service file
+- name: Ensure old filter service absent
+  become: true
+  ansible.builtin.file:
+    path: /etc/systemd/system/lasair-filter.service
+    state: absent
+
+- name: Create filter-alert service file
   become: true
   template:
-    src: filter.service
-    dest: /etc/systemd/system/lasair-filter.service
+    src: filter-alert.service
+    dest: /etc/systemd/system/lasair-filter-alert.service
 
-- name: Make sure a service unit is running
+- name: Create filter-annotation service file
+  become: true
+  template:
+    src: filter-annotation.service
+    dest: /etc/systemd/system/lasair-filter-annotation.service
+
+- name: Make sure service units are stopped
   become: true
   ansible.builtin.systemd:
     #state: started
     #enabled: true
     state: stopped
     enabled: false
-    name: lasair-filter 
+    name: "{{ item }}"
+  loop:
+    - lasair-filter-alert
+    - lasair-filter-annotation
 

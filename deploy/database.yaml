@@ -299,7 +299,7 @@
   vars_files:
     - settings.yaml
   vars:
-    schema: "10_0_A"
+    schema: "11_0"
   tasks:
     - name: Create SQL files
       ansible.builtin.shell:
@@ -322,7 +322,7 @@
   vars:
     settings: "{{ lookup('hashi_vault', 'secret='+vault.path+'/settings url='+vault.url)}}"
     git_branch: "{{ lasair_version }}"
-    schema: "9_0"
+    schema: "11_0"
   roles:
     - lasair_database
   tags: setup_database

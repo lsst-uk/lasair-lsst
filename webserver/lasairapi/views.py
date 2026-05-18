@@ -4,8 +4,8 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .serializers import ConeSerializer, QuerySerializer, ObjectSerializer
 from .serializers import SherlockObjectSerializer, SherlockPositionSerializer
-from .serializers import AnnotateSerializer
-from rest_framework.authentication import TokenAuthentication
+from .serializers import AnnotateSerializer, AnnotateListSerializer
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .query_auth import QueryAuthentication
 
@@ -14,7 +14,7 @@ def retcode(message):
     else:                  return status.HTTP_200_OK
 
 class ConeView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -32,7 +32,7 @@ class ConeView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class QueryView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -50,7 +50,7 @@ class QueryView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class ObjectView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -69,7 +69,7 @@ class ObjectView(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SherlockObjectView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -87,7 +87,7 @@ class SherlockObjectView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class SherlockPositionView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
@@ -105,15 +105,24 @@ class SherlockPositionView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-
-
-
 class AnnotateView(APIView):
-    authentication_classes = [TokenAuthentication, QueryAuthentication]
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
     permission_classes = [IsAuthenticated]
 
     def post(self, request, format=None):
         serializer = AnnotateSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            message = serializer.save()
+            return Response(message, status=retcode(message))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AnnotateListView(APIView):
+    authentication_classes = [TokenAuthentication, QueryAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, format=None):
+        serializer = AnnotateListSerializer(data=request.data, context={'request': request})
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))

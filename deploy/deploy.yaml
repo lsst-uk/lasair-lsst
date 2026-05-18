@@ -5,6 +5,7 @@
     - name: Get current git branch
       ansible.builtin.command: git branch --show-current
       register: git_tag
+      check_mode: false
   tags: always
 
 - hosts: all 
@@ -62,6 +63,11 @@
     - name: Set API token
       ansible.builtin.set_fact:
         powerapi_token: "{{ api_token_response.json.token }}"
+      when: not ansible_check_mode
+    - name: Set dummy API token
+      ansible.builtin.set_fact:
+        powerapi_token: "dummy_api_token"
+      when: ansible_check_mode
   tags:
     - always
 
@@ -168,7 +174,7 @@
     - settings.yaml
     - exports.yaml
   vars:
-    schema: "10_0_A"
+    schema: "11_0"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"

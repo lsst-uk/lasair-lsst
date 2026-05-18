@@ -181,7 +181,7 @@ and the return is something like:
             "HErr": 0.179,
             "K": 15.389,
 ```
-### <a name="sherlockposition"></a>/api/sherlock/position/
+### <a name="sherlockposition"></a>sherlock_position
 
 This method returns Sherlock information for an arbitrary position in the sky, either the "lite" record that is also in the Lasair database, or the full record including many possible crossmatches. It is meant as an illustration of what Sherlock can do. If you would like to use Sherlock for high volume work, please [Email Lasair-help](mailto:lasair-help@mlist.is.ed.ac.uk?subject=sherlock). The arguments are:
 
@@ -207,3 +207,10 @@ status= 200
       "The transient is synonymous with
 ```
 
+### <a name="annotate"></a>annotate
+Annotate a Lasair object:
+For information about this method see <a href=make_annotator.html>Making an Annotator</a>.
+
+### <a name="annotate_list"></a>annotate_list
+Annotate a list of Lasair objects:
+For information about this method see <a href=make_annotator.html>Making an Annotator</a>.

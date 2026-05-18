@@ -15,7 +15,7 @@ import os, sys
 sys.path.append('../../common')
 import settings
 sys.path.append('../../common/src')
-import db_connect, lasairLogging, skymaps
+import lasairLogging, skymaps
 
 
 def mmagw(fltr, minmjd=None, maxmjd=None, verbose=False):
@@ -25,10 +25,8 @@ def mmagw(fltr, minmjd=None, maxmjd=None, verbose=False):
         minmjd = maxmjd - settings.GW_ACTIVE_DAYS
 
     # must use main database, since GW alert may have been inserted since sunset
-    main_database = db_connect.remote()
-
     try:
-        skymaplist = skymaps.fetch_skymaps_by_mjd(main_database, minmjd, maxmjd, verbose)
+        skymaplist = skymaps.fetch_skymaps_by_mjd(fltr.database_remote, minmjd, maxmjd, verbose)
     except Exception as e:
         fltr.log.error("ERROR in mmagw/mmagw" + str(e))
         return None

@@ -138,6 +138,7 @@ def reformat(old, lasair_added=True):
     new['diaObject'] = diaObject
     new['diaSourcesList'] = diaSourcesList
     new['diaForcedSourcesList'] = old['diaForcedSources']
+
     return new
 
 class ObjectSerializer(serializers.Serializer):
@@ -314,7 +315,11 @@ class QuerySerializer(serializers.Serializer):
         else:
             offset = int(offset)
 
-        error = check_query(selected, tables, conditions)
+        try:
+            error = check_query(selected, tables, conditions, user=userId)
+        except Exception as e:
+            error = str(e)
+
         if error:
             return {"error": error}
 
@@ -336,7 +341,6 @@ class QuerySerializer(serializers.Serializer):
         except Exception as e:
             error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
             return {"error": error}
-
 
 
 class AnnotateSerializer(serializers.Serializer):
@@ -387,30 +391,22 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # form the insert query
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (diaObjectId, topic, version, classification, explanation, classdict, url)
+        # push a kafka message to make sure queries are ingested t database and run immediately
+        message = {'diaObjectId'   : diaObjectId, 
+                   'topic'         : topic,
+                   'version'       : version,
+                   'classification': classification,
+                   'explanation'   : explanation,
+                   'classdict'     : classdict,
+                   'url'           : url,
+                   }
 
-        try:
-            cursor = msl.cursor(dictionary=True)
-            cursor.execute(query)
-            cursor.close()
-            msl.commit()
-        except Exception as e:
-            return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
-
-        if active < 2:
-            return {'status': 'success', 'query': query}
-
-        # when active=2, we push a kafka message to make sure queries are run immediately
-        message = {'diaObjectId': diaObjectId, 'annotator': topic}
         conf = {
             'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
             'client.id': 'client-1',
         }
+
+        # will we really instantiate the producer for each message?
         producer = Producer(conf)
         topicout = lasair_settings.ANNOTATION_TOPIC
         try:
@@ -420,4 +416,20 @@ class AnnotateSerializer(serializers.Serializer):
             return {'error': "Kafka production failed: %s\n" % e}
         producer.flush()
 
-        return {'status': 'success', 'query': query, 'annotation_topic': topicout, 'message': s}
+        return {'status': 'success', 'annotation_topic': topicout, 'message': s}
+
+class AnnotateListSerializer(serializers.Serializer):
+    annotations = serializers.ListField()
+
+    def save(self):
+        annotations = self.validated_data['annotations']
+        request = self.context.get("request")
+
+        for a in annotations:
+            serializer = AnnotateSerializer(data=a, context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            message = serializer.save()
+            if 'error' in message:
+                return message
+
+        return {'status': 'success', 'n': len(annotations)}

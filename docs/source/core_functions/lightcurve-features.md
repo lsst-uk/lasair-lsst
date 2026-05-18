@@ -40,8 +40,18 @@ See the [set of notebooks](https://github.com/lsst-uk/lasair-examples/tree/main/
 ----
 **Jump detector**: Finds the number of sigma the latest detection (time T)
  deviates from a mean in the interval [T-70,T-10] days. 
+This is designed to find outbursts from objects such as variable stars or
+AGN, which lave long lightcurves that move up and down within limits.
+But occasionaly the object may become much brighter in just a few days.
+We measure the mean and standard deviation of the flux in each band, then compare
+to the latest brightness, dividing the (absolute) difference from the mean by the 
+standard devation to get number of sigma. The quantity `jump1` is the maximum 
+over bands, and `jump2` is the next largest.
 
 <img src="../_images/jump/jump_image.png" width="450"/>
+
+Note that this feature must be caught as it happens: within a few days, new 
+detections will come in that may have much smaller values of `jump1` and `jump2`.
 
 See the [notebook](https://github.com/lsst-uk/lasair-examples/blob/main/features/jump.ipynb) for more information.
 

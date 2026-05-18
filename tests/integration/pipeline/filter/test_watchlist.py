@@ -12,8 +12,8 @@ sys.path.append('../../../../common/src')
 import lasairLogging
 sys.path.append('../../../../services')
 from services.make_watchlist_files import rebuild_cache
-from pipeline.filter.watchlists import check_alerts_against_watchlists
-from pipeline.filter.watchlists import read_watchlist_cache_files
+from pipeline.filter.alert.watchlists import check_alerts_against_watchlists
+from pipeline.filter.alert.watchlists import read_watchlist_cache_files
 
 cache_dir = 'watchlist_cache/'
 chunk_size = 50000
