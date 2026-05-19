@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $('[data-bs-toggle="popover"]').popover();
 
+    bootstrap.Tooltip.Default.delay = { show: 0, hide: 600 };
     var ttDefaultAllowList = bootstrap.Tooltip.Default.allowList;
     ttDefaultAllowList.table = [];
     ttDefaultAllowList.tr = [];
@@ -51,10 +52,10 @@ document.addEventListener('DOMContentLoaded', function() {
 //     });
 // });
 
-
+var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
 document.addEventListener('DOMContentLoaded', function () {
   // Set global defaults
-  bootstrap.Tooltip.Default.delay = { show: 500, hide: 1200 };
+  bootstrap.Tooltip.Default.delay = { show: 0, hide: 600 };
 
   const tooltipList = [].slice.call(
     document.querySelectorAll('[data-bs-toggle="tooltip"]')
