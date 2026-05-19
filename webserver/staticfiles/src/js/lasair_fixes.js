@@ -25,28 +25,39 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
-$(document).ready(function() {
-    $('body').on('inserted.bs.tooltip', function(e) {
-        var $target = $(e.target);
+// $(document).ready(function() {
+//     $('body').on('inserted.bs.tooltip', function(e) {
+//         var $target = $(e.target);
 
-        // Keep track so we can check if mouse is hovering over the tooltip
-        $('[role="tooltip"]').hover(function() {
-            $(this).toggleClass('hover');
-        });
+//         // Keep track so we can check if mouse is hovering over the tooltip
+//         $('[role="tooltip"]').hover(function() {
+//             $(this).toggleClass('hover');
+//         });
 
-        $target.on('hide.bs.tooltip', function(e) {
-            // If tooltip is under the mouse, prevent hide but
-            // add handler to hide when mouse leaves tooltip
-            if ($('[role="tooltip"]').hasClass('hover')) {
-                $('[role="tooltip"]').on('mouseleave', function() {
-                    setTimeout(function() {
-                        $target.tooltip('hide');
-                    }, 200);
-                });
-                // Tell bootstrap tooltip to bail and not actually hide
-                e.preventDefault();
-                return;
-            }
-        });
-    });
-});
+//         $target.on('hide.bs.tooltip', function(e) {
+//             // If tooltip is under the mouse, prevent hide but
+//             // add handler to hide when mouse leaves tooltip
+//             if ($('[role="tooltip"]').hasClass('hover')) {
+//                 $('[role="tooltip"]').on('mouseleave', function() {
+//                     setTimeout(function() {
+//                         $target.tooltip('hide');
+//                     }, 200);
+//                 });
+//                 // Tell bootstrap tooltip to bail and not actually hide
+//                 e.preventDefault();
+//                 return;
+//             }
+//         });
+//     });
+// });
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  // Set global defaults
+  bootstrap.Tooltip.Default.delay = { show: 500, hide: 1200 };
+
+  const tooltipList = [].slice.call(
+    document.querySelectorAll('[data-bs-toggle="tooltip"]')
+  ).map((el) => new bootstrap.Tooltip(el));
+}, false);
+

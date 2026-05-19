@@ -28,6 +28,30 @@ import os
 import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
+from django import forms
+
+
+def set_filter_run_type(filterQuery, request):
+    runOnAlert = request.POST.get('runOnAlert')
+    runOnAnnotation = request.POST.get('runOnAnnotation')
+
+    # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
+    # runTypes = (
+    #     (0, 'not active'),
+    #     (1, 'on new alert'),
+    #     (2, 'on updated annotation'),
+    #     (3, 'both')
+    # )
+    if runOnAlert and runOnAnnotation:
+        filterQuery.run = 3
+    elif runOnAlert:
+        filterQuery.run = 1
+    elif runOnAnnotation:
+        filterQuery.run = 2
+    else:
+        filterQuery.run = 0
+
+    return filterQuery
 
 
 @csrf_exempt
@@ -102,6 +126,7 @@ def filter_query_detail(request, mq_id, action=False):
 
     if request.method == 'POST':
         form = UpdateFilterQueryForm(request.POST, instance=filterQuery, request=request)
+        form.fields['runOnAlert'] = forms.BooleanField(required=False, initial=(filterQuery.run in [1, 3]))
         duplicateForm = DuplicateFilterQueryForm(request.POST, instance=filterQuery, request=request)
         action = request.POST.get('action')
 
@@ -112,25 +137,8 @@ def filter_query_detail(request, mq_id, action=False):
             # UPDATING SETTINGS?
             filterQuery.name = request.POST.get('name')
             filterQuery.description = request.POST.get('description')
-            
-            runOnAlert = request.POST.get('runOnAlert')
-            runOnAnnotation = request.POST.get('runOnAnnotation')
 
-            # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
-            # runTypes = (
-            #     (0, 'not active'),
-            #     (1, 'on new alert'),
-            #     (2, 'on updated annotation'),
-            #     (3, 'both')
-            # )
-            if runOnAlert and runOnAnnotation:
-                filterQuery.run = 3
-            elif runOnAlert:
-                filterQuery.run = 1
-            elif runOnAnnotation:
-                filterQuery.run = 2
-            else:
-                filterQuery.run = 0
+            filterQuery = set_filter_run_type(filterQuery, request)
 
             if request.POST.get('output'):
                 filterQuery.output = int(request.POST.get('output'))
@@ -174,24 +182,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
         newFil.topic_name = tn = topicName(request.user.id, newFil.name)
 
-        runOnAlert = request.POST.get('runOnAlert')
-        runOnAnnotation = request.POST.get('runOnAnnotation')
-
-        # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
-        # runTypes = (
-        #     (0, 'not active'),
-        #     (1, 'on new alert'),
-        #     (2, 'on updated annotation'),
-        #     (3, 'both')
-        # )
-        if runOnAlert and runOnAnnotation:
-            newFil.run = 3
-        elif runOnAlert:
-            newFil.run = 1
-        elif runOnAnnotation:
-            newFil.run = 2
-        else:
-            newFil.run = 0
+        newFil = set_filter_run_type(newFil, request)
 
         if request.POST.get('public'):
             newFil.public = True
@@ -211,12 +202,15 @@ def filter_query_detail(request, mq_id, action=False):
             except Exception as e:
                 messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
 
-        message += f'You have successfully copied the "{oldName}" filter to My Filters.'
+        message += f'You have successfully copied the "{oldName}" filter  to My Filters.'
         messages.success(request, message)
         return redirect(f'filter_query_detail', mq_id)
     else:
         form = UpdateFilterQueryForm(instance=filterQuery, request=request)
         duplicateForm = DuplicateFilterQueryForm(instance=filterQuery, request=request)
+        
+
+
 
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
 
@@ -440,6 +434,8 @@ def filter_query_create(request, mq_id=False):
                     filterQuery.public = 1
                 else:
                     filterQuery.public = 0
+
+                filterQuery = set_filter_run_type(filterQuery, request)
                 filterQuery.selected = selected
                 filterQuery.tables = tables
                 filterQuery.conditions = conditions
