@@ -17,8 +17,15 @@ def fetch_csv(date):
 
     if date == 'All':
         cmd += settings.TNS_URL + 'tns_public_objects.csv.zip '
-    else:
+    elif len(date) == 8: # e.g. the date is 20260521
         cmd += settings.TNS_URL + 'tns_public_objects_%s.csv.zip ' % date
+    elif len(date) == 2: # This assumes the hour - e.g. 09 or 23
+        cmd += settings.TNS_URL + 'tns_public_objects_%s.csv.zip ' % date
+    else:
+        # The date is not in the right format. Panic!
+        print("ERROR with the date format.")
+        sys.exit(1)
+        
 
     cmd += ' > %s' % filename
     os.system(cmd)
@@ -42,10 +49,13 @@ def fetch_csv(date):
 if __name__ == '__main__':
     from datetime import datetime, timedelta
     g = datetime.now() - timedelta(days=1)
-    yesterday = str(g).split()[0].replace('-', '')
-    rows = fetch_csv(yesterday)
+#    yesterday = str(g).split()[0].replace('-', '')
+    hour = '09'
+    rows = fetch_csv(hour)
+    #rows = fetch_csv(yesterday)
     #rows = fetch_csv('All')
     header = rows[0]
+    print(rows)
 
     print(header)
 #    print('----')
