@@ -25,7 +25,7 @@ def fetch_csv(date):
     try:
         archive = zipfile.ZipFile(filename, mode='r')
     except:
-        print("ERROR with TNS/poll_tns: Cannot download " + cmd)
+        print("ERROR with TNS/poll_tns: Cannot download the CSV file.")
         sys.exit()
 
     if date == 'All':
