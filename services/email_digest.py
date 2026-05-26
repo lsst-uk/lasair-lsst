@@ -99,8 +99,7 @@ def main(to_addr, groupid, fname):
 
         # Create and send digest email
         if len(alerts) > 0:
-            if not to_addr:
-                to_addr = f['email']
+            to_addr = f['email']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
             send_email(to_addr, f['name'], text, html, json_str)
