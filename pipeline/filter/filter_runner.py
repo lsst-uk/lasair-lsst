@@ -80,6 +80,19 @@ def run(args, log):
             if nalerts == 0:   # process got no messages, so sleep a few minutes
                 log.info('Waiting for more messages ....')
                 time.sleep(settings.WAIT_TIME)
+                if grist == 'alert':
+                    s = '#HELP lasair_alert_batch_lag Lasair alert batch lag stats\n'
+                    s += '#TYPE gauge\n'
+                    s += 'lasair_alert_batch_lag{type="min"} NaN\n'
+                    s += 'lasair_alert_batch_lag{type="avg"} NaN\n'
+                    s += 'lasair_alert_batch_lag{type="max"} NaN\n'
+                    filename = '/var/lib/prometheus/node-exporter/lasair.prom'
+                    try:
+                        f = open(filename, 'w')
+                        f.write(s)
+                        f.close()
+                    except IOError:
+                        log.error("ERROR in filter_runner: Cannot write promethus export file %s" % filename)
         except Exception as e:
             log.exception('Exception')
             log.critical('Unrecoverable error in filter batch: ' + str(e))
