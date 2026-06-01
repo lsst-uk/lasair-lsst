@@ -23,7 +23,7 @@ from docopt import docopt
 import os, sys
 import csv
 from datetime import datetime
-from gkutils.commonutils import Struct, dbConnect, cleanOptions
+from gkutils.commonutils import Struct, cleanOptions
 from gkhtm import _gkhtm as htmCircle
 import tns_crossmatch
 from fetch_from_tns import fetch_csv
@@ -187,6 +187,8 @@ def getTNSData(opts, conn):
     if options.radius:
         radius = float(options.radius)
 
+    doingAll = False
+
     if options.daysAgo is not None and options.daysAgo == 'All':
         doingAll = True
         # truncate the cables crossmatch_tns, and
@@ -214,7 +216,7 @@ def getTNSData(opts, conn):
         data = fetch_csv(pastTime)
     elif options.hourly is not None:
         # Grab the current hour.
-        hour = "%0d" % (datetime.now().hour)
+        hour = "%02d" % (datetime.now() - timedelta(hours=1)).hour
         data = fetch_csv(hour)
     else:
         # Panic. Wrong option combination.
@@ -223,11 +225,16 @@ def getTNSData(opts, conn):
 
 
     # First row of the CSV is the header names
+    if len(data) == 0:
+        print("No data and no header.")
+        sys.exit(1)
+
     header = data[0]
 
     rowsAdded = 0
     rowsChanged = 0
 
+    #print("Data length = ", len(data))
     for row in data[1:]:
         row_dict = {}
         for i in range(len(header)):
@@ -291,6 +298,7 @@ if __name__ == '__main__':
     conn = db_connect.remote()
     options = Struct(**opts)
 
+ 
     getTNSData(options, conn)
 
     countTNS = countTNSRow(conn)
