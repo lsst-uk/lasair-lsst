@@ -31,8 +31,8 @@ def fetch_csv(date):
     os.system(cmd)
     try:
         archive = zipfile.ZipFile(filename, mode='r')
-    except:
-        print("ERROR with TNS/poll_tns: Cannot download " + cmd)
+    except Exception as e:
+        print("ERROR with TNS/poll_tns: Cannot download the CSV file.")
         sys.exit()
 
     if date == 'All':
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     from datetime import datetime, timedelta
     g = datetime.now() - timedelta(days=1)
 #    yesterday = str(g).split()[0].replace('-', '')
-    hour = '09'
+    hour = '13'
     rows = fetch_csv(hour)
     #rows = fetch_csv(yesterday)
     #rows = fetch_csv('All')
