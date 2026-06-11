@@ -29,7 +29,7 @@ from email.mime.text import MIMEText
 sys.path.append('../common')
 import settings
 sys.path.append('../common/src')
-from src import db_connect
+import db_connect, send_email
 
 # What we should call the resource, then the database name of it, then the name of the identifier
 resources = {
@@ -43,13 +43,13 @@ messages = {
 'warning':
 """
 Dear %s,
-Your active Lasair %s will become inactive on %s without action from you, and there will be no further real-time matching of incoming alerts. This is to relieve pressure on the real-time pipeline. To keep your %s active for 180 days, go to %s then click "Settings", then "Save".  Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
+Your active Lasair %s named '%s' will become inactive on %s without action from you, and there will be no further real-time matching of incoming alerts. This is to relieve pressure on the real-time pipeline. To keep your %s active for 180 days, go to %s then click "Settings", then "Save".  Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
 """,
 
 'expiration':
 """
 Dear %s,
-Your active Lasair %s has recently expired and thus become inactive, and there will be no further matching of incoming alerts. To make your %s active again for 180 days, go to %s then click "Settings", "Active" or "Streaming", then "Save". Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
+Your active Lasair %s named '%s' has recently expired and thus become inactive, and there will be no further matching of incoming alerts. To make your %s active again for 180 days, go to %s then click "Settings", "Active" or "Streaming", then "Save". Questions to lasair-help@mlist.is.ed.ac.uk -- The Lasair Team
 """,
 }
 
@@ -64,22 +64,6 @@ def log(out):
         f.close
     else:
         print(out)
-
-def send_email(email, message, message_html=''):
-#    print(email, message, message_html)
-    msg = MIMEMultipart('alternative')
-
-    msg['Subject'] = 'Lasair: Active resource becoming inactive'
-    msg['From']    = 'lasair@lsst.ac.uk'
-    msg['To']      = email
-
-    msg.attach(MIMEText(message, 'plain'))
-    if len(message_html) > 0:
-        msg.attach(MIMEText(message_html, 'html'))
-    s = smtplib.SMTP('localhost')
-    s.sendmail('lasair@lsst.ac.uk', email, msg.as_string())
-    s.quit()
-    log('Email sent to %s' % email)
 
 def list_resources(msl):
     """
@@ -156,18 +140,19 @@ def check_and_action(msl, rname, resource, action, daysAhead, rid=None):
             url      = 'https://%s/%ss/%d/' % (settings.LASAIR_URL, rname, rid)
             url_html = '<a href="%s">%s</a>' % (url, url)
             message_fmt = messages[action]
+            fname = row['name']
 
             if action == 'expiration':
-                message      = message_fmt % (name, rname, rname, url)
-                message_html = message_fmt % (name, rname, rname, url_html)
+                message      = message_fmt % (name, fname, rname, rname, url)
+                message_html = message_fmt % (name, fname, rname, rname, url_html)
                 make_inactive(msl, resource, rid)
-                send_email(row['email'], message, message_html)
+                send_email.send_email(row['email'], fname, message, message_html)
 
             if action == 'warning':
                 niceexpire = nice_date(row['date_expire'])
-                message      = message_fmt % (name, rname, niceexpire, rname, url)
-                message_html = message_fmt % (name, rname, niceexpire, rname, url_html)
-                send_email(row['email'], message, message_html)
+                message      = message_fmt % (name, fname, rname, niceexpire, rname, url)
+                message_html = message_fmt % (name, fname, rname, niceexpire, rname, url_html)
+                send_email.send_email(row['email'], fname, message, message_html)
 
 if __name__ == "__main__":
     global logfile
