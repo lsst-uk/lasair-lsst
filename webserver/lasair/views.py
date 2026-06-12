@@ -55,7 +55,7 @@ def index(request):
        objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.nDiaSources > 8
+       AND objects.nDiaSources > 3
        AND sherlock_classifications.classification in (%s)
     ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
