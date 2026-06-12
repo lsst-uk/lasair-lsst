@@ -33,9 +33,9 @@ import db_connect, send_email
 
 # What we should call the resource, then the database name of it, then the name of the identifier
 resources = {
-    'filter':    {'dbname':'myqueries',  activity:'run',    'rid': 'mq_id'},
-    'watchlist': {'dbname':'watchlists', activity:'active', 'rid': 'wl_id'},
-    'watchmap':  {'dbname':'areas',      activity:'active', 'rid': 'ar_id'},
+    'filter':    {'dbname':'myqueries',  'activity':'run',    'rid': 'mq_id'},
+    'watchlist': {'dbname':'watchlists', 'activity':'active', 'rid': 'wl_id'},
+    'watchmap':  {'dbname':'areas',      'activity':'active', 'rid': 'ar_id'},
 }
 
 # The emails we can send out
@@ -127,9 +127,10 @@ def check_and_action(msl, rname, resource, action, daysAhead, rid=None):
     timelimit = datetime.datetime.now() + datetime.timedelta(days=daysAhead)
     cursor = msl.cursor(buffered=True, dictionary=True)
     query = 'SELECT %s as id, name, first_name, last_name, email, date_expire ' % resource['rid'] 
-    query += 'FROM %s,auth_user WHERE auth_user.id=user AND %s>0 ' % (resource['activity'], resource['dbname'])
+    query += 'FROM %s,auth_user WHERE auth_user.id=user AND %s>0 ' % (resource['dbname'], resource['activity'])
     if rid:
         query += 'AND %s=%s' % (resource['rid'], rid)
+#    print('---', query)
     cursor.execute(query)
     for row in cursor:
         if row['date_expire'] and row['date_expire'] < timelimit:
@@ -143,15 +144,15 @@ def check_and_action(msl, rname, resource, action, daysAhead, rid=None):
             fname = row['name']
 
             if action == 'expiration':
-                message      = message_fmt % (name, fname, rname, rname, url)
-                message_html = message_fmt % (name, fname, rname, rname, url_html)
+                message      = message_fmt % (name, rname, fname, rname, url)
+                message_html = message_fmt % (name, rname, fname, rname, url_html)
                 make_inactive(msl, resource, rid)
                 send_email.send_email(row['email'], fname, message, message_html)
 
             if action == 'warning':
                 niceexpire = nice_date(row['date_expire'])
-                message      = message_fmt % (name, fname, rname, niceexpire, rname, url)
-                message_html = message_fmt % (name, fname, rname, niceexpire, rname, url_html)
+                message      = message_fmt % (name, rname, fname, niceexpire, rname, url)
+                message_html = message_fmt % (name, rname, fname, niceexpire, rname, url_html)
                 send_email.send_email(row['email'], fname, message, message_html)
 
 if __name__ == "__main__":
