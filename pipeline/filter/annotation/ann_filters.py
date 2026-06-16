@@ -64,7 +64,7 @@ def query_for_object(query, objList):
         query: the original query, as generated from the Lasair query builder
         objList: the object that is the new constraint
     """
-    tok = query.replace('order by', 'ORDER BY').split('ORDER BY')
+    tok = query.lower().split('order by')
     txtObjList = ','.join([str(id) for id in objList])
     query = tok[0] + ' AND objects.diaObjectId IN (%s) ' % txtObjList
     if len(tok) == 2: # has order clause, add it back
@@ -78,7 +78,15 @@ def append_lightcurve(fltr, query_results):
         that will be further processed in the dispose_kafka method in ../util.py
     """
     for q in query_results:
-        diaObjectId = q['diaObjectId']
+        # need to get the diaObjectId key even if the user put lower case
+        diaObjectId = None
+        for k,v in q.items():   
+            if k.lower() == 'diaobjectid':
+                diaObjectId = v
+        if diaObjectId is None:
+            fltr.log.error('Query %s has no diaObjectId' % query['topic_name'])
+            continue
+
         # don't fetch if we already have it
         if diaObjectId in fltr.message_dict:
             continue
