@@ -130,7 +130,7 @@ def run_query(query, msl, annotator, objList, fltr):
                  "and write to lasair-help@mlist.is.ed.ac.uk if you want help." % (utc, topic, str(e)))
         fltr.log.info(error)
         fltr.log.info(sqlquery_real)
-        send_email(email, topic, error)
+        send_email.send_email(email, topic, error)
         return []
 
     # fetch the lite or full lightcurve from cassandra if wanted
