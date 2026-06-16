@@ -74,7 +74,7 @@ def main(to_addr, groupid, fname):
         query += f"AND myqueries.name='{fname}'"
     else:
         # get all email queries
-        query += "AND output=%d" % OUTPUT_EMAIL
+        query += "AND output=%d" % settings.OUTPUT_EMAIL
     cursor.execute(query)
     filters = cursor.fetchall()
 
