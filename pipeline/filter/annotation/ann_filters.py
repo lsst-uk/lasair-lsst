@@ -8,6 +8,7 @@ import settings
 from src import send_email
 
 
+
 def annotation_filters(fltr):
     """run_annotation_queries.
     Pulls the recent content from the kafka topic 'lsst_annotations' 
@@ -19,7 +20,7 @@ def annotation_filters(fltr):
     try:
         query_list = fetch_queries(fltr)
     except Exception as e:
-        fltr.log.error("ERROR in filter/run_active_queries.fetch_queries" + str(e))
+        fltr.log.error("ERROR: " + str(e))
         return 0
     msg = ''
     for topic, ann_list in fltr.ann_diaObjectId.items():
@@ -34,19 +35,23 @@ def annotation_filters(fltr):
 
 
 def run_queries(fltr, query_list):
+    """
+    Run all the queries (set to run on annotation or both) against the local database
+    """
     ntotal = 0
     for query in query_list:
-        n = 0
-        t = time.time()
-        for ann,objList in fltr.ann_diaObjectId.items():
-            query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
-            n += dispose_query_results(fltr, query, query_results)
+        if query['run'] == settings.RUN_ANNOTATION or query['run'] == settings.RUN_BOTH:
+            n = 0
+            t = time.time()
+            for ann, objList in fltr.ann_diaObjectId.items():
+                query_results = run_query(query, fltr.database_remote, ann, objList, fltr)
+                n += dispose_query_results(fltr, query, query_results)
 
-        t = time.time() - t
-        if n > 0:
-            fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['active'], n, t))
-            sys.stdout.flush()
-        ntotal += n
+            t = time.time() - t
+            if n > 0:
+                fltr.log.info('   %s(%d) got %d in %.1f seconds' % (query['topic_name'], query['output'], n, t))
+                sys.stdout.flush()
+            ntotal += n
     return ntotal
 
 
@@ -98,7 +103,7 @@ def run_query(query, msl, annotator, objList, fltr):
         query:
         msl:
     """
-    active = query['active']
+    output = query['output']
     email = query['email']
     topic = query['topic_name']
     limit = 1000
@@ -134,7 +139,7 @@ def run_query(query, msl, annotator, objList, fltr):
         return []
 
     # fetch the lite or full lightcurve from cassandra if wanted
-    if active >= 3:
+    if output >= settings.OUTPUT_LITE:   # a lightcurve is needed
         append_lightcurve(fltr, query_results)
 
     return query_results

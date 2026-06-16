@@ -9,29 +9,31 @@ sys.path.append('../../common/src')
 import lasairLogging
 import logging
 
+
 def fetch_queries(fltr):
     """fetch_queries.
     Get all the stored queries from the main database
     """
 
-    # Fetch all the stored queries from the main database
+    # Fetch all the stored queries from the main database that are active
     cursor = fltr.database_remote.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mq_id, user, name, email, tables, active, byte_quota, real_sql, topic_name '
-    query += 'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND active > 0'
+    query = 'SELECT mq_id, user, name, email, tables, run, output, byte_quota, real_sql, topic_name '
+    query += f'FROM myqueries, auth_user WHERE myqueries.user = auth_user.id AND run > {settings.RUN_MUTED}'
     cursor.execute(query)
 
     query_list = []
     for query in cursor:
         query_dict = {
-            'mq_id':     query['mq_id'],
-            'user':      query['user'],
-            'name':      query['name'],
-            'active':    query['active'],
-            'email':     query['email'],
-            'tables':    query['tables'],
-            'real_sql':  query['real_sql'],
-            'topic_name':query['topic_name'],
-            'byte_quota':query['byte_quota'],
+            'mq_id':      query['mq_id'],
+            'user':       query['user'],
+            'name':       query['name'],
+            'run':        query['run'],
+            'output':     query['output'],
+            'email':      query['email'],
+            'tables':     query['tables'],
+            'real_sql':   query['real_sql'],
+            'topic_name': query['topic_name'],
+            'byte_quota': query['byte_quota'],
         }
         # Lets see if some kafka has produced on this filter
         nbytesname = query['topic_name'] + '_bytes_produced'
@@ -64,23 +66,24 @@ def lightcurve_lite(alert):
         "diaForcedSourcesList": diaForcedSourcesList,
     }
 
+
 def dispose_query_results(fltr, query, query_results):
-    """ Send out the query results by email or kafka, and ipdate the digest file
+    """ Decide whether to Send out the query results by kafka, add lightcurve if necessary
     """
     if len(query_results) == 0:
         return 0
-    active = query['active']
-
-    BASIC_EMAIL     = 1
-    BASIC_KAFKA     = 2
-    LIGHTCURVE_LITE = 3
-    LIGHTCURVE_FULL = 4
+    output = query['output']
+    run    = query['run']
 
     if not fltr.send_kafka:
         return len(query_results)
 
+    if run == settings.RUN_MUTED:
+        return len(query_results)
+    # else: output must be >= OUTPUT_EMAIL
+
     # try to append the lightcurve info
-    if active >= LIGHTCURVE_LITE:
+    if output >= settings.OUTPUT_LITE:  # lightcurve required
         for q in query_results:
             if 'diaObjectId' in q:
                 diaObjectId = q['diaObjectId']
@@ -93,13 +96,14 @@ def dispose_query_results(fltr, query, query_results):
                     fltr.log.info(f'Cannot find lightcurve {diaObjectId} in alert cache')
 
                 if alert:
-                    if active == LIGHTCURVE_LITE:
+                    if output == settings.OUTPUT_LITE:
                         q['alert'] = lightcurve_lite(alert)
-                    if active == LIGHTCURVE_FULL:
+                    if output == settings.OUTPUT_FULL:
                         q['alert'] = alert
 
     dispose_kafka(fltr, query_results, query)
     return len(query_results)
+
 
 def dispose_kafka(fltr, query_results, query):
     """ Send out query results by kafka to the given topic.
@@ -127,7 +131,7 @@ def dispose_kafka(fltr, query_results, query):
                     producer.flush()
         producer.flush(10.0)   # 10 second timeout
     except Exception as e:
-        rtxt = "ERROR in filter/run_active_queries: cannot produce to public kafka"
+        rtxt = "ERROR: cannot produce to public kafka"
         rtxt += str(e)
         log.error(settings.SLACK_URL, rtxt)
         print(rtxt)
@@ -145,6 +149,7 @@ def dispose_kafka(fltr, query_results, query):
             topic_name+'_alerts_rejected': nalert,
         }, fltr.nid)
 
+
 def crap_converter(o):
     """crap_converter. Deal with the things that JSON can't encode.
 
@@ -156,6 +161,7 @@ def crap_converter(o):
         return o.__str__()
     else:
         return 'Unexpected type in json.dumps:' + str(type(o))
+
 
 def kafka_ack(err, msg):
     if err is not None:

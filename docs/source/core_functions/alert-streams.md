@@ -1,11 +1,10 @@
 ## Alert Streams
 
-The Lasair broker can send immediate “push” notifications when your active 
-filter sees and interesting alert. Here is how to make that 
-happen with email notification. First make sure you are logged in to your 
-Lasair account (top left of screen, then go to create new stored filter. 
-This page is about how to get machine-readable push records from your active filter; 
-You can also get alert by email, although obviously the numbers will be limited.
+The Lasair broker can send immediate “push” notifications when your  
+filter sees an interesting alert or, if your filter uses annotations, when the
+annotation is updated. Results are delivered using Kafka; alternatively you can
+get results as a daily email, although obviously this will only be
+suitable for filters that produce limited output
 
 ### Resources
 - See the [Consume Kafka notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafka.ipynb) for basic consumption of an active stream.
@@ -20,15 +19,26 @@ the Rubin Observatory to brokers such as Lasair.
 By providing Kafka streams, Lasair provides a machine-readable packet of data 
 that can cause action at your site. 
 
-You will need to be logged in to your Lasair account. Make a filter as in the
-previous section, then click “Save". You will then be prompted for "Filter Settings", 
+You will need to be logged in to your Lasair account. [Make a filter](make_filter.html),
+then click “Save". You will then be prompted for "Filter Settings", 
 which you can fill in like this:
 
 <img src="../_images/alert-streams/filter_settings.png" width="400px"/>
 
-You need a name and description, and at the bottom choose the filter is to be
-publicly visible or not. See below for the meaning of the various choices in
-the "Streaming" selection. When you save the filter, you see something like this:
+You need a name and description.
+
+The next menu indicates _when_ your filter should be run. This can be _manually only_,
+i.e. your filter will not be active, or _on alert_, in which case the filter is automatically
+run against new alerts. If your filter involves [annotations](../concepts.html#annotations)
+then it can also run when the annotation is updated, either instead of or as well as when
+a new alert arrives.
+
+The _output_ menu asks what content you would like to appear in your output Kafka stream. See
+[below](#types-of-kafka-streams) for details. 
+
+At the bottom choose whether the filter is to be publicly visible or not.
+
+When you save the filter, you see something like this:
 
 <img src="../_images/alert-streams/filter_saved.png" width="400px"/>
 
@@ -185,9 +195,5 @@ It assumes the filter has been saved with the 'lite lightcurve' option.
 ### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 
-filters that do not pass many alerts 
-in a given day -- or else the email box will be flooded with spam. Lasair throttles
-the number of emails; once the first has been sent, another will not be sent until 24
-hours later, containing the objects passed by the filter in that time. In this 
-way, a maximum of one email per day can come from a Lasair filter.
-
+filters that do not pass many alerts. A single daily email will be sent on any day
+when at least one alert is matched.
