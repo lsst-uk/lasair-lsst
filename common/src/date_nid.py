@@ -59,9 +59,6 @@ if __name__ == "__main__":
     nid = nid_now()
     print("nid now is: %d" % nid)
 
-    nid4 = nid_soon()
-    print("nid soon is: %d" % nid4)
-
     date = nid_to_date(nid)
     print("date now is: %s" % date)
 
