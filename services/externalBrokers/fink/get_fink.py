@@ -23,6 +23,8 @@ fink_config = {
     'group.id':          settings.FINK_GROUP_ID
 }
 
+print(fink_config)
+
 # Instantiate a consumer
 consumer = AlertConsumer(settings.FINK_TOPICS, fink_config)
 
