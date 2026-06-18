@@ -12,7 +12,7 @@ suitable for filters that produce limited output
 - Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
 - Copy and modify the program at the bottom of this page to fetch your own Kafka records.
 
-### Active Filter with Kafka
+### Filter triggering and notification
 Lasair provides a protocol for immediate delivery that is suitable for machines to 
 communicate with machines. It is called Kafka, and is the way alerts are delivered from
 the Rubin Observatory to brokers such as Lasair.
@@ -43,8 +43,20 @@ of the annotation.
 The _notification_ menu asks what content you would like to appear in your output Kafka stream. See
 [below](#types-of-kafka-streams) for details. 
 
+Here are some examples of how the trigger and notification can be set for a filter:
+<img src="../_images/alert-streams/trigger_notify.png" width="800px"/>
+
+Left: An inactive filter. Only runs when you click "Run Filter" on the web page.
+
+Middle: A filter that produces the SELECTed attributes and the lite lightcurve, 
+triggered by the arrival of an alert.
+
+Right: A filter triggered by the arrival of the annotation that the filter is listening for, 
+that produces only the SELECTed attributes.
+
 At the bottom choose whether the filter is to be publicly visible or not.
 
+### Kafka Streams
 When you save the filter, you see something like this:
 
 <img src="../_images/alert-streams/filter_saved.png" width="400px"/>
