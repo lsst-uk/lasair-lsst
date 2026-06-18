@@ -27,13 +27,20 @@ which you can fill in like this:
 
 You need a name and description.
 
-The next menu indicates _when_ your filter should be run. This can be _manually only_,
-i.e. your filter will not be active, or _on alert_, in which case the filter is automatically
-run against new alerts. If your filter involves [annotations](../concepts.html#annotations)
-then it can also run when the annotation is updated, either instead of or as well as when
-a new alert arrives.
+The next menu indicates the trigger that makes your filter run, which can be 
+when you click the "run filter" button on the web page, or if the filter is "active"
+it can be triggered by either an alert or an annotation. To keep the filter inactive,
+meaning it only runs from clicking, just uncheck both the trigger options.
 
-The _output_ menu asks what content you would like to appear in your output Kafka stream. See
+If you select "On new alert", then your filter is run in near-real-time against arriving alerts.
+There is an additional option if your filter involves [annotations](../concepts.html#annotations),
+so it can also run when the annotation is updated, either instead of or as well as when
+a new alert arrives. If you choose *both* of these options, you will get the results of the
+filter *first* when the alert arrives, using the old value of the annotation, then *again*
+onece the annotator as run and been uploaded and you get results with the new value
+of the annotation.
+
+The _notification_ menu asks what content you would like to appear in your output Kafka stream. See
 [below](#types-of-kafka-streams) for details. 
 
 At the bottom choose whether the filter is to be publicly visible or not.
@@ -42,7 +49,7 @@ When you save the filter, you see something like this:
 
 <img src="../_images/alert-streams/filter_saved.png" width="400px"/>
 
-The red warning on the settings panel is connected to the green message in the response. 
+The pink warning on the settings panel is connected to the green message in the response. 
 Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
 with the Kafka consumer (code below). You can run the filter in the usual way 
@@ -196,4 +203,6 @@ It assumes the filter has been saved with the 'lite lightcurve' option.
 
 The email distribution is a much simpler notification process, and is intended for 
 filters that do not pass many alerts. A single daily email will be sent on any day
-when at least one alert is matched.
+when at least one alert is matched, containing all the results from the filters. If you choose 
+the email option, you cannot get lightcurves in the Kafka messages, only the SELECTed attributes
+of the filter.
