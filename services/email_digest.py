@@ -15,7 +15,7 @@ Options:
 import sys
 sys.path.append('../common')
 from docopt import docopt
-from src import db_connect, date_nid
+from src import db_connect, date_nid, slack_webhook
 from src.send_email import send_email
 from confluent_kafka import Consumer
 import settings
@@ -106,9 +106,10 @@ def main(to_addr, groupid, fname):
         # Create and send digest email
         if len(alerts) > 0:
             to_addr = f['email']
+            topic = f['topic_name']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
-            logf.write('%d to %s\n' % (len(alerts), to_addr))
+            logf.write('%d from topic %s\n' % (len(alerts), topic))
             send_email(to_addr, f['name'], text, html, json_str)
 
 
@@ -116,17 +117,19 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     email = args.get('--email')
     group = args.get('--group')
-    log = args.get('--log')
+    service_log = args.get('--log')
 
     nid  = date_nid.nid_now()
     date = date_nid.nid_to_date(nid)
-    if log:
-        logfile = settings.SERVICES_LOG +'/'+ date + '.log'
+    if service_log:
+        logfile = settings.SERVICES_LOG + '/'+ date + '.log'
         try:
             logf    = open(logfile, 'a')
         except Exception as e:
-            log.error("ERROR %s" % str(e))
-            sys.exit(0)
+            s = "ERROR %s" % str(e)
+            slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
+            slack_webhook.send(settings.SLACK_URL, s, channel=slack_channel)
+            sys.exit(1)
 
     filter_name = args.get('--filter')
     if email and not group or group and not email:
