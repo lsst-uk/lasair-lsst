@@ -64,8 +64,11 @@ When you save the filter, you see something like this:
 The pink warning on the settings panel is connected to the green message in the response. 
 Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
-with the Kafka consumer (code below). You can run the filter in the usual way 
-from the web browser, but you will have to wait for some alerts to arrive for 
+with the Kafka consumer (code below). This is so you cna experiment with 
+the stream in a cycle of editing and consuming kafka. (Of course if your filter
+returns no objects, then non will be put in the kafka stream!)
+Once saved, you can run the filter in the usual way 
+from the web browser, but you will have to wait for more alerts to arrive for 
 more records to go in the stream.
 
 In order to run the consumer code, you need the "topic name" corresponding to your 
@@ -73,7 +76,7 @@ filter, which is derived from the name you gave it in the settings. In this case
 topic name is `lasair_2Hasabsmag`.
 
 ### Types of Kafka Streams
-The plain kafka stream offers just the attributes you selected in your filter query.
+The plain Kafka stream offers just the attributes you selected in your filter query.
 Supoose your SQL SELECT says `objects.diaObjectId,  objects.decl, objects.ra`, 
 then your plain Kafka output would be just these, with a timestamp added for
 when the record was produced:
