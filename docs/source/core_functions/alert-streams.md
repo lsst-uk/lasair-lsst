@@ -64,9 +64,9 @@ When you save the filter, you see something like this:
 The pink warning on the settings panel is connected to the green message in the response. 
 Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
-with the Kafka consumer (code below). This is so you cna experiment with 
+with the Kafka consumer (code below). This is so you can experiment with 
 the stream in a cycle of editing and consuming kafka. (Of course if your filter
-returns no objects, then non will be put in the kafka stream!)
+returns no objects, then none will be put in the kafka stream!)
 Once saved, you can run the filter in the usual way 
 from the web browser, but you will have to wait for more alerts to arrive for 
 more records to go in the stream.
@@ -217,7 +217,7 @@ It assumes the filter has been saved with the 'lite lightcurve' option.
 ### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 
-filters that do not pass many alerts. A single daily email will be sent on any day
-when at least one alert is matched, containing all the results from the filters. If you choose 
-the email option, you cannot get lightcurves in the Kafka messages, only the SELECTed attributes
+filters that do not pass many alerts. A single daily email will be sent on any day 
+when there are results, containing all the results from the filters. If you choose 
+the email option, you cannot get lightcurves, only the SELECTed attributes
 of the filter.
