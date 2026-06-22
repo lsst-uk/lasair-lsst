@@ -464,6 +464,8 @@ def filter_query_create(request, mq_id=False):
             message = ''
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
+            if filterQuery.output is None:
+                filterQuery.output = 0
             output = int(filterQuery.output)
             if output >= 2:
                 try:
