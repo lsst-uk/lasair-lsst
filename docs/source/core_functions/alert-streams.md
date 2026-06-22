@@ -12,7 +12,7 @@ suitable for filters that produce limited output
 - Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
 - Copy and modify the program at the bottom of this page to fetch your own Kafka records.
 
-### Active Filter with Kafka
+### Filter triggering and notification
 Lasair provides a protocol for immediate delivery that is suitable for machines to 
 communicate with machines. It is called Kafka, and is the way alerts are delivered from
 the Rubin Observatory to brokers such as Lasair.
@@ -27,26 +27,50 @@ which you can fill in like this:
 
 You need a name and description.
 
-The next menu indicates _when_ your filter should be run. This can be _manually only_,
-i.e. your filter will not be active, or _on alert_, in which case the filter is automatically
-run against new alerts. If your filter involves [annotations](../concepts.html#annotations)
-then it can also run when the annotation is updated, either instead of or as well as when
-a new alert arrives.
+The next menu indicates the trigger that makes your filter run, which can be 
+when you click the "run filter" button on the web page, or if the filter is "active"
+it can be triggered by either an alert or an annotation. To keep the filter inactive,
+meaning it only runs from clicking, just uncheck both the trigger options.
 
-The _output_ menu asks what content you would like to appear in your output Kafka stream. See
+If you select "On new alert", then your filter is run in near-real-time against arriving alerts.
+There is an additional option if your filter involves [annotations](../concepts.html#annotations),
+so it can also run when the annotation is updated, either instead of or as well as when
+a new alert arrives. If you choose *both* of these options, you will get the results of the
+filter *first* when the alert arrives, using the old value of the annotation, then *again*
+onece the annotator as run and been uploaded and you get results with the new value
+of the annotation.
+
+The _notification_ menu asks what content you would like to appear in your output Kafka stream. See
 [below](#types-of-kafka-streams) for details. 
+
+Here are some examples of how the trigger and notification can be set for a filter:
+<img src="../_images/alert-streams/trigger_notify.png" width="800px"/>
+
+Left: An inactive filter. Only runs when you click "Run Filter" on the web page.
+
+Middle: A filter that produces the SELECTed attributes and the lite lightcurve, 
+triggered by the arrival of an alert.
+
+Right: A filter triggered by the arrival of the annotation that the filter is listening for, 
+that produces only the SELECTed attributes.
 
 At the bottom choose whether the filter is to be publicly visible or not.
 
+### Kafka Streams
 When you save the filter, you see something like this:
 
 <img src="../_images/alert-streams/filter_saved.png" width="400px"/>
 
-The red warning on the settings panel is connected to the green message in the response. 
+The pink warning on the settings panel is connected to the green message in the response. 
 Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
-with the Kafka consumer (code below). You can run the filter in the usual way 
-from the web browser, but you will have to wait for some alerts to arrive for 
+with the Kafka consumer (code below). This is so you can experiment with 
+the stream in a cycle of editing and consuming kafka. (Of course if your filter
+returns no objects, then none will be put in the kafka stream! Trying to read from such an
+empty topic will result in the error `UNKNOWN_TOPIC_OR_PART`; this is not a problem,
+the error will go away when the fist message is returned by the filter.)
+Once saved, you can run the filter in the usual way 
+from the web browser, but you will have to wait for more alerts to arrive for 
 more records to go in the stream.
 
 In order to run the consumer code, you need the "topic name" corresponding to your 
@@ -54,7 +78,7 @@ filter, which is derived from the name you gave it in the settings. In this case
 topic name is `lasair_2Hasabsmag`.
 
 ### Types of Kafka Streams
-The plain kafka stream offers just the attributes you selected in your filter query.
+The plain Kafka stream offers just the attributes you selected in your filter query.
 Supoose your SQL SELECT says `objects.diaObjectId,  objects.decl, objects.ra`, 
 then your plain Kafka output would be just these, with a timestamp added for
 when the record was produced:
@@ -195,5 +219,7 @@ It assumes the filter has been saved with the 'lite lightcurve' option.
 ### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 
-filters that do not pass many alerts. A single daily email will be sent on any day
-when at least one alert is matched.
+filters that do not pass many alerts. A single daily email will be sent on any day 
+when there are results, containing all the results from the filters. If you choose 
+the email option, you cannot get lightcurves, only the SELECTed attributes
+of the filter.

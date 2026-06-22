@@ -41,7 +41,7 @@
 
                 <div class="form-group mb-4">
 
-                    <label for="run">Triggers {% include "includes/info_tooltip.html" with info="Choice how you would like to automatically trigger your filter. You can click the 'run' button at any point to trigger the filter manually" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
+                    <label for="run">Triggers {% include "includes/info_tooltip.html" with info="Choose how you would like to automatically trigger your filter. You can click the 'run' button at any point to trigger the filter manually" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
                     <div class="ms-2 form-check form-switch">
                         {{ form.runOnAlert|add_class:"form-check-input" }}
                         <label class="form-check-label text-gray-500" for="runOnAlert">On new alert</label>
@@ -57,7 +57,7 @@
 
                 <div class="form-group mb-4">
 
-                    <label for="output">Notifications {% include "includes/info_tooltip.html" with info="Choice how you would like to be notified of new matches to yuor filter" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
+                    <label for="output">Notifications {% include "includes/info_tooltip.html" with info="Choice how you would like to be notified of new matches to your filter" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
                     <small class="d-flex align-items-center text-gray-500 mb-2">How would you like to be notified new filter matches?</small>
                         {{ form.output|add_class:"form-select" }}
 
