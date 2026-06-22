@@ -66,7 +66,9 @@ Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
 with the Kafka consumer (code below). This is so you can experiment with 
 the stream in a cycle of editing and consuming kafka. (Of course if your filter
-returns no objects, then none will be put in the kafka stream!)
+returns no objects, then none will be put in the kafka stream! Trying to read from such an
+empty topic will result in the error `UNKNOWN_TOPIC_OR_PART`; this is not a problem,
+the error will go away when the fist message is returned by the filter.)
 Once saved, you can run the filter in the usual way 
 from the web browser, but you will have to wait for more alerts to arrive for 
 more records to go in the stream.
