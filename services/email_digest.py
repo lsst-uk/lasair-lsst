@@ -2,25 +2,29 @@
 For each filter with email output, checks the associated Kafka topic for new alerts,
 builds a digest email and sends it. Intended to be run as a daily cronjob.
 Usage:
-    email_digest.py [--email=<address> --group=<id>] [--filter=<name>]
+    email_digest.py [--email=<address> --group=<id>] [--filter=<name>] [--log]
 
 Options:
     --help             Show usage information
     --email=<address>  Send all alerts here instead of to users (for testing)
     --group=<id>       Group ID (for testing)
     --filter=<name>    Limit to a single filter (for testing)
+    --log              If present, logs to service log
 """
 
 import sys
 sys.path.append('../common')
 from docopt import docopt
-from src import db_connect
+from src import db_connect, date_nid, slack_webhook
 from src.send_email import send_email
 from confluent_kafka import Consumer
 import settings
 from time import sleep
 import json
+from datetime import datetime
 
+logfile = ''
+logf = sys.stdout
 
 def format_line(alert):
     text = ' '.join(str(value) for key, value in alert.items()) + "\n"
@@ -53,6 +57,8 @@ def format_message(fname, alerts):
 
 
 def main(to_addr, groupid, fname):
+    now = datetime.now()
+    logf.write(f'Starting email_digest at {now}\n') 
     if not groupid:
         groupid = 'email_digest'
     consumer_conf = {
@@ -100,8 +106,10 @@ def main(to_addr, groupid, fname):
         # Create and send digest email
         if len(alerts) > 0:
             to_addr = f['email']
+            topic = f['topic_name']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
+            logf.write('%d from topic %s\n' % (len(alerts), topic))
             send_email(to_addr, f['name'], text, html, json_str)
 
 
@@ -109,6 +117,20 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     email = args.get('--email')
     group = args.get('--group')
+    service_log = args.get('--log')
+
+    nid  = date_nid.nid_now()
+    date = date_nid.nid_to_date(nid)
+    if service_log:
+        logfile = settings.SERVICES_LOG + '/'+ date + '.log'
+        try:
+            logf    = open(logfile, 'a')
+        except Exception as e:
+            s = "ERROR %s" % str(e)
+            slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
+            slack_webhook.send(settings.SLACK_URL, s, channel=slack_channel)
+            sys.exit(1)
+
     filter_name = args.get('--filter')
     if email and not group or group and not email:
         print('Either both email and group options must be set, or neither.')
