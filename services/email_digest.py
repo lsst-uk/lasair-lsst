@@ -26,6 +26,7 @@ from datetime import datetime
 logfile = ''
 logf = sys.stdout
 
+
 def format_line(alert):
     text = ' '.join(str(value) for key, value in alert.items()) + "\n"
     html = "<tr>"
@@ -98,9 +99,10 @@ def main(to_addr, groupid, fname):
                 sleep(1)
                 continue
             if msg.error():
-                print('ERROR polling for alerts: ' + str(msg.error()))
+                logf.write('ERROR polling for alerts: ' + str(msg.error()))
                 break
             alerts.append(json.loads(msg.value()))
+        consumer.commit()
         consumer.close()
 
         # Create and send digest email
@@ -124,7 +126,7 @@ if __name__ == "__main__":
     if service_log:
         logfile = settings.SERVICES_LOG + '/'+ date + '.log'
         try:
-            logf    = open(logfile, 'a')
+            logf = open(logfile, 'a')
         except Exception as e:
             s = "ERROR %s" % str(e)
             slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
