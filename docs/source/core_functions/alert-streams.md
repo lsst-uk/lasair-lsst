@@ -158,7 +158,7 @@ To run the code below, install
 [Confluent Kafka](https://pypi.org/project/confluent-kafka/), 
 the python install being `pip install confluent_kafka`.
 
-You will be connecting to `lasair-lsst-kafka.lsst.ac.uk` on port 9092. 
+You will be connecting to `lasair-lsst-kafka.lsst_pub.ac.uk` on port 9092. 
 
 You will need to understand two concepts: `topic_name` and `group_id`. The `topic_name` is a string 
 to identify which stream of alerts you want, which derives from the name of a 
@@ -189,7 +189,7 @@ Here is the sample code
 import json
 from lasair import lasair_consumer
 
-kafka_server = 'lasair-lsst-kafka.lsst.ac.uk:9092'
+kafka_server = 'lasair-lsst-kafka_pub.lsst.ac.uk:9092'
 group_id     = 'test123'
 my_topic     = 'lasair_2Hasabsmag'
 consumer = lasair_consumer(kafka_server, group_id, my_topic)
