@@ -61,13 +61,13 @@ def main(to_addr, groupid, fname):
     now = datetime.now()
     logf.write(f'Starting email_digest at {now}\n') 
     if not groupid:
-        groupid = 'email_digest'
+        groupid = 'email_digest_1352'
     consumer_conf = {
         'bootstrap.servers': settings.PUBLIC_KAFKA_READONLY,
         'default.topic.config': {'auto.offset.reset': 'earliest'},
         'client.id': 'email_digest',
         'group.id': groupid,
-        'enable.auto.commit': True,
+        'enable.auto.commit': False,
     }
 
     # Get a list of filters
@@ -85,10 +85,12 @@ def main(to_addr, groupid, fname):
     cursor.execute(query)
     filters = cursor.fetchall()
 
+    consumer = Consumer(consumer_conf)
+
     for f in filters:
         # Get any new alerts
-        consumer = Consumer(consumer_conf)
         consumer.subscribe([f['topic_name']])
+        sleep(2)
         alerts = []
         i = 0
         while i < 10:
@@ -102,17 +104,25 @@ def main(to_addr, groupid, fname):
                 logf.write('ERROR polling for alerts: ' + str(msg.error()))
                 break
             alerts.append(json.loads(msg.value()))
-        consumer.commit()
-        consumer.close()
 
         # Create and send digest email
         if len(alerts) > 0:
             to_addr = f['email']
-            topic = f['topic_name']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
-            logf.write('%d from topic %s\n' % (len(alerts), topic))
-            send_email(to_addr, f['name'], text, html, json_str)
+            logf.write('%d from topic %s\n' % (len(alerts), f['topic_name']))
+            if len(json_str) < 3000000:
+                send_email(to_addr, f['name'], text, html, json_str)
+            else:
+                logf.write('ERROR: message too large to send as email')
+        else:
+            logf.write('No new output in topic %s\n' % (f['topic_name']))
+
+        consumer.commit()
+        sleep(2)
+        consumer.unsubscribe()
+        sleep(2)
+    consumer.close()
 
 
 if __name__ == "__main__":
@@ -121,10 +131,10 @@ if __name__ == "__main__":
     group = args.get('--group')
     service_log = args.get('--log')
 
-    nid  = date_nid.nid_now()
+    nid = date_nid.nid_now()
     date = date_nid.nid_to_date(nid)
     if service_log:
-        logfile = settings.SERVICES_LOG + '/'+ date + '.log'
+        logfile = settings.SERVICES_LOG + '/' + date + '.log'
         try:
             logf = open(logfile, 'a')
         except Exception as e:
