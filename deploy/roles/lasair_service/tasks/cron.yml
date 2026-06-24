@@ -32,15 +32,33 @@
     weekday: 6   
     job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services; {{ venv_path }}/bin/python3 mysqlbackup.py)"
 
-
-# Polls the TNS for new entries (22 past midnight)
-- name: "Crontab for TNS"
+# Polls the TNS for new entries
+- name: "Crontab for TNS hourly"
   cron:
-    name:   "Poll TNS"
+    name:   "Poll TNS hourly"
+    user:   "{{ ansible_env.USER }}"
+    minute: '30'
+    hour:   '0-17,23'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services/externalBrokers/TNS; {{ venv_path }}/bin/python3 tns_runner.py --hourly)"
+
+# Polls the TNS for new entries
+- name: "Crontab for TNS daily"
+  cron:
+    name:   "Poll TNS daily"
     user:   "{{ ansible_env.USER }}"
     minute: '10'
-    hour:   '0'
-    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services/externalBrokers/TNS; {{ venv_path }}/bin/python3 tns_runner.py)"
+    hour:   '8'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services/externalBrokers/TNS; {{ venv_path }}/bin/python3 tns_runner.py --daysAgo=1)"
+
+# Polls the TNS for new entries
+- name: "Crontab for TNS full"
+  cron:
+    name:   "Poll TNS full"
+    user:   "{{ ansible_env.USER }}"
+    minute: '15'
+    hour:   '9'
+    day:    '1,4'
+    job:    "(cd {{ ansible_env.HOME }}/{{ git_name }}/services/externalBrokers/TNS; {{ venv_path }}/bin/python3 tns_runner.py --daysAgo=All)"
 
 # Dump the crossmatch_tns table to CephFS (30 past midnight)
 - name: "Crontab to dump crossmatch_tns"
