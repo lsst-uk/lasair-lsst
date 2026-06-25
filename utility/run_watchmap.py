@@ -36,8 +36,9 @@ def run_watchmap(batch, ar_id):
         hits = check_alerts_against_watchmap(batch, alertlist, watchmap)
         print('Found %d hits' % len(hits))
     
-        insert_watchmap_hits(batch, hits)
-        print('Inserted into database')
+        if len(hits) > 0:
+            insert_watchmap_hits(batch, hits)
+            print('Inserted into database')
 
 # A way to pass the db connection to the watchmap code
 class Batch():
