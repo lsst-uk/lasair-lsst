@@ -13,7 +13,7 @@
             <div class="modal-body px-md-5 mb-3">
                 <h2 class="h4 text-center">Filter Settings</h2>
                 <p class="text-center mb-4">Update your filter settings</p>
-                <p class="text-center mb-4 text-danger">Warning: Saving the filter (even with no changes) clears the Kafka queue and puts in 10 new examples. If you want to experiment with your filter and keep previous data, then use the Duplicate Filter option.</p>
+                
 		
                 {% if filterQ %}
                     <form enctype="multipart/form-data" action="{% url 'filter_query_detail' filterQ.mq_id %}" method="post" class="mt-0 mb-3">
@@ -41,16 +41,31 @@
 
                 <div class="form-group mb-4">
 
-                    <label for="active">Streaming</label>
-                    <small class="d-flex align-items-center text-gray-500 mb-2">How would you like to be notified of new alerts matching your filter?</small>
-                    {{ form.active|add_class:"form-select" }}
+                    <label for="run">Triggers {% include "includes/info_tooltip.html" with info="Choose how you would like to automatically trigger your filter. You can click the 'run' button at any point to trigger the filter manually" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
+                    <div class="ms-2 form-check form-switch">
+                        {{ form.runOnAlert|add_class:"form-check-input" }}
+                        <label class="form-check-label text-gray-500" for="runOnAlert">On new alert</label>
+                    </div>
 
-                    <span class="text-error">{{ form.active.errors }}</span>
+                    <div class="ms-2 form-check form-switch">
+                        {{ form.runOnAnnotation|add_class:"form-check-input" }}
+                        <label class="form-check-label text-gray-500" for="runOnAnnotation"> On new annotation</label>
+                    </div>
+
+                    <span class="text-error">{{ form.run.errors }}</span>
                 </div>
 
                 <div class="form-group mb-4">
-                    <div class="form-check form-switch">
-                        <label for="public">public</label>
+
+                    <label for="output">Notifications {% include "includes/info_tooltip.html" with info="Choice how you would like to be notified of new matches to your filter" position="auto" link=docroot|add:"/core_functions/alert-streams.html" %}</label>
+                    <small class="d-flex align-items-center text-gray-500 mb-2">How would you like to be notified new filter matches?</small>
+                        {{ form.output|add_class:"form-select" }}
+
+                    <span class="text-error">{{ form.output.errors }}</span>
+                </div>
+                <div class="form-group mb-4">
+                    <div class="ms-2 form-check form-switch">
+                        <label for="public">Public</label>
                         {{ form.public|add_class:"form-check-input" }}
                         <small class="d-flex align-items-center text-gray-500">Submit filter to the public gallery</small>
                     </div>
@@ -58,6 +73,8 @@
 
                 </div>
 
+                <div class="alert alert-danger text-center" role="alert" style="text-wrap-mode: wrap;">
+                <strong><span class="fas fa-bullhorn me-1"></span>WARNING! </strong></br>Saving the filter, even with no change, clears the Kafka queue and inserts 10 example alerts.</div>
                 <div class="d-grid">
                     <button type="submit" name="action" class="btn btn-dark" value="save"><span class="icon icon-xs">{% include "includes/icons/icon_save.html" %}</span><span class="align-middle ms-2 icon-xs">Save</span></button>
                 </div>
@@ -99,3 +116,61 @@
     </div>
 
 {% endif %}
+
+
+<!-- Specific Page JS goes HERE  -->
+{% block javascripts %}
+
+<script>
+    function onEditFilterFormShown(event) {
+        // DISBALE runOnAnnotation AND runOnAlert SWITHCES 
+        var editFilterFormModal = document.getElementById('editFilterForm');
+        const runOnAnnotationSwitch = editFilterFormModal.querySelector('#id_runOnAnnotation');
+        const runOnAlertSwitch = editFilterFormModal.querySelector('#id_runOnAlert');
+        const annotatorsDropdown = document.getElementById('id_annotators');
+        const notificationDropdown = editFilterFormModal.querySelector('#id_output');
+
+        if (runOnAnnotationSwitch) {
+            // DISABLE IF NO ANNOTATORS SELECTED, OTHERWISE ENABLE
+            if (annotatorsDropdown) {
+                runOnAnnotationSwitch.disabled = annotatorsDropdown.selectedOptions.length === 0;
+            }
+            if (runOnAnnotationSwitch.disabled) {
+                runOnAnnotationSwitch.checked = false;
+            }
+            if (!runOnAnnotationSwitch.checked && !runOnAlertSwitch.checked) {
+                notificationDropdown.value = "0";
+                notificationDropdown.disabled = true;
+            } else {
+                notificationDropdown.disabled = false;
+            }
+
+        }
+        
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        var editFilterFormModal = document.getElementById('editFilterForm');
+        if (editFilterFormModal) {
+            editFilterFormModal.addEventListener('shown.bs.modal', onEditFilterFormShown);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        var editFilterFormModal = document.getElementById('editFilterForm');
+        if (editFilterFormModal) {
+            editFilterFormModal.addEventListener('shown.bs.modal', onEditFilterFormShown);
+        }
+    });
+    document.addEventListener('DOMContentLoaded', function () {
+        var editFilterFormModal = document.getElementById('editFilterForm');
+        var runTrigger1 = editFilterFormModal.querySelector('#id_runOnAnnotation');
+        var runTrigger2 = editFilterFormModal.querySelector('#id_runOnAlert');
+        if (runTrigger1) {
+            runTrigger1.addEventListener('click', onEditFilterFormShown);
+        }
+        if (runTrigger2) {
+            runTrigger2.addEventListener('click', onEditFilterFormShown);
+        }
+    });
+</script>
+{% endblock javascripts %}

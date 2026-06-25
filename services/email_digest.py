@@ -2,24 +2,29 @@
 For each filter with email output, checks the associated Kafka topic for new alerts,
 builds a digest email and sends it. Intended to be run as a daily cronjob.
 Usage:
-    email_digest.py [--email=<address> --group=<id>] [--filter=<name>]
+    email_digest.py [--email=<address> --group=<id>] [--filter=<name>] [--log]
 
 Options:
     --help             Show usage information
     --email=<address>  Send all alerts here instead of to users (for testing)
     --group=<id>       Group ID (for testing)
     --filter=<name>    Limit to a single filter (for testing)
+    --log              If present, logs to service log
 """
 
 import sys
 sys.path.append('../common')
 from docopt import docopt
-from src import db_connect
+from src import db_connect, date_nid, slack_webhook
 from src.send_email import send_email
 from confluent_kafka import Consumer
 import settings
 from time import sleep
 import json
+from datetime import datetime
+
+logfile = ''
+logf = sys.stdout
 
 
 def format_line(alert):
@@ -53,14 +58,16 @@ def format_message(fname, alerts):
 
 
 def main(to_addr, groupid, fname):
+    now = datetime.now()
+    logf.write(f'Starting email_digest at {now}\n') 
     if not groupid:
-        groupid = 'email_digest'
+        groupid = 'email_digest_1352'
     consumer_conf = {
         'bootstrap.servers': settings.PUBLIC_KAFKA_READONLY,
         'default.topic.config': {'auto.offset.reset': 'earliest'},
         'client.id': 'email_digest',
         'group.id': groupid,
-        'enable.auto.commit': True,
+        'enable.auto.commit': False,
     }
 
     # Get a list of filters
@@ -73,15 +80,17 @@ def main(to_addr, groupid, fname):
         # get a specific query (for testing)
         query += f"AND myqueries.name='{fname}'"
     else:
-        # get all active=1 queries
-        query += "AND active=1"
+        # get all email queries
+        query += "AND output=%d" % settings.OUTPUT_EMAIL
     cursor.execute(query)
     filters = cursor.fetchall()
 
+    consumer = Consumer(consumer_conf)
+
     for f in filters:
         # Get any new alerts
-        consumer = Consumer(consumer_conf)
         consumer.subscribe([f['topic_name']])
+        sleep(2)
         alerts = []
         i = 0
         while i < 10:
@@ -92,24 +101,48 @@ def main(to_addr, groupid, fname):
                 sleep(1)
                 continue
             if msg.error():
-                print('ERROR polling for alerts: ' + str(msg.error()))
+                logf.write('ERROR polling for alerts: ' + str(msg.error()))
                 break
             alerts.append(json.loads(msg.value()))
-        consumer.close()
 
         # Create and send digest email
         if len(alerts) > 0:
-            if not to_addr:
-                to_addr = f['email']
+            to_addr = f['email']
             text, html = format_message(f['name'], alerts)
             json_str = json.dumps(alerts, indent=2)
-            send_email(to_addr, f['name'], text, html, json_str)
+            logf.write('%d from topic %s\n' % (len(alerts), f['topic_name']))
+            if len(json_str) < 3000000:
+                send_email(to_addr, f['name'], text, html, json_str)
+            else:
+                logf.write('ERROR: message too large to send as email')
+        else:
+            logf.write('No new output in topic %s\n' % (f['topic_name']))
+
+        consumer.commit()
+        sleep(2)
+        consumer.unsubscribe()
+        sleep(2)
+    consumer.close()
 
 
 if __name__ == "__main__":
     args = docopt(__doc__)
     email = args.get('--email')
     group = args.get('--group')
+    service_log = args.get('--log')
+
+    nid = date_nid.nid_now()
+    date = date_nid.nid_to_date(nid)
+    if service_log:
+        logfile = settings.SERVICES_LOG + '/' + date + '.log'
+        try:
+            logf = open(logfile, 'a')
+        except Exception as e:
+            s = "ERROR %s" % str(e)
+            slack_channel = getattr(settings, 'SLACK_CHANNEL', None)
+            slack_webhook.send(settings.SLACK_URL, s, channel=slack_channel)
+            sys.exit(1)
+
     filter_name = args.get('--filter')
     if email and not group or group and not email:
         print('Either both email and group options must be set, or neither.')

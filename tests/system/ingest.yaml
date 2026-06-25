@@ -7,9 +7,6 @@
   vars_files:
     - system_test_settings.yaml
   tasks:
-    - name: Pause for 10 seconds
-      ansible.builtin.pause:
-        seconds: 10
     - name: Send test alerts
       ansible.builtin.shell: "python3 serializing_json2kafka.py {{ groups['kafka'][0] }}:9092 sample_alerts/schema{{ schema }}/alert.json ingest_test {{ (groups['ingest'] | length) * (groups['sherlock'] | length) * (groups['filter'] | length) }}"
 

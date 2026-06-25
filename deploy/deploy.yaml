@@ -22,6 +22,34 @@
   tags:
     - always
 
+- hosts: localhost
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Lookup TNS watchlist ID
+      community.mysql.mysql_query:
+        login_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+        login_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+        login_db: "{{ settings.master_db_username }}"
+        login_user: "{{ settings.master_db_readonly_username}}"
+        login_password: "{{ settings.master_db_readonly_password }}"
+        query: SELECT wl_id FROM watchlists WHERE name='__TNS__'
+      register: tns_wl_lookup
+  tags:
+    - always
+
+- hosts: all
+  gather_facts: true
+  tasks:
+    - name: Set TNS watchlist ID
+      ansible.builtin.set_fact:
+        tns_wl_id: "{{ hostvars['localhost']['tns_wl_lookup']['query_result'][0][0]['wl_id'] | default('-1') }}"
+    - name: Show TNS watchlist ID
+      ansible.builtin.debug:
+        msg: "TNS watchlist Id: {{ tns_wl_id }}"
+  tags:
+    - always
+
 - hosts: all:!localhost
   gather_facts: false
   vars_files:

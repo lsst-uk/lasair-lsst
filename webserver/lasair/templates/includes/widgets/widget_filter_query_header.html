@@ -66,11 +66,15 @@
                     {{filterQ.description}}
                 </small>
                 <small class="text-gray-500">
-                    The filter is <b>{% if not filterQ.active %}not active{% elif filterQ.active == 1%} streamed via email {% elif filterQ.active == 2%} streamed via kafka</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% elif filterQ.active == 3%} streamed via kafka with lite lightcurve</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% elif filterQ.active == 4%} streamed via kafka with full alert</b> with the topic name <code>{{filterQ.topic_name}}</code><b> {% endif %}.</b> {% include "includes/info_tooltip.html" with info="when active, a filter will be dynamically matched against new transient alerts and the results streamed via email or kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
-		</small><br/>
-		<small>
-		{{ kafka_message }}
-		</small>
+                    The filter is <b>
+                        {% if filterQ.run %}active{% else %}not active{% endif %}</b>
+                        {% if filterQ.output == 1%}and <b>streamed via email
+                        {% elif filterQ.output == 2%}and <b>streamed via kafka</b> with the topic name <code>{{filterQ.topic_name}}</code><b>
+                        {% elif filterQ.output == 3%}and <b>streamed via kafka with lite lightcurve</b> with the topic name <code>{{filterQ.topic_name}}</code><b>
+                        {% elif filterQ.output == 4%}and <b>streamed via kafka with full alert</b> with the topic name <code>{{filterQ.topic_name}}</code><b>
+                        {% endif %}.</b>
+                    {% include "includes/info_tooltip.html" with info="when active, a filter will be dynamically matched against new transient alerts and/or annotations and the results streamed via email or kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
+                </small>
             </div>
 
 

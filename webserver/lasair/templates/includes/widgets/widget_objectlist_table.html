@@ -3,10 +3,18 @@
 <div class="card border-0 shadow h-100 p-3">
 
 
+       
+
+
     {% if header %}
         <div class="card-header border-0 pb-1">
             <div class="row d-flex">
+                {% if kafka_message %}
+                 <div class="alert alert-info text-center" role="alert" style="text-wrap-mode: wrap;">
+                <strong><span class="fas fa-bullhorn me-1"></span></strong>{{ kafka_message }}</div>
+                {% endif %}
                 <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
+                    
                     <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
                         {% include "includes/icons/icon_object_list.html" %}
                     </div>

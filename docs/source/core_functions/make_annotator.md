@@ -4,7 +4,7 @@
 Annotation means that external users push information to the Lasair database.
 Therefore it requires that user to inform the Lasair team and be approved
 before it will work. The team will use the admin interface to create an `annotator`
-object in the database, which is a conneciton between the API token of that user
+object in the database, which is a connection between the API token of that user
 with the name (`topic`) assigned to the annotator. 
 
 In the first case, write to 
@@ -94,7 +94,7 @@ group_id = settings.GROUP_ID
 topic_in = settings.TOPIC_IN
 
 # kafka consumer that we can suck from
-consumer = lasair.lasair_consumer('lasair-lsst-kafka.lsst.ac.uk:9092', group_id, topic_in)
+consumer = lasair.lasair_consumer('lasair-lsst-kafka_pub.lsst.ac.uk:9092', group_id, topic_in)
 
 # the lasair client will be used for pulling all the info about the object
 # and for annotating it

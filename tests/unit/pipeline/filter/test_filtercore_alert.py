@@ -11,7 +11,7 @@ def test_message_handler(message_list):
     return len(message_list)
 
 
-class AlertFilterTest(unittest.TestCase):
+class FilterTest(unittest.TestCase):
 
     def test_sigterm_handler(self):
         """Test that the sigterm handler sets sigterm raised correctly"""
@@ -76,8 +76,6 @@ class AlertFilterTest(unittest.TestCase):
         for item in result.split(','):
             self.assertIn(item, expected_results)
 
-# Dont know why this fails. In the main branch the mock function FeatureGroup.run_all is used
-# but in the refactor/filter branch it tries to use the real version and fails
     @patch('alertcore.FeatureGroup')
     def test_insert_query(self, mock_FeatureGroup):
         """Test that the method for constructing the object table insert gives the expected output given a dict of

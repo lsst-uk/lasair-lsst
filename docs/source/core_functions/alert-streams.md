@@ -1,11 +1,10 @@
 ## Alert Streams
 
-The Lasair broker can send immediate “push” notifications when your active 
-filter sees and interesting alert. Here is how to make that 
-happen with email notification. First make sure you are logged in to your 
-Lasair account (top left of screen, then go to create new stored filter. 
-This page is about how to get machine-readable push records from your active filter; 
-You can also get alert by email, although obviously the numbers will be limited.
+The Lasair broker can send immediate “push” notifications when your  
+filter sees an interesting alert or, if your filter uses annotations, when the
+annotation is updated. Results are delivered using Kafka; alternatively you can
+get results as a daily email, although obviously this will only be
+suitable for filters that produce limited output
 
 ### Resources
 - See the [Consume Kafka notebook](https://github.com/lsst-uk/lasair-examples/blob/main/notebooks/consume_kafka.ipynb) for basic consumption of an active stream.
@@ -13,30 +12,65 @@ You can also get alert by email, although obviously the numbers will be limited.
 - Watch the video [Topic and GroupID for a Lasair Kafka Stream](https://youtu.be/HJneKr1EhmY).
 - Copy and modify the program at the bottom of this page to fetch your own Kafka records.
 
-### Active Filter with Kafka
+### Filter triggering and notification
 Lasair provides a protocol for immediate delivery that is suitable for machines to 
 communicate with machines. It is called Kafka, and is the way alerts are delivered from
 the Rubin Observatory to brokers such as Lasair.
 By providing Kafka streams, Lasair provides a machine-readable packet of data 
 that can cause action at your site. 
 
-You will need to be logged in to your Lasair account. Make a filter as in the
-previous section, then click “Save". You will then be prompted for "Filter Settings", 
+You will need to be logged in to your Lasair account. [Make a filter](make_filter.html),
+then click “Save". You will then be prompted for "Filter Settings", 
 which you can fill in like this:
 
 <img src="../_images/alert-streams/filter_settings.png" width="400px"/>
 
-You need a name and description, and at the bottom choose the filter is to be
-publicly visible or not. See below for the meaning of the various choices in
-the "Streaming" selection. When you save the filter, you see something like this:
+You need a name and description.
+
+The next menu indicates the trigger that makes your filter run, which can be 
+when you click the "run filter" button on the web page, or if the filter is "active"
+it can be triggered by either an alert or an annotation. To keep the filter inactive,
+meaning it only runs from clicking, just uncheck both the trigger options.
+
+If you select "On new alert", then your filter is run in near-real-time against arriving alerts.
+There is an additional option if your filter involves [annotations](../concepts.html#annotations),
+so it can also run when the annotation is updated, either instead of or as well as when
+a new alert arrives. If you choose *both* of these options, you will get the results of the
+filter *first* when the alert arrives, using the old value of the annotation, then *again*
+onece the annotator as run and been uploaded and you get results with the new value
+of the annotation.
+
+The _notification_ menu asks what content you would like to appear in your output Kafka stream. See
+[below](#types-of-kafka-streams) for details. 
+
+Here are some examples of how the trigger and notification can be set for a filter:
+<img src="../_images/alert-streams/trigger_notify.png" width="800px"/>
+
+Left: An inactive filter. Only runs when you click "Run Filter" on the web page.
+
+Middle: A filter that produces the SELECTed attributes and the lite lightcurve, 
+triggered by the arrival of an alert.
+
+Right: A filter triggered by the arrival of the annotation that the filter is listening for, 
+that produces only the SELECTed attributes.
+
+At the bottom choose whether the filter is to be publicly visible or not.
+
+### Kafka Streams
+When you save the filter, you see something like this:
 
 <img src="../_images/alert-streams/filter_saved.png" width="400px"/>
 
-The red warning on the settings panel is connected to the green message in the response. 
+The pink warning on the settings panel is connected to the green message in the response. 
 Whenever a kafka filter is changed, the old records are deleted, and Lasair runs
 the new filter to try and put 10 records in the stream so you can see something
-with the Kafka consumer (code below). You can run the filter in the usual way 
-from the web browser, but you will have to wait for some alerts to arrive for 
+with the Kafka consumer (code below). This is so you can experiment with 
+the stream in a cycle of editing and consuming kafka. (Of course if your filter
+returns no objects, then none will be put in the kafka stream! Trying to read from such an
+empty topic will result in the error `UNKNOWN_TOPIC_OR_PART`; this is not a problem,
+the error will go away when the fist message is returned by the filter.)
+Once saved, you can run the filter in the usual way 
+from the web browser, but you will have to wait for more alerts to arrive for 
 more records to go in the stream.
 
 In order to run the consumer code, you need the "topic name" corresponding to your 
@@ -44,7 +78,7 @@ filter, which is derived from the name you gave it in the settings. In this case
 topic name is `lasair_2Hasabsmag`.
 
 ### Types of Kafka Streams
-The plain kafka stream offers just the attributes you selected in your filter query.
+The plain Kafka stream offers just the attributes you selected in your filter query.
 Supoose your SQL SELECT says `objects.diaObjectId,  objects.decl, objects.ra`, 
 then your plain Kafka output would be just these, with a timestamp added for
 when the record was produced:
@@ -124,7 +158,7 @@ To run the code below, install
 [Confluent Kafka](https://pypi.org/project/confluent-kafka/), 
 the python install being `pip install confluent_kafka`.
 
-You will be connecting to `lasair-lsst-kafka.lsst.ac.uk` on port 9092. 
+You will be connecting to `lasair-lsst-kafka.lsst_pub.ac.uk` on port 9092. 
 
 You will need to understand two concepts: `topic_name` and `group_id`. The `topic_name` is a string 
 to identify which stream of alerts you want, which derives from the name of a 
@@ -155,7 +189,7 @@ Here is the sample code
 import json
 from lasair import lasair_consumer
 
-kafka_server = 'lasair-lsst-kafka.lsst.ac.uk:9092'
+kafka_server = 'lasair-lsst-kafka_pub.lsst.ac.uk:9092'
 group_id     = 'test123'
 my_topic     = 'lasair_2Hasabsmag'
 consumer = lasair_consumer(kafka_server, group_id, my_topic)
@@ -185,9 +219,7 @@ It assumes the filter has been saved with the 'lite lightcurve' option.
 ### Email Streaming
 
 The email distribution is a much simpler notification process, and is intended for 
-filters that do not pass many alerts 
-in a given day -- or else the email box will be flooded with spam. Lasair throttles
-the number of emails; once the first has been sent, another will not be sent until 24
-hours later, containing the objects passed by the filter in that time. In this 
-way, a maximum of one email per day can come from a Lasair filter.
-
+filters that do not pass many alerts. A single daily email will be sent on any day 
+when there are results, containing all the results from the filters. If you choose 
+the email option, you cannot get lightcurves, only the SELECTed attributes
+of the filter.

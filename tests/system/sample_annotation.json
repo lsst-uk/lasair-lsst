@@ -1,0 +1,9 @@
+{
+  "diaObjectId": 1234,
+  "topic": "test",
+  "version": "1",
+  "classification": "TEST",
+  "explanation": "testing",
+  "classdict": "{\"ra\": 149.934, \"dec\": 2.821}",
+  "url": ""
+}
