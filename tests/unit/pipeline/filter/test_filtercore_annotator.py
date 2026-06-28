@@ -55,7 +55,8 @@ class AnnotationFilterTest(unittest.TestCase):
         fltr.ann_diaObjectId = {}
         result = fltr.ingest_annotation(test_annotation)
         self.assertEqual(result, 1)
-        mock_execute_remote_query.assert_called_once()
+        # a delete and an insert
+        self.assertEqual(mock_execute_remote_query.call_count, 2)
 
     @patch('annotationcore.AnnotationFilter.ingest_annotation')
     @patch('annotationcore.AnnotationFilter.ingest_message_list')
