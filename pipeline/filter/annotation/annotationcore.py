@@ -79,7 +79,7 @@ class AnnotationFilter(Filter):
                 annotation['diaObjectId'], 
                 annotation['topic'])
 
-        queryr = 'REPLACE INTO annotations ('
+        queryr = 'INSERT INTO annotations ('
         queryr += 'diaObjectId, topic, version, classification, explanation, classdict, url'
         queryr += ') VALUES ('
         queryr += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
