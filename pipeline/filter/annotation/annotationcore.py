@@ -74,11 +74,16 @@ class AnnotationFilter(Filter):
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
         # put the annotation in the database
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (
+        queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
+        queryd = queryd % (
+                annotation['diaObjectId'], 
+                annotation['topic'])
+
+        queryr = 'INSERT INTO annotations ('
+        queryr += 'diaObjectId, topic, version, classification, explanation, classdict, url'
+        queryr += ') VALUES ('
+        queryr += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+        queryr = queryr % (
                 annotation['diaObjectId'], 
                 annotation['topic'], 
                 annotation['version'], 
@@ -88,7 +93,8 @@ class AnnotationFilter(Filter):
                 annotation['url'])
 
         if self.transfer:
-            self.execute_remote_query(query)
+            self.execute_remote_query(queryd)
+            self.execute_remote_query(queryr)
         return 1
 
     def post_ingest(self, n_messages):
