@@ -7,6 +7,7 @@ topics_in = [
     'extragalactic-transients',
 ]
 import sys
+import lasair
 from hop_reader import hop_reader
 sys.path.append('../../../common')
 import settings
@@ -65,12 +66,12 @@ def fetch(topic_in, L):
 
 if __name__=="__main__":
     endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
-    L = lasair.lasair_client(settings.HOPSKOTCH_API_TOKEN, endpoint=endpoint)
+    L = lasair.lasair_client(settings.AMPEL_API_TOKEN, endpoint=endpoint)
     if len(sys.argv) > 1:
         group_id = sys.argv[1]
     else:
         group_id = 'test01'
 
-    for topic_in in settings.HOPSKOTCH_IN:
+    for topic_in in settings.HOPSKOTCH_TOPICS:
         nalert = fetch(topic_in, L)
         print(f'Fetched {nalert} from {topic_in}')
