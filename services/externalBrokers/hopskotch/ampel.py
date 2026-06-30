@@ -1,18 +1,11 @@
 """
 Read AMPEL classifications from Hopskotch.
-Choices are
 """
-topics_in = [
-    'extragalactic-infants',
-    'extragalactic-transients',
-]
 import sys
 import lasair
 from hop_reader import hop_reader
 sys.path.append('../../../common')
 import settings
-
-
 
 def make_classdict(d, topic):
     # convert AMPEL message to objectId and Lasair classdict
@@ -39,7 +32,7 @@ def make_classdict(d, topic):
 
     return (diaObjectId, classification, classdict)
 
-def fetch(topic_in, L):
+def fetch(topic_in, L, topic_out):
     hr = hop_reader(topic_in, group_id, is_gcn=False)
     nalert = 0
     while 1:
@@ -72,6 +65,8 @@ if __name__=="__main__":
     else:
         group_id = 'test01'
 
-    for topic_in in settings.HOPSKOTCH_TOPICS:
-        nalert = fetch(topic_in, L)
+    for i in range(len(settings.HOPSKOTCH_TOPICS_IN)):
+        topic_in  = settings.HOPSKOTCH_TOPICS_IN[i]
+        topic_out = settings.HOPSKOTCH_TOPICS_OUT[i]
+        nalert = fetch(topic_in, L, topic_out)
         print(f'Fetched {nalert} from {topic_in}')
