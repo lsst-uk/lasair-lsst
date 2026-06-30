@@ -2,10 +2,18 @@
 Read AMPEL classifications from Hopskotch.
 """
 import sys
+from datetime import datetime
 import lasair
 from hop_reader import hop_reader
 sys.path.append('../../../common')
+from src import date_nid
 import settings
+
+# open system services log
+nid  = date_nid.nid_now()
+date = date_nid.nid_to_date(nid)
+logfile = settings.SERVICES_LOG +'/'+ date + '.log'
+logf = open(logfile, 'a')
 
 def make_classdict(d, topic):
     # convert AMPEL message to objectId and Lasair classdict
@@ -28,7 +36,7 @@ def make_classdict(d, topic):
         classification = 'infant'
 
     else:
-        print(f'Unknown topic {topic}')
+        logf.write(f'Hopskotch error: Unknown topic {topic}')
 
     return (diaObjectId, classification, classdict)
 
@@ -42,7 +50,6 @@ def fetch(topic_in, L, topic_out):
             return nalert
         (diaObjectId, classification, classdict) = make_classdict(d, topic_in)
         if classification:
-            print(diaObjectId, classdict)
             L.annotate(
                 topic_out,
                 diaObjectId,
@@ -52,12 +59,11 @@ def fetch(topic_in, L, topic_out):
                 classdict=classdict,
                 url='')
         else:
-            print('Cannot make classification')
-            print(d)
             continue
         nalert += 1
 
 if __name__=="__main__":
+    logf.write('\n\nHopskotch at %s\n' % datetime.now())
     endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
     L = lasair.lasair_client(settings.AMPEL_API_TOKEN, endpoint=endpoint)
     if len(sys.argv) > 1:
@@ -69,4 +75,4 @@ if __name__=="__main__":
         topic_in  = settings.HOPSKOTCH_TOPICS_IN[i]
         topic_out = settings.HOPSKOTCH_TOPICS_OUT[i]
         nalert = fetch(topic_in, L, topic_out)
-        print(f'Fetched {nalert} from {topic_in}')
+        logf.write(f'Hopskotch: Fetched {nalert} from {topic_in}\n')
