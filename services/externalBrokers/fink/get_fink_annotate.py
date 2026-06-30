@@ -44,6 +44,7 @@ fink_config = {
 
 # Instantiate a consumer
 consumer = AlertConsumer(settings.FINK_TOPICS, fink_config)
+logf.write('\nFink at %s\n' % datetime.now())
 
 nalert = 0
 maxtimeout = 5
@@ -73,5 +74,4 @@ while nalert < maxalert:
 
     nalert += 1
 
-if nalert > 0:
-    logf.write('\n-- %s from Fink at %s\n' % (nalert, datetime.now()))
+logf.write('Fink got %d\n' % nalert)
