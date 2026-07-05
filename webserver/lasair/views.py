@@ -157,6 +157,24 @@ def index(request):
             'psfFlux'        : '%.0f' % t['psfFlux'],
             'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
         })
+##############
+    from plotly.offline import plot
+    import plotly.graph_objs as go
+    nid = date_nid.nid_now()
+    query = f'SELECT nid,value FROM lasair_statistics where name="today_alert" AND nid > {nid-21} ORDER BY nid'
+    msl = db_connect.readonly()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor.execute(query)
+    nids = []
+    nalerts = []
+    for row in cursor:
+        nids.append(nid - row['nid'])
+        nalerts.append(row['value'])
+    fig = go.Figure()
+    fig.add_trace(go.Bar( x=nids, y=nalerts, marker_color='gray'))
+    fig.update_xaxes(range=[21, 0])
+    timeline = plot(fig, output_type='div')
+##############
 
     context = {
         'web_domain': lasair_settings.WEB_DOMAIN,
@@ -165,5 +183,6 @@ def index(request):
         'news': news,
         'table': textTable,
         'schema': schema,
+        'timeline': timeline,
     }
     return render(request, 'index.html', context)
