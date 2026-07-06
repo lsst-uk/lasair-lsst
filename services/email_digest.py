@@ -31,7 +31,7 @@ def format_line(alert):
     text = ' '.join(str(value) for key, value in alert.items()) + "\n"
     html = "<tr>"
     for key, value in alert.items():
-        if key == 'diaObjectId':
+        if key.lower() == 'diaobjectid':
             html += f"<td><a href=\"https://{settings.LASAIR_URL}/objects/{str(value)}\">{str(value)}</a></td>"
         else:
             html += f"<td>{str(value)}</td>"
