@@ -53,7 +53,7 @@ class sherlock(FeatureGroup):
                         print(distances)
                     distanceModulusK = distances['dmod'] - 2.5*math.log10(1+z)
                 except:
-                    print('Redshift from Sherlock is, z)
+                    print('Redshift from Sherlock is:', z)
         
         if self.verbose:
             print('K corrected distanceModulus', distanceModulusK)
