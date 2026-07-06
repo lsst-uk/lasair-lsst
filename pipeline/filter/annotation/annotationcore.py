@@ -64,6 +64,7 @@ class AnnotationFilter(Filter):
             annotator = annotation['topic']
         else:
             return 0
+        print(annotation['diaObjectId'], annotation['topic'], annotation['classdict']) ### HACK
 
         # self.ann_diaObjectId = {
         #     'topic1':[oid1, oid2, ...], 
@@ -73,12 +74,18 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        # put the annotation in the database
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (
+        # to ensure uniqueness of classic annotations
+        queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
+        queryd = queryd % (
+                annotation['diaObjectId'], 
+                annotation['topic'])
+
+        # insert the annotation
+        queryi = 'INSERT INTO annotations ('
+        queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
+        queryi += ') VALUES ('
+        queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+        queryi = queryi % (
                 annotation['diaObjectId'], 
                 annotation['topic'], 
                 annotation['version'], 
@@ -87,8 +94,13 @@ class AnnotationFilter(Filter):
                 annotation['classdict'], 
                 annotation['url'])
 
-        if self.transfer:
-            self.execute_remote_query(query)
+        # classic annotators do not start 'tags_' 
+        # and there is only one per object/topic
+        if not annotation['topic'].startswith('tags_'):
+            self.execute_remote_query(queryd)
+
+        # insert the annotation/tag
+        self.execute_remote_query(queryi)
         return 1
 
     def post_ingest(self, n_messages):
@@ -110,4 +122,5 @@ class AnnotationFilter(Filter):
             self.log.error("ERROR in filter/fast_annotation_filters")
 
         # commit the kafka
-        self.consumer.commit()
+        print('commit')   # HACK
+        self.consumer.commit(asynchronous=False)

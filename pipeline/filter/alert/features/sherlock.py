@@ -52,8 +52,8 @@ class sherlock(FeatureGroup):
                     if self.verbose:
                         print(distances)
                     distanceModulusK = distances['dmod'] - 2.5*math.log10(1+z)
-                except:
-                    print('Redshift from Sherlock is:', z)
+                except Exception as e:
+                    print('Redshift %s gets error %s' % (str(z), str(e)))
         
         if self.verbose:
             print('K corrected distanceModulus', distanceModulusK)
