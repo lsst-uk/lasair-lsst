@@ -161,15 +161,19 @@ def index(request):
     from plotly.offline import plot
     import plotly.graph_objs as go
     nid = date_nid.nid_now()
-    query = f'SELECT nid,value FROM lasair_statistics where name="today_alert" AND nid > {nid-21} ORDER BY nid'
+    query = f'SELECT nid,value FROM lasair_statistics where name="today_alert" AND nid > {nid-182} ORDER BY nid'
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     cursor.execute(query)
     nids = []
     nalerts = []
+    maxalert = 1000000
     for row in cursor:
         nids.append(nid - row['nid'])
-        nalerts.append(row['value'])
+        if row['value'] > maxalert:
+            nalerts.append(maxalert)
+        else:
+            nalerts.append(row['value'])
     fig = go.Figure()
     fig.add_trace(go.Bar( x=nids, y=nalerts, marker_color='gray'))
     fig.update_xaxes(range=[21, 0])
