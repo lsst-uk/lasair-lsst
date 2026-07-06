@@ -115,11 +115,11 @@ def main(to_addr, groupid, fname):
                 send_email(to_addr, f['name'], text, html, json_str)
             else:
                 logf.write('ERROR: message too large to send as email')
+            consumer.commit()
+            sleep(2)
         else:
             logf.write('No new output in topic %s\n' % (f['topic_name']))
 
-        consumer.commit()
-        sleep(2)
         consumer.unsubscribe()
         sleep(2)
     consumer.close()
