@@ -83,7 +83,7 @@ def status(request, nid):
 
     statusSchema = {
         'today_alert'      : 'Alerts received today',
-        'today_lsst'       : 'Alerts sent by LSST today',
+#        'today_lsst'       : 'Alerts sent by LSST today',
         'diaObject'        : 'NonSS objects received today',
         'nSSObject'         : 'SS objects received today',
         'nSSSource'         : 'SS sources received today',
