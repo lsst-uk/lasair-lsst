@@ -448,28 +448,27 @@ class Filter:
     def grafana_today():
         """How many objects reported today from LSST.
         """
-        g = datetime.datetime.now(datetime.UTC)
-        date = '%4d%02d%02d' % (g.year, g.month, g.day)
-        # do not have this for LSST yet
-#        url = 'https://monitor.alerts.ztf.uw.edu/api/datasources/proxy/7/api/v1/query?query='
-#        urltail = 'sum(kafka_log_log_value{ name="LogEndOffset" , night = "%s", program = "MSIP" }) ' \
-#                  '- sum(kafka_log_log_value{ name="LogStartOffset", night = "%s", program="MSIP" })' % (
-#                      date, date)
-
-#        try:
-#            urlquote = url + urllib.parse.quote(urltail)
-#            resultjson = requests.get(urlquote,
-#                                      auth=(settings.GRAFANA_USERNAME, settings.GRAFANA_PASSWORD))
-#            result = json.loads(resultjson.text)
-#            alertsstr = result['data']['result'][0]['value'][1]
-#            today_candidates_ztf = int(alertsstr) // 4
-#        except Exception as e:
-#            log = lasairLogging.getLogger("filter")
-#            log.info('Cannot parse grafana: %s' % str(e))
-#            today_candidates_ztf = -1
-        today_candidates_ztf = 0
-        return today_candidates_ztf
-
+        too = int(time.time())*1000  # milliseconds
+        fro = too - 85400 * 1000
+        
+        data = {
+            "intervalMs":60000,
+            "maxDataPoints":1496,
+            "timeRange":{
+                "from":0,
+                "to"  :0,
+                "timezone":"utc"
+            }
+        }
+        data['timeRange']['from'] = str(fro)
+        data['timeRange']['to']   = str(too)
+        url = 'https://grafana.slac.stanford.edu/api/public/dashboards/26d8f1d4d48c40e9b9d9b490b43b7943/panels/29/query'
+        response = requests.post(url, json=data)
+        rj = json.loads(response.text)
+        rj = rj['results']['Alert Total']['frames'][0]['data']['values'][1][-1]
+        alerts_today = rj
+        return alerts_today
+    
     def run_batch(self):
         """the subclass is handed a list of messages (alerts or annotations)"""
         self.setup()
