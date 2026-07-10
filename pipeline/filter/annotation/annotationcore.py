@@ -79,11 +79,11 @@ class AnnotationFilter(Filter):
                 annotation['diaObjectId'], 
                 annotation['topic'])
 
-        queryr = 'INSERT INTO annotations ('
-        queryr += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        queryr += ') VALUES ('
-        queryr += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        queryr = queryr % (
+        queryi = 'INSERT INTO annotations ('
+        queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
+        queryi += ') VALUES ('
+        queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+        queryi = queryi % (
                 annotation['diaObjectId'], 
                 annotation['topic'], 
                 annotation['version'], 
@@ -93,8 +93,12 @@ class AnnotationFilter(Filter):
                 annotation['url'])
 
         if self.transfer:
-            self.execute_remote_query(queryd)
-            self.execute_remote_query(queryr)
+            # classic annotations have unique classification
+            if not topic.startswith('tags_'):
+                self.execute_remote_query(queryd) 
+
+            # actually insert the annotation
+            self.execute_remote_query(queryi)
         return 1
 
     def post_ingest(self, n_messages):
