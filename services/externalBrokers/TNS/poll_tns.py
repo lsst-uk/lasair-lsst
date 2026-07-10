@@ -275,7 +275,7 @@ def getTNSData(opts, conn):
 
 #        print(prefix, name, ra, dec, htm16)
 
-    print("Total rows added = %d, modified = %d\n" % (rowsAdded, rowsChanged))
+    print("Total rows added = %d, modified = %d" % (rowsAdded, rowsChanged))
 
     # update objects.tns_name from crossmatch_tns.tns_name
     cursor = conn.cursor (dictionary=True, buffered=True)
@@ -283,7 +283,7 @@ def getTNSData(opts, conn):
     query += "WHERE objects.diaObjectId = watchlist_hits.diaObjectId AND watchlist_hits.wl_id = %d"
     query = query % settings.TNS_WATCHLIST_ID
     cursor.execute(query)
-    print('Objects.tns_name updated\n')
+    print('Objects.tns_name updated')
 
 def truncate_tns(conn):
     """ Delete all the cones, hits, and crossmatch_tns 
