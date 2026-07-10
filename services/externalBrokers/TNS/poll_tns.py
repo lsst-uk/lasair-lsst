@@ -277,6 +277,13 @@ def getTNSData(opts, conn):
 
     print("Total rows added = %d, modified = %d\n" % (rowsAdded, rowsChanged))
 
+    # update objects.tns_name from crossmatch_tns.tns_name
+    query = "UPDATE objects, watchlist_hits SET objects.tns_name = watchlist_hits.name "
+    query += "WHERE objects.diaObjectId = watchlist_hits.diaObjectId AND watchlist_hits.wl_id = %d"
+    query = query % settings.TNS_WATCHLIST_ID
+    cursor.execute(query)
+    print('Objects.tns_name updated')
+
 def truncate_tns(conn):
     """ Delete all the cones, hits, and crossmatch_tns 
     """
