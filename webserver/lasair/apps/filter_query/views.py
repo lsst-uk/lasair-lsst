@@ -157,6 +157,8 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
+            if filterQuery.output is None
+                filterQuery.output = 0
             output = int(filterQuery.output)
             if output >= 2:
                 try:
@@ -191,11 +193,14 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.date_expire = \
             datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
         newFil.save()
+
+        message = ''
+        if newFil.output is None
+            newFil.output = 0
         filterQuery = newFil
         mq_id = filterQuery.pk
 
-        message = ''
-        output = int(newFil.output)
+        output = int(filterQuery.output)
         if output >= 2:
             try:
                 message += topic_refresh(newFil.real_sql, tn, output, limit=10) + '<br/>'
@@ -426,7 +431,11 @@ def filter_query_create(request, mq_id=False):
                 else:
                     filterQuery.run = 0
                 if request.POST.get('output'):
-                    filterQuery.output = int(request.POST.get('output'))
+                    filterQuery.output = request.POST.get('output')
+                    if filterQuery.output is None
+                        filterQuery.output = 0
+                    else:
+                        filterQuery.output = int(filterQuery.output)
                 else:
                     filterQuery.output = 0
 
