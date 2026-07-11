@@ -51,6 +51,7 @@ class AnnotationFilter(Filter):
         """insert_message_list: handle a list of annotations of the form
         [ann1, ann2, ....]
         """
+        print('===', annotation_list)    ### HACK
         nannotation = 0
         for ann in annotation_list:
             nannotation += self.ingest_annotation(ann)
@@ -74,10 +75,14 @@ class AnnotationFilter(Filter):
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
         # put the annotation in the database
-        queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
+        queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s" '
         queryd = queryd % (
                 annotation['diaObjectId'], 
                 annotation['topic'])
+
+        # if its tags, we can have multiple per object/topic
+        if annotation['topic'].startswith('tags_'):
+            queryd += 'AND classification="%s"' % annotation['classification']
 
         queryi = 'INSERT INTO annotations ('
         queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
@@ -93,11 +98,9 @@ class AnnotationFilter(Filter):
                 annotation['url'])
 
         if self.transfer:
-            # classic annotations have unique classification
-            if not topic.startswith('tags_'):
-                self.execute_remote_query(queryd) 
-
-            # actually insert the annotation
+            print(queryd)
+            self.execute_remote_query(queryd) 
+            print(queryi)
             self.execute_remote_query(queryi)
         return 1
 
