@@ -157,7 +157,7 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
-            if filterQuery.output is None
+            if filterQuery.output is None:
                 filterQuery.output = 0
             output = int(filterQuery.output)
             if output >= 2:
@@ -195,7 +195,7 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.save()
 
         message = ''
-        if newFil.output is None
+        if newFil.output is None:
             newFil.output = 0
         filterQuery = newFil
         mq_id = filterQuery.pk
@@ -432,7 +432,7 @@ def filter_query_create(request, mq_id=False):
                     filterQuery.run = 0
                 if request.POST.get('output'):
                     filterQuery.output = request.POST.get('output')
-                    if filterQuery.output is None
+                    if filterQuery.output is None:
                         filterQuery.output = 0
                     else:
                         filterQuery.output = int(filterQuery.output)
