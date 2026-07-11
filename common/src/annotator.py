@@ -3,6 +3,7 @@ import json
 from confluent_kafka import Producer, KafkaError
 sys.path.append('..')
 import settings as lasair_settings
+import db_connect
 
 def insert_annotation(diaObjectId, topic, classification,
                       version='', explanation='', classdict='{}', url=''):
@@ -37,7 +38,7 @@ def delete_annotation(diaObjectId, topic, classification=''):
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
-    except MySQLdb.Error as e:
+    except Exception as e:
         return "Cannot connect to master database %s\n" % str(e)
 
     query = 'DELETE from annotations WHERE diaObjectId=%d AND topic="%s"'
@@ -59,12 +60,14 @@ def tags_for_object(username, diaObjectId):
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
-    except MySQLdb.Error as e:
+    except Exception as e:
         return "Cannot connect to master database %s\n" % str(e)
 
     query = 'SELECT classification FROM annotations '
     query += 'WHERE topic="tags_%s" AND diaObjectId=%d'
     query = query % (username, diaObjectId)
+    cursor.execute(query)
+    print(query)
     taglist = []
     for row in cursor:
         taglist.append(row['classification'])
@@ -75,12 +78,15 @@ def objects_for_tag(username, tag):
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
-    except MySQLdb.Error as e:
+    except Exception as e:
         return "Cannot connect to master database %s\n" % str(e)
 
     query = 'SELECT diaObjectId FROM annotations '
     query += 'WHERE topic="tags_%s" AND classification="%s"'
     query = query % (username, tag)
+    cursor.execute(query)
+    print(query)
     objlist = []
     for row in cursor:
         objlist.append(row['diaObjectId'])
+    return objlist
