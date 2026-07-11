@@ -1,4 +1,5 @@
 import sys
+import json
 from confluent_kafka import Producer, KafkaError
 sys.path.append('..')
 import settings as lasair_settings
@@ -21,11 +22,13 @@ def insert_annotation(diaObjectId, topic, classification,
         }
     producer = Producer(conf)
     topicout = lasair_settings.ANNOTATION_TOPIC
-    try:
+#    try:
+    if 1:
         s = json.dumps(message)
+        print(topicout, s)
         producer.produce(topicout, s)
-    except Exception as e:
-        return 'Kafka production failed: %s\n' % str(e)
+#    except Exception as e:
+#        return 'Kafka production failed: %s\n' % str(e)
     producer.flush()
     return ''
 
