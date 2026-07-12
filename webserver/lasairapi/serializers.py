@@ -392,7 +392,7 @@ class AnnotateSerializer(serializers.Serializer):
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
         # push a kafka message to make sure queries are ingested t database and run immediately
-        message = {'diaObjectId'   : diaObjectId,
+        message = {'diaObjectId'   : diaObjectId, 
                    'topic'         : topic,
                    'version'       : version,
                    'classification': classification,
