@@ -7,31 +7,37 @@ import db_connect
 
 def insert_annotation(diaObjectId, topic, classification,
                       version='', explanation='', classdict='{}', url=''):
-    # adds an annotation/tag to the kafka for processing by filter-annotation
-    message = {
-        'diaObjectId'   : diaObjectId,
-        'topic'         : topic,
-        'version'       : version,
-        'classification': classification,
-        'explanation'   : explanation,
-        'classdict'     : classdict,
-        'url'           : url,
-    }
-    conf = {
-            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-            'client.id': 'client-1',
-        }
-    producer = Producer(conf)
-    topicout = lasair_settings.ANNOTATION_TOPIC
-#    try:
-    if 1:
-        s = json.dumps(message)
-        print(topicout, s)
-        producer.produce(topicout, s)
-#    except Exception as e:
-#        return 'Kafka production failed: %s\n' % str(e)
-    producer.flush()
-    return ''
+    # adds an annotation/tag to the database
+    try:
+        msl = db_connect.remote()
+        cursor = msl.cursor(buffered=True, dictionary=True)
+    except Exception as e:
+        return "Cannot connect to master database %s\n" % str(e)
+
+    queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
+    queryd = queryd % (
+            annotation['diaObjectId'],
+            annotation['topic'])
+
+    queryi = 'INSERT INTO annotations ('
+    queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
+    queryi += ') VALUES ('
+    queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
+    queryi = queryi % (
+            annotation['diaObjectId'],
+            annotation['topic'],
+            annotation['version'],
+            annotation['classification'],
+            annotation['explanation'],
+            annotation['classdict'],
+            annotation['url'])
+
+    # classic annotations have unique classification
+    if not topic.startswith('tags_'):
+        self.execute_remote_query(queryd)
+
+    # actually insert the annotation
+    self.execute_remote_query(queryi)
 
 def delete_annotation(diaObjectId, topic, classification=''):
     # deletes an annotation or deletes a tag (annotation with classificaiton)
