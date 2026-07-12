@@ -391,30 +391,32 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # adds an annotation/tag to the database
-        message = {
-            'diaObjectId'   : diaObjectId,
-            'topic'         : topic,
-            'version'       : version,
-            'classification': classification,
-            'explanation'   : explanation,
-            'classdict'     : classdict,
-            'url'           : url,
-        }
+        # push a kafka message to make sure queries are ingested t database and run immediately
+        message = {'diaObjectId'   : diaObjectId,
+                   'topic'         : topic,
+                   'version'       : version,
+                   'classification': classification,
+                   'explanation'   : explanation,
+                   'classdict'     : classdict,
+                   'url'           : url,
+                   }
+
         conf = {
-                'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-                'client.id': 'client-1',
-            }
+            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
+            'client.id': 'client-1',
+        }
+
+        # will we really instantiate the producer for each message?
         producer = Producer(conf)
         topicout = lasair_settings.ANNOTATION_TOPIC
         try:
             s = json.dumps(message)
-            print(topicout, s)
             producer.produce(topicout, s)
         except Exception as e:
-            return 'Kafka production failed: %s\n' % str(e)
+            return {'error': "Kafka production failed: %s\n" % e}
         producer.flush()
-        return {'status': 'success', 'message': s}
+
+        return {'status': 'success', 'annotation_topic': topicout, 'message': s}
 
 class AnnotateListSerializer(serializers.Serializer):
     annotations = serializers.ListField()

@@ -15,28 +15,20 @@ def insert_annotation(diaObjectId, topic, classification,
         return "Cannot connect to master database %s\n" % str(e)
 
     queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
-    queryd = queryd % (
-            annotation['diaObjectId'],
-            annotation['topic'])
+    queryd = queryd % (diaObjectId,topic)
+
+    # if its tags, we can have multiple per object/topic
+    if topic.startswith('tags_'):
+        queryd += 'AND classification="%s"' % classification
 
     queryi = 'INSERT INTO annotations ('
     queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
     queryi += ') VALUES ('
     queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-    queryi = queryi % (
-            annotation['diaObjectId'],
-            annotation['topic'],
-            annotation['version'],
-            annotation['classification'],
-            annotation['explanation'],
-            annotation['classdict'],
-            annotation['url'])
+    queryi = queryi % (diaObjectId, topic, version, classification,
+        explanation, classdict, url)
 
-    # classic annotations have unique classification
-    if not topic.startswith('tags_'):
-        self.execute_remote_query(queryd)
-
-    # actually insert the annotation
+    self.execute_remote_query(queryd)
     self.execute_remote_query(queryi)
 
 def delete_annotation(diaObjectId, topic, classification=''):

@@ -10,6 +10,7 @@ from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
+from src import annotation
 
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
@@ -74,34 +75,14 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        # put the annotation in the database
-        queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s" '
-        queryd = queryd % (
-                annotation['diaObjectId'], 
-                annotation['topic'])
-
-        # if its tags, we can have multiple per object/topic
-        if annotation['topic'].startswith('tags_'):
-            queryd += 'AND classification="%s"' % annotation['classification']
-
-        queryi = 'INSERT INTO annotations ('
-        queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        queryi += ') VALUES ('
-        queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        queryi = queryi % (
-                annotation['diaObjectId'], 
-                annotation['topic'], 
-                annotation['version'], 
-                annotation['classification'], 
-                annotation['explanation'], 
-                annotation['classdict'], 
-                annotation['url'])
-
-        if self.transfer:
-            print(queryd)
-            self.execute_remote_query(queryd) 
-            print(queryi)
-            self.execute_remote_query(queryi)
+        annotation.insert_annotation(
+            annotation['diaObjectId']),
+            annotation['topic']),
+            annotation['classification'],
+            annotation['version'],
+            annotation['explanation'],
+            annotation['classdict'],
+            annotation['url'])
         return 1
 
     def post_ingest(self, n_messages):
