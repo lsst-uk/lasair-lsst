@@ -16,7 +16,6 @@ class FilterTest(unittest.TestCase):
                      "WHERE objects.nDiaSources > 1  AND objects.diaObjectId IN (1,2,3) "
                      " ORDER BY  objects.nDiaSources")
         result = ann_filters.query_for_object(query, objList)
-        print(result)
         self.assertEqual(result, expected)
 
 
