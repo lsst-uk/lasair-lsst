@@ -10,7 +10,7 @@ from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
-from src import annotation
+from src import annotate
 
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
@@ -75,9 +75,9 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        annotation.insert_annotation(
-            annotation['diaObjectId']),
-            annotation['topic']),
+        annotate.insert_annotation_db(
+            annotation['diaObjectId'],
+            annotation['topic'],
             annotation['classification'],
             annotation['version'],
             annotation['explanation'],

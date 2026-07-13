@@ -15,7 +15,7 @@ from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
-from src import db_connect
+from src import db_connect, annotate
 import settings as lasair_settings
 import sys
 sys.path.append('../common')
@@ -391,31 +391,8 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # push a kafka message to make sure queries are ingested t database and run immediately
-        message = {'diaObjectId'   : diaObjectId, 
-                   'topic'         : topic,
-                   'version'       : version,
-                   'classification': classification,
-                   'explanation'   : explanation,
-                   'classdict'     : classdict,
-                   'url'           : url,
-                   }
-
-        conf = {
-            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-            'client.id': 'client-1',
-        }
-
-        # will we really instantiate the producer for each message?
-        producer = Producer(conf)
-        topicout = lasair_settings.ANNOTATION_TOPIC
-        try:
-            s = json.dumps(message)
-            producer.produce(topicout, s)
-        except Exception as e:
-            return {'error': "Kafka production failed: %s\n" % e}
-        producer.flush()
-
+        annotate.insert_annotation_kafka(diaObjectId, topicout, classification,
+              version, explanation, classdict, url)
         return {'status': 'success', 'annotation_topic': topicout, 'message': s}
 
 class AnnotateListSerializer(serializers.Serializer):

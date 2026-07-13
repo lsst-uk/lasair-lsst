@@ -5,7 +5,33 @@ sys.path.append('..')
 import settings as lasair_settings
 import db_connect
 
-def insert_annotation(diaObjectId, topic, classification,
+def insert_annotation_kafka(diaObjectId, topic, classification,
+                      version='', explanation='', classdict='{}', url=''):
+    message = {'diaObjectId'   : diaObjectId,
+           'topic'         : topic,
+           'version'       : version,
+           'classification': classification,
+           'explanation'   : explanation,
+           'classdict'     : classdict,
+           'url'           : url,
+       }
+
+    conf = {
+       'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
+        'client.id': 'client-1',
+    }
+
+    # will we really instantiate the producer for each message?
+    producer = Producer(conf)
+    topicout = lasair_settings.ANNOTATION_TOPIC
+    try:
+        s = json.dumps(message)
+        producer.produce(topic, s)
+    except Exception as e:
+        return {'error': "Kafka production failed: %s\n" % e}
+    producer.flush()
+
+def insert_annotation_db(diaObjectId, topic, classification,
                       version='', explanation='', classdict='{}', url=''):
     # adds an annotation/tag to the database
     try:
@@ -28,8 +54,10 @@ def insert_annotation(diaObjectId, topic, classification,
     queryi = queryi % (diaObjectId, topic, version, classification,
         explanation, classdict, url)
 
-    self.execute_remote_query(queryd)
-    self.execute_remote_query(queryi)
+    print(queryd)
+    cursor.execute(queryd)
+    print(queryi)
+    cursor.execute(queryi)
 
 def delete_annotation(diaObjectId, topic, classification=''):
     # deletes an annotation or deletes a tag (annotation with classificaiton)

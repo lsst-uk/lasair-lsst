@@ -3,10 +3,11 @@ import time
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import db_connect, annotator
+import db_connect, annotate
 
-username = 'royg'
-msl = db_connect.remote()
+# some global variables
+username    = 'royg'
+msl         = db_connect.remote()
 
 def clean():
     print('cleaning up')
@@ -32,7 +33,10 @@ def make_annotator():
     query = 'INSERT INTO annotators (topic, active, public, user) '
     query += f'VALUES ("tags_{username}", 1, 0, {id})'
     print(query)
-    cursor.execute(query)
+    try:
+        cursor.execute(query)
+    except Exception as e:
+        print(str(e))
 
 def make_annotations():
     print('\nmaking annotations')
@@ -45,17 +49,19 @@ def make_annotations():
         diaObjectId = row['diaObjectId']
     print(f'diaObjectId is {diaObjectId}')
 
+    # use the annotations modulw to insert
     topic = f'tags_{username}'
-    annotator.insert_annotation(diaObjectId, topic, 'apple')
-    annotator.insert_annotation(diaObjectId, topic, 'pear')
+    annotate.insert_annotation(diaObjectId, topic, 'apple')
+    annotate.insert_annotation(diaObjectId, topic, 'pear')
+    return diaObjectId
 
-def check_annotations():
+def check_annotations(diaObjectId):
     print('\nchecking annotations')
-    tags = annotator.tags_for_object(username, diaObjectId)
+    tags = annotate.tags_for_object(username, diaObjectId)
     print(f'Found tags for {diaObjectId}/{username}:', tags)
 
     tag = 'apple'
-    objs = annotator.objects_for_tag(username, tag)
+    objs = annotate.objects_for_tag(username, tag)
     print(f'Found objects for {username}/{tag}:', objs)
 
 if __name__ == '__main__':
@@ -64,7 +70,6 @@ if __name__ == '__main__':
         sys.exit()
     clean()
     make_annotator()
-    make_annotations()
-    time.sleep(300)
-    check_annotations()
+    diaObjectId = make_annotations()
+    check_annotations(diaObjectId)
     msl.commit()
