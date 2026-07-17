@@ -1,24 +1,39 @@
+"""
+Annotation/tag test for Lasair. 
+Usage:
+    ann_test.py <username> <ann_topic> (api | direct)
+
+Arguments:
+    <username>   Username to use.
+    <ann_topic>  Announcement topic.
+    api          Use API mode.
+    direct       Use direct mode.
+
+Options:
+    -h --help    Show this help message.
+"""
+
 import sys
 import time
 import lasair
+from docopt import docopt
 import api_token
 from util import make_annotator, make_filter_ann, get_diaObjectId
 from util import delete_annotator, delete_filter, check_annotations
 sys.path.append('../../../common')
 import settings
+sys.path.append('../../../common/src')
+import annotate
 
 if __name__ == "__main__":
     if settings.WEB_DOMAIN != 'lasair-lsst-dev':
         print('This test can only run on the dev system')
         sys.exit()
 
-    username = 'royg'
-
-#    ann_topic = f'tags_{username}'    # testing tags
-    ann_topic = '__annot'            # testing classic annotations
-
-    method = 'direct'
-    method = 'api'
+    args = docopt(__doc__)
+    username = args['<username>']
+    ann_topic = args['<ann_topic>']
+    print(f'Using username {username} and annotator {ann_topic}')
 
     make_annotator(ann_topic, username)
 
@@ -27,23 +42,25 @@ if __name__ == "__main__":
     make_filter_ann(filter_name, username, ann_topic)
     diaObjectId = get_diaObjectId()
 
-    if method == 'api':
+    if args['api']:
+        # will use API to annotate
         endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
         L = lasair.lasair_client(api_token.API_TOKEN, endpoint=endpoint)
-        classification = 'mango'
-        # one annotation "apple"
         L.annotate(
-            ann_topic, diaObjectId, classification,
+            ann_topic, diaObjectId, 'mango',
+            version='0.1', explanation='', classdict={}, url='')
+        L.annotate(
+            ann_topic, diaObjectId, 'papaya',
             version='0.1', explanation='', classdict={}, url='')
 
-    elif method == 'direct':
+    if args['direct']:
+        # will annotate directly
         # two annotations "apple" and "pear"
-        make_annotations_db(diaObjectId, ann_topic)
+        annotate.insert_annotation_db(diaObjectId, ann_topic, 'apple')
+        annotate.insert_annotation_db(diaObjectId, ann_topic, 'pear')
         # two annotations "banana" and "orange"
-        make_annotations_kafka(diaObjectId, ann_topic)
-    else:
-        print(f'unknown method {method}')
-        sys.exit()
+        annotate.insert_annotation_kafka(diaObjectId, ann_topic, 'banana')
+        annotate.insert_annotation_kafka(diaObjectId, ann_topic, 'orange')
 
     check_annotations(diaObjectId, ann_topic, 'apple')
     check_annotations(diaObjectId, ann_topic, 'pear')
@@ -55,5 +72,5 @@ if __name__ == "__main__":
     check_annotations(diaObjectId, ann_topic, 'orange')
     check_annotations(diaObjectId, ann_topic, 'mango')
 
-    delete_annotator(ann_topic, True)
+    delete_annotator(ann_topic)
     delete_filter(filter_name)
