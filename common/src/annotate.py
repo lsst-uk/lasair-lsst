@@ -82,7 +82,7 @@ def delete_annotation(diaObjectId, topic, classification='', verbose=False):
     except Exception as e:
         return "Cannot delete annotation: %s" % str(e)
 
-def tags_for_object(username, diaObjectId, verbose=False):
+def classifications_for_object(topic, diaObjectId, verbose=False):
     # all tags connected to an object
     try:
         msl = db_connect.remote()
@@ -91,8 +91,8 @@ def tags_for_object(username, diaObjectId, verbose=False):
         return "Cannot connect to master database %s\n" % str(e)
 
     query = 'SELECT classification FROM annotations '
-    query += 'WHERE topic="tags_%s" AND diaObjectId=%d'
-    query = query % (username, diaObjectId)
+    query += 'WHERE topic="%s" AND diaObjectId=%d'
+    query = query % (topic, diaObjectId)
     cursor.execute(query)
     if verbose: print(query)
     taglist = []
@@ -100,7 +100,7 @@ def tags_for_object(username, diaObjectId, verbose=False):
         taglist.append(row['classification'])
     return taglist
 
-def objects_for_tag(username, tag, verbose=False):
+def objects_for_classification(topic, tag, verbose=False):
     # all objects with given tag
     try:
         msl = db_connect.remote()
@@ -109,8 +109,8 @@ def objects_for_tag(username, tag, verbose=False):
         return "Cannot connect to master database %s\n" % str(e)
 
     query = 'SELECT diaObjectId FROM annotations '
-    query += 'WHERE topic="tags_%s" AND classification="%s"'
-    query = query % (username, tag)
+    query += 'WHERE topic="%s" AND classification="%s"'
+    query = query % (topic, tag)
     cursor.execute(query)
     if verbose: print(query)
     objlist = []
