@@ -32,7 +32,7 @@ def insert_annotation_kafka(diaObjectId, topic, classification,
     producer.flush()
 
 def insert_annotation_db(diaObjectId, topic, classification,
-                      version='', explanation='', classdict='{}', url=''):
+                      version='', explanation='', classdict='{}', url='', verbose=False):
     # adds an annotation/tag to the database
     try:
         msl = db_connect.remote()
@@ -54,12 +54,12 @@ def insert_annotation_db(diaObjectId, topic, classification,
     queryi = queryi % (diaObjectId, topic, version, classification,
         explanation, classdict, url)
 
-    print(queryd)
+    if verbose: print(queryd)
     cursor.execute(queryd)
-    print(queryi)
+    if verbose: print(queryi)
     cursor.execute(queryi)
 
-def delete_annotation(diaObjectId, topic, classification=''):
+def delete_annotation(diaObjectId, topic, classification='', verbose=False):
     # deletes an annotation or deletes a tag (annotation with classificaiton)
     try:
         msl = db_connect.remote()
@@ -76,12 +76,13 @@ def delete_annotation(diaObjectId, topic, classification=''):
         else:
             return "Cannot delete a tag without a classification"
     
+    if verbose: print(query)
     try:
         cursor.execute(query)
     except Exception as e:
         return "Cannot delete annotation: %s" % str(e)
 
-def tags_for_object(username, diaObjectId):
+def tags_for_object(username, diaObjectId, verbose=False):
     # all tags connected to an object
     try:
         msl = db_connect.remote()
@@ -93,13 +94,13 @@ def tags_for_object(username, diaObjectId):
     query += 'WHERE topic="tags_%s" AND diaObjectId=%d'
     query = query % (username, diaObjectId)
     cursor.execute(query)
-    print(query)
+    if verbose: print(query)
     taglist = []
     for row in cursor:
         taglist.append(row['classification'])
     return taglist
 
-def objects_for_tag(username, tag):
+def objects_for_tag(username, tag, verbose=False):
     # all objects with given tag
     try:
         msl = db_connect.remote()
@@ -111,7 +112,7 @@ def objects_for_tag(username, tag):
     query += 'WHERE topic="tags_%s" AND classification="%s"'
     query = query % (username, tag)
     cursor.execute(query)
-    print(query)
+    if verbose: print(query)
     objlist = []
     for row in cursor:
         objlist.append(row['diaObjectId'])

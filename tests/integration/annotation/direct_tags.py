@@ -51,8 +51,10 @@ def make_annotations():
 
     # use the annotations modulw to insert
     topic = f'tags_{username}'
-    annotate.insert_annotation(diaObjectId, topic, 'apple')
-    annotate.insert_annotation(diaObjectId, topic, 'pear')
+    annotate.insert_annotation_db   (diaObjectId, topic, 'apple')
+    annotate.insert_annotation_db   (diaObjectId, topic, 'pear')
+    annotate.insert_annotation_kafka(diaObjectId, topic, 'banana')
+    annotate.insert_annotation_kafka(diaObjectId, topic, 'orange')
     return diaObjectId
 
 def check_annotations(diaObjectId):
@@ -71,5 +73,7 @@ if __name__ == '__main__':
     clean()
     make_annotator()
     diaObjectId = make_annotations()
+    check_annotations(diaObjectId)
+    time.sleep(300)  # wait for kafka
     check_annotations(diaObjectId)
     msl.commit()
