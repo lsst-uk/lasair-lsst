@@ -10,12 +10,10 @@ from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
-from src import annotate
-
+sys.path.append('../../common/src')
+import annotate_util
 sys.path.append('../../webserver/lasair')
-sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
-
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -75,7 +73,7 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        annotate.insert_annotation_db(
+        annotate_util.insert_annotation_db(
             annotation['diaObjectId'],
             annotation['topic'],
             annotation['classification'],
