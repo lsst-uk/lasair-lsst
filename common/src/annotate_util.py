@@ -38,7 +38,7 @@ def insert_annotation_db(diaObjectId, topic, classification,
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
     except Exception as e:
-        return "Cannot connect to master database %s\n" % str(e)
+        print("Cannot connect to master database %s\n" % str(e))
 
     queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
     queryd = queryd % (diaObjectId,topic)
@@ -58,6 +58,7 @@ def insert_annotation_db(diaObjectId, topic, classification,
     cursor.execute(queryd)
     if verbose: print(queryi)
     cursor.execute(queryi)
+    msl.commit()
 
 def delete_annotation(diaObjectId, topic, classification='', verbose=False):
     # deletes an annotation or deletes a tag (annotation with classificaiton)
@@ -81,6 +82,7 @@ def delete_annotation(diaObjectId, topic, classification='', verbose=False):
         cursor.execute(query)
     except Exception as e:
         return "Cannot delete annotation: %s" % str(e)
+    msl.commit()
 
 def classifications_for_object(topic, diaObjectId, verbose=False):
     # all tags connected to an object

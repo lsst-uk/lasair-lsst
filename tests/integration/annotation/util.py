@@ -3,7 +3,7 @@ import time
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import db_connect, annotate, topic_name
+import db_connect, annotate_util, topic_name
 sys.path.append('../../../webserver/lasair')
 from query_builder import build_query
 
@@ -98,24 +98,12 @@ def make_filter_ann(filter_name, username, ann_topic):
     msl.commit()
     return tn
 
-def make_annotations_db(diaObjectId, topic):
-    print('\nmaking annotations')
-    cursor =  msl.cursor(buffered=True, dictionary=True)
-    annotate.insert_annotation_db   (diaObjectId, topic, 'apple', verbose)
-    annotate.insert_annotation_db   (diaObjectId, topic, 'pear', verbose)
-
-def make_annotations_kafka(topic, diaObjectId):
-    print('\nmaking annotations')
-    cursor =  msl.cursor(buffered=True, dictionary=True)
-    annotate.insert_annotation_kafka(diaObjectId, topic, 'banana')
-    annotate.insert_annotation_kafka(diaObjectId, topic, 'orange')
-
-def check_annotations(diaObjectId, topic, tag):
+def check_annotations(diaObjectId, topic, tag, verbose=False):
     print('\nchecking annotations')
-    tags = annotate.classifications_for_object(topic, diaObjectId, verbose)
+    tags = annotate_util.classifications_for_object(topic, diaObjectId, verbose)
     print(f'Found tags for {diaObjectId}/{topic}:', tags)
 
-    objs = annotate.objects_for_classification(topic, tag, verbose)
+    objs = annotate_util.objects_for_classification(topic, tag, verbose=False)
     print(f'Found objects for {topic}/{tag}:', objs)
     msl.commit()
 

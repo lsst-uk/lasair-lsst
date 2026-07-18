@@ -22,7 +22,7 @@ from util import delete_annotator, delete_filter, check_annotations
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import annotate
+import annotate_util
 
 if __name__ == "__main__":
     if settings.WEB_DOMAIN != 'lasair-lsst-dev':
@@ -40,9 +40,10 @@ if __name__ == "__main__":
     # fins a random object to annotate
     diaObjectId = get_diaObjectId()
 
-    # two annotations "banana" and "orange"
-    annotate.insert_annotation_db(diaObjectId, ann_topic, 'apple')
-    annotate.insert_annotation_db(diaObjectId, ann_topic, 'pear')
+    # two annotations
+    print('inserting annotations')
+    annotate_util.insert_annotation_db(diaObjectId, ann_topic, 'apple')
+    annotate_util.insert_annotation_db(diaObjectId, ann_topic, 'pear')
 
     # check to see what has come through
     check_annotations(diaObjectId, ann_topic, 'apple')

@@ -3,11 +3,13 @@
 - Program arguments (below) give annotator name/topic and username of owner
 - If the annotator name begins "tags_" the behaviour is slightly different
 - First create an annotator of the given name/topic with given owner
+- Annotations are made with classification set to apple, and another with pear
 
 #### Direct
-- Direct annotation is by the code `ann_direct.py`, where an annotator is made, and annotations inserted, then we see the results.
+- Direct annotation is by the code `ann_direct.py`, where an annotator is made, and annotations inserted directly, then we see the results immediately.
+- This is how the webserver will run when users add/delete tags
 - Two annotations are made, should happen immediately
-- For classic, we just get pear, for tags we get apple and pear
+- For classic, there can only be one annotation per object, so we just get pear, but for tags we get apple and pear
 - classic: `python3 ann_direct.py royg __annot`
 - tags: `python3 ann_direct.py royg tags_roy`
 
@@ -15,8 +17,9 @@
 - Kafka-mediated annotation is more complicated, using the code `ann_kafka.py`. 
 - The `ann_kafka.py` runs via the `filter-annotation` service, that may take
 a couple of minutes to see and respons to the kafka messages, so we sleep for a bit. 
-This route also means that the filter should be triggered by the arrival of the annotations,
-so we run the kafka consumer.
+This route also means that the filter should be triggered by the arrival 
+of the annotations, so we run the kafka consumer.
+- Make sure the service is running: in lasair-lsst/deploy do `./start.sh filter-annotation`
 - In addition to the annotator, we create a filter that triggers on annotation, with plain kafka output
 - If the program is run in `api` mode, make two annotations added via the webserver and kafka
 - If run in `direct_kafka` mode, annotations added directly into the kafka stream without using the webserver

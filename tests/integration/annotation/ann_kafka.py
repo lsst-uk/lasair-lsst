@@ -25,7 +25,7 @@ from util import delete_annotator, delete_filter, check_annotations
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import annotate
+import annotate_util
 
 if __name__ == "__main__":
     if settings.WEB_DOMAIN != 'lasair-lsst-dev':
@@ -62,8 +62,8 @@ if __name__ == "__main__":
 
     if args['direct_kafka']:
         # two annotations "banana" and "orange"
-        annotate.insert_annotation_kafka(diaObjectId, ann_topic, 'apple')
-        annotate.insert_annotation_kafka(diaObjectId, ann_topic, 'pear')
+        annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'apple')
+        annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'pear')
 
     # if the annotations went into kafka, we need to wait a while
     print(f'sleeping for {sleep_time} seconds ...')
