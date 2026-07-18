@@ -10,6 +10,7 @@
 - This is how the webserver will run when users add/delete tags
 - Two annotations are made, should happen immediately
 - For classic, there can only be one annotation per object, so we just get pear, but for tags we get apple and pear
+
 | test | command |
 |------|---------|
 | classic+direct | `python3 ann_direct.py royg __annot` |
@@ -27,10 +28,10 @@ of the annotations, so we run the kafka consumer.
 - If run in `direct_kafka` mode, annotations added directly into the kafka stream without using the webserver
 - Two annotations are made via Kafka, and it will take a minute for them to arrive
 - For classic, we just get apple, for tags we get apple and pear
+
 | test | command |
 |------|---------|
 | classic+api | `python3 ann_kafka.py royg __annot 10 api` |
 | tags+api | `python3 ann_kafka.py royg tags_royg 10 api` |
 | classic+kafka | `python3 ann_kafka.py royg __annot 10 direct_kafka` |
 | tags+kafka | `python3 ann_kafka.py royg tags_royg 10 direct_kafka` |
-
