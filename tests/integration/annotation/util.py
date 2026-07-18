@@ -90,12 +90,13 @@ def make_filter_ann(filter_name, username, ann_topic):
     query += '(user, name, selected, conditions, tables, public, '
     query += 'run, output, byte_quota, topic_name, real_sql) '
     query += f'VALUES ({id}, "{filter_name}", "{selected}", "{conditions}", "{tables}", 0, '
-    query += f'2, 2, 10000000, "{tn}", \'{sql}\')'
+    query += f'{settings.RUN_ANNOTATION}, {settings.OUTPUT_PLAIN}, 10000000, "{tn}", \'{sql}\')'
     print(f'\nMaking filter {filter_name}, topic name {tn}, uses annotation {ann_topic}')
     if verbose: print(query)
     cursor =  msl.cursor(buffered=True, dictionary=True)
     cursor.execute(query)
     msl.commit()
+    return tn
 
 def make_annotations_db(diaObjectId, topic):
     print('\nmaking annotations')
