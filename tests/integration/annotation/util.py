@@ -106,4 +106,5 @@ def check_annotations(diaObjectId, topic, tag, verbose=False):
     objs = annotate_util.objects_for_classification(topic, tag, verbose=False)
     print(f'Found objects for {topic}/{tag}:', objs)
     msl.commit()
+    return len(tags)
 

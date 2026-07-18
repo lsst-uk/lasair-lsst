@@ -65,13 +65,22 @@ if __name__ == "__main__":
         annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'apple')
         annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'pear')
 
-    # if the annotations went into kafka, we need to wait a while
-    print(f'sleeping for {sleep_time} seconds ...')
-    time.sleep(sleep_time)
-
     # check to see what has come through
-    check_annotations(diaObjectId, ann_topic, 'apple')
-    check_annotations(diaObjectId, ann_topic, 'pear')
+    # if the annotations went into kafka, we need to wait a while
+    print('checking annotations')
+    while 1:
+        print(f'sleeping for {sleep_time} seconds ...')
+        time.sleep(sleep_time)
+        ntags = 0
+        ntags += check_annotations(diaObjectId, ann_topic, 'apple')
+        ntags += check_annotations(diaObjectId, ann_topic, 'pear')
+        if ntags > 0:
+            break
+
+    # Don't need these any more
+    print('Deleting annotator, annotations, and filter')
+    delete_annotator(ann_topic)
+    delete_filter(filter_name)
 
     # the filter should have produced kafka
     print('Now fetch kafka')
@@ -82,6 +91,8 @@ if __name__ == "__main__":
     while n < 10:
         msg = consumer.poll(timeout=20)
         if msg is None:
+            if n > 0:
+                break
             print('sleeping 5')
             time.sleep(5)
             continue
@@ -93,7 +104,3 @@ if __name__ == "__main__":
         n += 1
     print(n, 'Kafka messages')
 
-    # Finally clean up
-    print('deleting annotator, annotations, and filter')
-    delete_annotator(ann_topic)
-    delete_filter(filter_name)
