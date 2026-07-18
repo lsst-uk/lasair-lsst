@@ -31,7 +31,7 @@ of the annotations, so we run the kafka consumer.
 
 | test | command |
 |------|---------|
-| classic+api | `python3 ann_kafka.py royg __annot 10 api` |
-| tags+api | `python3 ann_kafka.py royg tags_royg 10 api` |
-| classic+kafka | `python3 ann_kafka.py royg __annot 10 direct_kafka` |
-| tags+kafka | `python3 ann_kafka.py royg tags_royg 10 direct_kafka` |
+| classic+api   | `python3 ann_kafka.py royg __annot   10 api` |
+| tags+api      | `python3 ann_kafka.py royg tags_royg 10 api` |
+| classic+kafka | `python3 ann_kafka.py royg __annot   10 direct_kafka` |
+| tags+kafka    | `python3 ann_kafka.py royg tags_royg 10 direct_kafka` |
