@@ -30,7 +30,8 @@ def insert_annotation_kafka(diaObjectId, topic, classification,
     topicout = lasair_settings.ANNOTATION_TOPIC
     try:
         s = json.dumps(message)
-        producer.produce(topic, s)
+#        print(topicout, s)
+        producer.produce(topicout, s)
     except Exception as e:
         return {'error': "Kafka production failed: %s\n" % e}
     producer.flush()
