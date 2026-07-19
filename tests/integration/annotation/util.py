@@ -1,3 +1,5 @@
+""" Test system utilities for annotations
+"""
 import sys
 import time
 sys.path.append('../../../common')
@@ -12,7 +14,7 @@ verbose    = False
 sleep_time = 10
 
 def delete_annotator(ann_topic, verbose=False):
-    print(f'\nDeleting annotator {ann_topic}')
+    print(f'- Deleting annotator {ann_topic}')
     cursor =  msl.cursor(buffered=True, dictionary=True)
 
     query = f'DELETE from annotations WHERE topic="{ann_topic}"'
@@ -31,7 +33,7 @@ def delete_annotator(ann_topic, verbose=False):
     msl.commit()
 
 def delete_filter(filter_name, verbose=False):
-    print(f'\nDeleting filter {filter_name}')
+    print(f'- Deleting filter {filter_name}')
     query = f'DELETE FROM myqueries where name="{filter_name}"'
     if verbose: print(query)
     cursor =  msl.cursor(buffered=True, dictionary=True)
@@ -43,18 +45,18 @@ def delete_filter(filter_name, verbose=False):
 
 def get_userid(username, verbose=False):
     # find user id number for given username
-    print(f'\nGet userid for username {username}')
+    print(f'- Get userid for username {username}')
     cursor =  msl.cursor(buffered=True, dictionary=True)
     query = f'SELECT id FROM auth_user WHERE username="{username}"'
     if verbose: print(query)
     cursor.execute(query)
     for row in cursor:
         id = row['id']
-    if verbose: print(f'{username} is user number {id}')
+    if verbose: print(f'- {username} is user number {id}')
     return id
 
 def get_diaObjectId():
-    print('\nFinding an arbitrary diaObjectId')
+    print('- Finding an arbitrary diaObjectId')
     cursor =  msl.cursor(buffered=True, dictionary=True)
     # find an object
     query = f'SELECT diaObjectId FROM objects LIMIT 1'
@@ -62,12 +64,12 @@ def get_diaObjectId():
     cursor.execute(query)
     for row in cursor:
         diaObjectId = row['diaObjectId']
-    print(f'diaObjectId is {diaObjectId}')
+    print(f'- diaObjectId is {diaObjectId}')
     return diaObjectId
 
 def make_annotator(topic, username, verbose=False):
     id = get_userid(username)
-    print(f'\nMaking annotator for topic {topic} owned by {username}')
+    print(f'- Making annotator for topic {topic} owned by {username}')
     cursor =  msl.cursor(buffered=True, dictionary=True)
     # make the tags_ annotator
     query = 'INSERT INTO annotators (topic, active, public, user) '
@@ -91,7 +93,7 @@ def make_filter_ann(filter_name, username, ann_topic):
     query += 'run, output, byte_quota, topic_name, real_sql) '
     query += f'VALUES ({id}, "{filter_name}", "{selected}", "{conditions}", "{tables}", 0, '
     query += f'{settings.RUN_ANNOTATION}, {settings.OUTPUT_PLAIN}, 10000000, "{tn}", \'{sql}\')'
-    print(f'\nMaking filter {filter_name}, topic name {tn}, uses annotation {ann_topic}')
+    print(f'- Making filter {filter_name}, topic name {tn}, uses annotation {ann_topic}')
     if verbose: print(query)
     cursor =  msl.cursor(buffered=True, dictionary=True)
     cursor.execute(query)
@@ -101,10 +103,10 @@ def make_filter_ann(filter_name, username, ann_topic):
 def check_annotations(diaObjectId, topic, tag, verbose=False):
     print('\nchecking annotations')
     tags = annotate_util.classifications_for_object(topic, diaObjectId, verbose)
-    print(f'Found tags for {diaObjectId}/{topic}:', tags)
+    print(f'- Found tags for {diaObjectId}/{topic}:', tags)
 
     objs = annotate_util.objects_for_classification(topic, tag, verbose=False)
-    print(f'Found objects for {topic}/{tag}:', objs)
+    print(f'- Found objects for {topic}/{tag}:', objs)
     msl.commit()
     return len(tags)
 

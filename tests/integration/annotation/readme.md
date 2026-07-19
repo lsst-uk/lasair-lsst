@@ -1,4 +1,10 @@
 ### Testing annotations and tags
+
+- Three ways to insert annotations: by API, directly int Kafka, and directly into the database
+- In each case the annotator topic can begin with "tags_", so there can be multiple classifications for a given object/topic. Otherwise there can only be one classification.
+
+![Screenshot](ann.png)
+
 - This test can only run on lasair-lsst-dev because it adds records to the live database.
 - Program arguments (below) give annotator name/topic and username of owner
 - If the annotator name begins "tags_" the behaviour is slightly different

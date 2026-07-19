@@ -1,3 +1,5 @@
+""" Annotation utilities
+"""
 import sys
 import json
 from confluent_kafka import Producer, KafkaError
@@ -7,6 +9,7 @@ import db_connect
 
 def insert_annotation_kafka(diaObjectId, topic, classification,
                       version='', explanation='', classdict='{}', url=''):
+    # Insert an annotation to the Kafka queue. The webserver uses this.
     message = {'diaObjectId'   : diaObjectId,
            'topic'         : topic,
            'version'       : version,
@@ -33,7 +36,7 @@ def insert_annotation_kafka(diaObjectId, topic, classification,
 
 def insert_annotation_db(diaObjectId, topic, classification,
                       version='', explanation='', classdict='{}', url='', verbose=False):
-    # adds an annotation/tag to the database
+    # Insert an annotation/tag directly to the database
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
@@ -85,7 +88,7 @@ def delete_annotation(diaObjectId, topic, classification='', verbose=False):
     msl.commit()
 
 def classifications_for_object(topic, diaObjectId, verbose=False):
-    # all tags connected to an object
+    # Fetch all tags connected to an object
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
@@ -103,7 +106,7 @@ def classifications_for_object(topic, diaObjectId, verbose=False):
     return taglist
 
 def objects_for_classification(topic, tag, verbose=False):
-    # all objects with given tag
+    # Fetch all objects with given tag
     try:
         msl = db_connect.remote()
         cursor = msl.cursor(buffered=True, dictionary=True)
