@@ -47,6 +47,7 @@ if __name__ == "__main__":
     # fins a random object to annotate
     diaObjectId = get_diaObjectId()
 
+    print('making annotations apple and pear')
     if args['api']:
         # will use API to annotate
         endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
