@@ -1,12 +1,11 @@
 """
 Annotation/tag test for Lasair using kafka.
 Usage:
-    ann_test.py <username> <ann_topic> <sleep_time> (api | direct_kafka)
+    ann_test.py <username> <ann_topic> (api | direct_kafka)
 
 Arguments:
     <username>      Username to use.
     <ann_topic>     Announcement topic.
-    <sleep_time>    Seconds to sleep
     api             Use API mode.
     direct_kafka    Use direct kafka mode.
 
@@ -35,8 +34,7 @@ if __name__ == "__main__":
     args = docopt(__doc__)
     username = args['<username>']
     ann_topic = args['<ann_topic>']
-    sleep_time = int(args['<sleep_time>'])
-    print(f'Using username {username} and annotator {ann_topic} and sleep time {sleep_time}')
+    print(f'Using username {username} and annotator {ann_topic} ')
 
     # make the annotator
     make_annotator(ann_topic, username)
@@ -69,8 +67,8 @@ if __name__ == "__main__":
     # if the annotations went into kafka, we need to wait a while
     print('checking annotations')
     while 1:
-        print(f'sleeping for {sleep_time} seconds ...')
-        time.sleep(sleep_time)
+        print(f'sleeping for 10 seconds ...')
+        time.sleep(10)
         ntags = 0
         ntags += check_annotations(diaObjectId, ann_topic, 'apple')
         ntags += check_annotations(diaObjectId, ann_topic, 'pear')
