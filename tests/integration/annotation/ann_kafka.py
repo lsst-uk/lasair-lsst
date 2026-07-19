@@ -20,7 +20,7 @@ from lasair import lasair_client, lasair_consumer
 from docopt import docopt
 import api_token
 from util import make_annotator, make_filter_ann, get_diaObjectId
-from util import delete_annotator, delete_filter, check_annotations
+from util import delete_annotator, delete_filter
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
@@ -69,9 +69,21 @@ if __name__ == "__main__":
     while 1:
         print(f'sleeping for 10 seconds ...')
         time.sleep(10)
-        ntags = 0
-        ntags += check_annotations(diaObjectId, ann_topic, 'apple')
-        ntags += check_annotations(diaObjectId, ann_topic, 'pear')
+
+        tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
+        ntags = len(tags)
+        print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
+
+        tag = 'apple'
+        objs = annotate_util.objects_for_classification(ann_topic, tag)
+        ntags += len(objs)
+        print(f'- Found objects for {ann_topic}/{tag}:', objs)
+
+        tag = 'pear'
+        objs = annotate_util.objects_for_classification(ann_topic, tag)
+        ntags += len(objs)
+        print(f'- Found objects for {ann_topic}/{tag}:', objs)
+
         if ntags > 0:
             break
 

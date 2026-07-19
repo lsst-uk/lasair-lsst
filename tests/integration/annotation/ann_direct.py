@@ -18,7 +18,7 @@ import lasair
 from docopt import docopt
 import api_token
 from util import make_annotator, make_filter_ann, get_diaObjectId
-from util import delete_annotator, delete_filter, check_annotations
+from util import delete_annotator, delete_filter
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
@@ -46,8 +46,16 @@ if __name__ == "__main__":
     annotate_util.insert_annotation_db(diaObjectId, ann_topic, 'pear')
 
     # check to see what has come through
-    check_annotations(diaObjectId, ann_topic, 'apple')
-    check_annotations(diaObjectId, ann_topic, 'pear')
+    tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
+    print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
+
+    tag = 'apple'
+    objs = annotate_util.objects_for_classification(ann_topic, tag)
+    print(f'- Found objects for {ann_topic}/{tag}:', objs)
+
+    tag = 'pear'
+    objs = annotate_util.objects_for_classification(ann_topic, tag)
+    print(f'- Found objects for {ann_topic}/{tag}:', objs)
 
     # Finally clean up
     print('deleting annotator, annotations')

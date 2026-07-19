@@ -99,14 +99,3 @@ def make_filter_ann(filter_name, username, ann_topic):
     cursor.execute(query)
     msl.commit()
     return tn
-
-def check_annotations(diaObjectId, topic, tag, verbose=False):
-    print('\nchecking annotations')
-    tags = annotate_util.classifications_for_object(topic, diaObjectId, verbose)
-    print(f'- Found tags for {diaObjectId}/{topic}:', tags)
-
-    objs = annotate_util.objects_for_classification(topic, tag, verbose=False)
-    print(f'- Found objects for {topic}/{tag}:', objs)
-    msl.commit()
-    return len(tags)
-
