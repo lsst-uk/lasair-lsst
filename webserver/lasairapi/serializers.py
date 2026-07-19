@@ -15,7 +15,7 @@ from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
-from src import db_connect, annotate
+from src import db_connect, annotate_util
 import settings as lasair_settings
 import sys
 sys.path.append('../common')
@@ -391,9 +391,9 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        annotate.insert_annotation_kafka(diaObjectId, topicout, classification,
+        annotate_util.insert_annotation_kafka(diaObjectId, topic, classification,
               version, explanation, classdict, url)
-        return {'status': 'success', 'annotation_topic': topicout, 'message': s}
+        return {'status': 'success', 'annotation_topic': topic}
 
 class AnnotateListSerializer(serializers.Serializer):
     annotations = serializers.ListField()

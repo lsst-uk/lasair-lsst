@@ -5,6 +5,7 @@ import json
 from confluent_kafka import Producer, KafkaError
 sys.path.append('..')
 import settings as lasair_settings
+sys.path.append('../common/src')
 import db_connect
 
 def insert_annotation_kafka(diaObjectId, topic, classification,
