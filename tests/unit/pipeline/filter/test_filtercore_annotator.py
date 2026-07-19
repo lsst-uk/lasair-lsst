@@ -40,8 +40,8 @@ class AnnotationFilterTest(unittest.TestCase):
 #        for item in result.split(','):
 #            self.assertIn(item, expected_results)
 
-    @patch('filtercore.Filter.execute_remote_query')
-    def test_ingest_annotation(self, mock_execute_remote_query):
+    @patch('filtercore.db_connect.remote')
+    def test_ingest_annotation(self, mock_db_connect_remote):
         """Test that handle_annotation method returns 1 for an annotation with sources."""
         test_annotation = {'diaObjectId': 123, 
                  'topic':'test_topic', 
@@ -56,7 +56,7 @@ class AnnotationFilterTest(unittest.TestCase):
         result = fltr.ingest_annotation(test_annotation)
         self.assertEqual(result, 1)
         # a delete and an insert
-        self.assertEqual(mock_execute_remote_query.call_count, 2)
+        self.assertEqual(mock_db_connect_remote.call_count, 1)
 
     @patch('annotationcore.AnnotationFilter.ingest_annotation')
     @patch('annotationcore.AnnotationFilter.ingest_message_list')
