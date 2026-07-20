@@ -67,26 +67,41 @@ if __name__ == "__main__":
     # check to see what has come through
     # if the annotations went into kafka, we need to wait a while
     print('checking annotations')
-    while 1:
+    for niter in range(10):
         print(f'sleeping for 10 seconds ...')
         time.sleep(10)
 
         tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
         ntags = len(tags)
         print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
+        if ann_topic.startswith('tags_'):
+            right1 = (ntags == 2)   # if tags, apple and pear are there
+        else:
+            right1 = (ntags == 1)   # if classic, only pear
 
         tag = 'apple'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
-        ntags += len(objs)
         print(f'- Found objects for {ann_topic}/{tag}:', objs)
+        nobjs1 = len(objs)
+        if ann_topic.startswith('tags_'):
+            right2 = (nobjs1 == 1)  # if tags, apple is there
+        else:
+            right2 = (nobjs1 == 0)  # if classic, apple is not there
 
         tag = 'pear'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
-        ntags += len(objs)
         print(f'- Found objects for {ann_topic}/{tag}:', objs)
+        nobjs2 = len(objs)
+        if ann_topic.startswith('tags_'):
+            right2 = (nobjs2 == 1)  # if tags, apple is there
+        else:
+            right2 = (nobjs2 == 0)  # if classic, apple is not there
 
-        if ntags > 0:
+        if ntags > 0 or nobjs1 > 0 or nobjs2 > 0:
             break
+    else:
+        print('Did not see annotations from filter-annotation process')
+        right1 = right2 = right3 = False
 
     # Don't need these any more
     print('Deleting annotator, annotations, and filter')
@@ -98,12 +113,10 @@ if __name__ == "__main__":
     kafka_server = 'lasair-lsst-dev-kafka_pub.lsst.ac.uk:9092'
     group_id = 'LASAIR1'
     consumer = lasair_consumer(kafka_server, group_id, kafka_topic_name)
-    n = 0
-    while n < 10:
-        msg = consumer.poll(timeout=20)
+    nmessage = 0
+    for i in range(3):
+        msg = consumer.poll(timeout=10)
         if msg is None:
-            if n > 0:
-                break
             print('sleeping 5')
             time.sleep(5)
             continue
@@ -112,6 +125,17 @@ if __name__ == "__main__":
             break
         result = json.loads(msg.value())
         print(result)
-        n += 1
-    print(n, 'Kafka messages')
+        nmessage += 1
+    else:
+        print('Did not see alerts triggered by annotations')
+
+    print(nmessage, 'Kafka messages')
+    right4 = (nmessage > 2)
+
+    if right1 and right2 and right3 and right4:
+        print('passed test')
+        exit(0)
+    else:
+        print('failed test')
+        exit(1)
 

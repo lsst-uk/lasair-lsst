@@ -37,7 +37,7 @@ if __name__ == "__main__":
     # make the annotator
     make_annotator(ann_topic, username)
 
-    # fins a random object to annotate
+    # find a random object to annotate
     diaObjectId = get_diaObjectId()
 
     # two annotations
@@ -48,15 +48,31 @@ if __name__ == "__main__":
     # check to see what has come through
     tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
     print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
+    if ann_topic.startswith('tags_'):
+        right1 = len(tags) == 2   # if tags, apple and pear are there
+    else:
+        right1 = len(tags) == 1   # if classic, only pear
 
     tag = 'apple'
     objs = annotate_util.objects_for_classification(ann_topic, tag)
     print(f'- Found objects for {ann_topic}/{tag}:', objs)
+    if ann_topic.startswith('tags_'):
+        right2 = (len(objs) == 1)  # if tags, apple is there
+    else:
+        right2 = (len(objs) == 0)  # if classic, apple is not there
 
     tag = 'pear'
     objs = annotate_util.objects_for_classification(ann_topic, tag)
     print(f'- Found objects for {ann_topic}/{tag}:', objs)
+    right3 = (len(objs) == 1)   # one object has tag pear
 
     # Finally clean up
     print('deleting annotator, annotations')
     delete_annotator(ann_topic)
+
+    if right1 and right2 and right3:
+        print('passed test')
+        exit(0)
+    else:
+        print('failed test')
+        exit(1)
