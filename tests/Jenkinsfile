@@ -45,6 +45,9 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchmaps.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_transfer.py'
                 }
+                dir('tests/unit/pipeline/filter/annotation') {
+                    sh 'python3 -m coverage run -a --branch --data-file=../../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ann_filters.py'
+                }
                 dir('tests/unit/services/') {
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotations_dump.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_check_expire.py'
@@ -78,6 +81,7 @@ pipeline {
                     junit 'tests/unit/pipeline/ingest/test-reports/*.xml'
                     junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
+                    junit 'tests/unit/pipeline/filter/annotation/test-reports/*.xml'
                     // junit 'tests/unit/services/test-reports/*.xml'
                     junit 'tests/unit/services/annotations/test-reports/*.xml'
                     // junit 'tests/unit/services/externalBrokers/test-reports/*.xml'

@@ -1,4 +1,5 @@
 import os, sys, time, json, datetime
+import re
 
 # some help from upstairs
 from util import fetch_queries, dispose_query_results
@@ -64,7 +65,7 @@ def query_for_object(query, objList):
         query: the original query, as generated from the Lasair query builder
         objList: the object that is the new constraint
     """
-    tok = query.lower().split('order by')
+    tok = re.split(re.compile("ORDER\\W+BY", re.IGNORECASE), query)
     txtObjList = ','.join([str(id) for id in objList])
     query = tok[0] + ' AND objects.diaObjectId IN (%s) ' % txtObjList
     if len(tok) == 2: # has order clause, add it back
