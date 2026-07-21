@@ -20,7 +20,7 @@
 | test | command |
 |------|---------|
 | classic+direct | `python3 ann_direct.py royg __annot` |
-| tags+direct | `python3 ann_direct.py royg tags_roy` |
+| tags+direct | `python3 ann_direct.py royg tags_username` |
 
 #### Kafka
 - Kafka-mediated annotation is more complicated, using the code `ann_kafka.py`. 
@@ -37,7 +37,12 @@ of the annotations, so we run the kafka consumer.
 
 | test | command |
 |------|---------|
-| classic+api   | `python3 ann_kafka.py royg __annot   api` |
-| tags+api      | `python3 ann_kafka.py royg tags_royg api` |
-| classic+kafka | `python3 ann_kafka.py royg __annot   direct_kafka` |
-| tags+kafka    | `python3 ann_kafka.py royg tags_royg direct_kafka` |
+| classic+api   | `python3 ann_kafka.py royg __annot       api` |
+| tags+api      | `python3 ann_kafka.py royg tags_username api` |
+| classic+kafka | `python3 ann_kafka.py royg __annot       direct_kafka` |
+| tags+kafka    | `python3 ann_kafka.py royg tags_username direct_kafka` |
+
+#### Diagnostic
+If things aren't working properly, there maybe some trash left behind from running 
+this test, so try this:
+`SELECT count(*) FROM annotations WHERE classification IN ('apple', 'pear')`

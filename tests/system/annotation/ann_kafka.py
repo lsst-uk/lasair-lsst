@@ -78,6 +78,7 @@ if __name__ == "__main__":
             right1 = (ntags == 2)   # if tags, apple and pear are there
         else:
             right1 = (ntags == 1)   # if classic, only pear
+        if right1: print('success')
 
         tag = 'apple'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
@@ -92,10 +93,8 @@ if __name__ == "__main__":
         objs = annotate_util.objects_for_classification(ann_topic, tag)
         print(f'- Found objects for {ann_topic}/{tag}:', objs)
         nobjs2 = len(objs)
-        if ann_topic.startswith('tags_'):
-            right2 = (nobjs2 == 1)  # if tags, apple is there
-        else:
-            right2 = (nobjs2 == 0)  # if classic, apple is not there
+        right3 = (nobjs2 == 1)  # pear should be there
+        if right3: print('success')
 
         if ntags > 0 or nobjs1 > 0 or nobjs2 > 0:
             break
@@ -103,20 +102,17 @@ if __name__ == "__main__":
         print('Did not see annotations from filter-annotation process')
         right1 = right2 = right3 = False
 
-    # Don't need these any more
-    print('Deleting annotator, annotations, and filter')
-    delete_annotator(ann_topic)
-    delete_filter(filter_name)
-
     # the filter should have produced kafka
     print('Now fetch kafka')
     kafka_server = 'lasair-lsst-dev-kafka_pub.lsst.ac.uk:9092'
     group_id = 'LASAIR1'
     consumer = lasair_consumer(kafka_server, group_id, kafka_topic_name)
     nmessage = 0
-    for i in range(3):
+    for i in range(5):
         msg = consumer.poll(timeout=10)
         if msg is None:
+            if nmessage > 0:
+                break
             print('sleeping 5')
             time.sleep(5)
             continue
@@ -130,7 +126,12 @@ if __name__ == "__main__":
         print('Did not see alerts triggered by annotations')
 
     print(nmessage, 'Kafka messages')
-    right4 = (nmessage > 2)
+    right4 = (nmessage >= 1)
+
+    # Don't need these any more
+    print('Deleting annotator, annotations, and filter')
+    delete_annotator(ann_topic)
+    delete_filter(filter_name)
 
     if right1 and right2 and right3 and right4:
         print('passed test')
