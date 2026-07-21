@@ -1,0 +1,33 @@
+# Run the annotation tests
+
+---
+
+- hosts: filter
+  gather_facts: false
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+- hosts: filter[0]
+  gather_facts: false
+  tasks:
+    - name: filter services running
+      ansible.builtin.assert:
+        that: "ansible_facts.services['lasair-filter-{{ item }}.service'].state == 'running'"
+        fail_msg: Filter service not running
+        success_msg: Filter service running
+      loop:
+        - alert
+        - annotation
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: run direct annotation test
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_direct.py su systest1"
+    - name: run direct tags test
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_direct.py su systest1"
