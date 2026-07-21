@@ -5,7 +5,7 @@ Usage:
 
 Arguments:
     <username>      Username to use.
-    <ann_topic>     Announcement topic.
+    <ann_topic>     Annotation topic.
 
 Options:
     -h --help    Show this help message.
@@ -25,10 +25,6 @@ sys.path.append('../../../common/src')
 import annotate_util
 
 if __name__ == "__main__":
-    if settings.WEB_DOMAIN != 'lasair-lsst-dev':
-        print('This test can only run on the dev system')
-        sys.exit()
-
     args = docopt(__doc__)
     username = args['<username>']
     ann_topic = args['<ann_topic>']

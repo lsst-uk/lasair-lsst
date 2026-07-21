@@ -51,7 +51,7 @@ class AnnotationFilter(Filter):
         """insert_message_list: handle a list of annotations of the form
         [ann1, ann2, ....]
         """
-        print('===', annotation_list)    ### HACK
+        #print('===', annotation_list)    ### HACK
         nannotation = 0
         for ann in annotation_list:
             nannotation += self.ingest_annotation(ann)
