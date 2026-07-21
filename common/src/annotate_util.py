@@ -49,7 +49,6 @@ def insert_annotations_kafka(annotations: [{}]):
         producer.produce(topicout, s)
 
     producer.flush()
-    producer.close()
 
 
 def insert_annotation_kafka(diaObjectId: int, topic: str, classification: str,
