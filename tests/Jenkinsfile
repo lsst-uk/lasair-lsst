@@ -24,6 +24,7 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" settings.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_slack_webhook.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_topic_name.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotate_util.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'

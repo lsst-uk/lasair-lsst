@@ -10,11 +10,11 @@ from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
-
+sys.path.append('../../common/src')
+import annotate_util
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
-
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -51,6 +51,7 @@ class AnnotationFilter(Filter):
         """insert_message_list: handle a list of annotations of the form
         [ann1, ann2, ....]
         """
+        #print('===', annotation_list)    ### HACK
         nannotation = 0
         for ann in annotation_list:
             nannotation += self.ingest_annotation(ann)
@@ -73,22 +74,14 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        # put the annotation in the database
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (
-                annotation['diaObjectId'], 
-                annotation['topic'], 
-                annotation['version'], 
-                annotation['classification'], 
-                annotation['explanation'], 
-                annotation['classdict'], 
-                annotation['url'])
-
-        if self.transfer:
-            self.execute_remote_query(query)
+        annotate_util.insert_annotation_db(
+            annotation['diaObjectId'],
+            annotation['topic'],
+            annotation['classification'],
+            annotation['version'],
+            annotation['explanation'],
+            annotation['classdict'],
+            annotation['url'])
         return 1
 
     def post_ingest(self, n_messages):

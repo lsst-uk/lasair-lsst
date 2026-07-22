@@ -1,0 +1,74 @@
+"""
+Annotation/tag test for Lasair with direct database calls.
+Usage:
+    ann_direct.py <username> <ann_topic>
+
+Arguments:
+    <username>      Username to use.
+    <ann_topic>     Annotation topic.
+
+Options:
+    -h --help    Show this help message.
+"""
+
+import sys
+import time
+import json
+import lasair
+from docopt import docopt
+import api_token
+from util import make_annotator, make_filter_ann, get_diaObjectId
+from util import delete_annotator, delete_filter
+sys.path.append('../../../common')
+import settings
+sys.path.append('../../../common/src')
+import annotate_util
+
+if __name__ == "__main__":
+    args = docopt(__doc__)
+    username = args['<username>']
+    ann_topic = args['<ann_topic>']
+    print(f'Using username {username} and annotator {ann_topic}')
+
+    # make the annotator
+    make_annotator(ann_topic, username)
+
+    # find a random object to annotate
+    diaObjectId = get_diaObjectId()
+
+    # two annotations
+    print('inserting annotations')
+    annotate_util.insert_annotation_db(diaObjectId, ann_topic, 'apple')
+    annotate_util.insert_annotation_db(diaObjectId, ann_topic, 'pear')
+
+    # check to see what has come through
+    tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
+    print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
+    if ann_topic.startswith('tags_'):
+        right1 = len(tags) == 2   # if tags, apple and pear are there
+    else:
+        right1 = len(tags) == 1   # if classic, only pear
+
+    tag = 'apple'
+    objs = annotate_util.objects_for_classification(ann_topic, tag)
+    print(f'- Found objects for {ann_topic}/{tag}:', objs)
+    if ann_topic.startswith('tags_'):
+        right2 = (len(objs) == 1)  # if tags, apple is there
+    else:
+        right2 = (len(objs) == 0)  # if classic, apple is not there
+
+    tag = 'pear'
+    objs = annotate_util.objects_for_classification(ann_topic, tag)
+    print(f'- Found objects for {ann_topic}/{tag}:', objs)
+    right3 = (len(objs) == 1)   # one object has tag pear
+
+    # Finally clean up
+    print('deleting annotator, annotations')
+    delete_annotator(ann_topic)
+
+    if right1 and right2 and right3:
+        print('passed test')
+        exit(0)
+    else:
+        print('failed test')
+        exit(1)
