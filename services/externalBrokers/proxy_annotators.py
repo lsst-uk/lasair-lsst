@@ -12,7 +12,7 @@ Options:
 # example: python3 proxy_annotators.py --ann=fink_snn --ann=alerce_stamp --ann=ampel_extragal --verbose
 import sys
 import importlib
-import lasair
+import datetime
 from docopt import docopt
 sys.path.append('../../common')
 import settings
@@ -35,13 +35,11 @@ if log:
     logf = open(logfile, 'a')
 else:
     logf = sys.stdout
-
-endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
+logf.write(f'Annotation proxies at {datetime.datetime.now()}\n')
 
 for ann_name in ann_names:
     ann = settings.proxies[ann_name]
-    print(ann)
-    L = lasair.lasair_client(ann['API_TOKEN'], endpoint=endpoint)
+    logf.write(f'Running {ann}\n')
     ann_code = importlib.import_module(ann['CODE'])
 
     ac = ann_code.Annotator(ann)
@@ -50,7 +48,9 @@ for ann_name in ann_names:
         d = ac.next_ann()
         if not d:
             break
-        print(d)
+        if verbose:
+            logf.write(f'{d}\n')
         annotate_util.insert_annotations_kafka([d])
         nann += 1
-    print(f'{nann} annotations found')
+        sys.exit()
+    logf.write(f'{nann} annotations found\n')

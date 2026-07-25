@@ -163,6 +163,7 @@ GW_BBH_MAX_AREA        = 300
 ##################
 # fetched via Kafka and converted to annotations
 # First, common elements for the service we fetch from
+proxies = {}
 hopskotch = {
     'SCIMMA_AUTH_USERNAME': '{{ settings.scimma_auth_username }}',
     'SCIMMA_AUTH_PASSWORD': '{{ settings.scimma_auth_password }}',
@@ -170,23 +171,23 @@ hopskotch = {
 # Specialise the comment elements for each module
 # CODE returns a list of annotations.
 # The keys of this dict are annotator names.
-ampel_infants = hopskotch | {
+proxies['ampel_infant'] = hopskotch | {
     'MODULE'   : 'ampel.lsst.extragalactic-infants',
-    'CODE'     : 'hopskotch/ampel_infants',
+    'CODE'     : 'hopskotch.ampel_infant',
 }
-ampel_extragal = hopskotch | {
+proxies['ampel_extragal'] = hopskotch | {
     'MODULE'   : 'ampel.lsst.extragalactic-transients',
-    'CODE'     : 'hopskotch/ampel_extragal',
+    'CODE'     : 'hopskotch.ampel_extragal',
 }
 #-----------
 fink = {
     'SERVERS'  : '{{ settings.fink_servers }}',
     'USERNAME' : '{{ settings.fink_username }}',
     'GROUP_ID' : 'fink-roy',
-    'CODE'     : 'fink/get_fink',
 }
-fink_snn = fink | {
+proxies['fink_snn'] = fink | {
     'MODULE': 'fink_extragalactic_lt20mag_candidate_lsst',
+    'CODE'     : 'fink.fink_snn',
 }
 #-----------
 alerce = {
@@ -194,11 +195,9 @@ alerce = {
     'ALERCE_NAME'    : 'lasair_prod',
     'ALERCE_PASSWORD': '{{ settings.alerce_password }}',
 }
-alerce_stamp = alerce | {
-    'MODULE': 'stamp',
-    'CODE' : 'alerce/alerce_stamp',
+proxies['alerce_stamp'] = alerce | {
+    'CODE' : 'alerce.alerce_stamp',
 }
-alerce_lc = alerce | {
-    'MODULE': 'lc',
-    'CODE' : 'alerce/alerce_lc',
+proxies['alerce_lc'] = alerce | {
+    'CODE' : 'alerce.alerce_lc',
 }
