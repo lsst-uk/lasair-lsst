@@ -171,22 +171,19 @@ hopskotch = {
 # CODE returns a list of annotations.
 # The keys of this dict are annotator names.
 ampel_infants = hopskotch | {
-    'API_TOKEN': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
     'MODULE'   : 'ampel.lsst.extragalactic-infants',
-    'CODE'     : 'hopskotch/ampel_infants.py',
+    'CODE'     : 'hopskotch/ampel_infants',
 }
 ampel_extragal = hopskotch | {
-    'API_TOKEN': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
     'MODULE'   : 'ampel.lsst.extragalactic-transients',
-    'CODE'     : 'hopskotch/ampel_extragal.py',
+    'CODE'     : 'hopskotch/ampel_extragal',
 }
 #-----------
 fink = {
     'SERVERS'  : '{{ settings.fink_servers }}',
     'USERNAME' : '{{ settings.fink_username }}',
     'GROUP_ID' : 'fink-roy',
-    'API_TOKEN': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
-    'CODE'     : 'fink/get_fink.py',
+    'CODE'     : 'fink/get_fink',
 }
 fink_snn = fink | {
     'MODULE': 'fink_extragalactic_lt20mag_candidate_lsst',
@@ -196,16 +193,12 @@ alerce = {
     'SERVERS'        : {{ settings.alerce_server }},
     'ALERCE_NAME'    : 'lasair_prod',
     'ALERCE_PASSWORD': '{{ settings.alerce_password }}',
-    'API_TOKEN': 'xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx',
 }
 alerce_stamp = alerce | {
     'MODULE': 'stamp',
-    'CODE' : 'alerce/alerce_stamp.py',
+    'CODE' : 'alerce/alerce_stamp',
 }
 alerce_lc = alerce | {
     'MODULE': 'lc',
-    'CODE' : 'alerce/alerce_lc.py',
+    'CODE' : 'alerce/alerce_lc',
 }
-#-----------
-# Which proxy annotators will be run on the cron
-LIVE_PROXIES = ['ampel_infants', 'ampel_extragal', 'fink_snn', 'alerce_stamp']
