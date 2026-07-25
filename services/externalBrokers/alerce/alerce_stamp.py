@@ -20,15 +20,11 @@ class Annotator():
             'auto.offset.reset': 'earliest',
         }
         self.streamReader = Consumer(conf)
-        schema_filename = 'alerce/stamp_classifier_rubin.avsc'
-        self.schema = json.loads(open(schema_filename).read())
 
     def next_ann(self):
-
         nid  = date_nid.nid_now()
         date = date_nid.nid_to_date(nid)
         topic = f'stamp_classifier_{date}'
-        topic = 'stamp_classifier_20260717'   # HACK
         self.streamReader.subscribe([topic])
         msg = self.streamReader.poll(timeout=20)
         if msg == None:
@@ -38,21 +34,21 @@ class Annotator():
         # Stamp classifier Rubin is a schemaless abro. Give schema to read.
         # Reader returns a dict.
         try:
-            reader = fastavro.schemaless_reader(bytes_io, self.schema)
+            reader = fastavro.reader(bytes_io)
         except:
             print(f'Cannot open {topic}')
-            return 'fail'
-            r = {}
-            classdict = {}
-            maxprob = 0
-            for k,v in record['probabilities'].items():
-                classdict[k] = float('%.3f'%v)
-                if v > maxprob:
-                    r['classification'] = k
-            maxprob = v
-            r['diaObjectId'] = record['diaObjectId']
-            r['classdict']      = classdict
-            if r['classification'] in ['VS', 'AGN', 'asteroid', 'bogus']:
-                return None
-            else:
-                return r
+            return None
+        r = {}
+        classdict = {}
+        maxprob = 0
+        for k,v in record['probabilities'].items():
+            classdict[k] = float('%.3f'%v)
+            if v > maxprob:
+                r['classification'] = k
+        maxprob = v
+        r['diaObjectId'] = record['diaObjectId']
+        r['classdict']      = classdict
+        if r['classification'] in ['VS', 'AGN', 'asteroid', 'bogus']:
+            return None
+        else:
+            return r
