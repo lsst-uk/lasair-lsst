@@ -53,6 +53,9 @@ else:
     logf = sys.stdout
 logf.write(f'Annotation proxies at {datetime.datetime.now()}\n')
 
+if len(ann_names) == 0:
+    print('List of proxy annotators: ', settings.proxies.keys())
+
 for ann_name in ann_names:
     if ann_name in settings.proxies:
         ann = settings.proxies[ann_name]

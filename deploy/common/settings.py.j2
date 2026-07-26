@@ -164,6 +164,12 @@ GW_BBH_MAX_AREA        = 300
 # fetched via Kafka and converted to annotations
 # First, common elements for the service we fetch from
 proxies = {}
+#-----------
+proxies['BBB_fast_SN'] = {
+    'CODE': 'filter.BBB_fast_SN',
+    'TOPIC': 'lasair_82BBBfastriserSN',
+}
+#-----------
 hopskotch = {
     'SCIMMA_AUTH_USERNAME': '{{ settings.scimma_auth_username }}',
     'SCIMMA_AUTH_PASSWORD': '{{ settings.scimma_auth_password }}',
