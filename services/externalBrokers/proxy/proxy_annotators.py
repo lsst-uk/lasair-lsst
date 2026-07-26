@@ -21,9 +21,9 @@ import importlib
 import datetime
 import signal
 from docopt import docopt
-sys.path.append('../../common')
+sys.path.append('../../../common')
 import settings
-sys.path.append('../../common/src')
+sys.path.append('../../../common/src')
 import date_nid, annotate_util
 
 def handler(signum, frame):
@@ -64,6 +64,7 @@ for ann_name in ann_names:
         logf.write(f'Unknown proxy annotator {ann_name}\n')
         continue
 
+    # import the code from the CODE parameter in the settings
     ann_code = importlib.import_module(ann['CODE'])
     ac = ann_code.Annotator(ann)
     nann = 0
@@ -78,7 +79,7 @@ for ann_name in ann_names:
             try:
                 result = ac.next_ann()
                 signal.alarm(0)
-                break
+                break  # process the result
             except TimeoutError:
                 result = {}
                 logf.write('  waiting\n')
