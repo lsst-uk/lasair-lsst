@@ -71,7 +71,7 @@ def insert_annotation_kafka(diaObjectId: int, topic: str, classification: str,
 
 def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
                          version: str = '', explanation: str = '', classdict: str = '{}', url: str = '',
-                         verbose: bool = False):
+                         verbose: bool = False, log=None):
     """Insert an annotation/tag directly to the database
 
     Args:
@@ -97,12 +97,17 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     queryi = queryi % (diaObjectId, topic, version, classification, explanation, classdict, url)
 
     if verbose: print(queryd)
-    cursor.execute(queryd)
+    try:
+        cursor.execute(queryd)
+    except Exception as e:
+        if log: log.error(f'Bad queryd{queryd}, {str(e)}')
     if verbose: print(queryi)
-    cursor.execute(queryi)
+    try:
+        cursor.execute(queryi)
+    except Exception as e:
+        if log: log.error(f'Bad queryi {queryi}, {str(e)}')
     msl.commit()
     msl.close()
-
 
 def delete_annotation(diaObjectId: int, topic: str, classification: str = '', verbose=False):
     """Deletes an annotation or tag (annotation with classificaiton).

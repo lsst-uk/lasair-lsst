@@ -81,7 +81,7 @@ class AnnotationFilter(Filter):
             annotation['version'],
             annotation['explanation'],
             annotation['classdict'],
-            annotation['url'])
+            annotation['url'], self.log)
         return 1
 
     def post_ingest(self, n_messages):
