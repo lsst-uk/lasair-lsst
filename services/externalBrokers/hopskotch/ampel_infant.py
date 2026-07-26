@@ -10,17 +10,18 @@ class Annotator():
         self.hr = hop_reader(settings)
 
     def next_ann(self):
-        try:
-            message = self.hr.poll()
-        except TimeoutError:
-            return None
+        message = self.hr.poll()
+        if 'error' in message:
+            return message
 
         diaObjectId    = message['object']['id']
         classdict = message['features'][0]['features']
         classification = 'infant'
 
-        return {'diaObjectId'   : diaObjectId,
-                'topic'         : 'ampel_infant',
-                'classification': 'infant',
-                'classdict'     : classdict,
+        return {'annotation': {
+                  'diaObjectId'   : diaObjectId,
+                  'topic'         : 'ampel_infant',
+                  'classification': 'infant',
+                  'classdict'     : classdict,
                 }
+              }

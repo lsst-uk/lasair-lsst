@@ -15,17 +15,26 @@ classes = {11: 'SN-like', 12: 'Fast', 13: 'Long', 21:'Periodic', 22:'NonPeriodic
 class Annotator():
     def __init__(self, settings):
         self.settings = settings
+        if 'group_id' in settings:
+            group_id = settings['group_id']
+        else:
+            group_id = 'bla15'
         fink_config = {
             'username':          settings['USERNAME'] ,
             'bootstrap.servers': settings['SERVERS'],
-            'group.id':          'bla15'
+            'group.id':          group_id,
         }
         self.consumer = AlertConsumer([settings['MODULE']], fink_config)
 
     def next_ann(self):
         (topic, alert, version) = self.consumer.poll(10)
         if topic is None:
-            return None
+            return {'error': 'End of stream'}
+
+        if self.settings['verbose']:
+            result = {'info': f'Got record {str(record)}'}
+        else:
+            result = {}
 
         diaObjectId = alert['diaSource']['diaObjectId']
         classdict = alert['clf']
@@ -33,8 +42,9 @@ class Annotator():
             classification = classes[classdict['cats_class']]
         except:
             classification = 'Unknown'
-        return {'diaObjectId'   : diaObjectId,
+        result['annotation'] = {'diaObjectId'   : diaObjectId,
                 'topic'         : 'fink_snn',
                 'classification': classification,
                 'classdict'     : classdict,
                 }
+        return result

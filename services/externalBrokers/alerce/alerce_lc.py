@@ -11,9 +11,13 @@ import date_nid
 class Annotator():
     def __init__(self, settings):
         self.settings = settings
+        if 'group_id' in settings:
+            group_id = settings['group_id']
+        else:
+            group_id = '-001'
         conf = {
             'bootstrap.servers': settings['SERVERS'],
-            'group.id'         : settings['ALERCE_NAME'] + '-001',
+            'group.id'         : settings['ALERCE_NAME'] + group_id,
             'security.protocol': 'SASL_SSL',
             'sasl.mechanism'   : 'SCRAM-SHA-512',
             'sasl.username'    : settings['ALERCE_NAME'],
@@ -32,7 +36,7 @@ class Annotator():
         self.streamReader.subscribe([topic])
         msg = self.streamReader.poll(timeout=20)
         if msg == None:
-            return None
+            return {'error': 'End of stream'}
         bytes_io = io.BytesIO(msg.value())
 
         # Stamp classifier Rubin is a schemaless abro. Give schema to read.
@@ -40,19 +44,22 @@ class Annotator():
         try:
             reader = fastavro.schemaless_reader(bytes_io, self.schema)
         except:
-            print(f'Cannot open {topic}')
-            return None
+            return {'error': f'Cannot open {topic}'}
 
-        r['diaObjectId'] = record['oid']
+        if self.settings['verbose']:
+            result = {'info': f'Got record {str(record)}'}
+        else:
+            result = {}
+
+        annotation = {}
+        annotation['diaObjectId'] = record['oid']
         lcc = record['lc_classification']
-        r['classification'] = lcc['class']
+        annotation['classification'] = lcc['class']
         classdict = {}
         for k,v in lcc['probabilities'].items():
             if v > 0.02:
                 classdict[k] = float('%.3f'%v)
-        r['classdict'] = classdict
-        if r['classification'] in ['E', 'Periodic-Other']:
-            return None
-        else:
-            return r
-
+        annotation['classdict'] = classdict
+        if annotation['classification'] not in ['E', 'Periodic-Other']:
+            result['annotation'] = annotation
+        return result

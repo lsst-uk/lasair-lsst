@@ -10,9 +10,13 @@ import date_nid
 class Annotator():
     def __init__(self, settings):
         self.settings = settings
+        if 'group_id' in settings:
+            group_id = settings['group_id']
+        else:
+            group_id = '-001'
         conf = {
             'bootstrap.servers': settings['SERVERS'],
-            'group.id'         : settings['ALERCE_NAME'] + '-001',
+            'group.id'         : settings['ALERCE_NAME'] + group_id,
             'security.protocol': 'SASL_SSL',
             'sasl.mechanism'   : 'SCRAM-SHA-512',
             'sasl.username'    : settings['ALERCE_NAME'],
@@ -28,27 +32,32 @@ class Annotator():
         self.streamReader.subscribe([topic])
         msg = self.streamReader.poll(timeout=20)
         if msg == None:
-            return None
+            return {'error': 'End of stream'}
         bytes_io = io.BytesIO(msg.value())
 
         # Stamp classifier Rubin is a schemaless abro. Give schema to read.
         # Reader returns a dict.
         try:
             reader = fastavro.reader(bytes_io)
+            record = next(reader)
         except:
-            print(f'Cannot open {topic}')
-            return None
-        r = {}
+            return {'error': f'Cannot open {topic}'}
+
+        if self.settings['verbose']:
+            result = {'info': f'Got record {str(record)}'}
+        else:
+            result = {}
+
+        annotation = {}
         classdict = {}
         maxprob = 0
         for k,v in record['probabilities'].items():
             classdict[k] = float('%.3f'%v)
             if v > maxprob:
-                r['classification'] = k
+                annotation['classification'] = k
         maxprob = v
-        r['diaObjectId'] = record['diaObjectId']
-        r['classdict']      = classdict
-        if r['classification'] in ['VS', 'AGN', 'asteroid', 'bogus']:
-            return None
-        else:
-            return r
+        annotation['diaObjectId'] = record['objectId']
+        annotation['classdict']      = classdict
+        if annotation['classification'] not in ['VS', 'AGN', 'asteroid', 'bogus']:
+            result['annotation'] = annotation
+        return result

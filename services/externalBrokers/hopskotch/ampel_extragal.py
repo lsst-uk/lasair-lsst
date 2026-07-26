@@ -10,11 +10,9 @@ class Annotator():
         self.hr = hop_reader(settings)
 
     def next_ann(self):
-        try:
-            message = self.hr.poll()
-        except TimeoutError:
-            return None
-
+        message = self.hr.poll()
+        if 'error' in message:
+            return message
         diaObjectId    = message['object']['id']
         classdict      = {}
         classification = None
@@ -28,8 +26,10 @@ class Annotator():
         if len(classdict) > 0:
             classification = list(classdict.keys())[0]
 
-        return {'diaObjectId'   : diaObjectId,
-                'topic'         : 'ampel_extragal',
-                'classification': classification,
-                'classdict'     : classdict,
+        return {'annotation': {
+                  'diaObjectId'   : diaObjectId,
+                  'topic'         : 'ampel_extragal',
+                  'classification': classification,
+                  'classdict'     : classdict,
                 }
+              }
