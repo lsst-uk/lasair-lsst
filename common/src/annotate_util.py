@@ -71,7 +71,7 @@ def insert_annotation_kafka(diaObjectId: int, topic: str, classification: str,
 
 def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
                          version: str = '', explanation: str = '', classdict: str = '{}', url: str = '',
-                         verbose: bool = False, log=None):
+                         verbose: bool = False):
     """Insert an annotation/tag directly to the database
 
     Args:
@@ -97,19 +97,14 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     queryi = queryi % (diaObjectId, topic, version, classification, explanation, classdict, url)
 
     if verbose: print(queryd)
-    try:
-        cursor.execute(queryd)
-    except Exception as e:
-        if log: log.error(f'Bad queryd{queryd}, {str(e)}')
+    cursor.execute(queryd)
     if verbose: print(queryi)
-    try:
-        cursor.execute(queryi)
-    except Exception as e:
-        if log: log.error(f'Bad queryi {queryi}, {str(e)}')
+    cursor.execute(queryi)
     msl.commit()
     msl.close()
 
-def delete_annotation(diaObjectId: int, topic: str, classification: str = '', verbose=False):
+
+def delete_annotation(diaObjectId: int, topic: str, classification: str = None, verbose=False):
     """Deletes an annotation or tag (annotation with classificaiton).
 
     Args:
@@ -122,11 +117,11 @@ def delete_annotation(diaObjectId: int, topic: str, classification: str = '', ve
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    query = 'DELETE from annotations WHERE diaObjectId=%d AND topic="%s"'
+    query = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
     query = query % (diaObjectId, topic)
 
     if topic.startswith('tags_'):
-        if len('classification') > 0:
+        if classification:
             query += ' AND classification=%s' % classification
         else:
             raise AnnotationError("Cannot delete a tag without a classification")

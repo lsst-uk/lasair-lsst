@@ -15,6 +15,7 @@ import annotate_util
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
+import mysql.connector.Error
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -74,14 +75,17 @@ class AnnotationFilter(Filter):
         else:
             self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
 
-        annotate_util.insert_annotation_db(
-            annotation['diaObjectId'],
-            annotation['topic'],
-            annotation['classification'],
-            annotation['version'],
-            annotation['explanation'],
-            annotation['classdict'],
-            annotation['url'], self.log)
+        try:
+            annotate_util.insert_annotation_db(
+                annotation['diaObjectId'],
+                annotation['topic'],
+                annotation['classification'],
+                annotation['version'],
+                annotation['explanation'],
+                annotation['classdict'],
+                annotation['url'])
+        except mysql.connector.Error as e:
+            log.error(f'Bad query: {queryd}, {str(e)}')
         return 1
 
     def post_ingest(self, n_messages):
