@@ -85,7 +85,7 @@ class AnnotationFilter(Filter):
                 annotation['classdict'],
                 annotation['url'])
         except mysql.connector.Error as e:
-            log.error(f'Bad query: {queryd}, {str(e)}')
+            self.log.error(f'Error inserting annotation: {str(e)}')
         return 1
 
     def post_ingest(self, n_messages):
