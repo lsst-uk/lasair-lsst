@@ -29,76 +29,92 @@ import date_nid, annotate_util
 def handler(signum, frame):
     raise TimeoutError
 
-args = docopt(__doc__)
-ann_names = args["--ann"]
-maxtry    = int(args["--maxtry"])
-group_id  = args["--group_id"]
-verbose   = args["--verbose"]
-log       = args["--log"]
+signal.signal(signal.SIGALRM, handler)
 
-if verbose:
-    print(f"ann_names = {ann_names}")
-    print(f'maxtry = {maxtry}')
-    print(f'group_id = {group_id}')
-    print(f"verbose = {verbose}")
-    print(f"log = {log}")
+def parse_args():
+    args = docopt(__doc__)
+    argdict =  {
+        "ann_names": args["--ann"],
+        "maxtry"   : int(args["--maxtry"]),
+        "group_id" : args["--group_id"],
+        "verbose"  : args["--verbose"],
+        "log"      : args["--log"],
+    }
+    if argdict['verbose']:
+        print(f"ann_names = {argdict['ann_names']}")
+        print(f"maxtry =    {argdict['maxtry']}")
+        print(f"group_id =  {argdict['group_id']}")
+        print(f"verbose =   {argdict['verbose']}")
+        print(f"log =       {argdict['log']}")
 
-if log:
-    # open system services log
-    nid  = date_nid.nid_now()
+    # with no list of annotators, print the possible names
+    if len(argdict['ann_names']) == 0:
+        print('List of proxy annotators: ')
+        for ann in settings.proxies.keys():
+            print(f'--ann={ann} ', end='')
+        print()
+
+    return argdict
+
+def get_log_stream(log):
+    if not log:
+        return sys.stdout
+    nid = date_nid.nid_now()
     date = date_nid.nid_to_date(nid)
-    logfile = settings.SERVICES_LOG +'/'+ date + '.log'
-    logf = open(logfile, 'a')
-else:
-    logf = sys.stdout
-logf.write(f'Annotation proxies at {datetime.datetime.now()}\n')
+    logfile = f"{settings.SERVICES_LOG}/{date}.log"
+    return open(logfile, "a")
 
-if len(ann_names) == 0:
-    print('List of proxy annotators: ')
-    for ann in settings.proxies.keys():
-        print(f'--ann={ann} ', end='')
-    print()
+def load_annotator(ann):
+    module = importlib.import_module(ann["CODE"])
+    return module.Annotator(ann)
 
-for ann_name in ann_names:
-    if ann_name in settings.proxies:
-        ann = settings.proxies[ann_name]
-        ann['verbose'] = verbose
-        if group_id: 
-            ann['group_id'] = group_id
-        logf.write(f'Running {ann_name}\n')
-    else:
-        logf.write(f'Unknown proxy annotator {ann_name}\n')
-        continue
+def get_next_annotation(ac, retries=4, timeout=5, logger=sys.stdout):
+    for _ in range(retries):
+        signal.alarm(timeout)
+        try:
+            result = ac.next_ann()
+            signal.alarm(0)
+            return result
+        except TimeoutError:
+            logger.write("  waiting\n")
+    return None
 
-    # import the code from the CODE parameter in the settings
-    ann_code = importlib.import_module(ann['CODE'])
-    ac = ann_code.Annotator(ann)
-    nann = 0
-    signal.signal(signal.SIGALRM, handler)
-
-    for _try in range(maxtry):
-        # expect {'error':'blabla', 'info':'blabla', 'annotation':{'classdict':....}}
-        # if error no more in stream
-        # if info just report and keep going
-        for attempt in range(4):
-            signal.alarm(5)
-            try:
-                result = ac.next_ann()
-                signal.alarm(0)
-                break  # process the result
-            except TimeoutError:
-                result = {}
-                logf.write('  waiting\n')
-        else:
-            break  # next proxy annotator
-
-        if 'error' in result:
-            logf.write(f'  {result["error"]}\n')
+def process_annotator(ac, maxtry, logger):
+    inserted = 0
+    for _ in range(maxtry):
+        result = get_next_annotation(ac, logger=logger)
+        if result is None:
             break
-        if 'info' in result:
-            logf.write(f'  {result["info"]}\n')
-        if 'annotation' in result:
-            annotation = result['annotation']
-            annotate_util.insert_annotations_kafka([annotation])
-            nann += 1
-    logf.write(f'  {nann} annotations inserted\n')
+# expect {'error':'blabla', 'info':'blabla', 'annotation':{'classdict':....}}
+        if "error" in result:
+            logger.write(f'  {result["error"]}\n')
+            break
+        if "info" in result:
+            logger.write(f'  {result["info"]}\n')
+        if "annotation" in result:
+            annotate_util.insert_annotations_kafka( [result["annotation"]])
+            inserted += 1
+    return inserted
+
+def main():
+    argdict = parse_args()
+    logf = get_log_stream(argdict['log'])
+    logf.write(f'Annotation proxies at {datetime.datetime.now()}\n')
+
+    for ann_name in argdict['ann_names']:
+        if ann_name in settings.proxies:
+            ann = settings.proxies[ann_name]
+            ann['verbose'] = argdict['verbose']
+            if argdict['group_id']:
+                ann['group_id'] = argdict['group_id']
+            logf.write(f'Running {ann_name}\n')
+        else:
+            logf.write(f'Unknown proxy annotator {ann_name}\n')
+            continue
+
+        ac = load_annotator(ann)
+        inserted = process_annotator(ac, argdict["maxtry"], logf)
+        logf.write(f"{inserted} annotations inserted\n")
+
+if __name__ == "__main__":
+    main()
