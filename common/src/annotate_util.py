@@ -122,7 +122,7 @@ def delete_annotation(diaObjectId: int, topic: str, classification: str = None, 
 
     if topic.startswith('tags_'):
         if classification:
-            query += ' AND classification=%s' % classification
+            query += ' AND classification="%s"' % classification
         else:
             raise AnnotationError("Cannot delete a tag without a classification")
     
