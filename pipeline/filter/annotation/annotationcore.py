@@ -15,7 +15,7 @@ import annotate_util
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
-import mysql.connector.Error
+#import mysql.connector.Error
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -84,7 +84,8 @@ class AnnotationFilter(Filter):
                 annotation['explanation'],
                 annotation['classdict'],
                 annotation['url'])
-        except mysql.connector.Error as e:
+#        except mysql.connector.Error as e:
+        except Exception as e:
             self.log.error(f'Error inserting annotation: {str(e)}')
         return 1
 
