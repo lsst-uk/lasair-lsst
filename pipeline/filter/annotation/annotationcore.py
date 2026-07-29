@@ -67,17 +67,24 @@ class AnnotationFilter(Filter):
         else:
             return 0
 
+        # This is because the Lasair client and webserver expect to use 'objectId'
+        # instead of 'diaObjectId'
+        if 'objectId' in annotation:
+            diaObjectId = annotation['objectId']
+        else:
+            diaObjectId = annotation['diaObjectId']
+
         # self.ann_diaObjectId = {
         #     'topic1':[oid1, oid2, ...], 
         #     'topic2':[...] }
         if annotator in self.ann_diaObjectId:
-            self.ann_diaObjectId[annotator].append(annotation['diaObjectId'])
+            self.ann_diaObjectId[annotator].append(diaObjectId)
         else:
-            self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
+            self.ann_diaObjectId[annotator] = [diaObjectId]
 
         try:
             annotate_util.insert_annotation_db(
-                annotation['diaObjectId'],
+                diaObjectId,
                 annotation['topic'],
                 annotation['classification'],
                 annotation['version'],
