@@ -5,7 +5,7 @@
 
 ![Screenshot](ann.png)
 
-- This test can only run on lasair-lsst-dev because it adds records to the live database.
+- Do not run this test with an existing annotator, make up a new name
 - Program arguments (below) give annotator name/topic and username of owner
 - If the annotator name begins "tags_" the behaviour is slightly different
 - First create an annotator of the given name/topic with given owner

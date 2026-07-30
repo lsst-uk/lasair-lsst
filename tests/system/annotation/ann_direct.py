@@ -31,7 +31,9 @@ if __name__ == "__main__":
     print(f'Using username {username} and annotator {ann_topic}')
 
     # make the annotator
-    make_annotator(ann_topic, username)
+    if make_annotator(ann_topic, username) == 1:
+        print('Cannot run test with existing annotator')
+        sys.exit()
 
     # find a random object to annotate
     diaObjectId = get_diaObjectId()

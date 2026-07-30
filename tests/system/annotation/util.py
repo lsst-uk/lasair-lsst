@@ -79,7 +79,10 @@ def make_annotator(topic, username, verbose=False):
         cursor.execute(query)
     except Exception as e:
         print(str(e))
+        print('Note -- do not run this test with an existing annotator')
+        return 1
     msl.commit()
+    return 0
 
 def make_filter_ann(filter_name, username, ann_topic):
     id = get_userid(username)

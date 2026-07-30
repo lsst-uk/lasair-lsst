@@ -33,7 +33,9 @@ if __name__ == "__main__":
     print(f'Using username {username} and annotator {ann_topic} ')
 
     # make the annotator
-    make_annotator(ann_topic, username)
+    if make_annotator(ann_topic, username) == 1:
+        print('Cannot run test with existing annotator')
+        sys.exit()
 
     # make the filter
     filter_name = f'__filt{ann_topic}'
