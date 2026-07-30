@@ -15,7 +15,8 @@ import annotate_util
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
-#import mysql.connector.Error
+import mysql.connector.errors
+
 
 def now():
     return datetime.datetime.now(datetime.UTC).strftime("%H:%M:%S")
@@ -52,7 +53,6 @@ class AnnotationFilter(Filter):
         """insert_message_list: handle a list of annotations of the form
         [ann1, ann2, ....]
         """
-        #print('===', annotation_list)    ### HACK
         nannotation = 0
         for ann in annotation_list:
             nannotation += self.ingest_annotation(ann)
@@ -91,9 +91,9 @@ class AnnotationFilter(Filter):
                 annotation['explanation'],
                 annotation['classdict'],
                 annotation['url'])
-#        except mysql.connector.Error as e:
-        except Exception as e:
+        except mysql.connector.errors.Error as e:
             self.log.error(f'Error inserting annotation: {str(e)}')
+            return 0
         return 1
 
     def post_ingest(self, n_messages):

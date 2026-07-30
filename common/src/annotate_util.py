@@ -78,7 +78,7 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
         verbose: print the SQL queries on stdout
 
     Raises:
-        mysql.connector.Error: database error
+        mysql.connector.errors.Error: database error
     """
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
@@ -111,7 +111,7 @@ def delete_annotation(diaObjectId: int, topic: str, classification: str = None, 
         verbose: print the SQL queries on stdout
 
     Raises:
-        mysql.connector.Error: database error
+        mysql.connector.errors.Error: database error
         AnnotationError: an error not caused by anything external
     """
     msl = db_connect.remote()
@@ -139,7 +139,7 @@ def classifications_for_object(topic: str, diaObjectId: int, verbose: bool = Fal
         verbose: print the SQL queries on stdout
 
     Raises:
-        mysql.connector.Error: database error
+        mysql.connector.errors.Error: database error
 
     Returns:
         A list of tags
@@ -166,7 +166,7 @@ def objects_for_classification(topic: str, tag: str, verbose: bool = False) -> l
         verbose: print the SQL queries on stdout
 
     Raises:
-        mysql.connector.Error: database error
+        mysql.connector.errors.Error: database error
 
     Returns:
         A list of objects

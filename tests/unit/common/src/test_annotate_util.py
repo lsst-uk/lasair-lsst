@@ -13,9 +13,11 @@ class AnnotateUtilTest(unittest.TestCase):
         """Test insert_annotation_kafka function"""
         annotate_util.lasair_settings.ANNOTATION_TOPIC = 'asdf'
         annotate_util.insert_annotation_kafka(123, 'test_topic', 'test_class', 'v1', 'expl', '{}', 'test_url')
-        mock_producer.return_value.produce.assert_called_once_with('asdf',
+        mock_producer.return_value.produce.assert_called_once_with(
+            'asdf',
             '{"diaObjectId": 123, "topic": "test_topic", "classification": "test_class", "version": "v1", '
-            '"explanation": "expl", "classdict": "{}", "url": "test_url"}')
+            '"explanation": "expl", "classdict": "{}", "url": "test_url"}'
+            )
         mock_producer.return_value.flush.assert_called_once()
 
     def test_insert_annotations_kafka(self):
@@ -49,11 +51,6 @@ class AnnotateUtilTest(unittest.TestCase):
     def test_delete_annotation(self, mock_db):
         """Test delete_annotation function"""
         """Test delete_annotation function for tags"""
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
-
         annotate_util.delete_annotation(123, 'test_topic', 'test_class')
         expected_delete = (
             'DELETE FROM annotations WHERE diaObjectId=123 AND topic="test_topic"'
@@ -63,10 +60,6 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_tags(self, mock_db):
         """Test delete_annotation function for tags"""
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
         annotate_util.delete_annotation(123, 'tags_test_topic', 'test_class')
         expected_delete = (
             'DELETE FROM annotations WHERE diaObjectId=123 AND topic="tags_test_topic" '
@@ -77,21 +70,14 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_error(self, mock_db):
         """Test that delete_annotation function raises exception if called without classification on a tags topic"""
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
         with self.assertRaises(annotate_util.AnnotationError):
             annotate_util.delete_annotation(123, 'tags_test_topic')
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_classifications_for_object(self, mock_db):
         """Test classifications_for_object function"""
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
-        expected_select = ('SELECT classification FROM annotations '
+        expected_select = (
+            'SELECT classification FROM annotations '
             'WHERE topic="test_topic" AND diaObjectId=123'
             )
         annotate_util.classifications_for_object('test_topic', 123)
@@ -100,15 +86,13 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('annotate_util.db_connect.remote')
     def test_objects_for_classification(self, mock_db):
         """Test objects_for_classification function"""
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
-        expected_select = ('SELECT diaObjectId FROM annotations '
+        expected_select = (
+            'SELECT diaObjectId FROM annotations '
             'WHERE topic="test_topic" AND classification="apple"'
             )
         annotate_util.objects_for_classification('test_topic', 'apple')
         mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_select)
+
 
 if __name__ == '__main__':
     import xmlrunner
