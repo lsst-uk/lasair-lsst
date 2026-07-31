@@ -18,7 +18,6 @@ import time
 import json
 from lasair import lasair_client, lasair_consumer
 from docopt import docopt
-import api_token
 from util import make_annotator, make_filter_ann, get_diaObjectId
 from util import delete_annotator, delete_filter
 sys.path.append('../../../common')
@@ -49,7 +48,7 @@ if __name__ == "__main__":
     if args['api']:
         # will use API to annotate
         endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
-        L = lasair_client(api_token.API_TOKEN, endpoint=endpoint)
+        L = lasair_client(settings.API_TOKEN, endpoint=endpoint)
         L.annotate(
             ann_topic, diaObjectId, 'apple',
             version='0.1', explanation='', classdict={}, url='')
