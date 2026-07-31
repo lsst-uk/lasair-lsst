@@ -15,7 +15,7 @@ from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
-from src import db_connect
+from src import db_connect, annotate_util
 import settings as lasair_settings
 import sys
 sys.path.append('../common')
@@ -344,22 +344,41 @@ class QuerySerializer(serializers.Serializer):
 
 
 class AnnotateSerializer(serializers.Serializer):
-    topic = serializers.CharField(max_length=255, required=True)
-    objectId = serializers.IntegerField(required=True)
+
+    objectId       = serializers.IntegerField(required=True)
+    topic          = serializers.CharField(max_length=255, required=True)
     classification = serializers.CharField(max_length=80, required=True)
-    version = serializers.CharField(max_length=80, required=True)
-    explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)
-    classdict = serializers.CharField(max_length=4096, required=True)
-    url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    version        = serializers.CharField(max_length=80, required=True)
+    explanation    = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    classdict      = serializers.CharField(max_length=4096, required=True)
+    url            = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
     def save(self):
-        topic = self.validated_data['topic']
-        diaObjectId = self.validated_data['objectId']
-        classification = self.validated_data['classification']
-        version = self.validated_data['version']
-        explanation = self.validated_data['explanation']
-        classdict = self.validated_data['classdict']
-        url = self.validated_data['url']
+        request = self.context.get("request")
+        a = {
+            'diaObjectId'   : self.validated_data['objectId'],
+            'topic'         : self.validated_data['topic'],
+            'classification': self.validated_data['classification'],
+            'version'       : self.validated_data['version'],
+            'explanation'   : self.validated_data['explanation'],
+            'classdict'     : self.validated_data['classdict'],
+            'url'           : self.validated_data['url'],
+            }
+
+        serializer = AnnotateListSerializer(
+                data={'annotations':[a]}, 
+                context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        return {'status': 'success', 'annotation_topic': a['topic']}
+
+class AnnotateListSerializer(serializers.Serializer):
+    annotations = serializers.ListField()
+
+    def save(self):
+        annotations = self.validated_data['annotations']
+        request = self.context.get("request")
+
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
@@ -376,6 +395,7 @@ class AnnotateSerializer(serializers.Serializer):
             return {'error': "Cannot connect to master database %d: %s\n" % (e.args[0], e.args[1])}
 
         cursor = msl.cursor(dictionary=True)
+        topic = annotations[0]['topic']
         cursor.execute('SELECT * from annotators where topic="%s"' % topic)
         nrow = 0
         for row in cursor:
@@ -391,45 +411,6 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # push a kafka message to make sure queries are ingested t database and run immediately
-        message = {'diaObjectId'   : diaObjectId, 
-                   'topic'         : topic,
-                   'version'       : version,
-                   'classification': classification,
-                   'explanation'   : explanation,
-                   'classdict'     : classdict,
-                   'url'           : url,
-                   }
-
-        conf = {
-            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-            'client.id': 'client-1',
-        }
-
-        # will we really instantiate the producer for each message?
-        producer = Producer(conf)
-        topicout = lasair_settings.ANNOTATION_TOPIC
-        try:
-            s = json.dumps(message)
-            producer.produce(topicout, s)
-        except Exception as e:
-            return {'error': "Kafka production failed: %s\n" % e}
-        producer.flush()
-
-        return {'status': 'success', 'annotation_topic': topicout, 'message': s}
-
-class AnnotateListSerializer(serializers.Serializer):
-    annotations = serializers.ListField()
-
-    def save(self):
-        annotations = self.validated_data['annotations']
-        request = self.context.get("request")
-
-        for a in annotations:
-            serializer = AnnotateSerializer(data=a, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            message = serializer.save()
-            if 'error' in message:
-                return message
-
+        # now actually put the annotations in the kafka
+        annotate_util.insert_annotations_kafka(annotations)
         return {'status': 'success', 'n': len(annotations)}
