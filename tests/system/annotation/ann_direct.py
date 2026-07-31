@@ -16,7 +16,6 @@ import time
 import json
 import lasair
 from docopt import docopt
-import api_token
 from util import make_annotator, make_filter_ann, get_diaObjectId
 from util import delete_annotator, delete_filter
 sys.path.append('../../../common')
