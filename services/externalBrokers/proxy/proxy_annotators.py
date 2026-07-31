@@ -24,7 +24,7 @@ from docopt import docopt
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import date_nid, annotate_util
+import date_nid, annotation_util
 
 def handler(signum, frame):
     raise TimeoutError
@@ -92,7 +92,7 @@ def process_annotator(ac, maxtry, logger):
         if "info" in result:
             logger.write(f'  {result["info"]}\n')
         if "annotation" in result:
-            annotate_util.insert_annotations_kafka( [result["annotation"]])
+            annotation_util.insert_annotations_kafka( [result["annotation"]])
             inserted += 1
     return inserted
 

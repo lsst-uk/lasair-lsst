@@ -36,7 +36,7 @@ class ProxyTest(unittest.TestCase):
         result = get_next_annotation(ac)
         assert result is None
 
-    @patch("proxy_annotators.annotate_util.insert_annotations_kafka")
+    @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
     def test_process_annotation(self, mock_insert):
         ac = unittest.mock.MagicMock()
         ac.next_ann.side_effect = [
