@@ -26,8 +26,11 @@ class Annotator():
         self.streamReader = Consumer(conf)
 
     def next_ann(self):
-        nid  = date_nid.nid_now()
-        date = date_nid.nid_to_date(nid)
+        if 'DATE' in self.settings:
+            date = self.settings['DATE']
+        else:
+            nid  = date_nid.nid_now()
+            date = date_nid.nid_to_date(nid)
         topic = f'stamp_classifier_{date}'
         self.streamReader.subscribe([topic])
         msg = self.streamReader.poll(timeout=20)
