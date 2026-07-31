@@ -37,9 +37,10 @@ class Annotator():
             classification = 'Bazin'
         else:
             classification = 'Exp'
-        annotation = {'diaObjectId': diaObjectId,
+        annotation = {'diaObjectId'   : diaObjectId,
+                      'topic'         : 'BBB_fast_SN',
                       'classification': classification,
-                      'classdict': msg
+                      'classdict'     : json.dumps(msg, indent=2),
                       }
 
         return {'annotation': annotation}

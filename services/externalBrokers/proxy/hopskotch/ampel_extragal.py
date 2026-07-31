@@ -1,7 +1,7 @@
 """
 Read AMPEL classifications from Hopskotch.
 """
-import sys
+import sys, json
 from .hop_reader import hop_reader
 
 class Annotator():
@@ -30,6 +30,6 @@ class Annotator():
                   'diaObjectId'   : diaObjectId,
                   'topic'         : 'ampel_extragal',
                   'classification': classification,
-                  'classdict'     : classdict,
+                  'classdict'     : json.dumps(classdict),
                 }
               }

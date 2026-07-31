@@ -1,3 +1,4 @@
+import json
 from fink_client.consumer import AlertConsumer
 
 """ classifications, see https://lsst.fink-portal.org/schemas
@@ -45,6 +46,6 @@ class Annotator():
         result['annotation'] = {'diaObjectId'   : diaObjectId,
                 'topic'         : 'fink_snn',
                 'classification': classification,
-                'classdict'     : classdict,
+                'classdict'     : json.dumps(classdict),
                 }
         return result
