@@ -1,0 +1,47 @@
+# Run the annotation tests
+
+---
+
+- hosts: filter
+  gather_facts: false
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+
+- hosts: filter[0]
+  gather_facts: false
+  tasks:
+    - name: filter services running
+      ansible.builtin.assert:
+        that: "ansible_facts.services['lasair-filter-{{ item }}.service'].state == 'running'"
+        fail_msg: Service not running
+        success_msg: Service running
+        quiet: true
+      loop:
+        - alert
+        - annotation
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: run direct tests
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_direct.py su {{ item }}"
+      loop:
+        - systest1
+        - tags_systest1
+    - name: run kafka tests
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_kafka.py su {{ item }} direct_kafka"
+      loop:
+        - systest1
+        - tags_systest1
+    - name: run api tests
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_kafka.py su {{ item }} api"
+      loop:
+        - systest1
+        - tags_systest1

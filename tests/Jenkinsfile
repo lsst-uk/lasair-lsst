@@ -25,6 +25,7 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_slack_webhook.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_topic_name.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_make_tag_annotator.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotate_util.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'
@@ -60,9 +61,6 @@ pipeline {
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_my_cmd.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_mysql_backup.py'
                 }
-                dir('tests/unit/services/annotations/') {
-                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" kafka_test.py'
-                }
                 dir('tests/unit/services/externalBrokers/') {
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_alerce.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_fink.py'
@@ -84,7 +82,7 @@ pipeline {
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/annotation/test-reports/*.xml'
                     // junit 'tests/unit/services/test-reports/*.xml'
-                    junit 'tests/unit/services/annotations/test-reports/*.xml'
+                    // junit 'tests/unit/services/annotations/test-reports/*.xml'
                     // junit 'tests/unit/services/externalBrokers/test-reports/*.xml'
                     junit 'tests/unit/services/sherlock/test-reports/*.xml'
                     recordCoverage(tools: [[parser: 'COBERTURA', pattern: 'tests/unit/coverage.xml']])

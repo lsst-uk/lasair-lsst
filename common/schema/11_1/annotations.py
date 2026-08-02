@@ -16,7 +16,7 @@ schema = {
     },
     {
       "name": "topic",
-      "type": "text",
+      "type": "bigstring",
       "doc": "The topic name of the annotator -- acts as primary key"
     },
     {
@@ -56,7 +56,7 @@ schema = {
   ],
   "indexes": [
     "PRIMARY KEY    (annotationID)",
-    "UNIQUE KEY     one_per_object (diaObjectId, topic)",
+    "UNIQUE KEY     one_per_object (diaObjectId, topic, classification)",
     "KEY topic_idx (topic)"
   ]
 }
