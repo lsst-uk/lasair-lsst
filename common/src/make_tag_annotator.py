@@ -29,6 +29,6 @@ if __name__ == "__main__":
     cursor.execute(query)
     for row in cursor:
         make_annotator(msl, row['username'], row['id'], verbose)
-        print(f'tags annotator made for {row['username']}')
+        print(f'tags annotator made for {row["username"]}')
     msl.commit()
 
