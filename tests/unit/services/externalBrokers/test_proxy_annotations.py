@@ -5,6 +5,7 @@ import unittest, unittest.mock
 from unittest.mock import patch
 from proxy_annotators import get_log_stream, load_annotator, get_next_annotation, process_annotator
 
+
 class ProxyTest(unittest.TestCase):
     def test_get_log_stream_stdout(self):
         stream = get_log_stream(False)
@@ -52,6 +53,14 @@ class ProxyTest(unittest.TestCase):
         assert inserted == 2
         assert mock_insert.call_count == 2
 
+    @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
+    def test_process_annotation_end(self, mock_insert):
+        ac = unittest.mock.MagicMock()
+        ac.next_ann.side_effect = TimeoutError()
+        inserted = process_annotator(ac, 10, io.StringIO())
+        assert inserted == 0
+        assert mock_insert.call_count == 0
+
     def test_info_message(self):
         ac = unittest.mock.MagicMock()
         ac.next_ann.side_effect = [
@@ -61,6 +70,7 @@ class ProxyTest(unittest.TestCase):
         logger = io.StringIO()
         process_annotator(ac, 10, logger)
         assert "waiting" in logger.getvalue()
+
 
 if __name__ == '__main__':
     import xmlrunner
