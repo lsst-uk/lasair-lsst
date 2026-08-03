@@ -17,6 +17,7 @@ Options:
 
 # example: python3 proxy_annotators.py --ann=fink_snn --ann=alerce_stamp --ann=ampel_extragal --verbose
 import sys
+import io
 import importlib
 import datetime
 import signal
@@ -26,10 +27,23 @@ import settings
 sys.path.append('../../../common/src')
 import date_nid, annotation_util
 
+
+class ProxyAnnotator():
+
+    def __init__(self, settings):
+        self.settings = settings
+
+    def next_ann(self) -> dict:
+        """Get the next available annotation."""
+        raise NotImplementedError("Method must be implemented in subclass")
+
+
 def handler(signum, frame):
     raise TimeoutError
 
+
 signal.signal(signal.SIGALRM, handler)
+
 
 def parse_args():
     args = docopt(__doc__)
@@ -56,7 +70,8 @@ def parse_args():
 
     return argdict
 
-def get_log_stream(log):
+
+def get_log_stream(log: str):
     if not log:
         return sys.stdout
     nid = date_nid.nid_now()
@@ -64,9 +79,11 @@ def get_log_stream(log):
     logfile = f"{settings.SERVICES_LOG}/{date}.log"
     return open(logfile, "a")
 
-def load_annotator(ann):
+
+def load_annotator(ann: dict) -> ProxyAnnotator:
     module = importlib.import_module(ann["CODE"])
     return module.Annotator(ann)
+
 
 def get_next_annotation(ac, retries=4, timeout=5, logger=sys.stdout):
     for _ in range(retries):
@@ -78,6 +95,7 @@ def get_next_annotation(ac, retries=4, timeout=5, logger=sys.stdout):
         except TimeoutError:
             logger.write("  waiting\n")
     return None
+
 
 def process_annotator(ac, maxtry, logger):
     inserted = 0
@@ -95,6 +113,7 @@ def process_annotator(ac, maxtry, logger):
             annotation_util.insert_annotations_kafka( [result["annotation"]])
             inserted += 1
     return inserted
+
 
 def main():
     argdict = parse_args()
@@ -115,6 +134,7 @@ def main():
         ac = load_annotator(ann)
         inserted = process_annotator(ac, argdict["maxtry"], logf)
         logf.write(f"{inserted} annotations inserted\n")
+
 
 if __name__ == "__main__":
     main()

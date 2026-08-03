@@ -1,5 +1,6 @@
 import json
 from fink_client.consumer import AlertConsumer
+from proxy_annotators import ProxyAnnotator
 
 """ classifications, see https://lsst.fink-portal.org/schemas
 CATS classifier broad class prediction with the highest probability. -1= not processed, 
@@ -13,9 +14,10 @@ See https://arxiv.org/abs/2404.08798 Available from fink_broker_version 4.0 and 
 
 classes = {11: 'SN-like', 12: 'Fast', 13: 'Long', 21:'Periodic', 22:'NonPeriodic'}
 
-class Annotator():
+
+class Annotator(ProxyAnnotator):
     def __init__(self, settings):
-        self.settings = settings
+        super().__init__(settings)
         if 'group_id' in settings:
             group_id = settings['group_id']
         else:
