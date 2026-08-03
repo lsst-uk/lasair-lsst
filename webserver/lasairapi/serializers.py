@@ -410,10 +410,13 @@ class AnnotateListSerializer(serializers.Serializer):
             return {'error': "Annotator error: %s is not allowed to submit to topic %s" % (user_name, topic)}
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
+
+        ff = open('/home/ubuntu/qq', 'a')
         for iann in range(len(annotations)):
+            cd = annotations[iann]['classdict']
             try:
                 jcd = json.loads(cd)
-            except json.decoder.JSONDecodeError:
+            except Exception:
                 return {'error': "Bad JSON %s for annotation %d" % (cd, iann)}
 
         # now actually put the annotations in the kafka
