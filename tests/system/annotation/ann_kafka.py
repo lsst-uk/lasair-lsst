@@ -1,10 +1,9 @@
 """
 Annotation/tag test for Lasair using kafka.
 Usage:
-    ann_test.py <username> <ann_topic> (api | direct_kafka)
+    ann_test.py <ann_topic> (api | direct_kafka)
 
 Arguments:
-    <username>      Username to use.
     <ann_topic>     Annotation topic.
     api             Use API mode.
     direct_kafka    Use direct kafka mode.
@@ -27,7 +26,7 @@ import annotate_util
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    username = args['<username>']
+    username = 'su'
     ann_topic = args['<ann_topic>']
     print(f'Using username {username} and annotator {ann_topic} ')
 

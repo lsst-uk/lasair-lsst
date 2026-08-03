@@ -1,10 +1,9 @@
 """
 Annotation/tag test for Lasair with direct database calls.
 Usage:
-    ann_direct.py <username> <ann_topic>
+    ann_direct.py <ann_topic>
 
 Arguments:
-    <username>      Username to use.
     <ann_topic>     Annotation topic.
 
 Options:
@@ -25,7 +24,7 @@ import annotate_util
 
 if __name__ == "__main__":
     args = docopt(__doc__)
-    username = args['<username>']
+    username = 'su'
     ann_topic = args['<ann_topic>']
     print(f'Using username {username} and annotator {ann_topic}')
 
