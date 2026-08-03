@@ -3,6 +3,7 @@
 
 Usage:
   %s [--daysAgo=<n>]
+  %s [--hourly]
   %s [--radius=3]
   %s (-h | --help)
   %s (-v | --version)
@@ -11,17 +12,18 @@ Options:
   -h --help            Show this screen.
   --daysAgo=<n>        Which nightly report to fetch. 1 day ago is default.
                        If 'All', then the whole TNS database is scrubbed and rebuilt
+  --hourly             Get the TNS data for the current hour.
   --radius=<f>         Matching radius, arcseconds, default 3
 """
 
 import sys
 sys.path.append('../../../common')
-__doc__ = __doc__ % (sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
+__doc__ = __doc__ % (sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0], sys.argv[0])
 from docopt import docopt
 import os, sys
 import csv
 from datetime import datetime
-from gkutils.commonutils import Struct, dbConnect, cleanOptions
+from gkutils.commonutils import Struct, cleanOptions
 from gkhtm import _gkhtm as htmCircle
 import tns_crossmatch
 from fetch_from_tns import fetch_csv
@@ -185,7 +187,9 @@ def getTNSData(opts, conn):
     if options.radius:
         radius = float(options.radius)
 
-    if options.daysAgo == 'All':
+    doingAll = False
+
+    if options.daysAgo is not None and options.daysAgo == 'All':
         doingAll = True
         # truncate the cables crossmatch_tns, and
         #     watchlist_cones(TNS), watchlist_hits(TNS)
@@ -195,7 +199,7 @@ def getTNSData(opts, conn):
         data = fetch_csv('All')
 
 #        data = data[:10]   reduce to 10 for testing
-    else:
+    elif options.daysAgo is not None and options.daysAgo != 'All':
         doingAll = False
         try:
             daysAgo = int(options.daysAgo)
@@ -210,12 +214,27 @@ def getTNSData(opts, conn):
 
         # get the data file from TNS
         data = fetch_csv(pastTime)
+    elif options.hourly is not None:
+        # Grab the current hour.
+        hour = "%02d" % (datetime.now() - timedelta(hours=1)).hour
+        data = fetch_csv(hour)
+    else:
+        # Panic. Wrong option combination.
+        print("Incorrect combination of options.")
+        sys.exit(1)
+
 
     # First row of the CSV is the header names
+    if len(data) == 0:
+        print("No data and no header.")
+        sys.exit(1)
+
     header = data[0]
+
     rowsAdded = 0
     rowsChanged = 0
 
+    #print("Data length = ", len(data))
     for row in data[1:]:
         row_dict = {}
         for i in range(len(header)):
@@ -256,7 +275,15 @@ def getTNSData(opts, conn):
 
 #        print(prefix, name, ra, dec, htm16)
 
-    print("Total rows added = %d, modified = %d\n" % (rowsAdded, rowsChanged))
+    print("Total rows added = %d, modified = %d" % (rowsAdded, rowsChanged))
+
+    # update objects.tns_name from crossmatch_tns.tns_name
+    cursor = conn.cursor (dictionary=True, buffered=True)
+    query = "UPDATE objects, watchlist_hits SET objects.tns_name = watchlist_hits.name "
+    query += "WHERE objects.diaObjectId = watchlist_hits.diaObjectId AND watchlist_hits.wl_id = %d"
+    query = query % settings.TNS_WATCHLIST_ID
+    cursor.execute(query)
+    print('Objects.tns_name updated')
 
 def truncate_tns(conn):
     """ Delete all the cones, hits, and crossmatch_tns 
@@ -279,6 +306,7 @@ if __name__ == '__main__':
     conn = db_connect.remote()
     options = Struct(**opts)
 
+ 
     getTNSData(options, conn)
 
     countTNS = countTNSRow(conn)

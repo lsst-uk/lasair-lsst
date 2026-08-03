@@ -16,11 +16,13 @@ import sys
 import json
 import time
 import socket
+from mysql.connector.errors import OperationalError
 try:
     sys.path.append('../../../common/')
     import src.db_connect as db_connect
 except:
     pass
+
 
 class manage_status():
     """ manage_status.
@@ -34,7 +36,11 @@ class manage_status():
         self.log = log
 
     def read(self, nid):
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
+        except OperationalError:
+            self.msl = db_connect.remote()
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
         query = 'SELECT name,value FROM %s WHERE nid=%d' % (self.table, nid)
         cursor.execute(query)
         dict = {}
@@ -43,7 +49,11 @@ class manage_status():
         return dict
 
     def delete(self, nid=False):
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
+        except OperationalError:
+            self.msl = db_connect.remote()
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
         query = 'DELETE FROM %s ' % self.table
         if nid:
             query += ' WHERE nid=%d' % nid
@@ -55,7 +65,11 @@ class manage_status():
 
     def execute_with_retry(self, query, max_retries=5, initial_wait=1):
         wait_time = initial_wait
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
+        except OperationalError:
+            self.msl = db_connect.remote()
+            cursor = self.msl.cursor(buffered=True, dictionary=True)
         for attempt in range(1, max_retries + 1):
             try:
                 cursor.execute(query)
@@ -84,11 +98,10 @@ class manage_status():
     def add(self, dictionary, nid):
         queryfmt = "INSERT INTO %s (nid,name,value) VALUES " % self.table
         queryfmt += "(%d,'%s',%f) ON DUPLICATE KEY UPDATE value=value+%f"
-        cursor  = self.msl.cursor(buffered=True, dictionary=True)
         for name,value in dictionary.items():
             query = queryfmt % (nid, name, value, value)
-#            print(query)
             self.execute_with_retry(query)
+
 
 # A timing class built with manage_status
 class timer():

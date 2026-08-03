@@ -71,3 +71,54 @@ Check other tables in the same way.
 (3) The value of SCHEMA_VERSION should be up to date in `/common/settings.py` for both ingest nodes, 
 both filters, and web. In fact, it would be great to simply replace all the local copies of 
 `settings.py` from the template in the bootstrap node. 
+
+## Update June 2026
+How to do a minor schema update, where nothing is added to the objects table of MySQL
+```
+ssh lasair-lsst-dev
+
+cd lasair-lsst/deploy
+./stop.sh ingest
+
+cd ../common/schema
+git switch schema_11_1
+mkdir 11_1
+cp 11_0/*.py 11_1
+python3 1_fetch_avsc.py  11_1
+python3 2_join_object_schema.py 11_1
+python3 3_make_all_alter_table.py 11_0 11_1
+    MySQL databases
+    Cassandra
+    ALTER TABLE diaSources ADD "exposureTime"  float;
+    ALTER TABLE diaSources ADD "trailAlgorithm"  int;
+    ALTER TABLE diaSources ADD "trail_flag"  boolean;
+    ALTER TABLE diaSources ADD "reliabilityVersion"  ascii;
+git add 11_1
+git commit -m 'updated to 11_1'
+git push
+
+--> edit ../settings.py
+SCHEMA_VERSION = "11_1"
+and copy this to the nodes
+---------------
+ssh lasair-lsst-dev-cassandranodes-0
+cqlsh
+cqlsh> use lasair
+cqlsh> ALTER TABLE diaSources ADD "exposureTime"  float;
+etc etc as above
+exit
+----------------
+ssh lasair-lsst-dev-ingest-0
+cd lasair-lsst/pipeline/ingest/
+git fetch
+git switch schema_11_1
+python3 ingest.py --maxalert=100 --group_id=blabla12
+
+    INFO:ingest:2026-06-27T06:52:49Z 100 alerts 1348 diaSource 223 forcedSource 5 noObject
+
+--> same on ingest-1
+exit
+------------------
+--> back to bootstrap
+./start.sh ingest
+```

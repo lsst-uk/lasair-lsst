@@ -296,17 +296,33 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Start Filter
+    - name: Start Alert Filter
       ansible.builtin.systemd:
         state: started
-        name: lasair-filter 
+        name: lasair-filter-alert
       when: command == "start"
-    - name: Stop Filter
+    - name: Stop Alert Filter
       ansible.builtin.systemd:
         state: stopped
-        name: lasair-filter 
+        name: lasair-filter-alert
       when: command == "stop"
-  tags: filter, pipeline
+  tags: filter-alert, pipeline
+
+- hosts: filter[0]
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Start Annotation Filter
+      ansible.builtin.systemd:
+        state: started
+        name: lasair-filter-annotation
+      when: command == "start"
+    - name: Stop Annotation Filter
+      ansible.builtin.systemd:
+        state: stopped
+        name: lasair-filter-annotation
+      when: command == "stop"
+  tags: filter-annotation
 
 - hosts: web
   gather_facts: true

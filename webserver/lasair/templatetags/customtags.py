@@ -22,3 +22,8 @@ def replace(value, arg):
 
     what, to = arg.split('|')
     return value.replace(what, to)
+
+
+@register.filter
+def is_float(value):
+    return isinstance(value, float)

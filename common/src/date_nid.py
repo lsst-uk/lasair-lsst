@@ -1,6 +1,7 @@
 import datetime
 from time import gmtime
 
+SOON_HOURS = 4
 
 def date_to_nid(d):
     """ Converts date string yyyymmdd to ZTF night id (nid)
@@ -18,12 +19,18 @@ def date_to_nid(d):
     return nid
 
 
-def nid_now():
-    """ Converts date string yyyymmdd (in UTC) to ZTF night id (nid)
-    """
-    g = gmtime()
-    return date_to_nid("%4s%2s%2s" % (g.tm_year, g.tm_mon, g.tm_mday))
+#def nid_now():
+#    """ Gets nid now
+#    """
+#    g = gmtime()
+#    return date_to_nid("%4s%2s%2s" % (g.tm_year, g.tm_mon, g.tm_mday))
 
+def nid_now():
+    """ Gets what the nid will be in SOON_HOURS hours
+    """
+    g = datetime.datetime.now() + datetime.timedelta(hours=SOON_HOURS)
+    d = '%4d%02d%02d' % (g.year, g.month, g.day)
+    return date_to_nid(d)
 
 def nid_to_date(nid):
     """ Converts ZTF night id (nid) to date string yyyymmdd (in UTC)

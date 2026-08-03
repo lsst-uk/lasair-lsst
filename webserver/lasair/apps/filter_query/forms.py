@@ -11,6 +11,38 @@ from .utils import check_query_zero_limit
 import re
 
 
+def initialize_instance_fields(form, set_defaults=False, add_run_checkboxes=False):
+
+    if set_defaults:
+        for i in form.fields:
+            if i in ["public"]:
+                if form.instance.__dict__[i]:
+                    form.initial[i] = True
+                else:
+                    form.initial[i] = False
+            else:
+                form.fields[i].widget.attrs['value'] = form.instance.__dict__[i]
+
+    if add_run_checkboxes and "run" in form.fields:
+        form.fields["runOnAlert"] = forms.BooleanField(widget=forms.CheckboxInput(), required=False)
+        if form.instance.__dict__["run"] in [1, 3]:
+            form.initial["runOnAlert"] = True
+        else:
+            form.initial["runOnAlert"] = False
+
+        
+        if form.instance.tables and "annotator:" in form.instance.tables:
+            disabled = False
+        else:
+            disabled = True
+
+        form.fields["runOnAnnotation"] = forms.BooleanField(widget=forms.CheckboxInput(), required=False, disabled=disabled)
+        if form.instance.__dict__["run"] in [2, 3]:
+            form.initial["runOnAnnotation"] = True
+        else:
+            form.initial["runOnAnnotation"] = False
+
+
 class filterQueryForm(forms.ModelForm):
 
     msl = db_connect.readonly()
@@ -23,6 +55,8 @@ class filterQueryForm(forms.ModelForm):
         self.request = kwargs.pop('request', None)
         super().__init__(*args, **kwargs)
         self.helper = FormHelper()
+
+        
 
         if 'instance' in kwargs:
             self.instance = kwargs.get('instance', None)
@@ -103,11 +137,20 @@ class filterQueryForm(forms.ModelForm):
         self.fields['conditions'].required = False
         self.fields['conditions'].widget.required = False
 
-    class Meta:
+        initialize_instance_fields(self, set_defaults=False, add_run_checkboxes=True)
 
+        
+
+    class Meta:
+        runTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
-            (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (0, 'silent'),
+            (1, 'email - daily digest'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -120,9 +163,10 @@ class filterQueryForm(forms.ModelForm):
             'selected': forms.Textarea(),
             'conditions': forms.Textarea(),
             'real_sql': forms.Textarea(),
-            'active': forms.Select(choices=notificationTypes)
+            'run': forms.Select(choices=runTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
+        fields = ['name', 'description', 'run', 'output', 'public', 'selected', 'conditions', 'real_sql', 'watchlists', 'watchmaps']
 
     def clean(self):
 
@@ -195,9 +239,15 @@ class filterQueryForm(forms.ModelForm):
 class UpdateFilterQueryForm(forms.ModelForm):
 
     class Meta:
+        runTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
-            (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (0, 'silent'),
+            (1, 'email - daily digest'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -207,9 +257,10 @@ class UpdateFilterQueryForm(forms.ModelForm):
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
             'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'active': forms.Select(choices=notificationTypes)
+            'run': forms.Select(choices=runTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['name', 'description', 'run', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(UpdateFilterQueryForm, self).clean()
@@ -229,23 +280,25 @@ class UpdateFilterQueryForm(forms.ModelForm):
         self.helper = FormHelper()
 
         self.instance = kwargs.get('instance', {})
+        initialize_instance_fields(self, set_defaults=True, add_run_checkboxes=True)
 
-        for i in self.fields:
-            if i in ["public"]:
-                if self.instance.__dict__[i]:
-                    self.initial[i] = True
-                else:
-                    self.initial[i] = False
-            else:
-                self.fields[i].widget.attrs['value'] = self.instance.__dict__[i]
+
+        
+               
 
 
 class DuplicateFilterQueryForm(forms.ModelForm):
 
     class Meta:
+        runTypes = (
+            (0, 'not active'),
+            (1, 'on new alert'),
+            (2, 'on updated annotation'),
+            (3, 'both')
+        )
         notificationTypes = (
-            (0, 'muted'),
-            (1, 'email stream (daily)'),
+            (0, 'silent'),
+            (1, 'email - daily digest'),
             (2, 'kafka stream'),
             (3, 'kafka stream with lite lightcurve'),
             (4, 'kafka stream with full alert'),
@@ -253,11 +306,12 @@ class DuplicateFilterQueryForm(forms.ModelForm):
         model = filter_query
         widgets = {
             'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your filter.', 'required': 'true'}),
             'public': forms.CheckboxInput(),
-            'active': forms.Select(choices=notificationTypes)
+            'run': forms.Select(choices=runTypes),
+            'output': forms.Select(choices=notificationTypes)
         }
-        fields = ['name', 'description', 'active', 'public']
+        fields = ['name', 'description', 'run', 'output', 'public']
 
     def clean(self):
         cleaned_data = super(DuplicateFilterQueryForm, self).clean()
@@ -277,12 +331,4 @@ class DuplicateFilterQueryForm(forms.ModelForm):
         self.helper = FormHelper()
 
         self.instance = kwargs.get('instance', {})
-
-        for i in self.fields:
-            if i in ["public"]:
-                if self.instance.__dict__[i]:
-                    self.initial[i] = True
-                else:
-                    self.initial[i] = False
-            else:
-                self.fields[i].widget.attrs['value'] = self.instance.__dict__[i]
+        initialize_instance_fields(self, set_defaults=True,  add_run_checkboxes=True)

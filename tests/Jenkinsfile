@@ -24,6 +24,7 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" settings.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_slack_webhook.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_topic_name.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotate_util.py'
                 }
                 dir('tests/unit/pipeline/ingest') {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ingest.py'
@@ -37,11 +38,16 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_feature_groups.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_features.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filtercore.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filtercore_alert.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filtercore_annotator.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filters.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_filter_runner.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchlists.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_watchmaps.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_transfer.py'
+                }
+                dir('tests/unit/pipeline/filter/annotation') {
+                    sh 'python3 -m coverage run -a --branch --data-file=../../../.coverage --omit="*/tests/*,*/dist-packages/*" test_ann_filters.py'
                 }
                 dir('tests/unit/services/') {
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_annotations_dump.py'
@@ -53,9 +59,6 @@ pipeline {
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_make_watchlist_files.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_my_cmd.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_mysql_backup.py'
-                }
-                dir('tests/unit/services/annotations/') {
-                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" kafka_test.py'
                 }
                 dir('tests/unit/services/externalBrokers/') {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_proxy_annotations.py'
@@ -76,6 +79,7 @@ pipeline {
                     junit 'tests/unit/pipeline/ingest/test-reports/*.xml'
                     junit 'tests/unit/pipeline/sherlock/test-reports/*.xml'
                     junit 'tests/unit/pipeline/filter/test-reports/*.xml'
+                    junit 'tests/unit/pipeline/filter/annotation/test-reports/*.xml'
                     // junit 'tests/unit/services/test-reports/*.xml'
                     junit 'tests/unit/services/annotations/test-reports/*.xml'
                     junit 'tests/unit/services/externalBrokers/test-reports/*.xml'

@@ -1,9 +1,16 @@
-# End to end test of as much of the Lasair pipeline as possible
+# Remove test topics and databases
 
 ---
 
 - name: Clean
   import_playbook: clean.yaml
+
+- hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Pause for 10 seconds
+      ansible.builtin.pause:
+        seconds: 10
 
 - name: Ingest
   import_playbook: ingest.yaml
@@ -13,6 +20,9 @@
 
 - name: Filter
   import_playbook: filter.yaml
+
+- name: Annotations
+  import_playbook: annotations.yaml
 
 - name: Clean
   import_playbook: clean.yaml

@@ -28,6 +28,30 @@ import os
 import sqlparse
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
+from django import forms
+
+
+def set_filter_run_type(filterQuery, request):
+    runOnAlert = request.POST.get('runOnAlert')
+    runOnAnnotation = request.POST.get('runOnAnnotation')
+
+    # THE IF-ELSE BELOW SETS THE 'run' FIELD TO 0, 1, 2 OR 3 DEPENDING ON WHETHER THE USER WANTS TO RUN THE FILTER ON NEW ALERTS AND/OR UPDATED ANNOTATIONS
+    # runTypes = (
+    #     (0, 'not active'),
+    #     (1, 'on new alert'),
+    #     (2, 'on updated annotation'),
+    #     (3, 'both')
+    # )
+    if runOnAlert and runOnAnnotation:
+        filterQuery.run = 3
+    elif runOnAlert:
+        filterQuery.run = 1
+    elif runOnAnnotation:
+        filterQuery.run = 2
+    else:
+        filterQuery.run = 0
+
+    return filterQuery
 
 
 @csrf_exempt
@@ -50,12 +74,12 @@ def filter_query_index(request):
     """
 
     # PUBLIC FILTERS
-    publicFilters = filter_query.objects.filter(public__gte=1).order_by('-active', 'name')
+    publicFilters = filter_query.objects.filter(public__gte=1).order_by('-output', 'name')
     publicFilters = add_filter_query_metadata(publicFilters, remove_duplicates=True)
 
     # USER FILTERS
     if request.user.is_authenticated:
-        myFilters = filter_query.objects.filter(user=request.user).order_by('-active', 'name')
+        myFilters = filter_query.objects.filter(user=request.user).order_by('-output', 'name')
         myFilters = add_filter_query_metadata(myFilters)
     else:
         myFilters = None
@@ -102,6 +126,7 @@ def filter_query_detail(request, mq_id, action=False):
 
     if request.method == 'POST':
         form = UpdateFilterQueryForm(request.POST, instance=filterQuery, request=request)
+        form.fields['runOnAlert'] = forms.BooleanField(required=False, initial=(filterQuery.run in [1, 3]))
         duplicateForm = DuplicateFilterQueryForm(request.POST, instance=filterQuery, request=request)
         action = request.POST.get('action')
 
@@ -113,10 +138,12 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.name = request.POST.get('name')
             filterQuery.description = request.POST.get('description')
 
-            if request.POST.get('active'):
-                filterQuery.active = int(request.POST.get('active'))
+            filterQuery = set_filter_run_type(filterQuery, request)
+
+            if request.POST.get('output'):
+                filterQuery.output = int(request.POST.get('output'))
             else:
-                filterQuery.active = 0
+                filterQuery.output = 0
 
             if request.POST.get('public'):
                 filterQuery.public = 1
@@ -130,9 +157,12 @@ def filter_query_detail(request, mq_id, action=False):
             filterQuery.topic_name = tn
             delete_stream_file(request, filterQuery.name)
             message = ''
-            if filterQuery.active == 2:
+            if filterQuery.output is None:
+                filterQuery.output = 0
+            output = int(filterQuery.output)
+            if output >= 2:
                 try:
-                    message = topic_refresh(filterQuery.real_sql, tn, limit=10)
+                    message = topic_refresh(filterQuery.real_sql, tn, output, limit=10)
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
             filterQuery.save()
@@ -150,9 +180,11 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.user = request.user
         newFil.name = request.POST.get('name')
         newFil.description = request.POST.get('description')
-        newFil.active = request.POST.get('active')
+        newFil.output = request.POST.get('output')
         newFil.byte_query = settings.KAFKA_BYTE_QUOTA
-        newFil.topic_name = topicName(request.user.id, newFil.name)
+        newFil.topic_name = tn = topicName(request.user.id, newFil.name)
+
+        newFil = set_filter_run_type(newFil, request)
 
         if request.POST.get('public'):
             newFil.public = True
@@ -161,14 +193,29 @@ def filter_query_detail(request, mq_id, action=False):
         newFil.date_expire = \
             datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
         newFil.save()
+
+        message = ''
+        if newFil.output is None:
+            newFil.output = 0
         filterQuery = newFil
         mq_id = filterQuery.pk
 
-        messages.success(request, f'You have successfully copied the "{oldName}" filter to My Filters. The results table is initially empty, but should start to fill as new transient detections match against your filter.')
+        output = int(filterQuery.output)
+        if output >= 2:
+            try:
+                message += topic_refresh(newFil.real_sql, tn, output, limit=10) + '<br/>'
+            except Exception as e:
+                messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
+
+        message += f'You have successfully copied the "{oldName}" filter  to My Filters.'
+        messages.success(request, message)
         return redirect(f'filter_query_detail', mq_id)
     else:
         form = UpdateFilterQueryForm(instance=filterQuery, request=request)
         duplicateForm = DuplicateFilterQueryForm(instance=filterQuery, request=request)
+        
+
+
 
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
 
@@ -220,7 +267,7 @@ def filter_query_detail(request, mq_id, action=False):
         sortTable = True
 
     # info about kafka records produced and rejected
-    if filterQuery.active >= 2:
+    if filterQuery.output and filterQuery.output >= 2:
         topic_name = filterQuery.topic_name
         ms = manage_status.manage_status(msl)
         nid = date_nid.nid_now()
@@ -303,7 +350,8 @@ def filter_query_create(request, mq_id=False):
                 public = 1
             else:
                 public = 0
-            active = request.POST.get('active')
+            run = request.POST.get('run')
+            output = request.POST.get('output')
 
         elif request.method != 'POST' and mq_id:
             filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
@@ -327,7 +375,8 @@ def filter_query_create(request, mq_id=False):
             name = form.fields['name'].widget.attrs['value']
             description = form.fields['description'].widget.attrs['value']
             public = form.initial["public"]
-            active = form.initial["active"]
+            run = form.initial["run"]
+            output = form.initial["output"]
 
         # EXTRA DEFAULTS
         tables = "objects_ext"
@@ -377,15 +426,25 @@ def filter_query_create(request, mq_id=False):
             if filterQuery:
                 filterQuery.name = name
                 filterQuery.description = description
-                if request.POST.get('active'):
-                    filterQuery.active = int(request.POST.get('active'))
+                if request.POST.get('run'):
+                    filterQuery.run = int(request.POST.get('run'))
                 else:
-                    filterQuery.active = 0
+                    filterQuery.run = 0
+                if request.POST.get('output'):
+                    filterQuery.output = request.POST.get('output')
+                    if filterQuery.output is None:
+                        filterQuery.output = 0
+                    else:
+                        filterQuery.output = int(filterQuery.output)
+                else:
+                    filterQuery.output = 0
 
                 if request.POST.get('public'):
                     filterQuery.public = 1
                 else:
                     filterQuery.public = 0
+
+                filterQuery = set_filter_run_type(filterQuery, request)
                 filterQuery.selected = selected
                 filterQuery.tables = tables
                 filterQuery.conditions = conditions
@@ -402,7 +461,7 @@ def filter_query_create(request, mq_id=False):
                 tn = topicName(request.user.id, name)
                 filterQuery = filter_query(user=request.user,
                                            name=name, description=description,
-                                           public=public, active=active,
+                                           public=public, run=run, output=output,
                                            byte_quota = settings.KAFKA_BYTE_QUOTA,
                                            selected=selected, conditions=conditions, tables=tables,
                                            real_sql=sqlquery_real, topic_name=tn)
@@ -411,17 +470,21 @@ def filter_query_create(request, mq_id=False):
             filterQuery.date_expire = \
                 datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
             filterQuery.save()
+            message = ''
 
             # AFTER SAVING, DELETE THE TOPIC AND PUSH SOME RECORDS FROM THE DATABASE
-            if filterQuery.active == 2:
+            if filterQuery.output is None:
+                filterQuery.output = 0
+            output = int(filterQuery.output)
+            if output >= 2:
                 try:
-                    message += topic_refresh(filterQuery.real_sql, tn, limit=10)
+                    message += topic_refresh(filterQuery.real_sql, tn, output, limit=10) + '<br/>'
                 except Exception as e:
                     messages.error(request, f'The kafka topic could not be refreshed for this filter. {e}')
 
             filtername = form.cleaned_data.get('name')
-#            messages.success(request, f'The "{filtername}" filter has been successfully {verb}')
-            messages.success(request, message)  # hack hack
+            message += f'The "{filtername}" filter has been successfully {verb}'
+            messages.success(request, message)
             return redirect(f'filter_query_detail', filterQuery.pk)
 
     else:

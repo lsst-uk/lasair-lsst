@@ -360,7 +360,7 @@
       changed_when: false
     - name: filter service running
       ansible.builtin.assert:
-        that: ansible_facts.services['lasair-filter.service'].state == "running"
+        that: ansible_facts.services['lasair-filter-alert.service'].state == "running"
         fail_msg: Filter service not running
         success_msg: Filter service running
         quiet: true

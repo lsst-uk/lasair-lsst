@@ -9,7 +9,6 @@ from django.db.models import Q
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
 from django.shortcuts import render, get_object_or_404, HttpResponse
-from src import db_connect
 import settings
 import os
 import sys
@@ -71,6 +70,7 @@ def object_detail(request, diaObjectId):
     def my_json_encoder(obj):
         return str(obj)
 
+
     return render(request, 'object/object_detail.html', {
         'data': data,
         'json_data': json.dumps(data2, default=my_json_encoder),
@@ -78,5 +78,7 @@ def object_detail(request, diaObjectId):
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
         'lcData': lcData,
-        'lasair_url': settings.LASAIR_URL,
+        'lasair_url': settings.LASAIR_URL
     })
+
+

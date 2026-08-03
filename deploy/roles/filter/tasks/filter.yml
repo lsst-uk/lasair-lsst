@@ -28,6 +28,7 @@
       - scipy
       - skytag
       - dustmaps
+      - cassandra-driver
 
 - name: Install dustmaps
   become: true
@@ -67,6 +68,7 @@
     repo: "{{ git_url }}"
     dest: "{{ ansible_env.HOME }}/{{ git_name }}"
     version: "{{ lasair_version }}"
+  when: not ansible_check_mode
 
 - name: Setup Lasair database
   community.mysql.mysql_query:
@@ -80,7 +82,7 @@
       - CREATE FUNCTION mjdnow () RETURNS DOUBLE DETERMINISTIC RETURN (unix_timestamp(now())/86400 + 40587.0);
       - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.mjdnow TO '{{ mysql_db_user }}'@'localhost';
       - DROP FUNCTION IF EXISTS flux2mag;
-      - CREATE FUNCTION flux2mag (flux FLOAT) RETURNS FLOAT RETURN (-2.5*log10(flux)+31.4);
+      - CREATE FUNCTION flux2mag(flux FLOAT) RETURNS FLOAT RETURN IF(flux>0, -2.5*log10(flux)+31.4, NULL);
       - GRANT EXECUTE ON FUNCTION {{ mysql_db_name }}.flux2mag TO '{{ mysql_db_user }}'@'localhost';
     login_host: 127.0.0.1
     login_user: root

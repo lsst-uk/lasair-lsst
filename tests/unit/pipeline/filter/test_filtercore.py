@@ -8,302 +8,113 @@ import re
 
 
 class FilterTest(unittest.TestCase):
+    """Tests for filter base class"""
 
-    def test_sigterm_handler(self):
-        """Test that the sigterm handler sets sigterm raised correctly"""
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        self.assertFalse(fltr.sigterm_raised)
-        psutil.Process().terminate()
-        self.assertTrue(fltr.sigterm_raised)
+    def test_execute_local_query(self):
+        """Test executing a local query."""
+        fltr = Filter()
+        mock_db = unittest.mock.MagicMock()
+        fltr.database_local = mock_db
+        fltr.execute_local_query("SELECT * FROM things")
+        # cursor should have been called once
+        mock_db.cursor.assert_called_once()
+        # execute should have been called once
+        mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+        # commit should have been called once
+        mock_db.commit.assert_called_once()
 
-    def test_insert_sherlock(self):
-        """Test that the method for constructing the sherlock classification insert query from a sherlock annotation
-        gives the expected output."""
-        test_ann = {
-            "classification": "VS",
-            "description": "This is a description",
-            "diaObjectId": "ZTF18aaujzlh",
-            "catalogue_object_id": "1237655465380610133",
-            "raDeg": 191.5944036793479,
-            "decDeg": 62.93254720807615,
-            "distance": None,
-            "unexpected_attribute": "should not appear in output"
-        }
-        expected_results = [
-            "classification='VS'",
-            "diaObjectId='ZTF18aaujzlh'",
-            "association_type=NULL",
-            "catalogue_table_name=NULL",
-            "catalogue_object_id='1237655465380610133'",
-            "catalogue_object_type=NULL",
-            "raDeg='191.5944036793479'",
-            "decDeg='62.93254720807615'",
-            "separationArcsec=NULL",
-            "northSeparationArcsec=NULL",
-            "eastSeparationArcsec=NULL",
-            "physical_separation_kpc=NULL",
-            "direct_distance=NULL",
-            "distance=NULL",
-            "best_distance=NULL",
-            "best_distance_flag=NULL",
-            "best_distance_source=NULL",
-            "z=NULL",
-            "photoZ=NULL",
-            "photoZErr=NULL",
-            "Mag=NULL",
-            "MagFilter=NULL",
-            "MagErr=NULL",
-            "classificationReliability=NULL",
-            "major_axis_arcsec=NULL",
-            "annotator=NULL",
-            "additional_output=NULL",
-            "description='This is a description'",
-            "summary=NULL"
-            ]
-        result = Filter.create_insert_sherlock(test_ann)
-        result = re.sub("\n",'', result)
-
-        # check that query starts OK
-        self.assertRegex(result, "^REPLACE INTO sherlock_classifications SET ")
-
-        # check that the items in the constructed query match the set of expected items
-        result = re.sub("^REPLACE INTO sherlock_classifications SET ", "", result)
-        self.assertEqual(len(result.split(',')), len(expected_results))
-        for item in result.split(','):
-            self.assertIn(item, expected_results)
-
-    @patch('filtercore.FeatureGroup')
-    def test_insert_query(self, mock_FeatureGroup):
-        """Test that the method for constructing the object table insert gives the expected output given a dict of
-        features."""
-        mock_FeatureGroup.run_all.return_value = {
-            "strFeature": "A string", "floatFeature": 0.123, "nanFeature": float("nan"), "missingFeature": None}
-        expected_results = [
-            'strFeature="A string"', 'floatFeature=0.123', 'nanFeature=NULL', 'missingFeature=NULL']
-        result = Filter.create_insert_query({})
-        result = re.sub("\n",'', result)
-
-        # check that query starts OK
-        self.assertRegex(result, "^REPLACE INTO objects SET ")
-
-        # check that the items in the constructed query match the set of expected items
-        result = re.sub("^REPLACE INTO objects SET ", "", result)
-        self.assertEqual(len(result.split(',')), len(expected_results))
-        for item in result.split(','):
-            self.assertIn(item, expected_results)
-
-    def test_handle_alert_no_sources(self):
-        """Test that the handle_alert method returns 0 for an alert with no sources."""
-        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra': 0.0, 'decl': 0.0},
-                      'diaSourcesList': []}
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.sfd = mock_sfd
-        result = fltr.handle_alert(test_alert)
-        self.assertEqual(result, 0)
-
-    def test_handle_alert_list_no_sources(self):
-        """Test that the handle_alert_list method returns  for an alert list with no sources."""
-        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra': 0.0, 'decl': 0.0},
-                      'diaSourcesList': []}
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.sfd = mock_sfd
-        result = fltr.handle_alert_list([test_alert])
-        self.assertEqual(result, 0)
-
-    @patch('filtercore.Filter.create_insert_query')
-    @patch('filtercore.Filter.execute_query')
-    def test_handle_alert(self, mock_execute_query, mock_create_insert_query):
-        """Test that handle_alert method returns 1 for an alert with sources."""
-        mock_create_insert_query.return_value = "QUERY"
-        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
-                      'diaSourcesList': ['']}
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        result = fltr.handle_alert(test_alert)
-        self.assertEqual(result, 1)
-        mock_create_insert_query.assert_called_once()
-        mock_execute_query.assert_called_once()
-
-    @patch('filtercore.Filter.create_insert_sherlock')
-    @patch('filtercore.Filter.create_insert_query')
-    @patch('filtercore.Filter.execute_query')
-    def test_handle_alert_sherlock(self, mock_execute_query, mock_create_insert_query, mock_create_insert_sherlock):
-        """Test that handle_alert method works with a sherlock annotation."""
-        mock_create_insert_query.return_value = "QUERY"
-        mock_create_insert_sherlock.return_value = "SHERLOCK"
-        test_alert = {'diaObject': {'diaObjectId': 'blah', 'ra':0.0, 'decl':0.0},
-                      'diaSourcesList': [''],
-                      'annotations': {'sherlock': [{}]}}
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        result = fltr.handle_alert(test_alert)
-        self.assertEqual(result, 1)
-        mock_create_insert_query.assert_called_once()
-        mock_create_insert_sherlock.assert_called_once()
-        mock_execute_query.assert_has_calls(
-            [unittest.mock.call("QUERY"), unittest.mock.call("SHERLOCK")], any_order=True)
-
-    @patch('filtercore.manage_status')
-    def test_consume_alerts_sigterm(self, mock_manage_status):
-        """Test that consume alerts stops when sigterm raised"""
-        mock_consumer = unittest.mock.MagicMock()
-        mock_consumer.poll.return_value = None
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
-        fltr.consumer = mock_consumer
-        fltr.sfd = mock_sfd
-        fltr.sigterm_raised = True
-        result = fltr.consume_alerts()
-        self.assertEqual(result, 0)
-        mock_consumer.poll.assert_not_called()
-
-    @patch('filtercore.manage_status')
-    def test_consume_alerts_none(self, mock_manage_status):
-        """Test that consume alerts returns 0 when poll returns None"""
-        mock_consumer = unittest.mock.MagicMock()
-        mock_consumer.poll.return_value = None
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
-        fltr.consumer = mock_consumer
-        fltr.sfd = mock_sfd
-        result = fltr.consume_alerts()
-        self.assertEqual(result, 0)
-        mock_consumer.poll.assert_called_once()
-
-    @patch('filtercore.manage_status')
-    def test_consume_alerts_error(self, mock_manage_status):
-        """Test consume alerts when poll returns error"""
-        mock_consumer = unittest.mock.MagicMock()
-        mock_consumer.poll.return_value.error.return_value = "test error"
+    @patch('db_connect.local')
+    def test_execute_local_query_disconnected(self, mock_local):
+        """Test executing a local query when the db is not connected."""
         mock_log = unittest.mock.MagicMock()
-        mock_sfd = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=1)
-        fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        fltr.sfd = mock_sfd
-        result = fltr.consume_alerts()
-        self.assertEqual(result, 0)
-        self.assertEqual(mock_consumer.poll.call_count, 101)
+        mock_db = unittest.mock.MagicMock()
+        # dbconnect.local should return the mock db when called
+        mock_local.return_value = mock_db
+        fltr = Filter(log=mock_log)
+        mock_db.is_connected.return_value = False
+        fltr.database_local = mock_db
+        fltr.execute_local_query("SELECT * FROM things")
+        # a warning should be logged
+        mock_log.warning.assert_called()
+        # we should try to reconnect
+        mock_local.assert_called()
+        # cursor should have been called once
+        mock_db.cursor.assert_called_once()
+        # execute should have been called once
+        mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+        # commit should have been called once
+        mock_db.commit.assert_called_once()
 
-    @patch('filtercore.Filter.handle_alert')
-    @patch('filtercore.manage_status.manage_status')
-    def test_consume_alerts(self, mock_manage_status, mock_handle_alert):
-        """Test consume alerts"""
-        mock_consumer = unittest.mock.MagicMock()
+    def test_execute_local_query_error(self):
+        """Test getting an error executing a local query."""
         mock_log = unittest.mock.MagicMock()
-        mock_sfd = unittest.mock.MagicMock()
-        mock_sfd.return_value = [0]
-        mock_consumer.poll.return_value.error.return_value = None
-        mock_consumer.poll.return_value.value.return_value = '{"diaObject": {"diaObjectId":123, "ra":23, "decl":23}}'
-        mock_handle_alert.return_value = 1
-        fltr = Filter(group_id='filter_test', maxalert=1)
-        fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        fltr.sfd = mock_sfd
-        result = fltr.consume_alerts()
-        self.assertEqual(result, 1)
-        mock_consumer.poll.assert_called_once()
-        mock_manage_status.assert_called_once()
-        mock_manage_status.return_value.add.assert_called_once()
+        fltr = Filter(log=mock_log)
+        mock_db = unittest.mock.MagicMock()
+        mock_db.cursor.return_value.execute.side_effect = Exception('test')
+        fltr.database_local = mock_db
+        with self.assertRaises(Exception):
+            fltr.execute_local_query("SELECT * FROM things")
+            # an error should be logged
+            mock_log.error.assert_called()
+            # cursor should have been called once
+            mock_db.cursor.assert_called_once()
+            # execute should have been called once
+            mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+            # commit should NOT have been called once
+            mock_db.commit.assert_not_called()
 
-    @patch('os.system')
-    @patch('filtercore.Filter.execute_query')
-    def test_transfer_to_main_local_error(self, mock_execute_query, mock_system):
-        """Test that an error when building the CSV causes transfer_to_main to return None"""
-        mock_consumer = unittest.mock.MagicMock()
+    def test_execute_remote_query(self):
+        """Test executing a remote query."""
+        fltr = Filter()
+        mock_db = unittest.mock.MagicMock()
+        fltr.database_remote = mock_db
+        fltr.execute_remote_query("SELECT * FROM things")
+        # cursor should have been called once
+        mock_db.cursor.assert_called_once()
+        # execute should have been called once
+        mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+        # commit should have been called once
+        mock_db.commit.assert_called_once()
+
+    @patch('db_connect.remote')
+    def test_execute_remote_query_disconnected(self, mock_remote):
+        """Test executing a remote query when the db is not connected."""
         mock_log = unittest.mock.MagicMock()
-        mock_execute_query.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        result = fltr.transfer_to_main(retry=2, delay=0)
-        self.assertEqual(result, False)
-        self.assertEqual(mock_log.warning.call_count, 2)
-        mock_log.error.assert_called_once()
-        mock_consumer.commit.assert_not_called()
+        mock_db = unittest.mock.MagicMock()
+        # dbconnect.remote should return the mock db when called
+        mock_remote.return_value = mock_db
+        fltr = Filter(log=mock_log)
+        mock_db.is_connected.return_value = False
+        fltr.database_remote = mock_db
+        fltr.execute_remote_query("SELECT * FROM things")
+        # a warning should be logged
+        mock_log.warning.assert_called()
+        # we should try to reconnect
+        mock_remote.assert_called()
+        # cursor should have been called once
+        mock_db.cursor.assert_called_once()
+        # execute should have been called once
+        mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+        # commit should have been called once
+        mock_db.commit.assert_called_once()
 
-    @patch('os.system')
-    @patch('filtercore.transfer_csv')
-    @patch('filtercore.db_connect.remote')
-    def test_transfer_to_main_remote_connect_error(self, mock_db_connect_remote, mock_transfer, mock_system):
-        """Test that an error connecting to main db causes transfer_to_main to return None"""
-        mock_consumer = unittest.mock.MagicMock()
+    def test_execute_remote_query_error(self):
+        """Test getting an error executing a remote query."""
         mock_log = unittest.mock.MagicMock()
-        mock_db_connect_remote.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        result = fltr.transfer_to_main(retry=2, delay=0)
-        self.assertEqual(result, False)
-        self.assertEqual(mock_log.warning.call_count, 2)
-        self.assertEqual(mock_db_connect_remote.call_count, 2)
-        mock_log.error.assert_called_once()
-        mock_consumer.commit.assert_not_called()
-
-    # @patch('filtercore.Filter.execute_query')
-    # @patch('filtercore.db_connect.remote')
-    # @patch('os.system')
-    # def test_transfer_to_main_remote_cli_error(self, mock_system, mock_db_connect_remote, mock_execute_query):
-    #     """Test that an error writing to main db using the cli causes transfer_to_main to return None"""
-    #     mock_consumer = unittest.mock.MagicMock()
-    #     mock_log = unittest.mock.MagicMock()
-    #     mock_system.return_value = 1
-    #     fltr = Filter(group_id='filter_test', maxalert=0)
-    #     fltr.consumer = mock_consumer
-    #     fltr.log = mock_log
-    #     result = fltr.transfer_to_main(retry=1, delay=0)
-    #     self.assertEqual(result, False)
-    #     mock_log.error.assert_called()
-    #     mock_consumer.commit.assert_not_called()
-
-    @patch('os.system')
-    @patch('filtercore.transfer_csv')
-    @patch('filtercore.db_connect.remote')
-    def test_transfer_to_main_remote_write_error(self, mock_db_connect_remote, mock_transfer, mock_system):
-        """Test that an error writing to main db causes transfer_to_main to return False"""
-        mock_consumer = unittest.mock.MagicMock()
-        mock_log = unittest.mock.MagicMock()
-        mock_transfer.side_effect = Exception('test error')
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.consumer = mock_consumer
-        fltr.log = mock_log
-        fltr.csv_attrs = {'objects': ['one', 'two', 'three']}
-        result = fltr.transfer_to_main(retry=2, delay=0)
-        self.assertEqual(result, False)
-        self.assertEqual(mock_log.warning.call_count, 2)
-        mock_log.error.assert_called()
-        mock_consumer.commit.assert_not_called()
-
-    # @patch('filtercore.Filter.execute_query')
-    # @patch('filtercore.db_connect.remote')
-    # @patch('os.system')
-    # def test_transfer_to_main_cli_normal_flow(self, mock_system, mock_db_connect_remote, mock_execute_query):
-    #     """Test transfer to main normal flow using the cli"""
-    #     mock_log = unittest.mock.MagicMock()
-    #     mock_system.return_value = 0
-    #     mock_consumer = unittest.mock.MagicMock()
-    #     fltr = Filter(group_id='filter_test', maxalert=0)
-    #     fltr.log = mock_log
-    #     fltr.consumer = mock_consumer
-    #     result = fltr.transfer_to_main()
-    #     self.assertEqual(result, True)
-
-    @patch('os.system')
-    @patch('filtercore.transfer_csv')
-    @patch('filtercore.db_connect.remote')
-    def test_transfer_to_main(self, mock_db_connect_remote, mock_transfer, mock_system):
-        """Test transfer to main normal flow"""
-        mock_log = unittest.mock.MagicMock()
-        mock_consumer = unittest.mock.MagicMock()
-        fltr = Filter(group_id='filter_test', maxalert=0)
-        fltr.log = mock_log
-        fltr.consumer = mock_consumer
-        fltr.csv_attrs = {'this': ['one', 'two'], 'that': ['three', 'four']}
-        result = fltr.transfer_to_main()
-        self.assertEqual(result, True)
-        mock_log.error.assert_not_called()
-        self.assertEqual(mock_transfer.call_count, 2)
-        mock_consumer.commit.assert_called_once()
+        fltr = Filter(log=mock_log)
+        mock_db = unittest.mock.MagicMock()
+        mock_db.cursor.return_value.execute.side_effect = Exception('test')
+        fltr.database_remote = mock_db
+        with self.assertRaises(Exception):
+            fltr.execute_remote_query("SELECT * FROM things")
+            # an error should be logged
+            mock_log.error.assert_called()
+            # cursor should have been called once
+            mock_db.cursor.assert_called_once()
+            # execute should have been called once
+            mock_db.cursor.return_value.execute.assert_called_with("SELECT * FROM things")
+            # commit should NOT have been called once
+            mock_db.commit.assert_not_called()
 
 
 if __name__ == '__main__':

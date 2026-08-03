@@ -65,7 +65,7 @@ def get_mysql_names(conf):
 
     msl = mysql.connector.connect(**config)
     cursor = msl.cursor(buffered=True, dictionary=True)
-    cursor.execute("select column_name, column_type from information_schema.columns where table_name=%s", (table,))
+    cursor.execute("SELECT column_name, column_type FROM information_schema.columns WHERE table_name=%s AND table_schema='ztf'", (table,))
     mysql_names = [row['column_name'] for row in cursor]
     return mysql_names
 

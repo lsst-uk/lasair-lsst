@@ -115,7 +115,7 @@ def check_where_forbidden(where_condition):
     return None
 
 
-def check_query(select_expression, from_expression, where_condition):
+def check_query(select_expression, from_expression, where_condition, user=None):
     """ Check the query arguments with the functions above
     """
     # check if the select expression is OK
@@ -127,6 +127,51 @@ def check_query(select_expression, from_expression, where_condition):
     s = check_where_forbidden(where_condition)
     if s:
         return s
+
+    if not user:
+        return None
+    watchlist_id = None
+    area_ids     = []
+    msl          = None
+    # now check permissions for watchlists and watchmaps
+    tables = from_expression.split(',')
+    for _table in tables:
+        table = _table.strip().lower()
+
+        if table.startswith('watchlist:'):
+            w = table.split(':')
+            try:
+                watchlist_id = int(w[1])
+            except:
+                raise QueryBuilderError('Error in FROM list, %s not of the form watchlist:nnn' % table)
+
+        if table.startswith('area:') or table.startswith('watchmap:'):
+            w = table.split(':')
+            try:
+                area_ids = w[1].split('&')
+            except:
+                raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn or watchmap:nnn' % table)
+
+    if watchlist_id:
+        if not msl: 
+            msl = db_connect.remote()
+            cursor = msl.cursor(buffered=True, dictionary=True)
+        query = f'SELECT public,user from watchlists where wl_id={watchlist_id}'
+        cursor.execute(query)
+        for row in cursor:
+            if row['public'] == 0 and row['user'] != user:
+                raise QueryBuilderError(f'Error: you do not have permission to access watchlist {watchlist_id}')
+
+    if len(area_ids) > 0:
+        if not msl: 
+            msl = db_connect.remote()
+            cursor = msl.cursor(buffered=True, dictionary=True)
+        for area_id in area_ids:
+            query = f'SELECT public,user from areas where ar_id={area_id}'
+            cursor.execute(query)
+            for row in cursor:
+                if row['public'] == 0 and row['user'] != user:
+                    raise QueryBuilderError(f'Error: you do not have permission to access watchmap {area_id}')
 
     return None
 

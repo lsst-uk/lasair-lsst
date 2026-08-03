@@ -4,7 +4,7 @@
 Annotation means that external users push information to the Lasair database.
 Therefore it requires that user to inform the Lasair team and be approved
 before it will work. The team will use the admin interface to create an `annotator`
-object in the database, which is a conneciton between the API token of that user
+object in the database, which is a connection between the API token of that user
 with the name (`topic`) assigned to the annotator. 
 
 In the first case, write to 
@@ -94,7 +94,7 @@ group_id = settings.GROUP_ID
 topic_in = settings.TOPIC_IN
 
 # kafka consumer that we can suck from
-consumer = lasair.lasair_consumer('lasair-lsst-kafka.lsst.ac.uk:9092', group_id, topic_in)
+consumer = lasair.lasair_consumer('lasair-lsst-kafka_pub.lsst.ac.uk:9092', group_id, topic_in)
 
 # the lasair client will be used for pulling all the info about the object
 # and for annotating it
@@ -120,4 +120,32 @@ while n_alert < max_alert:
     n_annotate += handle_object(objectId, L, topic_out)
 
 print('Annotated %d of %d objects' % (n_annotate, n_alert))
+```
+
+### Annotating a Batch
+
+The following is a skeleton code for sending a batch of annotations all
+at the same time. As above, each annotation must have the `objectId`, `topic`, 
+and `classification` entries, where `topic` is the name of the annotator, which must 
+be owned by the user that owns the `API_TOKEN` used to make the Lasair client instance.
+The other attributes 
+are optional. The method `annotate_list` can be used to submit a batch of these.
+
+```
+topic = my_annotator_name
+ann_list = []
+for diaObjectId in diaObjectList:
+    # a single, short word
+    classification = ....
+    ann = {
+        'objectId'      : diaObjectId,
+        'topic'         : topic_out,
+        'classification': classification,
+        'version'       :'0.1',     # optional
+        'explanation'   :'.....',   # optional
+        'classdict'     :classdict, # optional
+        'url'           :'.....'    # optional
+    }
+    ann_list.append(ann)
+L.annotate_list(ann_list)
 ```

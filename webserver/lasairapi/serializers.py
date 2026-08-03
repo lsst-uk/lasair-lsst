@@ -15,7 +15,7 @@ from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
-from src import db_connect
+from src import db_connect, annotate_util
 import settings as lasair_settings
 import sys
 sys.path.append('../common')
@@ -138,6 +138,7 @@ def reformat(old, lasair_added=True):
     new['diaObject'] = diaObject
     new['diaSourcesList'] = diaSourcesList
     new['diaForcedSourcesList'] = old['diaForcedSources']
+
     return new
 
 class ObjectSerializer(serializers.Serializer):
@@ -314,7 +315,11 @@ class QuerySerializer(serializers.Serializer):
         else:
             offset = int(offset)
 
-        error = check_query(selected, tables, conditions)
+        try:
+            error = check_query(selected, tables, conditions, user=userId.id)
+        except Exception as e:
+            error = str(e)
+
         if error:
             return {"error": error}
 
@@ -338,24 +343,42 @@ class QuerySerializer(serializers.Serializer):
             return {"error": error}
 
 
-
 class AnnotateSerializer(serializers.Serializer):
-    topic = serializers.CharField(max_length=255, required=True)
-    objectId = serializers.IntegerField(required=True)
+
+    objectId       = serializers.IntegerField(required=True)
+    topic          = serializers.CharField(max_length=255, required=True)
     classification = serializers.CharField(max_length=80, required=True)
-    version = serializers.CharField(max_length=80, required=True)
-    explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)
-    classdict = serializers.CharField(max_length=4096, required=True)
-    url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    version        = serializers.CharField(max_length=80, required=True)
+    explanation    = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    classdict      = serializers.CharField(max_length=4096, required=True)
+    url            = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
     def save(self):
-        topic = self.validated_data['topic']
-        diaObjectId = self.validated_data['objectId']
-        classification = self.validated_data['classification']
-        version = self.validated_data['version']
-        explanation = self.validated_data['explanation']
-        classdict = self.validated_data['classdict']
-        url = self.validated_data['url']
+        request = self.context.get("request")
+        a = {
+            'diaObjectId'   : self.validated_data['objectId'],
+            'topic'         : self.validated_data['topic'],
+            'classification': self.validated_data['classification'],
+            'version'       : self.validated_data['version'],
+            'explanation'   : self.validated_data['explanation'],
+            'classdict'     : self.validated_data['classdict'],
+            'url'           : self.validated_data['url'],
+            }
+
+        serializer = AnnotateListSerializer(
+                data={'annotations':[a]}, 
+                context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        return {'status': 'success', 'annotation_topic': a['topic']}
+
+class AnnotateListSerializer(serializers.Serializer):
+    annotations = serializers.ListField()
+
+    def save(self):
+        annotations = self.validated_data['annotations']
+        request = self.context.get("request")
+
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
@@ -372,6 +395,7 @@ class AnnotateSerializer(serializers.Serializer):
             return {'error': "Cannot connect to master database %d: %s\n" % (e.args[0], e.args[1])}
 
         cursor = msl.cursor(dictionary=True)
+        topic = annotations[0]['topic']
         cursor.execute('SELECT * from annotators where topic="%s"' % topic)
         nrow = 0
         for row in cursor:
@@ -387,37 +411,6 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # form the insert query
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (diaObjectId, topic, version, classification, explanation, classdict, url)
-
-        try:
-            cursor = msl.cursor(dictionary=True)
-            cursor.execute(query)
-            cursor.close()
-            msl.commit()
-        except Exception as e:
-            return {'error': "Query failed %d: %s\n" % (e.args[0], e.args[1])}
-
-        if active < 2:
-            return {'status': 'success', 'query': query}
-
-        # when active=2, we push a kafka message to make sure queries are run immediately
-        message = {'diaObjectId': diaObjectId, 'annotator': topic}
-        conf = {
-            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-            'client.id': 'client-1',
-        }
-        producer = Producer(conf)
-        topicout = lasair_settings.ANNOTATION_TOPIC
-        try:
-            s = json.dumps(message)
-            producer.produce(topicout, s)
-        except Exception as e:
-            return {'error': "Kafka production failed: %s\n" % e}
-        producer.flush()
-
-        return {'status': 'success', 'query': query, 'annotation_topic': topicout, 'message': s}
+        # now actually put the annotations in the kafka
+        annotate_util.insert_annotations_kafka(annotations)
+        return {'status': 'success', 'n': len(annotations)}

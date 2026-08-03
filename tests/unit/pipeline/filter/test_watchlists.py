@@ -24,7 +24,7 @@ class WatchlistsTest(unittest.TestCase):
         ]
         mock_fltr = unittest.mock.MagicMock()
         watchlists.insert_watchlist_hits(mock_fltr, test_hits)
-        mock_fltr.execute_query.assert_called_with(
+        mock_fltr.execute_local_query.assert_called_with(
             'REPLACE into watchlist_hits (wl_id, cone_id, diaObjectId, arcsec, name) VALUES\n'
             '(1,2,"ABC123",0.500,"foo")'
         )
@@ -42,7 +42,7 @@ class WatchlistsTest(unittest.TestCase):
             }
         ]
         mock_fltr = unittest.mock.MagicMock()
-        mock_fltr.execute_query.side_effect = Exception("test error")
+        mock_fltr.execute_local_query.side_effect = Exception("test error")
         watchlists.insert_watchlist_hits(mock_fltr, test_hits)
         mock_fltr.log.error.assert_called_once()
 

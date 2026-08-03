@@ -55,7 +55,7 @@ def index(request):
        objects.ra, objects.decl
     FROM objects, sherlock_classifications
     WHERE objects.diaObjectId=sherlock_classifications.diaObjectId
-       AND objects.nDiaSources > 8
+       AND objects.nDiaSources > 3
        AND sherlock_classifications.classification in (%s)
     ORDER BY objects.lastDiaSourceMjdTai DESC LIMIT 1000
     """
@@ -105,29 +105,29 @@ def index(request):
         alerts[iclass] = [[] for iage in range(nage)]
 
     for row in table:
-        flux = 1
+        flux = -10000000
         for fluxband in ['u_psfFlux', 'g_psfFlux', 'r_psfFlux', 'i_psfFlux', 'z_psfFlux', 'y_psfFlux']:
             if row[fluxband] and row[fluxband] > flux:
                 flux = row[fluxband]
         row['psfFlux'] = flux
-        mag = flux2mag(flux)
 
-        iclass = sherlock_classes.index(row["predicted type"])
+        if flux > 0:
+            mag = flux2mag(flux)
+            iclass = sherlock_classes.index(row["predicted type"])
+            age = row["days ago"]
+            if   age < 1: iage = 0
+            elif age < 3: iage = 1
+            elif age < 5: iage = 2
+            elif age <10: iage = 3
+            else:         iage = 4
 
-        age = row["days ago"]
-        if   age < 1: iage = 0
-        elif age < 3: iage = 1
-        elif age < 5: iage = 2
-        elif age <10: iage = 3
-        else:         iage = 4
-
-        alerts[iclass][iage].append({
-            'diaObjectId': str(row['diaObjectId']),
-            'age': row["days ago"],
-            'class': row["predicted type"],
-            'mag': mag,
-            'coordinates': [row['ra'], row['decl']]
-        })
+            alerts[iclass][iage].append({
+                'diaObjectId': str(row['diaObjectId']),
+                'age': row["days ago"],
+                'class': row["predicted type"],
+                'mag': mag,
+                'coordinates': [row['ra'], row['decl']]
+            })
 
     try:
         # MAKE RELATIVE HOME PATH ABSOLUTE
@@ -144,7 +144,7 @@ def index(request):
     schema['days ago']    = 'Days since last detection of this object'
     schema['sherlock']    = 'Sherlock classification for this object'
     schema['nDiaSources'] = 'Number of detections of this object'
-    schema['psfFlux']     = 'Flux from most recent detection in nJ '
+    schema['psfFlux']     = 'Difference flux from most recent detection in nJ '
     schema['absMag']      = 'Peak absolute magnitude, if known'
 
     textTable = []

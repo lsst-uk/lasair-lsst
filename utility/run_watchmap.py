@@ -4,7 +4,7 @@ sys.path.append('../common')
 import settings
 sys.path.append('../common/src')
 import db_connect, lasairLogging
-sys.path.append('../pipeline/filter')
+sys.path.append('../pipeline/filter/alert')
 from watchmaps import check_alerts_against_watchmap
 from watchmaps import fetch_alerts, insert_watchmap_hits
 
@@ -36,13 +36,14 @@ def run_watchmap(batch, ar_id):
         hits = check_alerts_against_watchmap(batch, alertlist, watchmap)
         print('Found %d hits' % len(hits))
     
-        insert_watchmap_hits(batch, hits)
-        print('Inserted into database')
+        if len(hits) > 0:
+            insert_watchmap_hits(batch, hits)
+            print('Inserted into database')
 
 # A way to pass the db connection to the watchmap code
 class Batch():
     def __init__(self):
-        self.database = db_connect.remote()
+        self.database = self.database_local = db_connect.remote()
 
 if __name__ == "__main__":
     batch = Batch()
