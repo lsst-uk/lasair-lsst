@@ -411,13 +411,16 @@ class AnnotateListSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        ff = open('/home/ubuntu/qq', 'a')
         for iann in range(len(annotations)):
             cd = annotations[iann]['classdict']
             try:
-                jcd = json.loads(cd)
+                jcd = json.loads(cd)      # if they sent a dict jcd is a dict
+                if isinstance(jcd, str):  # if they sent a string then loads again
+                    jcd = json.loads(jcd) # check their string is valid json
+                    annotations[iann]['classdict'] = jcd
             except Exception:
                 return {'error': "Bad JSON %s for annotation %d" % (cd, iann)}
+        ff.write('\n')
 
         # now actually put the annotations in the kafka
         annotate_util.insert_annotations_kafka(annotations)
