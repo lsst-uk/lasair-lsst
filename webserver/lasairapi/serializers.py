@@ -420,7 +420,6 @@ class AnnotateListSerializer(serializers.Serializer):
                     annotations[iann]['classdict'] = jcd
             except Exception:
                 return {'error': "Bad JSON %s for annotation %d" % (cd, iann)}
-        ff.write('\n')
 
         # now actually put the annotations in the kafka
         annotate_util.insert_annotations_kafka(annotations)
