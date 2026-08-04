@@ -8,4 +8,5 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/fink')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/hopskotch')))
 
