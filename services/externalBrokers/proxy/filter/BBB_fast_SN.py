@@ -4,14 +4,14 @@ Read Lasair filter and make annotations
 import sys
 import json
 from lasair import lasair_consumer
+from proxy_annotators import ProxyAnnotator
 sys.path.append('../../../../common')
 import settings
 
 kafka_server = settings.PUBLIC_KAFKA_READONLY
 
-class Annotator():
+class Annotator(ProxyAnnotator):
     def __init__(self, settings):
-        self.settings = settings
         my_topic = settings['TOPIC']
         if 'group_id' in settings:
             group_id = settings['group_id']
