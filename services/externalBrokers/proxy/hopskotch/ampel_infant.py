@@ -3,7 +3,7 @@ Read AMPEL classifications from Hopskotch.
 """
 import sys, json
 from proxy_annotators import ProxyAnnotator
-from .hop_reader import HopReader
+from hop_reader import HopReader
 
 
 class Annotator(HopReader):
@@ -16,7 +16,6 @@ class Annotator(HopReader):
 
         diaObjectId    = message['object']['id']
         classdict = message['features'][0]['features']
-        classification = 'infant'
 
         return {'annotation': {
                   'diaObjectId'   : diaObjectId,

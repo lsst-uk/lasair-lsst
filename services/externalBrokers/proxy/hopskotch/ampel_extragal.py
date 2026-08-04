@@ -2,7 +2,7 @@
 Read AMPEL classifications from Hopskotch.
 """
 import sys, json
-from .hop_reader import HopReader
+from hop_reader import HopReader
 
 
 class Annotator(HopReader):
