@@ -2,11 +2,11 @@
 Read AMPEL classifications from Hopskotch.
 """
 import sys, json
+from proxy_annotators import ProxyAnnotator
 from .hop_reader import hop_reader
 
-class Annotator():
+class Annotator(ProxyAnnotator):
     def __init__(self, settings):
-        self.settings = settings
         self.hr = hop_reader(settings)
 
     def next_ann(self):

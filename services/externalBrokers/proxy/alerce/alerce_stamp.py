@@ -3,13 +3,14 @@ import sys
 import json
 import io
 import fastavro
+from proxy_annotators import ProxyAnnotator
 from confluent_kafka import Consumer, KafkaError
 sys.path.append('../../../common/src')
 import date_nid
 
-class Annotator():
+class Annotator(ProxyAnnotator):
     def __init__(self, settings):
-        self.settings = settings
+        super().__init__(settings)
         if 'group_id' in settings:
             group_id = settings['group_id']
         else:
