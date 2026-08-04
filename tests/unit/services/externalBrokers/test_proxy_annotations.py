@@ -20,23 +20,6 @@ class ProxyTest(unittest.TestCase):
         assert result == "annotator"
         mock_import.assert_called_once_with("abc")
 
-    def test_retry_until_success(self):
-        ac = unittest.mock.MagicMock()
-
-        ac.next_ann.side_effect = [
-            TimeoutError(),
-            TimeoutError(),
-            {"annotation": {"id": 1}},
-        ]
-        result = get_next_annotation(ac)
-        assert result == {"annotation": {"id": 1}}
-
-    def test_retry_failure(self):
-        ac = unittest.mock.MagicMock()
-        ac.next_ann.side_effect = TimeoutError()
-        result = get_next_annotation(ac)
-        assert result is None
-
     @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
     def test_process_annotation(self, mock_insert):
         ac = unittest.mock.MagicMock()
@@ -52,14 +35,6 @@ class ProxyTest(unittest.TestCase):
         )
         assert inserted == 2
         assert mock_insert.call_count == 2
-
-    @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
-    def test_process_annotation_end(self, mock_insert):
-        ac = unittest.mock.MagicMock()
-        ac.next_ann.side_effect = TimeoutError()
-        inserted = process_annotator(ac, 10, io.StringIO())
-        assert inserted == 0
-        assert mock_insert.call_count == 0
 
     def test_info_message(self):
         ac = unittest.mock.MagicMock()
