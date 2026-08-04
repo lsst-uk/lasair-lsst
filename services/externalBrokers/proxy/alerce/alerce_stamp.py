@@ -25,8 +25,6 @@ class Annotator(ProxyAnnotator):
             'auto.offset.reset': 'earliest',
         }
         self.streamReader = Consumer(conf)
-
-    def next_ann(self):
         if 'DATE' in self.settings:
             date = self.settings['DATE']
         else:
@@ -34,6 +32,8 @@ class Annotator(ProxyAnnotator):
             date = date_nid.nid_to_date(nid)
         topic = f'stamp_classifier_{date}'
         self.streamReader.subscribe([topic])
+
+    def next_ann(self):
         msg = self.streamReader.poll(timeout=20)
         if msg == None:
             return {'error': 'End of stream'}

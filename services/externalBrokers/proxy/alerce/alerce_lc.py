@@ -28,13 +28,15 @@ class Annotator(ProxyAnnotator):
         self.streamReader = Consumer(conf)
         schema_filename = 'alerce/stamp_classifier_rubin.avsc'
         self.schema = json.loads(open(schema_filename).read())
+        if 'DATE' in self.settings:
+            date = self.settings['DATE']
+        else:
+            nid  = date_nid.nid_now()
+            date = date_nid.nid_to_date(nid)
+        topic = f'stamp_classifier_{date}'
+        self.streamReader.subscribe([topic])
 
     def next_ann(self):
-        nid  = date_nid.nid_now()
-        date = date_nid.nid_to_date(nid)
-        topic = f'stamp_classifier_{date}'
-        topic = 'stamp_classifier_20260717'   # HACK
-        self.streamReader.subscribe([topic])
         msg = self.streamReader.poll(timeout=20)
         if msg == None:
             return {'error': 'End of stream'}
@@ -45,7 +47,7 @@ class Annotator(ProxyAnnotator):
         try:
             reader = fastavro.schemaless_reader(bytes_io, self.schema)
         except:
-            return {'error': f'Cannot open {topic}'}
+            return {'error': f'Cannot open alerce_lc'}
 
         if self.settings['verbose']:
             result = {'info': f'Got record {str(record)}'}
