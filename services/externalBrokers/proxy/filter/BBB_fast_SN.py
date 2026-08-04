@@ -30,7 +30,8 @@ class Annotator(ProxyAnnotator):
             return {'error': msg.error()}
         msg = json.loads(msg.value())
 
-        print(msg)
+        if self.settings['verbose']:
+            print(msg)
         diaObjectId = msg['diaObjectId']
         del msg['diaObjectId']
         if msg['BBBFallRate']:

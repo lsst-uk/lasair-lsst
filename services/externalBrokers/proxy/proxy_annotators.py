@@ -133,7 +133,7 @@ def main():
 
         ac = load_annotator(ann)
         inserted = process_annotator(ac, argdict["maxtry"], logf)
-        logf.write(f"{inserted} annotations inserted\n")
+        logf.write(f"  {inserted} annotations inserted\n")
 
 
 if __name__ == "__main__":
