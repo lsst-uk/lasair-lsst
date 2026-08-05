@@ -60,7 +60,7 @@ class Annotator(ProxyAnnotator):
             classdict[k] = float('%.3f' % v)
             if v > maxprob:
                 annotation['classification'] = k
-            maxprob = v
+                maxprob = v
         annotation['diaObjectId'] = record['objectId']
         annotation['classdict']      = classdict
         if annotation['classification'] not in ['VS', 'AGN', 'asteroid', 'bogus']:
