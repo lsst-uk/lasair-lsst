@@ -9,6 +9,7 @@ from proxy_annotators import ProxyAnnotator
 sys.path.append('../../../common/src')
 import date_nid
 
+
 class Annotator(ProxyAnnotator):
     def __init__(self, settings):
         super().__init__(settings)
@@ -26,7 +27,7 @@ class Annotator(ProxyAnnotator):
             'auto.offset.reset': 'earliest',
         }
         self.streamReader = Consumer(conf)
-        schema_filename = 'alerce/stamp_classifier_rubin.avsc'
+        schema_filename = settings.get('schema_filename', 'alerce/stamp_classifier_rubin.avsc')
         self.schema = json.loads(open(schema_filename).read())
         if 'DATE' in self.settings:
             date = self.settings['DATE']
@@ -42,14 +43,15 @@ class Annotator(ProxyAnnotator):
             return {'error': 'End of stream'}
         bytes_io = io.BytesIO(msg.value())
 
-        # Stamp classifier Rubin is a schemaless abro. Give schema to read.
+        # Stamp classifier Rubin is a schemaless avro. Give schema to read.
         # Reader returns a dict.
         try:
             reader = fastavro.schemaless_reader(bytes_io, self.schema)
+            record = next(reader)
         except:
             return {'error': f'Cannot open alerce_lc'}
 
-        if self.settings['verbose']:
+        if self.settings.get('verbose'):
             result = {'info': f'Got record {str(record)}'}
         else:
             result = {}
