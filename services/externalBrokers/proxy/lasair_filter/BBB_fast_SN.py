@@ -8,15 +8,14 @@ from proxy_annotators import ProxyAnnotator
 sys.path.append('../../../../common')
 import settings
 
-kafka_server = settings.PUBLIC_KAFKA_READONLY
+kafka_server = getattr(settings, 'PUBLIC_KAFKA_READONLY', '')
+
 
 class Annotator(ProxyAnnotator):
     def __init__(self, settings):
+        super().__init__(settings)
         my_topic = settings['TOPIC']
-        if 'group_id' in settings:
-            group_id = settings['group_id']
-        else:
-            group_id = 'test123'
+        group_id = settings.get('group_id', 'test123')
         self.consumer = lasair_consumer(kafka_server, group_id, my_topic)
 
     def next_ann(self):
@@ -30,11 +29,11 @@ class Annotator(ProxyAnnotator):
             return {'error': msg.error()}
         msg = json.loads(msg.value())
 
-        if self.settings['verbose']:
+        if self.settings.get('verbose'):
             print(msg)
         diaObjectId = msg['diaObjectId']
         del msg['diaObjectId']
-        if msg['BBBFallRate']:
+        if msg.get('BBBFallRate'):
             classification = 'Bazin'
         else:
             classification = 'Exp'

@@ -8,6 +8,7 @@ from confluent_kafka import Consumer, KafkaError
 sys.path.append('../../../common/src')
 import date_nid
 
+
 class Annotator(ProxyAnnotator):
     def __init__(self, settings):
         super().__init__(settings)
@@ -30,8 +31,8 @@ class Annotator(ProxyAnnotator):
         else:
             nid  = date_nid.nid_now()
             date = date_nid.nid_to_date(nid)
-        topic = f'stamp_classifier_{date}'
-        self.streamReader.subscribe([topic])
+        self.topic = f'stamp_classifier_{date}'
+        self.streamReader.subscribe([self.topic])
 
     def next_ann(self):
         msg = self.streamReader.poll(timeout=20)
@@ -45,9 +46,9 @@ class Annotator(ProxyAnnotator):
             reader = fastavro.reader(bytes_io)
             record = next(reader)
         except:
-            return {'error': f'Cannot open {topic}'}
+            return {'error': f'Cannot open {self.topic}'}
 
-        if self.settings['verbose']:
+        if self.settings.get('verbose'):
             result = {'info': f'Got record {str(record)}'}
         else:
             result = {}
@@ -56,10 +57,10 @@ class Annotator(ProxyAnnotator):
         classdict = {}
         maxprob = 0
         for k,v in record['probabilities'].items():
-            classdict[k] = float('%.3f'%v)
+            classdict[k] = float('%.3f' % v)
             if v > maxprob:
                 annotation['classification'] = k
-        maxprob = v
+                maxprob = v
         annotation['diaObjectId'] = record['objectId']
         annotation['classdict']      = classdict
         if annotation['classification'] not in ['VS', 'AGN', 'asteroid', 'bogus']:
