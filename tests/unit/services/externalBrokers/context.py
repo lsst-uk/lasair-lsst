@@ -11,5 +11,5 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../.
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/hopskotch')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/ampel')))
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/alerce')))
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/filter')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../services/externalBrokers/proxy/lasair_filter')))
 

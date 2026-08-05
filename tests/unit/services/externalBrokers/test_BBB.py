@@ -2,25 +2,24 @@ import sys
 import context
 import unittest, unittest.mock
 from unittest.mock import patch
-from proxy_annotators import get_log_stream, load_annotator, get_next_annotation, process_annotator, ProxyAnnotator
-
+from proxy_annotators import load_annotator, ProxyAnnotator
 
 class BBBTest(unittest.TestCase):
 
-    @patch('filter.BBB_fast_SN.lasair_consumer')
+    @patch('lasair_filter.BBB_fast_SN.lasair_consumer')
     def test_load_BBB_fast_SN(self, mock_consumer):
         result = load_annotator({
-            "CODE": "filter.BBB_fast_SN",
+            "CODE": "lasair_filter.BBB_fast_SN",
             "TOPIC": "",
              }
         )
         self.assertIsInstance(result, ProxyAnnotator)
 
-    @patch('filter.BBB_fast_SN.lasair_consumer')
+    @patch('lasair_filter.BBB_fast_SN.lasair_consumer')
     def test_next_ann(self, mock_consumer):
-        from filter import BBB_fast_SN
+        from lasair_filter import BBB_fast_SN
         a = BBB_fast_SN.Annotator({
-            "CODE": "filter.BBB_fast_SN",
+            "CODE": "lasair_filter.BBB_fast_SN",
             "TOPIC": "",
              }
         )
