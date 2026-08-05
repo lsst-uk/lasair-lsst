@@ -9,7 +9,7 @@ sys.modules['lasair'] = unittest.mock.Mock()
 
 class BBBTest(unittest.TestCase):
 
-    def test_load_BBB_fast_SN(self, mock_consumer):
+    def test_load_BBB_fast_SN(self):
         result = load_annotator({
             "CODE": "lasair_filter.BBB_fast_SN",
             "TOPIC": "",
