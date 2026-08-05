@@ -30,8 +30,10 @@ class Annotator(ProxyAnnotator):
         else:
             nid  = date_nid.nid_now()
             date = date_nid.nid_to_date(nid)
-        topic = f'stamp_classifier_{date}'
-        self.streamReader.subscribe([topic])
+        self.topic = f'stamp_classifier_lsst_{date}'
+        if self.settings['verbose']:
+            print('Reading topic ', self.topic)
+        self.streamReader.subscribe([self.topic])
 
     def next_ann(self):
         msg = self.streamReader.poll(timeout=20)
@@ -45,7 +47,7 @@ class Annotator(ProxyAnnotator):
             reader = fastavro.reader(bytes_io)
             record = next(reader)
         except:
-            return {'error': f'Cannot open {topic}'}
+            return {'error': f'Cannot open {self.topic}'}
 
         if self.settings['verbose']:
             result = {'info': f'Got record {str(record)}'}
