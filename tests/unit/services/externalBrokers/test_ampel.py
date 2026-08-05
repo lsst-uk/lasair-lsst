@@ -10,7 +10,7 @@ import ampel_extragal
 import ampel_infant
 
 
-class Ampel(unittest.TestCase):
+class AmpelTest(unittest.TestCase):
 
     def test_load_ampel_extragal(self):
         result = load_annotator({
