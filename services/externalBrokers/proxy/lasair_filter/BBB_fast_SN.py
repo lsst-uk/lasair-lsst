@@ -8,7 +8,7 @@ from proxy_annotators import ProxyAnnotator
 sys.path.append('../../../../common')
 import settings
 
-kafka_server = settings.PUBLIC_KAFKA_READONLY
+kafka_server = getattr(settings, 'PUBLIC_KAFKA_READONLY', '')
 
 
 class Annotator(ProxyAnnotator):

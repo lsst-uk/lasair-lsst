@@ -4,9 +4,11 @@ import unittest, unittest.mock
 from unittest.mock import patch
 from proxy_annotators import load_annotator, ProxyAnnotator
 
+sys.modules['lasair'] = unittest.mock.Mock()
+
+
 class BBBTest(unittest.TestCase):
 
-    @patch('lasair_filter.BBB_fast_SN.lasair_consumer')
     def test_load_BBB_fast_SN(self, mock_consumer):
         result = load_annotator({
             "CODE": "lasair_filter.BBB_fast_SN",
@@ -15,8 +17,7 @@ class BBBTest(unittest.TestCase):
         )
         self.assertIsInstance(result, ProxyAnnotator)
 
-    @patch('lasair_filter.BBB_fast_SN.lasair_consumer')
-    def test_next_ann(self, mock_consumer):
+    def test_next_ann(self):
         from lasair_filter import BBB_fast_SN
         a = BBB_fast_SN.Annotator({
             "CODE": "lasair_filter.BBB_fast_SN",
@@ -24,6 +25,7 @@ class BBBTest(unittest.TestCase):
              }
         )
         fake_msg = '{"diaObjectId": "1"}'
+        mock_consumer = unittest.mock.MagicMock()
         mock_consumer.poll.return_value.error.return_value = None
         mock_consumer.poll.return_value.value.return_value = fake_msg
         a.consumer = mock_consumer
