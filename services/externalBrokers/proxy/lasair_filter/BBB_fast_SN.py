@@ -15,10 +15,7 @@ class Annotator(ProxyAnnotator):
     def __init__(self, settings):
         super().__init__(settings)
         my_topic = settings['TOPIC']
-        if 'group_id' in settings:
-            group_id = settings['group_id']
-        else:
-            group_id = 'test123'
+        group_id = settings.get('group_id', 'test123')
         self.consumer = lasair_consumer(kafka_server, group_id, my_topic)
 
     def next_ann(self):
