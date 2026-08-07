@@ -1,5 +1,6 @@
 from src import db_connect
 import sys
+import json
 from django.contrib import messages
 from django.shortcuts import render
 from lasair.apps.annotator.models import Annotators
@@ -9,8 +10,59 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404, redirect
 from lasair.apps.db_schema.utils import get_schema_dict
 from .utils import add_annotator_metadata
-sys.path.append('../common')
+sys.path.append('../common/src')
+from annotate_util import insert_annotation_db, delete_annotation, classifications_for_object
 
+@csrf_exempt
+def addtag(request, diaObjectId, username, tag):
+    topic = 'tags_' + username
+    insert_annotation_db(diaObjectId, topic, tag)
+    taglist = classifications_for_object(topic, diaObjectId)
+    return HttpResponse(json.dumps(taglist), content_type="application/json")
+
+@csrf_exempt
+def removetag(request, diaObjectId, username, tag):
+    topic = 'tags_' + username
+    delete_annotation(diaObjectId, topic, tag)
+    taglist = classifications_for_object(topic, diaObjectId)
+    return HttpResponse(json.dumps(taglist), content_type="application/json")
+
+@csrf_exempt
+def tags_index(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Must be logged in to use the Tags system")
+        return render(request, 'error.html')
+
+    topic = 'tags_' + request.user.username
+    query = 'SELECT diaObjectId, classification FROM  annotations '
+    query += f'WHERE topic="{topic}" ORDER BY diaObjectId'
+
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor.execute(query)
+    newTable = []
+    taglist = []
+    start = True
+    for row in cursor:
+        diaObjectId = row['diaObjectId']
+        if not start and diaObjectId != oldDiaObjectId:
+           newTable.append({
+               'diaObjectId':oldDiaObjectId,
+               'taglist': ', '.join(taglist),
+           })
+           taglist = []
+
+        taglist.append(row['classification'])
+        oldDiaObjectId = diaObjectId
+        start = False
+    newTable.append({
+       'diaObjectId':oldDiaObjectId,
+       'taglist': ', '.join(taglist),
+    })
+
+    return render(request, 'annotator/tags.html', {
+        'table': newTable
+        })
 
 @csrf_exempt
 def annotator_index(request):

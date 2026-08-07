@@ -15,7 +15,8 @@ import sys
 from astropy.time import Time
 from lasair.utils import mjd_now, ecliptic_and_galactic, rasex, decsex, objjson
 from .utils import object_difference_lightcurve
-sys.path.append('../common')
+sys.path.append('../common/src')
+from annotate_util import classifications_for_object
 
 
 def object_detail(request, diaObjectId):
@@ -60,6 +61,13 @@ def object_detail(request, diaObjectId):
     if 'sherlock' in data2:
         data2.pop('sherlock')
 
+    # tag information only if logged in
+    if request.user.is_authenticated:
+        data['username'] = request.user.username
+        topic = 'tags_' + data['username']
+        data['taglist'] = classifications_for_object(topic, int(diaObjectId))
+
+    # fetch lightcives
     lightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=False)
     fplightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=True)
     if mergedDF is not None:
