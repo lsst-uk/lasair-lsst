@@ -10,10 +10,22 @@ Objects with tag {{ tag }}
         <div class="row mt-4">
 
 <h1>Tag = {{ tag }}</h1>
-<table border=1 width=30>
+The first column is the diaObjectId, then "obj_last" is the number of days since the last 
+detection (diaSource) for that object, then "tag_age" is the number of days 
+since the tag was assigned to the object.
+
+<table border=1 style="width:50%">
+<thead>
+<tr><th>diaObjectId</th><th>obj_last</th><th>tag_age</th></tr>
+</thead>
+<tbody>
 {% for row in table %}
-<tr><td><a href=/objects/{{ row.diaObjectId }}>{{ row.diaObjectId }}</a></td></tr>
+<tr><td><a href=/objects/{{ row.diaObjectId }}>{{ row.diaObjectId }}</a></td>
+<td>{{ row.obj_last }}<td>
+<td>{{ row.tag_age }}<td>
+</tr>
 {% endfor %}
+</tbody>
 </table>
 
 

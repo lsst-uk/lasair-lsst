@@ -52,8 +52,15 @@ def tags_detail(request, tag):
         return render(request, 'error.html')
 
     topic = 'tags_' + request.user.username
-    query = 'SELECT diaObjectId FROM annotations WHERE '
-    query += f'topic="{topic}" AND classification="{tag}"'
+#    query = 'SELECT diaObjectId FROM annotations WHERE '
+#    query += f'topic="{topic}" AND classification="{tag}"'
+
+    query  = 'SELECT objects.diaObjectId,  '
+    query += 'FORMAT(mjdnow() - objects.lastDiaSourceMjdTai,1) as obj_last,  '
+    query += 'FORMAT(mjdnow() - (UNIX_TIMESTAMP(annotations.timestamp) / 86400 + 40587),1) AS tag_age  '
+    query += 'FROM objects,annotations  '
+    query += 'WHERE objects.diaObjectId = annotations.diaObjectId '
+    query += f'AND annotations.topic="{topic}" AND annotations.classification="{tag}"'
 
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
