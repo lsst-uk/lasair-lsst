@@ -34,35 +34,36 @@ def tags_index(request):
         return render(request, 'error.html')
 
     topic = 'tags_' + request.user.username
-    query = 'SELECT diaObjectId, classification FROM  annotations '
-    query += f'WHERE topic="{topic}" ORDER BY diaObjectId'
+    query = 'SELECT classification AS tag, count(*) AS n FROM annotations '
+    query += f'WHERE topic="{topic}" GROUP BY classification'
 
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
     cursor.execute(query)
-    newTable = []
-    taglist = []
-    start = True
-    for row in cursor:
-        diaObjectId = row['diaObjectId']
-        if not start and diaObjectId != oldDiaObjectId:
-           newTable.append({
-               'diaObjectId':oldDiaObjectId,
-               'taglist': ', '.join(taglist),
-           })
-           taglist = []
-
-        taglist.append(row['classification'])
-        oldDiaObjectId = diaObjectId
-        start = False
-    newTable.append({
-       'diaObjectId':oldDiaObjectId,
-       'taglist': ', '.join(taglist),
-    })
-
-    return render(request, 'annotator/tags.html', {
-        'table': newTable
+    table = cursor.fetchall()
+    return render(request, 'annotator/tags_index.html', 
+       { 'table': table, 
         })
+
+@csrf_exempt
+def tags_detail(request, tag):
+    if not request.user.is_authenticated:
+        messages.error(request, "Must be logged in to use the Tags system")
+        return render(request, 'error.html')
+
+    topic = 'tags_' + request.user.username
+    query = 'SELECT diaObjectId FROM annotations WHERE '
+    query += f'topic="{topic}" AND classification="{tag}"'
+
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    return render(request, 'annotator/tags_detail.html', 
+       { 'table': table,
+        'tag': tag,
+        })
+
 
 @csrf_exempt
 def annotator_index(request):

@@ -1,0 +1,23 @@
+{% extends "layouts/base.html" %}
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+{% block title %}
+    Your Tags
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-4">
+
+
+<table border=1 width=30>
+{% for row in table %}
+<tr><td><a href=/tags/{{ row.tag }}>{{ row.tag }}</a></td><td>{{ row.n }}</td></tr>
+{% endfor %}
+</table>
+
+
+
+        </div>
+    </div>
+{% endblock %}

@@ -6,6 +6,9 @@ urlpatterns = [
     path('annotators/<slug:topic>/', views.annotator_detail, name='annotator_detail'),
 
     path('tags/', views.tags_index, name='tags_index'),
+    path('tags/<tag>/', views.tags_detail, name='tags_detail'),
+
+    # called by the javascript in the object page
     path('tags/addtag/<int:diaObjectId>/<username>/<tag>/', views.addtag, name='tags.addtag'),
     path('tags/removetag/<int:diaObjectId>/<username>/<tag>/', views.removetag, name='tags.removetag'),
 ]
