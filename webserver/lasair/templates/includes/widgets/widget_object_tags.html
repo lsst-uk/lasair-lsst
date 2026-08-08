@@ -61,7 +61,10 @@ function renderTags(tags) {
 // Add a tag.
 addTagForm.addEventListener("submit", async function(event) {
     event.preventDefault();
-    const tag = newTagInput.value.trim();
+    var tag = newTagInput.value.trim();
+    // force tags to be only a-z and 0-9
+    tag = tag.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
     if (!tag) { return; }
     args = "{{ data.diaObjectId }}";
     args = args + '/' + "{{ data.username }}";
