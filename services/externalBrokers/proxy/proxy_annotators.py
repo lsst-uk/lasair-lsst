@@ -24,7 +24,7 @@ from docopt import docopt
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import date_nid, annotation_util
+import date_nid, annotate_util
 
 
 class ProxyAnnotator():
@@ -96,7 +96,7 @@ def process_annotator(ac, maxtry, logger):
         if "info" in result:
             logger.write(f'  {result["info"]}\n')
         if "annotation" in result:
-            annotation_util.insert_annotations_kafka( [result["annotation"]])
+            annotate_util.insert_annotations_kafka( [result["annotation"]])
             inserted += 1
     return inserted
 
