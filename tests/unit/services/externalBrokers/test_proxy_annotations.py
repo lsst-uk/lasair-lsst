@@ -20,7 +20,7 @@ class ProxyTest(unittest.TestCase):
         assert result == "annotator"
         mock_import.assert_called_once_with("abc")
 
-    @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
+    @patch("proxy_annotators.annotate_util.insert_annotations_kafka")
     def test_process_annotation(self, mock_insert):
         ac = unittest.mock.MagicMock()
         ac.next_ann.side_effect = [
@@ -46,7 +46,7 @@ class ProxyTest(unittest.TestCase):
         process_annotator(ac, 10, logger)
         assert "waiting" in logger.getvalue()
 
-    @patch("proxy_annotators.annotation_util.insert_annotations_kafka")
+    @patch("proxy_annotators.annotate_util.insert_annotations_kafka")
     def test_process_annotation_end(self, mock_insert):
         ac = unittest.mock.MagicMock()
         ac.next_ann.return_value = None
