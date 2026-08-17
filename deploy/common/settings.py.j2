@@ -173,17 +173,52 @@ GW_DIRECTORY           = '/mnt/cephfs/lasair/mma/gw/'
 GW_ACTIVE_DAYS         = 21
 GW_BBH_MAX_AREA        = 300
 
-# Alerce streams
-ALERCE_KAFKA           = '{{ settings.alerce_server }}'
-ALERCE_PASSWORD        = '{{ settings.alerce_password }}'
-ALERCE_GROUP_ID        = 'lasair003'
-
-# Fink streams
-FINK_USERNAME          = '{{ settings.fink_username }}'
-FINK_GROUP_ID          = 'fink-roy'
-FINK_TOPICS            = [
-    'fink_early_sn_candidates_ztf',
-    'fink_sn_candidates_ztf',
-    'fink_kn_candidates_ztf',
-]
-FINK_SERVERS           = '{{ settings.fink_servers }}'
+# Proxy annotators 
+##################
+# fetched via Kafka and converted to annotations
+# First, common elements for the service we fetch from
+proxies = {}
+#-----------
+proxies['BBB_fast_SN'] = {
+    'CODE': 'filter.BBB_fast_SN',
+    'TOPIC': 'lasair_82BBBfastriserSN',
+}
+#-----------
+hopskotch = {
+    'SCIMMA_AUTH_USERNAME': '{{ settings.scimma_auth_username }}',
+    'SCIMMA_AUTH_PASSWORD': '{{ settings.scimma_auth_password }}',
+}
+# Specialise the comment elements for each module
+# CODE returns a list of annotations.
+# The keys of this dict are annotator names.
+proxies['ampel_infant'] = hopskotch | {
+    'MODULE'   : 'ampel.lsst.extragalactic-infants',
+    'CODE'     : 'hopskotch.ampel_infant',
+}
+proxies['ampel_extragal'] = hopskotch | {
+    'MODULE'   : 'ampel.lsst.extragalactic-transients',
+    'CODE'     : 'hopskotch.ampel_extragal',
+}
+#-----------
+fink = {
+    'SERVERS'  : '{{ settings.fink_servers }}',
+    'USERNAME' : '{{ settings.fink_username }}',
+    'GROUP_ID' : 'fink-roy',
+}
+proxies['fink_snn'] = fink | {
+    'MODULE': 'fink_extragalactic_lt20mag_candidate_lsst',
+    'CODE'     : 'fink.fink_snn',
+}
+#-----------
+alerce = {
+    'SERVERS'        : {{ settings.alerce_server }},
+    'ALERCE_NAME'    : 'lasair_prod',
+    'ALERCE_PASSWORD': '{{ settings.alerce_password }}',
+#    'DATE'           : '20260726',  # or else use today
+}
+proxies['alerce_stamp'] = alerce | {
+    'CODE' : 'alerce.alerce_stamp',
+}
+proxies['alerce_lc'] = alerce | {
+    'CODE' : 'alerce.alerce_lc',
+}
