@@ -20,12 +20,11 @@ import sys
 import io
 import importlib
 import datetime
-import signal
 from docopt import docopt
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
-import date_nid, annotation_util
+import date_nid, annotate_util
 
 
 class ProxyAnnotator():
@@ -36,13 +35,6 @@ class ProxyAnnotator():
     def next_ann(self) -> dict:
         """Get the next available annotation."""
         raise NotImplementedError("Method must be implemented in subclass")
-
-
-def handler(signum, frame):
-    raise TimeoutError
-
-
-signal.signal(signal.SIGALRM, handler)
 
 
 def parse_args():
@@ -84,34 +76,16 @@ def load_annotator(ann: dict) -> ProxyAnnotator:
     module = importlib.import_module(ann["CODE"])
     return module.Annotator(ann)
 
-def get_next_annotation(ac, logger=sys.stdout):
+
+def get_next_annotation(ac):
     result = ac.next_ann()
     return result
-
-def get_next_annotation_timeout(ac, retries=4, timeout=5, logger=sys.stdout):
-    for _ in range(retries):
-        signal.alarm(timeout)
-        try:
-            logger.write('next ann')
-            result = ac.next_ann()
-            logger.write('returned')
-            return result
-        except TimeoutError:
-            logger.write("  waiting\n")
-        finally:
-            logger.write('cancelling alarm')
-            signal.alarm(0)
-    return None
 
 
 def process_annotator(ac, maxtry, logger):
     inserted = 0
     for _ in range(maxtry):
-        # scimma/hopskotch has no inbuilt timeout
-        if 'SCIMMA_AUTH_USERNAME' in ac.settings:
-            result = get_next_annotation_timeout(ac, logger=logger)
-        else:
-            result = get_next_annotation(ac, logger=logger)
+        result = get_next_annotation(ac)
 
         if result is None:
             break
@@ -122,7 +96,7 @@ def process_annotator(ac, maxtry, logger):
         if "info" in result:
             logger.write(f'  {result["info"]}\n')
         if "annotation" in result:
-            annotation_util.insert_annotations_kafka( [result["annotation"]])
+            annotate_util.insert_annotations_kafka( [result["annotation"]])
             inserted += 1
     return inserted
 

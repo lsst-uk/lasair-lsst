@@ -2,15 +2,14 @@
 Read AMPEL classifications from Hopskotch.
 """
 import sys, json
-from proxy_annotators import ProxyAnnotator
-from .hop_reader import hop_reader
+from hop_reader import HopReader
 
-class Annotator(ProxyAnnotator):
+
+class Annotator(HopReader):
     def __init__(self, settings):
-        self.hr = hop_reader(settings)
+        super().__init__(settings)
 
-    def next_ann(self):
-        message = self.hr.poll()
+    def parse(self, message):
         if 'error' in message:
             return message
         diaObjectId    = message['object']['id']
