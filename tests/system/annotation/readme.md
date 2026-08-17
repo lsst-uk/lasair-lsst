@@ -19,8 +19,8 @@
 
 | test | command |
 |------|---------|
-| classic+direct | `python3 ann_direct.py su __annot` |
-| tags+direct | `python3 ann_direct.py su tags_username` |
+| classic+direct | `python3 ann_direct.py __annot` |
+| tags+direct | `python3 ann_direct.py tags_username` |
 
 #### Kafka
 - Kafka-mediated annotation is more complicated, using the code `ann_kafka.py`. 
@@ -37,10 +37,18 @@ of the annotations, so we run the kafka consumer.
 
 | test | command |
 |------|---------|
-| classic+api   | `python3 ann_kafka.py su __annot       api` |
-| tags+api      | `python3 ann_kafka.py su tags_username api` |
-| classic+kafka | `python3 ann_kafka.py su __annot       direct_kafka` |
-| tags+kafka    | `python3 ann_kafka.py su tags_username direct_kafka` |
+| classic+api   | `python3 ann_kafka.py __annot       api` |
+| tags+api      | `python3 ann_kafka.py tags_username api` |
+| classic+kafka | `python3 ann_kafka.py __annot       direct_kafka` |
+| tags+kafka    | `python3 ann_kafka.py tags_username direct_kafka` |
+
+#### JSON upload
+- Uploads and annotation with a non-trivial JSON `classdict` 
+- Then checks it has been received by making a filter for it
+
+| test | command |
+|------|---------|
+| JSON+api   | `python3 ann_json.py __annot` |
 
 #### Diagnostic
 If things aren't working properly, there maybe some trash left behind from running 

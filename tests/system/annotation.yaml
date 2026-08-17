@@ -27,21 +27,28 @@
     - name: run direct tests
       ansible.builtin.command:
         chdir: annotation
-        cmd: "python3 ann_direct.py su {{ item }}"
+        cmd: "python3 ann_direct.py {{ item }}"
       loop:
         - systest1
         - tags_systest1
     - name: run kafka tests
       ansible.builtin.command:
         chdir: annotation
-        cmd: "python3 ann_kafka.py su {{ item }} direct_kafka"
+        cmd: "python3 ann_kafka.py {{ item }} direct_kafka"
       loop:
         - systest1
         - tags_systest1
     - name: run api tests
       ansible.builtin.command:
         chdir: annotation
-        cmd: "python3 ann_kafka.py su {{ item }} api"
+        cmd: "python3 ann_kafka.py {{ item }} api"
+      loop:
+        - systest1
+        - tags_systest1
+    - name: run JSON tests
+      ansible.builtin.command:
+        chdir: annotation
+        cmd: "python3 ann_json.py {{ item }}"
       loop:
         - systest1
         - tags_systest1

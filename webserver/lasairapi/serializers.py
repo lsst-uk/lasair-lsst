@@ -370,7 +370,7 @@ class AnnotateSerializer(serializers.Serializer):
                 context={'request': request})
         serializer.is_valid(raise_exception=True)
         message = serializer.save()
-        return {'status': 'success', 'annotation_topic': a['topic']}
+        return message
 
 class AnnotateListSerializer(serializers.Serializer):
     annotations = serializers.ListField()
@@ -410,6 +410,16 @@ class AnnotateListSerializer(serializers.Serializer):
             return {'error': "Annotator error: %s is not allowed to submit to topic %s" % (user_name, topic)}
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
+
+        for iann in range(len(annotations)):
+            cd = annotations[iann]['classdict']
+            try:
+                jcd = json.loads(cd)      # if they sent a dict jcd is a dict
+                if isinstance(jcd, str):  # if they sent a string then loads again
+                    jcd = json.loads(jcd) # check their string is valid json
+                    annotations[iann]['classdict'] = jcd
+            except Exception:
+                return {'error': "Bad JSON %s for annotation %d" % (cd, iann)}
 
         # now actually put the annotations in the kafka
         annotate_util.insert_annotations_kafka(annotations)
