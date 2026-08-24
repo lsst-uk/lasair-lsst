@@ -209,6 +209,12 @@ pre.prism-live {
         content: " "
     }
 
+    pre.prism > code#from_box:empty::before {
+        content: "tables are added automatically as you build your SELECT statement above";
+        color: $gray-500;
+        font-style: italic;
+    }
+
 .tooltip-inner {
     a {
         color: $secondary;
