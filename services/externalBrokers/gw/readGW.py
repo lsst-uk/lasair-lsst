@@ -202,7 +202,7 @@ def make_image(moc10, moc50, moc90):
     moc50 = make_moc(moc50)
     moc90 = make_moc(moc90)
     notmoc = moc10.complement()
-    fig = plt.figure(111, figsize=(8, 5))
+    fig = plt.figure(figsize=(8, 5))
     with WCS(fig, fov=360 * u.deg, projection="AIT") as wcs:
         ax = fig.add_subplot(1, 1, 1, projection=wcs)
         notmoc.fill(ax=ax, wcs=wcs, alpha=1.0, fill=True, color="lightgray", linewidth=None)
