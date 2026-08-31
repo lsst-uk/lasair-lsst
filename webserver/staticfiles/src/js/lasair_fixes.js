@@ -12,7 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     $('[data-bs-toggle="popover"]').popover();
 
-    bootstrap.Tooltip.Default.delay = { show: 0, hide: 600 };
+    // Default tooltip timing: instant show, 0.5s hide. Tooltips that contain
+    // a link (see includes/info_tooltip.html) override this per-element via
+    // data-bs-delay so there's time to reach the link before it disappears.
+    bootstrap.Tooltip.Default.delay = { show: 0, hide: 500 };
     var ttDefaultAllowList = bootstrap.Tooltip.Default.allowList;
     ttDefaultAllowList.table = [];
     ttDefaultAllowList.tr = [];
@@ -22,43 +25,26 @@ document.addEventListener('DOMContentLoaded', function() {
     ttDefaultAllowList.tbody = [];
     ttDefaultAllowList.thead = [];
 
-    $('[data-bs-toggle="tooltip"]').tooltip();
+    // Guard against double-initializing an element that already has a
+    // Tooltip instance (e.g. from volt.js's own init) -- attaching a second
+    // instance to the same element is what caused tooltips to bubble.
+    document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+        if (!bootstrap.Tooltip.getInstance(el)) {
+            new bootstrap.Tooltip(el);
+        }
+    });
+
+    // Only ever show one tooltip at a time: as soon as one is about to
+    // appear, hide every other currently-attached tooltip instance.
+    document.addEventListener('show.bs.tooltip', function (e) {
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(function (el) {
+            if (el !== e.target) {
+                var instance = bootstrap.Tooltip.getInstance(el);
+                if (instance) {
+                    instance.hide();
+                }
+            }
+        });
+    });
 
 });
-
-// $(document).ready(function() {
-//     $('body').on('inserted.bs.tooltip', function(e) {
-//         var $target = $(e.target);
-
-//         // Keep track so we can check if mouse is hovering over the tooltip
-//         $('[role="tooltip"]').hover(function() {
-//             $(this).toggleClass('hover');
-//         });
-
-//         $target.on('hide.bs.tooltip', function(e) {
-//             // If tooltip is under the mouse, prevent hide but
-//             // add handler to hide when mouse leaves tooltip
-//             if ($('[role="tooltip"]').hasClass('hover')) {
-//                 $('[role="tooltip"]').on('mouseleave', function() {
-//                     setTimeout(function() {
-//                         $target.tooltip('hide');
-//                     }, 200);
-//                 });
-//                 // Tell bootstrap tooltip to bail and not actually hide
-//                 e.preventDefault();
-//                 return;
-//             }
-//         });
-//     });
-// });
-
-var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-document.addEventListener('DOMContentLoaded', function () {
-  // Set global defaults
-  bootstrap.Tooltip.Default.delay = { show: 0, hide: 600 };
-
-  const tooltipList = [].slice.call(
-    document.querySelectorAll('[data-bs-toggle="tooltip"]')
-  ).map((el) => new bootstrap.Tooltip(el));
-}, false);
-
