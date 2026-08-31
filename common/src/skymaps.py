@@ -119,9 +119,12 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
         # The sherlock may have distance in Mpc, z, and/or photoZ
         # distance is best, else z, else photoZ
 
-        if row['distance']:   d = row['distance']
-        elif row['z']:        d = redshiftToDistance(row['z'])['dl_mpc']
-        elif row['photoz']:   d = redshiftToDistance(row['photoz'])['dl_mpc']
+        if row['distance']:   
+            d = row['distance']
+        elif row['z'] and row['z'] > 0:        
+            d = redshiftToDistance(row['z'])['dl_mpc']
+        elif row['photoz'] and row['photoz'] > 0:   
+            d = redshiftToDistance(row['photoz'])['dl_mpc']
         else:                 d = None
 
         distancelist.append(d)

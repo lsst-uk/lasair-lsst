@@ -76,9 +76,8 @@ def insert_gw_alert(database, dir, otherId, version):
             percent = v
             gwclass = k
 
-    if      gwclass != 'BNS' and \
-            gwclass != 'NSBH' and \
-            area90 > settings.GW_BBH_MAX_AREA:
+    good = (gwclass == 'BNS' or gwclass == 'NSBH') and area90 < settings.GW_BBH_MAX_AREA
+    if not good:
         return 'Classification = %s and area90 = %s' % (gwclass, str(area90))
 
     # Deal with the 3 MOCs
@@ -153,7 +152,7 @@ def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
             if not getDone(dir, otherId, version):
                 # Set done flag so we dont come back
                 setDone(dir, otherId, version)
-
+                message = ''
                 try:
                     message = insert_gw_alert(database, dir, otherId, version)
                 except Exception as e:
@@ -213,6 +212,7 @@ def make_image(moc10, moc50, moc90):
     plt.grid(color="black", linestyle="dotted")
     outbuf = io.BytesIO()
     plt.savefig(outbuf, format='png', bbox_inches='tight', pad_inches=-0.85, dpi=200)
+    plt.close()
     bytes = outbuf.getvalue()
     outbuf.close()
     return bytes
