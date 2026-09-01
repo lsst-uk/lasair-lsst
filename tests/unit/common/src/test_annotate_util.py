@@ -304,6 +304,37 @@ class MarksForObjectsTest(unittest.TestCase):
         mock_db.assert_not_called()
 
 
+class CountClassificationTest(unittest.TestCase):
+    """Tests for counting the rows of one classification in a topic."""
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_counts_with_one_parameterised_query(self, mock_db):
+        """The count never pulls the rows themselves"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = {'n': 7}
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        n = annotate_util.count_classification('tags_dave', 'favourite')
+
+        # ASSERT
+        expected = 'SELECT COUNT(*) AS n FROM annotations WHERE topic=%s AND classification=%s'
+        cursor.execute.assert_called_once_with(expected, ('tags_dave', 'favourite'))
+        self.assertEqual(n, 7)
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_no_rows_is_zero(self, mock_db):
+        """A topic that does not exist counts zero"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = None
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT / ASSERT
+        self.assertEqual(annotate_util.count_classification('tags_dave', 'hidden'), 0)
+
+
 class DeleteClassificationTest(unittest.TestCase):
     """Tests for clearing every row of one classification from a topic."""
 

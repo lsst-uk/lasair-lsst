@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../common')
 from src.topic_name import topic_name as topicName
-from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
+from .utils import add_filter_query_metadata, run_filter, count_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
 from src import date_nid, db_connect, manage_status
 from src.annotate_util import tag_topic
@@ -18,7 +18,7 @@ from django.views.decorators.csrf import csrf_exempt
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from .models import filter_query
 from .forms import filterQueryForm, UpdateFilterQueryForm, DuplicateFilterQueryForm
-from lasair.query_builder import check_query, build_query, build_query_for_filter
+from lasair.query_builder import check_query, build_query, build_query_for_filter, FAVOURITE_ONLY, HIDDEN_INCLUDE
 from django.conf import settings
 import json
 import re
@@ -225,10 +225,26 @@ def filter_query_detail(request, mq_id, action=False):
 
     is_owner = (request.user.is_authenticated) and (request.user.id == filterQuery.user.id)
     filterQuery.real_sql = build_query_for_filter(filterQuery, is_owner)
-    filterQuery.display_sql = \
-            'SELECT COLUMNS:\n' + filterQuery.selected + \
-            '\nFROM:\n'         + filterQuery.tables + \
-            '\nWHERE:\n'        + filterQuery.conditions
+    # THE ACCORDION SHOWS THE SQL THAT ACTUALLY RUNS. ECHOING tables VERBATIM WOULD
+    # PRINT 'favourite:only' AS IF IT WERE A TABLE AND WOULD HIDE A PREDICATE THAT
+    # CHANGES THE RESULT SET; IT IS ALSO THE ONE PLACE A NON-OWNER CAN READ THAT A
+    # PUBLIC FILTER IS RESTRICTED TO ITS OWNER'S FAVOURITES.
+    filterQuery.display_sql = sqlparse.format(
+        build_query_for_filter(filterQuery, is_owner),
+        reindent=True, keyword_case='upper', strip_comments=True)
+
+    # THE STANDING LINE, SHOWN ON EVERY FILTER PAGE RATHER THAN AS A ONE-OFF NOTICE:
+    # THE PERSON WHO NEEDS TO READ IT IS THE ONE WHO HIDES THEIR FIRST OBJECT LATER
+    hidden_note = ''
+    if is_owner:
+        if HIDDEN_INCLUDE in (filterQuery.tables or ''):
+            hidden_note = 'Including your hidden objects'
+        else:
+            hidden_note = 'Your hidden objects are excluded from these results'
+    favourite_note = ''
+    if FAVOURITE_ONLY in (filterQuery.tables or ''):
+        favourite_note = \
+            f"Restricted to {filterQuery.user.username}'s favourited objects."
 
     cursor.execute(f'SELECT name, selected, tables, conditions, real_sql FROM myqueries WHERE mq_id={mq_id}')
     for row in cursor:
@@ -245,6 +261,12 @@ def filter_query_detail(request, mq_id, action=False):
     table = {}
     schema = {}
 
+    # "SHOW ANYWAY" RE-RUNS THIS ONE PREVIEW WITHOUT THE EXCLUSION AND STORES NOTHING.
+    # A LINK THAT REWROTE THE SAVED DEFINITION WOULD CHANGE WHAT THE PIPELINE EMITS TO
+    # KAFKA AND TO THE DIGEST EVERY NIGHT; THE CHECKBOX IS THE DELIBERATE VERSION.
+    show_hidden_now = is_owner and request.GET.get('show_hidden') == '1'
+    hidden_omitted = 0
+
     if action == "run":
         table, schema, count, topic, error = run_filter(
             selected=filterQuery.selected,
@@ -255,9 +277,18 @@ def filter_query_detail(request, mq_id, action=False):
             mq_id=mq_id,
             query_name=filterQuery.name,
             owner_topic=tag_topic(filterQuery.user.username),
-            exclude_hidden=is_owner)
+            exclude_hidden=is_owner and not show_hidden_now)
         if error:
             messages.error(request, error)
+        elif (is_owner and not show_hidden_now and count is not None and count < limit
+                and HIDDEN_INCLUDE not in (filterQuery.tables or '')):
+            # ONE EXTRA COUNT, SO THE OWNER IS TOLD WHAT THE EXCLUSION REMOVED
+            countWithHidden = count_filter(
+                filterQuery.tables, filterQuery.conditions,
+                owner_topic=tag_topic(filterQuery.user.username),
+                exclude_hidden=False)
+            if countWithHidden is not None and countWithHidden > count:
+                hidden_omitted = countWithHidden - count
 
     if count and count == limit:
         if settings.DEBUG:
@@ -293,6 +324,10 @@ def filter_query_detail(request, mq_id, action=False):
         'filterQ': filterQuery,
         'table': table,
         'marks': marks_for_table(request.user, table),
+        'hidden_note': hidden_note,
+        'favourite_note': favourite_note,
+        'hidden_omitted': hidden_omitted,
+        'show_hidden_now': show_hidden_now,
         'count': count,
         "schema": schema,
         "form": form,
@@ -352,6 +387,8 @@ def filter_query_create(request, mq_id=False):
             watchlists = request.POST.get('watchlists')
             watchmaps = request.POST.getlist('watchmaps')
             annotators = request.POST.getlist('annotators')
+            favouritesOnly = bool(request.POST.get('favouritesOnly'))
+            includeHidden = bool(request.POST.get('includeHidden'))
             name = request.POST.get('name')
             description = request.POST.get('description')
             if request.POST.get('public'):
@@ -379,6 +416,8 @@ def filter_query_create(request, mq_id=False):
                 watchmaps = form.initial["watchmaps"]
             if "annotators" in form.initial:
                 annotators = form.initial["annotators"]
+            favouritesOnly = form.initial.get("favouritesOnly", False)
+            includeHidden = form.initial.get("includeHidden", False)
 
             name = form.fields['name'].widget.attrs['value']
             description = form.fields['description'].widget.attrs['value']
@@ -405,6 +444,10 @@ def filter_query_create(request, mq_id=False):
             for a in annotators:
                 tables = tables.replace(a + ",", "").replace(a, "")
             tables += f", annotator:{('&').join(annotators)}"
+        if favouritesOnly:
+            tables += f", {FAVOURITE_ONLY}"
+        if includeHidden:
+            tables += f", {HIDDEN_INCLUDE}"
 
         # RUN?
         if action and action.lower() == "run":

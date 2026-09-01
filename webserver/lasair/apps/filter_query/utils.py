@@ -59,6 +59,34 @@ def add_filter_query_metadata(
     return updatedFilterQueryLists
 
 
+def count_filter(tables, conditions, owner_topic=None, exclude_hidden=True):
+    """count the objects a filter matches, without fetching them
+
+    **Key Arguments:**
+
+        - `tables` -- the FROM expression
+        - `conditions` -- the WHERE expression
+        - `owner_topic` -- the tag topic of the filter's owner
+        - `exclude_hidden` -- emit the hidden exclusion
+
+    **Return:**
+
+        - `count` -- the number of matching objects, or None if the count failed
+    """
+    sqlquery_real = build_query('count(*) AS n', tables, conditions,
+                                owner_topic=owner_topic, exclude_hidden=exclude_hidden)
+    sqlquery_real = 'SET STATEMENT max_statement_time=60 FOR %s' % sqlquery_real
+
+    msl = db_connect.readonly()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    try:
+        cursor.execute(sqlquery_real)
+    except Exception:
+        return None
+    row = cursor.fetchone()
+    return row['n'] if row else None
+
+
 def run_filter(
         selected,
         tables,

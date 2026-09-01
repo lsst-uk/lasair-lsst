@@ -95,6 +95,34 @@ class CheckQueryAnnotatorPermissionTest(unittest.TestCase):
         mock_remote.assert_not_called()
 
 
+class CheckQueryMarkFragmentsTest(unittest.TestCase):
+    """check_query must know the two mark fragments by name."""
+
+    @mock.patch('query_builder.db_connect.remote')
+    def test_the_mark_fragments_are_accepted(self, mock_remote):
+        """A filter carrying both fragments passes validation"""
+        # ACT
+        result = query_builder.check_query(
+            'diaObjectId', 'objects, favourite:only, hidden:include', '', user=3)
+
+        # ASSERT
+        self.assertIsNone(result)
+        mock_remote.assert_not_called()
+
+    @mock.patch('query_builder.db_connect.remote')
+    def test_a_misspelled_mark_fragment_is_rejected(self, mock_remote):
+        """An unrecognised favourites fragment would otherwise be silently ignored"""
+        with self.assertRaises(query_builder.QueryBuilderError):
+            query_builder.check_query(
+                'diaObjectId', 'objects, favourite:all', '', user=3)
+
+    @mock.patch('query_builder.db_connect.remote')
+    def test_a_misspelled_hidden_fragment_is_rejected(self, mock_remote):
+        with self.assertRaises(query_builder.QueryBuilderError):
+            query_builder.check_query(
+                'diaObjectId', 'objects, hidden:yes', '', user=3)
+
+
 class BuildQueryMarkPredicatesTest(unittest.TestCase):
     """Tests for the hidden exclusion and the favourites restriction."""
 

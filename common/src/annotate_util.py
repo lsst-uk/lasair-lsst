@@ -359,3 +359,33 @@ def delete_classification(topic: str, classification: str, verbose: bool = False
     msl.commit()
     msl.close()
     return removed
+
+
+def count_classification(topic: str, classification: str, verbose: bool = False) -> int:
+    """Count the annotations one topic holds with a given classification.
+
+    Args:
+        topic: the topic to count within
+        classification: the classification to count
+        verbose: print the SQL query on stdout
+
+    Raises:
+        mysql.connector.errors.Error: database error
+
+    Returns:
+        The number of rows
+
+    **Usage:**
+
+        n = annotate_util.count_classification('tags_dave', 'favourite')
+    """
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+
+    query = 'SELECT COUNT(*) AS n FROM annotations WHERE topic=%s AND classification=%s'
+    params = (topic, classification)
+    if verbose: print(query, params)
+    cursor.execute(query, params)
+    row = cursor.fetchone()
+    msl.close()
+    return row['n'] if row else 0

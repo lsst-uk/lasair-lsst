@@ -78,12 +78,33 @@
                         <div class="d-flex justify-content-around">
 
                             <div class="form-group mb-4">
-                                <label for="annotators">Object Annotators {% include "includes/info_tooltip.html" with info="Include value-added annotations within your filter results. By selecting an annotator, objects returned are constrained to those tagged by the annotator. Not all annotators tag every object." position="auto" %}</label>
+                                <label for="annotators">Object Annotators {% include "includes/info_tooltip.html" with info="Include value-added annotations within your filter results. By selecting an annotator, objects returned are constrained to those tagged by the annotator. Not all annotators tag every object. Favouriting and hiding an object do not trigger annotation-run filters, because they are written straight to the database rather than through Kafka." position="auto" %}</label>
                                 <div class="input-group">
                                     {{ form.annotators|add_class:"form-select multi-select" }}
                                 </div>
                                 <span class="text-error">{{ form.annotators.errors }}</span>
                             </div>
+                        </div>
+
+                        {% comment %}
+                        My Objects sits in the FROM block, under Object Annotators: these
+                        two boxes constrain which objects come back, which is what this
+                        block does. They are not scheduling controls, so they do not sit
+                        beside runOnAlert and runOnAnnotation.
+                        {% endcomment %}
+                        <div class="form-group mb-4">
+                            <label>My Objects {% include "includes/info_tooltip.html" with info="Restrict this filter to the objects you have favourited, or stop your hidden objects being left out of its results. Favouriting and hiding do not trigger annotation-run filters." position="auto" %}</label>
+                            <div class="form-check">
+                                {{ form.favouritesOnly }}
+                                <label class="form-check-label" for="{{ form.favouritesOnly.id_for_label }}"{% if not user.is_authenticated %} title="Sign in to filter on your favourite objects"{% endif %}>Only my favourites</label>
+                            </div>
+                            <div class="form-check">
+                                {{ form.includeHidden }}
+                                <label class="form-check-label" for="{{ form.includeHidden.id_for_label }}"{% if not user.is_authenticated %} title="Sign in to filter on your hidden objects"{% endif %}>Include hidden objects</label>
+                            </div>
+                            {% if not user.is_authenticated %}
+                                <small class="form-text text-muted d-block">Sign in to use your favourite and hidden objects here.</small>
+                            {% endif %}
                         </div>
 
 

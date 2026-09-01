@@ -1,4 +1,5 @@
 from django import forms
+from django.contrib import messages
 from .models import filter_query
 from crispy_forms.helper import FormHelper
 from src import db_connect
@@ -6,8 +7,8 @@ from lasair.apps.annotator.models import Annotators
 from lasair.apps.watchmap.models import Watchmap
 from lasair.apps.watchlist.models import Watchlist
 from django.db.models import Q
-from lasair.query_builder import check_query, build_query
-from src.annotate_util import tag_topic
+from lasair.query_builder import check_query, build_query, FAVOURITE_ONLY, HIDDEN_INCLUDE
+from src.annotate_util import tag_topic, count_classification, MARK_FAVOURITE
 from .utils import check_query_zero_limit
 import re
 
@@ -51,6 +52,10 @@ class filterQueryForm(forms.ModelForm):
     watchlists = forms.ChoiceField(widget=forms.Select)
     watchmaps = forms.MultipleChoiceField(widget=forms.SelectMultiple)
     annotators = forms.MultipleChoiceField(widget=forms.SelectMultiple)
+    favouritesOnly = forms.BooleanField(widget=forms.CheckboxInput(), required=False,
+                                        label='Only my favourites')
+    includeHidden = forms.BooleanField(widget=forms.CheckboxInput(), required=False,
+                                       label='Include hidden objects')
 
     def __init__(self, *args, **kwargs):
         self.request = kwargs.pop('request', None)
@@ -69,7 +74,8 @@ class filterQueryForm(forms.ModelForm):
                             self.initial[i] = True
                         else:
                             self.initial[i] = False
-                    elif i not in ["watchlists", "watchmaps", "annotators"]:
+                    elif i not in ["watchlists", "watchmaps", "annotators",
+                                   "favouritesOnly", "includeHidden"]:
                         self.fields[i].widget.attrs['value'] = self.instance.__dict__[i]
 
                 # PARSE WATCHLISTS, WATCHMAPS, ANNOTATORS
@@ -93,6 +99,10 @@ class filterQueryForm(forms.ModelForm):
                         self.initial["annotators"] = currentAnnotators
                     except:
                         pass
+
+                # THE TWO MARK FRAGMENTS ARE READ BACK THE SAME WAY AS THE OTHERS
+                self.initial["favouritesOnly"] = FAVOURITE_ONLY in self.instance.tables
+                self.initial["includeHidden"] = HIDDEN_INCLUDE in self.instance.tables
 
         if self.request.user.is_authenticated:
             email = self.request.user.email
@@ -137,6 +147,12 @@ class filterQueryForm(forms.ModelForm):
 
         self.fields['conditions'].required = False
         self.fields['conditions'].widget.required = False
+
+        if not self.request.user.is_authenticated:
+            for markField in ['favouritesOnly', 'includeHidden']:
+                self.fields[markField].disabled = True
+                self.fields[markField].widget.attrs['title'] = \
+                    'Sign in to filter on your favourite and hidden objects'
 
         initialize_instance_fields(self, set_defaults=False, add_run_checkboxes=True)
 
@@ -203,6 +219,24 @@ class filterQueryForm(forms.ModelForm):
                 for a in annotators:
                     tables = tables.replace(a + ",", "").replace(a, "")
                 tables += f", annotator:{('&').join(annotators)}"
+
+            favouritesOnly = self.cleaned_data.get('favouritesOnly')
+            includeHidden = self.cleaned_data.get('includeHidden')
+            if favouritesOnly:
+                tables += f", {FAVOURITE_ONLY}"
+            if includeHidden:
+                tables += f", {HIDDEN_INCLUDE}"
+
+            # BUILDING THE FILTER BEFORE CURATING THE SET IS A LEGITIMATE ORDER OF WORK,
+            # SO THIS WARNS AND DOES NOT BLOCK. SILENCE WOULD LEAVE A KAFKA OR DIGEST
+            # FILTER LOOKING BROKEN RATHER THAN EMPTY.
+            if favouritesOnly and self.request and self.request.user.is_authenticated:
+                topic = tag_topic(self.request.user.username)
+                if count_classification(topic, MARK_FAVOURITE) == 0:
+                    messages.warning(
+                        self.request,
+                        'You have not favourited any objects, so this filter will '
+                        'match nothing until you do.')
 
             e = check_query(selected, tables, conditions)
             if e:

@@ -24,6 +24,22 @@
 	{% include "includes/widgets/widget_filter_query_header.html" with display_sql=filterQ.display_sql %}
                 </div>
 
+                {% if hidden_note or favourite_note or hidden_omitted %}
+                    <div class="col-12 mb-2">
+                        <small class="text-gray-500 d-block">
+                            {% if favourite_note %}{{ favourite_note }} {% endif %}
+                            {% if hidden_note %}{{ hidden_note }}.{% endif %}
+                            {% if hidden_omitted %}
+                                {{ hidden_omitted }} hidden object{{ hidden_omitted|pluralize }} omitted —
+                                <a href="?show_hidden=1">show anyway</a> (this run only, nothing is saved).
+                            {% endif %}
+                            {% if show_hidden_now %}
+                                Showing your hidden objects for this run only; the filter is unchanged.
+                            {% endif %}
+                        </small>
+                    </div>
+                {% endif %}
+
                 <div class="col-12 mb-4">
                     
    

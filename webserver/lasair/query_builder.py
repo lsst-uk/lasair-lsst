@@ -27,6 +27,8 @@ from src import db_connect
 import settings
 import sys
 sys.path.append('../../../common')
+FAVOURITE_ONLY = 'favourite:only'   # restrict a filter to the owner's favourites
+HIDDEN_INCLUDE = 'hidden:include'   # show the owner's hidden objects rather than excluding them
 max_execution_time = 300000  # maximum execution time in milliseconds
 max_query_rows = 1000    # default LIMIT if none specified
 
@@ -153,6 +155,16 @@ def check_query(select_expression, from_expression, where_condition, user=None):
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn or watchmap:nnn' % table)
 
+        # A MISSPELLED MARK FRAGMENT WOULD OTHERWISE PASS AND BE SILENTLY IGNORED,
+        # LEAVING THE CALLER BELIEVING A RESTRICTION WAS APPLIED
+        if table.startswith('favourite:') and table != FAVOURITE_ONLY:
+            raise QueryBuilderError(
+                'Error in FROM list, %s is not a fragment; did you mean %s?' % (table, FAVOURITE_ONLY))
+
+        if table.startswith('hidden:') and table != HIDDEN_INCLUDE:
+            raise QueryBuilderError(
+                'Error in FROM list, %s is not a fragment; did you mean %s?' % (table, HIDDEN_INCLUDE))
+
         # THE WEB BUILDER EMITS SEVERAL TOPICS AS annotator:a&b, THE API ONE PER FRAGMENT
         if table.startswith('annotator:'):
             w = table.split(':')
@@ -200,10 +212,6 @@ def check_query(select_expression, from_expression, where_condition, user=None):
 
 def sanitise(expression):
     return expression.replace("'", '"')
-
-
-FAVOURITE_ONLY = 'favourite:only'
-HIDDEN_INCLUDE = 'hidden:include'
 
 
 def mark_predicate(owner_topic, classification, negated=False):
