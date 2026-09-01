@@ -61,6 +61,20 @@
 
 
 
+                {% if user.is_authenticated %}
+                    <li class="nav-item {% if 'favourites' in request.path %} active {% endif %}">
+                        <a class="nav-link" href="{% url 'favourites' %}">
+                            <span class="sidebar-icon">
+                                <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>
+                                </svg>
+                            </span>
+                            <span class="sidebar-text">Favourites</span>
+                            {% include "includes/info_tooltip.html" with info="The objects you have starred. Only you can see them." position="auto" %}
+                        </a>
+                    </li>
+                {% endif %}
+
                 <li class="nav-item {% if 'filters' in request.path %} active {% endif %}">
                     <a class="nav-link" href="{% url 'filter_query_index' %}">
                         <span class="sidebar-icon">

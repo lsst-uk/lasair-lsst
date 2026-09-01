@@ -304,6 +304,32 @@ class MarksForObjectsTest(unittest.TestCase):
         mock_db.assert_not_called()
 
 
+class DeleteClassificationTest(unittest.TestCase):
+    """Tests for clearing every row of one classification from a topic."""
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_deletes_every_row_of_the_classification(self, mock_db):
+        """Unhide all is one parameterised DELETE"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.rowcount = 4
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        removed = annotate_util.delete_classification('tags_dave', 'hidden')
+
+        # ASSERT
+        expected = 'DELETE FROM annotations WHERE topic=%s AND classification=%s'
+        cursor.execute.assert_called_once_with(expected, ('tags_dave', 'hidden'))
+        self.assertEqual(removed, 4)
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_refuses_a_classification_that_is_not_a_mark(self, mock_db):
+        """Only the marks may be cleared wholesale from a topic"""
+        with self.assertRaises(annotate_util.AnnotationError):
+            annotate_util.delete_classification('tags_dave', 'follow-up')
+
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')

@@ -321,3 +321,41 @@ def marks_for_objects(topic: str, diaObjectIds: list, verbose: bool = False) -> 
         marks[row['diaObjectId']] = row['classification']
     msl.close()
     return marks
+
+
+def delete_classification(topic: str, classification: str, verbose: bool = False) -> int:
+    """Delete every row of one mark from a tag topic.
+
+    This is the Hidden page's "Unhide all". Only a mark may be cleared
+    wholesale, so a stray call cannot empty a user's hand-written tags.
+
+    Args:
+        topic: the tag topic to clear, `tags_<username>`
+        classification: `favourite` or `hidden`
+        verbose: print the SQL query on stdout
+
+    Raises:
+        AnnotationError: `classification` is not a mark
+        mysql.connector.errors.Error: database error
+
+    Returns:
+        The number of rows deleted
+
+    **Usage:**
+
+        removed = annotate_util.delete_classification('tags_dave', 'hidden')
+    """
+    if classification not in MARKS:
+        raise AnnotationError("Not a mark: %s" % classification)
+
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+
+    query = 'DELETE FROM annotations WHERE topic=%s AND classification=%s'
+    params = (topic, classification)
+    if verbose: print(query, params)
+    cursor.execute(query, params)
+    removed = cursor.rowcount
+    msl.commit()
+    msl.close()
+    return removed

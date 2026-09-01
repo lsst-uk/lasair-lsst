@@ -8,15 +8,30 @@ import json
 import logging
 import sys
 
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
+from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from src import annotate_util
+from lasair.apps.db_schema.utils import get_schema_dict
+from src import annotate_util, db_connect
 
 sys.path.append('../common')
 
 log = logging.getLogger(__name__)
+
+RESULT_CAP = 1000
+
+FAVOURITES_ZEROTEXT = (
+    'You have not favourited any objects yet. '
+    'Click the star on any object page to add it here.')
+
+HIDDEN_ZEROTEXT = (
+    'You have not hidden any objects. Hiding an object removes it from your own '
+    'filter results and email digests, but leaves it visible to everyone else. '
+    'Click the archive icon on an object page to hide one.')
 
 
 @require_POST
@@ -65,3 +80,173 @@ def object_mark(request, diaObjectId):
         return JsonResponse({'detail': 'Could not save the mark'}, status=500)
 
     return JsonResponse({'diaObjectId': diaObjectId, 'mark': mark})
+
+
+def marked_objects(topic, classification):
+    """*fetch the objects one user has marked, most recently marked first*
+
+    **Key Arguments:**
+
+    - `topic` -- the user's tag topic, `tags_<username>`
+    - `classification` -- `favourite` or `hidden`
+
+    **Return:**
+
+    - `table` -- a list of rows for the object list widget
+
+    **Usage:**
+
+    ```python
+    table = marked_objects('tags_dave', 'favourite')
+    ```
+    """
+    dateColumn = 'favourited' if classification == annotate_util.MARK_FAVOURITE else 'hidden since'
+
+    msl = db_connect.readonly()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    query = 'SELECT o.diaObjectId, o.ra, o.decl, '
+    query += 'FORMAT(mjdnow()-o.lastDiaSourceMjdTai,1) AS "days since", '
+    query += 'o.latest_psfFlux AS "latest flux", '
+    query += 's.classification AS "predicted type", '
+    query += 'a.timestamp AS "' + dateColumn + '" '
+    query += 'FROM annotations AS a '
+    query += 'JOIN objects AS o ON o.diaObjectId = a.diaObjectId '
+    query += 'LEFT JOIN sherlock_classifications AS s ON s.diaObjectId = a.diaObjectId '
+    query += 'WHERE a.topic = %s AND a.classification = %s '
+    # EXPLICIT, BECAUSE THE DATATABLE ONLY AUTO-SORTS objectId AND Created COLUMNS
+    query += 'ORDER BY a.timestamp DESC '
+    query += 'LIMIT %s'
+    cursor.execute(query, (topic, classification, RESULT_CAP))
+    table = cursor.fetchall()
+    msl.close()
+    return table
+
+
+def mark_list(request, classification, header, desc, zerotext, export_name, mode):
+    """*render one page of the objects a user has marked*
+
+    **Key Arguments:**
+
+    - `request` -- the original request
+    - `classification` -- `favourite` or `hidden`
+    - `header` -- the page heading
+    - `desc` -- the line under the heading
+    - `zerotext` -- the empty state
+    - `export_name` -- the file name for the export dropdown
+    - `mode` -- `favourites` or `hidden`, which the template branches on
+
+    **Return:**
+
+    - `response` -- the rendered page
+    """
+    topic = annotate_util.tag_topic(request.user.username)
+    table = marked_objects(topic, classification)
+
+    count = len(table)
+    if count == RESULT_CAP:
+        messages.info(
+            request,
+            f'We are only displaying the first <b>{RESULT_CAP}</b> objects.')
+
+    marks = {row['diaObjectId']: classification for row in table}
+
+    schema = get_schema_dict('objects')
+    if count:
+        for k in table[0].keys():
+            if k not in schema:
+                schema[k] = 'custom column'
+
+    return render(request, 'favourites/object_list.html', {
+        'table': table,
+        'count': count,
+        'schema': schema,
+        'marks': marks,
+        'header': header,
+        'desc': desc,
+        'zerotext': zerotext,
+        'export_name': export_name,
+        'mode': mode,
+    })
+
+
+@login_required
+def favourites_list(request):
+    """*display the objects the signed-in user has favourited*
+
+    **Usage:**
+
+    ```python
+    urlpatterns = [
+        ...
+        path('favourites/', views.favourites_list, name='favourites'),
+        ...
+    ]
+    ```
+    """
+    return mark_list(
+        request,
+        classification=annotate_util.MARK_FAVOURITE,
+        header='Favourites',
+        desc='The objects you have favourited, most recently favourited first.',
+        zerotext=FAVOURITES_ZEROTEXT,
+        export_name='favourites',
+        mode='favourites')
+
+
+@login_required
+def hidden_list(request):
+    """*display the objects the signed-in user has hidden*
+
+    **Usage:**
+
+    ```python
+    urlpatterns = [
+        ...
+        path('hidden/', views.hidden_list, name='hidden_objects'),
+        ...
+    ]
+    ```
+    """
+    return mark_list(
+        request,
+        classification=annotate_util.MARK_HIDDEN,
+        header='Hidden Objects',
+        desc=('The objects you have hidden. They are left out of your own filter '
+              'results, search results and email digests, and stay visible to '
+              'everybody else.'),
+        zerotext=HIDDEN_ZEROTEXT,
+        export_name='hidden-objects',
+        mode='hidden')
+
+
+@login_required
+@require_POST
+def unhide_all(request):
+    """*clear every hidden mark the signed-in user holds*
+
+    The escape hatch for a user who has hidden things and cannot find them.
+    There is no favourites equivalent.
+
+    **Usage:**
+
+    ```python
+    urlpatterns = [
+        ...
+        path('hidden/unhide-all/', views.unhide_all, name='unhide_all'),
+        ...
+    ]
+    ```
+    """
+    topic = annotate_util.tag_topic(request.user.username)
+    try:
+        removed = annotate_util.delete_classification(topic, annotate_util.MARK_HIDDEN)
+    except Exception as e:
+        log.error('Could not unhide all for %s: %s', request.user.username, e)
+        messages.error(request, 'Your hidden objects could not be cleared.')
+        return redirect('hidden_objects')
+
+    if removed:
+        messages.success(request, f'{removed} objects are no longer hidden.')
+    else:
+        messages.info(request, 'You had no hidden objects to clear.')
+    return redirect('hidden_objects')
