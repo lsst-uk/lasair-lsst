@@ -16,6 +16,7 @@ from astropy.time import Time
 from lasair.utils import mjd_now, ecliptic_and_galactic, rasex, decsex, objjson
 from .utils import object_difference_lightcurve
 sys.path.append('../common')
+from src import annotate_util
 
 
 def object_detail(request, diaObjectId):
@@ -50,6 +51,16 @@ def object_detail(request, diaObjectId):
     if not data:
         return render(request, 'error.html',
                       {'message': 'Object %s not in database' % diaObjectId})
+
+    # THE MARK COSTS NO EXTRA QUERY: THE VIEWER'S OWN TAG ROWS ARE ALREADY HERE
+    data['myMark'] = None
+    if request.user.is_authenticated:
+        myTopic = annotate_util.tag_topic(request.user.username)
+        for annotation in data['annotations']:
+            if annotation['topic'] == myTopic and annotation['classification'] in annotate_util.MARKS:
+                data['myMark'] = annotation['classification']
+                if data['myMark'] == annotate_util.MARK_FAVOURITE:
+                    break
 
     if 'sherlock' in data and 'classification' in data['sherlock']:
         data['sherlock']['classification_expanded'] = data['sherlock']['classification']

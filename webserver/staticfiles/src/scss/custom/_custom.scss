@@ -324,3 +324,88 @@ td > .text-action:not(.btn) {
         cursor: pointer;
     }
 }
+
+
+// FAVOURITE AND HIDDEN MARK CONTROLS
+
+.mark-btn {
+    background: none;
+    border: 1px solid transparent;
+    border-radius: .35rem;
+    padding: .25rem;
+    line-height: 0;
+    color: #66799e;
+
+    .mark-icon {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    // OFF: THE OUTLINE PATH ONLY. ON: THE SOLID PATH ONLY.
+    .mark-icon-solid {
+        display: none;
+    }
+
+    &.is-on {
+        .mark-icon-outline {
+            display: none;
+        }
+
+        .mark-icon-solid {
+            display: inline;
+        }
+    }
+
+    &.mark-btn-favourite.is-on {
+        color: #f5b759;
+    }
+
+    &.mark-btn-hidden.is-on {
+        color: #66799e;
+    }
+
+    &:hover:not(:disabled) {
+        border-color: #d1d7e0;
+    }
+
+    &.mark-btn-signedout {
+        color: #b7c3d2;
+        cursor: pointer;
+    }
+
+    &.is-in-flight {
+        opacity: .45;
+        cursor: progress;
+        animation: mark-pulse 1.2s ease-in-out infinite;
+    }
+}
+
+.mark-shake {
+    animation: mark-shake 350ms ease-in-out;
+}
+
+.mark-col {
+    width: 4.5rem;
+    white-space: nowrap;
+}
+
+.row-struck td {
+    text-decoration: line-through;
+    color: #93a5be;
+}
+
+.row-struck .mark-col-cell {
+    text-decoration: none;
+}
+
+@keyframes mark-pulse {
+    0%   { opacity: .45; }
+    50%  { opacity: .8; }
+    100% { opacity: .45; }
+}
+
+@keyframes mark-shake {
+    0%, 100% { transform: translateX(0); }
+    25%      { transform: translateX(-3px); }
+    75%      { transform: translateX(3px); }
+}

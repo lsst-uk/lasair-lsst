@@ -29,6 +29,9 @@
                 <span class="float-end me-2">
                     {% include "includes/go_deeper_button.html" with collapseId="collapseObject" %}
                 </span>
+                <span class="float-end me-2 mark-controls">
+                    {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=data.diaObjectId mark=data.myMark %}
+                </span>
             </div>
         </div>
         <div class="row  d-xl-flex mb-3 ms-sm-2">
