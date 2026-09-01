@@ -97,7 +97,12 @@
                 <tbody>
                     {% for object in table %}
 
-                        <tr>
+                        {% comment %}
+                        A row already showing a hidden object — because "Include hidden
+                        objects" is ticked, or because this is the Hidden page — is not
+                        leaving the table, so it is not struck through when clicked.
+                        {% endcomment %}
+                        <tr{% if marks|keyvalue:object.diaObjectId == 'hidden' %} data-shows-hidden="true"{% endif %}>
                             {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
                                 <td class="mark-col mark-col-cell mark-controls">
                                     {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=object.diaObjectId mark=marks|keyvalue:object.diaObjectId %}
