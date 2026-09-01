@@ -258,6 +258,70 @@ class MarkObjectTest(unittest.TestCase):
         mock_annotator.assert_called_once_with(mock_db.return_value, 'dave', 3)
 
 
+class MarkObjectsTest(unittest.TestCase):
+    """Tests for marking a list of objects in one transaction."""
+
+    def setUp(self):
+        self.user = MagicMock()
+        self.user.username = 'dave'
+        self.user.id = 3
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_marks_every_object_in_one_transaction(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """One connection, one commit, whatever the size of the list"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        msl = mock_db.return_value
+        msl.cursor.return_value = cursor
+
+        # ACT
+        results = annotate_util.mark_objects(self.user, [1, 2, 3], 'favourite')
+
+        # ASSERT
+        self.assertEqual([r['diaObjectId'] for r in results], [1, 2, 3])
+        self.assertEqual(mock_db.call_count, 1)
+        self.assertEqual(msl.commit.call_count, 1)
+        self.assertEqual(mock_insert.call_count, 3)
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_nothing_is_committed_when_one_write_fails(self, mock_db, mock_insert, mock_annotator):
+        """All or nothing: a failure part way through commits none of it"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        msl = mock_db.return_value
+        msl.cursor.return_value = cursor
+        mock_insert.side_effect = [None, Exception('database is down')]
+
+        # ACT / ASSERT
+        with self.assertRaises(Exception):
+            annotate_util.mark_objects(self.user, [1, 2], 'favourite')
+        msl.commit.assert_not_called()
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_reports_the_previous_mark_of_each_object(self, mock_db):
+        """A caller that batched a list can see how many marks it displaced"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        with mock.patch('annotate_util.make_tag_annotator.make_annotator'), \
+                mock.patch('annotate_util.insert_annotation_db'), \
+                mock.patch('annotate_util.delete_annotation'):
+            # ACT
+            results = annotate_util.mark_objects(self.user, [1], 'favourite')
+
+        # ASSERT
+        self.assertEqual(results[0]['previous'], 'hidden')
+
+
 class MarksForObjectsTest(unittest.TestCase):
     """Tests for the marks_for_objects helper."""
 

@@ -429,3 +429,50 @@ class AnnotateListSerializer(serializers.Serializer):
         # now actually put the annotations in the kafka
         annotate_util.insert_annotations_kafka(annotations)
         return {'status': 'success', 'n': len(annotations)}
+
+
+MARK_BULK_CAP = 1000
+
+
+class MarkSerializer(serializers.Serializer):
+    """Set the caller's mark on one object or on a list of them.
+
+    The body carries the desired end state, so `mark_object` keeps favourite
+    and hidden mutually exclusive and the caller never chains two requests.
+    Re-posting a mark the object already holds is a 200, not a 409: the caller
+    asked for an end state and the end state holds.
+    """
+    diaObjectId = serializers.IntegerField(required=False)
+    diaObjectIds = serializers.ListField(
+        child=serializers.IntegerField(), required=False, max_length=MARK_BULK_CAP)
+    mark = serializers.CharField(required=False, allow_null=True, allow_blank=False)
+
+    def validate(self, data):
+        if ('diaObjectId' in data) == ('diaObjectIds' in data):
+            raise ValidationError('Send either diaObjectId or diaObjectIds, not both')
+        mark = data.get('mark')
+        if mark is not None and mark not in annotate_util.MARKS:
+            raise ValidationError('Not a mark: %s' % mark)
+        return data
+
+    def save(self):
+        request = self.context.get("request")
+        user = request.user
+
+        # THE dummy TOKEN IS PUBLISHED ON THE /api PAGE, SO EVERY READER OF THE
+        # DOCUMENTATION WOULD OTHERWISE WRITE INTO ONE SHARED tags_dummy TOPIC.
+        # A SILENT NO-OP WAS REJECTED: A CALLER WOULD SEE SUCCESS AND NO EFFECT.
+        if user.username == 'dummy':
+            return {'error': 'The demonstration token is read-only. '
+                             'Get your own token to mark objects.'}
+
+        mark = self.validated_data.get('mark')
+        single = 'diaObjectId' in self.validated_data
+        diaObjectIds = ([self.validated_data['diaObjectId']] if single
+                        else self.validated_data['diaObjectIds'])
+
+        if len(diaObjectIds) > MARK_BULK_CAP:
+            return {'error': 'At most %d objects may be marked at once' % MARK_BULK_CAP}
+
+        results = annotate_util.mark_objects(user, diaObjectIds, mark)
+        return results[0] if single else results

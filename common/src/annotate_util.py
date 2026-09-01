@@ -244,40 +244,94 @@ def mark_object(user, diaObjectId: int, mark: str, verbose: bool = False):
 
         previous = annotate_util.mark_object(request.user, 123, 'favourite')
     """
+    return mark_objects(user, [diaObjectId], mark, verbose=verbose)[0]['previous']
+
+
+def mark_objects(user, diaObjectIds: list, mark: str, verbose: bool = False) -> list:
+    """Set a user's mark on several objects, all or nothing.
+
+    One connection and one commit however long the list, so a caller that
+    batched a set either marks all of it or none of it.
+
+    Args:
+        user: the marking user, carrying `username` and `id`
+        diaObjectIds: the objects being marked
+        mark: `'favourite'`, `'hidden'` or `None` to clear whichever is held
+        verbose: print the SQL queries on stdout
+
+    Raises:
+        AnnotationError: `mark` is not a mark
+        mysql.connector.errors.Error: database error
+
+    Returns:
+        A list of `{'diaObjectId', 'mark', 'previous'}`, in the order given
+
+    **Usage:**
+
+        results = annotate_util.mark_objects(request.user, [123, 456], 'hidden')
+    """
     if mark is not None and mark not in MARKS:
         raise AnnotationError("Not a mark: %s" % mark)
 
     topic = tag_topic(user.username)
 
     msl = db_connect.remote()
+    try:
+        # THE ANNOTATOR IS PROVISIONED LAZILY, ON THE WRITE PATH ONLY
+        make_tag_annotator.make_annotator(msl, user.username, user.id)
 
-    # THE ANNOTATOR IS PROVISIONED LAZILY, ON THE WRITE PATH ONLY
-    make_tag_annotator.make_annotator(msl, user.username, user.id)
+        results = []
+        for diaObjectId in diaObjectIds:
+            held = marks_held(msl, topic, diaObjectId, verbose=verbose)
 
+            # AN OBJECT CAN HOLD BOTH MARKS IF THEY WERE WRITTEN THROUGH /api/annotate/
+            previous = None
+            if mark in held:
+                previous = mark
+            elif held:
+                previous = held[0]
+
+            if mark:
+                insert_annotation_db(diaObjectId, topic, mark, msl=msl, verbose=verbose)
+            for classification in held:
+                if classification != mark:
+                    delete_annotation(diaObjectId, topic, classification,
+                                      msl=msl, verbose=verbose)
+
+            results.append({
+                'diaObjectId': diaObjectId,
+                'mark': mark,
+                'previous': previous,
+            })
+
+        msl.commit()
+    finally:
+        msl.close()
+    return results
+
+
+def marks_held(msl, topic: str, diaObjectId: int, verbose: bool = False) -> list:
+    """The marks one topic holds on one object, read on an open connection.
+
+    Args:
+        msl: an open connection to the main database
+        topic: the tag topic to read, `tags_<username>`
+        diaObjectId: the object to look up
+        verbose: print the SQL query on stdout
+
+    Raises:
+        mysql.connector.errors.Error: database error
+
+    Returns:
+        A list of the classifications held, empty when there are none
+    """
     cursor = msl.cursor(buffered=True, dictionary=True)
     query = 'SELECT classification FROM annotations '
     query += 'WHERE diaObjectId=%s AND topic=%s AND classification IN (%s, %s)'
     params = (diaObjectId, topic, MARK_FAVOURITE, MARK_HIDDEN)
     if verbose: print(query, params)
     cursor.execute(query, params)
-    held = [row['classification'] for row in cursor]
-
-    # AN OBJECT CAN HOLD BOTH MARKS IF THEY WERE WRITTEN THROUGH /api/annotate/
-    previous = None
-    if mark in held:
-        previous = mark
-    elif held:
-        previous = held[0]
-
-    if mark:
-        insert_annotation_db(diaObjectId, topic, mark, msl=msl, verbose=verbose)
-    for classification in held:
-        if classification != mark:
-            delete_annotation(diaObjectId, topic, classification, msl=msl, verbose=verbose)
-
-    msl.commit()
-    msl.close()
-    return previous
+    return [row['classification'] for row in cursor]
 
 
 def marks_for_objects(topic: str, diaObjectIds: list, verbose: bool = False) -> dict:
