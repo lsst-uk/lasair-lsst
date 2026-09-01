@@ -37,7 +37,9 @@ def object_detail(request, diaObjectId):
     ```           
     """
 #    data = objjson(diaObjectId, lite=True)
-    data = objjson(diaObjectId, lite=False)
+    # THE VIEWER DECIDES WHICH PRIVATE ANNOTATIONS COME BACK; ANONYMOUS SEES PUBLIC ONLY
+    viewer_id = request.user.id if request.user.is_authenticated else None
+    data = objjson(diaObjectId, lite=False, viewer_id=viewer_id)
 
     # how to replace the real data with fake data
 #    with open('/home/ubuntu/fake.json', 'r') as f:

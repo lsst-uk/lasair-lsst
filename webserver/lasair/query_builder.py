@@ -132,6 +132,7 @@ def check_query(select_expression, from_expression, where_condition, user=None):
         return None
     watchlist_id = None
     area_ids     = []
+    annotation_topics = []
     msl          = None
     # now check permissions for watchlists and watchmaps
     tables = from_expression.split(',')
@@ -151,6 +152,14 @@ def check_query(select_expression, from_expression, where_condition, user=None):
                 area_ids = w[1].split('&')
             except:
                 raise QueryBuilderError('Error in FROM list, %s not of the form area:nnn or watchmap:nnn' % table)
+
+        # THE WEB BUILDER EMITS SEVERAL TOPICS AS annotator:a&b, THE API ONE PER FRAGMENT
+        if table.startswith('annotator:'):
+            w = table.split(':')
+            try:
+                annotation_topics += w[1].split('&')
+            except:
+                raise QueryBuilderError('Error in FROM list, %s not of the form annotator:topic' % table)
 
     if watchlist_id:
         if not msl: 
@@ -172,6 +181,19 @@ def check_query(select_expression, from_expression, where_condition, user=None):
             for row in cursor:
                 if row['public'] == 0 and row['user'] != user:
                     raise QueryBuilderError(f'Error: you do not have permission to access watchmap {area_id}')
+
+    if len(annotation_topics) > 0:
+        if not msl:
+            msl = db_connect.remote()
+            cursor = msl.cursor(buffered=True, dictionary=True)
+        for topic in annotation_topics:
+            # PARAMETERISED: THE TOPIC IS A CALLER-SUPPLIED STRING FROM /api/query/
+            query = 'SELECT public, user FROM annotators WHERE topic = %s'
+            cursor.execute(query, (topic,))
+            for row in cursor:
+                if row['public'] == 0 and row['user'] != user:
+                    raise QueryBuilderError(
+                        f'Error: you do not have permission to access annotator {topic}')
 
     return None
 

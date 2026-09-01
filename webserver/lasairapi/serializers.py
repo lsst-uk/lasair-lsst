@@ -155,14 +155,18 @@ class ObjectSerializer(serializers.Serializer):
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
+        viewer_id = None
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
+            if request.user.is_authenticated:
+                viewer_id = request.user.id
 
         if lasair_added:
             try:
                 result = objjson(objectId, lite=lite, 
-                     reliabilityThreshold=reliabilityThreshold)
+                     reliabilityThreshold=reliabilityThreshold,
+                     viewer_id=viewer_id)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
@@ -396,7 +400,8 @@ class AnnotateListSerializer(serializers.Serializer):
 
         cursor = msl.cursor(dictionary=True)
         topic = annotations[0]['topic']
-        cursor.execute('SELECT * from annotators where topic="%s"' % topic)
+        # PARAMETERISED: topic IS CALLER-SUPPLIED AND THIS QUERY GATES OWNERSHIP
+        cursor.execute('SELECT * from annotators where topic=%s', (topic,))
         nrow = 0
         for row in cursor:
             nrow += 1

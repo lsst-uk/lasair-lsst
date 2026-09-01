@@ -83,23 +83,23 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
-    queryd = queryd % (diaObjectId,topic)
+    queryd = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+    paramsd = [diaObjectId, topic]
 
     # if its tags, we can have multiple per object/topic
     if topic.startswith('tags_'):
-        queryd += 'AND classification="%s"' % classification
+        queryd += ' AND classification=%s'
+        paramsd.append(classification)
 
     queryi = 'INSERT INTO annotations ('
     queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-    queryi += ') VALUES ('
-    queryi += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-    queryi = queryi % (diaObjectId, topic, version, classification, explanation, classdict, url)
+    queryi += ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
+    paramsi = (diaObjectId, topic, version, classification, explanation, classdict, url)
 
-    if verbose: print(queryd)
-    cursor.execute(queryd)
-    if verbose: print(queryi)
-    cursor.execute(queryi)
+    if verbose: print(queryd, paramsd)
+    cursor.execute(queryd, tuple(paramsd))
+    if verbose: print(queryi, paramsi)
+    cursor.execute(queryi, paramsi)
     msl.commit()
     msl.close()
 
@@ -117,17 +117,18 @@ def delete_annotation(diaObjectId: int, topic: str, classification: str = None, 
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    query = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
-    query = query % (diaObjectId, topic)
+    query = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+    params = [diaObjectId, topic]
 
     if topic.startswith('tags_'):
         if classification:
-            query += ' AND classification="%s"' % classification
+            query += ' AND classification=%s'
+            params.append(classification)
         else:
             raise AnnotationError("Cannot delete a tag without a classification")
-    
-    if verbose: print(query)
-    cursor.execute(query)
+
+    if verbose: print(query, params)
+    cursor.execute(query, tuple(params))
     msl.commit()
     msl.close()
 
@@ -148,10 +149,9 @@ def classifications_for_object(topic: str, diaObjectId: int, verbose: bool = Fal
     cursor = msl.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT classification FROM annotations '
-    query += 'WHERE topic="%s" AND diaObjectId=%d'
-    query = query % (topic, diaObjectId)
-    cursor.execute(query)
-    if verbose: print(query)
+    query += 'WHERE topic=%s AND diaObjectId=%s'
+    if verbose: print(query, (topic, diaObjectId))
+    cursor.execute(query, (topic, diaObjectId))
     taglist = []
     for row in cursor:
         taglist.append(row['classification'])
@@ -175,10 +175,9 @@ def objects_for_classification(topic: str, tag: str, verbose: bool = False) -> l
     cursor = msl.cursor(buffered=True, dictionary=True)
 
     query = 'SELECT diaObjectId FROM annotations '
-    query += 'WHERE topic="%s" AND classification="%s"'
-    query = query % (topic, tag)
-    cursor.execute(query)
-    if verbose: print(query)
+    query += 'WHERE topic=%s AND classification=%s'
+    if verbose: print(query, (topic, tag))
+    cursor.execute(query, (topic, tag))
     objlist = []
     for row in cursor:
         objlist.append(row['diaObjectId'])

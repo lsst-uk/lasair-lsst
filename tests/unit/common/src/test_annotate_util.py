@@ -28,44 +28,71 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('db_connect.remote')
     def test_insert_annotation_db(self, mock_db):
         """Test insert_annotation_db function"""
+        # ARRANGE
         mock_msl = MagicMock()
         mock_cursor = MagicMock()
         mock_db.return_value = mock_msl
         mock_msl.cursor.return_value = mock_cursor
 
-        expected_delete = (
-            'DELETE FROM annotations '
-            'WHERE diaObjectId=123 AND topic="test_topic"'
-        )
-        expected_insert = (
-            "INSERT INTO annotations ("
-            "diaObjectId, topic, version, classification, explanation, classdict, url"
-            ") VALUES ("
-            "'123', 'test_topic', 'v1', 'test_class', 'expl', '{}', 'test_url')"
-        )
+        # ACT
         annotate_util.insert_annotation_db(123, 'test_topic', 'test_class', 'v1', 'expl', '{}', 'test_url')
-        mock_cursor.execute.assert_any_call(expected_delete)
-        mock_cursor.execute.assert_any_call(expected_insert)
+
+        # ASSERT
+        expected_delete = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+        expected_insert = (
+            'INSERT INTO annotations ('
+            'diaObjectId, topic, version, classification, explanation, classdict, url'
+            ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        )
+        mock_cursor.execute.assert_any_call(expected_delete, (123, 'test_topic'))
+        mock_cursor.execute.assert_any_call(
+            expected_insert,
+            (123, 'test_topic', 'v1', 'test_class', 'expl', '{}', 'test_url'))
+
+    @mock.patch('db_connect.remote')
+    def test_insert_annotation_db_tags(self, mock_db):
+        """Test insert_annotation_db deletes only the matching tag on a tags topic"""
+        # ARRANGE
+        mock_msl = MagicMock()
+        mock_cursor = MagicMock()
+        mock_db.return_value = mock_msl
+        mock_msl.cursor.return_value = mock_cursor
+
+        # ACT
+        annotate_util.insert_annotation_db(123, 'tags_test_topic', 'test_class')
+
+        # ASSERT
+        expected_delete = (
+            'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s '
+            'AND classification=%s'
+        )
+        mock_cursor.execute.assert_any_call(
+            expected_delete, (123, 'tags_test_topic', 'test_class'))
 
     @mock.patch('db_connect.remote')
     def test_delete_annotation(self, mock_db):
         """Test delete_annotation function"""
-        """Test delete_annotation function for tags"""
+        # ACT
         annotate_util.delete_annotation(123, 'test_topic', 'test_class')
-        expected_delete = (
-            'DELETE FROM annotations WHERE diaObjectId=123 AND topic="test_topic"'
-            )
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_delete)
+
+        # ASSERT
+        expected_delete = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_delete, (123, 'test_topic'))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_tags(self, mock_db):
         """Test delete_annotation function for tags"""
+        # ACT
         annotate_util.delete_annotation(123, 'tags_test_topic', 'test_class')
+
+        # ASSERT
         expected_delete = (
-            'DELETE FROM annotations WHERE diaObjectId=123 AND topic="tags_test_topic" '
-            'AND classification="test_class"'
-            )
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_delete)
+            'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s '
+            'AND classification=%s'
+        )
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_delete, (123, 'tags_test_topic', 'test_class'))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_error(self, mock_db):
@@ -76,22 +103,30 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('annotate_util.db_connect.remote')
     def test_classifications_for_object(self, mock_db):
         """Test classifications_for_object function"""
+        # ACT
+        annotate_util.classifications_for_object('test_topic', 123)
+
+        # ASSERT
         expected_select = (
             'SELECT classification FROM annotations '
-            'WHERE topic="test_topic" AND diaObjectId=123'
+            'WHERE topic=%s AND diaObjectId=%s'
             )
-        annotate_util.classifications_for_object('test_topic', 123)
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_select)
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_select, ('test_topic', 123))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_objects_for_classification(self, mock_db):
         """Test objects_for_classification function"""
+        # ACT
+        annotate_util.objects_for_classification('test_topic', 'apple')
+
+        # ASSERT
         expected_select = (
             'SELECT diaObjectId FROM annotations '
-            'WHERE topic="test_topic" AND classification="apple"'
+            'WHERE topic=%s AND classification=%s'
             )
-        annotate_util.objects_for_classification('test_topic', 'apple')
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_select)
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_select, ('test_topic', 'apple'))
 
 
 if __name__ == '__main__':
