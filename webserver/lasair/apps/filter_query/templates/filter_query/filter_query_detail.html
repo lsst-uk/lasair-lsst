@@ -29,16 +29,16 @@
    
               {% if limit and limit != "False" %}
                     
-                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter, capped at "|add:limit|add:" objects."  sortTable=sortTable %}
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter, capped at "|add:limit|add:" objects."  sortTable=sortTable markable=True %}
           
                 {% elif 'run' in request.path %}
 
            
-                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results" sortTable=sortTable %}
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results" sortTable=sortTable markable=True %}
                     
                 {% else %}
                     
-                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Click on the run button above to execute your filter." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results"  sortTable=sortTable %}
+                        {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Click on the run button above to execute your filter." table=table header="Filter Results"  desc="A list of objects passing the '"|add:filterQ.name|add:"' filter."  export_name=filterQ.topic_name|add:"_filter_results"  sortTable=sortTable markable=True %}
                     
 
 

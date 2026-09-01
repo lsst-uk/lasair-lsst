@@ -10,6 +10,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
+from lasair.apps.favourites.utils import marks_for_table
 from django.shortcuts import render, get_object_or_404, redirect
 from datetime import timezone
 
@@ -323,6 +324,7 @@ c.wl_id={wl_id} limit 1000
     return render(request, 'watchlist/watchlist_detail.html', {
         'watchlist': watchlist,
         'table': table,
+        'marks': marks_for_table(request.user, table),
         'count': count,
         'schema': schema,
         'form': form,

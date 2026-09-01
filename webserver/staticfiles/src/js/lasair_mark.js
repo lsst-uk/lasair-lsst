@@ -133,9 +133,7 @@ function handleMarkClick(button) {
         if (wanted && previous && previous !== wanted) {
             lasairToast(MARK_DISPLACED_MESSAGE[wanted], 'info');
         }
-        if (typeof onMarkSaved === 'function') {
-            onMarkSaved(container, diaObjectId, wanted, previous);
-        }
+        reflectMarkInRow(container, wanted);
     }).catch(function(error) {
         renderMark(container, previous);
         setInFlight(container, false);
@@ -146,6 +144,47 @@ function handleMarkClick(button) {
             lasairToast(error.message + ' — nothing was changed.', 'error');
         }
     });
+}
+
+/*
+ * In a result table, the row you just hid is struck through in place with an
+ * undo link — never removed. The DataTable's row count, "showing X to Y of Z"
+ * line and pager all stay correct, and a mis-click does not make a row vanish
+ * under the cursor. Nothing is ever removed from the DOM by a mark click.
+ */
+function reflectMarkInRow(container, mark) {
+    var row = container.closest ? container.closest('tr') : null;
+    if (!row || !container.classList.contains('mark-col-cell')) {
+        return;
+    }
+
+    /* A row already showing hidden objects, because "Include hidden objects" is
+     * ticked, is not leaving the table and is not struck through. */
+    var strike = mark === 'hidden' && row.getAttribute('data-shows-hidden') !== 'true';
+    row.classList.toggle('row-struck', strike);
+
+    var undo = container.querySelector('.mark-undo');
+    if (!strike) {
+        if (undo) {
+            undo.remove();
+        }
+        return;
+    }
+    if (undo) {
+        return;
+    }
+    undo = document.createElement('a');
+    undo.href = '#';
+    undo.className = 'mark-undo ms-1 small';
+    undo.textContent = 'undo';
+    undo.addEventListener('click', function(event) {
+        event.preventDefault();
+        var button = container.querySelector('.mark-btn[data-mark="hidden"]');
+        if (button) {
+            handleMarkClick(button);
+        }
+    });
+    container.appendChild(undo);
 }
 
 /* One delegated listener per container, never one per button. */

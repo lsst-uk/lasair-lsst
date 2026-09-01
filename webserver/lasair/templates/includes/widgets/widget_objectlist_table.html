@@ -69,13 +69,23 @@
 
             <div class="table-responsive p-1 pt-0" id="objectlist-table">
 
+                {% comment %}
+                The mark column is opt-in per call site, and vanishes entirely when the
+                SELECT has no diaObjectId: with no id there is nothing to write an
+                annotation against, so a disabled column would be a promise the page
+                cannot keep. data-mark-col carries its index explicitly, because the
+                heading is deliberately empty and a user can alias a column to anything.
+                {% endcomment %}
 	        {% if sortTable is None or sortTable != False %}
-                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
+                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}>
                 {%else%}
-                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
+                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}>
                 {% endif %}
                 <thead class="thead-light">
                     <tr>
+                        {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
+                            <th class="mark-col"><span class="visually-hidden">Mark</span></th>
+                        {% endif %}
                         {% for key in table.0.keys %}
                             {% if key == "UTC" %}
                                 <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
@@ -88,6 +98,11 @@
                     {% for object in table %}
 
                         <tr>
+                            {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
+                                <td class="mark-col mark-col-cell mark-controls">
+                                    {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=object.diaObjectId mark=marks|keyvalue:object.diaObjectId %}
+                                </td>
+                            {% endif %}
                             {% for key in object.keys %}
 
                                 {% if key == "diaObjectId" %}

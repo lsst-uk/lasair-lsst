@@ -18,6 +18,7 @@ from django.http import HttpResponse, FileResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
+from lasair.apps.favourites.utils import marks_for_table
 from django.shortcuts import render, get_object_or_404, redirect
 from datetime import timezone
 from lasair.apps.db_schema.utils import get_schema_dict
@@ -243,6 +244,7 @@ limit {resultCap}
     return render(request, 'watchmap/watchmap_detail.html', {
         'watchmap': watchmap,
         'table': table,
+        'marks': marks_for_table(request.user, table),
         'count': count,
         'schema': schema,
         'form': form,

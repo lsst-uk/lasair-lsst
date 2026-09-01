@@ -1,3 +1,4 @@
+from lasair.apps.favourites.utils import marks_for_table
 from django.shortcuts import render
 from .utils import conesearch_impl, readcone, sexra, sexde
 import re
@@ -41,7 +42,9 @@ def search(
         if json_checked:
             return HttpResponse(json.dumps(results, indent=2), content_type="application/json")
         else:
-            return render(request, 'search/search.html', {'results': results, 'schema': schema, 'query': query})
+            return render(request, 'search/search.html', {
+                'results': results, 'schema': schema, 'query': query,
+                'marks': marks_for_table(request.user, results)})
     else:
         return render(request, 'search/search.html', {'results': [], 'schema': [], 'query': ''})
 

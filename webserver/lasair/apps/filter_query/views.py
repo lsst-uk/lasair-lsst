@@ -5,6 +5,7 @@ from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit
 import random
 from src import date_nid, db_connect, manage_status
 from src.annotate_util import tag_topic
+from lasair.apps.favourites.utils import marks_for_table
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -291,6 +292,7 @@ def filter_query_detail(request, mq_id, action=False):
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
+        'marks': marks_for_table(request.user, table),
         'count': count,
         "schema": schema,
         "form": form,
