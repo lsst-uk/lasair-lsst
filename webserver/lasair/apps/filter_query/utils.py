@@ -78,13 +78,16 @@ def count_filter(tables, conditions, owner_topic=None, exclude_hidden=True):
     sqlquery_real = 'SET STATEMENT max_statement_time=60 FOR %s' % sqlquery_real
 
     msl = db_connect.readonly()
-    cursor = msl.cursor(buffered=True, dictionary=True)
     try:
-        cursor.execute(sqlquery_real)
-    except Exception:
-        return None
-    row = cursor.fetchone()
-    return row['n'] if row else None
+        cursor = msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor.execute(sqlquery_real)
+        except Exception:
+            return None
+        row = cursor.fetchone()
+        return row['n'] if row else None
+    finally:
+        msl.close()
 
 
 def run_filter(

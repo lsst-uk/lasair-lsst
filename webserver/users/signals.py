@@ -30,9 +30,11 @@ def create_tag_annotator(sender, instance, created, **kwargs):
         return
     try:
         msl = db_connect.remote()
-        make_tag_annotator.make_annotator(msl, instance.username, instance.id)
-        msl.commit()
-        msl.close()
+        try:
+            make_tag_annotator.make_annotator(msl, instance.username, instance.id)
+            msl.commit()
+        finally:
+            msl.close()
     except Exception as e:
         log.error('Could not make the tags annotator for %s: %s', instance.username, e)
 

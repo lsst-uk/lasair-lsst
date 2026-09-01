@@ -1,9 +1,8 @@
 """Helpers for showing a user's marks beside a table of objects."""
 import sys
+sys.path.append('../common')
 
 from src import annotate_util
-
-sys.path.append('../common')
 
 
 def marks_for_table(user, table):
@@ -37,3 +36,35 @@ def marks_for_table(user, table):
         return {}
 
     return annotate_util.marks_for_objects(annotate_util.tag_topic(user.username), diaObjectIds)
+
+
+def suppress_hidden(user, table):
+    """*remove a user's hidden objects from a table of results*
+
+    Used where the result set is not built by `build_query`, so the SQL
+    exclusion cannot apply — the search page is the one such surface.
+
+    **Key Arguments:**
+
+    - `user` -- the viewer, marked or anonymous
+    - `table` -- the rows about to be rendered
+
+    **Return:**
+
+    - `kept` -- the rows to show
+    - `marks` -- the marks held over those rows
+    - `omitted` -- how many rows were removed
+
+    **Usage:**
+
+    ```python
+    results, marks, omitted = suppress_hidden(request.user, results)
+    ```
+    """
+    marks = marks_for_table(user, table)
+    if not marks:
+        return table, marks, 0
+
+    kept = [row for row in table
+            if marks.get(row.get('diaObjectId')) != annotate_util.MARK_HIDDEN]
+    return kept, marks, len(table) - len(kept)

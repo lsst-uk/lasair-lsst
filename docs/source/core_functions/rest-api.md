@@ -247,3 +247,5 @@ There is no read method for marks. List your favourites with [query](#query), us
 #### Where hiding does not reach
 
 Hiding suppresses objects from your own web results, API query results and daily digest emails. It does **not** filter a filter's public Kafka topic: alert-triggered filters run on the filter nodes, which have no access to your marks, so a consumer reading that topic directly still receives your hidden objects, and they still count against the filter's byte quota.
+
+The same gap works the other way for favourites. A filter that runs on new alerts and is restricted with `favourite:only` matches **nothing** on the filter nodes, because the favourites test cannot be true against a database that holds no marks. `favourite:only` works when you run the filter from the website or through [query](#query), and on filters that run on updated annotations, which are processed against the main database.

@@ -235,14 +235,15 @@ def filter_query_detail(request, mq_id, action=False):
 
     # THE STANDING LINE, SHOWN ON EVERY FILTER PAGE RATHER THAN AS A ONE-OFF NOTICE:
     # THE PERSON WHO NEEDS TO READ IT IS THE ONE WHO HIDES THEIR FIRST OBJECT LATER
+    tables_lower = (filterQuery.tables or '').lower()
     hidden_note = ''
     if is_owner:
-        if HIDDEN_INCLUDE in (filterQuery.tables or ''):
+        if HIDDEN_INCLUDE in tables_lower:
             hidden_note = 'Including your hidden objects'
         else:
             hidden_note = 'Your hidden objects are excluded from these results'
     favourite_note = ''
-    if FAVOURITE_ONLY in (filterQuery.tables or ''):
+    if FAVOURITE_ONLY in tables_lower:
         favourite_note = \
             f"Restricted to {filterQuery.user.username}'s favourited objects."
 
@@ -281,7 +282,7 @@ def filter_query_detail(request, mq_id, action=False):
         if error:
             messages.error(request, error)
         elif (is_owner and not show_hidden_now and count is not None and count < limit
-                and HIDDEN_INCLUDE not in (filterQuery.tables or '')):
+                and HIDDEN_INCLUDE not in tables_lower):
             # ONE EXTRA COUNT, SO THE OWNER IS TOLD WHAT THE EXCLUSION REMOVED
             countWithHidden = count_filter(
                 filterQuery.tables, filterQuery.conditions,

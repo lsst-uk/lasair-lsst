@@ -85,6 +85,23 @@ class CheckQueryAnnotatorPermissionTest(unittest.TestCase):
         self.assertEqual(topics, ['sherlock', 'tags_bob'])
 
     @mock.patch('query_builder.db_connect.remote')
+    def test_an_annotator_prefix_without_a_colon_is_still_checked(self, mock_remote):
+        """build_query joins on any token starting 'annotator', so the check must too"""
+        # ARRANGE
+        msl, cursor = cursor_returning([{'public': 0, 'user': 7}])
+        mock_remote.return_value = msl
+
+        # ACT / ASSERT
+        with self.assertRaises(query_builder.QueryBuilderError):
+            query_builder.check_query(
+                'diaObjectId', 'objects, annotators:tags_bob', '', user=3)
+
+    def test_build_query_refuses_a_malformed_annotator_fragment(self):
+        """A fragment the permission check cannot parse must not build a join"""
+        with self.assertRaises(query_builder.QueryBuilderError):
+            query_builder.build_query('diaObjectId', 'objects, annotatortags_bob', '')
+
+    @mock.patch('query_builder.db_connect.remote')
     def test_no_database_call_without_a_user(self, mock_remote):
         """An anonymous check returns before any permission query"""
         # ACT

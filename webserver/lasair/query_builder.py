@@ -165,13 +165,9 @@ def check_query(select_expression, from_expression, where_condition, user=None):
             raise QueryBuilderError(
                 'Error in FROM list, %s is not a fragment; did you mean %s?' % (table, HIDDEN_INCLUDE))
 
-        # THE WEB BUILDER EMITS SEVERAL TOPICS AS annotator:a&b, THE API ONE PER FRAGMENT
-        if table.startswith('annotator:'):
-            w = table.split(':')
-            try:
-                annotation_topics += w[1].split('&')
-            except:
-                raise QueryBuilderError('Error in FROM list, %s not of the form annotator:topic' % table)
+        topics = annotator_topics(table)
+        if topics:
+            annotation_topics += topics
 
     if watchlist_id:
         if not msl: 
@@ -214,6 +210,25 @@ def sanitise(expression):
     return expression.replace("'", '"')
 
 
+def annotator_topics(table):
+    """ The annotator topics named by one FROM token, or None if it names none.
+
+    check_query and build_query must agree exactly on which tokens name an
+    annotator: a token that builds a join but is not recognised by the
+    permission check is a way to read another user's private tags.
+
+    The web builder emits several topics as annotator:a&b; the API sends one
+    fragment each.
+    """
+    if not table.startswith('annotator'):
+        return None
+    w = table.split(':')
+    if len(w) != 2 or w[0] != 'annotator' or not w[1]:
+        raise QueryBuilderError(
+            'Error in FROM list, %s not of the form annotator:topic' % table)
+    return w[1].split('&')
+
+
 def mark_predicate(owner_topic, classification, negated=False):
     """ Build the correlated subquery that tests one of a user's marks.
 
@@ -223,6 +238,9 @@ def mark_predicate(owner_topic, classification, negated=False):
     clause. There is no alias, so nothing can collide with a user's own
     annotator alias.
     """
+    if "'" in owner_topic or '\\' in owner_topic:
+        raise QueryBuilderError('Error: %s is not a valid annotator topic' % owner_topic)
+
     return ('%sEXISTS (SELECT 1 FROM annotations '
             "WHERE annotations.diaObjectId = objects.diaObjectId "
             "AND annotations.topic = '%s' "
@@ -338,12 +356,9 @@ def build_query(select_expression, from_expression, where_condition,
 
         # multiple annotations comes in here from web as annotator:apple&pear
         # comes in from API/client as annotator:apple, annotator:pear
-        if table.startswith('annotator'):
-            w = table.split(':')
-            try:
-                annotation_topics += w[1].split('&')
-            except:
-                raise QueryBuilderError('Error in FROM list, %s not of the form annotation:topic' % table)
+        topics = annotator_topics(table)
+        if topics:
+            annotation_topics += topics
 
     # We know if the watchlist is there or n ot, can see if the put in crossamtch_tns
     for _table in tables:

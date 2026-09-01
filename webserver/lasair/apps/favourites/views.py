@@ -7,6 +7,7 @@ feature is owned by this app; every URLconf is mounted at the root, so the
 import json
 import logging
 import sys
+sys.path.append('../common')
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
@@ -17,8 +18,6 @@ from django.views.decorators.http import require_POST
 
 from lasair.apps.db_schema.utils import get_schema_dict
 from src import annotate_util, db_connect
-
-sys.path.append('../common')
 
 log = logging.getLogger(__name__)
 

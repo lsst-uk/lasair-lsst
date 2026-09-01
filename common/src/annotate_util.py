@@ -110,6 +110,7 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     cursor.execute(queryd, tuple(paramsd))
     if verbose: print(queryi, paramsi)
     cursor.execute(queryi, paramsi)
+    cursor.close()
     if not caller_owns_connection:
         msl.commit()
         msl.close()
@@ -145,6 +146,7 @@ def delete_annotation(diaObjectId: int, topic: str, classification: str = None, 
 
     if verbose: print(query, params)
     cursor.execute(query, tuple(params))
+    cursor.close()
     if not caller_owns_connection:
         msl.commit()
         msl.close()
@@ -331,7 +333,9 @@ def marks_held(msl, topic: str, diaObjectId: int, verbose: bool = False) -> list
     params = (diaObjectId, topic, MARK_FAVOURITE, MARK_HIDDEN)
     if verbose: print(query, params)
     cursor.execute(query, params)
-    return [row['classification'] for row in cursor]
+    held = [row['classification'] for row in cursor]
+    cursor.close()
+    return held
 
 
 def marks_for_objects(topic: str, diaObjectIds: list, verbose: bool = False) -> dict:

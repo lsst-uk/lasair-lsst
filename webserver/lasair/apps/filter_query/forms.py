@@ -100,9 +100,12 @@ class filterQueryForm(forms.ModelForm):
                     except:
                         pass
 
-                # THE TWO MARK FRAGMENTS ARE READ BACK THE SAME WAY AS THE OTHERS
-                self.initial["favouritesOnly"] = FAVOURITE_ONLY in self.instance.tables
-                self.initial["includeHidden"] = HIDDEN_INCLUDE in self.instance.tables
+                # THE TWO MARK FRAGMENTS ARE READ BACK THE SAME WAY AS THE OTHERS.
+                # LOWERCASED, BECAUSE build_query LOWERCASES EVERY FROM TOKEN BEFORE
+                # PARSING IT, AND AN UNTICKED BOX SILENTLY STRIPS THE FRAGMENT ON SAVE.
+                tablesLower = (self.instance.tables or '').lower()
+                self.initial["favouritesOnly"] = FAVOURITE_ONLY in tablesLower
+                self.initial["includeHidden"] = HIDDEN_INCLUDE in tablesLower
 
         if self.request.user.is_authenticated:
             email = self.request.user.email
@@ -237,6 +240,19 @@ class filterQueryForm(forms.ModelForm):
                         self.request,
                         'You have not favourited any objects, so this filter will '
                         'match nothing until you do.')
+
+                # ALERT-TRIGGERED FILTERS RUN ON THE FILTER NODES, AGAINST A LOCAL
+                # DATABASE THAT HOLDS NO ANNOTATIONS, SO THE FAVOURITES TEST IS
+                # ALWAYS FALSE THERE AND THE STREAM WOULD BE SILENT WITH NO ERROR
+                if self.request.POST.get('runOnAlert'):
+                    messages.warning(
+                        self.request,
+                        'Filters that run on new alerts are processed on the filter '
+                        'nodes, which cannot see your favourites, so "Only my '
+                        'favourites" will match nothing in this filter\'s Kafka '
+                        'stream or email digest. It still works when you run the '
+                        'filter from this website, and on filters that run on '
+                        'updated annotations.')
 
             e = check_query(selected, tables, conditions)
             if e:
