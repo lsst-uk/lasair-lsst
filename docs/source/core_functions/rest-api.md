@@ -234,6 +234,8 @@ curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
      https://api.lasair.lsst.ac.uk/api/mark/
 ```
 
+Queries you run through [query](#query) leave your hidden objects out, in the same way the website does. Add `hidden:include` to `tables` to put them back.
+
 #### Listing your marks
 
 There is no read method for marks. List your favourites with [query](#query), using `tables=objects, favourite:only`, which composes with any other condition — a Sherlock class, a magnitude cut — in one query. `tables=objects, hidden:include` puts your hidden objects back into a query that would otherwise leave them out.

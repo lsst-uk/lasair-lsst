@@ -328,7 +328,11 @@ class QuerySerializer(serializers.Serializer):
             return {"error": error}
 
         try:
-            sqlquery_real = build_query(selected, tables, conditions)
+            # THE CALLER IS THE OWNER OF AN AD-HOC QUERY, SO THEIR HIDDEN OBJECTS ARE
+            # LEFT OUT AND favourite:only MEANS THEIR OWN FAVOURITES
+            sqlquery_real = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username))
         except Exception as e:
             return {"error": str(e)}
 
