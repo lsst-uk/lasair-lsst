@@ -53,6 +53,13 @@ def object_detail(request, diaObjectId):
                       {'message': 'Object %s not in database' % diaObjectId})
 
     # THE MARK COSTS NO EXTRA QUERY: THE VIEWER'S OWN TAG ROWS ARE ALREADY HERE
+    # AGGREGATE ONLY, AND COMPUTED HERE RATHER THAN IN objjson, SO THE API CANNOT
+    # ACQUIRE IT BY ACCIDENT AND THE ANNOTATION VISIBILITY RULE STAYS TIGHT
+    try:
+        data['favouritedBy'] = annotate_util.count_favouriters(diaObjectId)
+    except Exception:
+        data['favouritedBy'] = 0
+
     data['myMark'] = None
     if request.user.is_authenticated:
         myTopic = annotate_util.tag_topic(request.user.username)

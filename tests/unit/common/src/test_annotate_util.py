@@ -399,6 +399,37 @@ class CountClassificationTest(unittest.TestCase):
         self.assertEqual(annotate_util.count_classification('tags_dave', 'hidden'), 0)
 
 
+class CountFavouritersTest(unittest.TestCase):
+    """Tests for the aggregate favourited-by count."""
+
+    @mock.patch('annotate_util.db_connect.readonly')
+    def test_counts_only_user_tag_topics(self, mock_db):
+        """A third-party annotator emitting 'favourite' is not a user favourite"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = {'n': 3}
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        n = annotate_util.count_favouriters(123)
+
+        # ASSERT
+        query, params = cursor.execute.call_args[0]
+        self.assertIn("topic LIKE 'tags\\_%'", query)
+        self.assertEqual(params, (123, 'favourite'))
+        self.assertEqual(n, 3)
+
+    @mock.patch('annotate_util.db_connect.readonly')
+    def test_no_rows_is_zero(self, mock_db):
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = None
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT / ASSERT
+        self.assertEqual(annotate_util.count_favouriters(123), 0)
+
+
 class DeleteClassificationTest(unittest.TestCase):
     """Tests for clearing every row of one classification from a topic."""
 

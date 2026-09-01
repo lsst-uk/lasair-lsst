@@ -23,6 +23,10 @@
                     <h2 class="accordion-header " id="headinOne">
                         <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
                     </h2>
+
+                    {% if data.favouritedBy %}
+                        <small class="text-gray-500">favourited by {{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</small>
+                    {% endif %}
                 </div>
             </div>
             <div class="col-3  px-xl-1 float-end">

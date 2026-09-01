@@ -443,3 +443,41 @@ def count_classification(topic: str, classification: str, verbose: bool = False)
     row = cursor.fetchone()
     msl.close()
     return row['n'] if row else 0
+
+
+def count_favouriters(diaObjectId: int, verbose: bool = False) -> int:
+    """Count how many users have favourited an object.
+
+    Aggregate only. There is no function, key, endpoint or parameter, now or
+    later, that maps an object to the users who favourited it: this is the one
+    surface of the feature that crosses the per-user boundary.
+
+    The `tags_` guard is not decorative — without it any third-party annotator
+    that happens to emit `classification='favourite'` would be counted as a
+    user favourite.
+
+    Args:
+        diaObjectId: the object to count for
+        verbose: print the SQL query on stdout
+
+    Raises:
+        mysql.connector.errors.Error: database error
+
+    Returns:
+        The number of users who have favourited the object
+
+    **Usage:**
+
+        n = annotate_util.count_favouriters(123)
+    """
+    msl = db_connect.readonly()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+
+    query = 'SELECT COUNT(*) AS n FROM annotations '
+    query += "WHERE diaObjectId=%s AND classification=%s AND topic LIKE 'tags\\_%'"
+    params = (diaObjectId, MARK_FAVOURITE)
+    if verbose: print(query, params)
+    cursor.execute(query, params)
+    row = cursor.fetchone()
+    msl.close()
+    return row['n'] if row else 0
