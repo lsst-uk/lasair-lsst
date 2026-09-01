@@ -209,6 +209,28 @@ To add/remove instances:
 * If you have removed instances then edit `hosts` and `/etc/hosts` to remove the entries
 * If you have both removed and added instances you may need to delete `~/.ssh/known_hosts`
 
+## One-off steps for favourites and hiding
+
+The favourite and hidden marks need no schema change, no `ALTER TABLE` and no
+`SCHEMA_VERSION` bump, but two backfills are needed the first time this release
+is deployed. Both are idempotent and can be re-run.
+
+Give every existing user the tag annotator their marks live in. New users get
+one from a registration signal, and the write path creates one lazily, so this
+is only for accounts that predate the feature:
+```
+$ cd common/src && python3 make_tag_annotator.py
+```
+
+Rebuild `real_sql` for every existing filter, so each one carries its owner's
+hidden exclusion. Filters saved after this release build it themselves:
+```
+$ cd utility && python3 check_query_syntax.py --update
+```
+
+Then build the front-end assets (`cd webserver/staticfiles && gulp build`,
+followed by `manage.py collectstatic`) and restart the webserver.
+
 ## Remove a deployment
 
 To remove a deployment:
