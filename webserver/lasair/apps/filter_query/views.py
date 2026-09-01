@@ -4,6 +4,7 @@ from src.topic_name import topic_name as topicName
 from .utils import add_filter_query_metadata, run_filter, check_query_zero_limit, delete_stream_file, topic_refresh
 import random
 from src import date_nid, db_connect, manage_status
+from src.annotate_util import tag_topic
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -16,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 from lasair.apps.db_schema.utils import get_schema, get_schema_dict, get_schema_for_query_selected
 from .models import filter_query
 from .forms import filterQueryForm, UpdateFilterQueryForm, DuplicateFilterQueryForm
-from lasair.query_builder import check_query, build_query
+from lasair.query_builder import check_query, build_query, build_query_for_filter
 from django.conf import settings
 import json
 import re
@@ -114,12 +115,12 @@ def filter_query_detail(request, mq_id, action=False):
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
-    filterQuery.real_sql = build_query(filterQuery.selected, filterQuery.tables, filterQuery.conditions)
 
     # IS USER ALLOWED TO SEE THIS RESOURCE?
     is_owner = (request.user.is_authenticated) and (request.user.id == filterQuery.user.id)
     is_public = (filterQuery.public > 0)
     is_visible = is_owner or is_public or request.user.is_superuser
+    filterQuery.real_sql = build_query_for_filter(filterQuery, is_owner)
     if not is_visible:
         messages.error(request, "This filter is private and not visible to you")
         return render(request, 'error.html')
@@ -192,6 +193,8 @@ def filter_query_detail(request, mq_id, action=False):
             newFil.public = False
         newFil.date_expire = \
             datetime.datetime.now() + datetime.timedelta(days=settings.ACTIVE_EXPIRE)
+        # THE COPY BELONGS TO THE DUPLICATOR, SO ITS SQL MUST BE REBUILT FOR THEM
+        newFil.real_sql = build_query_for_filter(newFil, is_owner=True)
         newFil.save()
 
         message = ''
@@ -219,7 +222,8 @@ def filter_query_detail(request, mq_id, action=False):
 
     filterQuery = get_object_or_404(filter_query, mq_id=mq_id)
 
-    filterQuery.real_sql = build_query(filterQuery.selected, filterQuery.tables, filterQuery.conditions)
+    is_owner = (request.user.is_authenticated) and (request.user.id == filterQuery.user.id)
+    filterQuery.real_sql = build_query_for_filter(filterQuery, is_owner)
     filterQuery.display_sql = \
             'SELECT COLUMNS:\n' + filterQuery.selected + \
             '\nFROM:\n'         + filterQuery.tables + \
@@ -248,7 +252,9 @@ def filter_query_detail(request, mq_id, action=False):
             limit=limit,
             offset=offset,
             mq_id=mq_id,
-            query_name=filterQuery.name)
+            query_name=filterQuery.name,
+            owner_topic=tag_topic(filterQuery.user.username),
+            exclude_hidden=is_owner)
         if error:
             messages.error(request, error)
 
@@ -408,9 +414,13 @@ def filter_query_create(request, mq_id=False):
                 limit=limit,
                 offset=offset,
                 mq_id=None,
-                query_name=False)
+                query_name=False,
+                owner_topic=tag_topic(request.user.username))
 
-            sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
+            sqlquery_real = sqlparse.format(
+                build_query(selected, tables, conditions,
+                            owner_topic=tag_topic(request.user.username)),
+                reindent=True, keyword_case='upper', strip_comments=True)
 
             if "order by" in conditions.lower():
                 sortTable = False
@@ -422,7 +432,10 @@ def filter_query_create(request, mq_id=False):
         # OR SAVE?
         elif action and action.lower() == "save" and len(name) and form.is_valid():
 
-            sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
+            sqlquery_real = sqlparse.format(
+                build_query(selected, tables, conditions,
+                            owner_topic=tag_topic(request.user.username)),
+                reindent=True, keyword_case='upper', strip_comments=True)
             if filterQuery:
                 filterQuery.name = name
                 filterQuery.description = description
@@ -457,7 +470,10 @@ def filter_query_create(request, mq_id=False):
                 verb = "updated"
 
             else:
-                sqlquery_real = sqlparse.format(build_query(selected, tables, conditions), reindent=True, keyword_case='upper', strip_comments=True)
+                sqlquery_real = sqlparse.format(
+                    build_query(selected, tables, conditions,
+                                owner_topic=tag_topic(request.user.username)),
+                    reindent=True, keyword_case='upper', strip_comments=True)
                 tn = topicName(request.user.id, name)
                 filterQuery = filter_query(user=request.user,
                                            name=name, description=description,

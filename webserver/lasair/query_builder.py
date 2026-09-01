@@ -202,8 +202,77 @@ def sanitise(expression):
     return expression.replace("'", '"')
 
 
-def build_query(select_expression, from_expression, where_condition):
+FAVOURITE_ONLY = 'favourite:only'
+HIDDEN_INCLUDE = 'hidden:include'
+
+
+def mark_predicate(owner_topic, classification, negated=False):
+    """ Build the correlated subquery that tests one of a user's marks.
+
+    A correlated EXISTS rather than a LEFT JOIN, because build_query assembles
+    its FROM clause as a comma-separated list and puts every join predicate
+    into where_clauses; a LEFT JOIN would mean string surgery on the FROM
+    clause. There is no alias, so nothing can collide with a user's own
+    annotator alias.
+    """
+    return ('%sEXISTS (SELECT 1 FROM annotations '
+            "WHERE annotations.diaObjectId = objects.diaObjectId "
+            "AND annotations.topic = '%s' "
+            "AND annotations.classification = '%s')"
+            % ('NOT ' if negated else '', owner_topic, classification))
+
+
+def build_query_for_filter(filter_query, is_owner=True):
+    """ Build the SQL of a saved filter, scoped to the filter's owner.
+
+    This is the single door for saved filters: every webserver path that
+    rebuilds a saved filter's SQL comes through here rather than calling
+    build_query directly, so the owner's topic is resolved in one place.
+
+    A non-owner running a public filter on the web gets no hidden exclusion —
+    hiding is a negative signal nobody publishes on purpose — but does get the
+    owner's favourites restriction, which is curation the owner published
+    deliberately.
+
+    Args:
+        filter_query: a FilterQuery instance or a database row, carrying
+            selected, tables, conditions and the owner
+        is_owner: whether the viewer owns the filter
+
+    Returns:
+        The real SQL
+    """
+    def field(name, *alternatives):
+        for candidate in (name,) + alternatives:
+            if isinstance(filter_query, dict):
+                if candidate in filter_query:
+                    return filter_query[candidate]
+            elif hasattr(filter_query, candidate):
+                return getattr(filter_query, candidate)
+        return None
+
+    username = field('username')
+    if username is None:
+        user = field('user')
+        username = getattr(user, 'username', user)
+
+    owner_topic = 'tags_%s' % username if username else None
+
+    return build_query(
+        field('selected'), field('tables'), field('conditions'),
+        owner_topic=owner_topic, exclude_hidden=is_owner)
+
+
+def build_query(select_expression, from_expression, where_condition,
+                owner_topic=None, exclude_hidden=True):
     """ Build a real SQL query from the pre-sanitised input
+
+    Args:
+        owner_topic: the tag topic of the user the query is scoped to,
+            `tags_<username>`. When given, the owner's hidden objects are
+            excluded and `favourite:only` can be honoured.
+        exclude_hidden: emit the hidden exclusion. False for a non-owner
+            running somebody else's public filter.
     """
     if select_expression:
         select_expression = sanitise(select_expression)
@@ -224,6 +293,8 @@ def build_query(select_expression, from_expression, where_condition):
     # Cannot have both watchlist and crossmatch_tns (the latter IS a watchlist)
 
     sherlock_classifications = False  # using sherlock_classifications
+    favourite_only = False  # restrict to the owner's favourited objects
+    include_hidden = False  # show the owner's hidden objects rather than excluding them
     crossmatch_tns = False  # using crossmatch tns, but not combined with watchlist
     annotation_topics = []  # topics of chosen annotations
     watchlist_id = None     # wl_id of the chosen watchlist, if any
@@ -235,6 +306,13 @@ def build_query(select_expression, from_expression, where_condition):
 
         if table == 'sherlock_classifications':
             sherlock_classifications = True
+
+        # THE TWO MARK FRAGMENTS ARE FLAGS, NOT TABLES; THEY JOIN NOTHING
+        if table == FAVOURITE_ONLY:
+            favourite_only = True
+
+        if table == HIDDEN_INCLUDE:
+            include_hidden = True
 
         if table.startswith('watchlist:'):
             w = table.split(':')
@@ -312,6 +390,17 @@ def build_query(select_expression, from_expression, where_condition):
         for at in annotation_topics:
             where_clauses.append('objects.diaObjectId=%s.diaObjectId' % at)
             where_clauses.append('%s.topic="%s"' % (at, at))
+
+    if favourite_only:
+        if not owner_topic:
+            raise QueryBuilderError(
+                'Error in FROM list, favourite:only needs an owner to take the favourites of')
+        where_clauses.append(mark_predicate(owner_topic, 'favourite'))
+
+    # EMITTED FOR AN OWNER WHO HAS NOT OPTED OUT, EVEN IF THEY HAVE HIDDEN NOTHING YET:
+    # THAT IS WHAT MAKES IT SAFE TO FREEZE THIS SQL INTO real_sql AT BUILD TIME
+    if owner_topic and exclude_hidden and not include_hidden:
+        where_clauses.append(mark_predicate(owner_topic, 'hidden', negated=True))
 
     # if the WHERE is just an ORDER BY, then we mustn't have AND before it
     order_condition = ''

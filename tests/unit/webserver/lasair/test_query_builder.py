@@ -95,6 +95,172 @@ class CheckQueryAnnotatorPermissionTest(unittest.TestCase):
         mock_remote.assert_not_called()
 
 
+class BuildQueryMarkPredicatesTest(unittest.TestCase):
+    """Tests for the hidden exclusion and the favourites restriction."""
+
+    HIDDEN_EXCLUSION = (
+        "NOT EXISTS (SELECT 1 FROM annotations "
+        "WHERE annotations.diaObjectId = objects.diaObjectId "
+        "AND annotations.topic = 'tags_dave' "
+        "AND annotations.classification = 'hidden')")
+
+    FAVOURITE_RESTRICTION = (
+        "EXISTS (SELECT 1 FROM annotations "
+        "WHERE annotations.diaObjectId = objects.diaObjectId "
+        "AND annotations.topic = 'tags_dave' "
+        "AND annotations.classification = 'favourite')")
+
+    def test_hidden_is_excluded_for_an_owner(self):
+        """The exclusion is emitted for an owner who has not opted out"""
+        # ACT
+        sql = query_builder.build_query('diaObjectId', 'objects', 'ra > 1', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertIn(self.HIDDEN_EXCLUSION, sql)
+
+    def test_no_exclusion_without_an_owner_topic(self):
+        """An ad-hoc query with no owner excludes nothing"""
+        # ACT
+        sql = query_builder.build_query('diaObjectId', 'objects', 'ra > 1')
+
+        # ASSERT
+        self.assertNotIn('NOT EXISTS', sql)
+
+    def test_include_hidden_suppresses_the_exclusion(self):
+        """The hidden:include fragment turns the exclusion off"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, hidden:include', 'ra > 1', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertNotIn('NOT EXISTS', sql)
+
+    def test_exclude_hidden_false_suppresses_the_exclusion(self):
+        """A non-owner running a public filter gets no hidden exclusion"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1',
+            owner_topic='tags_dave', exclude_hidden=False)
+
+        # ASSERT
+        self.assertNotIn('NOT EXISTS', sql)
+        self.assertIn(self.FAVOURITE_RESTRICTION, sql)
+
+    def test_favourites_only_is_emitted(self):
+        """The favourite:only fragment restricts to the owner's favourites"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertIn(self.FAVOURITE_RESTRICTION, sql)
+
+    def test_both_predicates_may_be_emitted_together(self):
+        """Both boxes ticked emits both predicates; the rows can coexist"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only, hidden:include', 'ra > 1',
+            owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertIn(self.FAVOURITE_RESTRICTION, sql)
+        self.assertNotIn('NOT EXISTS', sql)
+
+    def test_the_fragments_are_not_treated_as_tables(self):
+        """Neither fragment reaches the FROM list"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only, hidden:include', '', owner_topic='tags_dave')
+
+        # ASSERT
+        from_clause = sql.split('FROM')[1].split('WHERE')[0]
+        self.assertNotIn('favourite', from_clause)
+        self.assertNotIn('hidden', from_clause)
+
+    def test_favourites_only_without_an_owner_is_an_error(self):
+        """There is no owner whose favourites could be meant"""
+        with self.assertRaises(query_builder.QueryBuilderError):
+            query_builder.build_query('diaObjectId', 'objects, favourite:only', '')
+
+    def test_the_exclusion_survives_an_order_by_only_condition(self):
+        """A condition that is only an ORDER BY still gets the exclusion"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects', 'ORDER BY ra', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertIn(self.HIDDEN_EXCLUSION, sql)
+        self.assertTrue(sql.rstrip().endswith('ORDER BY ra'))
+
+
+class BuildQueryForFilterTest(unittest.TestCase):
+    """Tests for the single door saved filters build their SQL through."""
+
+    def setUp(self):
+        self.row = {
+            'selected': 'objects.diaObjectId',
+            'tables': 'objects',
+            'conditions': 'ra > 1',
+            'username': 'dave',
+        }
+
+    def test_the_owner_gets_their_own_hidden_exclusion(self):
+        # ACT
+        sql = query_builder.build_query_for_filter(self.row, is_owner=True)
+
+        # ASSERT
+        self.assertIn("annotations.topic = 'tags_dave'", sql)
+        self.assertIn('NOT EXISTS', sql)
+
+    def test_a_non_owner_gets_no_hidden_exclusion(self):
+        # ACT
+        sql = query_builder.build_query_for_filter(self.row, is_owner=False)
+
+        # ASSERT
+        self.assertNotIn('NOT EXISTS', sql)
+
+    def test_a_non_owner_still_gets_the_owners_favourites(self):
+        # ARRANGE
+        self.row['tables'] = 'objects, favourite:only'
+
+        # ACT
+        sql = query_builder.build_query_for_filter(self.row, is_owner=False)
+
+        # ASSERT
+        self.assertIn("annotations.classification = 'favourite'", sql)
+        self.assertIn("annotations.topic = 'tags_dave'", sql)
+
+    def test_include_hidden_is_honoured_for_the_owner(self):
+        # ARRANGE
+        self.row['tables'] = 'objects, hidden:include'
+
+        # ACT
+        sql = query_builder.build_query_for_filter(self.row, is_owner=True)
+
+        # ASSERT
+        self.assertNotIn('NOT EXISTS', sql)
+
+    def test_a_model_instance_is_accepted_as_well_as_a_dict(self):
+        """Callers pass a filter_query model instance or a database row"""
+        # ARRANGE
+        class Owner:
+            username = 'dave'
+
+        class FilterQueryRow:
+            selected = 'objects.diaObjectId'
+            tables = 'objects'
+            conditions = 'ra > 1'
+            user = Owner()
+
+        row = FilterQueryRow()
+
+        # ACT
+        sql = query_builder.build_query_for_filter(row, is_owner=True)
+
+        # ASSERT
+        self.assertIn("annotations.topic = 'tags_dave'", sql)
+
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')

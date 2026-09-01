@@ -66,19 +66,25 @@ def run_filter(
         limit,
         offset,
         mq_id=False,
-        query_name=False):
+        query_name=False,
+        owner_topic=None,
+        exclude_hidden=True):
     """run the filter and return the table of results
 
     **Key Arguments:**
 
         - `userid` -- the users unique ID
         - `name` -- the name given to the filter
+        - `owner_topic` -- the tag topic of the filter's owner, so their hidden
+          objects are excluded and `favourite:only` can be honoured
+        - `exclude_hidden` -- emit the hidden exclusion; False for a non-owner
 
     """
     error = check_query(selected, tables, conditions)
     if error:
         return None, None, None, None, error
-    sqlquery_real = build_query(selected, tables, conditions)
+    sqlquery_real = build_query(selected, tables, conditions,
+                                owner_topic=owner_topic, exclude_hidden=exclude_hidden)
     sqlquery_limit = 'SET STATEMENT max_statement_time=60 FOR %s LIMIT %d OFFSET %d' % (sqlquery_real, limit, offset)
 
     nalert = 0

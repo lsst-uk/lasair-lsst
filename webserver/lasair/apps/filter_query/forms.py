@@ -7,6 +7,7 @@ from lasair.apps.watchmap.models import Watchmap
 from lasair.apps.watchlist.models import Watchlist
 from django.db.models import Q
 from lasair.query_builder import check_query, build_query
+from src.annotate_util import tag_topic
 from .utils import check_query_zero_limit
 import re
 
@@ -215,7 +216,8 @@ class filterQueryForm(forms.ModelForm):
                     msg = e
                 self.add_error('selected', msg)
 
-            sqlquery_real = build_query(selected, tables, conditions)
+            sqlquery_real = build_query(selected, tables, conditions,
+                                        owner_topic=tag_topic(self.request.user.username))
 
             e = check_query_zero_limit(sqlquery_real)
             if e:
