@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+**FIXED**: `gulp build` corrupted every binary asset it copied, because gulp 5 decodes file contents as UTF-8 by default and replaces each invalid byte sequence with U+FFFD, which left images, fonts, the PDF and the JS9 WebAssembly module both broken and larger than their sources.
+
 **FIXED**: hiding an object the user had favourited returned a 500, because the new mark was inserted before the mark it displaces was deleted, which is a duplicate entry against the unique key that schemas before 11_1 carry over `(diaObjectId, topic)`.
 
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
