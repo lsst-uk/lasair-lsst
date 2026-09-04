@@ -4,7 +4,7 @@ import json
 from django.contrib import messages
 from django.shortcuts import render
 from lasair.apps.annotator.models import Annotators
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404, redirect
@@ -15,6 +15,9 @@ from annotate_util import insert_annotation_db, delete_annotation, classificatio
 
 @csrf_exempt
 def addtag(request, diaObjectId, username, tag):
+    if request.META['HTTP_SEC_FETCH_SITE'] != 'same-origin':
+        return HttpResponseForbidden()
+
     topic = 'tags_' + username
     insert_annotation_db(diaObjectId, topic, tag)
     taglist = classifications_for_object(topic, diaObjectId)
@@ -22,6 +25,8 @@ def addtag(request, diaObjectId, username, tag):
 
 @csrf_exempt
 def removetag(request, diaObjectId, username, tag):
+    if request.META['HTTP_SEC_FETCH_SITE'] != 'same-origin':
+        return HttpResponseForbidden()
     topic = 'tags_' + username
     delete_annotation(diaObjectId, topic, tag)
     taglist = classifications_for_object(topic, diaObjectId)
