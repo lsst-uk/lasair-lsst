@@ -293,12 +293,16 @@ def mark_objects(user, diaObjectIds: list, mark: str, verbose: bool = False) -> 
             elif held:
                 previous = held[0]
 
-            if mark:
-                insert_annotation_db(diaObjectId, topic, mark, msl=msl, verbose=verbose)
+            # THE DISPLACED MARK GOES FIRST. SCHEMAS BEFORE 11_1 CARRY A UNIQUE
+            # KEY OVER (diaObjectId, topic) ALONE, SO INSERTING THE NEW MARK
+            # WHILE THE OLD ROW IS STILL THERE IS A DUPLICATE-KEY ERROR. IT ALSO
+            # KEEPS THE OBJECT FROM EVER HOLDING TWO MARKS MID-TRANSACTION.
             for classification in held:
                 if classification != mark:
                     delete_annotation(diaObjectId, topic, classification,
                                       msl=msl, verbose=verbose)
+            if mark:
+                insert_annotation_db(diaObjectId, topic, mark, msl=msl, verbose=verbose)
 
             results.append({
                 'diaObjectId': diaObjectId,

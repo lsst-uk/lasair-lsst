@@ -181,6 +181,30 @@ class MarkObjectTest(unittest.TestCase):
     @mock.patch('annotate_util.delete_annotation')
     @mock.patch('annotate_util.insert_annotation_db')
     @mock.patch('annotate_util.db_connect.remote')
+    def test_displaced_mark_is_deleted_before_the_new_one_is_inserted(
+            self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """The mark being displaced goes before the new mark arrives"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'favourite'}])
+        mock_db.return_value.cursor.return_value = cursor
+        # ONE PARENT MOCK SO THE TWO WRITES SHARE A CALL ORDER
+        calls = MagicMock()
+        calls.attach_mock(mock_delete, 'delete')
+        calls.attach_mock(mock_insert, 'insert')
+
+        # ACT
+        annotate_util.mark_object(self.user, 123, 'hidden')
+
+        # ASSERT
+        # THE ANNOTATIONS TABLE HAS A UNIQUE KEY OVER (diaObjectId, topic) IN
+        # SCHEMAS BEFORE 11_1, SO INSERTING FIRST IS A DUPLICATE-KEY ERROR
+        self.assertEqual([call[0] for call in calls.mock_calls], ['delete', 'insert'])
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
     def test_repeating_a_mark_is_idempotent(self, mock_db, mock_insert, mock_delete, mock_annotator):
         """Re-marking an object it already holds writes the mark and deletes nothing"""
         # ARRANGE
