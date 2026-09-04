@@ -1,0 +1,24 @@
+{% extends "layouts/base.html" %}
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+{% block title %}
+Objects with tag {{ tag }}
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-4">
+
+<h1>Tag = {{ tag }}</h1>
+The first column is the diaObjectId, then the number of days since the last 
+detection (diaSource) for that object, then the number of days 
+since the tag was assigned to the object.
+
+               <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_tags_detail.html" with type="public" position="auto" %}
+               </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

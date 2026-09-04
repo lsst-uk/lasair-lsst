@@ -1,15 +1,80 @@
 from src import db_connect
 import sys
+import json
 from django.contrib import messages
 from django.shortcuts import render
 from lasair.apps.annotator.models import Annotators
-from django.http import HttpResponse, FileResponse
+from django.http import HttpResponse, FileResponse, HttpResponseForbidden
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404, redirect
 from lasair.apps.db_schema.utils import get_schema_dict
 from .utils import add_annotator_metadata
-sys.path.append('../common')
+sys.path.append('../common/src')
+from annotate_util import insert_annotation_db, delete_annotation, classifications_for_object
+
+@csrf_exempt
+def addtag(request, diaObjectId, username, tag):
+    if request.META['HTTP_SEC_FETCH_SITE'] != 'same-origin':
+        return HttpResponseForbidden()
+
+    topic = 'tags_' + username
+    insert_annotation_db(diaObjectId, topic, tag)
+    taglist = classifications_for_object(topic, diaObjectId)
+    return HttpResponse(json.dumps(taglist), content_type="application/json")
+
+@csrf_exempt
+def removetag(request, diaObjectId, username, tag):
+    if request.META['HTTP_SEC_FETCH_SITE'] != 'same-origin':
+        return HttpResponseForbidden()
+    topic = 'tags_' + username
+    delete_annotation(diaObjectId, topic, tag)
+    taglist = classifications_for_object(topic, diaObjectId)
+    return HttpResponse(json.dumps(taglist), content_type="application/json")
+
+@csrf_exempt
+def tags_index(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Must be logged in to use the Tags system")
+        return render(request, 'error.html')
+
+    topic = 'tags_' + request.user.username
+    query = 'SELECT classification AS tag, count(*) AS n FROM annotations '
+    query += f'WHERE topic="{topic}" GROUP BY classification'
+
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    return render(request, 'annotator/tags_index.html', 
+       { 'table': table, 
+        })
+
+@csrf_exempt
+def tags_detail(request, tag):
+    if not request.user.is_authenticated:
+        messages.error(request, "Must be logged in to use the Tags system")
+        return render(request, 'error.html')
+
+    topic = 'tags_' + request.user.username
+#    query = 'SELECT diaObjectId FROM annotations WHERE '
+#    query += f'topic="{topic}" AND classification="{tag}"'
+
+    query  = 'SELECT objects.diaObjectId,  '
+    query += 'FORMAT(mjdnow() - objects.lastDiaSourceMjdTai,1) as obj_last,  '
+    query += 'FORMAT(mjdnow() - (UNIX_TIMESTAMP(annotations.timestamp) / 86400 + 40587),1) AS tag_age  '
+    query += 'FROM objects,annotations  '
+    query += 'WHERE objects.diaObjectId = annotations.diaObjectId '
+    query += f'AND annotations.topic="{topic}" AND annotations.classification="{tag}"'
+
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    cursor.execute(query)
+    table = cursor.fetchall()
+    return render(request, 'annotator/tags_detail.html', 
+       { 'table': table,
+        'tag': tag,
+        })
 
 
 @csrf_exempt

@@ -1,0 +1,135 @@
+<div class="card border-0 shadow h-100">
+    <div class="card-body">
+        <div class="row d-flex align-items-start">
+            <div class="col-2 col-md-1 text-xl-center mb-3  justify-content-xl-start">
+                <div class="icon-shape icon-shape-tertiary rounded me-sm-0 ">
+            <img src="{{ ASSETS_ROOT }}/img/icons/tag.png" class="image-fluid image-xs">
+                </div>
+            </div>
+
+	  <div class="col-10 col-md-11 col-xl-10 pe-lg-2 ps-lg-5">
+            <h2 class="h6 text-gray-400 mb-0 ps-3">Tag Objects with your words</h2>
+	    <h3 class="fw-extrabold mb-2 ps-3"> <span class="fw-normal text-gray-400">User Tags</span> </h3>
+           </div>
+
+	  <div class="col-12 col-xl-10 pe-lg-2 ps-lg-5">
+            <small class="text-gray-500">
+          <div id="tag-widget" class="col-10 col-xl-11 pe-xl-2 ps-xl-5">
+            <small>Existing tags for this object.</small>
+              <div id="tag-list">
+                <table>
+                  {% for tag in data.taglist %}
+                    <tr><td>
+                      <a href="/tags/{{ tag }}">see all {{ tag }}</a>
+                    </td><td>
+                      <button type="button" class="tag" data-tag="{{ tag }}">remove {{ tag }} </button>
+                    </tr>
+                  {% endfor %}
+                </table>
+              </div>
+      
+              <form id="add-tag-form">
+                <input
+                    type="text"
+                    id="new-tag"
+                    name="tag"
+                    placeholder="Add a tag"
+                    autocomplete="off"
+                >
+                <button type="submit">Add</button>
+            </form>
+
+	    </small>
+	  </div>
+          </div>
+        </div>
+    </div>
+</div>
+
+<script>
+var tagList = document.getElementById("tag-list");
+var addTagForm = document.getElementById("add-tag-form");
+var newTagInput = document.getElementById("new-tag");
+
+// Rebuild only the tag list, not the whole page.
+function renderTags(tags) {
+  console.log(tags);
+    tagList.innerHTML = "";
+    const table = document.createElement("table");
+    tags.forEach(tag => {
+        var tr = document.createElement("tr");
+
+        var td = document.createElement("td");
+        var a = document.createElement('a');
+        var linkText = document.createTextNode('see all ' + tag);
+        a.appendChild(linkText);
+  a.href = "/tags/" + tag + "/";
+        td.appendChild(a);
+  tr.appendChild(td);
+
+        td = document.createElement("td");
+        var button = document.createElement("button");
+        button.type = "button";
+        button.className = "tag";
+        button.dataset.tag = tag;
+        button.textContent = "remove " + tag;
+        td.appendChild(button);
+  tr.appendChild(td);
+
+  table.appendChild(tr);
+    });
+    tagList.appendChild(table);
+}
+
+// Add a tag.
+addTagForm.addEventListener("submit", async function(event) {
+    event.preventDefault();
+    var tag = newTagInput.value.trim();
+    // force tags to be only a-z and 0-9
+    tag = tag.replace(/[^a-zA-Z0-9]/g, '').toLowerCase();
+
+    if (!tag) { return; }
+    args = "{{ data.diaObjectId }}";
+    args = args + '/' + "{{ data.username }}";
+    args = args + '/' + tag ;
+    args = args + '/';
+    try {
+        const response = await fetch("/tags/addtag/" + args)
+        if (!response.ok) {
+            throw new Error("Could not add tag");
+        }
+        const ret = await response.json();
+
+        renderTags(ret);
+        newTagInput.value = "";
+        newTagInput.focus();
+    } catch (error) {
+        console.error(error);
+        alert("Unable to add tag.");
+    }
+});
+
+// Remove a tag.
+tagList.addEventListener("click", async function(event) {
+    const button = event.target.closest(".tag");
+    const tag = button.dataset.tag;
+    if (!button) { return; }
+    args = "{{ data.diaObjectId }}";
+    args = args + '/' + "{{ data.username }}";
+    args = args + '/' + tag ;
+    args = args + '/';
+    try {
+        const response = await fetch("/tags/removetag/" + args)
+        if (!response.ok) {
+            throw new Error("Could not remove tag");
+        }
+        const ret = await response.json();
+      console.log(ret);
+
+        renderTags(ret);
+    } catch (error) {
+        console.error(error);
+        alert("Unable to remove tag.");
+    }
+});
+</script>

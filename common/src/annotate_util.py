@@ -83,7 +83,7 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s"'
+    queryd = 'DELETE FROM annotations WHERE diaObjectId=%d AND topic="%s" '
     queryd = queryd % (diaObjectId,topic)
 
     # if its tags, we can have multiple per object/topic
