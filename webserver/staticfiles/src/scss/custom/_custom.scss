@@ -364,8 +364,13 @@ td > .text-action:not(.btn) {
         color: #66799e;
     }
 
+    // HOVER DARKENS THE ICON ITSELF; THE TRANSPARENT BORDER STAYS SO NOTHING SHIFTS.
     &:hover:not(:disabled) {
-        border-color: #d1d7e0;
+        color: darken(#66799e, 15%);
+    }
+
+    &.mark-btn-favourite.is-on:hover:not(:disabled) {
+        color: darken(#f5b759, 12%);
     }
 
     &.mark-btn-signedout {
@@ -373,10 +378,41 @@ td > .text-action:not(.btn) {
         cursor: pointer;
     }
 
+    &.mark-btn-signedout:hover {
+        color: darken(#b7c3d2, 15%);
+    }
+
     &.is-in-flight {
         opacity: .45;
         cursor: progress;
         animation: mark-pulse 1.2s ease-in-out infinite;
+    }
+}
+
+// OBJECT PAGE: LARGER ICONS, SIZED TO SIT LEVEL WITH THE "GO DEEPER" BUTTON.
+.mark-controls-lg .mark-btn .mark-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+}
+
+// go_deeper_button CARRIES mb-2, WHICH WOULD PUSH IT OFF THE FLEX BASELINE.
+.object-id-actions .btn {
+    margin-bottom: 0;
+}
+
+// FAVOURITE / HIDDEN OBJECT LIST PAGES REUSE THE MARK-BUTTON GLYPH IN THE HEADER.
+// .icon-shape svg ALREADY SIZES IT; SHOW ONLY THE OUTLINE FORM (THE UNSET-BUTTON LOOK).
+.card-header .icon-shape .mark-icon-solid {
+    display: none;
+}
+
+// THE SOFT-PINK TOAST lasair_mark.js SHOWS WHEN A MARK COULD NOT BE SAVED.
+// NOTYF PAINTS THE BACKGROUND FROM ITS types CONFIG AND SETS WHITE TEXT ON .notyf;
+// THE PALE PINK NEEDS DARK TEXT INSTEAD.
+.notyf__toast--mark-error {
+    .notyf__wrapper,
+    .notyf__message {
+        color: #7a2a41;
     }
 }
 
@@ -389,13 +425,33 @@ td > .text-action:not(.btn) {
     white-space: nowrap;
 }
 
-.row-struck td {
-    text-decoration: line-through;
-    color: #93a5be;
+// A ROW ON ITS WAY OUT OF THE TABLE: FADES OVER ROW_FADE_MS (1.5s), THEN lasair_mark.js
+// ADDS .row-collapsing TO ROLL IT UP AND REMOVES IT.
+// CLICKING THE MARK AGAIN INSIDE THE FADE WINDOW CLEARS THE CLASS AND THE ROW SNAPS BACK.
+tr.row-fading > td {
+    opacity: .3;
+    transition: opacity 1.5s linear;
 }
 
-.row-struck .mark-col-cell {
-    text-decoration: none;
+// THE ROLL-UP: COLLAPSE THE CELL BOX TO NOTHING OVER 300ms. DURATION MUST MATCH
+// ROW_COLLAPSE_MS IN lasair_mark.js. overflow:hidden KEEPS THE CONTENT CLIPPED
+// AS THE HEIGHT GOES.
+tr.row-collapsing > td {
+    padding-top: 0;
+    padding-bottom: 0;
+    border-top-width: 0;
+    border-bottom-width: 0;
+    line-height: 0;
+    font-size: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: padding 300ms ease, line-height 300ms ease, font-size 300ms ease,
+                border-width 300ms ease, opacity 300ms ease;
+}
+
+// object_detail.html SETS body.object-hidden WHEN THE VIEWER HAS HIDDEN THIS OBJECT.
+body.object-hidden {
+    background-color: darken($gray-100, 20%);
 }
 
 @keyframes mark-pulse {
