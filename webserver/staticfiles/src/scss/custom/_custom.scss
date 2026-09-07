@@ -416,6 +416,13 @@ td > .text-action:not(.btn) {
     }
 }
 
+// KEEP BOTTOM TOASTS ABOVE THE COLLAPSED 40PX HELP TAB WHILE RETAINING A 20PX GAP.
+@media (min-width: 481px) {
+    .notyf {
+        padding-bottom: 60px;
+    }
+}
+
 .mark-shake {
     animation: mark-shake 350ms ease-in-out;
 }

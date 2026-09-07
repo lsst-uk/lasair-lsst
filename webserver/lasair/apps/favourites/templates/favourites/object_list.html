@@ -19,8 +19,9 @@
             {% endif %}
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with markable=True %}
+                {% include "includes/widgets/widget_objectlist_table.html" with markable=True markList=mode %}
             </div>
         </div>
     </div>
 {% endblock %}
+

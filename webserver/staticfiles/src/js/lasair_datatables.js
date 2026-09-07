@@ -49,6 +49,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 columns: markCol === null ? [] : [{ select: markCol, sortable: false, searchable: false }]
             });
 
+            /* SO lasair_mark.js CAN REMOVE A ROW THROUGH THE DATATABLE, KEEPING THE PAGER AND COUNT IN STEP. */
+            dataTableEl.lasairDataTable = dataTable;
+
             const headings = dataTable.columns().dt.labels;
 
             if (headings.includes("objectId")) {

@@ -5,7 +5,7 @@ from .utils import add_filter_query_metadata, run_filter, count_filter, check_qu
 import random
 from src import date_nid, db_connect, manage_status
 from src.annotate_util import tag_topic
-from lasair.apps.favourites.utils import marks_for_table
+from lasair.apps.favourites.utils import marks_for_table, suppress_hidden
 from django.shortcuts import render
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
@@ -233,15 +233,20 @@ def filter_query_detail(request, mq_id, action=False):
         build_query_for_filter(filterQuery, is_owner),
         reindent=True, keyword_case='upper', strip_comments=True)
 
+    # "SHOW ANYWAY" RE-RUNS THIS ONE PREVIEW WITHOUT THE EXCLUSION AND STORES NOTHING.
+    # A LINK THAT REWROTE THE SAVED DEFINITION WOULD CHANGE WHAT THE PIPELINE EMITS TO
+    # KAFKA AND TO THE DIGEST EVERY NIGHT; THE CHECKBOX IS THE DELIBERATE VERSION.
+    show_hidden_now = request.user.is_authenticated and request.GET.get('show_hidden') == '1'
+
     # THE STANDING LINE, SHOWN ON EVERY FILTER PAGE RATHER THAN AS A ONE-OFF NOTICE:
     # THE PERSON WHO NEEDS TO READ IT IS THE ONE WHO HIDES THEIR FIRST OBJECT LATER
     tables_lower = (filterQuery.tables or '').lower()
     hidden_note = ''
-    if is_owner:
-        if HIDDEN_INCLUDE in tables_lower:
+    if request.user.is_authenticated and not show_hidden_now:
+        if is_owner and HIDDEN_INCLUDE in tables_lower:
             hidden_note = 'Including your hidden objects'
         else:
-            hidden_note = 'Your hidden objects are excluded from these results'
+            hidden_note = ''
     favourite_note = ''
     if FAVOURITE_ONLY in tables_lower:
         favourite_note = \
@@ -262,10 +267,6 @@ def filter_query_detail(request, mq_id, action=False):
     table = {}
     schema = {}
 
-    # "SHOW ANYWAY" RE-RUNS THIS ONE PREVIEW WITHOUT THE EXCLUSION AND STORES NOTHING.
-    # A LINK THAT REWROTE THE SAVED DEFINITION WOULD CHANGE WHAT THE PIPELINE EMITS TO
-    # KAFKA AND TO THE DIGEST EVERY NIGHT; THE CHECKBOX IS THE DELIBERATE VERSION.
-    show_hidden_now = is_owner and request.GET.get('show_hidden') == '1'
     hidden_omitted = 0
 
     if action == "run":
@@ -290,6 +291,19 @@ def filter_query_detail(request, mq_id, action=False):
                 exclude_hidden=False)
             if countWithHidden is not None and countWithHidden > count:
                 hidden_omitted = countWithHidden - count
+
+    # THE SQL EXCLUSION ABOVE IS SCOPED TO THE FILTER'S OWNER, BECAUSE IT IS THE
+    # SAME SQL THE PIPELINE RUNS FOR KAFKA AND THE NIGHTLY DIGEST. A VIEWER WHO IS
+    # NOT THE OWNER STILL EXPECTS THEIR OWN HIDDEN OBJECTS GONE, SO SUPPRESS THEM
+    # HERE. FOR THE OWNER THIS IS A NO-OP: THE SQL ALREADY REMOVED THEM.
+    suppress = not show_hidden_now and not (is_owner and HIDDEN_INCLUDE in tables_lower)
+    if suppress:
+        table, marks, suppressed = suppress_hidden(request.user, table)
+        if suppressed:
+            count = len(table)
+            hidden_omitted = suppressed
+    else:
+        marks = marks_for_table(request.user, table)
 
     if count and count == limit:
         if settings.DEBUG:
@@ -324,7 +338,7 @@ def filter_query_detail(request, mq_id, action=False):
     return render(request, 'filter_query/filter_query_detail.html', {
         'filterQ': filterQuery,
         'table': table,
-        'marks': marks_for_table(request.user, table),
+        'marks': marks,
         'hidden_note': hidden_note,
         'favourite_note': favourite_note,
         'hidden_omitted': hidden_omitted,

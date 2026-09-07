@@ -6,8 +6,8 @@ Context:
   diaObjectId -- the object these buttons mark
   mark        -- 'favourite', 'hidden' or empty, the mark the user holds now
 
-Signed-out visitors get inert controls that advertise the feature and open a
-sign-in popover; they send no request.
+Signed-out visitors get the same icons as links straight to sign-in, with a
+?next= back to the current page; they send no request.
 {% endcomment %}
 {% if user.is_authenticated %}
     <button type="button"
@@ -29,16 +29,14 @@ sign-in popover; they send no request.
         {% include "includes/icons/icon_archive.html" %}
     </button>
 {% else %}
-    <button type="button" class="mark-btn mark-btn-signedout"
-            data-bs-toggle="popover" data-bs-html="true" data-bs-trigger="focus"
-            data-bs-content="Sign in to favourite objects. <a href='{% url 'login' %}?next={{ request.get_full_path|urlencode }}'>Sign in</a>"
-            aria-label="Sign in to favourite objects" title="Sign in to favourite objects">
+    <a class="mark-btn mark-btn-signedout"
+       href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"
+       aria-label="Sign in to favourite objects" title="Sign in to favourite objects">
         {% include "includes/icons/icon_star.html" %}
-    </button>
-    <button type="button" class="mark-btn mark-btn-signedout"
-            data-bs-toggle="popover" data-bs-html="true" data-bs-trigger="focus"
-            data-bs-content="Sign in to hide objects. <a href='{% url 'login' %}?next={{ request.get_full_path|urlencode }}'>Sign in</a>"
-            aria-label="Sign in to hide objects" title="Sign in to hide objects">
+    </a>
+    <a class="mark-btn mark-btn-signedout"
+       href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"
+       aria-label="Sign in to hide objects" title="Sign in to hide objects">
         {% include "includes/icons/icon_archive.html" %}
-    </button>
+    </a>
 {% endif %}

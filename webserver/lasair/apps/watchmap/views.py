@@ -18,7 +18,7 @@ from django.http import HttpResponse, FileResponse
 from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.template.context_processors import csrf
-from lasair.apps.favourites.utils import marks_for_table
+from lasair.apps.favourites.utils import marks_for_table, suppress_hidden
 from django.shortcuts import render, get_object_or_404, redirect
 from datetime import timezone
 from lasair.apps.db_schema.utils import get_schema_dict
@@ -233,6 +233,19 @@ limit {resultCap}
     else:
         limit = False
 
+    # HIDING MEANS "NEVER SHOW ME THIS AGAIN". THE EXCLUSION IS SCOPED TO THE
+    # VIEWER, NOT THE WATCHMAP OWNER, SO IT REACHES A PUBLIC WATCHMAP SOMEBODY
+    # ELSE OWNS. IT RUNS AFTER THE resultCap TEST ABOVE, WHICH ASKS WHETHER THE
+    # QUERY ITSELF WAS CAPPED.
+    show_hidden_now = (
+        request.user.is_authenticated and request.GET.get('show_hidden') == '1')
+    if show_hidden_now:
+        marks = marks_for_table(request.user, table)
+        hidden_omitted = 0
+    else:
+        table, marks, hidden_omitted = suppress_hidden(request.user, table)
+    count = len(table)
+
     # ADD SCHEMA
     schema = get_schema_dict("objects")
 
@@ -244,7 +257,9 @@ limit {resultCap}
     return render(request, 'watchmap/watchmap_detail.html', {
         'watchmap': watchmap,
         'table': table,
-        'marks': marks_for_table(request.user, table),
+        'marks': marks,
+        'hidden_omitted': hidden_omitted,
+        'show_hidden_now': show_hidden_now,
         'count': count,
         'schema': schema,
         'form': form,

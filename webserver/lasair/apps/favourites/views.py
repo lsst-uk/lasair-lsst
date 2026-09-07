@@ -121,7 +121,7 @@ def marked_objects(topic, classification):
     return table
 
 
-def mark_list(request, classification, header, desc, zerotext, export_name, mode):
+def mark_list(request, classification, header, header_icon, desc, zerotext, export_name, mode):
     """*render one page of the objects a user has marked*
 
     **Key Arguments:**
@@ -129,6 +129,7 @@ def mark_list(request, classification, header, desc, zerotext, export_name, mode
     - `request` -- the original request
     - `classification` -- `favourite` or `hidden`
     - `header` -- the page heading
+    - `header_icon` -- template path of the header icon, the same glyph as the mark button
     - `desc` -- the line under the heading
     - `zerotext` -- the empty state
     - `export_name` -- the file name for the export dropdown
@@ -161,6 +162,7 @@ def mark_list(request, classification, header, desc, zerotext, export_name, mode
         'schema': schema,
         'marks': marks,
         'header': header,
+        'header_icon': header_icon,
         'desc': desc,
         'zerotext': zerotext,
         'export_name': export_name,
@@ -185,7 +187,8 @@ def favourites_list(request):
     return mark_list(
         request,
         classification=annotate_util.MARK_FAVOURITE,
-        header='Favourites',
+        header='Favourite Objects',
+        header_icon='includes/icons/icon_star.html',
         desc='The objects you have favourited, most recently favourited first.',
         zerotext=FAVOURITES_ZEROTEXT,
         export_name='favourites',
@@ -210,6 +213,7 @@ def hidden_list(request):
         request,
         classification=annotate_util.MARK_HIDDEN,
         header='Hidden Objects',
+        header_icon='includes/icons/icon_archive.html',
         desc=('The objects you have hidden. They are left out of your own filter '
               'results, search results and email digests, and stay visible to '
               'everybody else.'),
