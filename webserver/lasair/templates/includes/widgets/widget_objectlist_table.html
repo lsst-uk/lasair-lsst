@@ -16,7 +16,7 @@
                 <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
                     
                     <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
-                        {% include "includes/icons/icon_object_list.html" %}
+                        {% include header_icon|default:"includes/icons/icon_object_list.html" %}
                     </div>
                     <h2 class="h3 fw-extrabold mb-0 ps-2">{{header}}</h2>
 
@@ -42,10 +42,20 @@
 
                 <div class="col-12 px-4">
 
-                    {% if table|length > 0 %}
+                    {% if table|length > 0 or hidden_omitted %}
                         <small class="text-gray-500">
-                            {% if desc %}
+                            {% if table|length > 0 and desc %}
                                 {{desc}}
+                            {% endif %}
+                            {% if hidden_note or favourite_note or hidden_omitted or show_hidden_now %}
+
+                                {% if favourite_note %}{{ favourite_note }} {% endif %}
+                                {% if hidden_note %}{{ hidden_note }}.{% endif %}
+                                {% if hidden_omitted %}
+                                    You have {{ hidden_omitted }} hidden object{{ hidden_omitted|pluralize }} in this list —
+                                    <a href="?show_hidden=1">show them</a>.
+                                {% endif %}
+                                {% if show_hidden_now %}Showing your hidden objects for this page.{% endif %}
                             {% endif %}
                         </small>
                     {% endif %}
@@ -69,13 +79,23 @@
 
             <div class="table-responsive p-1 pt-0" id="objectlist-table">
 
+                {% comment %}
+                The mark column is opt-in per call site, and vanishes entirely when the
+                SELECT has no diaObjectId: with no id there is nothing to write an
+                annotation against, so a disabled column would be a promise the page
+                cannot keep. data-mark-col carries its index explicitly, because the
+                heading is deliberately empty and a user can alias a column to anything.
+                {% endcomment %}
 	        {% if sortTable is None or sortTable != False %}
-                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results">
+                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}{% if markList %} data-mark-list="{{ markList }}"{% endif %}>
                 {%else%}
-                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results">
+                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}{% if markList %} data-mark-list="{{ markList }}"{% endif %}>
                 {% endif %}
                 <thead class="thead-light">
                     <tr>
+                        {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
+                            <th class="mark-col"><span class="visually-hidden">Mark</span></th>
+                        {% endif %}
                         {% for key in table.0.keys %}
                             {% if key == "UTC" %}
                                 <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
@@ -87,7 +107,17 @@
                 <tbody>
                     {% for object in table %}
 
-                        <tr>
+                        {% comment %}
+                        A row already showing a hidden object — because "Include hidden
+                        objects" is ticked, or because this is the Hidden page — is not
+                        leaving the table, so it is not struck through when clicked.
+                        {% endcomment %}
+                        <tr{% if marks|keyvalue:object.diaObjectId == 'hidden' %} data-shows-hidden="true"{% endif %}>
+                            {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
+                                <td class="mark-col mark-col-cell mark-controls">
+                                    {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=object.diaObjectId mark=marks|keyvalue:object.diaObjectId %}
+                                </td>
+                            {% endif %}
                             {% for key in object.keys %}
 
                                 {% if key == "diaObjectId" %}

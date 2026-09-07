@@ -37,7 +37,7 @@
         {% block stylesheets %}{% endblock stylesheets %}
 
     </head>
-    <body>
+    <body class="{% block body_class %}{% endblock body_class %}">
 
 
 
@@ -49,6 +49,7 @@
 
 
             {% include 'includes/messages.html' %}
+            {% include 'includes/widgets/widget_hidden_info_panel.html' %}
 
             {% block content %}{% endblock content %}
 

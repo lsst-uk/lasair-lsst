@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 perPage = parseInt(dataTableEl.getAttribute('data-perPage'));
             }
 
+            /*
+             * THE MARK COLUMN'S INDEX IS DECLARED BY THE WIDGET, NOT MATCHED BY LABEL:
+             * ITS HEADING IS DELIBERATELY EMPTY AND A USER CAN ALIAS A COLUMN TO ANYTHING.
+             */
+            let markCol = null;
+            if (dataTableEl.hasAttribute('data-mark-col')) {
+                markCol = parseInt(dataTableEl.getAttribute('data-mark-col'));
+            }
+
             let searchable = true;
             let paging = true;
             if (dataTableEl.hasAttribute('datatable-vanilla')) {
@@ -35,8 +44,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     bottom: "{select}{info}{pager}"
                 },
                 perPage: perPage,
-                perPageSelect: [5, 10, 50, 100, 500, 10000]
+                perPageSelect: [5, 10, 50, 100, 500, 10000],
+                /* WITHOUT THIS, THE BLANK HEADING SORTS BY BUTTON MARKUP AND SEARCH MATCHES EVERY ROW */
+                columns: markCol === null ? [] : [{ select: markCol, sortable: false, searchable: false }]
             });
+
+            /* SO lasair_mark.js CAN REMOVE A ROW THROUGH THE DATATABLE, KEEPING THE PAGER AND COUNT IN STEP. */
+            dataTableEl.lasairDataTable = dataTable;
 
             const headings = dataTable.columns().dt.labels;
 
@@ -78,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                 colIdxsToRemove.push(idx);
                             }
                         });
+                        if (markCol !== null) {
+                            colIdxsToRemove.push(markCol);
+                        }
 
                         if (type === "csv") {
                             data.columnDelimiter = ",";

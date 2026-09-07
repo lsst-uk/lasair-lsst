@@ -1,0 +1,42 @@
+{% comment %}
+The favourite and hidden controls for one object. Used by the object page header
+card and by every markable result table, so the markup exists in one place.
+
+Context:
+  diaObjectId -- the object these buttons mark
+  mark        -- 'favourite', 'hidden' or empty, the mark the user holds now
+
+Signed-out visitors get the same icons as links straight to sign-in, with a
+?next= back to the current page; they send no request.
+{% endcomment %}
+{% if user.is_authenticated %}
+    <button type="button"
+            class="mark-btn mark-btn-favourite{% if mark == 'favourite' %} is-on{% endif %}"
+            data-mark="favourite"
+            data-object-id="{{ diaObjectId }}"
+            aria-pressed="{% if mark == 'favourite' %}true{% else %}false{% endif %}"
+            aria-label="{% if mark == 'favourite' %}Favourited — click to undo{% else %}Favourite{% endif %}"
+            title="{% if mark == 'favourite' %}Favourited — click to undo{% else %}Favourite{% endif %}">
+        {% include "includes/icons/icon_star.html" %}
+    </button>
+    <button type="button"
+            class="mark-btn mark-btn-hidden{% if mark == 'hidden' %} is-on{% endif %}"
+            data-mark="hidden"
+            data-object-id="{{ diaObjectId }}"
+            aria-pressed="{% if mark == 'hidden' %}true{% else %}false{% endif %}"
+            aria-label="{% if mark == 'hidden' %}Hidden — click to undo{% else %}Hide{% endif %}"
+            title="{% if mark == 'hidden' %}Hidden — click to undo{% else %}Hide{% endif %}">
+        {% include "includes/icons/icon_archive.html" %}
+    </button>
+{% else %}
+    <a class="mark-btn mark-btn-signedout"
+       href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"
+       aria-label="Sign in to favourite objects" title="Sign in to favourite objects">
+        {% include "includes/icons/icon_star.html" %}
+    </a>
+    <a class="mark-btn mark-btn-signedout"
+       href="{% url 'login' %}?next={{ request.get_full_path|urlencode }}"
+       aria-label="Sign in to hide objects" title="Sign in to hide objects">
+        {% include "includes/icons/icon_archive.html" %}
+    </a>
+{% endif %}
