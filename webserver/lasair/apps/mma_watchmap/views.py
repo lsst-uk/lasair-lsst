@@ -121,7 +121,7 @@ o.diaObjectId,
 h.probdens2, h.contour, 
 o.lastDiaSourceMjdTai as "last detected",
 o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
-o.r_psfFlux, o.g_psfFlux,
+o.latest_psfFlux,
 o.ra, o.decl
 FROM mma_area_hits as h, objects AS o, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
@@ -146,23 +146,15 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
              'contour': r2['contour'],
              'last detected': r2['last detected'],
              't_GW': chop(r2['t_GW']),
+             'latest flux': r2['latest_psfFlux'],
              }
-        if r2['gPSFluxMax'] and r2['gPSFluxMax'] > 0:
-            r['mag_g'] = chop(31.4 - 2.5 * math.log10(r2['gPSFluxMax']))
-        else:
-            r['mag_g'] = ''
-
-        if r2['rPSFluxMax'] and r2['rPSFluxMax'] > 0:
-            r['mag_r'] = chop(31.4 - 2.5 * math.log10(r2['rPSFluxMax']))
-        else:
-            r['mag_r'] = ''
 
         r['ra'] = r2['ra']
         r['decl'] = r2['decl']
         newtable2.append(r)
 
     count = len(table2)
-    schema2 = ['probdens', 'contour', 'last detected', 't_GW', 'mag_g', 'mag_r', 'ra', 'decl']
+    schema2 = ['probdens', 'contour', 'last detected', 't_GW', 'latest flux', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
@@ -191,7 +183,7 @@ h.probdens3, h.contour, h.distance as dist,
 o.lastDiaSourceMjdTai as "last detected",
 o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.r_psfFlux, o.g_psfFlux,
+o.latest_psfFlux, o.absMag,
 o.ra, o.decl 
 FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
@@ -218,24 +210,8 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
              'last detected': r3['last detected'],
              't_GW': chop(r3['t_GW']),
              'Sherlock': r3['classification'],
+             'latest flux': r3['latest_psfFlux'],
              }
-
-        if r3['gPSFluxMax'] and r3['gPSFluxMax'] > 0:
-            m = 23.9 - 2.5 * math.log10(r3['gPSFluxMax'])
-            r['mag_g'] = chop(m)
-            r['M_g'] = chop(m - 25 - 5 * math.log10(r3['dist']))
-        else:
-            r['mag_g'] = ''
-            r['M_g'] = ''
-
-        if r3['rPSFluxMax'] and r3['rPSFluxMax'] > 0:
-            m = 23.9 - 2.5 * math.log10(r3['rPSFluxMax'])
-            r['mag_r'] = chop(m)
-            r['M_r'] = chop(m - 25 - 5 * math.log10(r3['dist']))
-        else:
-            r['mag_r'] = ''
-            r['M_r'] = ''
-
         if r3['z']:
             r['z'] = r3['z']
             r['zerr'] = 0.0
