@@ -149,8 +149,8 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
              'latest flux': r2['latest_psfFlux'],
              }
 
-        r['ra'] = r2['ra']
-        r['decl'] = r2['decl']
+        r['ra'] = chop(r2['ra'])
+        r['decl'] = chop(r2['decl'])
         newtable2.append(r)
 
     count = len(table2)
@@ -214,22 +214,23 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
              }
         if r3['z']:
             r['z'] = r3['z']
-            r['zerr'] = 0.0
             r['zflag'] = 'specz'
         elif r3['photoZ']:
             r['z'] = r3['photoZ']
-            r['zerr'] = r3['photoZerr']
             r['zflag'] = 'photz'
         else:
             r['z'] = ''
-            r['zerr'] = ''
             r['zflag'] = 'no_z'
+        if r3['absMag']:
+            r['absMag'] = chop(r3['absMag'])
+        else:
+            r['absMag'] = ''
 
-        r['ra'] = r3['ra']
-        r['decl'] = r3['decl']
+        r['ra'] = chop(r3['ra'])
+        r['decl'] = chop(r3['decl'])
         newtable3.append(r)
 
-    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'mag_g', 'M_g', 'mag_r', 'M_r', 'z', 'zerr', 'zflag', 'ra', 'decl']
+    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'latest flux', 'absMag', 'z', 'zflag', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
