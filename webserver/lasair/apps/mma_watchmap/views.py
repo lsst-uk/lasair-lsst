@@ -49,6 +49,16 @@ def mma_watchmap_index(request):
     ```           
     """
     mmaWatchmaps = MmaWatchmap.objects.all()
+
+    # how many hits for each
+    msl = db_connect.remote()
+    cursor = msl.cursor(buffered=True, dictionary=True)
+    query = 'SELECT mw_id, count(*) AS n FROM mma_area_hits GROUP BY mw_id'
+    cursor.execute(query)
+    how_many = {}
+    for row in cursor:
+        how_many[row['mw_id']] = row['n']
+
     d = {}
     for mw in list(mmaWatchmaps):
         namespace = mw.namespace
@@ -68,7 +78,8 @@ def mma_watchmap_index(request):
                'mocimage': mw.mocimage,
                'area90': mw.area90,
                'mma_type': mma_type,
-               'event_date': mw.event_date
+               'event_date': mw.event_date,
+               'how_many': how_many.get(mw.mw_id, 0),
                }
         # get the latest version for each otherId
         if mw.otherId in d:
