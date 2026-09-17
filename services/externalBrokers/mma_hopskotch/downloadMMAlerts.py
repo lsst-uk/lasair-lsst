@@ -68,7 +68,7 @@ def listen(options):
         dataDict = hr.poll()
         print('got event')
 
-        process according to event type
+        # process according to event type
         if options['--type'] == 'GW':
             readGW.handleDataDict(dataDict, options, logger)
         elif options['--type'] == 'Icecube':
