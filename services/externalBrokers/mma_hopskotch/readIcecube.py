@@ -10,9 +10,13 @@ import healpy as hp
 from mocpy import MOC
 import requests
 
+# Handling Icecube CASCADE events
+
 def handleDataDict(dataDict, options, logger):
+    # where the output goes
     dir = options['--directory']
 
+    # fetch the skymap from the given URL
     if 'skymap_fits_url' in dataDict:
         r = requests.get(dataDict['skymap_fits_url'])
         skymap = r.content
@@ -20,16 +24,19 @@ def handleDataDict(dataDict, options, logger):
         logger.error('Icecube dataDict has no skymap_fits_url. Quitting')
         return None
 
+    # Use the event name for the directory
     if 'event_name' in dataDict:
         alertDir = dataDict['event_name']
     else:
         logger.error('Icecube dataDict has no event_name. Quitting')
 
+    # write the fits file to the alert directory
     os.makedirs(dir + '/' + alertDir, exist_ok = True)
     skymapFile = dir + '/' + alertDir + '/map.fits'
     with open(skymapFile, 'wb') as fitsFile:
         fitsFile.write(skymap)
 
+    # make the MOCs
     areas = {}
     contours = options.get('--contours', '90')
     for contour in contours.split(','):
@@ -38,9 +45,9 @@ def handleDataDict(dataDict, options, logger):
         area = moc_single_level(int(contour), skymapFile, output_file, logger)
         areas[f'area{contour}'] = area
 
+    # Fetch all the metadata from the Skymap FITS file
     h = fits.open(BytesIO(skymap))
     header = h[1].header
-
     mjd = header['EVENTMJD']
     alertDict = {}
     alertDict['RA']         = header['RA']
@@ -56,7 +63,7 @@ def handleDataDict(dataDict, options, logger):
                  'EXTRA': areas,
                  'HEADER': {'MJD-OBS': mjd,
                             'CREATOR': creator}}
-
+    # Write the metadat as a yaml
     os.makedirs(dir + '/' + alertDir, exist_ok = True)
     with open(dir + '/' + alertDir + '/meta.yaml', 'w') as yamlFile:
         yamlFile.write(yaml.dump(eventMeta))
@@ -101,14 +108,13 @@ def moc_single_level(contour, input_file, output_file, logger):
 if __name__=="__main__":
     logger = logging.getLogger('')
     logger.setLevel(logging.INFO)
-
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
     ))
-
     logger.addHandler(handler)
 
+    # Test by running with the sample data
     dataDict = json.loads(open('sample_data/icecube.json').read())
     options = {
         '--superevents': False,

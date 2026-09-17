@@ -5,6 +5,9 @@ import json
 from io import BytesIO
 import numpy as np   
 from copy import deepcopy
+from astropy.table import Table
+from astropy import units as u
+import math
 
 def uniq2order(uniq):
     """
@@ -27,7 +30,10 @@ def uniq2pixarea(uniq):
     return 4.0 * np.pi / npix
 
 def handleDataDict(dataDict, options, logger):
+    # where the output goes
     dir = options['--directory']
+
+    # used to throttle the numbers
     superEventId = dataDict['superevent_id']
     eventType = superEventId[0] # M, T or S
 
@@ -54,12 +60,14 @@ def handleDataDict(dataDict, options, logger):
             with open(dir + '/' + alertDir + '/meta.yaml', 'w') as yamlFile:
                 yamlFile.write(yaml.dump(meta))
 
+    # write the skymap
     if dataDict['event'] is not None:
         skymap = dataDict['event']['skymap']
         os.makedirs(dir + '/' + alertDir, exist_ok = True)
         with open(dir + '/' + alertDir + '/map.fits', 'wb') as fitsFile:
             fitsFile.write(skymap)
 
+    # make the MOCs
     contours = options.get('--contours', '90')
     if dataDict['event'] is not None:
         for contour in contours.split(','):
@@ -73,11 +81,9 @@ def handleDataDict(dataDict, options, logger):
     return "success"
 
 def getContourArea(inputFilePointer, contour, logger):
-
-    from astropy.table import Table
-    from astropy import units as u
-    import math
-    #from ligo.skymap.moc import uniq2pixarea
+    # this could be replaced by 
+    # ALL_SKY = 180*180*4/math.pi
+    # area =  moc.sky_fraction * ALL_SKY
 
     # Read and verify the input
     skymap = Table.read(inputFilePointer, format='fits')
@@ -201,9 +207,6 @@ def writeMeta(options, dataDict, logger):
     except KeyError as e:
         logger.error("The CREATOR variable is missing.")
 
-    # Do NOT write to the database, which could potentially be locked and crash the
-    # daemon. Write another script (e.g the reports script) that does that. Just
-    # record the metadata for loading.
     # Remove the skymap from the dictionary.
     try:
         dataDictCopy['event'].pop('skymap')
@@ -225,7 +228,6 @@ def writeMeta(options, dataDict, logger):
     return eventMeta
 
 if __name__=="__main__":
-
     logger = logging.getLogger('')
     logger.setLevel(logging.INFO)
 
@@ -236,7 +238,7 @@ if __name__=="__main__":
 
     logger.addHandler(handler)
 
-
+    # Test with the sample date
     dataDict = json.loads(open('sample_data/igwn.json').read())
     skymap = open('sample_data/igwn_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
@@ -247,13 +249,3 @@ if __name__=="__main__":
     }
     ret = handleDataDict(dataDict, options, logger)
     print(ret)
-
-
-
-
-
-
-
-
-
-
