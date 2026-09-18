@@ -49,8 +49,10 @@ def listen(options):
     # which alerts are we fetching?
     if options['--type'] == 'GW':
          topic = 'igwn.gwalert'
+         is_gcn = False
     elif options['--type'] == 'Icecube':
         topic = 'gcn.classic.text.ICECUBE_CASCADE'
+        is_gcn = True
     else:
         logger.error(f'Unknown event type {options['--type']}. Exiting')
         sys.exit()
@@ -60,7 +62,7 @@ def listen(options):
     scimma_auth_password = settings.SCIMMA_AUTH_PASSWORD
     group_id             = settings.HOPSKOTCH_GROUP_ID
     hr = hop_reader(scimma_auth_username, scimma_auth_password, \
-        topic, group_id, earliest=options['--earliest'])
+        topic, group_id, is_gcn=is_gcn, earliest=options['--earliest'])
 
     # Hopskotch has no timeout. So this just waits forever.
     while True:

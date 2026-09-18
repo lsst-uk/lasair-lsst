@@ -8,7 +8,8 @@ def handler(signum, frame):
     raise TimeoutError
 
 class hop_reader():
-    def __init__(self, username, password, topic, my_group_id, earliest=False):
+    def __init__(self, username, password, topic, my_group_id, is_gcn=False, earliest=False):
+        self.is_gcn = is_gcn
         hop_auth = Auth(username, password)
 
         # By default only listen to alerts that appear after the daemon has started.
@@ -31,4 +32,7 @@ class hop_reader():
 
     def poll(self):
         alert = next(self.hop_stream)
-        return alert.content
+        if self.is_gcn:
+            return alert.fields
+        else:
+            return alert.content

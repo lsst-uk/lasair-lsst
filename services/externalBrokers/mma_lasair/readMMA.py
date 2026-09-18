@@ -210,17 +210,17 @@ if __name__ == "__main__":
     else:                maxmjd = skymaps.mjdnow()
 
     if args['--minmjd']: minmjd = float(args['--minmjd'])
-    else:                minmjd = maxmjd - settings.GW_ACTIVE_DAYS
+    else:                minmjd = maxmjd - settings.MMA_ACTIVE_DAYS
 
     if args['--namespace']: namespace = args['--namespace']
     else:                   namespace = 'LVK'
 
     if namespace == 'LVK':
         import handle_gw_yaml as handle_yaml
-        dir = settings.GW_DIRECTORY  #  '/mnt/cephfs/lasair/mma/gw/'
+        dir = settings.MMA_DIRECTORY + '/gw'       #  '/mnt/cephfs/lasair/mma/gw/'
     else:
         import handle_icecube_yaml as handle_yaml
-        dir = settings.ICECUBE_DIRECTORY  #  '/mnt/cephfs/lasair/mma/icecube/'
+        dir = settings.MMA_DIRECTORY + '/icecube'  #  '/mnt/cephfs/lasair/mma/icecube/'
 
     database = db_connect.remote()
 
