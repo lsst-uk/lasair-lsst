@@ -21,14 +21,19 @@ def handleDataDict(dataDict, options, logger):
         r = requests.get(dataDict['skymap_fits_url'])
         skymap = r.content
     else:
-        logger.error('Icecube dataDict has no skymap_fits_url. Quitting')
+        msg = 'Icecube dataDict has no skymap_fits_url. Quitting'
+        if logger: logger.error(msg)
+        else:      print(msg)
         return None
 
     # Use the event name for the directory
     if 'event_name' in dataDict:
-        alertDir = dataDict['event_name']
+        alertDir = dataDict['event_name'] + '/final/'
     else:
-        logger.error('Icecube dataDict has no event_name. Quitting')
+        msg = 'Icecube dataDict has no event_name. Quitting'
+        if logger: logger.error(msg)
+        else:      print(msg)
+
 
     # write the fits file to the alert directory
     os.makedirs(dir + '/' + alertDir, exist_ok = True)
@@ -79,7 +84,10 @@ def moc_single_level(contour, input_file, output_file, logger):
     order = hp.nside2order(nside)
     ordering = header_dict.get('ORDERING', 'RING').strip().upper()
     
-    logger.debug(f"moc_single_level: NSIDE = {nside} (Order {order}), Ordering = {ordering}")
+    msg = f"moc_single_level: NSIDE = {nside} (Order {order}), Ordering = {ordering}"
+    if logger: logger.info(msg)
+    else:      print(msg)
+
     
     prob = map_data / map_data.sum()
     order_idx = np.argsort(prob)[::-1]
@@ -102,24 +110,18 @@ def moc_single_level(contour, input_file, output_file, logger):
     moc.save(output_file, format='fits', overwrite=True)
     ALL_SKY = 180*180*4/math.pi
     area =  moc.sky_fraction * ALL_SKY
-    logger.debug(f"moc_single_level: area {area} saved to {output_file}")
+    msg = f"moc_single_level: area {area} saved to {output_file}"
+    if logger: logger.info(msg)
+    else:      print(msg)
+
     return area
 
 if __name__=="__main__":
-    logger = logging.getLogger('')
-    logger.setLevel(logging.INFO)
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    ))
-    logger.addHandler(handler)
-
-    # Test by running with the sample data
-    dataDict = json.loads(open('sample_data/icecube.json').read())
+    dataDict = json.loads(open('sample_input/icecube.json').read())
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_data/icecube',
+        '--directory'  : 'sample_output/icecube',
         '--contours'   : '10,50,90',
     }
-    ret = handleDataDict(dataDict, options, logger)
+    ret = handleDataDict(dataDict, options, logger=None)
     print(ret)

@@ -41,12 +41,15 @@ def handleDataDict(dataDict, options, logger):
     alertType = dataDict['alert_type'].lower()
     alertName = superEventId + '_' + alertTimeStamp + '_' + alertType
     alertDir = alertName.replace('_','/',1)
-    logger.info("Alert Received: %s" % alertName) # Future version of this script will log the output.
+    msg = "Alert Received: %s" % alertName
+    if logger: logger.info(msg)
+    else:      print(msg)
 
     # Act on all events unless we only want superevents. Need to think about the logic!
     if eventType != 'S' and options['--superevents']:
-        logger.info("Skipping over this event.")
-        # Skip to the next event
+        msg= "Skipping over this event."
+        if logger: logger.info(msg)
+        else:      print(msg)
         return None
 
     # Write the event meta into the databases
@@ -54,7 +57,9 @@ def handleDataDict(dataDict, options, logger):
         meta = writeMeta(options, dataDict, logger)
         if meta:
             for k,v in meta.items():
-                logger.info("%s = %s" % (k, str(v)))
+                msg= "%s = %s" % (k, str(v))
+                if logger: logger.info(msg)
+                else:      print(msg)
             # Overwrite the superevent info every time a new update arrives.
             os.makedirs(dir + '/' + alertDir, exist_ok = True)
             with open(dir + '/' + alertDir + '/meta.yaml', 'w') as yamlFile:
@@ -77,7 +82,9 @@ def handleDataDict(dataDict, options, logger):
                 os.makedirs(dir + '/' + alertDir, exist_ok = True)
                 writeMOC(BytesIO(skymap), dir + '/' + alertDir + '/' + contour + '.moc', c, logger)
             except ValueError as e:
-                logger.error("Contour %s is not a float" % contour)
+                msg= "Contour %s is not a float" % contour
+                if logger: logger.error(msg)
+                else:      print(msg)
     return "success"
 
 def getContourArea(inputFilePointer, contour, logger):
@@ -127,7 +134,7 @@ def writeMOC(inputFilePointer, outputMOCName, contour, logger):
     # Read and verify the input
     skymap = Table.read(inputFilePointer, format='fits')
     #print('Input multi-order skymap:')
-    logger.info(skymap.info)
+    #logger.info(skymap.info)
 
     # Sort by prob density of pixel
     skymap.sort('PROBDENSITY', reverse=True)
@@ -142,18 +149,18 @@ def writeMOC(inputFilePointer, outputMOCName, contour, logger):
 
     # Should be 1.0. But need not be.
     sumprob = np.sum(prob)
-    logger.info('Sum probability = %.3f\n' % sumprob)
+    #logger.info('Sum probability = %.3f\n' % sumprob)
 
     # Find the index where contour of prob is inside
     i = cumprob.searchsorted(contour*sumprob)
     area_wanted = pixel_area[:i].sum()
-    logger.info('Area of %.2f contour is %.2f sq deg' % \
-        (contour, area_wanted * (180/math.pi)**2))
+    #logger.info('Area of %.2f contour is %.2f sq deg' % \
+    #   (contour, area_wanted * (180/math.pi)**2))
 
     # A MOC is just an astropy Table with one column of healpix indexes
     skymap = skymap[:i]
     skymap = skymap['UNIQ',]
-    logger.info(skymap.info)
+    #logger.info(skymap.info)
     skymap.write(outputMOCName, format='fits', overwrite=True)
     # 2023-09-21 KWS There's a bug in MOCpy that requires format to be '1K'
     #                rather than the default 'K' (which is perfectly valid).
@@ -163,7 +170,9 @@ def writeMOC(inputFilePointer, outputMOCName, contour, logger):
     h.writeto(outputMOCName, overwrite=True)
     h.close()
 
-    logger.info('MOC file %s written' % outputMOCName)
+    msg = 'MOC file %s written' % outputMOCName
+    if logger: logger.info(msg)
+    else:      print(msg)
 
 def writeMeta(options, dataDict, logger):
     #import MySQLdb
@@ -190,22 +199,30 @@ def writeMeta(options, dataDict, logger):
     try:
         mjd = header['MJD-OBS']
     except KeyError as e:
-        logger.error("The MJD-OBS variable is missing.")
+        msg = "The MJD-OBS variable is missing."
+        if logger: logger.error(msg)
+        else:      print(msg)
 
     try:
         distance = header['DISTMEAN']
     except KeyError as e:
-        logger.error("The DISTMEAN variable is missing.")
+        msg = "The DISTMEAN variable is missing."
+        if logger: logger.error(msg)
+        else:      print(msg)
 
     try:
         distanceStd = header['DISTSTD']
     except KeyError as e:
-        logger.error("The DISTSTD variable is missing.")
+        msg = "The DISTSTD variable is missing."
+        if logger: logger.error(msg)
+        else:      print(msg)
 
     try:
         creator = header['CREATOR']
     except KeyError as e:
-        logger.error("The CREATOR variable is missing.")
+        msg = "The CREATOR variable is missing."
+        if logger: logger.error(msg)
+        else:      print(msg)
 
     # Remove the skymap from the dictionary.
     try:
@@ -228,24 +245,13 @@ def writeMeta(options, dataDict, logger):
     return eventMeta
 
 if __name__=="__main__":
-    logger = logging.getLogger('')
-    logger.setLevel(logging.INFO)
-
-    handler = logging.StreamHandler(sys.stdout)
-    handler.setFormatter(logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    ))
-
-    logger.addHandler(handler)
-
-    # Test with the sample date
-    dataDict = json.loads(open('sample_data/igwn.json').read())
-    skymap = open('sample_data/igwn_skymap.fits', 'rb').read()
+    dataDict = json.loads(open('sample_input/igwn.json').read())
+    skymap = open('sample_input/igwn_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_data/gw',
+        '--directory'  : 'sample_output/gw',
         '--contours'   : '10,50,90',
     }
-    ret = handleDataDict(dataDict, options, logger)
+    ret = handleDataDict(dataDict, options, logger=None)
     print(ret)
