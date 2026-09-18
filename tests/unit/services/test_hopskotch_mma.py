@@ -16,10 +16,12 @@ class MmaHopskotchTest(TestCase):
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_hopskotch_output/gw',
+        '--directory'  : '/tmp/gw',
         '--contours'   : '10,50,90',
     }
     ret = readGW.handleDataDict(dataDict, options, logger=None)
+    # assert that every file in /tmp/gw is identical 
+    # to those in sample_hopskotch_output/gw
 
   def test1_readIcecube(self):
     dataDict = json.loads(open('sample_hopskotch_input/icecube.json').read())
@@ -27,12 +29,12 @@ class MmaHopskotchTest(TestCase):
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_hopskotch_output/gw',
+        '--directory'  : '/tmp/icecube',
         '--contours'   : '10,50,90',
     }
     ret = readIcecube.handleDataDict(dataDict, options, logger=None)
-
-
+    # assert that every file in /tmp/icecube is identical 
+    # to those in sample_hopskotch_output/icecube
 
 if __name__ == '__main__':
   import xmlrunner
