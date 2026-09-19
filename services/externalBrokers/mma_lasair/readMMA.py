@@ -44,6 +44,7 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
 
     # the handle function is different depending on which type of event
     result = handle_yaml.handle(data)
+    print(result)
 
     event_date = mjd2date(result['event_tai'])
 
@@ -59,10 +60,10 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
     mocimage = make_image(moc10, moc50, moc90)
 
     # get most probable point
-    skymap_filename = datadir + '/map.fits'
-    (raprob, deprob) = get_ra_dec(skymap_filename)
-    result['loc']['RA'] = raprob
-    result['loc']['Dec'] = deprob
+#    skymap_filename = datadir + '/map.fits'
+#    (raprob, deprob) = get_ra_dec(skymap_filename)
+#    result['loc']['RA'] = raprob
+#    result['loc']['Dec'] = deprob
 
     # Insert into database
     query = """
@@ -81,6 +82,7 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
         namespace, otherId, version, result['more_info'], \
         area10, area50, area90, json.dumps(result['params']) \
     )
+    print(query)
 
     cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
@@ -114,24 +116,23 @@ def handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose=Fals
     nhits = 0
     ningested = 0
     for version in os.listdir(dir+'/'+otherId):
-        if version.startswith('20'):
+        # Only look at alerts whe havent seen before
+        if not getDone(dir, otherId, version):
+            # Set done flag so we dont come back
+            setDone(dir, otherId, version)
+            message = ''
+#            try:
+            if 1:
+                message = insert_mma_alert(database, namespace, dir, otherId, version)
+#            except Exception as e:
+#                print('Error inserting mma alert in database' + str(e))
 
-            # Only look at alerts whe havent seen before
-            if not getDone(dir, otherId, version):
-                # Set done flag so we dont come back
-                setDone(dir, otherId, version)
-                message = ''
-                try:
-                    message = insert_mma_alert(database, namespace, dir, otherId, version)
-                except Exception as e:
-                    print('Error inserting mma alert in database' + str(e))
-
-                # message says why it was rejected
-                if len(message) == 0:
-                    ningested += 1
-                    print(otherId, version, 'ingested')
-                else:
-                    print(otherId, version, 'not ingested:', message)
+            # message says why it was rejected
+            if len(message) == 0:
+                ningested += 1
+                print(otherId, version, 'ingested')
+            else:
+                print(otherId, version, 'not ingested:', message)
 
     return ningested
 
@@ -220,14 +221,13 @@ if __name__ == "__main__":
         dir = settings.MMA_DIRECTORY + '/LVK'       #  '/mnt/cephfs/lasair/mma/LVK/'
     else:
         import handle_Icecube_yaml as handle_yaml
-        dir = settings.MMA_DIRECTORY + '/icecube'  #  '/mnt/cephfs/lasair/mma/Icecube/'
+        dir = settings.MMA_DIRECTORY + '/Icecube'  #  '/mnt/cephfs/lasair/mma/Icecube/'
 
     database = db_connect.remote()
 
     verbose = True
     ningested = 0
     for file in sorted(os.listdir(dir)):
-        if file.startswith('S') or file.startswith('M'):
-            otherId = file
-            ningested += handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose)
+        otherId = file
+        ningested += handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose)
     print(ningested, 'event versions ingested')

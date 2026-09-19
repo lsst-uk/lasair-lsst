@@ -11,8 +11,8 @@ Usage:
 Options:
   -h --help                         Show this screen.
   --type=<alertType>                Can be LVK or Icecube [default: LVK]
-  --directory=<directory>           Directory to where the maps and MOCs will be written [default: /tmp].
-  --contours=<contours>             MOC contoursm separated by commas,  no spaces [default: 90]
+  --directory=<directory>           Directory to where the maps and MOCs will be written, default from settings1
+  --contours=<contours>             MOC contours separated by commas,  no spaces [default: 10,50,90]
   --logfile=<logfile>               log file [default: stdout]
   --superevents                     Only deal with superevents. 
   --earliest                        Start from the earliest message in the queue. (Default is the latest.)
@@ -50,9 +50,15 @@ def listen(options):
     if options['--type'] == 'LVK':
          topic = 'igwn.gwalert'
          is_gcn = False
+         if not options['--directory']:
+            options['--directory'] = settings.MMA_DIRECTORY + '/LVK/'
+
     elif options['--type'] == 'Icecube':
         topic = 'gcn.classic.text.ICECUBE_CASCADE'
         is_gcn = True
+        if not options['--directory']:
+            options['--directory'] = settings.MMA_DIRECTORY + '/Icecube/'
+
     else:
         logger.error(f'Unknown event type {options['--type']}. Exiting')
         sys.exit()
