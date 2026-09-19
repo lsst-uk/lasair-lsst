@@ -35,16 +35,16 @@ def handle(data):
     # Keep the BNS and NSBH, only keep BBH if small area
     # First find the most likely classification
     percent = 0
-    gwclass = ''
+    lvkclass = ''
     for k,v in params['classification'].items():
         if v>percent:
             percent = v
-            gwclass = k
+            lvkclass = k
 
     area90 = data['EXTRA']['area90']
-    good = (gwclass == 'BNS' or gwclass == 'NSBH') and area90 < settings.GW_BBH_MAX_AREA
+    good = (lvkclass == 'BNS' or lvkclass == 'NSBH') and area90 < settings.LVK_BBH_MAX_AREA
     if not good:
-        message = 'Classification = %s and area90 = %s' % (gwclass, str(area90))
+        message = 'Classification = %s and area90 = %s' % (lvkclass, str(area90))
 
     # What kind of MMA event is this
     more_info = 'This is a gravitational wave event from LIGO-Virgo-Kagra'

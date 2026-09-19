@@ -35,18 +35,18 @@ if __name__=="__main__":
 
     if args['--mw_id']:
         mw_id = int(args['--mw_id'])
-        gw = skymaps.fetch_skymap_by_id(database, mw_id)
-        skymaplist = [gw]
+        lvk = skymaps.fetch_skymap_by_id(database, mw_id)
+        skymaplist = [lvk]
     else:
         print('searching for skymaps between %f and %f' % (minmjd, maxmjd))
         skymaplist = skymaps.fetch_skymaps_by_mjd(database, minmjd, maxmjd)
 
     print('found %d active skymaps' % len(skymaplist))
 
-    for gw in skymaplist:
-        skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd, verbose=True)
+    for lvk in skymaplist:
+        skymaphits = skymaps.get_skymap_hits(database, lvk, minmjd, maxmjd, verbose=True)
         if len(skymaphits['diaObjectId']) > 0:
-            nhits = skymaps.insert_skymap_hits(database, gw, skymaphits)
-            print('mw_id=%d got %d hits' % (gw['mw_id'], nhits))
+            nhits = skymaps.insert_skymap_hits(database, lvk, skymaphits)
+            print('mw_id=%d got %d hits' % (lvk['mw_id'], nhits))
         else:
-            print('mw_id=%d no hits' % gw['mw_id'])
+            print('mw_id=%d no hits' % lvk['mw_id'])

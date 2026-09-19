@@ -250,7 +250,7 @@ if __name__=="__main__":
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_output/gw',
+        '--directory'  : 'sample_output/LVK',
         '--contours'   : '10,50,90',
     }
     ret = handleDataDict(dataDict, options, logger=None)

@@ -3,7 +3,7 @@ Checks the directory of MMA alerts for those we haven't seen before
 then tries to insert it into the database
 
 Usage:
-    readGW.py [--minmjd=minmjd]
+    readLVK.py [--minmjd=minmjd]
               [--maxmjd=maxmjd]
               [--namespace=namespace]
 
@@ -199,7 +199,7 @@ def setDone(dir, otherId, version):
     os.system('touch ' + flag) 
 
 if __name__ == "__main__":
-    """ Intended to run in a cron to harvest GW alerts that appear in the directory
+    """ Intended to run in a cron to harvest LVK alerts that appear in the directory
     """
     import sys
     from docopt import docopt
@@ -216,11 +216,11 @@ if __name__ == "__main__":
     else:                   namespace = 'LVK'
 
     if namespace == 'LVK':
-        import handle_gw_yaml as handle_yaml
-        dir = settings.MMA_DIRECTORY + '/gw'       #  '/mnt/cephfs/lasair/mma/gw/'
+        import handle_LVK_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/LVK'       #  '/mnt/cephfs/lasair/mma/LVK/'
     else:
-        import handle_icecube_yaml as handle_yaml
-        dir = settings.MMA_DIRECTORY + '/icecube'  #  '/mnt/cephfs/lasair/mma/icecube/'
+        import handle_Icecube_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/icecube'  #  '/mnt/cephfs/lasair/mma/Icecube/'
 
     database = db_connect.remote()
 

@@ -16,25 +16,25 @@ class MmaHopskotchTest(TestCase):
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : '/tmp/gw',
+        '--directory'  : '/tmp/LVK',
         '--contours'   : '10,50,90',
     }
     ret = readGW.handleDataDict(dataDict, options, logger=None)
-    # assert that every file in /tmp/gw is identical 
-    # to those in sample_hopskotch_output/gw
+    # assert that every file in /tmp/LVK is identical 
+    # to those in sample_hopskotch_output/LVK
 
   def test1_readIcecube(self):
-    dataDict = json.loads(open('sample_hopskotch_input/icecube.json').read())
-    skymap = open('sample_input/icecube_hopskotch_skymap.fits', 'rb').read()
+    dataDict = json.loads(open('sample_hopskotch_input/Icecube.json').read())
+    skymap = open('sample_input/Icecube_hopskotch_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
     options = {
         '--superevents': False,
-        '--directory'  : '/tmp/icecube',
+        '--directory'  : '/tmp/Icecube',
         '--contours'   : '10,50,90',
     }
     ret = readIcecube.handleDataDict(dataDict, options, logger=None)
-    # assert that every file in /tmp/icecube is identical 
-    # to those in sample_hopskotch_output/icecube
+    # assert that every file in /tmp/Icecube is identical 
+    # to those in sample_hopskotch_output/Icecube
 
 if __name__ == '__main__':
   import xmlrunner

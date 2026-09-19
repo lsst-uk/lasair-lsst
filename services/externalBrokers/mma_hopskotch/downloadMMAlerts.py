@@ -1,5 +1,5 @@
 """
-Download GW and Icecube Alerts and convert to MOC files.
+Download LVK and Icecube Alerts and convert to MOC files.
 https://emfollow.docs.ligo.org/userguide/tutorial/multiorder_skymaps.html
 
 This code written by Ken Smith and Roy Williams 2026
@@ -10,7 +10,7 @@ Usage:
 
 Options:
   -h --help                         Show this screen.
-  --type=<alertType>                Can be GW or Icecube [default: GW]
+  --type=<alertType>                Can be LVK or Icecube [default: LVK]
   --directory=<directory>           Directory to where the maps and MOCs will be written [default: /tmp].
   --contours=<contours>             MOC contoursm separated by commas,  no spaces [default: 90]
   --logfile=<logfile>               log file [default: stdout]
@@ -21,7 +21,7 @@ import sys
 from docopt import docopt
 import logging
 from hopskotch_utils import hop_reader
-import readGW, readIcecube
+import readLVK, readIcecube
 
 # in settings we expect SCIMMA_AUTH_USERNAME, SCIMMA_AUTH_PASSWORD, HOPSKOTCH_GROUP_ID
 sys.path.append('../../../common')
@@ -47,7 +47,7 @@ def listen(options):
     logger.addHandler(fh)
 
     # which alerts are we fetching?
-    if options['--type'] == 'GW':
+    if options['--type'] == 'LVK':
          topic = 'igwn.gwalert'
          is_gcn = False
     elif options['--type'] == 'Icecube':
@@ -71,8 +71,8 @@ def listen(options):
         print('got event')
 
         # process according to event type
-        if options['--type'] == 'GW':
-            readGW.handleDataDict(dataDict, options, logger)
+        if options['--type'] == 'LVK':
+            readLVK.handleDataDict(dataDict, options, logger)
         elif options['--type'] == 'Icecube':
             readIcecube.handleDataDict(dataDict, options, logger)
         else:
