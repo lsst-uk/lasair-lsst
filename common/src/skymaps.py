@@ -221,11 +221,11 @@ def mjdnow():
 def mocfilename(gw):
     """ Where to find the 90% MOC for a given skymap and version
     """
-    filename = '%s/%s/%s/90.moc' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
+    filename = '%s/%s/%s/90.moc' % (settings.MMA_DIRECTORY+'/gw/', gw['otherId'], gw['version'])
     return filename
 
 def mapfilename(gw):
     """ Where to find the skymap file for a given skymap and version
     """
-    filename = '%s/%s/%s/map.fits' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
+    filename = '%s/%s/%s/map.fits' % (settings.MMA_DIRECTORY+'/gw/', gw['otherId'], gw['version'])
     return filename
