@@ -27,8 +27,9 @@ def handleDataDict(dataDict, options, logger):
         return None
 
     # Use the event name for the directory
+    # event name looks like "IceCubeCascade-260801a" so just take the part with the date
     if 'event_name' in dataDict:
-        alertDir = dataDict['event_name'] + '/final/'
+        alertDir = dataDict['event_name'][-7:] + '/final/'
     else:
         msg = 'Icecube dataDict has no event_name. Quitting'
         if logger: logger.error(msg)
@@ -43,7 +44,7 @@ def handleDataDict(dataDict, options, logger):
 
     # make the MOCs
     areas = {}
-    contours = options.get('--contours', '90')
+    contours = options.get('--contours', '10,50,90')
     for contour in contours.split(','):
         os.makedirs(dir + '/' + alertDir, exist_ok = True)
         output_file = dir + '/' + alertDir + '/' + contour + '.moc'
@@ -88,7 +89,6 @@ def moc_single_level(contour, input_file, output_file, logger):
     if logger: logger.info(msg)
     else:      print(msg)
 
-    
     prob = map_data / map_data.sum()
     order_idx = np.argsort(prob)[::-1]
     cum = np.cumsum(prob[order_idx])
