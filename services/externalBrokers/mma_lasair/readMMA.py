@@ -44,7 +44,6 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
 
     # the handle function is different depending on which type of event
     result = handle_yaml.handle(data)
-    print(result)
 
     event_date = mjd2date(result['event_tai'])
 
@@ -82,7 +81,6 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
         namespace, otherId, version, result['more_info'], \
         area10, area50, area90, json.dumps(result['params']) \
     )
-    print(query)
 
     cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
@@ -94,7 +92,7 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
           'version': version,
           'mw_id'  : last_mw_id,
         }
-    skymaphits = skymaps.get_skymap_hits(database, event, minmjd, maxmjd, verbose)
+    skymaphits = skymaps.get_skymap_hits(database, namespace, event, minmjd, maxmjd, verbose)
     nhits = len(skymaphits['diaObjectId'])
     if nhits > 0:
         skymaps.insert_skymap_hits(database, event, skymaphits)

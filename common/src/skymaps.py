@@ -10,21 +10,19 @@ import math
 from mocpy import MOC
 import astropy.units as u
 from skytag.commonutils import prob_at_location
-from gkutils.commonutils import redshiftToDistance
+import healpy as hp
+import numpy as np
 
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
-# This is c/H, speed of light over Hubble constant
-# CONVERT_Z_TO_DISTANCE = 4271
-# Replaced by Kens code redshiftToDistance
-
 def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, verbose=False):
     """ Get all the alerts that match a given skymap, 
         then run against the watchmaplist, return the hits
     """
+    print('======', mma_event)
     moc = MOC.from_fits(mocfilename(namespace, mma_event))
 
     # get the alert positions from the database
@@ -86,14 +84,15 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
                 distance.append(None)
 
     elif namespace == 'Icecube':
-        m = hp.read_map(file)
-        theta = np.radians(90.0 - mocdelist)
-        phi = np.radians(mocralist)
+        m = hp.read_map(mapfilename(namespace, mma_event))
+        theta = np.radians(90.0 - np.array(mocdelist))
+        phi = np.radians(np.array(mocralist))
         ipix = hp.ang2pix(hp.get_nside(m), theta, phi)
         probdens2 = m[ipix]
         n = len(probdens2)
         probdens3 = np.array([None]*n)
         contour   = np.array([None]*n)
+        distance  = np.array([None]*n)
 
     else:
         print(f'Unknown Event namespace {namespace}. Quitting')
