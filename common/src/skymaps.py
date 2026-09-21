@@ -116,7 +116,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = 'SELECT objects.diaObjectId, ra, decl, z, photoz, distance '
+    query = 'SELECT objects.diaObjectId, ra, decl, best_distance '
     query += ' FROM objects,sherlock_classifications '
     query += ' WHERE objects.diaObjectId=sherlock_classifications.diaObjectId '
     if mjdmin and mjdmax:
@@ -131,19 +131,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
         objlist.append(row['diaObjectId'])
         ralist.append(row['ra'])
         delist.append(row['decl'])
-
-        # The sherlock may have distance in Mpc, z, and/or photoZ
-        # distance is best, else z, else photoZ
-
-        if row['distance']:   
-            d = row['distance']
-        elif row['z'] and row['z'] > 0:        
-            d = redshiftToDistance(row['z'])['dl_mpc']
-        elif row['photoz'] and row['photoz'] > 0:   
-            d = redshiftToDistance(row['photoz'])['dl_mpc']
-        else:                 d = None
-
-        distancelist.append(d)
+        distancelist.append(row['best_distance'])
     if verbose:
         print('fetch_alerts: mjd %s to %s, found %d' % (str(mjdmin), str(mjdmax), len(objlist)))
 
