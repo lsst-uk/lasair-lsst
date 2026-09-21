@@ -1,0 +1,37 @@
+ALERT:
+  alert_type: PRELIMINARY
+  event:
+    central_frequency: null
+    classification:
+      BBH: 0.0
+      BNS: 0.999990272260201
+      NSBH: 0.0
+      Terrestrial: 9.727739799034379e-06
+    duration: null
+    far: 9.110699364861297e-14
+    group: CBC
+    instruments:
+    - H1
+    - L1
+    pipeline: gstlal
+    properties:
+      HasMassGap: 0.0
+      HasNS: 1.0
+      HasRemnant: 1.0
+    search: MDC
+    significant: true
+    skymap_filename: bayestar.multiorder.fits,0
+    time: '2026-08-14T07:57:30.536Z'
+  superevent_id: MS260814i
+  time_created: '2026-08-14T08:03:40Z'
+  urls:
+    gracedb: https://gracedb.ligo.org/v2/superevents/MS260814i/view/
+EXTRA:
+  area10: 14.267991968589838
+  area50: 110.52448190374557
+  area90: 551.4159249037366
+HEADER:
+  CREATOR: BAYESTAR
+  DISTMEAN: 114.15797190219305
+  DISTSTD: 28.64205776859184
+  MJD-OBS: 61266.3316033953

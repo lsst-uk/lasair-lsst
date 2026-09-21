@@ -1,14 +1,16 @@
 """
-Checks the directory of GW alerts for those we haven't seen before
+Checks the directory of MMA alerts for those we haven't seen before
 then tries to insert it into the database
 
 Usage:
-    readGW.py [--minmjd=minmjd]
+    readLVK.py [--minmjd=minmjd]
               [--maxmjd=maxmjd]
+              [--namespace=namespace]
 
 Options:
-    --minmjd=minmjd    Choose all skymaps older than this MJD
-    --maxmjd=maxmjd    Choose all skymaps younger than this MJD
+    --minmjd=minmjd         Choose all skymaps older than this MJD
+    --maxmjd=maxmjd         Choose all skymaps younger than this MJD
+    --namespace=namespace   LVK or Icecube
 """
 import os, sys
 import json
@@ -31,7 +33,7 @@ sys.path.append('../../../common')
 import settings
 from src import db_connect, skymaps
 
-def insert_gw_alert(database, dir, otherId, version):
+def insert_mma_alert(database, namespace, dir, otherId, version):
     """ Deals with a given skymap
     """
     # open the meta.yaml file
@@ -40,45 +42,16 @@ def insert_gw_alert(database, dir, otherId, version):
     data = yaml.load(f, Loader=Loader)
     f.close()
 
-    # extract the classification (BNS, BBS etc) and far (false alarm rate)
-    params = {
-        'classification': data['ALERT']['event']['classification'],
-        'far': data['ALERT']['event']['far'],
-    }
-    # Should be a sky point near the most likely part of the skymap
-    #radec = data['EXTRA']['central coordinate']['equatorial'].split()
-    radec = '0.0 0.0'.split()
-    loc = {
-        'RA'      :float(radec[0].strip()), 
-        'Dec'     :float(radec[1].strip()), 
-        'distmean':data['HEADER']['DISTMEAN'], 
-        'diststd' :data['HEADER']['DISTSTD'],
-        }
-    params['location'] = loc
+    # the handle function is different depending on which type of event
+    result = handle_yaml.handle(data)
+    print(result)
 
-    # Event time as MJD and as UT
-    event_tai  = data['HEADER']['MJD-OBS']
-    event_date = mjd2date(event_tai)
+    event_date = mjd2date(result['event_tai'])
 
     # Areas of the 10%, 50%, and 90% contours in sq degrees
     area10 = data['EXTRA']['area10']
     area50 = data['EXTRA']['area50']
     area90 = data['EXTRA']['area90']
-
-    # decide if we want it
-    # If this function returns a string, it is a reason why the event was rejected
-    # Keep the BNS and NSBH, only keep BBH if small area
-    # First find the most likely classification
-    percent = 0
-    gwclass = ''
-    for k,v in params['classification'].items():
-        if v>percent:
-            percent = v
-            gwclass = k
-
-    good = (gwclass == 'BNS' or gwclass == 'NSBH') and area90 < settings.GW_BBH_MAX_AREA
-    if not good:
-        return 'Classification = %s and area90 = %s' % (gwclass, str(area90))
 
     # Deal with the 3 MOCs
     moc10 = read_moc(datadir, '10')
@@ -87,14 +60,10 @@ def insert_gw_alert(database, dir, otherId, version):
     mocimage = make_image(moc10, moc50, moc90)
 
     # get most probable point
-    skymap_filename = datadir + '/map.fits'
-    (raprob, deprob) = get_ra_dec(skymap_filename)
-    loc['RA'] = raprob
-    loc['Dec'] = deprob
-
-    # What kind of MMA event is this
-    namespace = 'LVK'
-    more_info = 'This is a gravitational wave event from LIGO-Virgo-Kagra'
+#    skymap_filename = datadir + '/map.fits'
+#    (raprob, deprob) = get_ra_dec(skymap_filename)
+#    result['loc']['RA'] = raprob
+#    result['loc']['Dec'] = deprob
 
     # Insert into database
     query = """
@@ -109,10 +78,11 @@ def insert_gw_alert(database, dir, otherId, version):
     ) """
 
     query = query % ( \
-        event_tai, event_date, bytes2string(mocimage),  \
-        namespace, otherId, version, more_info, \
-        area10, area50, area90, json.dumps(params) \
+        result['event_tai'], event_date, bytes2string(mocimage),  \
+        namespace, otherId, version, result['more_info'], \
+        area10, area50, area90, json.dumps(result['params']) \
     )
+    print(query)
 
     cursor = database.cursor(buffered=True, dictionary=True)
     cursor.execute (query)
@@ -120,14 +90,14 @@ def insert_gw_alert(database, dir, otherId, version):
     cursor.close()
     database.commit()
 
-    gw = {'otherId': otherId,
+    event = {'otherId': otherId,
           'version': version,
           'mw_id'  : last_mw_id,
         }
-    skymaphits = skymaps.get_skymap_hits(database, gw, minmjd, maxmjd, verbose)
+    skymaphits = skymaps.get_skymap_hits(database, event, minmjd, maxmjd, verbose)
     nhits = len(skymaphits['diaObjectId'])
     if nhits > 0:
-        skymaps.insert_skymap_hits(database, gw, skymaphits)
+        skymaps.insert_skymap_hits(database, event, skymaphits)
 
     return ''
 
@@ -142,28 +112,27 @@ def get_ra_dec(skymap_filename):
     ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
     return (ra.deg, dec.deg)
 
-def handle_event(database, dir, otherId, minmjd, maxmjd, verbose=False):
+def handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose=False):
     nhits = 0
     ningested = 0
     for version in os.listdir(dir+'/'+otherId):
-        if version.startswith('20'):
+        # Only look at alerts whe havent seen before
+        if not getDone(dir, otherId, version):
+            # Set done flag so we dont come back
+            setDone(dir, otherId, version)
+            message = ''
+#            try:
+            if 1:
+                message = insert_mma_alert(database, namespace, dir, otherId, version)
+#            except Exception as e:
+#                print('Error inserting mma alert in database' + str(e))
 
-            # Only look at GW alets whe havent seen before
-            if not getDone(dir, otherId, version):
-                # Set done flag so we dont come back
-                setDone(dir, otherId, version)
-                message = ''
-                try:
-                    message = insert_gw_alert(database, dir, otherId, version)
-                except Exception as e:
-                    print('Error inserting gw alert in database' + str(e))
-
-                # message says why it was rejected
-                if len(message) == 0:
-                    ningested += 1
-                    print(otherId, version, 'ingested')
-                else:
-                    print(otherId, version, 'not ingested:', message)
+            # message says why it was rejected
+            if len(message) == 0:
+                ningested += 1
+                print(otherId, version, 'ingested')
+            else:
+                print(otherId, version, 'not ingested:', message)
 
     return ningested
 
@@ -231,7 +200,7 @@ def setDone(dir, otherId, version):
     os.system('touch ' + flag) 
 
 if __name__ == "__main__":
-    """ Intended to run in a cron to harvest GW alerts that appear in the directory
+    """ Intended to run in a cron to harvest LVK alerts that appear in the directory
     """
     import sys
     from docopt import docopt
@@ -242,15 +211,23 @@ if __name__ == "__main__":
     else:                maxmjd = skymaps.mjdnow()
 
     if args['--minmjd']: minmjd = float(args['--minmjd'])
-    else:                minmjd = maxmjd - settings.GW_ACTIVE_DAYS
+    else:                minmjd = maxmjd - settings.MMA_ACTIVE_DAYS
 
-    dir = settings.GW_DIRECTORY  #  '/mnt/cephfs/lasair/mma/gw/'
+    if args['--namespace']: namespace = args['--namespace']
+    else:                   namespace = 'LVK'
+
+    if namespace == 'LVK':
+        import handle_LVK_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/LVK'       #  '/mnt/cephfs/lasair/mma/LVK/'
+    else:
+        import handle_Icecube_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/Icecube'  #  '/mnt/cephfs/lasair/mma/Icecube/'
+
     database = db_connect.remote()
 
     verbose = True
     ningested = 0
     for file in sorted(os.listdir(dir)):
-        if file.startswith('S') or file.startswith('M'):
-            otherId = file
-            ningested += handle_event(database, dir, otherId, minmjd, maxmjd, verbose)
+        otherId = file
+        ningested += handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose)
     print(ningested, 'event versions ingested')

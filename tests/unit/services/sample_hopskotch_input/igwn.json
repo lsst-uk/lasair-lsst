@@ -1,0 +1,35 @@
+{
+  "alert_type": "PRELIMINARY",
+  "time_created": "2026-08-14T08:03:40Z",
+  "superevent_id": "MS260814i",
+  "event": {
+    "time": "2026-08-14T07:57:30.536Z",
+    "far": 9.110699364861297e-14,
+    "significant": true,
+    "instruments": [
+      "H1",
+      "L1"
+    ],
+    "group": "CBC",
+    "pipeline": "gstlal",
+    "search": "MDC",
+    "classification": {
+      "BNS": 0.999990272260201,
+      "NSBH": 0.0,
+      "BBH": 0.0,
+      "Terrestrial": 9.727739799034379e-06
+    },
+    "properties": {
+      "HasNS": 1.0,
+      "HasRemnant": 1.0,
+      "HasMassGap": 0.0
+    },
+    "duration": null,
+    "central_frequency": null,
+    "skymap_filename": "bayestar.multiorder.fits,0"
+  },
+  "external_coinc": null,
+  "urls": {
+    "gracedb": "https://gracedb.ligo.org/v2/superevents/MS260814i/view/"
+  }
+}
