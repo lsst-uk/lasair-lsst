@@ -62,31 +62,37 @@ def mma_watchmap_index(request):
     d = {}
     for mw in list(mmaWatchmaps):
         namespace = mw.namespace
-        c = mw.params['classification']
-
-        # get the type with the largest probability
-        max = 0.0
-        for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
-            if type in c and c[type] > max:
-                max = c[type]
-                mma_type = namespace + ':' + type
-
         # build data packet
-        new = {'mw_id': mw.mw_id,
+        packet = {'mw_id': mw.mw_id,
                'otherId': mw.otherId,
                'version': mw.version,
                'mocimage': mw.mocimage,
                'area90': mw.area90,
-               'mma_type': mma_type,
                'event_date': mw.event_date,
                'how_many': how_many.get(mw.mw_id, 0),
-               }
-        # get the latest version for each otherId
-        if mw.otherId in d:
-            if mw.version > d[mw.otherId]['version']:
-                d[mw.otherId] = new
+           }
+
+        # get the type with the largest probability
+        if namespace == 'LVK':
+            max = 0.0
+            c = mw.params['classification']
+            for type in ['BBH', 'BNS', 'NSBH', 'Terrestrial']:
+                if type in c and c[type] > max:
+                    max = c[type]
+                    packet['mma_type'] = namespace + ':' + type
+
+            # get the latest version for each otherId
+            if mw.otherId in d:
+                if mw.version > d[mw.otherId]['version']:
+                    d[mw.otherId] = packet
+            else:
+                d[mw.otherId] = packet
+
+        elif namespace == 'Icecube':
+            packet['mma_type'] = 'Icecube:' + mw.otherId
+            d[mw.otherId] = packet
         else:
-            d[mw.otherId] = new
+            continue
 
     return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': d.values()})
 
