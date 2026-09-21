@@ -7,10 +7,10 @@ sys.path.append('../../../../common')
 import settings
 
 sys.path.append('../../../../services/externalBrokers/mma_hopskotch')
-import readGW, readIcecube
+import readLVK, readIcecube
 
 class MmaHopskotchTest(TestCase):
-  def test0_readGW(self):
+  def test0_readLVK(self):
     dataDict = json.loads(open('sample_hopskotch_input/igwn.json').read())
     skymap = open('sample_hopskotch_input/igwn_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
@@ -19,7 +19,7 @@ class MmaHopskotchTest(TestCase):
         '--directory'  : '/tmp/LVK',
         '--contours'   : '10,50,90',
     }
-    ret = readGW.handleDataDict(dataDict, options, logger=None)
+    ret = readLVK.handleDataDict(dataDict, options, logger=None)
     # assert that every file in /tmp/LVK is identical 
     # to those in sample_hopskotch_output/LVK
 
