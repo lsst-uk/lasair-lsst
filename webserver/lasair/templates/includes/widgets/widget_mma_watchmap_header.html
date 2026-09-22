@@ -46,7 +46,7 @@
 
 <script type="text/javascript">
 var aladin;
-var circle_size = 0.4;
+var circle_size = 0.1;
 var url = 'https://{{ lasair_url }}/lasair/static/mma/{{ mma_watchmap.namespace }}/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
 A.init.then(() => {
     aladin = A.aladin('#aladin-lite-div',
@@ -63,9 +63,9 @@ A.init.then(() => {
     var moc10 = A.MOCFromURL(url+'10.moc', {name: '10% contour', color: '#00babb', lineWidth: 1});
     aladin.addMOC(moc10);
 
-    var cat2 = A.graphicOverlay({name: '2D alerts', color:'lightgreen', lineWidth: 6});
+    var cat2 = A.graphicOverlay({name: '2D alerts', color:'lightgreen', lineWidth: 2});
     aladin.addOverlay(cat2);
-    var cat3 = A.graphicOverlay({name: '3D alerts', color:'white', lineWidth:10});
+    var cat3 = A.graphicOverlay({name: '3D alerts', color:'white', lineWidth:6});
     aladin.addOverlay(cat3);
     var cand = [];
 
