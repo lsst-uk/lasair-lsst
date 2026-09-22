@@ -55,6 +55,7 @@ pipeline {
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_make_watchlist_files.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_my_cmd.py'
                     sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_mysql_backup.py'
+                    sh '#python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_hopskotch_mma.py'
                 }
                 dir('tests/unit/services/annotations/') {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" kafka_test.py'
