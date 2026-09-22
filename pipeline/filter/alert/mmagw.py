@@ -22,7 +22,7 @@ def mmagw(fltr, minmjd=None, maxmjd=None, verbose=False):
     if not maxmjd: 
         maxmjd = skymaps.mjdnow()
     if not minmjd: 
-        minmjd = maxmjd - settings.GW_ACTIVE_DAYS
+        minmjd = maxmjd - settings.MMA_ACTIVE_DAYS
 
     # must use main database, since GW alert may have been inserted since sunset
     try:
@@ -55,7 +55,7 @@ if __name__ == "__main__":
     else:                maxmjd = skymaps.mjdnow()
 
     if args['--minmjd']: minmjd = float(args['--minmjd'])
-    else:                minmjd = maxmjd - settings.GW_ACTIVE_DAYS
+    else:                minmjd = maxmjd - settings.MMA_ACTIVE_DAYS
 
     fltr = mockFilter()
     nhits = mmagw(fltr, minmjd=None, maxmjd=None, verbose=True)
