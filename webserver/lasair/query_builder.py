@@ -32,6 +32,13 @@ HIDDEN_INCLUDE = 'hidden:include'   # show the owner's hidden objects rather tha
 max_execution_time = 300000  # maximum execution time in milliseconds
 max_query_rows = 1000    # default LIMIT if none specified
 
+# READABLE STAND-INS FOR THE MARK PREDICATES, SHOWN ONLY WHERE SQL IS DISPLAYED
+# TO A USER. THE SQL THAT RUNS NEVER USES THESE; SEE mark_predicate(for_display=).
+MARK_DISPLAY_PLACEHOLDER = {
+    'favourite': '/* only your favourite objects */',
+    'hidden': '/* excluding your hidden objects */',
+}
+
 
 class QueryBuilderError(Exception):
     """ Thrown when parsing encounters an error
@@ -229,7 +236,7 @@ def annotator_topics(table):
     return w[1].split('&')
 
 
-def mark_predicate(owner_topic, classification, negated=False):
+def mark_predicate(owner_topic, classification, negated=False, for_display=False):
     """ Build the correlated subquery that tests one of a user's marks.
 
     A correlated EXISTS rather than a LEFT JOIN, because build_query assembles
@@ -237,9 +244,16 @@ def mark_predicate(owner_topic, classification, negated=False):
     into where_clauses; a LEFT JOIN would mean string surgery on the FROM
     clause. There is no alias, so nothing can collide with a user's own
     annotator alias.
+
+    for_display: return a short readable placeholder comment instead of the
+        real predicate. Only for text shown to a user; the SQL that is run or
+        saved must always call this with for_display=False (the default).
     """
     if "'" in owner_topic or '\\' in owner_topic:
         raise QueryBuilderError('Error: %s is not a valid annotator topic' % owner_topic)
+
+    if for_display:
+        return MARK_DISPLAY_PLACEHOLDER[classification]
 
     return ('%sEXISTS (SELECT 1 FROM annotations '
             "WHERE annotations.diaObjectId = objects.diaObjectId "
@@ -248,7 +262,7 @@ def mark_predicate(owner_topic, classification, negated=False):
             % ('NOT ' if negated else '', owner_topic, classification))
 
 
-def build_query_for_filter(filter_query, is_owner=True):
+def build_query_for_filter(filter_query, is_owner=True, for_display=False):
     """ Build the SQL of a saved filter, scoped to the filter's owner.
 
     This is the single door for saved filters: every webserver path that
@@ -264,9 +278,10 @@ def build_query_for_filter(filter_query, is_owner=True):
         filter_query: a FilterQuery instance or a database row, carrying
             selected, tables, conditions and the owner
         is_owner: whether the viewer owns the filter
+        for_display: return the readable placeholder form; see build_query
 
     Returns:
-        The real SQL
+        The real SQL, or the display SQL when for_display is set
     """
     def field(name, *alternatives):
         for candidate in (name,) + alternatives:
@@ -286,11 +301,11 @@ def build_query_for_filter(filter_query, is_owner=True):
 
     return build_query(
         field('selected'), field('tables'), field('conditions'),
-        owner_topic=owner_topic, exclude_hidden=is_owner)
+        owner_topic=owner_topic, exclude_hidden=is_owner, for_display=for_display)
 
 
 def build_query(select_expression, from_expression, where_condition,
-                owner_topic=None, exclude_hidden=True):
+                owner_topic=None, exclude_hidden=True, for_display=False):
     """ Build a real SQL query from the pre-sanitised input
 
     Args:
@@ -299,6 +314,11 @@ def build_query(select_expression, from_expression, where_condition,
             excluded and `favourite:only` can be honoured.
         exclude_hidden: emit the hidden exclusion. False for a non-owner
             running somebody else's public filter.
+        for_display: replace the favourite/hidden mark predicates with short
+            readable placeholders (see MARK_DISPLAY_PLACEHOLDER), for SQL
+            shown to a user. The SQL that is run or saved to `real_sql` must
+            always be built with for_display=False (the default) — a display
+            query changes nothing about which rows the real query returns.
     """
     if select_expression:
         select_expression = sanitise(select_expression)
@@ -418,12 +438,14 @@ def build_query(select_expression, from_expression, where_condition,
         if not owner_topic:
             raise QueryBuilderError(
                 'Error in FROM list, favourite:only needs an owner to take the favourites of')
-        where_clauses.append(mark_predicate(owner_topic, 'favourite'))
+        where_clauses.append(
+            mark_predicate(owner_topic, 'favourite', for_display=for_display))
 
     # EMITTED FOR AN OWNER WHO HAS NOT OPTED OUT, EVEN IF THEY HAVE HIDDEN NOTHING YET:
     # THAT IS WHAT MAKES IT SAFE TO FREEZE THIS SQL INTO real_sql AT BUILD TIME
     if owner_topic and exclude_hidden and not include_hidden:
-        where_clauses.append(mark_predicate(owner_topic, 'hidden', negated=True))
+        where_clauses.append(
+            mark_predicate(owner_topic, 'hidden', negated=True, for_display=for_display))
 
     # if the WHERE is just an ORDER BY, then we mustn't have AND before it
     order_condition = ''

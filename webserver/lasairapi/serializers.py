@@ -347,7 +347,14 @@ class QuerySerializer(serializers.Serializer):
                 result.append(row)
             return result
         except Exception as e:
-            error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
+            # THE CALLER SEES A READABLE PLACEHOLDER, NEVER THE HIDDEN/FAVOURITE
+            # EXISTS BLOCK, EVEN THOUGH THAT IS WHAT sqlquery_real JUST RAN
+            display_sql = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username), for_display=True)
+            display_sql += ' LIMIT %d OFFSET %d' % (limit, offset)
+            error = ('Your query:<br/><b>' + display_sql + '</b><br/>'
+                     'returned the error<br/><i>' + str(e) + '</i>')
             return {"error": error}
 
 

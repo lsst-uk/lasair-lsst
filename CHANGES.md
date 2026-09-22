@@ -12,4 +12,6 @@
 
 **ENHANCEMENT**: the toast shown when a mark cannot be saved is now soft pink with a generic message, rather than Notyf's default red carrying the server's error detail.
 
+**ENHANCEMENT**: SQL shown to users now replaces the favourites/hidden-objects correlated subquery with a short comment placeholder, instead of exposing the raw `EXISTS` clause.
+
 **FEATURE**: hiding an object from a result table fades the row, rolls it up and removes it, and a panel shown once per browser session says where hidden objects went.

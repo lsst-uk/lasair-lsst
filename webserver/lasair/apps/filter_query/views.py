@@ -230,8 +230,8 @@ def filter_query_detail(request, mq_id, action=False):
     # CHANGES THE RESULT SET; IT IS ALSO THE ONE PLACE A NON-OWNER CAN READ THAT A
     # PUBLIC FILTER IS RESTRICTED TO ITS OWNER'S FAVOURITES.
     filterQuery.display_sql = sqlparse.format(
-        build_query_for_filter(filterQuery, is_owner),
-        reindent=True, keyword_case='upper', strip_comments=True)
+        build_query_for_filter(filterQuery, is_owner, for_display=True),
+        reindent=True, keyword_case='upper', strip_comments=False)
 
     # "SHOW ANYWAY" RE-RUNS THIS ONE PREVIEW WITHOUT THE EXCLUSION AND STORES NOTHING.
     # A LINK THAT REWROTE THE SAVED DEFINITION WOULD CHANGE WHAT THE PIPELINE EMITS TO
@@ -477,17 +477,19 @@ def filter_query_create(request, mq_id=False):
                 query_name=False,
                 owner_topic=tag_topic(request.user.username))
 
-            sqlquery_real = sqlparse.format(
+            # DISPLAY ONLY: NEVER SAVED OR EXECUTED. run_filter ABOVE ALREADY RAN
+            # THE REAL QUERY WITH THE REAL MARK PREDICATES.
+            display_sql = sqlparse.format(
                 build_query(selected, tables, conditions,
-                            owner_topic=tag_topic(request.user.username)),
-                reindent=True, keyword_case='upper', strip_comments=True)
+                            owner_topic=tag_topic(request.user.username), for_display=True),
+                reindent=True, keyword_case='upper', strip_comments=False)
 
             if "order by" in conditions.lower():
                 sortTable = False
             else:
                 sortTable = True
 
-            return render(request, 'filter_query/filter_query_create.html', {'schemas_core': schemas_core, 'schemas_addtional': schemas_addtional, 'form': form, 'table': table, 'schema': tableSchema, 'limit': str(limit), 'real_sql': sqlquery_real, "filterQ": filterQuery, 'sortTable': sortTable})
+            return render(request, 'filter_query/filter_query_create.html', {'schemas_core': schemas_core, 'schemas_addtional': schemas_addtional, 'form': form, 'table': table, 'schema': tableSchema, 'limit': str(limit), 'display_sql': display_sql, "filterQ": filterQuery, 'sortTable': sortTable})
 
         # OR SAVE?
         elif action and action.lower() == "save" and len(name) and form.is_valid():

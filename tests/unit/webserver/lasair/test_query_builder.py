@@ -238,6 +238,126 @@ class BuildQueryMarkPredicatesTest(unittest.TestCase):
         self.assertTrue(sql.rstrip().endswith('ORDER BY ra'))
 
 
+class BuildQueryForDisplayTest(unittest.TestCase):
+    """Tests for the for_display placeholder path: what a user sees must
+    never contain the mark predicates' EXISTS block, and the SQL built
+    without for_display must stay byte-for-byte the same as before."""
+
+    HIDDEN_EXCLUSION = (
+        "NOT EXISTS (SELECT 1 FROM annotations "
+        "WHERE annotations.diaObjectId = objects.diaObjectId "
+        "AND annotations.topic = 'tags_dave' "
+        "AND annotations.classification = 'hidden')")
+
+    FAVOURITE_RESTRICTION = (
+        "EXISTS (SELECT 1 FROM annotations "
+        "WHERE annotations.diaObjectId = objects.diaObjectId "
+        "AND annotations.topic = 'tags_dave' "
+        "AND annotations.classification = 'favourite')")
+
+    def test_without_display_mode_the_real_sql_is_unchanged(self):
+        """Regression: the default call still emits the exact current EXISTS SQL"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertIn(self.HIDDEN_EXCLUSION, sql)
+        self.assertIn(self.FAVOURITE_RESTRICTION, sql)
+
+    def test_without_display_mode_the_whole_sql_string_is_byte_for_byte_unchanged(self):
+        """The exact frozen string this build produces, not just substrings of it.
+
+        This is what a caller writes into myqueries.real_sql and what the
+        Kafka filter pipeline later runs verbatim, so predicate order and
+        surrounding whitespace matter just as much as the predicates."""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1', owner_topic='tags_dave')
+
+        # ASSERT
+        self.assertEqual(
+            sql,
+            'SELECT diaObjectId \n'
+            'FROM objects \n'
+            'WHERE\n '
+            + self.FAVOURITE_RESTRICTION + ' AND\n '
+            + self.HIDDEN_EXCLUSION + ' AND\n '
+            'ra > 1')
+
+    def test_a_non_owner_gets_no_hidden_placeholder_in_display_mode_either(self):
+        """build_query_for_filter(is_owner=False) sets exclude_hidden=False;
+        the display path must honour that exactly as the real path does"""
+        # ACT
+        sql = query_builder.build_query_for_filter(
+            {'selected': 'objects.diaObjectId', 'tables': 'objects',
+             'conditions': 'ra > 1', 'username': 'dave'},
+            is_owner=False, for_display=True)
+
+        # ASSERT
+        self.assertNotIn(query_builder.MARK_DISPLAY_PLACEHOLDER['hidden'], sql)
+        self.assertNotIn('annotations', sql)
+
+    def test_display_mode_emits_the_favourite_placeholder(self):
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1',
+            owner_topic='tags_dave', for_display=True)
+
+        # ASSERT
+        self.assertIn(query_builder.MARK_DISPLAY_PLACEHOLDER['favourite'], sql)
+        self.assertNotIn(self.FAVOURITE_RESTRICTION, sql)
+
+    def test_display_mode_emits_the_hidden_placeholder_by_default(self):
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects', 'ra > 1', owner_topic='tags_dave', for_display=True)
+
+        # ASSERT
+        self.assertIn(query_builder.MARK_DISPLAY_PLACEHOLDER['hidden'], sql)
+        self.assertNotIn(self.HIDDEN_EXCLUSION, sql)
+
+    def test_display_mode_hides_the_hidden_placeholder_with_hidden_include(self):
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, hidden:include', 'ra > 1',
+            owner_topic='tags_dave', for_display=True)
+
+        # ASSERT
+        self.assertNotIn(query_builder.MARK_DISPLAY_PLACEHOLDER['hidden'], sql)
+
+    def test_display_mode_hides_the_hidden_placeholder_with_exclude_hidden_false(self):
+        """A non-owner viewing a public filter gets no hidden placeholder either"""
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects', 'ra > 1',
+            owner_topic='tags_dave', exclude_hidden=False, for_display=True)
+
+        # ASSERT
+        self.assertNotIn(query_builder.MARK_DISPLAY_PLACEHOLDER['hidden'], sql)
+
+    def test_display_mode_output_never_leaks_annotations_or_the_topic(self):
+        # ACT
+        sql = query_builder.build_query(
+            'diaObjectId', 'objects, favourite:only', 'ra > 1',
+            owner_topic='tags_dave', for_display=True)
+
+        # ASSERT
+        self.assertNotIn('annotations', sql)
+        self.assertNotIn('tags_dave', sql)
+
+    def test_build_query_for_filter_passes_display_mode_through(self):
+        # ACT
+        sql = query_builder.build_query_for_filter(
+            {'selected': 'objects.diaObjectId', 'tables': 'objects',
+             'conditions': 'ra > 1', 'username': 'dave'},
+            is_owner=True, for_display=True)
+
+        # ASSERT
+        self.assertIn(query_builder.MARK_DISPLAY_PLACEHOLDER['hidden'], sql)
+        self.assertNotIn('annotations', sql)
+
+
 class BuildQueryForFilterTest(unittest.TestCase):
     """Tests for the single door saved filters build their SQL through."""
 
