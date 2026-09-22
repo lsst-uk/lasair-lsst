@@ -9,6 +9,8 @@ import time
 import json
 import math
 import datetime
+import yaml
+from yaml import CLoader as Loader
 import matplotlib.pyplot as plt
 import astropy.units as u
 from astropy.coordinates import Angle, SkyCoord
@@ -104,6 +106,42 @@ def chop(x):
         return ''
     return x
 
+
+def yaml2text(mw):
+    file = f'{settings.MMA_DIRECTORY}/{mw.namespace}/{mw.otherId}/{mw.version}/meta.yaml';
+    yaml_text = open(file).read()
+    data = yaml.load(yaml_text, Loader=Loader)
+    lines = dict_to_text(data)
+    return '\n'.join(lines)
+
+def dict_to_text(d):
+    suffices = {
+        'area10'     : 'sq deg',
+        'area50'     : 'sq deg',
+        'area90'     : 'sq deg',
+        'far'        : 'per year',
+        'FAR'        : 'per year',
+        'DISTMEAN'   : 'Mpc',
+        'DISTSTD'    : 'Mpc',
+        'CIRC_ERR50' : 'degrees',
+        'CIRC_ERR90' : 'degrees',
+    }
+    lines = []
+    for k,_v in d.items():
+        if isinstance(_v, list):
+            v = str(_v)
+        else:
+            v = _v
+        if isinstance(v, dict):
+            lins = dict_to_text(v)
+            for lin in lins:
+                lines.append(f'{k} {lin}')
+        else:
+            if k in suffices:
+                lines.append(f'{k} = {v} [{suffices[k]}]')
+            else:
+                lines.append(f'{k} = {v}')
+    return lines
 
 def mma_watchmap_detail(request, mw_id):
     """*return the resulting matches of a mma_watchmap*
@@ -262,6 +300,7 @@ ORDER BY h.probdens3 DESC LIMIT {resultCap}
 
     return render(request, 'mma_watchmap/mma_watchmap_detail.html', {
         'mma_watchmap': mma_watchmap,
+        'yaml2text': yaml2text(mma_watchmap),
         'lasair_url': settings.LASAIR_URL,
         'table2': newtable2, 'schema2': schema2,
         'table3': newtable3, 'schema3': schema3,
