@@ -120,6 +120,7 @@ def dict_to_text(d):
         'area50'     : 'sq deg',
         'area90'     : 'sq deg',
         'far'        : 'per year',
+        'ENERGY'     : 'TeV',
         'FAR'        : 'per year',
         'DISTMEAN'   : 'Mpc',
         'DISTSTD'    : 'Mpc',
