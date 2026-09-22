@@ -406,6 +406,19 @@ td > .text-action:not(.btn) {
     display: none;
 }
 
+// THE HIDDEN OBJECTS HEADER IS THE ONE EXCEPTION: IT SHOWS THE CLOSED EYE,
+// NOT THE GENERIC OPEN-EYE OUTLINE ABOVE. HIGHER SPECIFICITY THAN THE RULE
+// ABOVE (FOUR CLASSES VS THREE) WINS WITHOUT TOUCHING THE FAVOURITES HEADER.
+.card-header .icon-shape.header-icon-force-on {
+    .mark-icon-outline {
+        display: none;
+    }
+
+    .mark-icon-solid {
+        display: inline;
+    }
+}
+
 // THE SOFT-PINK TOAST lasair_mark.js SHOWS WHEN A MARK COULD NOT BE SAVED.
 // NOTYF PAINTS THE BACKGROUND FROM ITS types CONFIG AND SETS WHITE TEXT ON .notyf;
 // THE PALE PINK NEEDS DARK TEXT INSTEAD.

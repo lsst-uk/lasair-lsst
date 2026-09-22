@@ -15,7 +15,7 @@
                 {% endif %}
                 <div class="col-12 col-sm-11 mb-3 d-flex align-items-center">
                     
-                    <div class="icon-shape icon-shape-tertiary rounded me-sm-0">
+                    <div class="icon-shape icon-shape-tertiary rounded me-sm-0{% if markList == 'hidden' %} header-icon-force-on{% endif %}">
                         {% include header_icon|default:"includes/icons/icon_object_list.html" %}
                     </div>
                     <h2 class="h3 fw-extrabold mb-0 ps-2">{{header}}</h2>

@@ -30,7 +30,7 @@ FAVOURITES_ZEROTEXT = (
 HIDDEN_ZEROTEXT = (
     'You have not hidden any objects. Hiding an object removes it from your own '
     'filter results and email digests, but leaves it visible to everyone else. '
-    'Click the archive icon on an object page to hide one.')
+    'Click the eye icon on an object page to hide one.')
 
 
 @require_POST
