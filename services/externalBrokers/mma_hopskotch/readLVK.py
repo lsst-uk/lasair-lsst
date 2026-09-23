@@ -190,7 +190,7 @@ def writeMeta(options, dataDict, logger):
     areas = {}
     contours = options.get('--contours', '90')
     for c in contours.split(','):
-        areas['area' + str(c)] = getContourArea(BytesIO(skymap), float(c)/100.0, logger)
+        areas['area' + str(c)] = round(getContourArea(BytesIO(skymap), float(c)/100.0, logger), 3)
 
     # Some info (e.g. distance) only in the FITS file
     h = fits.open(BytesIO(skymap))

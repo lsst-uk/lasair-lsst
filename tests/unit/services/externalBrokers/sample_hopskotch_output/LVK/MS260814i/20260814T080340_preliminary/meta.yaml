@@ -27,9 +27,9 @@ ALERT:
   urls:
     gracedb: https://gracedb.ligo.org/v2/superevents/MS260814i/view/
 EXTRA:
-  area10: 14.267991968589838
-  area50: 110.52448190374557
-  area90: 551.4159249037366
+  area10: 14.268
+  area50: 110.524
+  area90: 551.416
 HEADER:
   CREATOR: BAYESTAR
   DISTMEAN: 114.15797190219305

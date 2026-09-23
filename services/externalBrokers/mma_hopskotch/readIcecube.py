@@ -49,7 +49,7 @@ def handleDataDict(dataDict, options, logger):
         os.makedirs(dir + '/' + alertDir, exist_ok = True)
         output_file = dir + '/' + alertDir + '/' + contour + '.moc'
         area = moc_single_level(int(contour), skymapFile, output_file, logger)
-        areas[f'area{contour}'] = area
+        areas[f'area{contour}'] = round(area, 3)
 
     # Fetch all the metadata from the Skymap FITS file
     h = fits.open(BytesIO(skymap))
