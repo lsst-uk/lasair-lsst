@@ -4,7 +4,6 @@ import sys
 import types
 import unittest
 from pathlib import Path
-from pathlib import Path
 from types import SimpleNamespace
 from unittest import mock
 
@@ -59,7 +58,8 @@ def load_view(kind):
     csrf_exempt = lambda function: function
     login_required = lambda function: function
     render = mock.Mock(side_effect=lambda request, template, context: context)
-    settings = SimpleNamespace(DEBUG=False, WATCHLIST_MAX_CROSSMATCH=1000)
+    settings = SimpleNamespace(
+        DEBUG=False, ACTIVE_EXPIRE=180, WATCHLIST_MAX_CROSSMATCH=1000)
     messages = module(error=mock.Mock(), info=mock.Mock(), success=mock.Mock())
     db_connect = module(remote=mock.Mock())
     favourites_utils = module(
@@ -85,6 +85,7 @@ def load_view(kind):
         'django.shortcuts': module(
             render=render, get_object_or_404=mock.Mock(), redirect=mock.Mock()),
         'django.conf': module(settings=settings),
+        'lasair.settings': settings,
         'django.utils': module(),
         'django.utils.text': module(slugify=lambda value: value),
         'src.db_connect': db_connect,
