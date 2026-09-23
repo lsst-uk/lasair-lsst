@@ -22,8 +22,10 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
     """ Get all the alerts that match a given skymap, 
         then run against the watchmaplist, return the hits
     """
-    print('======', mma_event)
-    moc = MOC.from_fits(mocfilename(namespace, mma_event))
+    if 'mocfilename' in mma_event:
+        moc = MOC.from_fits(mma_event['mocfilename'])
+    else:
+        moc = MOC.from_fits(mocfilename(namespace, mma_event))
 
     # get the alert positions from the database
     alertlist = fetch_alerts(database, mma_event, mjdmin, mjdmax, verbose)
@@ -59,10 +61,15 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         # contour is the contour of the skymap on which the given point lies
         # gw_disttuples are pairs of (mean,stddev) on the diatance
         # the code is at https://skytag.readthedocs.io/
+        if 'mapfilename' in mma_event:
+            map = mma_event['mapfilename']
+        else:
+            map = mapfilename(namespace, mma_event)
+
         contour, gw_disttuples, probdens2 = prob_at_location(
             ra =mocralist,
             dec=mocdelist,
-            mapPath=mapfilename(namespace, mma_event),
+            mapPath=map,
             distance=True,
             probdensity=True
         )

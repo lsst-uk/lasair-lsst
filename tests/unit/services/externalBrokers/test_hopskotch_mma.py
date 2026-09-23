@@ -7,7 +7,7 @@ from unittest import TestCase
 sys.path.append('../../../../common')
 import settings
 
-sys.path.append('../../../services/externalBrokers/mma_hopskotch')
+sys.path.append('../../../../services/externalBrokers/mma_hopskotch')
 import readLVK, readIcecube
 
 class MmaHopskotchTest(TestCase):
