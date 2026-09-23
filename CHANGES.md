@@ -16,4 +16,6 @@
 
 **ENHANCEMENT**: the hide button now shows a plain open eye when an object is not hidden and a plain closed eye when it is, instead of a single crossed-eye glyph, everywhere the mark applies (object page, result tables, the hidden-objects list header).
 
+**ENHANCEMENT**: the "My hidden objects" link on the profile page now uses the same closed-eye icon as the hide button, instead of the crossed-eye glyph it kept after the hide button moved on.
+
 **FEATURE**: hiding an object from a result table fades the row, rolls it up and removes it, and a panel shown once per browser session says where hidden objects went.
