@@ -12,6 +12,7 @@ import src.date_nid as date_nid
 from src import db_connect
 import settings as lasair_settings
 import importlib
+import logging
 import random
 import time
 import math
@@ -23,11 +24,88 @@ import sys
 
 sys.path.append('../common')
 
+LASAIR_CYAN = '#00BABB'  # matches $lasair-blue in webserver/staticfiles/src/scss/custom/_variables.scss
+
 
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0:
         mag = 31.4 - 2.5 * math.log10(flux)
         return mag
+
+
+def build_alert_timeline_plot(nid):
+    """*Build the responsive alert-count timeline chart for the homepage*
+
+    **Key Arguments:**
+
+    - ``nid`` -- the current Lasair night id, used to anchor the "days ago" query
+
+    **Return:**
+
+    - ``timelineHtml`` -- the chart rendered as an embeddable HTML div, defaulting
+        to the past month and pannable back over the full fetched history
+
+    **Usage:**
+
+        timelineHtml = build_alert_timeline_plot(nid)
+    """
+    import plotly.graph_objs as go
+    from datetime import datetime
+
+    historyDays = 182
+    defaultWindowDays = 31
+    maxAlertCap = 1000000
+
+    query = 'SELECT nid, value FROM lasair_statistics WHERE name=%s AND nid > %s ORDER BY nid'
+    dates = []
+    nalerts = []
+    msl = db_connect.readonly()
+    try:
+        cursor = msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor.execute(query, ('today_alert', nid - historyDays))
+            for row in cursor:
+                dates.append(datetime.strptime(date_nid.nid_to_date(row['nid']), '%Y%m%d'))
+                nalerts.append(min(row['value'], maxAlertCap))
+        finally:
+            cursor.close()
+    finally:
+        msl.close()
+
+    windowStart = datetime.strptime(date_nid.nid_to_date(nid - defaultWindowDays), '%Y%m%d')
+    windowEnd = datetime.strptime(date_nid.nid_to_date(nid), '%Y%m%d')
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_CYAN))
+    fig.update_layout(
+        autosize=True,
+        height=225,
+        margin=dict(l=50, r=10, t=10, b=40),
+        dragmode='pan',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+            type='date',
+            range=[windowStart, windowEnd],
+            tickformat='%d %b',
+            dtick=7 * 24 * 60 * 60 * 1000,  # weekly ticks
+            showgrid=False,
+        ),
+        yaxis=dict(
+            title='Number of alerts',
+            showgrid=True,
+            gridcolor='#F0F0F0',
+        ),
+    )
+
+    timelineHtml = fig.to_html(
+        config={
+            'displayModeBar': False,
+            'responsive': True,
+            'doubleClick': 'reset',
+            'scrollZoom': False,
+        })
+    return timelineHtml
 
 
 def index(request):
@@ -157,28 +235,11 @@ def index(request):
             'psfFlux'        : '%.0f' % t['psfFlux'],
             'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
         })
-##############
-    from plotly.offline import plot
-    import plotly.graph_objs as go
-    nid = date_nid.nid_now()
-    query = f'SELECT nid,value FROM lasair_statistics where name="today_alert" AND nid > {nid-182} ORDER BY nid'
-    msl = db_connect.readonly()
-    cursor = msl.cursor(buffered=True, dictionary=True)
-    cursor.execute(query)
-    nids = []
-    nalerts = []
-    maxalert = 1000000
-    for row in cursor:
-        nids.append(nid - row['nid'])
-        if row['value'] > maxalert:
-            nalerts.append(maxalert)
-        else:
-            nalerts.append(row['value'])
-    fig = go.Figure()
-    fig.add_trace(go.Bar( x=nids, y=nalerts, marker_color='gray'))
-    fig.update_xaxes(range=[21, 0])
-    timeline = plot(fig, output_type='div')
-##############
+    try:
+        timeline = build_alert_timeline_plot(date_nid.nid_now())
+    except Exception:
+        logging.getLogger(__name__).exception("Failed to build homepage alert timeline plot")
+        timeline = None
 
     context = {
         'web_domain': lasair_settings.WEB_DOMAIN,

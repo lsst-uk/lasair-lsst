@@ -64,22 +64,6 @@ Click on a marker for information about an object, or use the table below.
 
                     </div>
 
-
-
-
-
-
-                    <div class="col-12 px-4">
-			    {% autoescape off %}
-			    {{ timeline }}
-			    {% endautoescape %}
-	            </div>
-
-
-
-
-
-
                     <div class="card-body pt-0">
 
                         <div class="row mx-4">
@@ -89,6 +73,16 @@ Click on a marker for information about an object, or use the table below.
 
                             </div>
                         </div>
+
+                        {% if timeline %}
+                        <div class="row mx-4">
+                            <div class="col-12 mb-4">
+                                {% autoescape off %}
+                                {{ timeline }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                        {% endif %}
 
 
 
