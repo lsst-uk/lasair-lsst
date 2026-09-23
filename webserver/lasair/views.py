@@ -27,6 +27,30 @@ sys.path.append('../common')
 LASAIR_PINK = '#CE4257'  # MATCHES $LASAIR-RED/$TERTIARY, THE CARD TITLE ICON BADGE COLOUR
 
 
+def hex_to_rgba(hexColor, alpha):
+    """*Convert a #RRGGBB hex colour to a Plotly-compatible rgba(...) string*
+
+    **Key Arguments:**
+
+    - ``hexColor`` -- the colour as a #RRGGBB hex string
+    - ``alpha`` -- the opacity, from 0.0 to 1.0
+
+    **Return:**
+
+    - ``rgbaString`` -- the equivalent ``rgba(r, g, b, alpha)`` string
+
+    **Usage:**
+
+        rgbaString = hex_to_rgba('#CE4257', 0.3)
+    """
+    hexColor = hexColor.lstrip('#')
+    r, g, b = (int(hexColor[i:i + 2], 16) for i in (0, 2, 4))
+    return f'rgba({r}, {g}, {b}, {alpha})'
+
+
+LASAIR_PINK_LIGHT = hex_to_rgba(LASAIR_PINK, 0.3)  # THE ICON BADGE'S BACKGROUND TINT, PER ICON-SHAPE-VARIANT IN _ICON.SCSS (RGBA($TERTIARY, .3))
+
+
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0:
         mag = 31.4 - 2.5 * math.log10(flux)
@@ -76,7 +100,7 @@ def build_alert_timeline_plot(nid):
     windowEnd = datetime.strptime(date_nid.nid_to_date(nid), '%Y%m%d')
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_PINK))
+    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_PINK_LIGHT))
     fig.update_layout(
         autosize=True,
         height=158,  # FURTHER 30% OFF THE ORIGINAL 225PX CHART HEIGHT
@@ -104,6 +128,8 @@ def build_alert_timeline_plot(nid):
             showline=True,
             linewidth=1,
             linecolor='black',
+            rangemode='tozero',
+            fixedrange=True,  # LOCK THE Y-AXIS SO DRAGMODE='PAN' CAN'T PAN BELOW ZERO ALERTS
         ),
     )
 
