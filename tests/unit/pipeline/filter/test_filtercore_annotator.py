@@ -5,7 +5,7 @@ import psutil
 import context
 from annotationcore import AnnotationFilter
 import ann_filters
-import re
+import mysql.connector.errors
 
 
 def test_message_handler(message_list):
@@ -40,22 +40,41 @@ class AnnotationFilterTest(unittest.TestCase):
 #        for item in result.split(','):
 #            self.assertIn(item, expected_results)
 
-    @patch('filtercore.Filter.execute_remote_query')
-    def test_ingest_annotation(self, mock_execute_remote_query):
+    @patch('filtercore.db_connect.remote')
+    def test_ingest_annotation(self, mock_db_connect_remote):
         """Test that handle_annotation method returns 1 for an annotation with sources."""
         test_annotation = {'diaObjectId': 123, 
-                 'topic':'test_topic', 
-                 'version': '0.1',
-                 'classification':'fruit',
-                 'explanation': 'fruity',
-                 'classdict':{'apple':0.9, 'pear': 0.1},
-                 'url': '',
-                }
+                           'topic': 'test_topic',
+                           'version': '0.1',
+                           'classification': 'fruit',
+                           'explanation': 'fruity',
+                           'classdict': {'apple': 0.9, 'pear': 0.1},
+                           'url': '',
+                           }
         fltr = AnnotationFilter(group_id='filter_test', maxmessage=0)
         fltr.ann_diaObjectId = {}
         result = fltr.ingest_annotation(test_annotation)
         self.assertEqual(result, 1)
-        mock_execute_remote_query.assert_called_once()
+        # a delete and an insert
+        self.assertEqual(mock_db_connect_remote.call_count, 1)
+
+    @patch('filtercore.db_connect.remote')
+    def test_ingest_annotation_error(self, mock_db_connect_remote):
+        """Test that handle_annotation method raises an exception on error."""
+        test_annotation = {'diaObjectId': 123,
+                           'topic': 'test_topic',
+                           'version': '0.1',
+                           'classification': 'fruit',
+                           'explanation': 'fruity',
+                           'classdict': {'apple': 0.9, 'pear': 0.1},
+                           'url': '',
+                           }
+        mock_log = unittest.mock.MagicMock()
+        fltr = AnnotationFilter(group_id='filter_test', maxmessage=0, log=mock_log)
+        fltr.ann_diaObjectId = {}
+        mock_db_connect_remote.side_effect = mysql.connector.errors.Error('test error')
+        fltr.ingest_annotation(test_annotation)
+        mock_log.error.assert_called_with('Error inserting annotation: test error')
 
     @patch('annotationcore.AnnotationFilter.ingest_annotation')
     @patch('annotationcore.AnnotationFilter.ingest_message_list')

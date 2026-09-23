@@ -6,7 +6,7 @@ with open("web_stress.txt", "r") as f:
     objects = f.readlines()
 
 while True:
-    name = objects[random.randint(0, len(objects))].strip()
+    name = objects[random.randint(0, len(objects) - 1)].strip()
     url = f"https://lasair-lsst-dev.lsst.ac.uk/objects/{name}/"
     print('Getting', url)
     start_time = time.perf_counter()
