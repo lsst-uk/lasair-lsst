@@ -148,3 +148,5 @@ admin/
 /lasair-lsst.sublime-project
 /lasair-lsst.sublime-workspace
 webserver/static/files/front_page_cache.json
+/.codegraph
+/docs/agents

@@ -213,7 +213,7 @@ def hidden_list(request):
         request,
         classification=annotate_util.MARK_HIDDEN,
         header='Hidden Objects',
-        header_icon='includes/icons/icon_archive.html',
+        header_icon='includes/icons/icon_eye_closed.html',
         desc=('The objects you have hidden. They are left out of your own filter '
               'results, search results and email digests, and stay visible to '
               'everybody else.'),
