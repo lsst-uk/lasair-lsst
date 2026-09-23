@@ -24,7 +24,7 @@ import sys
 
 sys.path.append('../common')
 
-LASAIR_CYAN = '#00BABB'  # matches $lasair-blue in webserver/staticfiles/src/scss/custom/_variables.scss
+LASAIR_PINK = '#CE4257'  # MATCHES $LASAIR-RED/$TERTIARY, THE CARD TITLE ICON BADGE COLOUR
 
 
 def flux2mag(flux):   # nanoJansky to Magnitude
@@ -76,10 +76,10 @@ def build_alert_timeline_plot(nid):
     windowEnd = datetime.strptime(date_nid.nid_to_date(nid), '%Y%m%d')
 
     fig = go.Figure()
-    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_CYAN))
+    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_PINK))
     fig.update_layout(
         autosize=True,
-        height=225,
+        height=158,  # FURTHER 30% OFF THE ORIGINAL 225PX CHART HEIGHT
         margin=dict(l=50, r=10, t=10, b=40),
         dragmode='pan',
         plot_bgcolor='rgba(0,0,0,0)',
@@ -90,11 +90,20 @@ def build_alert_timeline_plot(nid):
             tickformat='%d %b',
             dtick=7 * 24 * 60 * 60 * 1000,  # weekly ticks
             showgrid=False,
+            showline=True,
+            linewidth=1,
+            linecolor='black',
+            ticks='outside',
+            ticklen=4,
+            tickcolor='black',
         ),
-        yaxis=dict(
+        yaxis=dict(  # NO OUTWARD TICKS HERE BY DESIGN: ONLY THE X-AXIS DATES NEED THEM
             title='Number of alerts',
             showgrid=True,
             gridcolor='#F0F0F0',
+            showline=True,
+            linewidth=1,
+            linecolor='black',
         ),
     )
 
