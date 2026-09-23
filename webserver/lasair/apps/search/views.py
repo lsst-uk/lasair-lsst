@@ -1,3 +1,5 @@
+from django.contrib import messages
+from lasair.apps.favourites.utils import marks_for_table, suppress_hidden
 from django.shortcuts import render
 from .utils import conesearch_impl, readcone, sexra, sexde
 import re
@@ -38,10 +40,18 @@ def search(
             json_checked = True
 
         # data = conesearch_impl(query)
+        # HIDING MEANS "NEVER SHOW ME THIS AGAIN", AND SEARCH IS ONE OF THE PLACES
+        # THE UI AND THE API DOCUMENTATION PROMISE IT REACHES
+        results, marks, omitted = suppress_hidden(request.user, results)
+        if omitted:
+            messages.info(request, f"{omitted} of your hidden objects were left out of these results.")
+
         if json_checked:
             return HttpResponse(json.dumps(results, indent=2), content_type="application/json")
         else:
-            return render(request, 'search/search.html', {'results': results, 'schema': schema, 'query': query})
+            return render(request, 'search/search.html', {
+                'results': results, 'schema': schema, 'query': query,
+                'marks': marks})
     else:
         return render(request, 'search/search.html', {'results': [], 'schema': [], 'query': ''})
 

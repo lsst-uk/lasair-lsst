@@ -36,6 +36,7 @@ urlpatterns = [
     path('', include('lasair.apps.annotator.urls')),
     path('', include('lasair.apps.community_resource.urls')),
     path('', include('lasair.apps.db_schema.urls')),
+    path('', include('lasair.apps.favourites.urls')),
     path('', include('lasair.apps.filter_query.urls')),
     path('', include('lasair.apps.mma_gw.urls')),
     path('', include('lasair.apps.object.urls')),

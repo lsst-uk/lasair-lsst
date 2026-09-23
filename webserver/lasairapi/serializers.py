@@ -155,14 +155,18 @@ class ObjectSerializer(serializers.Serializer):
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
+        viewer_id = None
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
+            if request.user.is_authenticated:
+                viewer_id = request.user.id
 
         if lasair_added:
             try:
                 result = objjson(objectId, lite=lite, 
-                     reliabilityThreshold=reliabilityThreshold)
+                     reliabilityThreshold=reliabilityThreshold,
+                     viewer_id=viewer_id)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
@@ -324,7 +328,11 @@ class QuerySerializer(serializers.Serializer):
             return {"error": error}
 
         try:
-            sqlquery_real = build_query(selected, tables, conditions)
+            # THE CALLER IS THE OWNER OF AN AD-HOC QUERY, SO THEIR HIDDEN OBJECTS ARE
+            # LEFT OUT AND favourite:only MEANS THEIR OWN FAVOURITES
+            sqlquery_real = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username))
         except Exception as e:
             return {"error": str(e)}
 
@@ -339,7 +347,14 @@ class QuerySerializer(serializers.Serializer):
                 result.append(row)
             return result
         except Exception as e:
-            error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
+            # THE CALLER SEES A READABLE PLACEHOLDER, NEVER THE HIDDEN/FAVOURITE
+            # EXISTS BLOCK, EVEN THOUGH THAT IS WHAT sqlquery_real JUST RAN
+            display_sql = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username), for_display=True)
+            display_sql += ' LIMIT %d OFFSET %d' % (limit, offset)
+            error = ('Your query:<br/><b>' + display_sql + '</b><br/>'
+                     'returned the error<br/><i>' + str(e) + '</i>')
             return {"error": error}
 
 
@@ -396,7 +411,8 @@ class AnnotateListSerializer(serializers.Serializer):
 
         cursor = msl.cursor(dictionary=True)
         topic = annotations[0]['topic']
-        cursor.execute('SELECT * from annotators where topic="%s"' % topic)
+        # PARAMETERISED: topic IS CALLER-SUPPLIED AND THIS QUERY GATES OWNERSHIP
+        cursor.execute('SELECT * from annotators where topic=%s', (topic,))
         nrow = 0
         for row in cursor:
             nrow += 1
@@ -424,3 +440,50 @@ class AnnotateListSerializer(serializers.Serializer):
         # now actually put the annotations in the kafka
         annotate_util.insert_annotations_kafka(annotations)
         return {'status': 'success', 'n': len(annotations)}
+
+
+MARK_BULK_CAP = 1000
+
+
+class MarkSerializer(serializers.Serializer):
+    """Set the caller's mark on one object or on a list of them.
+
+    The body carries the desired end state, so `mark_object` keeps favourite
+    and hidden mutually exclusive and the caller never chains two requests.
+    Re-posting a mark the object already holds is a 200, not a 409: the caller
+    asked for an end state and the end state holds.
+    """
+    diaObjectId = serializers.IntegerField(required=False)
+    diaObjectIds = serializers.ListField(
+        child=serializers.IntegerField(), required=False, max_length=MARK_BULK_CAP)
+    mark = serializers.CharField(required=False, allow_null=True, allow_blank=False)
+
+    def validate(self, data):
+        if ('diaObjectId' in data) == ('diaObjectIds' in data):
+            raise ValidationError('Send either diaObjectId or diaObjectIds, not both')
+        mark = data.get('mark')
+        if mark is not None and mark not in annotate_util.MARKS:
+            raise ValidationError('Not a mark: %s' % mark)
+        return data
+
+    def save(self):
+        request = self.context.get("request")
+        user = request.user
+
+        # THE dummy TOKEN IS PUBLISHED ON THE /api PAGE, SO EVERY READER OF THE
+        # DOCUMENTATION WOULD OTHERWISE WRITE INTO ONE SHARED tags_dummy TOPIC.
+        # A SILENT NO-OP WAS REJECTED: A CALLER WOULD SEE SUCCESS AND NO EFFECT.
+        if user.username == 'dummy':
+            return {'error': 'The demonstration token is read-only. '
+                             'Get your own token to mark objects.'}
+
+        mark = self.validated_data.get('mark')
+        single = 'diaObjectId' in self.validated_data
+        diaObjectIds = ([self.validated_data['diaObjectId']] if single
+                        else self.validated_data['diaObjectIds'])
+
+        if len(diaObjectIds) > MARK_BULK_CAP:
+            return {'error': 'At most %d objects may be marked at once' % MARK_BULK_CAP}
+
+        results = annotate_util.mark_objects(user, diaObjectIds, mark)
+        return results[0] if single else results

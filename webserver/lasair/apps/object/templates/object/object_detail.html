@@ -9,6 +9,8 @@
     {{data.objectId}}
 {% endblock title %}
 
+{% block body_class %}{% if data.myMark == 'hidden' %}object-hidden{% endif %}{% endblock body_class %}
+
 
 {% block content %}
 

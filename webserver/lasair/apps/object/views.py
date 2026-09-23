@@ -16,6 +16,7 @@ from astropy.time import Time
 from lasair.utils import mjd_now, ecliptic_and_galactic, rasex, decsex, objjson
 from .utils import object_difference_lightcurve
 sys.path.append('../common')
+from src import annotate_util
 
 
 def object_detail(request, diaObjectId):
@@ -37,7 +38,9 @@ def object_detail(request, diaObjectId):
     ```           
     """
 #    data = objjson(diaObjectId, lite=True)
-    data = objjson(diaObjectId, lite=False)
+    # THE VIEWER DECIDES WHICH PRIVATE ANNOTATIONS COME BACK; ANONYMOUS SEES PUBLIC ONLY
+    viewer_id = request.user.id if request.user.is_authenticated else None
+    data = objjson(diaObjectId, lite=False, viewer_id=viewer_id)
 
     # how to replace the real data with fake data
 #    with open('/home/ubuntu/fake.json', 'r') as f:
@@ -48,6 +51,23 @@ def object_detail(request, diaObjectId):
     if not data:
         return render(request, 'error.html',
                       {'message': 'Object %s not in database' % diaObjectId})
+
+    # THE MARK COSTS NO EXTRA QUERY: THE VIEWER'S OWN TAG ROWS ARE ALREADY HERE
+    # AGGREGATE ONLY, AND COMPUTED HERE RATHER THAN IN objjson, SO THE API CANNOT
+    # ACQUIRE IT BY ACCIDENT AND THE ANNOTATION VISIBILITY RULE STAYS TIGHT
+    try:
+        data['favouritedBy'] = annotate_util.count_favouriters(diaObjectId)
+    except Exception:
+        data['favouritedBy'] = 0
+
+    data['myMark'] = None
+    if request.user.is_authenticated:
+        myTopic = annotate_util.tag_topic(request.user.username)
+        for annotation in data['annotations']:
+            if annotation['topic'] == myTopic and annotation['classification'] in annotate_util.MARKS:
+                data['myMark'] = annotation['classification']
+                if data['myMark'] == annotate_util.MARK_FAVOURITE:
+                    break
 
     if 'sherlock' in data and 'classification' in data['sherlock']:
         data['sherlock']['classification_expanded'] = data['sherlock']['classification']
