@@ -74,6 +74,7 @@ class SuppressHiddenTest(unittest.TestCase):
         mock_marks.assert_not_called()
 
 
+@mock.patch.object(email_digest.settings, 'LASAIR_URL', 'lasair.example', create=True)
 class FormatMessageTest(unittest.TestCase):
     """Tests for the line telling the user what was left out."""
 
