@@ -146,3 +146,5 @@ admin/
 /lasair-lsst.sublime-project
 /lasair-lsst.sublime-workspace
 webserver/static/files/front_page_cache.json
+webserver/static/js/lasair_mark.js
+webserver/static/vendor/js9/js9plugins.min.js
