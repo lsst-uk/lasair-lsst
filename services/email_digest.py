@@ -31,7 +31,7 @@ def format_line(alert):
     text = ' '.join(str(value) for key, value in alert.items()) + "\n"
     html = "<tr>"
     for key, value in alert.items():
-        if key == 'diaObjectId':
+        if key.lower() == 'diaobjectid':
             html += f"<td><a href=\"https://{settings.LASAIR_URL}/objects/{str(value)}\">{str(value)}</a></td>"
         else:
             html += f"<td>{str(value)}</td>"
@@ -115,11 +115,14 @@ def main(to_addr, groupid, fname):
                 send_email(to_addr, f['name'], text, html, json_str)
             else:
                 logf.write('ERROR: message too large to send as email')
+            try:
+                consumer.commit(asynchronous=False)
+                sleep(2)
+            except Exception as e:
+                logf.write('ERROR: ' + str(e))
         else:
             logf.write('No new output in topic %s\n' % (f['topic_name']))
 
-        consumer.commit()
-        sleep(2)
         consumer.unsubscribe()
         sleep(2)
     consumer.close()
