@@ -46,10 +46,14 @@ class sherlock(FeatureGroup):
             if z:
                 # combine z and apparent mag to get absolute mag
                 # using Ken Smith code from Atlas for distance modulus
-                distances = redshiftToDistance(z)
-                if self.verbose:
-                    print(distances)
-                distanceModulusK = distances['dmod'] - 2.5*math.log10(1+z)
+                try:
+                    distances = redshiftToDistance(z)
+
+                    if self.verbose:
+                        print(distances)
+                    distanceModulusK = distances['dmod'] - 2.5*math.log10(1+z)
+                except Exception as e:
+                    print('Redshift %s gets error %s' % (str(z), str(e)))
         
         if self.verbose:
             print('K corrected distanceModulus', distanceModulusK)

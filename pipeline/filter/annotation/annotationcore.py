@@ -10,10 +10,12 @@ from transfer import fetch_attrs
 
 sys.path.append('../../common')
 import settings
-
+sys.path.append('../../common/src')
+import annotate_util
 sys.path.append('../../webserver/lasair')
 sys.path.append('../../../../webserver/lasair')
 from lightcurves import lightcurve_fetcher
+import mysql.connector.errors
 
 
 def now():
@@ -65,30 +67,33 @@ class AnnotationFilter(Filter):
         else:
             return 0
 
+        # This is because the Lasair client and webserver expect to use 'objectId'
+        # instead of 'diaObjectId'
+        if 'objectId' in annotation:
+            diaObjectId = annotation['objectId']
+        else:
+            diaObjectId = annotation['diaObjectId']
+
         # self.ann_diaObjectId = {
         #     'topic1':[oid1, oid2, ...], 
         #     'topic2':[...] }
         if annotator in self.ann_diaObjectId:
-            self.ann_diaObjectId[annotator].append(annotation['diaObjectId'])
+            self.ann_diaObjectId[annotator].append(diaObjectId)
         else:
-            self.ann_diaObjectId[annotator] = [annotation['diaObjectId']]
+            self.ann_diaObjectId[annotator] = [diaObjectId]
 
-        # put the annotation in the database
-        query = 'REPLACE INTO annotations ('
-        query += 'diaObjectId, topic, version, classification, explanation, classdict, url'
-        query += ') VALUES ('
-        query += "'%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-        query = query % (
-                annotation['diaObjectId'], 
-                annotation['topic'], 
-                annotation['version'], 
-                annotation['classification'], 
-                annotation['explanation'], 
-                annotation['classdict'], 
+        try:
+            annotate_util.insert_annotation_db(
+                diaObjectId,
+                annotation['topic'],
+                annotation['classification'],
+                annotation['version'],
+                annotation['explanation'],
+                annotation['classdict'],
                 annotation['url'])
-
-        if self.transfer:
-            self.execute_remote_query(query)
+        except mysql.connector.errors.Error as e:
+            self.log.error(f'Error inserting annotation: {str(e)}')
+            return 0
         return 1
 
     def post_ingest(self, n_messages):

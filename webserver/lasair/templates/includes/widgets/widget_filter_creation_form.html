@@ -25,7 +25,6 @@
                         {% csrf_token %}
 
 
-
                         <div class="d-flex my-4 justify-content-around">
 
                             <div class=" form-group  mx-5 w-100">
@@ -72,7 +71,8 @@
                             <label for="conditions"><h4>FROM</h4></label>
 
                             {% include "includes/help_popover.html" with title="FROM Help" position="right" content="Content in the FROM box <b>cannot be manually edited</b>, instead, tables are dynamically added or removed depending on the content of the SELECT box above and additional asset selections to the right." %}
-                            <pre class="prism language-sql"><code id="from_box"></code></pre>
+                            <pre class="prism language-sql mb-1"><code id="from_box"></code></pre>
+                            <small class="form-text text-muted d-block mb-2 text-end"><em>read-only</em></small>
                         </div>
 
                         <div class="d-flex justify-content-around">
