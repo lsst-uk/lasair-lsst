@@ -153,3 +153,5 @@ webserver/static/files/front_page_cache.json
 /tests/unit/webserver/lasair/test-reports
 /.codegraph
 /docs/agents
+webserver/static/js/lasair_mark.js
+webserver/static/vendor/js9/js9plugins.min.js
