@@ -43,7 +43,7 @@ def moc2sql(mocfilename):
     """ Return the SQL cluase that implements the bounding box.
     If the MOC covers the line of RA=0, we just can't do it.
     """
-    moc = MOC.from_fits(settings.GW_DIRECTORY +'/'+ mocfilename +'/90.moc')
+    moc = MOC.from_fits(settings.MMA_DIRECTORY +'/'+ mocfilename +'/90.moc')
     r = moc_bounding_box(moc)
     if r is None:
         return ''
@@ -66,7 +66,7 @@ def checkit(mocfilename, points):
     """
     ralist = points['ralist']
     delist = points['delist']
-    moc = MOC.from_fits(settings.GW_DIRECTORY +'/'+ mocfilename +'/90.moc')
+    moc = MOC.from_fits(settings.MMA_DIRECTORY +'/LVK/'+ mocfilename +'/90.moc')
     n1 = count(moc, ralist, delist)
 
     r = moc_bounding_box(moc)
@@ -85,16 +85,16 @@ def checkit(mocfilename, points):
     assert(n1 == n2)
 
 if __name__ == "__main__":
-    """ Intended to run in a cron to harvest GW alerts that appear in the directory
+    """ Intended to run in a cron to harvest LVK alerts that appear in the directory
     """
     checking = False
     if checking:
         points = makelist(1000)
 
-    for file in sorted(os.listdir(settings.GW_DIRECTORY)):
+    for file in sorted(os.listdir(settings.MMA_DIRECTORY + '/LVK/')):
         if file.startswith('S') or file.startswith('M'):
             otherId = file
-            for version in os.listdir(settings.GW_DIRECTORY+'/'+otherId):
+            for version in os.listdir(settings.MMA_DIRECTORY+'/LVK/'+otherId):
                 if version.startswith('20'):
                     mocfilename = '%s/%s' % (otherId, version)
                     if checking:

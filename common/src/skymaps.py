@@ -10,25 +10,25 @@ import math
 from mocpy import MOC
 import astropy.units as u
 from skytag.commonutils import prob_at_location
-from gkutils.commonutils import redshiftToDistance
+import healpy as hp
+import numpy as np
 
 sys.path.append('../../../common')
 import settings
 sys.path.append('../../../common/src')
 import db_connect, lasairLogging
 
-# This is c/H, speed of light over Hubble constant
-# CONVERT_Z_TO_DISTANCE = 4271
-# Replaced by Kens code redshiftToDistance
-
-def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
+def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, verbose=False):
     """ Get all the alerts that match a given skymap, 
         then run against the watchmaplist, return the hits
     """
-    moc = MOC.from_fits(mocfilename(gw))
+    if 'mocfilename' in mma_event:
+        moc = MOC.from_fits(mma_event['mocfilename'])
+    else:
+        moc = MOC.from_fits(mocfilename(namespace, mma_event))
 
     # get the alert positions from the database
-    alertlist = fetch_alerts(database, gw, mjdmin, mjdmax, verbose)
+    alertlist = fetch_alerts(database, mma_event, mjdmin, mjdmax, verbose)
 
     # alert positions
     alertobjlist      = alertlist['obj']
@@ -56,32 +56,54 @@ def get_skymap_hits(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
 #    if verbose:
 #        print(mocralist, mocdelist, mocdistancelist)
-    # contour is the contour of the skymap on which the given point lies
-    # gw_disttuples are pairs of (mean,stddev) on the diatance
-    # the code is at https://skytag.readthedocs.io/
-    contour, gw_disttuples, probdens2 = prob_at_location(
-        ra =mocralist,
-        dec=mocdelist,
-        mapPath=mapfilename(gw),
-        distance=True,
-        probdensity=True
-    )
 
-    # Use the distance of the optical event, if we have it, to get the
-    # number of sigma away from the GW mean distance
-    probdens3 = []
-    distance = []
-    for i in range(len(mocobjlist)):
-        (gw_distance, gw_diststddev) = gw_disttuples[i]
-        if mocdistancelist[i]:
-            ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
-            if math.isinf(ds): ds = 100
-            p3 = math.exp(-0.5*ds*ds) * probdens2[i]
-            probdens3.append(p3)
-            distance.append(mocdistancelist[i])
+    if namespace == 'LVK':
+        # contour is the contour of the skymap on which the given point lies
+        # gw_disttuples are pairs of (mean,stddev) on the diatance
+        # the code is at https://skytag.readthedocs.io/
+        if 'mapfilename' in mma_event:
+            map = mma_event['mapfilename']
         else:
-            probdens3.append(None)
-            distance.append(None)
+            map = mapfilename(namespace, mma_event)
+
+        contour, gw_disttuples, probdens2 = prob_at_location(
+            ra =mocralist,
+            dec=mocdelist,
+            mapPath=map,
+            distance=True,
+            probdensity=True
+        )
+
+        # Use the distance of the optical event, if we have it, to get the
+        # number of sigma away from the GW mean distance
+        probdens3 = []
+        distance = []
+        for i in range(len(mocobjlist)):
+            (gw_distance, gw_diststddev) = gw_disttuples[i]
+            if mocdistancelist[i]:
+                ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
+                if math.isinf(ds): ds = 100
+                p3 = math.exp(-0.5*ds*ds) * probdens2[i]
+                probdens3.append(p3)
+                distance.append(mocdistancelist[i])
+            else:
+                probdens3.append(None)
+                distance.append(None)
+
+    elif namespace == 'Icecube':
+        m = hp.read_map(mapfilename(namespace, mma_event))
+        theta = np.radians(90.0 - np.array(mocdelist))
+        phi = np.radians(np.array(mocralist))
+        ipix = hp.ang2pix(hp.get_nside(m), theta, phi)
+        probdens2 = m[ipix]
+        n = len(probdens2)
+        probdens3 = np.array([None]*n)
+        contour   = np.array([None]*n)
+        distance  = np.array([None]*n)
+
+    else:
+        print(f'Unknown Event namespace {namespace}. Quitting')
+        sys.exit()
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
@@ -100,7 +122,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = 'SELECT objects.diaObjectId, ra, decl, z, photoz, distance '
+    query = 'SELECT objects.diaObjectId, ra, decl, best_distance '
     query += ' FROM objects,sherlock_classifications '
     query += ' WHERE objects.diaObjectId=sherlock_classifications.diaObjectId '
     if mjdmin and mjdmax:
@@ -115,16 +137,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
         objlist.append(row['diaObjectId'])
         ralist.append(row['ra'])
         delist.append(row['decl'])
-
-        # The sherlock may have distance in Mpc, z, and/or photoZ
-        # distance is best, else z, else photoZ
-
-        if row['distance']:   d = row['distance']
-        elif row['z']:        d = redshiftToDistance(row['z'])['dl_mpc']
-        elif row['photoz']:   d = redshiftToDistance(row['photoz'])['dl_mpc']
-        else:                 d = None
-
-        distancelist.append(d)
+        distancelist.append(row['best_distance'])
     if verbose:
         print('fetch_alerts: mjd %s to %s, found %d' % (str(mjdmin), str(mjdmax), len(objlist)))
 
@@ -163,7 +176,7 @@ def fetch_skymap_by_id(database, mw_id):
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
         return None
 
-def insert_skymap_hits(database, gw, skymaphits):
+def insert_skymap_hits(database, mma_event, skymaphits):
     """ Insert skymap hits into the database
     Build and execute the insertion query to get the hits into the database
     """
@@ -171,7 +184,7 @@ def insert_skymap_hits(database, gw, skymaphits):
 
     query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distance, probdens2, probdens3) VALUES\n"
     hitlist = []
-    mw_id = gw['mw_id']
+    mw_id = mma_event['mw_id']
 
     did = skymaphits['diaObjectId']
     sky = skymaphits['contour']
@@ -179,10 +192,12 @@ def insert_skymap_hits(database, gw, skymaphits):
     p2 =  skymaphits['probdens2']
     p3 =  skymaphits['probdens3']
     for (diaObjectId, contour, distance, probdens2, probdens3) in zip(did, sky, dist, p2, p3):
+        if contour:   contour   = '%.2f'%contour
+        else:         contour   = 'NULL'
         if probdens3: probdens3 = '%.2f'%probdens3
         else:         probdens3 = 'NULL'
-        if distance:  distance = '%.2f'%distance
-        else:         distance = 'NULL'
+        if distance:  distance  = '%.2f'%distance
+        else:         distance  = 'NULL'
         hitlist.append('(%d,%d,%.4f,%s,%.4f,%s)' % \
             (mw_id, diaObjectId, contour, distance, probdens2, probdens3))
 
@@ -215,14 +230,14 @@ def mjdnow():
     """
     return time.time()/86400 + 40587.0;
 
-def mocfilename(gw):
+def mocfilename(namespace, mma_event):
     """ Where to find the 90% MOC for a given skymap and version
     """
-    filename = '%s/%s/%s/90.moc' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
+    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['otherId']}/{mma_event['version']}/90.moc'
     return filename
 
-def mapfilename(gw):
+def mapfilename(namespace, mma_event):
     """ Where to find the skymap file for a given skymap and version
     """
-    filename = '%s/%s/%s/map.fits' % (settings.GW_DIRECTORY, gw['otherId'], gw['version'])
+    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['otherId']}/{mma_event['version']}/map.fits'
     return filename
