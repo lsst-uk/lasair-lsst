@@ -77,6 +77,11 @@ In order to run the consumer code, you need the "topic name" corresponding to yo
 filter, which is derived from the name you gave it in the settings. In this case the 
 topic name is `lasair_2Hasabsmag`.
 
+<i>NOTE added Sept 2026: Some concerns about privacy have been addressed by obfuscating
+topic names on the public Kafka. Instead of a topic name like `lasair_22fromsecretEuclidwatchlist` 
+as indicated above, the name will be something like `lasair_22ad3673dd`. Existing topics
+are not affected, only when me will change only when the active filter is saved.</i>
+
 ### Types of Kafka Streams
 The plain Kafka stream offers just the attributes you selected in your filter query.
 Supoose your SQL SELECT says `objects.diaObjectId,  objects.decl, objects.ra`, 
