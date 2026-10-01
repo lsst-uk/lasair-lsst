@@ -231,7 +231,7 @@ def objjson(diaObjectId, lite=False, reliabilityThreshold=0):
         diaSource['image_urls'] = {}
         for cutoutType in ['Science', 'Template', 'Difference']:
             diaSourceId_cutoutType = '%s_cutout%s' % (diaSourceId, cutoutType)
-            url = 'https://%s/fits/%s'
+            url = 'https://%s/fits/%s/'
             url = url % (lasair_settings.LASAIR_URL, diaSourceId_cutoutType)
             diaSource['image_urls'][cutoutType] = url
 
