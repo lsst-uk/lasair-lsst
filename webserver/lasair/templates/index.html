@@ -75,6 +75,16 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
                             </div>
                         </div>
 
+                        {% if timeline %}
+                        <div class="row mx-4">
+                            <div class="col-12 mb-4">
+                                {% autoescape off %}
+                                {{ timeline }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                        {% endif %}
+
 
 
                         <div class="d-flex justify-content-center">

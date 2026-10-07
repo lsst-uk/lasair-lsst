@@ -12,6 +12,7 @@ import src.date_nid as date_nid
 from src import db_connect
 import settings as lasair_settings
 import importlib
+import logging
 import random
 import time
 import math
@@ -23,11 +24,123 @@ import sys
 
 sys.path.append('../common')
 
+LASAIR_PINK = '#CE4257'  # MATCHES $LASAIR-RED/$TERTIARY, THE CARD TITLE ICON BADGE COLOUR
+
+
+def hex_to_rgba(hexColor, alpha):
+    """*Convert a #RRGGBB hex colour to a Plotly-compatible rgba(...) string*
+
+    **Key Arguments:**
+
+    - ``hexColor`` -- the colour as a #RRGGBB hex string
+    - ``alpha`` -- the opacity, from 0.0 to 1.0
+
+    **Return:**
+
+    - ``rgbaString`` -- the equivalent ``rgba(r, g, b, alpha)`` string
+
+    **Usage:**
+
+        rgbaString = hex_to_rgba('#CE4257', 0.3)
+    """
+    hexColor = hexColor.lstrip('#')
+    r, g, b = (int(hexColor[i:i + 2], 16) for i in (0, 2, 4))
+    return f'rgba({r}, {g}, {b}, {alpha})'
+
+
+LASAIR_PINK_LIGHT = hex_to_rgba(LASAIR_PINK, 0.3)  # THE ICON BADGE'S BACKGROUND TINT, PER ICON-SHAPE-VARIANT IN _ICON.SCSS (RGBA($TERTIARY, .3))
+
 
 def flux2mag(flux):   # nanoJansky to Magnitude
     if flux > 0:
         mag = 31.4 - 2.5 * math.log10(flux)
         return mag
+
+
+def build_alert_timeline_plot(nid):
+    """*Build the responsive alert-count timeline chart for the homepage*
+
+    **Key Arguments:**
+
+    - ``nid`` -- the current Lasair night id, used to anchor the "days ago" query
+
+    **Return:**
+
+    - ``timelineHtml`` -- the chart rendered as an embeddable HTML div, defaulting
+        to the past month and pannable back over the full fetched history
+
+    **Usage:**
+
+        timelineHtml = build_alert_timeline_plot(nid)
+    """
+    import plotly.graph_objs as go
+    from datetime import datetime
+
+    historyDays = 182
+    defaultWindowDays = 31
+    maxAlertCap = 1000000
+
+    query = 'SELECT nid, value FROM lasair_statistics WHERE name=%s AND nid > %s ORDER BY nid'
+    dates = []
+    nalerts = []
+    msl = db_connect.readonly()
+    try:
+        cursor = msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor.execute(query, ('today_alert', nid - historyDays))
+            for row in cursor:
+                dates.append(datetime.strptime(date_nid.nid_to_date(row['nid']), '%Y%m%d'))
+                nalerts.append(min(row['value'], maxAlertCap))
+        finally:
+            cursor.close()
+    finally:
+        msl.close()
+
+    windowStart = datetime.strptime(date_nid.nid_to_date(nid - defaultWindowDays), '%Y%m%d')
+    windowEnd = datetime.strptime(date_nid.nid_to_date(nid), '%Y%m%d')
+
+    fig = go.Figure()
+    fig.add_trace(go.Bar(x=dates, y=nalerts, marker_color=LASAIR_PINK_LIGHT))
+    fig.update_layout(
+        autosize=True,
+        height=158,  # FURTHER 30% OFF THE ORIGINAL 225PX CHART HEIGHT
+        margin=dict(l=50, r=10, t=10, b=40),
+        dragmode='pan',
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        xaxis=dict(
+            type='date',
+            range=[windowStart, windowEnd],
+            tickformat='%d %b',
+            dtick=7 * 24 * 60 * 60 * 1000,  # weekly ticks
+            showgrid=False,
+            showline=True,
+            linewidth=1,
+            linecolor='black',
+            ticks='outside',
+            ticklen=4,
+            tickcolor='black',
+        ),
+        yaxis=dict(  # NO OUTWARD TICKS HERE BY DESIGN: ONLY THE X-AXIS DATES NEED THEM
+            title='Number of alerts',
+            showgrid=True,
+            gridcolor='#F0F0F0',
+            showline=True,
+            linewidth=1,
+            linecolor='black',
+            rangemode='tozero',
+            fixedrange=True,  # LOCK THE Y-AXIS SO DRAGMODE='PAN' CAN'T PAN BELOW ZERO ALERTS
+        ),
+    )
+
+    timelineHtml = fig.to_html(
+        config={
+            'displayModeBar': False,
+            'responsive': True,
+            'doubleClick': 'reset',
+            'scrollZoom': False,
+        })
+    return timelineHtml
 
 
 def index(request):
@@ -157,6 +270,11 @@ def index(request):
             'psfFlux'        : '%.0f' % t['psfFlux'],
             'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
         })
+    try:
+        timeline = build_alert_timeline_plot(date_nid.nid_now())
+    except Exception:
+        logging.getLogger(__name__).exception("Failed to build homepage alert timeline plot")
+        timeline = None
 
     context = {
         'web_domain': lasair_settings.WEB_DOMAIN,
@@ -165,5 +283,6 @@ def index(request):
         'news': news,
         'table': textTable,
         'schema': schema,
+        'timeline': timeline,
     }
     return render(request, 'index.html', context)
