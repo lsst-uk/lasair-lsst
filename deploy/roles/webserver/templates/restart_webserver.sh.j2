@@ -9,6 +9,8 @@ sleep 1
 
 cd {{ ansible_env.HOME }}/{{ git_name }}/webserver
 
+ulimit -n 4096
+
 mod_wsgi-express setup-server \
 --user {{ ansible_user_id }} \
 --group {{ lookup('pipe', 'id -gn') }} \
