@@ -37,6 +37,6 @@ def handle(data):
     return {
         'event_tai':event_tai, 
         'loc': loc,
-        'more_info': 'This is a high energy neutrino event from Icecube',
+        'more_info': 'This is a high energy neutrino event from Icecube Cascade',
         'params':params,
     }

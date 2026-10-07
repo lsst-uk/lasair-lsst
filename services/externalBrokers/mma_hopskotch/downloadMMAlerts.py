@@ -5,12 +5,12 @@ https://emfollow.docs.ligo.org/userguide/tutorial/multiorder_skymaps.html
 This code written by Ken Smith and Roy Williams 2026
 
 Usage:
-  %s [--type=<alertType>] [--directory=<directory>] [--contours=<contours>] [--logfile=<logfile>] [--superevents] [--earliest]
+  %s [--namespace=<alertType>] [--directory=<directory>] [--contours=<contours>] [--logfile=<logfile>] [--superevents] [--earliest]
   %s (-h | --help)
 
 Options:
   -h --help                         Show this screen.
-  --type=<alertType>                Can be LVK or Icecube [default: LVK]
+  --namespace=<alertType>                Can be LVK or ICC or ICGB [default: LVK]
   --directory=<directory>           Directory to where the maps and MOCs will be written, default from settings1
   --contours=<contours>             MOC contours separated by commas,  no spaces [default: 10,50,90]
   --logfile=<logfile>               log file [default: stdout]
@@ -21,7 +21,7 @@ import sys
 from docopt import docopt
 import logging
 from hopskotch_utils import hop_reader
-import readLVK, readIcecube
+import readLVK, readICC, readICGB
 
 # in settings we expect SCIMMA_AUTH_USERNAME, SCIMMA_AUTH_PASSWORD, HOPSKOTCH_GROUP_ID
 sys.path.append('../../../common')
@@ -47,20 +47,26 @@ def listen(options):
     logger.addHandler(fh)
 
     # which alerts are we fetching?
-    if options['--type'] == 'LVK':
+    if options['--namespace'] == 'LVK':
          topic = 'igwn.gwalert'
          is_gcn = False
          if not options['--directory']:
             options['--directory'] = settings.MMA_DIRECTORY + '/LVK/'
 
-    elif options['--type'] == 'Icecube':
+    elif options['--namespace'] == 'ICC':
         topic = 'gcn.classic.text.ICECUBE_CASCADE'
         is_gcn = True
         if not options['--directory']:
-            options['--directory'] = settings.MMA_DIRECTORY + '/Icecube/'
+            options['--directory'] = settings.MMA_DIRECTORY + '/ICC/'
+
+    elif options['--namespace'] == 'ICGB':
+        topic = 'gcn.notices.icecube.gold_bronze_track_alerts'
+        is_gcn = False
+        if not options['--directory']:
+            options['--directory'] = settings.MMA_DIRECTORY + '/ICGB/'
 
     else:
-        logger.error(f'Unknown event type {options['--type']}. Exiting')
+        logger.error(f'Unknown event namespace {options['--namespace']}. Exiting')
         sys.exit()
 
     # set up hopskotch
@@ -76,13 +82,15 @@ def listen(options):
         dataDict = hr.poll()
         print('got event')
 
-        # process according to event type
-        if options['--type'] == 'LVK':
+        # process according to event namespace
+        if options['--namespace'] == 'LVK':
             readLVK.handleDataDict(dataDict, options, logger)
-        elif options['--type'] == 'Icecube':
-            readIcecube.handleDataDict(dataDict, options, logger)
+        elif options['--namespace'] == 'ICC':
+            readICC.handleDataDict(dataDict, options, logger)
+        elif options['--namespace'] == 'ICGB':
+            readICGB.handleDataDict(dataDict, options, logger)
         else:
-            logger.error(f'Unknown event type {options['--type']}. Exiting')
+            logger.error(f'Unknown event namespace {options['--namespace']}. Exiting')
             continue
 
 if __name__ == '__main__':

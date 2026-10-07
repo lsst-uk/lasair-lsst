@@ -216,10 +216,16 @@ if __name__ == "__main__":
 
     if namespace == 'LVK':
         import handle_LVK_yaml as handle_yaml
-        dir = settings.MMA_DIRECTORY + '/LVK'       #  '/mnt/cephfs/lasair/mma/LVK/'
+        dir = settings.MMA_DIRECTORY + '/LVK'
+    elif namespace == 'ICC':
+        import handle_ICC_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/ICC'
+    elif namespace == 'ICGB':
+        import handle_ICGB_yaml as handle_yaml
+        dir = settings.MMA_DIRECTORY + '/ICGB'
     else:
-        import handle_Icecube_yaml as handle_yaml
-        dir = settings.MMA_DIRECTORY + '/Icecube'  #  '/mnt/cephfs/lasair/mma/Icecube/'
+        print('Unknown namespace ', namespace)
+        sys.exit()
 
     database = db_connect.remote()
 
