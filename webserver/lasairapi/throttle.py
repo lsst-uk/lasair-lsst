@@ -80,3 +80,12 @@ class UserClassRateThrottle(UserRateThrottle):
         except KeyError:
             msg = "No default throttle rate set for '%s' scope" % self.scope
             raise ImproperlyConfigured(msg)
+
+
+class MarkRateThrottle(UserClassRateThrottle):
+    """A separate bucket for writes to /api/mark/.
+
+    Not a higher limit — a separate scope, so curating a set of objects does
+    not spend the query budget for reading them.
+    """
+    scope = 'mark'

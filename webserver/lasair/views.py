@@ -270,6 +270,7 @@ def index(request):
             'psfFlux'        : '%.0f' % t['psfFlux'],
             'absMag'         : '%.1f'%t['absMag'] if t['absMag'] else '',
         })
+
     try:
         timeline = build_alert_timeline_plot(date_nid.nid_now())
     except Exception:

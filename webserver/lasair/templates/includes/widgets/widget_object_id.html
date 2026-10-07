@@ -23,12 +23,16 @@
                     <h2 class="accordion-header " id="headinOne">
                         <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
                     </h2>
+
                 </div>
             </div>
-            <div class="col-3  px-xl-1 float-end">
-                <span class="float-end me-2">
+            <div class="col-3 px-xl-1">
+                <div class="d-flex align-items-center justify-content-end object-id-actions">
+                    <span class="mark-controls mark-controls-lg d-inline-flex align-items-center me-2">
+                        {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=data.diaObjectId mark=data.myMark %}
+                    </span>
                     {% include "includes/go_deeper_button.html" with collapseId="collapseObject" %}
-                </span>
+                </div>
             </div>
         </div>
         <div class="row  d-xl-flex mb-3 ms-sm-2">
@@ -90,6 +94,12 @@
                                         <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
                                         <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
                                     </tr>
+                                    {% if data.favouritedBy %}
+                                        <tr>
+                                            <td class="fw-bold text-gray-900">Favourited by:</td>
+                                            <td class="fw-bold text-gray-400">{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</td>
+                                        </tr>
+                                    {% endif %}
                                     </tr>
                                 </tbody>
                             </table>

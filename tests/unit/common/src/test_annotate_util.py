@@ -28,44 +28,71 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('db_connect.remote')
     def test_insert_annotation_db(self, mock_db):
         """Test insert_annotation_db function"""
+        # ARRANGE
         mock_msl = MagicMock()
         mock_cursor = MagicMock()
         mock_db.return_value = mock_msl
         mock_msl.cursor.return_value = mock_cursor
 
-        expected_delete = (
-            'DELETE FROM annotations '
-            'WHERE diaObjectId=123 AND topic="test_topic"'
-        )
-        expected_insert = (
-            "INSERT INTO annotations ("
-            "diaObjectId, topic, version, classification, explanation, classdict, url"
-            ") VALUES ("
-            "'123', 'test_topic', 'v1', 'test_class', 'expl', '{}', 'test_url')"
-        )
+        # ACT
         annotate_util.insert_annotation_db(123, 'test_topic', 'test_class', 'v1', 'expl', '{}', 'test_url')
-        mock_cursor.execute.assert_any_call(expected_delete)
-        mock_cursor.execute.assert_any_call(expected_insert)
+
+        # ASSERT
+        expected_delete = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+        expected_insert = (
+            'INSERT INTO annotations ('
+            'diaObjectId, topic, version, classification, explanation, classdict, url'
+            ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
+        )
+        mock_cursor.execute.assert_any_call(expected_delete, (123, 'test_topic'))
+        mock_cursor.execute.assert_any_call(
+            expected_insert,
+            (123, 'test_topic', 'v1', 'test_class', 'expl', '{}', 'test_url'))
+
+    @mock.patch('db_connect.remote')
+    def test_insert_annotation_db_tags(self, mock_db):
+        """Test insert_annotation_db deletes only the matching tag on a tags topic"""
+        # ARRANGE
+        mock_msl = MagicMock()
+        mock_cursor = MagicMock()
+        mock_db.return_value = mock_msl
+        mock_msl.cursor.return_value = mock_cursor
+
+        # ACT
+        annotate_util.insert_annotation_db(123, 'tags_test_topic', 'test_class')
+
+        # ASSERT
+        expected_delete = (
+            'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s '
+            'AND classification=%s'
+        )
+        mock_cursor.execute.assert_any_call(
+            expected_delete, (123, 'tags_test_topic', 'test_class'))
 
     @mock.patch('db_connect.remote')
     def test_delete_annotation(self, mock_db):
         """Test delete_annotation function"""
-        """Test delete_annotation function for tags"""
+        # ACT
         annotate_util.delete_annotation(123, 'test_topic', 'test_class')
-        expected_delete = (
-            'DELETE FROM annotations WHERE diaObjectId=123 AND topic="test_topic"'
-            )
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_delete)
+
+        # ASSERT
+        expected_delete = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_delete, (123, 'test_topic'))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_tags(self, mock_db):
         """Test delete_annotation function for tags"""
+        # ACT
         annotate_util.delete_annotation(123, 'tags_test_topic', 'test_class')
+
+        # ASSERT
         expected_delete = (
-            'DELETE FROM annotations WHERE diaObjectId=123 AND topic="tags_test_topic" '
-            'AND classification="test_class"'
-            )
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_delete)
+            'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s '
+            'AND classification=%s'
+        )
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_delete, (123, 'tags_test_topic', 'test_class'))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_delete_annotation_error(self, mock_db):
@@ -76,22 +103,381 @@ class AnnotateUtilTest(unittest.TestCase):
     @mock.patch('annotate_util.db_connect.remote')
     def test_classifications_for_object(self, mock_db):
         """Test classifications_for_object function"""
+        # ACT
+        annotate_util.classifications_for_object('test_topic', 123)
+
+        # ASSERT
         expected_select = (
             'SELECT classification FROM annotations '
-            'WHERE topic="test_topic" AND diaObjectId=123'
+            'WHERE topic=%s AND diaObjectId=%s'
             )
-        annotate_util.classifications_for_object('test_topic', 123)
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_select)
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_select, ('test_topic', 123))
 
     @mock.patch('annotate_util.db_connect.remote')
     def test_objects_for_classification(self, mock_db):
         """Test objects_for_classification function"""
+        # ACT
+        annotate_util.objects_for_classification('test_topic', 'apple')
+
+        # ASSERT
         expected_select = (
             'SELECT diaObjectId FROM annotations '
-            'WHERE topic="test_topic" AND classification="apple"'
+            'WHERE topic=%s AND classification=%s'
             )
-        annotate_util.objects_for_classification('test_topic', 'apple')
-        mock_db.return_value.cursor.return_value.execute.assert_called_with(expected_select)
+        mock_db.return_value.cursor.return_value.execute.assert_called_with(
+            expected_select, ('test_topic', 'apple'))
+
+
+class MarkObjectTest(unittest.TestCase):
+    """Tests for the mark_object service function."""
+
+    def setUp(self):
+        self.user = MagicMock()
+        self.user.username = 'dave'
+        self.user.id = 3
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_favourite_displaces_hidden(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """Favouriting an object clears any hidden mark on it"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        previous = annotate_util.mark_object(self.user, 123, 'favourite')
+
+        # ASSERT
+        self.assertEqual(previous, 'hidden')
+        mock_insert.assert_called_once()
+        self.assertEqual(mock_insert.call_args[0][:3], (123, 'tags_dave', 'favourite'))
+        mock_delete.assert_called_once()
+        self.assertEqual(mock_delete.call_args[0][:3], (123, 'tags_dave', 'hidden'))
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_hidden_displaces_favourite(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """Hiding an object clears any favourite mark on it"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'favourite'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        previous = annotate_util.mark_object(self.user, 123, 'hidden')
+
+        # ASSERT
+        self.assertEqual(previous, 'favourite')
+        self.assertEqual(mock_insert.call_args[0][:3], (123, 'tags_dave', 'hidden'))
+        self.assertEqual(mock_delete.call_args[0][:3], (123, 'tags_dave', 'favourite'))
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_displaced_mark_is_deleted_before_the_new_one_is_inserted(
+            self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """The mark being displaced goes before the new mark arrives"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'favourite'}])
+        mock_db.return_value.cursor.return_value = cursor
+        # ONE PARENT MOCK SO THE TWO WRITES SHARE A CALL ORDER
+        calls = MagicMock()
+        calls.attach_mock(mock_delete, 'delete')
+        calls.attach_mock(mock_insert, 'insert')
+
+        # ACT
+        annotate_util.mark_object(self.user, 123, 'hidden')
+
+        # ASSERT
+        # THE ANNOTATIONS TABLE HAS A UNIQUE KEY OVER (diaObjectId, topic) IN
+        # SCHEMAS BEFORE 11_1, SO INSERTING FIRST IS A DUPLICATE-KEY ERROR
+        self.assertEqual([call[0] for call in calls.mock_calls], ['delete', 'insert'])
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_repeating_a_mark_is_idempotent(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """Re-marking an object it already holds writes the mark and deletes nothing"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'favourite'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        previous = annotate_util.mark_object(self.user, 123, 'favourite')
+
+        # ASSERT
+        self.assertEqual(previous, 'favourite')
+        mock_insert.assert_called_once()
+        mock_delete.assert_not_called()
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_none_clears_whichever_mark_is_held(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """A mark of None deletes the mark held and inserts nothing"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        previous = annotate_util.mark_object(self.user, 123, None)
+
+        # ASSERT
+        self.assertEqual(previous, 'hidden')
+        mock_insert.assert_not_called()
+        self.assertEqual(mock_delete.call_args[0][:3], (123, 'tags_dave', 'hidden'))
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_clears_both_marks_when_an_object_holds_both(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """An object left holding both marks by /api/annotate/ is tolerated"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([
+            {'classification': 'favourite'}, {'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        annotate_util.mark_object(self.user, 123, None)
+
+        # ASSERT
+        deleted = sorted(call[0][2] for call in mock_delete.call_args_list)
+        self.assertEqual(deleted, ['favourite', 'hidden'])
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_rejects_an_unknown_mark(self, mock_db, mock_annotator):
+        """Only favourite, hidden and None are marks"""
+        with self.assertRaises(annotate_util.AnnotationError):
+            annotate_util.mark_object(self.user, 123, 'interesting')
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_provisions_the_tag_annotator(self, mock_db, mock_insert, mock_annotator):
+        """The user's tags_ annotator is created lazily on the write path"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        annotate_util.mark_object(self.user, 123, 'favourite')
+
+        # ASSERT
+        mock_annotator.assert_called_once_with(mock_db.return_value, 'dave', 3)
+
+
+class MarkObjectsTest(unittest.TestCase):
+    """Tests for marking a list of objects in one transaction."""
+
+    def setUp(self):
+        self.user = MagicMock()
+        self.user.username = 'dave'
+        self.user.id = 3
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.delete_annotation')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_marks_every_object_in_one_transaction(self, mock_db, mock_insert, mock_delete, mock_annotator):
+        """One connection, one commit, whatever the size of the list"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        msl = mock_db.return_value
+        msl.cursor.return_value = cursor
+
+        # ACT
+        results = annotate_util.mark_objects(self.user, [1, 2, 3], 'favourite')
+
+        # ASSERT
+        self.assertEqual([r['diaObjectId'] for r in results], [1, 2, 3])
+        self.assertEqual(mock_db.call_count, 1)
+        self.assertEqual(msl.commit.call_count, 1)
+        self.assertEqual(mock_insert.call_count, 3)
+
+    @mock.patch('annotate_util.make_tag_annotator.make_annotator')
+    @mock.patch('annotate_util.insert_annotation_db')
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_nothing_is_committed_when_one_write_fails(self, mock_db, mock_insert, mock_annotator):
+        """All or nothing: a failure part way through commits none of it"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        msl = mock_db.return_value
+        msl.cursor.return_value = cursor
+        mock_insert.side_effect = [None, Exception('database is down')]
+
+        # ACT / ASSERT
+        with self.assertRaises(Exception):
+            annotate_util.mark_objects(self.user, [1, 2], 'favourite')
+        msl.commit.assert_not_called()
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_reports_the_previous_mark_of_each_object(self, mock_db):
+        """A caller that batched a list can see how many marks it displaced"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([{'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        with mock.patch('annotate_util.make_tag_annotator.make_annotator'), \
+                mock.patch('annotate_util.insert_annotation_db'), \
+                mock.patch('annotate_util.delete_annotation'):
+            # ACT
+            results = annotate_util.mark_objects(self.user, [1], 'favourite')
+
+        # ASSERT
+        self.assertEqual(results[0]['previous'], 'hidden')
+
+
+class MarksForObjectsTest(unittest.TestCase):
+    """Tests for the marks_for_objects helper."""
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_returns_a_mark_per_object(self, mock_db):
+        """The marks held by one topic over the ids given come back as a dict"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([
+            {'diaObjectId': 1, 'classification': 'favourite'},
+            {'diaObjectId': 2, 'classification': 'hidden'}])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        marks = annotate_util.marks_for_objects('tags_dave', [1, 2, 3])
+
+        # ASSERT
+        self.assertEqual(marks, {1: 'favourite', 2: 'hidden'})
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_parameterises_one_placeholder_per_id(self, mock_db):
+        """Ids are bound as parameters, never interpolated"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.__iter__.return_value = iter([])
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        annotate_util.marks_for_objects('tags_dave', [1, 2, 3])
+
+        # ASSERT
+        query, params = cursor.execute.call_args[0]
+        self.assertIn('IN (%s, %s, %s)', query)
+        self.assertEqual(params, ('tags_dave', 'favourite', 'hidden', 1, 2, 3))
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_no_query_for_an_empty_id_list(self, mock_db):
+        """An empty list of ids is an empty result, not a malformed IN clause"""
+        # ACT
+        marks = annotate_util.marks_for_objects('tags_dave', [])
+
+        # ASSERT
+        self.assertEqual(marks, {})
+        mock_db.assert_not_called()
+
+
+class CountClassificationTest(unittest.TestCase):
+    """Tests for counting the rows of one classification in a topic."""
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_counts_with_one_parameterised_query(self, mock_db):
+        """The count never pulls the rows themselves"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = {'n': 7}
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        n = annotate_util.count_classification('tags_dave', 'favourite')
+
+        # ASSERT
+        expected = 'SELECT COUNT(*) AS n FROM annotations WHERE topic=%s AND classification=%s'
+        cursor.execute.assert_called_once_with(expected, ('tags_dave', 'favourite'))
+        self.assertEqual(n, 7)
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_no_rows_is_zero(self, mock_db):
+        """A topic that does not exist counts zero"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = None
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT / ASSERT
+        self.assertEqual(annotate_util.count_classification('tags_dave', 'hidden'), 0)
+
+
+class CountFavouritersTest(unittest.TestCase):
+    """Tests for the aggregate favourited-by count."""
+
+    @mock.patch('annotate_util.db_connect.readonly')
+    def test_counts_only_user_tag_topics(self, mock_db):
+        """A third-party annotator emitting 'favourite' is not a user favourite"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = {'n': 3}
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        n = annotate_util.count_favouriters(123)
+
+        # ASSERT
+        query, params = cursor.execute.call_args[0]
+        self.assertIn("topic LIKE 'tags\\_%'", query)
+        self.assertEqual(params, (123, 'favourite'))
+        self.assertEqual(n, 3)
+
+    @mock.patch('annotate_util.db_connect.readonly')
+    def test_no_rows_is_zero(self, mock_db):
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.fetchone.return_value = None
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT / ASSERT
+        self.assertEqual(annotate_util.count_favouriters(123), 0)
+
+
+class DeleteClassificationTest(unittest.TestCase):
+    """Tests for clearing every row of one classification from a topic."""
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_deletes_every_row_of_the_classification(self, mock_db):
+        """Unhide all is one parameterised DELETE"""
+        # ARRANGE
+        cursor = MagicMock()
+        cursor.rowcount = 4
+        mock_db.return_value.cursor.return_value = cursor
+
+        # ACT
+        removed = annotate_util.delete_classification('tags_dave', 'hidden')
+
+        # ASSERT
+        expected = 'DELETE FROM annotations WHERE topic=%s AND classification=%s'
+        cursor.execute.assert_called_once_with(expected, ('tags_dave', 'hidden'))
+        self.assertEqual(removed, 4)
+
+    @mock.patch('annotate_util.db_connect.remote')
+    def test_refuses_a_classification_that_is_not_a_mark(self, mock_db):
+        """Only the marks may be cleared wholesale from a topic"""
+        with self.assertRaises(annotate_util.AnnotationError):
+            annotate_util.delete_classification('tags_dave', 'follow-up')
 
 
 if __name__ == '__main__':

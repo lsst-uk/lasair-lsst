@@ -19,15 +19,17 @@ import sys
 sys.path.append('../common')
 from src import db_connect
 sys.path.append('../webserver/lasair')
-from query_builder import check_query, build_query
+from query_builder import check_query, build_query_for_filter
 
 def check_query_syntax(mq_id, limit='0', timeout='0', update=False, verbose=False):
     msl = db_connect.remote()
     message = 'checking query %d' % mq_id
-    query = 'SELECT selected, conditions, tables FROM myqueries WHERE mq_id=%d'
-    query = query % mq_id
+    # THE OWNER'S USERNAME COMES ALONG, SO real_sql CARRIES THEIR HIDDEN EXCLUSION
+    query = 'SELECT selected, conditions, tables, auth_user.username AS username '
+    query += 'FROM myqueries JOIN auth_user ON auth_user.id = myqueries.user '
+    query += 'WHERE mq_id=%s'
     cursor = msl.cursor(buffered=True, dictionary=True)
-    cursor.execute(query)
+    cursor.execute(query, (mq_id,))
     for row in cursor:
         s = row['selected']
         f = row['tables']
@@ -39,7 +41,7 @@ def check_query_syntax(mq_id, limit='0', timeout='0', update=False, verbose=Fals
         print(e)
     else:
         try:
-            real_sql = build_query(s, f, w)
+            real_sql = build_query_for_filter(row, is_owner=True)
         except Exception as e:
             message = 'Query building failed %s\n%s\n%s\n%s\n' % (str(e), s, f, w)
             return message
@@ -62,9 +64,9 @@ def check_query_syntax(mq_id, limit='0', timeout='0', update=False, verbose=Fals
         good = False
 
     if update and good:
-        query = "UPDATE myqueries SET real_sql='%s' WHERE mq_id=%d" % (real_sql, mq_id)
-        print(query)
-        cursor.execute(query)
+        query = 'UPDATE myqueries SET real_sql=%s WHERE mq_id=%s'
+        print(query, (real_sql, mq_id))
+        cursor.execute(query, (real_sql, mq_id))
         msl.commit()
         message += ' real_sql updated'
     return message

@@ -8,6 +8,7 @@ from django.contrib.auth.models import User
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, get_object_or_404, redirect
 from lasair.apps.db_schema.utils import get_schema_dict
+from lasair.apps.favourites.utils import suppress_hidden
 from .utils import add_annotator_metadata
 sys.path.append('../common')
 
@@ -103,6 +104,17 @@ LIMIT {resultCap}
     else:
         limit = False
 
+    # HIDING MEANS "NEVER SHOW ME THIS AGAIN". THE EXCLUSION IS SCOPED TO THE
+    # VIEWER, NOT THE ANNOTATOR OWNER, SO IT REACHES A PUBLIC ANNOTATOR SOMEBODY
+    # ELSE OWNS. IT RUNS AFTER THE resultCap TEST ABOVE, WHICH ASKS WHETHER THE
+    # QUERY ITSELF WAS CAPPED.
+    table, marks, hidden_omitted = suppress_hidden(request.user, table)
+    count = len(table)
+    if hidden_omitted:
+        messages.info(
+            request,
+            f"{hidden_omitted} of your hidden objects were left out of these results.")
+
     # ADD SCHEMA
     schema = get_schema_dict("annotations")
 
@@ -114,6 +126,7 @@ LIMIT {resultCap}
     return render(request, 'annotator/annotator_detail.html', {
         'annotator': annotator,
         'table': table,
+        'marks': marks,
         'count': count,
         'schema': schema,
         'limit': limit})

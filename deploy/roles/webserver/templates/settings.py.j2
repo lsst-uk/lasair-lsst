@@ -87,6 +87,7 @@ INSTALLED_APPS = [
     'lasair',
     'lasair.apps.annotator',
     'lasair.apps.db_schema',
+    'lasair.apps.favourites',
     'lasair.apps.filter_query',
     'lasair.apps.mma_gw',
     'lasair.apps.object',
@@ -130,19 +131,19 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.UserRateThrottle',
         'lasairapi.throttle.UserClassRateThrottle'
     ),
-    'DEFAULT_THROTTLE_RATES': { 'user': '1000000/hour', },
+    'DEFAULT_THROTTLE_RATES': { 'user': '1000000/hour', 'mark': '1000000/hour', },
 
     # direct them to the dox to get more
     'EXCEPTION_HANDLER': 'lasairapi.throttle.custom_exception_handler',
 
     # this is for the 'dummy' user key in the api dox
-    'ANON_THROTTLE_RATES'   : { 'user': '10/hour', },
+    'ANON_THROTTLE_RATES'   : { 'user': '10/hour', 'mark': '10/hour', },
 
     # for somebody who has made their own token
-    'USER_THROTTLE_RATES'   : { 'user': '100/hour', },
+    'USER_THROTTLE_RATES'   : { 'user': '100/hour', 'mark': '100/hour', },
 
     # for somebody with a token in the 'powerapi' group
-    'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', },
+    'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', 'mark': '10000/hour', },
 
     # less strict JSON encoding RDW April 2025
     'STRICT_JSON': False,

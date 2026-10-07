@@ -118,8 +118,16 @@ def decsex(de):
         return '-%02d:%02d:%.3f' % (d, m, s)
 
 
-def objjson(diaObjectId, lite=False, reliabilityThreshold=0):
+def objjson(diaObjectId, lite=False, reliabilityThreshold=0, viewer_id=None):
     """return all data for an object as a json object (`diaObjectId`,`objectData`,`diaSources`,`count_isdiffpos`,`count_all_diaSources`,`count_diaNonDetectionLimits`,`sherlock`,`TNS`, `annotations`)
+
+    **Key Arguments:**
+
+    - `diaObjectId` -- the id of the object requested
+    - `lite` -- return a reduced set of object columns
+    - `reliabilityThreshold` -- minimum source reliability to include
+    - `viewer_id` -- the `auth_user.id` of the viewer, used to decide which annotations
+      they are entitled to see. `None` means public annotators only.
 
     **Usage:**
 
@@ -277,8 +285,13 @@ def objjson(diaObjectId, lite=False, reliabilityThreshold=0):
 
     # annotations
     annotations = []
-    query = 'SELECT annotationID, topic, version, timestamp, classification, explanation, classdict, url from annotations WHERE diaObjectId = %s' % diaObjectId
-    cursor.execute(query)
+    # ONLY ANNOTATORS THE VIEWER IS ENTITLED TO SEE: PUBLIC ONES, PLUS THEIR OWN
+    query = 'SELECT a.annotationID, a.topic, a.version, a.timestamp, '
+    query += 'a.classification, a.explanation, a.classdict, a.url '
+    query += 'FROM annotations AS a '
+    query += 'JOIN annotators AS n ON n.topic = a.topic '
+    query += 'WHERE a.diaObjectId = %s AND (n.public > 0 OR n.user = %s)'
+    cursor.execute(query, (diaObjectId, viewer_id))
     for row in cursor:
         annotations.append(row)
     for a in annotations:

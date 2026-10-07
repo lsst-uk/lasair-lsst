@@ -5,9 +5,11 @@ from rest_framework import status
 from .serializers import ConeSerializer, QuerySerializer, ObjectSerializer
 from .serializers import SherlockObjectSerializer, SherlockPositionSerializer
 from .serializers import AnnotateSerializer, AnnotateListSerializer
+from .serializers import MarkSerializer
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.permissions import IsAuthenticated
 from .query_auth import QueryAuthentication
+from .throttle import MarkRateThrottle
 
 def retcode(message):
     if 'error' in message: return status.HTTP_400_BAD_REQUEST
@@ -126,4 +128,26 @@ class AnnotateListView(APIView):
         if serializer.is_valid():
             message = serializer.save()
             return Response(message, status=retcode(message))
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class MarkView(APIView):
+    """Set the caller's favourite or hidden mark on objects.
+
+    TokenAuthentication and SessionAuthentication only. QueryAuthentication is
+    deliberately excluded, unlike every neighbouring view: it reads the token
+    from the URL query string, and URLs reach access logs, proxy logs, browser
+    history and Referer headers. A write token must never ride in one.
+    """
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    throttle_classes = [MarkRateThrottle]
+
+    def post(self, request, format=None):
+        serializer = MarkSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            message = serializer.save()
+            if isinstance(message, dict) and 'error' in message:
+                return Response({'detail': message['error']}, status=status.HTTP_403_FORBIDDEN)
+            return Response(message, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
