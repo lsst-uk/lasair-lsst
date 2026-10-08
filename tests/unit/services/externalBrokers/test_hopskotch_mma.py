@@ -11,7 +11,7 @@ sys.path.append('../../../../services/externalBrokers/mma_hopskotch')
 import readLVK, readICC, readICGB
 
 class MmaHopskotchTest(TestCase):
-  def test0_readLVK(self):
+  def test_readLVK(self):
     dataDict = json.loads(open('sample_hopskotch_input/igwn.json').read())
     skymap = open('sample_hopskotch_input/igwn_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
@@ -36,7 +36,7 @@ class MmaHopskotchTest(TestCase):
         "Files differ: LVK 90.moc",
     )
 
-  def test1_readICC(self):
+  def test_readICC(self):
     dataDict = json.loads(open('sample_hopskotch_input/ICC.json').read())
     skymap = open('sample_hopskotch_input/ICC_skymap.fits', 'rb').read()
     options = {
@@ -60,7 +60,7 @@ class MmaHopskotchTest(TestCase):
         "Files differ: ICC 90.moc",
     )
 
-  def test1_readICGB(self):
+  def test_readICGB(self):
     dataDict = json.loads(open('sample_hopskotch_input/ICGB.json').read())
     options = {
         '--superevents': False,
