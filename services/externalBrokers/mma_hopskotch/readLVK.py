@@ -245,13 +245,16 @@ def writeMeta(options, dataDict, logger):
     return eventMeta
 
 if __name__=="__main__":
-    dataDict = json.loads(open('sample_hopskotch_input/igwn.json').read())
-    skymap = open('sample_input/igwn_skymap.fits', 'rb').read()
-    dataDict['event']['skymap'] = skymap
+    indata = '../../../tests/unit/services/externalBrokers/sample_hopskotch_input/igwn.json'
+    skymap = '../../../tests/unit/services/externalBrokers/sample_hopskotch_input/igwn_skymap.fits'
+    outdir =  '../../../tests/unit/services/externalBrokers/sample_hopskotch_output/LVK'
+    dataDict = json.loads(open(indata).read())
+    dataDict['event']['skymap'] = open(skymap, 'rb').read()
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_hopskotch_output/LVK',
+        '--directory'  : outdir,
         '--contours'   : '10,50,90',
     }
+
     ret = handleDataDict(dataDict, options, logger=None)
     print(ret)

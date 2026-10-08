@@ -10,7 +10,7 @@ Usage:
 Options:
     --minmjd=minmjd         Choose all skymaps older than this MJD
     --maxmjd=maxmjd         Choose all skymaps younger than this MJD
-    --namespace=namespace   LVK or Icecube
+    --namespace=namespace   LVK or ICC or ICGB
 """
 import os, sys
 import json
@@ -213,6 +213,7 @@ if __name__ == "__main__":
 
     if args['--namespace']: namespace = args['--namespace']
     else:                   namespace = 'LVK'
+    print('Using namespace', namespace)
 
     if namespace == 'LVK':
         import handle_LVK_yaml as handle_yaml

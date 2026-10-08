@@ -8,10 +8,10 @@ sys.path.append('../../../../common')
 import settings
 
 sys.path.append('../../../../services/externalBrokers/mma_hopskotch')
-import readLVK, readIcecube
+import readLVK, readICC, readICGB
 
 class MmaHopskotchTest(TestCase):
-  def test0_readLVK(self):
+  def test_readLVK(self):
     dataDict = json.loads(open('sample_hopskotch_input/igwn.json').read())
     skymap = open('sample_hopskotch_input/igwn_skymap.fits', 'rb').read()
     dataDict['event']['skymap'] = skymap
@@ -36,16 +36,39 @@ class MmaHopskotchTest(TestCase):
         "Files differ: LVK 90.moc",
     )
 
-  def test1_readIcecube(self):
-    dataDict = json.loads(open('sample_hopskotch_input/icecube.json').read())
-    skymap = open('sample_hopskotch_input/icecube_skymap.fits', 'rb').read()
+  def test_readICC(self):
+    dataDict = json.loads(open('sample_hopskotch_input/ICC.json').read())
+    skymap = open('sample_hopskotch_input/ICC_skymap.fits', 'rb').read()
     options = {
         '--superevents': False,
-        '--directory'  : '/tmp/Icecube',
+        '--directory'  : '/tmp/ICC',
         '--contours'   : '10,50,90',
     }
-    ret = readIcecube.handleDataDict(dataDict, options, logger=None)
-    dir = '/Icecube/260801a/final/'
+    ret = readICC.handleDataDict(dataDict, options, logger=None)
+    dir = '/ICC/260801a/final/'
+    expect_dir = 'sample_hopskotch_output' + dir
+    actual_dir = '/tmp' + dir
+
+    self.assertEqual(
+        Path(expect_dir + '/meta.yaml').read_bytes(),
+        Path(actual_dir + '/meta.yaml').read_bytes(),
+        "Files differ: ICC meta.yaml",
+    )
+    self.assertEqual(
+        Path(expect_dir + '/90.moc').read_bytes(),
+        Path(actual_dir + '/90.moc').read_bytes(),
+        "Files differ: ICC 90.moc",
+    )
+
+  def test_readICGB(self):
+    dataDict = json.loads(open('sample_hopskotch_input/ICGB.json').read())
+    options = {
+        '--superevents': False,
+        '--directory'  : '/tmp/ICGB',
+        '--contours'   : '10,50,90',
+    }
+    ret = readICGB.handleDataDict(dataDict, options, logger=None)
+    dir = '/ICGB/260919A/final/'
     expect_dir = 'sample_hopskotch_output' + dir
     actual_dir = '/tmp' + dir
 
