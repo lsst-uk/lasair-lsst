@@ -81,6 +81,9 @@ class UserClassRateThrottle(UserRateThrottle):
             msg = "No default throttle rate set for '%s' scope" % self.scope
             raise ImproperlyConfigured(msg)
 
+class ImproperlyConfigured(Exception):
+    """Exception raised when the application is improperly configured."""
+    pass
 
 class MarkRateThrottle(UserClassRateThrottle):
     """A separate bucket for writes to /api/mark/.
