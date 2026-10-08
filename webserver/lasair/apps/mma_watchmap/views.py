@@ -100,7 +100,10 @@ def mma_watchmap_index(request):
         else:
             continue
 
-    return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': d.values()})
+        lambda packet: packet['event_date']
+        listd = sorted(d.values(), key=lambda packet: packet['event_date'], reverse=True)
+
+    return render(request, 'mma_watchmap/mma_watchmap_index.html', {'mmaWatchmaps': listd})
 
 
 def chop(x):
