@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def make_skymap(center_lon, center_lat, sigma_deg):
-    nside = 64  # Resolution parameter (must be a power of 2)
+    nside = 256  # Resolution parameter (must be a power of 2)
     npix = hp.nside2npix(nside)
     sigma_rad = np.radians(sigma_deg)
     

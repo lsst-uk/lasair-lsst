@@ -1,5 +1,5 @@
 """
-Reads the yaml file for namespace Icecube
+Reads the yaml file for namespace ICC
 """
 import os, sys
 import json
@@ -12,16 +12,16 @@ import settings
 
 def handle(data):
     params = {
-        'far'   : data['ALERT']['FAR'],
-        'energy': data['ALERT']['ENERGY'],
-        'signal': data['ALERT']['SIGNAL'],
+        'far'   : data['ALERT']['far'],
+        'energy': data['ALERT']['nu_energy'],
+        'signal': data['ALERT']['p_astro'],
     }
     # Should be a sky point near the most likely part of the skymap
     #radec = data['EXTRA']['central coordinate']['equatorial'].split()
     radec = '0.0 0.0'.split()
     loc = {
-        'RA'      :data['ALERT']['RA'],
-        'Dec'     :data['ALERT']['DEC'],
+        'RA'      :data['ALERT']['ra'],
+        'Dec'     :data['ALERT']['dec'],
         }
     params['location'] = loc
 
@@ -33,6 +33,6 @@ def handle(data):
     return {
         'event_tai':event_tai, 
         'loc': loc,
-        'more_info': 'This is a high energy neutrino event from Icecube Cascade',
+        'more_info': 'This is a high energy neutrino event from Icecube GoldBronze',
         'params':params,
     }
