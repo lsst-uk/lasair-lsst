@@ -90,8 +90,12 @@ def mma_watchmap_index(request):
             else:
                 d[mw.otherId] = packet
 
-        elif namespace == 'Icecube':
-            packet['mma_type'] = 'Icecube:' + mw.otherId
+        elif namespace == 'ICC':
+            packet['mma_type'] = 'ICC:' + mw.otherId
+            d[mw.otherId] = packet
+
+        elif namespace == 'ICGB':
+            packet['mma_type'] = 'ICGB:' + mw.otherId
             d[mw.otherId] = packet
         else:
             continue
