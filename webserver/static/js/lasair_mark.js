@@ -96,25 +96,7 @@ function lasairToast(message, type) {
         return;
     }
     if (!window.lasairNotyf) {
-        window.lasairNotyf = new Notyf({
-            duration: 5000,
-            ripple: false,
-            position: { x: 'right', y: 'bottom' },
-            types: [
-                {
-                    /* SOFT PINK RATHER THAN NOTYF'S DEFAULT RED: THIS IS A RULE
-                     * THE USER HAS RUN INTO, NOT A FAILURE ON THEIR PART. THE PALE
-                     * BACKGROUND NEEDS DARK TEXT, WHICH .notyf__toast--mark-error
-                     * IN _custom.scss SUPPLIES; NOTYF'S WHITE-ON-COLOUR ICON WOULD
-                     * VANISH AGAINST IT, SO THERE IS NO ICON. */
-                    type: 'error',
-                    background: '#f9dbe3',
-                    className: 'notyf__toast--mark-error',
-                    icon: false,
-                    dismissible: false
-                }
-            ]
-        });
+        window.lasairNotyf = new Notyf({ duration: 5000, ripple: false, position: { x: 'right', y: 'bottom' } });
     }
     if (type === 'error') {
         window.lasairNotyf.error(message);
@@ -123,23 +105,13 @@ function lasairToast(message, type) {
     }
 }
 
-/* SHOWN WHEN THE MARK COULD NOT BE SAVED. DELIBERATELY GENERIC: THE SERVER
- * RETURNS ONE 500 FOR EVERY CAUSE -- DATABASE DOWN, TIMEOUT, DROPPED
- * CONNECTION -- SO THIS CANNOT NAME A REASON WITHOUT SOMETIMES BEING WRONG. */
-var MARK_ERROR_MESSAGE = 'Something went wrong. Nothing was changed.';
-
 var MARK_DISPLACED_MESSAGE = {
     favourite: 'Favourited. This object is no longer hidden from your results.',
     hidden: 'Hidden. This object is no longer one of your favourites.'
 };
 
-/* HOW LONG A ROW STAYS VISIBLE, FADING, BEFORE IT STARTS TO ROLL UP. */
-var ROW_FADE_MS = 3000;
-
-/* HOW LONG TO WAIT FOR THE ROLL-UP BEFORE THE ROW IS REMOVED FROM THE TABLE.
- * A HAIR LONGER THAN THE 300ms transition ON tr.row-collapsing IN _custom.scss,
- * SO THE ANIMATION FINISHES BEFORE THE NODE GOES. */
-var ROW_COLLAPSE_MS = 350;
+/* HOW LONG A ROW STAYS VISIBLE, FADING, BEFORE IT IS REMOVED FROM THE TABLE. */
+var ROW_FADE_MS = 5000;
 
 /* PENDING REMOVAL TIMERS, KEYED BY THE <tr> THAT IS LEAVING. */
 var rowFadeTimers = new WeakMap();
@@ -187,7 +159,7 @@ function handleMarkClick(button) {
         if (error.status === 403 && error.loginUrl) {
             lasairToast('Your session has expired and nothing was changed. Sign in again to continue.', 'error');
         } else {
-            lasairToast(MARK_ERROR_MESSAGE, 'error');
+            lasairToast(error.message + ' — nothing was changed.', 'error');
         }
     });
 }
@@ -252,23 +224,10 @@ function removeRow(row) {
 }
 
 /*
- * Roll the row up — collapse its height to nothing over ROW_COLLAPSE_MS, driven
- * by the CSS transition on tr.row-collapsing — then remove it. The removal timer
- * reuses rowFadeTimers so an undo click clears it the same way.
- */
-function collapseRow(row) {
-    row.classList.remove('row-fading');
-    row.classList.add('row-collapsing');
-    rowFadeTimers.set(row, setTimeout(function() {
-        removeRow(row);
-    }, ROW_COLLAPSE_MS));
-}
-
-/*
- * In a result table, a mark that makes the row leave its list fades the row over
- * ROW_FADE_MS, then rolls it up and removes it. Clicking the same button again
- * inside the fade window clears the timer and restores the row — that is the
- * undo. A mark that does not make the row leave just clears any pending fade.
+ * In a result table, a mark that makes the row leave its list fades the row and
+ * removes it after ROW_FADE_MS. Clicking the same button again inside that
+ * window clears the timer and restores the row — that is the undo. A mark that
+ * does not make the row leave just clears any pending fade.
  */
 function reflectMarkInRow(container, mark) {
     var row = container.closest ? container.closest('tr') : null;
@@ -283,7 +242,6 @@ function reflectMarkInRow(container, mark) {
             rowFadeTimers.delete(row);
         }
         row.classList.remove('row-fading');
-        row.classList.remove('row-collapsing');
         return;
     }
 
@@ -292,7 +250,7 @@ function reflectMarkInRow(container, mark) {
     }
     row.classList.add('row-fading');
     rowFadeTimers.set(row, setTimeout(function() {
-        collapseRow(row);
+        removeRow(row);
     }, ROW_FADE_MS));
 }
 
