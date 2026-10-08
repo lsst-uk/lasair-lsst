@@ -71,11 +71,14 @@ def handleDataDict(dataDict, options, logger):
     return 'success'
 
 if __name__=="__main__":
-    dataDict = json.loads(open('sample_hopskotch_input/ICGB.json').read())
+    indata = '../../../tests/unit/services/externalBrokers/sample_hopskotch_input/ICGB.json'
+    outdir =  '../../../tests/unit/services/externalBrokers/sample_hopskotch_output/ICGB'
+    dataDict = json.loads(open(indata).read())
     options = {
         '--superevents': False,
-        '--directory'  : 'sample_hopskotch_output/ICGB',
+        '--directory'  : outdir,
         '--contours'   : '10,50,90',
     }
+
     ret = handleDataDict(dataDict, options, logger=None)
     print(ret)
