@@ -1,14 +1,16 @@
 # Multimessenger Counterparts
 
 Lasair can be used to find optical counterparts of gravitational-wave or 
-gamma-ray events. In particular, Lasair expects its multimessenger alerts to 
+high-energy neutrino events. In particular, Lasair expects its multimessenger alerts to 
 have a probability distribution on the sky, known as a "skymap".
 Skymaps are often represented by a HEALPIX FITS file, and that is what Lasair expects.
 From that, it computes MOC (watchmap) files for the 10, 50, and 90 
 percentiles of the skymap.
 
-There can be different types of multimessenger events -- gravitational wave (namespace LVK) 
-and Fermi gamma-ray alerts (namespace "GBM").
+There can be different types of multimessenger events
+- LVK: Gravitational Wave events from LIGO-Virgo-Kagra, at `igwn.gwalert`
+- ICGB: Icecube Gold/Bronze, at `gcn.notices.icecube.gold_bronze_track_alerts`
+- ICC: Icecube Cascade, at `gcn.classic.text.ICECUBE_CASCADE`
 
 ## LVK: Gravitational Waves
 
@@ -46,7 +48,12 @@ The table of 3d matches looks like this:
 Perhaps the best strategy is to follow up the 3D matches first, 
 and only then start on the 2D matches.
 
-## GBM: Fermi GBM bursts
-To find optical counterparts of gamma-ray bursts detected by Fermi.
+## ICGB and ICC: High energy neutrinos
+These events are detected at the Icecube observatory, which is in 
+a cubic kilometer of ice at the South Pole.
+
+The ICGB events come from muon neutrinos and have smaller skymaps (1 to 4 square degrees),
+whereas the ICC events are associated with an electro neutrion or tau neutrino, and have
+larget skymaps.
 
 

@@ -52,6 +52,7 @@ Lasair's core features are described in more detail here:
    :maxdepth: 1
    :caption: Core Functions
 
+   core_functions/favourite
    core_functions/sky-search
    core_functions/sherlock
    core_functions/make_filter
