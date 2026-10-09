@@ -12,6 +12,7 @@ class AnnotateUtilTest(unittest.TestCase):
     def test_insert_annotation_kafka(self, mock_producer):
         """Test insert_annotation_kafka function"""
         annotate_util.lasair_settings.ANNOTATION_TOPIC = 'asdf'
+        annotate_util.lasair_settings.INTERNAL_KAFKA_PRODUCER = 'asdf'
         annotate_util.insert_annotation_kafka(123, 'test_topic', 'test_class', 'v1', 'expl', '{}', 'test_url')
         mock_producer.return_value.produce.assert_called_once_with(
             'asdf',
