@@ -2,9 +2,13 @@
 # Roy Williams and Ken Smith 2023
 # Added trimming and compression - GF 2025
 
-from cassandra.cluster import Cluster
+from cassandra import OperationTimedOut
+from cassandra.cluster import Cluster, NoHostAvailable
+from cassandra.connection import ConnectionShutdown
 from concurrent.futures import Future
 from math import ceil
+import os
+import threading
 import lz4.frame
 try:
     import settings
@@ -51,6 +55,7 @@ class cutoutStore():
         """__init__.
 
         """
+        self.cluster = None
         if pass_session:
             # will use existing session and keyspace
             self.session = pass_session
@@ -68,6 +73,8 @@ class cutoutStore():
             except Exception as e:
                 print('Cutoutcass session failed to create: ' + str(e))
                 self.session = None
+                _close_quietly(self)
+                self.cluster = None
         self.trim = getattr(settings, 'CUTOUT_TRIM', False)
         self.compress = getattr(settings, 'CUTOUT_COMPRESS', False)
 
@@ -139,7 +146,106 @@ class cutoutStore():
         return [cutoutReturn, cutoutsByObjectReturn]
 
     def close(self):
-        self.cluster.shutdown()
+        """*shut down the Cassandra cluster this store created*
+
+        A session passed in to the constructor is left open for its owner to close.
+
+        **Usage:**
+
+            osc.close()
+        """
+        if self.cluster:
+            self.cluster.shutdown()
+
+
+# DRIVER ERRORS THAT MEAN THE CONNECTION ITSELF IS BROKEN, NOT THE QUERY OR THE ROW
+CONNECTION_ERRORS = (NoHostAvailable, OperationTimedOut, ConnectionShutdown)
+
+_sharedStore = None
+_sharedStoreLock = threading.Lock()
+
+
+def get_shared_store():
+    """*return the cutoutStore shared by every request in this process*
+
+    The store and its Cassandra cluster are created on first use and then reused,
+    so a web worker holds one cluster connection instead of one per request.
+    A store whose session failed to connect or has shut down is replaced.
+    While Cassandra is down, each call retries the connection while holding the lock,
+    so concurrent requests in one worker wait in turn for the driver's connect timeout.
+
+    **Return:**
+
+    - ``store`` -- the shared cutoutStore
+
+    **Usage:**
+
+        fitsdata = get_shared_store().getCutout(cutoutId)
+    """
+    global _sharedStore
+    with _sharedStoreLock:
+        if not _is_usable(_sharedStore):
+            _close_quietly(_sharedStore)
+            _sharedStore = cutoutStore()
+        return _sharedStore
+
+
+def discard_shared_store(failedStore):
+    """*shut down the shared cutoutStore after a request found it broken, so the next request reconnects*
+
+    Nothing happens if ``failedStore`` has already been replaced, so several requests
+    failing on the same store cause one reconnection, not one each.
+
+    **Key Arguments:**
+
+    - ``failedStore`` -- the store returned by get_shared_store that raised an error
+
+    **Usage:**
+
+        discard_shared_store(osc)
+    """
+    global _sharedStore
+    with _sharedStoreLock:
+        if _sharedStore is not failedStore:
+            return
+        _close_quietly(_sharedStore)
+        _sharedStore = None
+
+
+def reset_shared_store():
+    """*shut down the shared cutoutStore so the next call to get_shared_store reconnects*
+
+    **Usage:**
+
+        reset_shared_store()
+    """
+    global _sharedStore
+    with _sharedStoreLock:
+        _close_quietly(_sharedStore)
+        _sharedStore = None
+
+
+def _is_usable(store):
+    return store is not None and store.session is not None and not store.session.is_shutdown
+
+
+def _close_quietly(store):
+    if store is None:
+        return
+    try:
+        store.close()
+    except Exception as e:
+        print('Cutoutcass shared session failed to shut down: ' + str(e))
+
+
+def _forget_shared_store_after_fork():
+    # THE CHILD MUST NOT USE OR SHUT DOWN THE PARENT'S DRIVER THREADS AND SOCKETS
+    global _sharedStore, _sharedStoreLock
+    _sharedStore = None
+    _sharedStoreLock = threading.Lock()
+
+
+os.register_at_fork(after_in_child=_forget_shared_store_after_fork)
 
 
 if __name__ == "__main__":

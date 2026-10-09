@@ -355,10 +355,13 @@ def string2bytes(str):
 
 def fits(request, candid_cutoutType):
     # cutoutType can be cutoutDifference, cutoutTemplate, cutoutScience
-    osc = cutoutStore.cutoutStore()
+    osc = cutoutStore.get_shared_store()
     try:
         fitsdata = osc.getCutout(candid_cutoutType)
-    except:
+    except cutoutStore.CONNECTION_ERRORS:
+        cutoutStore.discard_shared_store(osc)
+        fitsdata = ''
+    except Exception:
         fitsdata = ''
 
     response = HttpResponse(fitsdata, content_type='image/fits')
