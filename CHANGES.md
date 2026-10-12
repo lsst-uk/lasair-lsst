@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+**FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
+
 **FIXED**: `test_hidden_object_results.py` and `test_email_digest.py` failed in CI, because they relied on settings (`lasair.settings`, `LASAIR_URL`) that only the gitignored `settings.py` on developer machines provides.
 
 **FIXED**: `gulp build` corrupted every binary asset it copied, because gulp 5 decodes file contents as UTF-8 by default and replaces each invalid byte sequence with U+FFFD, which left images, fonts, the PDF and the JS9 WebAssembly module both broken and larger than their sources.
