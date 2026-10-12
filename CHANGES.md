@@ -3,6 +3,7 @@
 ## Unreleased
 
 **FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
+**FIXED**: the `fits` cutout view opened a new Cassandra cluster connection on every request and never shut it down; each web worker now reuses one connection, and rebuilds it after a failed connect, a lost connection, a shutdown, or a fork.
 
 **FIXED**: `test_hidden_object_results.py` and `test_email_digest.py` failed in CI, because they relied on settings (`lasair.settings`, `LASAIR_URL`) that only the gitignored `settings.py` on developer machines provides.
 
