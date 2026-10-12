@@ -10,6 +10,8 @@
 
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
 
+**ENHANCEMENT**: the New and Edit Filter forms no longer offer the per-user `tags_<username>` annotators in the Object Annotators list; a filter that already uses one keeps it.
+
 **ENHANCEMENT**: the deploy playbooks pinned schema 11_0 while `SCHEMA_VERSION` was 11_1, so fresh nodes were built with the superseded `annotations` unique key.
 
 **ENHANCEMENT**: the toast shown when a mark cannot be saved is now soft pink with a generic message, rather than Notyf's default red carrying the server's error detail.

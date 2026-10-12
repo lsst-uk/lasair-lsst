@@ -15,6 +15,9 @@ MARK_FAVOURITE = 'favourite'
 MARK_HIDDEN = 'hidden'
 MARKS = (MARK_FAVOURITE, MARK_HIDDEN)
 
+# EVERY USER'S OWN TAG ANNOTATOR HAS THE TOPIC tags_<username>
+TAG_TOPIC_PREFIX = 'tags_'
+
 
 class AnnotationError(Exception):
     """Failure handling an annotation operation."""
@@ -217,7 +220,7 @@ def tag_topic(username: str) -> str:
 
         topic = annotate_util.tag_topic('dave')
     """
-    return 'tags_%s' % username
+    return TAG_TOPIC_PREFIX + username
 
 
 def mark_object(user, diaObjectId: int, mark: str, verbose: bool = False):

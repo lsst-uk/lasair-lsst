@@ -141,6 +141,59 @@ class SuppressHiddenTest(unittest.TestCase):
         self.assertIsNot(kept, table)
 
 
+class FakeAnnotator:
+    def __init__(self, topic):
+        self.topic = topic
+
+
+def topics(annotators):
+    return [a.topic for a in annotators]
+
+
+class OfferedAnnotatorsTest(unittest.TestCase):
+    """Tests for the offered_annotators helper behind the filter form."""
+
+    def test_drops_tag_annotators_from_the_choices(self):
+        # ARRANGE
+        annotators = [FakeAnnotator('fastfinder'), FakeAnnotator('tags_dave'),
+                      FakeAnnotator('tags_roy')]
+
+        # ACT
+        offered = utils.offered_annotators(annotators)
+
+        # ASSERT
+        self.assertEqual(topics(offered), ['fastfinder'])
+
+    def test_keeps_every_annotator_that_is_not_a_tag_annotator(self):
+        # ARRANGE
+        annotators = [FakeAnnotator('fastfinder'), FakeAnnotator('alerce_tags'),
+                      FakeAnnotator('mytags_x')]
+
+        # ACT
+        offered = utils.offered_annotators(annotators)
+
+        # ASSERT
+        self.assertEqual(topics(offered), ['fastfinder', 'alerce_tags', 'mytags_x'])
+
+    def test_keeps_a_tag_annotator_the_filter_already_uses(self):
+        # ARRANGE
+        annotators = [FakeAnnotator('fastfinder'), FakeAnnotator('tags_dave'),
+                      FakeAnnotator('tags_roy')]
+
+        # ACT
+        offered = utils.offered_annotators(annotators, selectedTopics=['tags_dave'])
+
+        # ASSERT
+        self.assertEqual(topics(offered), ['fastfinder', 'tags_dave'])
+
+    def test_offers_nothing_when_there_are_no_annotators(self):
+        # ACT
+        offered = utils.offered_annotators([])
+
+        # ASSERT
+        self.assertEqual(offered, [])
+
+
 if __name__ == '__main__':
     import xmlrunner
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

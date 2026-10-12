@@ -9,6 +9,7 @@ from lasair.apps.watchlist.models import Watchlist
 from django.db.models import Q
 from lasair.query_builder import check_query, build_query, FAVOURITE_ONLY, HIDDEN_INCLUDE
 from src.annotate_util import tag_topic, count_classification, MARK_FAVOURITE
+from lasair.apps.favourites.utils import offered_annotators
 from .utils import check_query_zero_limit
 import re
 
@@ -139,6 +140,8 @@ class filterQueryForm(forms.ModelForm):
         self.fields['watchmaps'].widget.choices = watchmapTypes
 
         # ADD ANNOTATOR SELECTION TO THE FORM
+        annotators = offered_annotators(annotators,
+                                        selectedTopics=self.initial.get('annotators', []))
         annotatorTypes, annotatorTypes2 = [], []
         if self.request.user.is_authenticated:
             annotatorTypes[:] = [(w.topic, w.topic) for w in annotators if w.user.id == self.request.user.id]
