@@ -1,0 +1,29 @@
+{
+  "$schema": "https://gcn.nasa.gov/schema/v6.1.1/gcn/notices/icecube/single_neutrino_alerts.schema.json",
+  "mission": "IceCube",
+  "instrument": "IC86",
+  "messenger": "Neutrino",
+  "pipeline": "Gold Track Alert",
+  "record_number": 0,
+  "event_name": [
+    "IceCube-260919A"
+  ],
+  "id": [
+    "143143_38400235"
+  ],
+  "alert_datetime": "2026-09-19T06:52:15.5Z",
+  "alert_type": "initial",
+  "alert_tense": "current",
+  "alert_topology": "Track",
+  "number_of_events": 1,
+  "ra": 111.06,
+  "dec": 6.6,
+  "ra_dec_error": 0.51,
+  "containment_probability": 0.9,
+  "systematic_included": false,
+  "healpix_url": null,
+  "trigger_time": "2026-09-19T06:52:15.5Z",
+  "nu_energy": 302.66,
+  "p_astro": 0.6703,
+  "far": 1.5993e-08
+}

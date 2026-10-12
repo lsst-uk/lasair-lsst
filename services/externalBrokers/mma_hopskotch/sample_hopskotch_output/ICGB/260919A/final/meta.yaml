@@ -1,0 +1,14 @@
+ALERT:
+  dec: 6.6
+  far: 1.5993e-08
+  nu_energy: 302.66
+  p_astro: 0.6703
+  ra: 111.06
+  ra_dec_error: 0.51
+EXTRA:
+  area10: 0.157
+  area50: 1.102
+  area90: 3.777
+HEADER:
+  CREATOR: Icecube Neutrino Observatory Gold/Bronze
+  MJD-OBS: 61302.28629050926
