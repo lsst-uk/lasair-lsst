@@ -142,7 +142,7 @@ REST_FRAMEWORK = {
     'USER_THROTTLE_RATES'   : { 'user': '100/hour', 'mark': '100/hour', },
 
     # for somebody with a token in the 'powerapi' group
-    'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', 'mark': '10000/hour', },
+    'POWER_THROTTLE_RATES'  : { 'user': '10000/hour', 'mark': '100/hour', },
 
     # less strict JSON encoding RDW April 2025
     'STRICT_JSON': False,

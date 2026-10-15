@@ -442,7 +442,7 @@ class AnnotateListSerializer(serializers.Serializer):
         return {'status': 'success', 'n': len(annotations)}
 
 
-MARK_BULK_CAP = 1000
+MARK_BULK_CAP = 100
 
 
 class MarkSerializer(serializers.Serializer):
