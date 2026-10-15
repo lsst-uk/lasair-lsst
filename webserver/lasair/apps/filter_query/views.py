@@ -229,9 +229,14 @@ def filter_query_detail(request, mq_id, action=False):
     # PRINT 'favourite:only' AS IF IT WERE A TABLE AND WOULD HIDE A PREDICATE THAT
     # CHANGES THE RESULT SET; IT IS ALSO THE ONE PLACE A NON-OWNER CAN READ THAT A
     # PUBLIC FILTER IS RESTRICTED TO ITS OWNER'S FAVOURITES.
-    filterQuery.display_sql = sqlparse.format(
-        build_query_for_filter(filterQuery, is_owner, for_display=True),
-        reindent=True, keyword_case='upper', strip_comments=False)
+#    filterQuery.display_sql = sqlparse.format(
+#        build_query_for_filter(filterQuery, is_owner, for_display=True),
+#        reindent=True, keyword_case='upper', strip_comments=False)
+
+    # This is the code that can go directly into the API query() method
+    filterQuery.display_sql = f'selected = """{filterQuery.selected.strip()}"""\n'
+    filterQuery.display_sql+= f'tables = "{filterQuery.tables.strip()}"\n'
+    filterQuery.display_sql+= f'conditions = """{filterQuery.conditions.strip()}"""\n'
 
     # "SHOW ANYWAY" RE-RUNS THIS ONE PREVIEW WITHOUT THE EXCLUSION AND STORES NOTHING.
     # A LINK THAT REWROTE THE SAVED DEFINITION WOULD CHANGE WHAT THE PIPELINE EMITS TO
