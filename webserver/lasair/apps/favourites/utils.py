@@ -68,3 +68,31 @@ def suppress_hidden(user, table):
     kept = [row for row in table
             if marks.get(row.get('diaObjectId')) != annotate_util.MARK_HIDDEN]
     return kept, marks, len(table) - len(kept)
+
+
+def offered_annotators(annotators, selectedTopics=()):
+    """*the annotators to offer as choices in the filter form*
+
+    Each user's own ``tags_<username>`` annotator holds their favourite and
+    hidden marks. The filter form reaches those through its "Only my
+    favourites" and "Include hidden objects" boxes, so the tag annotators are
+    not offered as annotator choices. One that a saved filter already uses is
+    kept, so that filter still opens and saves.
+
+    **Key Arguments:**
+
+    - ``annotators`` -- the annotators the viewer may choose from
+    - ``selectedTopics`` -- the topics the filter being edited already uses
+
+    **Return:**
+
+    - ``offered`` -- the annotators to offer, in their original order
+
+    **Usage:**
+
+        annotators = offered_annotators(annotators, selectedTopics=['tags_dave'])
+    """
+    keep = set(selectedTopics)
+    return [annotator for annotator in annotators
+            if not annotator.topic.startswith(annotate_util.TAG_TOPIC_PREFIX)
+            or annotator.topic in keep]
