@@ -88,7 +88,7 @@ class AnnotationFilter(Filter):
                 annotation['topic'],
                 annotation['classification'],
                 annotation['version'],
-                annotation['explanation'],
+                annotation['explanation'].replace("'", "\\'"),
                 annotation['classdict'],
                 annotation['url'])
         except mysql.connector.errors.Error as e:
