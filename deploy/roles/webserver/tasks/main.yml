@@ -49,7 +49,7 @@
     name: 
       - pyephem
       - MOCpy
-      - astropy
+      - astropy==7.1 # workaround as 8 is not compatible with ubuntu 24.04 system packages
       - gkhtm
       - gkutils
       - gkdbutils
