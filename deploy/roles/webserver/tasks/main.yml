@@ -22,7 +22,7 @@
   pip: 
     executable: pip3 
     name: 
-      - numpy
+      - numpy<2.4
       - mysql-connector-python
       - mysqlclient
       - requests
@@ -58,6 +58,7 @@
       - plotly
       - hmpty
       - pillow
+      - matplotlib
     extra_args: "--break-system-packages"
 
 - name: Disable Apache
