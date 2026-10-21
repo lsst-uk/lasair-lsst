@@ -57,6 +57,7 @@
       - pandas
       - plotly
       - hmpty
+      - pillow
     extra_args: "--break-system-packages"
 
 - name: Disable Apache
