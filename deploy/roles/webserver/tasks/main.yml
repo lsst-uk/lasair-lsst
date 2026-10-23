@@ -178,7 +178,7 @@
     - makemigrations watchmap
     - makemigrations mma_watchmap
     - makemigrations users
-    - migrate
+    - migrate --fake-initial
     - collectstatic --noinput
 
 - name: Create symlink for services log
