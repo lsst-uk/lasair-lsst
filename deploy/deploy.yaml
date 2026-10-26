@@ -232,7 +232,7 @@
     - filter
   tags: filter
 
-- hosts: proxy,api
+- hosts: proxy
   gather_facts: false
   vars_files:
     - settings.yaml
@@ -240,6 +240,19 @@
     enable_letsencrypt: true
     # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
     use_hsts: false 
+  roles:
+    - proxy
+  tags: proxy
+
+- hosts: api
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    enable_letsencrypt: true
+    # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
+    use_hsts: false 
+    server_name: "api.{{ web_name }}.{{ domain }}"
   roles:
     - proxy
   tags: proxy
