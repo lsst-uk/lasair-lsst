@@ -201,7 +201,7 @@
 
 - name: Create symlink for GW MOCS
   file:
-    src: /mnt/cephfs/lasair/mma/
+    src: /mnt/cephfs/lasair/mma
     dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/mma"
     state: link
 
