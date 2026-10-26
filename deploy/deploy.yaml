@@ -232,7 +232,7 @@
     - filter
   tags: filter
 
-- hosts: proxy
+- hosts: proxy,api
   gather_facts: false
   vars_files:
     - settings.yaml
