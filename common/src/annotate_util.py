@@ -96,21 +96,21 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
         msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    queryd = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
-    paramsd = [diaObjectId, topic]
+#    queryd = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
+#    paramsd = [diaObjectId, topic]
 
     # if its tags, we can have multiple per object/topic
-    if topic.startswith('tags_'):
-        queryd += ' AND classification=%s'
-        paramsd.append(classification)
+#    if topic.startswith('tags_'):
+#        queryd += ' AND classification=%s'
+#        paramsd.append(classification)
 
-    queryi = 'INSERT INTO annotations ('
+    queryi = 'REPLACE INTO annotations ('
     queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
     queryi += ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
     paramsi = (diaObjectId, topic, version, classification, explanation, classdict, url)
 
-    if verbose: print(queryd, paramsd)
-    cursor.execute(queryd, tuple(paramsd))
+#    if verbose: print(queryd, paramsd)
+#    cursor.execute(queryd, tuple(paramsd))
     if verbose: print(queryi, paramsi)
     cursor.execute(queryi, paramsi)
     cursor.close()
