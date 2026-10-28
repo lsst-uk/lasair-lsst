@@ -99,7 +99,7 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
     queryi = 'REPLACE INTO annotations ('
     queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
     queryi += ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    paramsi = (diaObjectId, topic, version, classification, explanation, json.dumps(classdict), url)
+    paramsi = (diaObjectId, topic, version, classification, explanation, classdict, url)
 
     if verbose: print(queryi, paramsi)
     cursor.execute(queryi, paramsi)
