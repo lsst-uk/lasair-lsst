@@ -145,7 +145,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
 def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
+    query = 'SELECT mw_id, namespace, event_tai, area90, otherId, version, params FROM mma_areas '
     query += 'WHERE event_tai BETWEEN %f AND %f' % (mjdmin, mjdmax)
     result = []
     try:
