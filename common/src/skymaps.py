@@ -90,7 +90,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
                 probdens3.append(None)
                 distance.append(None)
 
-    elif namespace == 'Icecube':
+    elif namespace == 'ICC' or namespace='ICGB':
         m = hp.read_map(mapfilename(namespace, mma_event))
         theta = np.radians(90.0 - np.array(mocdelist))
         phi = np.radians(np.array(mocralist))
@@ -103,7 +103,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
     else:
         print(f'Unknown Event namespace {namespace}. Quitting')
-        sys.exit()
+        return None
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
