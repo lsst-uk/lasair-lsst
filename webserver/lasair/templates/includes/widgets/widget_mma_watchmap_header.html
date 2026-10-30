@@ -1,6 +1,6 @@
 {% load static %}
 
-<script src='https://aladin.cds.unistra.fr/AladinLite/api/v3/latest/aladin.js' charset='utf-8'></script>
+{% include 'includes/aladin_loader.html' %}
 
 <div class="card border-0 shadow h-100">
     <div class="card-body">
@@ -37,7 +37,7 @@
 var aladin;
 var circle_size = 0.4;
 var url = 'https://{{ lasair_url }}/lasair/static/mmagw/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
-A.init.then(() => {
+loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
     aladin = A.aladin('#aladin-lite-div',
         {target: '{{ mma_watchmap.params.location.RA }} {{ mma_watchmap.params.location.Dec }}', fov: 20,
         projection: 'AIT', survey: 'P/Mellinger/color'});
@@ -86,5 +86,5 @@ A.init.then(() => {
         $('#info').html('<h2> You clicked at RA=' + data.ra.toFixed(3) + ' Dec=' + data.dec.toFixed(3));
     }
     });
-});
+}, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
 </script>

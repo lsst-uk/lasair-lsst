@@ -147,7 +147,7 @@ var surveys = [
 ];
 
 let aladin;
-A.init.then(() => {
+loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
     aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/DESI-Legacy-Surveys/DR10/color", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
 
     {% if data.sherlock.eastSeparationArcsec %}
@@ -178,6 +178,4 @@ hipsCats['gdr2'].hide();
 aladin.addCatalog(hipsCats['ps1']);
 aladin.addCatalog(hipsCats['gdr2']);
 
-});
-
-
+}, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
