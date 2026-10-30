@@ -96,28 +96,17 @@ def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
         msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
 
-    queryd = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
-    paramsd = [diaObjectId, topic]
-
-    # if its tags, we can have multiple per object/topic
-    if topic.startswith('tags_'):
-        queryd += ' AND classification=%s'
-        paramsd.append(classification)
-
-    queryi = 'INSERT INTO annotations ('
+    queryi = 'REPLACE INTO annotations ('
     queryi += 'diaObjectId, topic, version, classification, explanation, classdict, url'
     queryi += ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
-    paramsi = (diaObjectId, topic, version, classification, explanation, classdict, url)
+    paramsi = (diaObjectId, topic, version, classification, explanation, json.dumps(classdict), url)
 
-    if verbose: print(queryd, paramsd)
-    cursor.execute(queryd, tuple(paramsd))
     if verbose: print(queryi, paramsi)
     cursor.execute(queryi, paramsi)
     cursor.close()
     if not caller_owns_connection:
         msl.commit()
         msl.close()
-
 
 def delete_annotation(diaObjectId: int, topic: str, classification: str = None, verbose=False, msl=None):
     """Deletes an annotation or tag (annotation with classificaiton).

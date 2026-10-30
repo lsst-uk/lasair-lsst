@@ -90,7 +90,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
                 probdens3.append(None)
                 distance.append(None)
 
-    elif namespace == 'Icecube':
+    elif namespace == 'ICC' or namespace == 'ICGB':
         m = hp.read_map(mapfilename(namespace, mma_event))
         theta = np.radians(90.0 - np.array(mocdelist))
         phi = np.radians(np.array(mocralist))
@@ -103,7 +103,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
     else:
         print(f'Unknown Event namespace {namespace}. Quitting')
-        sys.exit()
+        return None
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
@@ -145,7 +145,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
 def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
+    query = 'SELECT mw_id, namespace, event_tai, area90, otherId, version, params FROM mma_areas '
     query += 'WHERE event_tai BETWEEN %f AND %f' % (mjdmin, mjdmax)
     result = []
     try:
@@ -176,7 +176,7 @@ def fetch_skymap_by_id(database, mw_id):
         print('ERROR in fetch_active_skymaps cannot query database: %s' % str(e))
         return None
 
-def insert_skymap_hits(database, mma_event, skymaphits):
+def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     """ Insert skymap hits into the database
     Build and execute the insertion query to get the hits into the database
     """
@@ -194,11 +194,13 @@ def insert_skymap_hits(database, mma_event, skymaphits):
     for (diaObjectId, contour, distance, probdens2, probdens3) in zip(did, sky, dist, p2, p3):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
+        if probdens2: probdens2 = '%.2f'%probdens2
+        else:         probdens2 = 'NULL'
         if probdens3: probdens3 = '%.2f'%probdens3
         else:         probdens3 = 'NULL'
         if distance:  distance  = '%.2f'%distance
         else:         distance  = 'NULL'
-        hitlist.append('(%d,%d,%.4f,%s,%.4f,%s)' % \
+        hitlist.append('(%d,%d,%s,%s,%s,%s)' % \
             (mw_id, diaObjectId, contour, distance, probdens2, probdens3))
 
     query += ',\n'.join(hitlist)

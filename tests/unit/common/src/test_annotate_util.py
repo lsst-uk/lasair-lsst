@@ -36,39 +36,17 @@ class AnnotateUtilTest(unittest.TestCase):
         mock_msl.cursor.return_value = mock_cursor
 
         # ACT
-        annotate_util.insert_annotation_db(123, 'test_topic', 'test_class', 'v1', 'expl', '{}', 'test_url')
+        annotate_util.insert_annotation_db(123, 'test_topic', 'test_class', 'v1', 'expl', {}, 'test_url')
 
         # ASSERT
-        expected_delete = 'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s'
         expected_insert = (
-            'INSERT INTO annotations ('
+            'REPLACE INTO annotations ('
             'diaObjectId, topic, version, classification, explanation, classdict, url'
             ') VALUES (%s, %s, %s, %s, %s, %s, %s)'
         )
-        mock_cursor.execute.assert_any_call(expected_delete, (123, 'test_topic'))
         mock_cursor.execute.assert_any_call(
             expected_insert,
             (123, 'test_topic', 'v1', 'test_class', 'expl', '{}', 'test_url'))
-
-    @mock.patch('db_connect.remote')
-    def test_insert_annotation_db_tags(self, mock_db):
-        """Test insert_annotation_db deletes only the matching tag on a tags topic"""
-        # ARRANGE
-        mock_msl = MagicMock()
-        mock_cursor = MagicMock()
-        mock_db.return_value = mock_msl
-        mock_msl.cursor.return_value = mock_cursor
-
-        # ACT
-        annotate_util.insert_annotation_db(123, 'tags_test_topic', 'test_class')
-
-        # ASSERT
-        expected_delete = (
-            'DELETE FROM annotations WHERE diaObjectId=%s AND topic=%s '
-            'AND classification=%s'
-        )
-        mock_cursor.execute.assert_any_call(
-            expected_delete, (123, 'tags_test_topic', 'test_class'))
 
     @mock.patch('db_connect.remote')
     def test_delete_annotation(self, mock_db):
