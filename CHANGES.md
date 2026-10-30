@@ -27,4 +27,6 @@
 
 **ENHANCEMENT**: the "My hidden objects" link on the profile page now uses the same closed-eye icon as the hide button, instead of the crossed-eye glyph it kept after the hide button moved on.
 
+**REFACTOR**: removed the unused Aladin Lite files `aladin.js`, `aladin.min.js` and `aladin.min.css` from `webserver/static/vendor/` and `webserver/staticfiles/vendor/`; no page loaded them, and Aladin Lite now comes from `vendor/aladin-lite/<VERSION>/`.
+
 **FEATURE**: hiding an object from a result table fades the row, rolls it up and removes it, and a panel shown once per browser session says where hidden objects went.
