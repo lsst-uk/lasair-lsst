@@ -257,6 +257,8 @@ gulp.task('replace_2', function() {
 gulp.task('copy:dist:vendor', function() {
     gulp.src(paths.src.node_modules + '/bootstrap-multiselect/dist/**/*.*', )
         .pipe(gulp.dest(paths.dist.vendor + "/bootstrap-multiselect"))
+    gulp.src(paths.src.vendor + '/aladin-lite/**/*.*', )
+        .pipe(gulp.dest(paths.dist.vendor + "/aladin-lite"))
     return gulp.src(paths.src.node_modules + '/js9/**/*.*', )
         .pipe(gulp.dest(paths.dist.vendor + "/js9"))
 });

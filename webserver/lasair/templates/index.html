@@ -126,6 +126,8 @@ Click on a marker for information about an object, or use the table below.
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+    {% include 'includes/aladin_loader.html' %}
+
     <script>
 
         var colors = {{ colors|safe }};
@@ -142,7 +144,7 @@ Click on a marker for information about an object, or use the table below.
             var imageSurvey = 'P/Mellinger/color'
 
             var aladin;
-            A.init.then(() => {
+            loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
                 aladin = A.aladin('#aladin-lite-div', {
                     fov:360,
                     cooFrame: 'ICRSd',
@@ -178,7 +180,7 @@ Click on a marker for information about an object, or use the table below.
                         markers.addSources(L);
                     }
                 }
-            });
+            }, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
         });
 
     </script>
