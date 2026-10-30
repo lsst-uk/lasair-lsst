@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+**FIXED**: every page was slow or stalled when the CDS servers were slow, because each page loaded Aladin Lite with a blocking script tag from the CDS website; Lasair now serves its own copy of Aladin Lite 3.8.1, loads it only on the home, object and MMA watchmap pages, loads it in the background, and shows a message in the sky map if it has not loaded after 10 seconds.
+
 **FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
 **FIXED**: the `fits` cutout view opened a new Cassandra cluster connection on every request and never shut it down; each web worker now reuses one connection, and rebuilds it after a failed connect, a lost connection, a shutdown, or a fork.
 

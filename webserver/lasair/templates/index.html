@@ -153,6 +153,8 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+    {% include 'includes/aladin_loader.html' %}
+
     <script>
 
         var colors = {{ colors|safe }};
@@ -169,7 +171,7 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
             var imageSurvey = 'P/Mellinger/color'
 
             var aladin;
-            A.init.then(() => {
+            loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
                 aladin = A.aladin('#aladin-lite-div', {
                     fov:360,
                     cooFrame: 'ICRSd',
@@ -205,7 +207,7 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
                         markers.addSources(L);
                     }
                 }
-            });
+            }, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
         });
 
     </script>

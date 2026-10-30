@@ -262,6 +262,8 @@ gulp.task('replace_2', function() {
 gulp.task('copy:dist:vendor', function() {
     gulp.src(paths.src.node_modules + '/bootstrap-multiselect/dist/**/*.*', { encoding: false })
         .pipe(gulp.dest(paths.dist.vendor + "/bootstrap-multiselect"))
+    gulp.src(paths.src.vendor + '/aladin-lite/**/*.*', { encoding: false })
+        .pipe(gulp.dest(paths.dist.vendor + "/aladin-lite"))
     return gulp.src(paths.src.node_modules + '/js9/**/*.*', { encoding: false })
         .pipe(gulp.dest(paths.dist.vendor + "/js9"))
 });
