@@ -15,7 +15,7 @@ Options:
 import sys
 sys.path.append('../common')
 from docopt import docopt
-from src import db_connect, date_nid, slack_webhook
+from src import annotate_util, db_connect, date_nid, slack_webhook
 from src.send_email import send_email
 from confluent_kafka import Consumer
 import settings
@@ -25,6 +25,9 @@ from datetime import datetime
 
 logfile = ''
 logf = sys.stdout
+
+# marks_for_objects IS SPECIFIED AGAINST A CAPPED RESULT TABLE; A DIGEST TOPIC IS NOT
+MARK_LOOKUP_CHUNK = 1000
 
 
 def format_line(alert):
@@ -39,7 +42,50 @@ def format_line(alert):
     return text, html
 
 
-def format_message(fname, alerts):
+def alert_object_id(alert):
+    """The diaObjectId of one digest message, matched case-insensitively as
+    format_line already does, or None when the message carries no id."""
+    for key, value in alert.items():
+        if key.lower() == 'diaobjectid':
+            return value
+    return None
+
+
+def suppress_hidden(alerts, topic):
+    """Remove the recipient's hidden objects from a filter's digest messages.
+
+    Applied to every email filter with no branch on how the filter runs. For an
+    annotation-triggered filter it costs one query and removes nothing, which
+    is the price of not carrying a second mode — and it still buys something
+    the SQL cannot, because the digest runs up to twenty-four hours after the
+    messages were produced, so an object hidden in that window is suppressed.
+
+    A message with no diaObjectId passes through: there is nothing to match on,
+    and dropping rows on a guess would be worse. That is a known hole.
+
+    Args:
+        alerts: the messages polled from the filter's topic
+        topic: the recipient's tag topic, `tags_<username>`
+
+    Returns:
+        `(kept, omitted)` — the messages to send, and how many were removed
+    """
+    if not alerts:
+        return [], 0
+
+    diaObjectIds = [oid for oid in (alert_object_id(a) for a in alerts) if oid is not None]
+
+    hidden = set()
+    for start in range(0, len(diaObjectIds), MARK_LOOKUP_CHUNK):
+        chunk = diaObjectIds[start:start + MARK_LOOKUP_CHUNK]
+        marks = annotate_util.marks_for_objects(topic, chunk)
+        hidden.update(oid for oid, mark in marks.items() if mark == annotate_util.MARK_HIDDEN)
+
+    kept = [a for a in alerts if alert_object_id(a) not in hidden]
+    return kept, len(alerts) - len(kept)
+
+
+def format_message(fname, alerts, omitted=0):
     text = f"Lasair alert digest for filter {fname}\n\n"
     html = f"<html><head><title>Lasair alert digest for filter {fname}</title></head><body><table>\n"
     if len(alerts) > 0:
@@ -53,7 +99,12 @@ def format_message(fname, alerts):
         text += line_text
         html += line_html
     text += "\n"
-    html += "</table></body></html>"
+    html += "</table>"
+    if omitted:
+        note = f"{omitted} hidden objects omitted"
+        text += note + "\n"
+        html += f"<p>{note}</p>"
+    html += "</body></html>"
     return text, html
 
 
@@ -73,16 +124,19 @@ def main(to_addr, groupid, fname):
     # Get a list of filters
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = ("SELECT name, topic_name, first_name, last_name, email "
+    query = ("SELECT name, topic_name, first_name, last_name, email, username "
              "FROM myqueries, auth_user "
              "WHERE auth_user.id=user ")
+    params = []
     if fname:
         # get a specific query (for testing)
-        query += f"AND myqueries.name='{fname}'"
+        query += "AND myqueries.name=%s"
+        params.append(fname)
     else:
         # get all email queries
-        query += "AND output=%d" % settings.OUTPUT_EMAIL
-    cursor.execute(query)
+        query += "AND output=%s"
+        params.append(settings.OUTPUT_EMAIL)
+    cursor.execute(query, tuple(params))
     filters = cursor.fetchall()
 
     consumer = Consumer(consumer_conf)
@@ -105,23 +159,39 @@ def main(to_addr, groupid, fname):
                 break
             alerts.append(json.loads(msg.value()))
 
+        polled = len(alerts)
+
+        # The second pass: hidden objects never reach the filter's Kafka topic,
+        # so they are removed here
+        omitted = 0
+        try:
+            alerts, omitted = suppress_hidden(alerts, annotate_util.tag_topic(f['username']))
+        except Exception as e:
+            logf.write('ERROR reading marks for %s: %s\n' % (f['username'], str(e)))
+
         # Create and send digest email
         if len(alerts) > 0:
-            to_addr = f['email']
-            text, html = format_message(f['name'], alerts)
+            # The --email test override must not be overwritten by the real address
+            recipient = to_addr if to_addr else f['email']
+            text, html = format_message(f['name'], alerts, omitted=omitted)
             json_str = json.dumps(alerts, indent=2)
             logf.write('%d from topic %s\n' % (len(alerts), f['topic_name']))
             if len(json_str) < 3000000:
-                send_email(to_addr, f['name'], text, html, json_str)
+                send_email(recipient, f['name'], text, html, json_str)
             else:
                 logf.write('ERROR: message too large to send as email')
+        else:
+            logf.write('No new output in topic %s\n' % (f['topic_name']))
+
+        # Committing rides on having polled, not on having sent. Otherwise a
+        # digest whose every message was hidden is re-polled and re-dropped
+        # every night for ever.
+        if polled > 0:
             try:
                 consumer.commit(asynchronous=False)
                 sleep(2)
             except Exception as e:
                 logf.write('ERROR: ' + str(e))
-        else:
-            logf.write('No new output in topic %s\n' % (f['topic_name']))
 
         consumer.unsubscribe()
         sleep(2)

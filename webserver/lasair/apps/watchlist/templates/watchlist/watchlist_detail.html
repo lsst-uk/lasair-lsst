@@ -23,7 +23,7 @@
 
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this watchlist so far. Check back later to see if any new objects have been matched, or update the watchlist search radius to catch more objects." table=table header="Watchlist Results"  desc=" Transient objects located within an association radius of a source in the '"|add:watchlist.name|add:"' watchlist." export_name=watchlist.name|add:"_watchlist_results"%}
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this watchlist so far. Check back later to see if any new objects have been matched, or update the watchlist search radius to catch more objects." table=table header="Watchlist Results"  desc=" Transient objects located within an association radius of a source in the '"|add:watchlist.name|add:"' watchlist." export_name=watchlist.name|add:"_watchlist_results" markable=True%}
             </div>
         </div>
     </div>
