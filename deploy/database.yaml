@@ -232,20 +232,44 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Request lowercase tables names on all mysql servers
-      ini_file:
+    # 2026-10-27 KWS/Claude Only make the changes if my.cnf is NOT a symlink (i.e. it's a new
+    #                       ClusterControl install). If there is a symlink it means we have
+    #                       intervened to fix the my.cnf to be the vanilla one, which includes
+    #                       data from /etc/mysql/mariadb.conf.d/.
+    - name: Check whether my.cnf is a symlink
+      stat:
         path: /etc/mysql/my.cnf
-        section: MYSQLD
-        option: lower_case_table_names
-        value: "1"
-        backup: no
-    - name: Request lowercase tables names on all mysql servers
-      ini_file:
-        path: /etc/mysql/my.cnf
-        section: MYSQLD
-        option: log_bin_trust_function_creators
-        value: "1"
-        backup: no
+      register: my_cnf
+    # 2026-10-27 KWS/Claude Only edit if my.cnf is a symlink - otherwise we've already migrated it.
+    - name: Edit my.cnf only if it is not a symlink
+      when: not (my_cnf.stat.islink | default(false))
+      block:
+        - name: Request lowercase tables names on all mysql servers
+          ini_file:
+            path: /etc/mysql/my.cnf
+            section: MYSQLD
+            option: lower_case_table_names
+            value: "1"
+            backup: no
+        - name: Request lowercase tables names on all mysql servers
+          ini_file:
+            path: /etc/mysql/my.cnf
+            section: MYSQLD
+            option: log_bin_trust_function_creators
+            value: "1"
+            backup: no
+        # 2026-10-27 KWS/Claude New code to set the gtid_domain_id to be 1, 2 or 3 (i.e.
+        #                       different from the wsrep_gtid_domain_id and different
+        #                       locally on each member of the cluster. (It's recommended
+        #                       in the MariaDB manual when adding an asynchronous backup
+        #                       node to one of the servers in the cluster.)
+        - name: Set a unique gtid_domain_id per server (only if already present)
+          lineinfile:
+            path: /etc/mysql/my.cnf
+            regexp: '^(\s*)gtid[_-]domain[_-]id\s*=.*$'
+            line: '\1gtid_domain_id = {{ (groups["backend_db"] + groups["frontend_db"]).index(inventory_hostname) + 1 }}'
+            backrefs: yes
+            backup: no
     - name: Increase open file limit
       ini_file:
         path: /etc/systemd/system/mariadb.service.d/override.conf
