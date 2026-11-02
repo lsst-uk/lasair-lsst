@@ -195,7 +195,10 @@ def filter_query_detail(request, mq_id, action=False):
         mq_id = filterQuery.pk
 
         message = ''
-        output = int(newFil.output)
+        if newFil.output:
+            output = int(newFil.output)
+        else:
+            output = 0
         if output >= 2:
             try:
                 message += topic_refresh(newFil.real_sql, tn, output, limit=10) + '<br/>'
