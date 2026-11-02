@@ -85,8 +85,12 @@ gulp.task('scss', function() {
 });
 
 // MOVE FILES AND IMAGES
+// GULP 5 DECODES FILE CONTENTS AS UTF-8 BY DEFAULT, WHICH REPLACES EVERY BYTE
+// SEQUENCE THAT IS NOT VALID UTF-8 WITH U+FFFD AND DESTROYS BINARY ASSETS.
+// EVERY TASK BELOW THAT COPIES BYTES RATHER THAN TRANSFORMING TEXT PASSES
+// { encoding: false } SO THE FILE IS CARRIED THROUGH UNTOUCHED.
 gulp.task('assets', function() {
-    return gulp.src([paths.src.assets])
+    return gulp.src([paths.src.assets], { encoding: false })
         .pipe(gulp.dest(paths.temp.assets))
         .pipe(browserSync.stream());
 });
@@ -94,7 +98,8 @@ gulp.task('assets', function() {
 // MOVE NODE MODULES TO VENDOR
 gulp.task('vendor', function() {
     return gulp.src(npmDist(), {
-            base: paths.src.node_modules
+            base: paths.src.node_modules,
+            encoding: false
         })
         .pipe(gulp.dest(paths.temp.vendor));
 });
@@ -128,7 +133,6 @@ gulp.task('concat:vendor:css', function() {
             paths.src.node_modules + '/js9/js9support.css',
             paths.src.node_modules + '/js9/js9.css',
             paths.src.node_modules + '/tributejs/dist/tribute.css',
-            //paths.src.vendor + '/aladin.min.css',
             paths.src.vendor + '/prism.css',
             paths.src.vendor + '/prism-live.css',
             paths.src.vendor + '/style.css',
@@ -151,6 +155,7 @@ gulp.task('concat:dist:js', function() {
             paths.src.js + '/fitsview_init.js',
             paths.src.js + '/fitsview.js',
             paths.src.js + '/lasair_utils.js',
+            paths.src.js + '/lasair_mark.js',
             paths.src.js + '/lasair_fixes.js',
         ])
         .pipe(sourcemaps.init())
@@ -174,7 +179,6 @@ gulp.task('concat:vendor:js', function() {
             paths.src.node_modules + '/vanillajs-datepicker/dist/js/datepicker.min.js',
             paths.src.node_modules + '/sweetalert2/dist/sweetalert2.all.min.js',
             paths.src.node_modules + '/moment/min/moment.min.js',
-            paths.src.node_modules + '/vanillajs-datepicker/dist/js/datepicker.min.js',
             paths.src.node_modules + '/notyf/notyf.min.js',
             paths.src.node_modules + '/simplebar/dist/simplebar.min.js',
             paths.src.node_modules + '/tributejs/dist/tribute.js',
@@ -217,19 +221,19 @@ gulp.task('copy:dist:css', function() {
 
 // COPY FILES
 gulp.task('copy:dist:files', function() {
-    return gulp.src(paths.src.files)
+    return gulp.src(paths.src.files, { encoding: false })
         .pipe(gulp.dest(paths.dist.files))
 });
 
 // COPY FONTS
 gulp.task('copy:dist:fonts', function() {
-    return gulp.src(paths.src.fonts)
+    return gulp.src(paths.src.fonts, { encoding: false })
         .pipe(gulp.dest(paths.dist.fonts))
 });
 
 // COPY IMAGES
 gulp.task('copy:dist:img', function() {
-    return gulp.src(paths.src.img)
+    return gulp.src(paths.src.img, { encoding: false })
         .pipe(gulp.dest(paths.dist.img))
 });
 
@@ -255,11 +259,11 @@ gulp.task('replace_2', function() {
 
 // COPY REQUIRED VENDOR MODULES
 gulp.task('copy:dist:vendor', function() {
-    gulp.src(paths.src.node_modules + '/bootstrap-multiselect/dist/**/*.*', )
+    gulp.src(paths.src.node_modules + '/bootstrap-multiselect/dist/**/*.*', { encoding: false })
         .pipe(gulp.dest(paths.dist.vendor + "/bootstrap-multiselect"))
-    gulp.src(paths.src.vendor + '/aladin-lite/**/*.*', )
+    gulp.src(paths.src.vendor + '/aladin-lite/**/*.*', { encoding: false })
         .pipe(gulp.dest(paths.dist.vendor + "/aladin-lite"))
-    return gulp.src(paths.src.node_modules + '/js9/**/*.*', )
+    return gulp.src(paths.src.node_modules + '/js9/**/*.*', { encoding: false })
         .pipe(gulp.dest(paths.dist.vendor + "/js9"))
 });
 

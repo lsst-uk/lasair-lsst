@@ -26,7 +26,7 @@ These data files are transformed by three programs:
 
 - `3_make_create_table`: converts the table specifications to SQL or CQL CREATE TABLE commands, or
 
-- `3_make_alter_table`: compares the table specifications of two different schema instantiations and uses the difference to make SQL or CQL ALTER TABLE commands.
+- `3_make_alter_table`: compares the table specifications of two different schema instantiations and uses the difference to make SQL or CQL ALTER TABLE commands. For MySQL it diffs the `indexes` as well as the fields. A named `KEY` or `UNIQUE KEY` whose columns changed is dropped and re-added in one `ALTER TABLE` statement, because MySQL auto-commits each DDL statement and the table must never sit unconstrained in between. Adding or changing a `UNIQUE` index also prints the `SELECT ... GROUP BY ... HAVING` to run first, since the statement fails outright if the live data already holds duplicates. It does not touch the `PRIMARY KEY`, which has no name to drop by; a change there, or any clause it cannot parse, is reported as a `-- CHECK BY HAND` comment ahead of the statements for you to act on.
 
 There is also a `3_make_all_alter_table` which runs `3_make_alter_table` for all the tables.
 

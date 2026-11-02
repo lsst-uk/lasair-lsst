@@ -59,6 +59,37 @@ def add_filter_query_metadata(
     return updatedFilterQueryLists
 
 
+def count_filter(tables, conditions, owner_topic=None, exclude_hidden=True):
+    """count the objects a filter matches, without fetching them
+
+    **Key Arguments:**
+
+        - `tables` -- the FROM expression
+        - `conditions` -- the WHERE expression
+        - `owner_topic` -- the tag topic of the filter's owner
+        - `exclude_hidden` -- emit the hidden exclusion
+
+    **Return:**
+
+        - `count` -- the number of matching objects, or None if the count failed
+    """
+    sqlquery_real = build_query('count(*) AS n', tables, conditions,
+                                owner_topic=owner_topic, exclude_hidden=exclude_hidden)
+    sqlquery_real = 'SET STATEMENT max_statement_time=60 FOR %s' % sqlquery_real
+
+    msl = db_connect.readonly()
+    try:
+        cursor = msl.cursor(buffered=True, dictionary=True)
+        try:
+            cursor.execute(sqlquery_real)
+        except Exception:
+            return None
+        row = cursor.fetchone()
+        return row['n'] if row else None
+    finally:
+        msl.close()
+
+
 def run_filter(
         selected,
         tables,
@@ -66,19 +97,25 @@ def run_filter(
         limit,
         offset,
         mq_id=False,
-        query_name=False):
+        query_name=False,
+        owner_topic=None,
+        exclude_hidden=True):
     """run the filter and return the table of results
 
     **Key Arguments:**
 
         - `userid` -- the users unique ID
         - `name` -- the name given to the filter
+        - `owner_topic` -- the tag topic of the filter's owner, so their hidden
+          objects are excluded and `favourite:only` can be honoured
+        - `exclude_hidden` -- emit the hidden exclusion; False for a non-owner
 
     """
     error = check_query(selected, tables, conditions)
     if error:
         return None, None, None, None, error
-    sqlquery_real = build_query(selected, tables, conditions)
+    sqlquery_real = build_query(selected, tables, conditions,
+                                owner_topic=owner_topic, exclude_hidden=exclude_hidden)
     sqlquery_limit = 'SET STATEMENT max_statement_time=60 FOR %s LIMIT %d OFFSET %d' % (sqlquery_real, limit, offset)
 
     nalert = 0

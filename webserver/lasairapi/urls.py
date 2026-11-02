@@ -14,5 +14,6 @@ urlpatterns = [
     path('api/auth-token/',            obtain_auth_token, name='auth_token'),
     path('api/annotate/',              views.AnnotateView.as_view()),
     path('api/annotatelist/',          views.AnnotateListView.as_view()),
+    path('api/mark/',                  views.MarkView.as_view()),
     path('api-auth/',                  include('rest_framework.urls')),
 ]

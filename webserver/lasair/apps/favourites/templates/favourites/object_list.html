@@ -1,0 +1,27 @@
+{% extends "layouts/base.html" %}
+{% block stylesheets %}{% endblock stylesheets %}
+{% load static %}
+{% block title %}
+    {{ header }}
+{% endblock title %}
+
+{% block content %}
+    <div class="container">
+        <div class="row mt-4">
+            {% if mode == 'hidden' and count %}
+                <div class="col-12 mb-3">
+                    <form method="post" action="{% url 'unhide_all' %}"
+                          onsubmit="return confirm('Unhide every object you have hidden? This cannot be undone.');">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-secondary float-end">Unhide all</button>
+                    </form>
+                </div>
+            {% endif %}
+
+            <div class="col-12 mb-4">
+                {% include "includes/widgets/widget_objectlist_table.html" with markable=True markList=mode %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
