@@ -218,7 +218,7 @@ proxies['fink_snn'] = fink | {
 }
 #-----------
 alerce = {
-    'SERVERS'        : {{ settings.alerce_server }},
+    'SERVERS'        : '{{ settings.alerce_server }}',
     'ALERCE_NAME'    : 'lasair_prod',
     'ALERCE_PASSWORD': '{{ settings.alerce_password }}',
 #    'DATE'           : '20260726',  # or else use today
