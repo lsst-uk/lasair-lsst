@@ -9,6 +9,8 @@
     {{data.objectId}}
 {% endblock title %}
 
+{% block body_class %}{% if data.myMark == 'hidden' %}object-hidden{% endif %}{% endblock body_class %}
+
 
 {% block content %}
 
@@ -73,6 +75,8 @@
 
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
+
+    {% include 'includes/aladin_loader.html' %}
 
     <script type="text/javascript">
         {% include "includes/widgets/widget_object_aladin.script" %}

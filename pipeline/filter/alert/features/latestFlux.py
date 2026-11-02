@@ -23,7 +23,7 @@ class latestFlux(FeatureGroup):
             latestMJD = band + '_latestMJD'
             output[bandflux] = None
             output[latestMJD] = None
-            for i in range(len(lc_flux)-1, -1, -1):
+            for i in range(len(lc_flux)):
                 if lc_band[i] == band:
                     output[bandflux]  = lc_flux[i]
                     output[latestMJD] = lc_time[i]

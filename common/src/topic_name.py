@@ -1,3 +1,7 @@
+import hashlib
+def hash(s):
+    return hashlib.sha256(s.encode("utf-8")).hexdigest()[:8]
+
 def topic_name(userid, name):
     """generate a kafka topic name based on userid and query name.
 
@@ -13,5 +17,7 @@ def topic_name(userid, name):
         nname = name[0:64]+name[-64:]
     else:
         nname = name
-    return 'lasair_' + str(userid) + nname
+    return 'lasair_' + str(userid) + hash(nname)
 
+# instead of lasair_22fromsecretEuclidwatchlist
+# the topic name is lasair_22ad3673dd

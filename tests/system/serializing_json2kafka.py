@@ -5,11 +5,13 @@ from confluent_kafka.schema_registry import SchemaRegistryClient
 from confluent_kafka.schema_registry.avro import AvroSerializer
 import base64
 
-SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
+#SCHEMA_REG_URL = "https://usdf-alert-schemas-dev.slac.stanford.edu"
+SCHEMA_REG_URL = "https://rubin-alert-schemas.slac.stanford.edu/schema-registry"
 # use sr_client.get_subjects() 
 SCHEMA_SUBJECT = "alert-packet"
 # use sr_client.get_versions('alert-packet')
-SCHEMA_VERSION = 900
+#SCHEMA_VERSION = 900
+SCHEMA_VERSION = "1100"
 
 def subject_name(context, string):
     return SCHEMA_SUBJECT

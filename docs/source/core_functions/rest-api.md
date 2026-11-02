@@ -53,6 +53,7 @@ Click on the method name to jump to documentation in the reference below.
 *   [object](#object): returns a machine-readable version of the object web page.
 *   [sherlock/object](#sherlockobject): returns Sherlock information about a named objects.
 *   [sherlock/position](#sherlockposition): returns Sherlock information about a sky position.
+*   [mark](#mark): favourites or hides objects for the calling user.
 
 ### <a name="cone"></a>/api/cone/
 
@@ -196,3 +197,55 @@ Curl Example: The authorization token goes in the header of the request, and the
 ```
 curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" --data "ra=16.851866&dec=34.53307" https://api.lasair.lsst.ac.uk/api/sherlock/position/
 ```
+
+### <a name="mark"></a>/api/mark/
+
+This method marks objects as *favourite* or as *hidden* for the calling user. A favourite is an object you care about; hidden means "never show me this again", and hidden objects are left out of your own filter results, search results, API query results and daily digest emails. Neither mark affects what anybody else sees.
+
+The method is POST only. The arguments are:
+
+*   `diaObjectId`: the object to mark, or
+*   `diaObjectIds`: a list of objects to mark, at most 1000, marked all or nothing
+*   `mark`: `favourite`, `hidden`, or `null` to clear whichever mark the object holds
+
+The two marks are mutually exclusive: favouriting an object clears any hidden mark on it, and hiding it clears any favourite. Re-sending a mark an object already holds succeeds and changes nothing. The response reports the mark the object now holds and the `previous` mark it displaced, so a caller that sent a list can see how many marks it replaced without reading them back.
+
+**The token goes in the header, never in the URL.** This is the only method on this page whose examples do not show `token=` in the query string, and that is deliberate rather than an oversight: URLs reach access logs, proxy logs, browser history and `Referer` headers, and this method writes. `/api/mark/` therefore accepts a header token or a logged-in session, and nothing else.
+
+The demonstration token shown on the API page is read-only here, and marking with it returns a 403. Get your own token to mark objects.
+
+Curl Example, marking one object:
+```
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+     --header "Content-Type: application/json" \
+     --data '{"diaObjectId": 123456789012345, "mark": "favourite"}' \
+     https://api.lasair.lsst.ac.uk/api/mark/
+```
+and the return is:
+```
+{"diaObjectId": 123456789012345, "mark": "favourite", "previous": null}
+```
+
+Curl Example, hiding several objects at once:
+```
+curl --header "Authorization: Token xxxxxxxxxxxxxxxxxxxxxxxx" \
+     --header "Content-Type: application/json" \
+     --data '{"diaObjectIds": [123456789012345, 123456789012346], "mark": "hidden"}' \
+     https://api.lasair.lsst.ac.uk/api/mark/
+```
+
+Queries you run through [query](#query) leave your hidden objects out, in the same way the website does. Add `hidden:include` to `tables` to put them back.
+
+#### Listing your marks
+
+There is no read method for marks. List your favourites with [query](#query), using `tables=objects, favourite:only`, which composes with any other condition — a Sherlock class, a magnitude cut — in one query. `tables=objects, hidden:include` puts your hidden objects back into a query that would otherwise leave them out.
+
+#### How this differs from /api/annotate/
+
+`/api/mark/` keeps favourite and hidden mutually exclusive, and writes synchronously to the database. `/api/annotate/` writes any classification you like to your own `tags_` topic through Kafka, enforces no exclusivity, and can therefore leave an object both favourited and hidden. Because a mark never travels through Kafka, favouriting or hiding an object does **not** trigger a filter set to run on updated annotation; a tag written through `/api/annotate/` still does.
+
+#### Where hiding does not reach
+
+Hiding suppresses objects from your own web results, API query results and daily digest emails. It does **not** filter a filter's public Kafka topic: alert-triggered filters run on the filter nodes, which have no access to your marks, so a consumer reading that topic directly still receives your hidden objects, and they still count against the filter's byte quota.
+
+The same gap works the other way for favourites. A filter that runs on new alerts and is restricted with `favourite:only` matches **nothing** on the filter nodes, because the favourites test cannot be true against a database that holds no marks. `favourite:only` works when you run the filter from the website or through [query](#query), and on filters that run on updated annotations, which are processed against the main database.

@@ -53,8 +53,9 @@
                             <div class="col-12 px-4">
 
                                 <small class="text-gray-500">
-This is a selection of recent alerts that have a Sherlock association.
+Below is a selection of recent alerts that have a Sherlock association.
 Click on a marker for information about an object, or use the table below.
+Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,m:cDDaeb4>weather at the Observatory</a>.
                                 </small>
 
                             </div>
@@ -63,6 +64,22 @@ Click on a marker for information about an object, or use the table below.
 
 
                     </div>
+
+
+
+
+
+
+                    <div class="col-12 px-4">
+			    {% autoescape off %}
+			    {{ timeline }}
+			    {% endautoescape %}
+	            </div>
+
+
+
+
+
 
                     <div class="card-body pt-0">
 
@@ -73,6 +90,16 @@ Click on a marker for information about an object, or use the table below.
 
                             </div>
                         </div>
+
+                        {% if timeline %}
+                        <div class="row mx-4">
+                            <div class="col-12 mb-4">
+                                {% autoescape off %}
+                                {{ timeline }}
+                                {% endautoescape %}
+                            </div>
+                        </div>
+                        {% endif %}
 
 
 
@@ -126,6 +153,8 @@ Click on a marker for information about an object, or use the table below.
 <!-- Specific Page JS goes HERE  -->
 {% block javascripts %}
 
+    {% include 'includes/aladin_loader.html' %}
+
     <script>
 
         var colors = {{ colors|safe }};
@@ -142,7 +171,7 @@ Click on a marker for information about an object, or use the table below.
             var imageSurvey = 'P/Mellinger/color'
 
             var aladin;
-            A.init.then(() => {
+            loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
                 aladin = A.aladin('#aladin-lite-div', {
                     fov:360,
                     cooFrame: 'ICRSd',
@@ -178,7 +207,7 @@ Click on a marker for information about an object, or use the table below.
                         markers.addSources(L);
                     }
                 }
-            });
+            }, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
         });
 
     </script>

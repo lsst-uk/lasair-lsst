@@ -1,0 +1,11 @@
+{% comment %}
+Both the outline and the solid star, in one SVG. CSS shows one or the other
+from the `is-on` class on the button, so the element identity — and therefore
+the focus ring — survives a state change.
+{% endcomment %}
+<svg class="mark-icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+    <path class="mark-icon-outline" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"
+          d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>
+    <path class="mark-icon-solid" fill="currentColor"
+          d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>
+</svg>

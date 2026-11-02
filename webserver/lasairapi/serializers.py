@@ -15,7 +15,7 @@ from confluent_kafka import Producer, KafkaError
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 from rest_framework import serializers
 from rest_framework.exceptions import NotFound, ValidationError
-from src import db_connect
+from src import db_connect, annotate_util
 import settings as lasair_settings
 import sys
 sys.path.append('../common')
@@ -155,14 +155,18 @@ class ObjectSerializer(serializers.Serializer):
 
         # Get the authenticated user, if it exists.
         userId = 'unknown'
+        viewer_id = None
         request = self.context.get("request")
         if request and hasattr(request, "user"):
             userId = request.user
+            if request.user.is_authenticated:
+                viewer_id = request.user.id
 
         if lasair_added:
             try:
                 result = objjson(objectId, lite=lite, 
-                     reliabilityThreshold=reliabilityThreshold)
+                     reliabilityThreshold=reliabilityThreshold,
+                     viewer_id=viewer_id)
             except Exception as e:
                 result = {'error': str(e)}
             if not result:
@@ -316,7 +320,7 @@ class QuerySerializer(serializers.Serializer):
             offset = int(offset)
 
         try:
-            error = check_query(selected, tables, conditions, user=userId)
+            error = check_query(selected, tables, conditions, user=userId.id)
         except Exception as e:
             error = str(e)
 
@@ -324,7 +328,11 @@ class QuerySerializer(serializers.Serializer):
             return {"error": error}
 
         try:
-            sqlquery_real = build_query(selected, tables, conditions)
+            # THE CALLER IS THE OWNER OF AN AD-HOC QUERY, SO THEIR HIDDEN OBJECTS ARE
+            # LEFT OUT AND favourite:only MEANS THEIR OWN FAVOURITES
+            sqlquery_real = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username))
         except Exception as e:
             return {"error": str(e)}
 
@@ -339,27 +347,53 @@ class QuerySerializer(serializers.Serializer):
                 result.append(row)
             return result
         except Exception as e:
-            error = 'Your query:<br/><b>' + sqlquery_real + '</b><br/>returned the error<br/><i>' + str(e) + '</i>'
+            # THE CALLER SEES A READABLE PLACEHOLDER, NEVER THE HIDDEN/FAVOURITE
+            # EXISTS BLOCK, EVEN THOUGH THAT IS WHAT sqlquery_real JUST RAN
+            display_sql = build_query(
+                selected, tables, conditions,
+                owner_topic=annotate_util.tag_topic(userId.username), for_display=True)
+            display_sql += ' LIMIT %d OFFSET %d' % (limit, offset)
+            error = ('Your query:<br/><b>' + display_sql + '</b><br/>'
+                     'returned the error<br/><i>' + str(e) + '</i>')
             return {"error": error}
 
 
 class AnnotateSerializer(serializers.Serializer):
-    topic = serializers.CharField(max_length=255, required=True)
-    objectId = serializers.IntegerField(required=True)
+
+    objectId       = serializers.IntegerField(required=True)
+    topic          = serializers.CharField(max_length=255, required=True)
     classification = serializers.CharField(max_length=80, required=True)
-    version = serializers.CharField(max_length=80, required=True)
-    explanation = serializers.CharField(max_length=1024, required=True, allow_blank=True)
-    classdict = serializers.CharField(max_length=4096, required=True)
-    url = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    version        = serializers.CharField(max_length=80, required=True)
+    explanation    = serializers.CharField(max_length=1024, required=True, allow_blank=True)
+    classdict      = serializers.CharField(max_length=4096, required=True)
+    url            = serializers.CharField(max_length=1024, required=True, allow_blank=True)
 
     def save(self):
-        topic = self.validated_data['topic']
-        diaObjectId = self.validated_data['objectId']
-        classification = self.validated_data['classification']
-        version = self.validated_data['version']
-        explanation = self.validated_data['explanation']
-        classdict = self.validated_data['classdict']
-        url = self.validated_data['url']
+        request = self.context.get("request")
+        a = {
+            'diaObjectId'   : self.validated_data['objectId'],
+            'topic'         : self.validated_data['topic'],
+            'classification': self.validated_data['classification'],
+            'version'       : self.validated_data['version'],
+            'explanation'   : self.validated_data['explanation'],
+            'classdict'     : self.validated_data['classdict'],
+            'url'           : self.validated_data['url'],
+            }
+
+        serializer = AnnotateListSerializer(
+                data={'annotations':[a]}, 
+                context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        message = serializer.save()
+        return message
+
+class AnnotateListSerializer(serializers.Serializer):
+    annotations = serializers.ListField()
+
+    def save(self):
+        annotations = self.validated_data['annotations']
+        request = self.context.get("request")
+
         # Get the authenticated user, if it exists.
         userId = 'unknown'
         request = self.context.get("request")
@@ -376,7 +410,9 @@ class AnnotateSerializer(serializers.Serializer):
             return {'error': "Cannot connect to master database %d: %s\n" % (e.args[0], e.args[1])}
 
         cursor = msl.cursor(dictionary=True)
-        cursor.execute('SELECT * from annotators where topic="%s"' % topic)
+        topic = annotations[0]['topic']
+        # PARAMETERISED: topic IS CALLER-SUPPLIED AND THIS QUERY GATES OWNERSHIP
+        cursor.execute('SELECT * from annotators where topic=%s', (topic,))
         nrow = 0
         for row in cursor:
             nrow += 1
@@ -391,45 +427,63 @@ class AnnotateSerializer(serializers.Serializer):
         if active == 0:
             return {'error': "Annotator error: topic %s is not active -- ask Lasair team" % topic}
 
-        # push a kafka message to make sure queries are ingested t database and run immediately
-        message = {'diaObjectId'   : diaObjectId, 
-                   'topic'         : topic,
-                   'version'       : version,
-                   'classification': classification,
-                   'explanation'   : explanation,
-                   'classdict'     : classdict,
-                   'url'           : url,
-                   }
+        for iann in range(len(annotations)):
+            cd = annotations[iann]['classdict']
+            try:
+                jcd = json.loads(cd)      # if they sent a dict jcd is a dict
+                if isinstance(jcd, str):  # if they sent a string then loads again
+                    jcd = json.loads(jcd) # check their string is valid json
+                    annotations[iann]['classdict'] = jcd
+            except Exception:
+                return {'error': "Bad JSON %s for annotation %d" % (cd, iann)}
 
-        conf = {
-            'bootstrap.servers': lasair_settings.INTERNAL_KAFKA_PRODUCER,
-            'client.id': 'client-1',
-        }
+        # now actually put the annotations in the kafka
+        annotate_util.insert_annotations_kafka(annotations)
+        return {'status': 'success', 'n': len(annotations)}
 
-        # will we really instantiate the producer for each message?
-        producer = Producer(conf)
-        topicout = lasair_settings.ANNOTATION_TOPIC
-        try:
-            s = json.dumps(message)
-            producer.produce(topicout, s)
-        except Exception as e:
-            return {'error': "Kafka production failed: %s\n" % e}
-        producer.flush()
 
-        return {'status': 'success', 'annotation_topic': topicout, 'message': s}
+MARK_BULK_CAP = 100
 
-class AnnotateListSerializer(serializers.Serializer):
-    annotations = serializers.ListField()
+
+class MarkSerializer(serializers.Serializer):
+    """Set the caller's mark on one object or on a list of them.
+
+    The body carries the desired end state, so `mark_object` keeps favourite
+    and hidden mutually exclusive and the caller never chains two requests.
+    Re-posting a mark the object already holds is a 200, not a 409: the caller
+    asked for an end state and the end state holds.
+    """
+    diaObjectId = serializers.IntegerField(required=False)
+    diaObjectIds = serializers.ListField(
+        child=serializers.IntegerField(), required=False, max_length=MARK_BULK_CAP)
+    mark = serializers.CharField(required=False, allow_null=True, allow_blank=False)
+
+    def validate(self, data):
+        if ('diaObjectId' in data) == ('diaObjectIds' in data):
+            raise ValidationError('Send either diaObjectId or diaObjectIds, not both')
+        mark = data.get('mark')
+        if mark is not None and mark not in annotate_util.MARKS:
+            raise ValidationError('Not a mark: %s' % mark)
+        return data
 
     def save(self):
-        annotations = self.validated_data['annotations']
         request = self.context.get("request")
+        user = request.user
 
-        for a in annotations:
-            serializer = AnnotateSerializer(data=a, context={'request': request})
-            serializer.is_valid(raise_exception=True)
-            message = serializer.save()
-            if 'error' in message:
-                return message
+        # THE dummy TOKEN IS PUBLISHED ON THE /api PAGE, SO EVERY READER OF THE
+        # DOCUMENTATION WOULD OTHERWISE WRITE INTO ONE SHARED tags_dummy TOPIC.
+        # A SILENT NO-OP WAS REJECTED: A CALLER WOULD SEE SUCCESS AND NO EFFECT.
+        if user.username == 'dummy':
+            return {'error': 'The demonstration token is read-only. '
+                             'Get your own token to mark objects.'}
 
-        return {'status': 'success', 'n': len(annotations)}
+        mark = self.validated_data.get('mark')
+        single = 'diaObjectId' in self.validated_data
+        diaObjectIds = ([self.validated_data['diaObjectId']] if single
+                        else self.validated_data['diaObjectIds'])
+
+        if len(diaObjectIds) > MARK_BULK_CAP:
+            return {'error': 'At most %d objects may be marked at once' % MARK_BULK_CAP}
+
+        results = annotate_util.mark_objects(user, diaObjectIds, mark)
+        return results[0] if single else results

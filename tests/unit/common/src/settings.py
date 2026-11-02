@@ -1,4 +1,5 @@
 """
 Dummy settings file for tests
 """
-GW_DIRECTORY = '.'
+MMA_DIRECTORY = '.'
+INTERNAL_KAFKA_PRODUCER = 'asdf'
