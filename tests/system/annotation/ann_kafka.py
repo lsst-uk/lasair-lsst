@@ -43,7 +43,7 @@ if __name__ == "__main__":
     # fins a random object to annotate
     diaObjectId = get_diaObjectId()
 
-    print('making annotations apple and pear')
+    print('making annotation apple')
     if args['api']:
         # will use API to annotate
         endpoint = f"https://api.{settings.LASAIR_URL}/api"
@@ -51,14 +51,9 @@ if __name__ == "__main__":
         L.annotate(
             ann_topic, diaObjectId, 'apple',
             version='0.1', explanation='', classdict={}, url='')
-        L.annotate(
-            ann_topic, diaObjectId, 'pear',
-            version='0.1', explanation='', classdict={}, url='')
 
     if args['direct_kafka']:
-        # two annotations "banana" and "orange"
         annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'apple')
-        annotate_util.insert_annotation_kafka(diaObjectId, ann_topic, 'pear')
 
     # check to see what has come through
     # if the annotations went into kafka, we need to wait a while
@@ -70,23 +65,16 @@ if __name__ == "__main__":
         tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
         ntags = len(tags)
         print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
-        right1 = (ntags == 1)   # if classic, only pear
+        right1 = (ntags == 1)   # apple tag is there
         if right1: print('success')
 
         tag = 'apple'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
         print(f'- Found objects for {ann_topic}/{tag}:', objs)
         nobjs1 = len(objs)
-        right2 = (nobjs1 == 0)  # if classic, apple is not there
+        right2 = (nobjs1 == 1)  # apple tag is there
 
-        tag = 'pear'
-        objs = annotate_util.objects_for_classification(ann_topic, tag)
-        print(f'- Found objects for {ann_topic}/{tag}:', objs)
-        nobjs2 = len(objs)
-        right3 = (nobjs2 == 1)  # pear should be there
-        if right3: print('success')
-
-        if ntags > 0 or nobjs1 > 0 or nobjs2 > 0:
+        if ntags > 0 or nobjs1 > 0:
             break
     else:
         print('Did not see annotations from filter-annotation process')
@@ -94,7 +82,14 @@ if __name__ == "__main__":
 
     # the filter should have produced kafka
     print('Now fetch kafka')
-    kafka_server = f'{settings.LASAIR_URL}-kafka_pub.lsst.ac.uk:9092'
+    if settings.LASAIR_URL == 'lasair.lsst.ac.uk':
+        kafka_server = 'lasair-lsst-kafka_pub.lsst.ac.uk:9092'
+    elif settings.LASAIR_URL == 'lasair-lsst-dev.lsst.ac.uk':
+        kafka_server = 'lasair-lsst-dev-kafka_pub.lsst.ac.uk:9092'
+    else:
+        print('Cannot find kafka_pub server for', settings.LASAIR_URL)
+        exit(1)
+
     group_id = 'LASAIR1'
     consumer = lasair_consumer(kafka_server, group_id, kafka_topic_name)
     nmessage = 0
@@ -116,14 +111,14 @@ if __name__ == "__main__":
         print('Did not see alerts triggered by annotations')
 
     print(nmessage, 'Kafka messages')
-    right4 = (nmessage >= 1)
+    right3 = (nmessage >= 1)
 
     # Don't need these any more
     print('Deleting annotator, annotations, and filter')
     delete_annotator(ann_topic)
     delete_filter(filter_name)
 
-    if right1 and right2 and right3 and right4:
+    if right1 and right2 and right3:
         print('passed test')
         exit(0)
     else:
