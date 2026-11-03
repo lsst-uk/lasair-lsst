@@ -34,7 +34,7 @@ if __name__ == "__main__":
 
     diaObjectId = get_diaObjectId()
 
-    endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
+    endpoint = f"https://api.{settings.LASAIR_URL}/api"
     L = lasair_client(settings.API_TOKEN, endpoint=endpoint)
 
     classdict = {'banana':2, 'mango':4}   # python dict

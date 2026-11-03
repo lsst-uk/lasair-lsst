@@ -62,6 +62,7 @@ def mma_watchmap_index(request):
         how_many[row['mw_id']] = row['n']
 
     d = {}
+    listd = None
     for mw in list(mmaWatchmaps):
         namespace = mw.namespace
         # build data packet

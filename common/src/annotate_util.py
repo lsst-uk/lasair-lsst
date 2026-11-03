@@ -60,7 +60,7 @@ def insert_annotations_kafka(annotations: [{}]):
 
 
 def insert_annotation_kafka(diaObjectId: int, topic: str, classification: str,
-                            version: str = '', explanation: str = '', classdict: str = '{}', url: str = ''):
+                            version: str = '', explanation: str = '', classdict: dict = {}, url: str = ''):
     """Insert a single annotation to the Kafka queue. The webserver uses this.
 
     Raises:
@@ -78,7 +78,7 @@ def insert_annotation_kafka(diaObjectId: int, topic: str, classification: str,
 
 
 def insert_annotation_db(diaObjectId: int, topic: str, classification: str,
-                         version: str = '', explanation: str = '', classdict: str = '{}', url: str = '',
+                         version: str = '', explanation: str = '', classdict: dict = {}, url: str = '',
                          verbose: bool = False, msl=None):
     """Insert an annotation/tag directly to the database
 
