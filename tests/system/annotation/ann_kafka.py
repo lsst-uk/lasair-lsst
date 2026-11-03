@@ -1,7 +1,7 @@
 """
 Annotation/tag test for Lasair using kafka.
 Usage:
-    ann_test.py <ann_topic> (api | direct_kafka)
+    ann_kafka.py <ann_topic> (api | direct_kafka)
 
 Arguments:
     <ann_topic>     Annotation topic.
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     print('making annotations apple and pear')
     if args['api']:
         # will use API to annotate
-        endpoint = "https://lasair-lsst-dev.lsst.ac.uk/api"
+        endpoint = f"https://api.{settings.LASAIR_URL}/api"
         L = lasair_client(settings.API_TOKEN, endpoint=endpoint)
         L.annotate(
             ann_topic, diaObjectId, 'apple',
@@ -70,20 +70,14 @@ if __name__ == "__main__":
         tags = annotate_util.classifications_for_object(ann_topic, diaObjectId)
         ntags = len(tags)
         print(f'- Found tags for {diaObjectId}/{ann_topic}:', tags)
-        if ann_topic.startswith('tags_'):
-            right1 = (ntags == 2)   # if tags, apple and pear are there
-        else:
-            right1 = (ntags == 1)   # if classic, only pear
+        right1 = (ntags == 1)   # if classic, only pear
         if right1: print('success')
 
         tag = 'apple'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
         print(f'- Found objects for {ann_topic}/{tag}:', objs)
         nobjs1 = len(objs)
-        if ann_topic.startswith('tags_'):
-            right2 = (nobjs1 == 1)  # if tags, apple is there
-        else:
-            right2 = (nobjs1 == 0)  # if classic, apple is not there
+        right2 = (nobjs1 == 0)  # if classic, apple is not there
 
         tag = 'pear'
         objs = annotate_util.objects_for_classification(ann_topic, tag)
@@ -100,7 +94,7 @@ if __name__ == "__main__":
 
     # the filter should have produced kafka
     print('Now fetch kafka')
-    kafka_server = 'lasair-lsst-dev-kafka_pub.lsst.ac.uk:9092'
+    kafka_server = f'{settings.LASAIR_URL}-kafka_pub.lsst.ac.uk:9092'
     group_id = 'LASAIR1'
     consumer = lasair_consumer(kafka_server, group_id, kafka_topic_name)
     nmessage = 0

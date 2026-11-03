@@ -49,7 +49,9 @@
     - lasair/areas
     - lasair/fits
     - lasair/mma
-    - lasair/mma/gw
+    - lasair/mma/LVK
+    - lasair/mma/ICC
+    - lasair/mma/ICGB
     - lasair/services_log
     - lasair/streams
     - lasair/system_status
