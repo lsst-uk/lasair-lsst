@@ -41,6 +41,7 @@
         - area_hits
         - watchlist_hits
         - annotations
+        - crossmatch_tns
     - name: Run filter
       ansible.builtin.shell:
         chdir: lasair-lsst/pipeline/filter
