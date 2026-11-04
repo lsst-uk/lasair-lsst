@@ -4,7 +4,7 @@ show_usage() {
 	echo "Usage: $0 <command> <tag_name>"
 	echo ""
 	echo "Arguments:"
-	echo "  <command>   : The action to perform. Valid options: 'start', 'stop', 'help'."
+	echo "  <command>   : The action to perform. Valid options: 'start', 'stop', 'status', 'help'."
 	echo "  <tag_name>  : Specify a tag to run."
 	echo "              : Use 'all' to run without tag filtering."
 	echo ""
@@ -46,7 +46,7 @@ fi
 
 # Validate the command argument
 if [ "$COMMAND_ARG" != "start" ] && [ "$COMMAND_ARG" != "stop" ]; then
-	echo "Error: Invalid command '$COMMAND_ARG'. Must be 'start' or 'stop'."
+	echo "Error: Invalid command '$COMMAND_ARG'. Must be 'start', 'stop' or 'status'."
 	show_usage
 	exit 1
 fi
