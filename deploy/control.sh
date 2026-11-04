@@ -8,6 +8,8 @@ show_usage() {
 	echo "  <tag_name>  : Specify a tag to run."
 	echo "              : Use 'all' to run without tag filtering."
 	echo ""
+	echo "NOTE: Remember to check service status is as expected after start/stop."
+	echo ""
 }
 
 show_tags() {
@@ -61,11 +63,16 @@ if [ -z "$TAG_ARG" ] && [ "$COMMAND_ARG" != "status" ]; then
 	exit 1
 fi
 
-if [ "$TAG_ARG" = "all" ]; then
+if [ "$TAG_ARG" = "all" ] || [ "$COMMAND_ARG" = "status" ]; then
 	# Run without --tags flag
 	ansible-playbook control.yaml --extra-vars "$EXTRA_VARS"
 else
 	# Run with the specified tag
 	ansible-playbook control.yaml --extra-vars "$EXTRA_VARS" --tags="$TAG_ARG"
+fi
+
+if [ "$COMMAND_ARG" != "status" ]; then
+	echo "NOTE: Remember to check service status is as expected after start/stop."
+	echo ""
 fi
 
