@@ -18,11 +18,8 @@ show_tags() {
 	if [ -f "control.yaml" ]; then
 		tags_output=$(ansible-playbook control.yaml --list-tags 2>/dev/null)
 		if [ -n "$tags_output" ]; then
-			echo "$tags_output" | grep -v "^playbook:" | grep -v "^$" | sed 's/.*tags: //; s/([^)]*)//g' | tr ',' '\n' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//' | sort -u | while read -r tag; do
-				if [ -n "$tag" ]; then
-					echo "  - $tag"
-				fi
-			done
+			echo "$tags_output" | grep -v "^playbook:" | grep -v "^$" | grep -v "always" \
+		       		| sed 's/.*TAGS: //; s/([^)]*)//g' | tr ',' '\n' | tr -d '][[:blank:]' | sort -u | sed 's/^/  - /' 
 		else
 			echo "  (Unable to retrieve tags. Ensure control.yaml is valid.)"
 		fi
@@ -30,8 +27,6 @@ show_tags() {
 		echo "  (control.yaml not found in current directory.)"
 	fi
 }
-
-
 
 COMMAND_ARG="$1"
 TAG_ARG="$2"
