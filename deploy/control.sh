@@ -45,7 +45,7 @@ if [ "$COMMAND_ARG" = "help" ]; then
 fi
 
 # Validate the command argument
-if [ "$COMMAND_ARG" != "start" ] && [ "$COMMAND_ARG" != "stop" ]&& [ "$COMMAND_ARG" != "status" ]; then
+if [ "$COMMAND_ARG" != "start" ] && [ "$COMMAND_ARG" != "stop" ] && [ "$COMMAND_ARG" != "status" ]; then
 	echo "Error: Invalid command '$COMMAND_ARG'. Must be 'start', 'stop' or 'status'."
 	show_usage
 	exit 1
@@ -55,7 +55,7 @@ fi
 EXTRA_VARS="command=$COMMAND_ARG"
 
 # Handle the second argument (Tag)
-if [ -z "$TAG_ARG" ]; then
+if [ -z "$TAG_ARG" ] && [ "$COMMAND_ARG" != "status" ]; then
 	# If no tag is provided, show usage (which now includes tag list)
 	show_usage
 	exit 1
