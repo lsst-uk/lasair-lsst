@@ -45,7 +45,7 @@ if [ "$COMMAND_ARG" = "help" ]; then
 fi
 
 # Validate the command argument
-if [ "$COMMAND_ARG" != "start" ] && [ "$COMMAND_ARG" != "stop" ]; then
+if [ "$COMMAND_ARG" != "start" ] && [ "$COMMAND_ARG" != "stop" ]&& [ "$COMMAND_ARG" != "status" ]; then
 	echo "Error: Invalid command '$COMMAND_ARG'. Must be 'start', 'stop' or 'status'."
 	show_usage
 	exit 1
