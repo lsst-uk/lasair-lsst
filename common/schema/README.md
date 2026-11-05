@@ -97,12 +97,12 @@ git add 11_1
 
 The schema version is written in other places in the code. Modify the following
 files:
-```
+
 deploy/deploy.yaml
 deploy/database.yaml
 tests/system/system_test_settings.yaml
 tests/unit/pipeline/filter/annotation/settings.py
-```
+
 Then do git add
 
 git commit -m 'updated to 11_1'
