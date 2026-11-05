@@ -1,0 +1,22 @@
+---
+
+- name: Create lasair-mma systemd service files
+  become: true
+  template:
+    src: "lasair-mma-{{ item }}.service"
+    dest: "/etc/systemd/system/lasair-mma-{{ item }}.service"
+  loop:
+    - icc
+    - icgb
+    - lvk
+
+- name: Make sure lasair-mma services are running
+  become: true
+  ansible.builtin.systemd:
+    state: started
+    enabled: true
+    name: "lasair-{{ item }}"
+  loop:
+    - icc
+    - icgb
+    - lvk
