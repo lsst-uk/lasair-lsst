@@ -10,6 +10,7 @@ Usage:
               [--topic_out=TOUT]
               [--wait_time=TIME]
               [--nocutouts]
+              [--stats=BOOL]
 
 Options:
     --nprocess=NP      Number of processes to use [default:1]
@@ -20,6 +21,7 @@ Options:
     --topic_out=TOUT   Kafka topic for output [default:lsst_sherlock]
     --wait_time=TIME   Override default wait time (in seconds)
     --nocutouts        Do not attempt to save cutout images
+    --stats=BOOL       Write stats [default: True]
 """
 
 import sys
@@ -88,7 +90,9 @@ class Ingester:
     # We split the setup between the constructor and setup method in order to allow for
     # an ingester with custom connections to other components, e.g. for testing
 
-    def __init__(self, topic_in, topic_out, group_id, maxalert, nocutouts=False, log=None, image_store=None, cassandra_session=None, producer=None, consumer=None, ms=None):
+    def __init__(self, topic_in: str, topic_out: str, group_id: str, maxalert: int, nocutouts: bool=False,
+                 stats: bool=True, log=None, image_store=None, cassandra_session=None,
+                 producer=None, consumer=None, ms=None):
         self.topic_in = topic_in
         self.topic_out = topic_out
         self.group_id = group_id
@@ -102,6 +106,7 @@ class Ingester:
         self.pschema = None
         self.cluster = None
         self.timers = {}
+        self.stats = stats
         
         self.wait_time = getattr(settings, 'WAIT_TIME', 60)
 
@@ -117,10 +122,11 @@ class Ingester:
             self.log = lasairLogging.getLogger("ingest")
 
         # put status on Lasair web page
-        if ms:
-            self.ms = ms
-        else:
-            self.ms = manage_status.manage_status(log=self.log)
+        if self.stats:
+            if ms:
+                self.ms = ms
+            else:
+                self.ms = manage_status.manage_status(log=self.log)
     
         # catch SIGTERM so that we can finish processing cleanly
         signal.signal(signal.SIGTERM, self._sigterm_handler)
@@ -555,19 +561,20 @@ class Ingester:
             self.surplus_attrs[component] = None
 
         # update the status page
-        nid = date_nid.nid_now()
-        self.ms.add({
-            'today_alert':nAlert, 
-            'diaObject'        : nDiaObject,
-            'nSSSource'      : nSSSource,
-            'nSSObject'         : nSSObject,
-            'diaSource'        : nDiaSource,
-            'diaSourceDB'      : nDiaSourceDB,
-            'diaForcedSource'  : nDiaForcedSource,
-            'diaForcedSourceDB': nDiaForcedSourceDB
-        }, nid)
-        for name,td in self.timers.items():
-            td.add2ms(self.ms, nid)
+        if self.stats:
+            nid = date_nid.nid_now()
+            self.ms.add({
+                'today_alert':nAlert,
+                'diaObject'        : nDiaObject,
+                'nSSSource'      : nSSSource,
+                'nSSObject'         : nSSObject,
+                'diaSource'        : nDiaSource,
+                'diaSourceDB'      : nDiaSourceDB,
+                'diaForcedSource'  : nDiaForcedSource,
+                'diaForcedSourceDB': nDiaForcedSourceDB
+            }, nid)
+            for name,td in self.timers.items():
+                td.add2ms(self.ms, nid)
 
         log.info('%s %d alerts %d diaSource %d forcedSource %d noObject' % (self._now(), nAlert, nDiaSource, nDiaForcedSource, nSSSource))
         sys.stdout.flush()
@@ -689,8 +696,9 @@ def run_ingest(args, log=None):
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
     nocutouts = args.get('--nocutouts', False)
+    stats = args.get('--stats') or True
 
-    ingester = Ingester(topic_in, topic_out, group_id, maxalert, nocutouts, log=log)
+    ingester = Ingester(topic_in, topic_out, group_id, maxalert, nocutouts, stats, log=log)
 
     if args.get('--wait_time'):
         ingester.wait_time = int(args['--wait_time'])
