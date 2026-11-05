@@ -94,6 +94,17 @@ python3 3_make_all_alter_table.py 11_0 11_1
     ALTER TABLE diaSources ADD "trail_flag"  boolean;
     ALTER TABLE diaSources ADD "reliabilityVersion"  ascii;
 git add 11_1
+
+The schema version is written in other places in the code. Modify the following
+files:
+```
+deploy/deploy.yaml
+deploy/database.yaml
+tests/system/system_test_settings.yaml
+tests/unit/pipeline/filter/annotation/settings.py
+```
+Then do git add
+
 git commit -m 'updated to 11_1'
 git push
 
