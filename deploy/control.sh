@@ -63,7 +63,7 @@ if [ -z "$TAG_ARG" ] && [ "$COMMAND_ARG" != "status" ]; then
 	exit 1
 fi
 
-if [ "$TAG_ARG" = "all" ] || [ "$COMMAND_ARG" = "status" ]; then
+if [ "$TAG_ARG" = "all" ] || [ -z "$TAG_ARG" ]; then
 	# Run without --tags flag
 	ansible-playbook control.yaml --extra-vars "$EXTRA_VARS"
 else
