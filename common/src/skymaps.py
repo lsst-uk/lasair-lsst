@@ -82,9 +82,8 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
             (gw_distance, gw_diststddev) = gw_disttuples[i]
             if mocdistancelist[i]:
                 ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
-                if math.isinf(ds): ds = 100
-                zsd = math.exp(-0.5*ds*ds)
-                z_score_dist.append(zsd)
+                if math.isinf(ds) or ds > 100: ds = 100
+                z_score_dist.append(ds)
                 distance.append(mocdistancelist[i])
             else:
                 z_score_dist.append(None)
