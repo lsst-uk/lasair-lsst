@@ -64,7 +64,7 @@
 #  # nothing to do?
 #  tags: svc
 
-# service node - prometheus & grafana
+# service node - prometheus, grafana
 - hosts: svc
   gather_facts: false
   become: true
@@ -72,11 +72,11 @@
     - name: Populate service facts
       ansible.builtin.service_facts:
       when: command == "status"
-    - name: Print service state
+    - name: Print Prometheus service state
       ansible.builtin.debug:
         var: ansible_facts.services['prometheus.service']['state']
       when: command == "status"
-    - name: Print service state
+    - name: Print Grafana service state
       ansible.builtin.debug:
         var: ansible_facts.services['grafana-server.service']['state']
       when: command == "status"
@@ -101,6 +101,58 @@
         state: stopped
       when: command == "stop"
   tags: monitor
+
+# service node - mma
+- hosts: svc
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Populate service facts
+      ansible.builtin.service_facts:
+      when: command == "status"
+    - name: Print MMA-ICC service state
+      ansible.builtin.debug:
+        var: ansible_facts.services['lasair-mma-icc.service']['state']
+      when: command == "status"
+    - name: Print MMA-ICGB service state
+      ansible.builtin.debug:
+        var: ansible_facts.services['lasair-mma-icgb.service']['state']
+      when: command == "status"
+    - name: Print MMA-LVK service state
+      ansible.builtin.debug:
+        var: ansible_facts.services['lasair-mma-lvk.service']['state']
+      when: command == "status"
+    - name: Start MMA-ICC
+      ansible.builtin.service:
+        name: lasair-mma-icc
+        state: started
+      when: command == "start"
+    - name: Start MMA-ICGB
+      ansible.builtin.service:
+        name: lasair-mma-icgb
+        state: started
+      when: command == "start"
+    - name: Start MMA-LVK
+      ansible.builtin.service:
+        name: lasair-mma-lvk
+        state: started
+      when: command == "start"
+    - name: Stop MMA-ICC
+      ansible.builtin.service:
+        name: lasair-mma-icc
+        state: stopped
+      when: command == "stop"
+    - name: Stop MMA-ICGB
+      ansible.builtin.service:
+        name: lasair-mma-icgb
+        state: stopped
+      when: command == "stop"
+    - name: Stop MMA-LVK
+      ansible.builtin.service:
+        name: lasair-mma-lvk
+        state: stopped
+      when: command == "stop"
+  tags: mma
 
 # kafkas node - zookeeper and kafka
 - hosts: kafka
