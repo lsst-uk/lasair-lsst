@@ -55,7 +55,7 @@ def mma_watchmap_index(request):
     # how many hits for each
     msl = db_connect.remote()
     cursor = msl.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, count(*) AS n FROM mma_area_hits GROUP BY mw_id'
+    query = 'SELECT mw_id, count(*) AS n FROM mma_assoc GROUP BY mw_id'
     cursor.execute(query)
     how_many = {}
     for row in cursor:
@@ -67,7 +67,7 @@ def mma_watchmap_index(request):
         namespace = mw.namespace
         # build data packet
         packet = {'mw_id': mw.mw_id,
-               'otherId': mw.otherId,
+               'event_id': mw.event_id,
                'version': mw.version,
                'mocimage': mw.mocimage,
                'area90': mw.area90,
@@ -84,20 +84,20 @@ def mma_watchmap_index(request):
                     max = c[type]
                     packet['mma_type'] = namespace + ':' + type
 
-            # get the latest version for each otherId
-            if mw.otherId in d:
-                if mw.version > d[mw.otherId]['version']:
-                    d[mw.otherId] = packet
+            # get the latest version for each event_id
+            if mw.event_id in d:
+                if mw.version > d[mw.event_id]['version']:
+                    d[mw.event_id] = packet
             else:
-                d[mw.otherId] = packet
+                d[mw.event_id] = packet
 
         elif namespace == 'ICC':
-            packet['mma_type'] = 'ICC:' + mw.otherId
-            d[mw.otherId] = packet
+            packet['mma_type'] = 'ICC:' + mw.event_id
+            d[mw.event_id] = packet
 
         elif namespace == 'ICGB':
-            packet['mma_type'] = 'ICGB:' + mw.otherId
-            d[mw.otherId] = packet
+            packet['mma_type'] = 'ICGB:' + mw.event_id
+            d[mw.event_id] = packet
         else:
             continue
 
@@ -116,7 +116,7 @@ def chop(x):
 
 
 def yaml2text(mw):
-    file = f'{settings.MMA_DIRECTORY}/{mw.namespace}/{mw.otherId}/{mw.version}/meta.yaml';
+    file = f'{settings.MMA_DIRECTORY}/{mw.namespace}/{mw.event_id}/{mw.version}/meta.yaml';
     yaml_text = open(file).read()
     data = yaml.load(yaml_text, Loader=Loader)
     lines = dict_to_text(data)
@@ -187,9 +187,9 @@ o.lastDiaSourceMjdTai as "last detected",
 o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 o.latest_psfFlux,
 o.ra, o.decl
-FROM mma_area_hits as h, objects AS o, mma_areas AS m
+FROM mma_assoc as h, objects AS o, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
-AND h.probdens3 is NULL
+AND h.z_score_dist is NULL
 ORDER BY h.probdens2 DESC LIMIT {resultCap}
 """
 
@@ -243,33 +243,26 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     query_hit = f"""
 SELECT
 o.diaObjectId, 
-h.probdens3, h.contour, h.distance as dist,
+h.z_score_dist, h.contour, h.distance as dist,
 o.lastDiaSourceMjdTai as "last detected",
 o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
 o.latest_psfFlux, o.absMag,
 o.ra, o.decl 
-FROM mma_area_hits as h, objects AS o, sherlock_classifications AS s, mma_areas AS m
+FROM mma_assoc as h, objects AS o, sherlock_classifications AS s, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
 AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
-AND h.probdens3 is not NULL
-ORDER BY h.probdens3 DESC LIMIT {resultCap}
+AND h.z_score_dist is not NULL
+ORDER BY h.z_score_dist DESC LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
 
-    if len(table3) > 0:
-        maxprobdens3 = table3[0]['probdens3']
-        for i in range(len(table3)):
-            table3[i]['probdens3'] /= maxprobdens3
-            if table3[i]['probdens3'] < 0.005:
-                table3 = table3[:i]
-                break
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
-             'probdens': chop(r3['probdens3']),
+             'z_score_dist': chop(r3['z_score_dist']),
              'contour': r3['contour'],
              'last detected': r3['last detected'],
              't_GW': chop(r3['t_GW']),

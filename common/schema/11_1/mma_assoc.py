@@ -28,9 +28,9 @@ schema = {
       "doc": "2D probability density, RA/Dec skymap"
     },
     {
-      "name": "probdens3",
+      "name": "z_score_dist",
       "type": "float",
-      "doc": "3D probability density, RA/Dec/Distance skymap"
+      "doc": "Number of sigma of the object from the LVK distance estimate"
     }
   ],
   "indexes": [

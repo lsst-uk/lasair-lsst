@@ -21,10 +21,10 @@ class MmaWatchmap(models.Model):
 
     # (eg namespace is LVK, IceCube, Fermi, etc)
     # Each should cite a place to find ut what the params are
-    # The otherId is their identifier, and there is version. 
-    # So our full ident is namespace:otherId:version
+    # The event_id is their identifier, and there is version. 
+    # So our full ident is namespace:event_id:version
     namespace    = models.CharField(max_length=16,  blank=True, null=True)
-    otherId      = models.CharField(max_length=256, blank=True, null=True)
+    event_id      = models.CharField(max_length=256, blank=True, null=True)
     version      = models.CharField(max_length=256, blank=True, null=True)
     more_info    = models.CharField(max_length=1024, blank=True, null=True)
     # their parameters ....
@@ -44,7 +44,7 @@ class MmaWatchmap(models.Model):
         """
 
         managed = True
-        db_table = 'mma_areas'
+        db_table = 'mma_events'
 
     def __str__(self):
-        return self.namespace + ':' + self.otherId +_+ + self.version
+        return self.namespace + ':' + self.event_id +_+ + self.version
