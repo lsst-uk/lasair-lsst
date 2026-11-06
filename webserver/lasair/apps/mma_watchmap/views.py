@@ -189,7 +189,7 @@ o.latest_psfFlux,
 o.ra, o.decl
 FROM mma_assoc as h, objects AS o, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
-AND h.probdens3 is NULL
+AND h.z_score_dist is NULL
 ORDER BY h.probdens2 DESC LIMIT {resultCap}
 """
 
@@ -243,7 +243,7 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     query_hit = f"""
 SELECT
 o.diaObjectId, 
-h.probdens3, h.contour, h.distance as dist,
+h.z_score_dist, h.contour, h.distance as dist,
 o.lastDiaSourceMjdTai as "last detected",
 o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
@@ -252,24 +252,24 @@ o.ra, o.decl
 FROM mma_assoc as h, objects AS o, sherlock_classifications AS s, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
 AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
-AND h.probdens3 is not NULL
-ORDER BY h.probdens3 DESC LIMIT {resultCap}
+AND h.z_score_dist is not NULL
+ORDER BY h.z_score_dist DESC LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
 
     if len(table3) > 0:
-        maxprobdens3 = table3[0]['probdens3']
+        maxz_score_dist = table3[0]['z_score_dist']
         for i in range(len(table3)):
-            table3[i]['probdens3'] /= maxprobdens3
-            if table3[i]['probdens3'] < 0.005:
+            table3[i]['z_score_dist'] /= maxz_score_dist
+            if table3[i]['z_score_dist'] < 0.005:
                 table3 = table3[:i]
                 break
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
-             'probdens': chop(r3['probdens3']),
+             'z_score_dist': chop(r3['z_score_dist']),
              'contour': r3['contour'],
              'last detected': r3['last detected'],
              't_GW': chop(r3['t_GW']),
