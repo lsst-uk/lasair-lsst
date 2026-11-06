@@ -15,7 +15,7 @@
   ansible.builtin.systemd:
     state: started
     enabled: true
-    name: "lasair-{{ item }}"
+    name: "lasair-mma-{{ item }}"
   loop:
     - icc
     - icgb
