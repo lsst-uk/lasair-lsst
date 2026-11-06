@@ -30,7 +30,7 @@ schema = {
     {
       "name": "z_score_dist",
       "type": "float",
-      "doc": "3D distance probability density"
+      "doc": "Number of sigma of the object from the LVK distance estimate"
     }
   ],
   "indexes": [
