@@ -259,13 +259,6 @@ ORDER BY h.z_score_dist DESC LIMIT {resultCap}
     cursor.execute(query_hit)
     table3 = cursor.fetchall()
 
-    if len(table3) > 0:
-        maxz_score_dist = table3[0]['z_score_dist']
-        for i in range(len(table3)):
-            table3[i]['z_score_dist'] /= maxz_score_dist
-            if table3[i]['z_score_dist'] < 0.005:
-                table3 = table3[:i]
-                break
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
