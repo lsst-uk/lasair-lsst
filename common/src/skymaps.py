@@ -76,18 +76,18 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
         # Use the distance of the optical event, if we have it, to get the
         # number of sigma away from the GW mean distance
-        probdens3 = []
+        z_score_dist = []
         distance = []
         for i in range(len(mocobjlist)):
             (gw_distance, gw_diststddev) = gw_disttuples[i]
             if mocdistancelist[i]:
                 ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
                 if math.isinf(ds): ds = 100
-                p3 = math.exp(-0.5*ds*ds) * probdens2[i]
-                probdens3.append(p3)
+                zsd = math.exp(-0.5*ds*ds)
+                z_score_dist.append(zsd)
                 distance.append(mocdistancelist[i])
             else:
-                probdens3.append(None)
+                z_score_dist.append(None)
                 distance.append(None)
 
     elif namespace == 'ICC' or namespace == 'ICGB':
@@ -97,7 +97,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         ipix = hp.ang2pix(hp.get_nside(m), theta, phi)
         probdens2 = m[ipix]
         n = len(probdens2)
-        probdens3 = np.array([None]*n)
+        z_score_dist = np.array([None]*n)
         contour   = np.array([None]*n)
         distance  = np.array([None]*n)
 
@@ -110,7 +110,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         'contour'    : contour, 
         'distance'   : distance, 
         'probdens2'  : probdens2,
-        'probdens3'  : probdens3,
+        'z_score_dist'  : z_score_dist,
     }
     if verbose:
         print('get_skymap_hits: got %d' % len(skymaphits['diaObjectId']))
@@ -145,7 +145,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
 
 def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, namespace, event_tai, area90, otherId, version, params FROM mma_areas '
+    query = 'SELECT mw_id, namespace, event_tai, area90, event_id, version, params FROM mma_events '
     query += 'WHERE event_tai BETWEEN %f AND %f' % (mjdmin, mjdmax)
     result = []
     try:
@@ -164,7 +164,7 @@ def fetch_skymap_by_id(database, mw_id):
     """ Fetches the GW information for a given ID
     """
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT mw_id, event_tai, area90, otherId, version, params FROM mma_areas '
+    query = 'SELECT mw_id, event_tai, area90, event_id, version, params FROM mma_events '
     query += 'WHERE mw_id=%d' % mw_id
     try:
         cursor.execute(query)
@@ -182,7 +182,7 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_area_hits (mw_id, diaObjectId, contour, distance, probdens2, probdens3) VALUES\n"
+    query = "REPLACE into mma_assoc (mw_id, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
     hitlist = []
     mw_id = mma_event['mw_id']
 
@@ -190,18 +190,18 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     sky = skymaphits['contour']
     dist= skymaphits['distance']
     p2 =  skymaphits['probdens2']
-    p3 =  skymaphits['probdens3']
-    for (diaObjectId, contour, distance, probdens2, probdens3) in zip(did, sky, dist, p2, p3):
+    zsd =  skymaphits['z_score_dist']
+    for (diaObjectId, contour, distance, probdens2, z_score_dist) in zip(did, sky, dist, p2, zsd):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
         else:         probdens2 = 'NULL'
-        if probdens3: probdens3 = '%.2f'%probdens3
-        else:         probdens3 = 'NULL'
+        if z_score_dist: z_score_dist = '%.2f'%z_score_dist
+        else:         z_score_dist = 'NULL'
         if distance:  distance  = '%.2f'%distance
         else:         distance  = 'NULL'
         hitlist.append('(%d,%d,%s,%s,%s,%s)' % \
-            (mw_id, diaObjectId, contour, distance, probdens2, probdens3))
+            (mw_id, diaObjectId, contour, distance, probdens2, z_score_dist))
 
     query += ',\n'.join(hitlist)
 
@@ -218,12 +218,12 @@ def delete_skymap_hits(database, mw_id):
     """ Delete all hits from this skymap
     """
     cursor = database.cursor(buffered=True, dictionary=True)
-    query = 'SELECT count(*) as ndeleted FROM mma_area_hits WHERE mw_id=%d' % mw_id
+    query = 'SELECT count(*) as ndeleted FROM mma_assoc WHERE mw_id=%d' % mw_id
     cursor.execute(query)
     for row in cursor:
         ndeleted = row['ndeleted']
 
-    query = 'DELETE FROM mma_area_hits WHERE mw_id=%d' % mw_id
+    query = 'DELETE FROM mma_assoc WHERE mw_id=%d' % mw_id
     cursor.execute(query)
     return ndeleted
 
@@ -235,11 +235,11 @@ def mjdnow():
 def mocfilename(namespace, mma_event):
     """ Where to find the 90% MOC for a given skymap and version
     """
-    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['otherId']}/{mma_event['version']}/90.moc'
+    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['event_id']}/{mma_event['version']}/90.moc'
     return filename
 
 def mapfilename(namespace, mma_event):
     """ Where to find the skymap file for a given skymap and version
     """
-    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['otherId']}/{mma_event['version']}/map.fits'
+    filename = f'{settings.MMA_DIRECTORY}/{namespace}/{mma_event['event_id']}/{mma_event['version']}/map.fits'
     return filename

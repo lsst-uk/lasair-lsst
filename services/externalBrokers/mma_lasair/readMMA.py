@@ -33,11 +33,11 @@ sys.path.append('../../../common')
 import settings
 from src import db_connect, skymaps
 
-def insert_mma_alert(database, namespace, dir, otherId, version):
+def insert_mma_alert(database, namespace, dir, event_id, version):
     """ Deals with a given skymap
     """
     # open the meta.yaml file
-    datadir = '%s/%s/%s' % (dir, otherId, version)
+    datadir = '%s/%s/%s' % (dir, event_id, version)
     f = open(datadir + '/meta.yaml')
     data = yaml.load(f, Loader=Loader)
     f.close()
@@ -66,9 +66,9 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
 
     # Insert into database
     query = """
-    INSERT INTO mma_areas (
+    INSERT INTO mma_events (
         event_tai, event_date, mocimage, 
-        namespace, otherId, version, more_info,
+        namespace, event_id, version, more_info,
         area10, area50, area90, params
     ) VALUES (
         %f, "%s", "%s",
@@ -78,7 +78,7 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
 
     query = query % ( \
         result['event_tai'], event_date, bytes2string(mocimage),  \
-        namespace, otherId, version, result['more_info'], \
+        namespace, event_id, version, result['more_info'], \
         area10, area50, area90, json.dumps(result['params']) \
     )
 
@@ -88,7 +88,7 @@ def insert_mma_alert(database, namespace, dir, otherId, version):
     cursor.close()
     database.commit()
 
-    event = {'otherId': otherId,
+    event = {'event_id': event_id,
           'version': version,
           'mw_id'  : last_mw_id,
         }
@@ -110,27 +110,27 @@ def get_ra_dec(skymap_filename):
     ra, dec = ah.healpix_to_lonlat(ipix, nside, order='nested')
     return (ra.deg, dec.deg)
 
-def handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose=False):
+def handle_event(database, namespace, dir, event_id, minmjd, maxmjd, verbose=False):
     nhits = 0
     ningested = 0
-    for version in os.listdir(dir+'/'+otherId):
+    for version in os.listdir(dir+'/'+event_id):
         # Only look at alerts whe havent seen before
-        if not getDone(dir, otherId, version):
+        if not getDone(dir, event_id, version):
             # Set done flag so we dont come back
-            setDone(dir, otherId, version)
+            setDone(dir, event_id, version)
             message = ''
 #            try:
             if 1:
-                message = insert_mma_alert(database, namespace, dir, otherId, version)
+                message = insert_mma_alert(database, namespace, dir, event_id, version)
 #            except Exception as e:
 #                print('Error inserting mma alert in database' + str(e))
 
             # message says why it was rejected
             if len(message) == 0:
                 ningested += 1
-                print(otherId, version, 'ingested')
+                print(event_id, version, 'ingested')
             else:
-                print(otherId, version, 'not ingested:', message)
+                print(event_id, version, 'not ingested:', message)
 
     return ningested
 
@@ -184,17 +184,17 @@ def make_image(moc10, moc50, moc90):
     outbuf.close()
     return bytes
 
-def getDone(dir, otherId, version):
-    """ Return True if an empty file 'done' is found in otherId/version directory
+def getDone(dir, event_id, version):
+    """ Return True if an empty file 'done' is found in event_id/version directory
     """
-    flag = '%s/%s/%s/done' % (dir, otherId, version)
+    flag = '%s/%s/%s/done' % (dir, event_id, version)
     return os.path.isfile(flag)
 
-def setDone(dir, otherId, version):
-    """ Create an empty file 'done' is found in otherId/version directory
+def setDone(dir, event_id, version):
+    """ Create an empty file 'done' is found in event_id/version directory
     """
-    flag = '%s/%s/%s/done' % (dir, otherId, version)
-    datadir = '%s/%s/%s' % (dir, otherId, version)
+    flag = '%s/%s/%s/done' % (dir, event_id, version)
+    datadir = '%s/%s/%s' % (dir, event_id, version)
     os.system('touch ' + flag) 
 
 if __name__ == "__main__":
@@ -233,6 +233,6 @@ if __name__ == "__main__":
     verbose = True
     ningested = 0
     for file in sorted(os.listdir(dir)):
-        otherId = file
-        ningested += handle_event(database, namespace, dir, otherId, minmjd, maxmjd, verbose)
+        event_id = file
+        ningested += handle_event(database, namespace, dir, event_id, minmjd, maxmjd, verbose)
     print(ningested, 'event versions ingested')
