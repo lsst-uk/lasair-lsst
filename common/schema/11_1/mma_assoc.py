@@ -13,6 +13,16 @@ schema = {
       "doc": "MMA area identifier"
     },
     {
+      "name": "event_id",
+      "type": "bigstring",
+      "doc": "MMA event name"
+    },
+    {
+      "name": "delta_t",
+      "type": "float",
+      "doc": "First diaSource time - event time (days)"
+    },
+    {
       "name": "contour",
       "type": "float",
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"

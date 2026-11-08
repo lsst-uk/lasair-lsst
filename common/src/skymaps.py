@@ -34,6 +34,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
     alertobjlist      = alertlist['obj']
     alertralist       = alertlist['ra']
     alertdelist       = alertlist['de']
+    alertdtlist       = alertlist['first_mjd'] - mma_event['event_tai']
     alertdistancelist = alertlist['distance']
 
     if verbose:
@@ -44,6 +45,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
     mocralist = []
     mocdelist = []
+    mocdtlist = []
     mocobjlist   = []
     mocdistancelist   = []
     # go through the boolean vector, looking for hits
@@ -52,10 +54,11 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
             mocobjlist     .append(alertobjlist[ialert])
             mocralist      .append(alertralist[ialert])
             mocdelist      .append(alertdelist[ialert])
+            mocdtlist      .append(alertdtlist[ialert])
             mocdistancelist.append(alertdistancelist[ialert])
 
 #    if verbose:
-#        print(mocralist, mocdelist, mocdistancelist)
+#        print(mocralist, mocdelist, mocdtlist, mocdistancelist)
 
     if namespace == 'LVK':
         # contour is the contour of the skymap on which the given point lies
@@ -106,6 +109,8 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
     skymaphits = {
         'diaObjectId': mocobjlist, 
+        'event_id'   : event_id,
+        'delta_t'    : mocdtlist,
         'contour'    : contour, 
         'distance'   : distance, 
         'probdens2'  : probdens2,
@@ -121,7 +126,7 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = 'SELECT objects.diaObjectId, ra, decl, best_distance '
+    query = 'SELECT objects.diaObjectId, firstDiaSourceMjdTai, ra, decl, best_distance '
     query += ' FROM objects,sherlock_classifications '
     query += ' WHERE objects.diaObjectId=sherlock_classifications.diaObjectId '
     if mjdmin and mjdmax:
@@ -131,16 +136,18 @@ def fetch_alerts(database, gw, mjdmin=None, mjdmax=None, verbose=False):
     objlist = []
     ralist = []
     delist = []
+    first_mjd = []
     distancelist = []
     for row in cursor:
         objlist.append(row['diaObjectId'])
         ralist.append(row['ra'])
         delist.append(row['decl'])
+        first_mjd.append(row['firstDiaSourceMjdTai'])
         distancelist.append(row['best_distance'])
     if verbose:
         print('fetch_alerts: mjd %s to %s, found %d' % (str(mjdmin), str(mjdmax), len(objlist)))
 
-    return {"obj": objlist, "ra":ralist, "de":delist, "distance":distancelist}
+    return {"obj": objlist, "ra":ralist, "de":delist, "first_mjd":first_mjd, "distance":distancelist}
 
 def fetch_skymaps_by_mjd(database, mjdmin, mjdmax, verbose=False):
     cursor = database.cursor(buffered=True, dictionary=True)
@@ -181,16 +188,17 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     """
     cursor = database.cursor(buffered=True, dictionary=True)
 
-    query = "REPLACE into mma_assoc (mw_id, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
+    query = "REPLACE into mma_assoc (mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
     hitlist = []
     mw_id = mma_event['mw_id']
-
     did = skymaphits['diaObjectId']
+    eid = skymaphits['event_id']
+    dt  = skymaphits['delta_t']
     sky = skymaphits['contour']
     dist= skymaphits['distance']
     p2 =  skymaphits['probdens2']
     zsd =  skymaphits['z_score_dist']
-    for (diaObjectId, contour, distance, probdens2, z_score_dist) in zip(did, sky, dist, p2, zsd):
+    for (diaObjectId, eid, dt, contour, distance, probdens2, z_score_dist) in zip(did, eid, dt, sky, dist, p2, zsd):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
