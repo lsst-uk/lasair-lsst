@@ -22,6 +22,8 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
     """ Get all the alerts that match a given skymap, 
         then run against the watchmaplist, return the hits
     """
+    event_id  = mma_event['event_id']
+    event_tai = mma_event['event_tai']
     if 'mocfilename' in mma_event:
         moc = MOC.from_fits(mma_event['mocfilename'])
     else:
@@ -34,7 +36,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
     alertobjlist      = alertlist['obj']
     alertralist       = alertlist['ra']
     alertdelist       = alertlist['de']
-    alertdtlist       = alertlist['first_mjd'] - mma_event['event_tai']
+    alertdtlist       = [f - event_tai for f in alertlist['first_mjd']]
     alertdistancelist = alertlist['distance']
 
     if verbose:
@@ -187,28 +189,30 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     Build and execute the insertion query to get the hits into the database
     """
     cursor = database.cursor(buffered=True, dictionary=True)
+    event_id = mma_event['event_id']
 
-    query = "REPLACE into mma_assoc (mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
-    hitlist = []
-    mw_id = mma_event['mw_id']
-    did = skymaphits['diaObjectId']
-    eid = skymaphits['event_id']
-    dt  = skymaphits['delta_t']
-    sky = skymaphits['contour']
-    dist= skymaphits['distance']
-    p2 =  skymaphits['probdens2']
-    zsd =  skymaphits['z_score_dist']
-    for (diaObjectId, eid, dt, contour, distance, probdens2, z_score_dist) in zip(did, eid, dt, sky, dist, p2, zsd):
+    query = "REPLACE into mma_assoc "
+    query += "(mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
+    hitlist  = []
+    mw_id    = mma_event['mw_id']
+    dt       = skymaphits['delta_t']
+    did      = skymaphits['diaObjectId']
+    contours = skymaphits['contour']
+    dist     = skymaphits['distance']
+    p2       = skymaphits['probdens2']
+    zsd      = skymaphits['z_score_dist']
+    for (delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) \
+            in zip(dt, did, contours, dist, p2, zsd):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
+        if distance:  distance  = '%.2f'%distance
+        else:         distance  = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
         else:         probdens2 = 'NULL'
         if z_score_dist: z_score_dist = '%.2f'%z_score_dist
         else:         z_score_dist = 'NULL'
-        if distance:  distance  = '%.2f'%distance
-        else:         distance  = 'NULL'
-        hitlist.append('(%d,%d,%s,%s,%s,%s)' % \
-            (mw_id, diaObjectId, contour, distance, probdens2, z_score_dist))
+        hitlist.append('(%d,"%s",%.2f,%d,%s,%s,%s,%s)' % \
+            (mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist))
 
     query += ',\n'.join(hitlist)
 

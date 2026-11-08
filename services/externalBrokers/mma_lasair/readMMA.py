@@ -45,7 +45,8 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     # the handle function is different depending on which type of event
     result = handle_yaml.handle(data)
 
-    event_date = mjd2date(result['event_tai'])
+    event_tai = result['event_tai']
+    event_date = mjd2date(event_tai)
 
     # Areas of the 10%, 50%, and 90% contours in sq degrees
     area10 = data['EXTRA']['area10']
@@ -77,7 +78,7 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     ) """
 
     query = query % ( \
-        result['event_tai'], event_date, bytes2string(mocimage),  \
+        event_tai, event_date, bytes2string(mocimage),  \
         namespace, event_id, version, result['more_info'], \
         area10, area50, area90, json.dumps(result['params']) \
     )
@@ -89,8 +90,9 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     database.commit()
 
     event = {'event_id': event_id,
-          'version': version,
-          'mw_id'  : last_mw_id,
+            'event_tai': event_tai,
+            'version'  : version,
+            'mw_id'    : last_mw_id,
         }
     skymaphits = skymaps.get_skymap_hits(database, namespace, event, minmjd, maxmjd, verbose)
     nhits = len(skymaphits['diaObjectId'])
