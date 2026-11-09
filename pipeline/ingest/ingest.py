@@ -696,7 +696,7 @@ def run_ingest(args, log=None):
     group_id = args.get('--group_id') or settings.KAFKA_GROUPID
     maxalert = int(args.get('--maxalert') or sys.maxsize)  # largest possible integer
     nocutouts = args.get('--nocutouts', False)
-    stats = args.get('--stats') or True
+    stats = args.get('--stats') in ['True', 'true', 'Yes', 'yes']
 
     ingester = Ingester(topic_in, topic_out, group_id, maxalert, nocutouts, stats, log=log)
 
