@@ -28,7 +28,7 @@ schema = {
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"
     },
     {
-      "name": "host_dist",
+      "name": "dist_host",
       "type": "float",
       "doc": "Distance (Mpc) to host galaxy"
     },

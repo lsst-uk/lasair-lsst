@@ -193,7 +193,7 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     event_id = mma_event['event_id']
 
     query = "REPLACE into mma_assoc "
-    query += "(mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, params) VALUES\n"
+    query += "(mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, params) VALUES\n"
     fmt = "(%d,'%s',%.2f,%d,%s,%s,%s,'%s')"
 
     hitlist  = []
@@ -208,11 +208,11 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
             in zip(dt, did, contours, dist, p2, paramslist):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
-        if distance:  host_dist  = '%.2f'%distance
-        else:         host_dist  = 'NULL'
+        if distance:  dist_host  = '%.2f'%distance
+        else:         dist_host  = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
         else:         probdens2 = 'NULL'
-        p = (mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, json.dumps(params))
+        p = (mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, json.dumps(params))
         hitlist.append(fmt % p)
 
     query += ',\n'.join(hitlist)
