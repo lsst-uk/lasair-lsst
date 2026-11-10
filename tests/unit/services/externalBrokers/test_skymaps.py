@@ -23,6 +23,7 @@ class SkymapTest(unittest.TestCase):
                 "obj"      :['a12', 'a13', 'a14', 'a15', 'a16'],
                 "ra"       :[8.0,   0.0, 0.0, 0.0, 0.9],
                 "de"       :[20,    22, 24, 26, 28],
+                "first_mjd":[60100, 60200, 60300, 60400, 60500],
                 "distance" :[23.510,20.350,27.440,34.780, 30.0]
                 }
 
@@ -34,6 +35,7 @@ class SkymapTest(unittest.TestCase):
             'mocfilename': dir + '/90.moc',
             'mapfilename': dir + '/map.fits',
             'mw_id': 1, 
+            'event_id': 'GW150914',
             'event_tai':60000, 
             'area90':500, 
             'params':None,
@@ -47,7 +49,7 @@ class SkymapTest(unittest.TestCase):
         contour   = skymaphits['contour'][0]
         distance  = skymaphits['distance'][0]
         probdens2  = skymaphits['probdens2'][0]
-        probdens3  = skymaphits['probdens3'][0]
+        z_score_dist  = skymaphits['z_score_dist'][0]
 
         self.assertTrue(abs(contour-87.5) < 1)
         self.assertTrue(abs(distance-20) < 1)
