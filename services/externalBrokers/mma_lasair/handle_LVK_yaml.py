@@ -18,10 +18,7 @@ def handle(data):
     }
     # Should be a sky point near the most likely part of the skymap
     #radec = data['EXTRA']['central coordinate']['equatorial'].split()
-    radec = '0.0 0.0'.split()
     loc = {
-        'RA'      :float(radec[0].strip()), 
-        'Dec'     :float(radec[1].strip()), 
         'distmean':data['HEADER']['DISTMEAN'], 
         'diststd' :data['HEADER']['DISTSTD'],
         }

@@ -70,11 +70,11 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     INSERT INTO mma_events (
         event_tai, event_date, mocimage, 
         namespace, event_id, version, more_info,
-        area10, area50, area90, params
+        area10, area50, area90, active, params
     ) VALUES (
         %f, "%s", "%s",
         "%s", "%s", "%s","%s",
-        %f, %f, %f, '%s'
+        %f, %f, %f, TRUE, '%s'
     ) """
 
     query = query % ( \
