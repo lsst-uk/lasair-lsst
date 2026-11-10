@@ -24,8 +24,9 @@ class MmaWatchmap(models.Model):
     # The event_id is their identifier, and there is version. 
     # So our full ident is namespace:event_id:version
     namespace    = models.CharField(max_length=16,  blank=True, null=True)
-    event_id      = models.CharField(max_length=256, blank=True, null=True)
+    event_id     = models.CharField(max_length=256, blank=True, null=True)
     version      = models.CharField(max_length=256, blank=True, null=True)
+    active       = models.BooleanField(blank=True, null=True)
     more_info    = models.CharField(max_length=1024, blank=True, null=True)
     # their parameters ....
     params       = models.JSONField()
