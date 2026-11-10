@@ -28,7 +28,7 @@ schema = {
       "doc": "2D skymap prob contour (0 to 1, smallest is best)"
     },
     {
-      "name": "distance",
+      "name": "host_dist",
       "type": "float",
       "doc": "Distance (Mpc) to host galaxy"
     },
@@ -38,10 +38,10 @@ schema = {
       "doc": "2D probability density, RA/Dec skymap"
     },
     {
-      "name": "z_score_dist",
-      "type": "float",
-      "doc": "Number of sigma of the object from the LVK distance estimate"
-    }
+      "name": "params",
+      "type": "JSON",
+      "doc": "Parameters of the association"
+    },
   ],
   "indexes": [
     "PRIMARY KEY (`diaObjectId`)",

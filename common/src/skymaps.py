@@ -81,17 +81,17 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
         # Use the distance of the optical event, if we have it, to get the
         # number of sigma away from the GW mean distance
-        z_score_dist = []
+        paramslist = []
         distance = []
         for i in range(len(mocobjlist)):
             (gw_distance, gw_diststddev) = gw_disttuples[i]
             if mocdistancelist[i]:
                 ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
                 if math.isinf(ds) or ds > 100: ds = 100
-                z_score_dist.append(ds)
+                paramslist.append({'dist_mean': gw_distance, 'dist_stddev':gw_diststddev)
                 distance.append(mocdistancelist[i])
             else:
-                z_score_dist.append(None)
+                paramslist.append({})
                 distance.append(None)
 
     elif namespace == 'ICC' or namespace == 'ICGB':
@@ -101,7 +101,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         ipix = hp.ang2pix(hp.get_nside(m), theta, phi)
         probdens2 = m[ipix]
         n = len(probdens2)
-        z_score_dist = np.array([None]*n)
+        paramslist = [{}]*n
         contour   = np.array([None]*n)
         distance  = np.array([None]*n)
 
@@ -116,7 +116,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         'contour'    : contour, 
         'distance'   : distance, 
         'probdens2'  : probdens2,
-        'z_score_dist'  : z_score_dist,
+        'paramslist'  : paramslist,
     }
     if verbose:
         print('get_skymap_hits: got %d' % len(skymaphits['diaObjectId']))
@@ -192,7 +192,9 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     event_id = mma_event['event_id']
 
     query = "REPLACE into mma_assoc "
-    query += "(mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) VALUES\n"
+    query += "(mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, params) VALUES\n"
+    fmt = '(%d,"%s",%.2f,%d,%s,%s,%s,%s)'
+
     hitlist  = []
     mw_id    = mma_event['mw_id']
     dt       = skymaphits['delta_t']
@@ -200,19 +202,19 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     contours = skymaphits['contour']
     dist     = skymaphits['distance']
     p2       = skymaphits['probdens2']
-    zsd      = skymaphits['z_score_dist']
-    for (delta_t, diaObjectId, contour, distance, probdens2, z_score_dist) \
-            in zip(dt, did, contours, dist, p2, zsd):
+    paramslist      = skymaphits['params']
+    for (delta_t, diaObjectId, contour, distance, probdens2, params) \
+            in zip(dt, did, contours, dist, p2, paramslist):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
-        if distance:  distance  = '%.2f'%distance
-        else:         distance  = 'NULL'
+        if distance:  host_dist  = '%.2f'%distance
+        else:         host_dist  = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
         else:         probdens2 = 'NULL'
         if z_score_dist: z_score_dist = '%.2f'%z_score_dist
         else:         z_score_dist = 'NULL'
-        hitlist.append('(%d,"%s",%.2f,%d,%s,%s,%s,%s)' % \
-            (mw_id, event_id, delta_t, diaObjectId, contour, distance, probdens2, z_score_dist))
+        p = (mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, params))
+        hitlist.append(fmt % p)
 
     query += ',\n'.join(hitlist)
 
