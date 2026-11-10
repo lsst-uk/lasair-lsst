@@ -124,7 +124,6 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         'delta_t'    : mocdtlist,
         'contour'    : contour, 
         'distance'   : distance, 
-        'probdens2'  : probdens2,
         'paramslist'  : paramslist,
     }
     if verbose:
@@ -201,8 +200,8 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     event_id = mma_event['event_id']
 
     query = "REPLACE into mma_assoc "
-    query += "(mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, params) VALUES\n"
-    fmt = "(%d,'%s',%.2f,%d,%s,%s,%s,'%s')"
+    query += "(mw_id, event_id, delta_t, diaObjectId, contour, dist_host, params) VALUES\n"
+    fmt = "(%d,'%s',%.2f,%d,%s,%s,'%s')"
 
     hitlist  = []
     mw_id    = mma_event['mw_id']
@@ -210,17 +209,14 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     did      = skymaphits['diaObjectId']
     contours = skymaphits['contour']
     dist     = skymaphits['distance']
-    p2       = skymaphits['probdens2']
     paramslist      = skymaphits['paramslist']
-    for (delta_t, diaObjectId, contour, distance, probdens2, params) \
-            in zip(dt, did, contours, dist, p2, paramslist):
+    for (delta_t, diaObjectId, contour, distance, params) \
+            in zip(dt, did, contours, dist, paramslist):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
         if distance:  dist_host  = '%.2f'%distance
         else:         dist_host  = 'NULL'
-        if probdens2: probdens2 = '%.2f'%probdens2
-        else:         probdens2 = 'NULL'
-        p = (mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, json.dumps(params))
+        p = (mw_id, event_id, delta_t, diaObjectId, contour, dist_host, json.dumps(params))
         hitlist.append(fmt % p)
 
     query += ',\n'.join(hitlist)

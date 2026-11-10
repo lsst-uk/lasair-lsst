@@ -33,11 +33,6 @@ schema = {
       "doc": "Distance (Mpc) to host galaxy"
     },
     {
-      "name": "probdens2",
-      "type": "float",
-      "doc": "2D probability density, RA/Dec skymap"
-    },
-    {
       "name": "params",
       "type": "JSON",
       "doc": "Parameters of the association"

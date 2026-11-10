@@ -182,34 +182,25 @@ def mma_watchmap_detail(request, mw_id):
     query_hit = f"""
 SELECT
 o.diaObjectId, 
-h.probdens2, h.contour, 
+h.contour, 
 o.lastDiaSourceMjdTai as "last detected",
-o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
-o.latest_psfFlux,
-o.ra, o.decl
+h.delta_t as "delta_t",
+o.latest_psfFlux, o.ra, o.decl
 FROM mma_assoc as h, objects AS o, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
-AND h.z_score_dist is NULL
-ORDER BY h.probdens2 DESC LIMIT {resultCap}
+AND h.dist_host is NULL
+ORDER BY h.contour LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
     table2 = cursor.fetchall()
 
-    if len(table2) > 0:
-        maxprobdens2 = table2[0]['probdens2']
-        for i in range(len(table2)):
-            table2[i]['probdens2'] /= maxprobdens2
-            if table2[i]['probdens2'] < 0.005:
-                table2 = table2[:i]
-                break
     newtable2 = []
     for r2 in table2:
         r = {'diaObjectId': r2['diaObjectId'],
-             'probdens': chop(r2['probdens2']),
              'contour': r2['contour'],
              'last detected': r2['last detected'],
-             't_GW': chop(r2['t_GW']),
+             'delta_t': chop(r2['delta_t']),
              'latest flux': r2['latest_psfFlux'],
              }
 
@@ -218,7 +209,7 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
         newtable2.append(r)
 
     count = len(table2)
-    schema2 = ['probdens', 'contour', 'last detected', 't_GW', 'latest flux', 'ra', 'decl']
+    schema2 = ['contour', 'last detected', 't_GW', 'latest flux', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
@@ -243,17 +234,16 @@ ORDER BY h.probdens2 DESC LIMIT {resultCap}
     query_hit = f"""
 SELECT
 o.diaObjectId, 
-h.z_score_dist, h.contour, h.distance as dist,
+h.contour, h.dist_host,
 o.lastDiaSourceMjdTai as "last detected",
-o.firstDiaSourceMjdTai - m.event_tai as "t_GW",
+h.delta_t as "delta_t",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.latest_psfFlux, o.absMag,
-o.ra, o.decl 
+o.latest_psfFlux, o.absMag, o.ra, o.decl 
 FROM mma_assoc as h, objects AS o, sherlock_classifications AS s, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
 AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
-AND h.z_score_dist is not NULL
-ORDER BY h.z_score_dist DESC LIMIT {resultCap}
+AND h.dist_host is not NULL
+ORDER BY h.dist_host DESC LIMIT {resultCap}
 """
 
     cursor.execute(query_hit)
@@ -262,10 +252,10 @@ ORDER BY h.z_score_dist DESC LIMIT {resultCap}
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
-             'z_score_dist': chop(r3['z_score_dist']),
+             'dist_host': chop(r3['dist_host']),
              'contour': r3['contour'],
              'last detected': r3['last detected'],
-             't_GW': chop(r3['t_GW']),
+             'delta_t': chop(r3['delta_t']),
              'Sherlock': r3['classification'],
              'latest flux': r3['latest_psfFlux'],
              }
@@ -287,7 +277,7 @@ ORDER BY h.z_score_dist DESC LIMIT {resultCap}
         r['decl'] = chop(r3['decl'])
         newtable3.append(r)
 
-    schema3 = ['probdens', 'contour', 'last detected', 't_GW', 'Sherlock', 'latest flux', 'absMag', 'z', 'zflag', 'ra', 'decl']
+    schema3 = ['contour', 'last detected', 't_GW', 'Sherlock', 'latest flux', 'absMag', 'z', 'zflag', 'ra', 'decl']
 
     if count == resultCap:
         limit = resultCap
