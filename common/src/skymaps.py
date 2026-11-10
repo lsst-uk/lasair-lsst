@@ -7,6 +7,7 @@ import os
 import sys 
 import time
 import math
+import json
 from mocpy import MOC
 import astropy.units as u
 from skytag.commonutils import prob_at_location
@@ -88,7 +89,7 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
             if mocdistancelist[i]:
                 ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
                 if math.isinf(ds) or ds > 100: ds = 100
-                paramslist.append({'dist_mean': gw_distance, 'dist_stddev':gw_diststddev)
+                paramslist.append({'dist_mean': gw_distance, 'dist_stddev':gw_diststddev})
                 distance.append(mocdistancelist[i])
             else:
                 paramslist.append({})
@@ -192,8 +193,8 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     event_id = mma_event['event_id']
 
     query = "REPLACE into mma_assoc "
-    query += "(mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, params) VALUES\n"
-    fmt = '(%d,"%s",%.2f,%d,%s,%s,%s,%s)'
+    query += "(mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, params) VALUES\n"
+    fmt = "(%d,'%s',%.2f,%d,%s,%s,%s,'%s')"
 
     hitlist  = []
     mw_id    = mma_event['mw_id']
@@ -202,18 +203,16 @@ def insert_skymap_hits(database, mma_event, skymaphits, verbose=False):
     contours = skymaphits['contour']
     dist     = skymaphits['distance']
     p2       = skymaphits['probdens2']
-    paramslist      = skymaphits['params']
+    paramslist      = skymaphits['paramslist']
     for (delta_t, diaObjectId, contour, distance, probdens2, params) \
             in zip(dt, did, contours, dist, p2, paramslist):
         if contour:   contour   = '%.2f'%contour
         else:         contour   = 'NULL'
-        if distance:  host_dist  = '%.2f'%distance
-        else:         host_dist  = 'NULL'
+        if distance:  dist_host  = '%.2f'%distance
+        else:         dist_host  = 'NULL'
         if probdens2: probdens2 = '%.2f'%probdens2
         else:         probdens2 = 'NULL'
-        if z_score_dist: z_score_dist = '%.2f'%z_score_dist
-        else:         z_score_dist = 'NULL'
-        p = (mw_id, event_id, delta_t, diaObjectId, contour, host_dist, probdens2, params))
+        p = (mw_id, event_id, delta_t, diaObjectId, contour, dist_host, probdens2, json.dumps(params))
         hitlist.append(fmt % p)
 
     query += ',\n'.join(hitlist)
