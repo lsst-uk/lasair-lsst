@@ -58,6 +58,22 @@
     - lasair_instance
   tags: lasair_instance
 
+- hosts: localhost:svc:ingest:sherlock:filter:web:api
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  tasks:
+    - name: Ensure the repo is up to date
+      git:
+        repo: "{{ git_url }}"
+        dest: "{{ ansible_env.HOME }}/{{ git_name }}"
+        version: "{{ lasair_version }}"
+    - name: Create settings file
+      template:
+        src: common/settings.py.j2
+        dest: "{{ ansible_env.HOME }}/{{ git_name }}/common/settings.py"
+  tags: settings
+
 - hosts: web
   gather_facts: false
   vars_files:
