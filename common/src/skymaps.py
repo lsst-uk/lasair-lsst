@@ -97,13 +97,21 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
 
     elif namespace == 'ICC' or namespace == 'ICGB':
         m = hp.read_map(mapfilename(namespace, mma_event))
+        total = m.sum()
+        m /= total
         theta = np.radians(90.0 - np.array(mocdelist))
         phi = np.radians(np.array(mocralist))
         ipix = hp.ang2pix(hp.get_nside(m), theta, phi)
         probdens2 = m[ipix]
         n = len(probdens2)
+
+        contour = []
+        for i in range(n):
+            c = np.sum(m[m > probdens2[i]])
+            contour.append(c)
+            
         paramslist = [{}]*n
-        contour   = np.array([None]*n)
+        contour = np.array(contour)
         distance  = np.array([None]*n)
 
     else:
