@@ -49,7 +49,7 @@ class SkymapTest(unittest.TestCase):
         contour   = skymaphits['contour'][0]
         distance  = skymaphits['distance'][0]
         probdens2  = skymaphits['probdens2'][0]
-        z_score_dist  = skymaphits['z_score_dist'][0]
+        z_score_dist  = skymaphits['paramslist'][0]
 
         self.assertTrue(abs(contour-87.5) < 1)
         self.assertTrue(abs(distance-20) < 1)
