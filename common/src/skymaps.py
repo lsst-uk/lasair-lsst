@@ -87,8 +87,6 @@ def get_skymap_hits(database, namespace, mma_event, mjdmin=None, mjdmax=None, ve
         for i in range(len(mocobjlist)):
             (gw_distance, gw_diststddev) = gw_disttuples[i]
             if mocdistancelist[i]:
-                ds = abs(gw_distance - mocdistancelist[i])/gw_diststddev
-                if math.isinf(ds) or ds > 100: ds = 100
                 paramslist.append({'dist_mean': gw_distance, 'dist_stddev':gw_diststddev})
                 distance.append(mocdistancelist[i])
             else:
