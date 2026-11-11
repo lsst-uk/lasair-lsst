@@ -15,7 +15,7 @@
 
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
 
-**ENHANCEMENT**: the website sidebar, the mobile navbar and the docs sidebar now show the Rubin Observatory logo beside or below the Lasair logo, so you can tell Lasair LSST from Lasair ZTF (DY-209).
+**ENHANCEMENT**: the website sidebar, the mobile navbar and the docs sidebar now show the Rubin Observatory logo beside or below the Lasair logo, so you can tell Lasair LSST from Lasair ZTF; the sidebar background is back to its original `bg-gray-800` dark grey (DY-209).
 
 **ENHANCEMENT**: the New and Edit Filter forms no longer offer the per-user `tags_<username>` annotators in the Object Annotators list; a filter that already uses one keeps it.
 
