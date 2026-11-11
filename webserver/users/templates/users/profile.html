@@ -26,7 +26,18 @@
                             {{ request.user.email }}
                         </p>
                         <p class="fw-bold text-gray  mb-0">API Token</p>
-                        <code class="mt-0">{{ token }}</code>
+                        <div class="d-flex justify-content-center align-items-center mt-0">
+                            <code id="api-token-display" class="mt-0">••••••••••••••••••••••••••••••••••••••••</code>
+                            <button type="button" id="api-token-toggle" class="btn btn-link btn-sm text-gray p-1 ms-2 d-none" aria-label="Show API token" aria-pressed="false" aria-controls="api-token-display">
+                                <span id="api-token-icon-show">{% include "includes/icons/icon_eye.html" %}</span>
+                                <span id="api-token-icon-hide" class="d-none">{% include "includes/icons/icon_eye_slash.html" %}</span>
+                            </button>
+                            <button type="button" id="api-token-copy" class="btn btn-link btn-sm text-gray p-1 d-none" aria-label="Copy API token to clipboard">
+                                {% include "includes/icons/icon_copy.html" %}
+                            </button>
+                        </div>
+                        <span id="api-token-copy-status" class="d-block small text-gray" role="status" aria-live="polite" data-copied-text="Copied" data-failed-text="Copy failed. Reveal the token and copy it by hand."></span>
+                        {{ token|json_script:"api-token" }}
 
                         <p class="mt-4 mb-0">
                             <a href="{% url 'hidden_objects' %}">
@@ -111,4 +122,65 @@
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    <script>
+        (function () {
+            var COPIED_RESET_MS = 2000;
+            var display = document.getElementById("api-token-display");
+            var toggle = document.getElementById("api-token-toggle");
+            var copyButton = document.getElementById("api-token-copy");
+            var status = document.getElementById("api-token-copy-status");
+            var iconShow = document.getElementById("api-token-icon-show");
+            var iconHide = document.getElementById("api-token-icon-hide");
+            var tokenElement = document.getElementById("api-token");
+            if (!display || !toggle || !copyButton || !status || !iconShow || !iconHide || !tokenElement) {
+                return;
+            }
+            // THE TOKEN LIVES ONLY IN THE JSON ELEMENT; THE DISPLAY HOLDS THE MASK UNTIL REVEALED
+            var token = JSON.parse(tokenElement.textContent);
+            if (!token || typeof token !== "string") {
+                return;
+            }
+            var maskedText = display.textContent;
+            var resetTimer = null;
+
+            function setRevealed(isRevealed) {
+                display.textContent = isRevealed ? token : maskedText;
+                toggle.setAttribute("aria-pressed", isRevealed ? "true" : "false");
+                iconShow.classList.toggle("d-none", isRevealed);
+                iconHide.classList.toggle("d-none", !isRevealed);
+            }
+
+            function clearStatus() {
+                window.clearTimeout(resetTimer);
+                status.textContent = "";
+            }
+
+            function showCopied() {
+                status.textContent = status.getAttribute("data-copied-text");
+                resetTimer = window.setTimeout(clearStatus, COPIED_RESET_MS);
+            }
+
+            function showCopyFailed() {
+                // A FAILURE STAYS UNTIL THE NEXT CLICK SO IT CANNOT BE MISSED
+                status.textContent = status.getAttribute("data-failed-text");
+            }
+
+            toggle.addEventListener("click", function () {
+                setRevealed(toggle.getAttribute("aria-pressed") !== "true");
+            });
+
+            copyButton.addEventListener("click", function () {
+                clearStatus();
+                if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                    showCopyFailed();
+                    return;
+                }
+                navigator.clipboard.writeText(token).then(showCopied, showCopyFailed);
+            });
+
+            toggle.classList.remove("d-none");
+            copyButton.classList.remove("d-none");
+        })();
+    </script>
+{% endblock javascripts %}
