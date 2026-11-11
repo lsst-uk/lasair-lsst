@@ -150,6 +150,10 @@
             <a href="{{ pathto(master_doc) }}" class="icon icon-home"> {{ project }} </a> {{strap_line}}
           {% endif %}
 
+          {% if theme_secondary_logo %}
+            <a href="{{ pathto(master_doc) }}"><img src="{{ pathto('_static/' + theme_secondary_logo, 1) }}" class="logo secondary-logo" alt="{{ theme_secondary_logo_alt }}" style="width: 50%;"/></a>
+          {% endif %}
+
 
           
           {% if theme_display_version %}
