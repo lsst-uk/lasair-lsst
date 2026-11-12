@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-**FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, colored by band.
+**FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
 
 **ENHANCEMENT**: the object page's top card is renamed Object Info, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
 

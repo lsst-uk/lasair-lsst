@@ -14,10 +14,12 @@ from lasair.apps.object.utils import (
     ARCSEC_PER_DEGREE,
     LIGHTCURVE_AXIS_TICKS,
     SCATTER_HEIGHT,
+    SCATTER_LEGEND_Y,
     SCATTER_RANGE_ARCSEC,
     UNKNOWN_BAND_COLOR,
     bandColors,
     bands,
+    bandSymbols,
     build_offset_scatter_figure,
     compute_source_offsets,
     make_offset_band_traces,
@@ -27,8 +29,10 @@ from lasair.apps.object.utils import (
 )
 
 ARCSEC = 1.0 / ARCSEC_PER_DEGREE
-# HALF THE HEIGHT OF THE FIRST VERSION OF THE PLOT (660 PX)
-EXPECTED_SCATTER_HEIGHT = 330
+# TALL ENOUGH FOR THE SQUARE PLOT TO USE THE FULL WIDTH OF A THIRD-WIDTH CARD, WITH THE LEGEND ABOVE IT
+EXPECTED_SCATTER_HEIGHT = 360
+# LINE HEIGHT OF THE 11 PX NOTE TEXT UNDER THE PLOT
+NOTE_LINE_HEIGHT_PX = 15
 
 
 def make_source(ra, decl, band='g', diaSourceId=1000, mjd=60000.5):
@@ -208,6 +212,7 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         bandTraces = [trace for trace in fig.data if trace.showlegend]
         self.assertEqual([trace.name for trace in bandTraces], [band + '-band' for band in bands])
         self.assertEqual([trace.marker.color for trace in bandTraces], bandColors)
+        self.assertEqual([trace.marker.symbol for trace in bandTraces], bandSymbols)
         self.assertTrue(fig.layout.showlegend)
 
     def test_axes_are_fixed_and_equal_aspect(self):
@@ -257,7 +262,7 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertEqual(LIGHTCURVE_AXIS_TICKS['tickfont_size'], 14)
         self.assertEqual(LIGHTCURVE_AXIS_TICKS['title_font_size'], 14)
 
-    def test_figure_is_half_the_original_height(self):
+    def test_figure_height_fits_a_third_width_card(self):
         # ARRANGE
         objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
 
@@ -386,7 +391,8 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertEqual(note.yref, 'paper')
         self.assertEqual(note.y, 0)
         self.assertLess(note.yshift, 0)
-        self.assertGreaterEqual(fig.layout.margin.b, -note.yshift + 2 * 20)
+        # ROOM FOR TWO LINES OF THE 11 PX NOTE TEXT
+        self.assertGreaterEqual(fig.layout.margin.b, -note.yshift + 2 * NOTE_LINE_HEIGHT_PX)
 
     def test_note_is_centered_under_the_plot_area(self):
         # ARRANGE
@@ -399,7 +405,7 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         note = fig.layout.annotations[0]
         self.assertEqual((note.xref, note.x, note.xanchor), ('paper', 0.5, 'center'))
 
-    def test_legend_sits_inside_the_top_left_corner_of_the_plot(self):
+    def test_legend_sits_above_the_plot_so_it_cannot_cover_points(self):
         # ARRANGE
         objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
 
@@ -408,8 +414,10 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
 
         # ASSERT
         legend = fig.layout.legend
-        self.assertEqual((legend.orientation, legend.x, legend.xanchor), ('v', 0.0, 'left'))
-        self.assertEqual((legend.y, legend.yanchor), (1.0, 'top'))
+        self.assertEqual((legend.orientation, legend.x, legend.xanchor), ('h', 0.5, 'center'))
+        self.assertEqual(legend.yanchor, 'bottom')
+        self.assertEqual(legend.y, SCATTER_LEGEND_Y)
+        self.assertGreater(SCATTER_LEGEND_Y, 1.0)
 
     def test_plots_empty_axes_with_note_when_no_detection_has_a_position(self):
         # ARRANGE
@@ -462,6 +470,16 @@ class TestRobustness(unittest.TestCase):
         # ASSERT
         names = [t.name for t in fig.data if t.showlegend]
         self.assertEqual(names, ['g-band', 'unknown-band'])
+
+    def test_unknown_band_uses_a_circle(self):
+        # ARRANGE
+        offsets = [{'diaSourceId': 1, 'mjd': 60000.5, 'band': 'unknown', 'dRa': 0.0, 'dDec': 0.0}]
+
+        # ACT
+        traces = make_offset_band_traces(offsets)
+
+        # ASSERT
+        self.assertEqual(traces[0].marker.symbol, 'circle')
 
     def test_band_outside_the_rubin_bands_is_plotted_as_unknown(self):
         # ARRANGE

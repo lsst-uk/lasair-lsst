@@ -20,13 +20,17 @@ UNKNOWN_BAND_COLOR = "#268bd2"
 # AXIS, MARKER AND HOVER COLOR OF THE OFFSET SCATTER PLOT
 PLOT_LINE_COLOR = "#1F2937"
 # ROOM FOR THE NOTES BELOW THE X-AXIS TITLE: PIXELS BELOW THE PLOT AREA, AND THE BOTTOM MARGIN
-SCATTER_NOTE_YSHIFT = -45
-SCATTER_MARGIN_BOTTOM = 85
-# MARGINS AND FIGURE HEIGHT THAT KEEP THE SQUARE PLOT FILLING A THIRD-WIDTH CARD (THE LEGEND SITS INSIDE THE PLOT)
-SCATTER_MARGIN_TOP = 10
-SCATTER_MARGIN_LEFT = 55
-SCATTER_MARGIN_RIGHT = 30
-SCATTER_HEIGHT = 330
+SCATTER_NOTE_YSHIFT = -50
+SCATTER_MARGIN_BOTTOM = 82
+# MARGINS AND FIGURE HEIGHT THAT KEEP THE SQUARE PLOT FILLING A THIRD-WIDTH CARD; PLOTLY GROWS THE TOP MARGIN TO FIT THE LEGEND
+SCATTER_MARGIN_TOP = 5
+SCATTER_MARGIN_LEFT = 50
+SCATTER_MARGIN_RIGHT = 15
+SCATTER_HEIGHT = 360
+# LEGEND POSITION IN PLOT-AREA FRACTIONS: JUST ABOVE THE TOP AXIS, WHICH MAKES PLOTLY GROW THE TOP MARGIN TO FIT IT
+SCATTER_LEGEND_Y = 1.02
+# MARKER FOR A DETECTION WHOSE BAND IS NOT A RUBIN BAND
+UNKNOWN_BAND_SYMBOL = 'circle'
 SCATTER_SMALL_FONT_SIZE = 11
 # TICK AND AXIS-TITLE STYLE OF THE LIGHT-CURVE AXES (TICKLEN AND TICKWIDTH ARE THE PLOTLY DEFAULTS THE LIGHT CURVE USES)
 LIGHTCURVE_AXIS_TICKS = dict(
@@ -653,6 +657,7 @@ def make_offset_band_traces(
     ```
     """
     colorByBand = dict(zip(bands, bandColors))
+    symbolByBand = dict(zip(bands, bandSymbols))
     presentBands = {offset["band"] for offset in offsets}
     traces = []
     # KNOWN BANDS FIRST, IN LIGHT CURVE ORDER, THEN ANY OTHERS
@@ -668,6 +673,7 @@ def make_offset_band_traces(
                 for offset in bandOffsets],
             mode="markers",
             marker_color=colorByBand.get(band, UNKNOWN_BAND_COLOR),
+            marker_symbol=symbolByBand.get(band, UNKNOWN_BAND_SYMBOL),
             marker_size=9,
             marker_opacity=0.7,
             name=band + "-band",
@@ -745,14 +751,14 @@ def apply_offset_scatter_layout(
         # RA INCREASES TO THE EAST, WHICH IS ON THE LEFT OF THE SKY, SO THE X RANGE IS DISPLAYED REVERSED
         xaxis=dict(title_text="ΔRA × cos(Dec) (arcsec)", range=[limit, -limit], **axisStyle),
         yaxis=dict(title_text="ΔDec (arcsec)", range=[-limit, limit], scaleanchor="x", scaleratio=1, **axisStyle),
-        # THE CARD IS TOO NARROW FOR A LEGEND BESIDE OR ABOVE THE PLOT, AND DETECTIONS CLUSTER AT THE CENTRE, SO USE THE TOP-LEFT CORNER
+        # ABOVE THE PLOT, OUTSIDE THE AXES, SO IT NEVER COVERS A DETECTION
         legend=dict(
-            orientation="v",
-            yanchor="top",
-            y=1.0,
-            xanchor="left",
-            x=0.0,
-            bgcolor="rgba(230, 229, 229, 0.85)",
+            orientation="h",
+            yanchor="bottom",
+            y=SCATTER_LEGEND_Y,
+            xanchor="center",
+            x=0.5,
+            bgcolor="#E6E5E5",
             borderwidth=4,
             bordercolor="#E6E5E5",
             font_size=SCATTER_SMALL_FONT_SIZE,
