@@ -4,14 +4,56 @@
 {% block title %} Profile {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+    <style>
+        .api-token-label {
+            margin-top: 1.75rem;
+        }
+
+        /* THE ICON WIDTH IS RESERVED ON BOTH SIDES SO THE TOKEN STAYS CENTRED UNDER THE LABEL */
+        .api-token-anchor {
+            position: relative;
+            display: inline-block;
+            max-width: calc(100% - 9rem);
+        }
+
+        .api-token-display {
+            display: block;
+            line-height: 1.5;
+        }
+
+        .api-token-actions {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .api-token-row .btn {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .api-token-row .btn svg {
+            display: block;
+        }
+
+        .api-token-masked {
+            filter: blur(4px);
+            user-select: none;
+        }
+    </style>
+{% endblock stylesheets %}
 
 {% block content %}
 
 
     <div class="row mt-4 justify-content-center">
         <div class="col-12 col-xl-8 justify-content-center">
-            <div class="col-12 col-md-6 col-xxl-5 mb-4 mx-auto">
+            <div class="col-12 col-lg-10 col-xxl-8 mb-4 mx-auto">
                 <div class="card shadow border-0 text-center p-0 ">
                     <div class="profile-cover rounded-top" data-background="{{ ASSETS_ROOT }}/img/space_images/space_image_002.jpg"></div>
                     <div class="card-body pb-5">
@@ -25,16 +67,21 @@
                         <p class="text-gray mb-4">
                             {{ request.user.email }}
                         </p>
-                        <p class="fw-bold text-gray  mb-0">API Token</p>
-                        <div class="d-flex justify-content-center align-items-center mt-0">
-                            <code id="api-token-display" class="mt-0">••••••••••••••••••••••••••••••••••••••••</code>
-                            <button type="button" id="api-token-toggle" class="btn btn-link btn-sm text-gray p-1 ms-2 d-none" aria-label="Show API token" aria-pressed="false" aria-controls="api-token-display">
-                                <span id="api-token-icon-show">{% include "includes/icons/icon_eye.html" %}</span>
-                                <span id="api-token-icon-hide" class="d-none">{% include "includes/icons/icon_eye_slash.html" %}</span>
-                            </button>
-                            <button type="button" id="api-token-copy" class="btn btn-link btn-sm text-gray p-1 d-none" aria-label="Copy API token to clipboard">
-                                {% include "includes/icons/icon_copy.html" %}
-                            </button>
+                        <p class="api-token-label fw-bold text-gray mb-2">API Token</p>
+                        <div class="api-token-row mt-0">
+                            <span id="api-token-hidden-note" class="visually-hidden">API token hidden</span>
+                            <span class="api-token-anchor">
+                                <code id="api-token-display" class="api-token-display api-token-masked text-body text-break mt-0" aria-hidden="true">3f9c2a7e1b5d8046c9e2f7a13b6d0e8c5a2f9b71</code>
+                                <span class="api-token-actions ms-2">
+                                    <button type="button" id="api-token-toggle" class="btn btn-link btn-sm text-body p-1 d-none" aria-label="Show API token" aria-pressed="false" aria-controls="api-token-display">
+                                        <span id="api-token-icon-show">{% include "includes/icons/icon_eye.html" %}</span>
+                                        <span id="api-token-icon-hide" class="d-none">{% include "includes/icons/icon_eye_slash.html" %}</span>
+                                    </button>
+                                    <button type="button" id="api-token-copy" class="btn btn-link btn-sm text-body p-1 d-none" aria-label="Copy API token to clipboard">
+                                        {% include "includes/icons/icon_copy.html" %}
+                                    </button>
+                                </span>
+                            </span>
                         </div>
                         <span id="api-token-copy-status" class="d-block small text-gray" role="status" aria-live="polite" data-copied-text="Copied" data-failed-text="Copy failed. Reveal the token and copy it by hand."></span>
                         {{ token|json_script:"api-token" }}
@@ -132,11 +179,12 @@
             var status = document.getElementById("api-token-copy-status");
             var iconShow = document.getElementById("api-token-icon-show");
             var iconHide = document.getElementById("api-token-icon-hide");
+            var hiddenNote = document.getElementById("api-token-hidden-note");
             var tokenElement = document.getElementById("api-token");
-            if (!display || !toggle || !copyButton || !status || !iconShow || !iconHide || !tokenElement) {
+            if (!display || !toggle || !copyButton || !status || !iconShow || !iconHide || !hiddenNote || !tokenElement) {
                 return;
             }
-            // THE TOKEN LIVES ONLY IN THE JSON ELEMENT; THE DISPLAY HOLDS THE MASK UNTIL REVEALED
+            // THE TOKEN LIVES ONLY IN THE JSON ELEMENT; THE DISPLAY HOLDS A BLURRED DECOY UNTIL REVEALED
             var token = JSON.parse(tokenElement.textContent);
             if (!token || typeof token !== "string") {
                 return;
@@ -146,6 +194,9 @@
 
             function setRevealed(isRevealed) {
                 display.textContent = isRevealed ? token : maskedText;
+                display.classList.toggle("api-token-masked", !isRevealed);
+                display.setAttribute("aria-hidden", isRevealed ? "false" : "true");
+                hiddenNote.classList.toggle("d-none", isRevealed);
                 toggle.setAttribute("aria-pressed", isRevealed ? "true" : "false");
                 iconShow.classList.toggle("d-none", isRevealed);
                 iconHide.classList.toggle("d-none", !isRevealed);

@@ -16,7 +16,7 @@ WEBSERVER_ROOT = Path(__file__).resolve().parents[4] / 'webserver'
 TEMPLATES_ROOT = WEBSERVER_ROOT / 'users' / 'templates'
 SITE_TEMPLATES_ROOT = WEBSERVER_ROOT / 'lasair' / 'templates'
 TOKEN = 'a1b2c3d4e5f60718293a4b5c6d7e8f9012345678'
-MASK = '•' * 40
+MASK = '3f9c2a7e1b5d8046c9e2f7a13b6d0e8c5a2f9b71'
 STUB_BASE = (
     '{% block title %}{% endblock %}{% block stylesheets %}{% endblock %}'
     '{% block content %}{% endblock %}{% block javascripts %}{% endblock %}')
@@ -140,6 +140,20 @@ class TestProfileTokenCard(unittest.TestCase):
 
         # ASSERT
         self.assertEqual(MASK, page.text['api-token-display'].strip())
+
+    def test_token_display_starts_masked_and_hidden_from_screen_readers(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        attrs = page.tags['api-token-display'][1]
+
+        # ASSERT
+        self.assertIn('api-token-masked', attrs['class'].split())
+        self.assertEqual('true', attrs['aria-hidden'])
+        self.assertEqual('API token hidden', page.text['api-token-hidden-note'].strip())
+        self.assertIn('visually-hidden', page.tags['api-token-hidden-note'][1]['class'].split())
 
     def test_reveal_button_is_accessible_toggle_button(self):
         # ARRANGE
