@@ -31,7 +31,7 @@ from lasair.apps.object.utils import (
 )
 
 ARCSEC = 1.0 / ARCSEC_PER_DEGREE
-# TALL ENOUGH FOR THE SQUARE PLOT TO USE THE FULL WIDTH OF A THIRD-WIDTH CARD, WITH THE LEGEND ABOVE IT
+# FALLBACK HEIGHT; THE OBJECT PAGE RESIZES THE FIGURE TO THE CARD WIDTH
 EXPECTED_SCATTER_HEIGHT = 360
 # LINE HEIGHT OF THE 11 PX NOTE TEXT UNDER THE PLOT
 NOTE_LINE_HEIGHT_PX = 15
@@ -264,7 +264,7 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertEqual(LIGHTCURVE_AXIS_TICKS['tickfont_size'], 14)
         self.assertEqual(LIGHTCURVE_AXIS_TICKS['title_font_size'], 14)
 
-    def test_figure_height_fits_a_third_width_card(self):
+    def test_figure_has_a_fallback_height(self):
         # ARRANGE
         objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
 

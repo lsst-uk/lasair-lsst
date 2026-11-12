@@ -29,8 +29,9 @@
         flex: 0 0 auto;
         margin-left: auto;
     }
+    /* BODY CONTENT SITS 3 PX IN FROM THE LEFT EDGE OF THE HEADER ICON */
     .card-body.widget-body {
-        padding: 1rem 1.5rem 1.5rem;
+        padding: 1rem 1.5rem 1.5rem calc(1.5rem + 3px);
     }
     /* TIGHTER OBJECT INFO TABLE CELLS; VALUES WRAP ONLY WHEN THE CARD IS TOO NARROW */
     .table.object-info-table td {
@@ -70,12 +71,12 @@
 
         <div class="row mt-4">
 
-            <div class="col-12 {% if offsetScatterFigure %}col-lg-8{% endif %} mb-4">
+            <div class="col-12 {% if offsetScatterFigure %}col-lg-9{% endif %} mb-4">
                 {% include "includes/widgets/widget_object_id.html" %}
             </div>
 
             {% if offsetScatterFigure %}
-            <div class="col-12 col-md-6 col-lg-4 mb-4">
+            <div class="col-12 col-md-6 col-lg-3 mb-4">
                 {% include "includes/widgets/widget_object_offset_scatter.html" %}
             </div>
             {% endif %}

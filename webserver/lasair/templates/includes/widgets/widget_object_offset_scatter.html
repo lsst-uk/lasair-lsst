@@ -12,7 +12,7 @@
         </div>
         <div class="widget-heading">
             <h2 class="h6 text-gray-400 widget-title">Detection Scatter{% include "includes/info_tooltip.html" with info="Position of each detection relative to the mean position of the object, in arcsec. Colors match the lightcurve bands. Forced photometry is not shown" position="auto" %}</h2>
-            <div class="h6 fw-extrabold text-gray-400 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
+            <div class="h6 fw-extrabold text-gray-900 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
         </div>
     </div>
     <div class="card-body widget-body widget-body-plot">
