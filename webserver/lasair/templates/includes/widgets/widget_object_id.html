@@ -21,39 +21,38 @@
     <div class="card-body widget-body object-info-body">
         <div class="object-info-cols">
             <div>
-                <table class="table table-sm object-info-table mb-4">
-                    <tbody>
-                        <tr>
-                            <td class="fw-bold text-gray-900">diaObjectId</td>
-                            <td class="fw-bold text-gray-400">{{ data.diaObjectId }}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-gray-900">Discovery UTC</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.discUtc }}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-gray-900">Discovery MJD</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.discMjd|floatformat:2 }}</td>
-                        </tr>
-                        <tr>
-                            <td class="fw-bold text-gray-900">Disc {{ data.objectData.discFilter }}-Flux</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.discMag }}</td>
-                        </tr>
-                    </tbody>
-                </table>
                 <table class="table table-sm object-info-table mb-3">
                     <tbody>
                         <tr>
+                            <td class="fw-bold text-gray-900">diaObjectId</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.diaObjectId }}">{{ data.diaObjectId }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Discovery UTC</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.discUtc }}">{{ data.objectData.discUtc }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Discovery MJD</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.discMjd|floatformat:2 }}">{{ data.objectData.discMjd|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Disc {{ data.objectData.discFilter }}-Flux</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.discMag }}">{{ data.objectData.discMag }}</td>
+                        </tr>
+                        {# SPACER ROWS KEEP THE LEFT AND RIGHT TABLES THE SAME NUMBER OF ROWS, SO THEIR LINES MATCH #}
+                        <tr class="object-info-gap"><td colspan="2">&nbsp;</td></tr>
+                        {% if data.favouritedBy %}<tr class="object-info-gap object-info-gap-extra"><td colspan="2">&nbsp;</td></tr>{% endif %}
+                        <tr>
                             <td class="fw-bold text-gray-900">Latest UTC</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.latestUtc }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.latestUtc }}">{{ data.objectData.latestUtc }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Latest MJD</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.latestMjd|floatformat:2 }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.latestMjd|floatformat:2 }}">{{ data.objectData.latestMjd|floatformat:2 }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Latest {{ data.objectData.latestFilter }}-Flux</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.latestMag }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.latestMag }}">{{ data.objectData.latestMag }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -63,40 +62,40 @@
                     <tbody>
                         <tr>
                             <td class="fw-bold text-gray-900">Peak Flux</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">UTC at Peak</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.peakUtc }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.peakUtc }}">{{ data.objectData.peakUtc }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">MJD at Peak</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.peakMjd|floatformat:2 }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.peakMjd|floatformat:2 }}">{{ data.objectData.peakMjd|floatformat:2 }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Detection Count</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.nDiaSources }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.nDiaSources }}">{{ data.objectData.nDiaSources }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Equatorial Lon,Lat</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.rasex }}, {{ data.objectData.decsex }}">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Galactic Lon,Lat</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}">{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">Ecliptic Lon,Lat</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
                         </tr>
                         <tr>
                             <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
-                            <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
+                            <td class="fw-bold text-gray-400" title="{{ data.objectData.ebv|floatformat:6 }}">{{ data.objectData.ebv|floatformat:6 }}</td>
                         </tr>
                         {% if data.favouritedBy %}
                             <tr>
                                 <td class="fw-bold text-gray-900">Favourited by:</td>
-                                <td class="fw-bold text-gray-400">{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</td>
+                                <td class="fw-bold text-gray-400" title="{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}">{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</td>
                             </tr>
                         {% endif %}
                     </tbody>

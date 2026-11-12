@@ -49,7 +49,15 @@
         table-layout: fixed;
     }
     .table.object-info-table td:first-child {
-        width: 45%;
+        width: 40%;
+    }
+    /* A SPACER ROW IS EXACTLY ONE ROW TALL; ITS RULE IS KEPT BUT HIDDEN SO THE HEIGHT MATCHES */
+    .table.object-info-table tr.object-info-gap td {
+        border-bottom-color: transparent;
+    }
+    /* THE EXTRA SPACER ONLY MATCHES THE RIGHT TABLE'S FAVOURITED ROW WHEN THE TABLES SIT SIDE BY SIDE */
+    .table.object-info-table tr.object-info-gap-extra {
+        display: none;
     }
     .card-body.widget-body.widget-body-plot {
         padding: 0.25rem 0.75rem 0.75rem;
@@ -103,9 +111,29 @@
         grid-template-columns: minmax(0, 1fr);
         column-gap: 1.5rem;
     }
-    @container (min-width: 620px) {
+    @container (min-width: 700px) {
         .object-info-cols {
             grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        /* SIDE BY SIDE, EVERY CELL IS ONE LINE, SO THE ROWS OF THE TWO TABLES LINE UP */
+        .table.object-info-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* LABELS TAKE THEIR NATURAL WIDTH; ONLY A TOO-LONG VALUE IS SHORTENED */
+        .table.object-info-table {
+            table-layout: auto;
+        }
+        .table.object-info-table td:first-child {
+            width: 1%;
+        }
+        /* THE VALUE COLUMN TAKES THE LEFTOVER WIDTH, SO A TOO-LONG VALUE IS CUT WITH AN ELLIPSIS */
+        .table.object-info-table td:last-child {
+            max-width: 0;
+        }
+        .table.object-info-table tr.object-info-gap-extra {
+            display: table-row;
         }
     }
     /* SQUARE SCATTER PLOT NEVER GROWS BEYOND THIS SIDE, SO A FULL-WIDTH CARD DOES NOT GET A GIANT PLOT */
