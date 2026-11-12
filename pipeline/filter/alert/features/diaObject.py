@@ -18,6 +18,9 @@ class diaObject(FeatureGroup):
     def run(self):
         out = {}
         for name in self._features:
-            out[name] = self.alert['diaObject'][name]
+            try:
+                out[name] = self.alert['diaObject'][name]
+            except:
+                print('Did not find attribute', name)
 
         return out

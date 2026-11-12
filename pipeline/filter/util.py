@@ -115,6 +115,14 @@ def dispose_kafka(fltr, query_results, query):
     bp = query.get('bytes_produced', 0)
     bq = query['byte_quota']
     will_produce = (bp < bq) or (bq == -1)
+    if not will_produce:
+        error_message={
+            "__error__": "your quota is exceeded",
+            "byte_quota": bq,
+            "bytes_produced": bp,
+        }
+        jsonout = json.dumps(error_message, default=crap_converter)
+        producer.produce(topic_name, value=jsonout, callback=kafka_ack)
 
     nbytes = 0
     nalert = 0
