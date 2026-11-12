@@ -14,95 +14,73 @@
             <div class="h6 fw-extrabold text-gray-400 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
         </div>
         <div class="widget-actions">
-            <div class="d-flex align-items-center justify-content-end object-id-actions">
-                    <span class="mark-controls mark-controls-lg d-inline-flex align-items-center me-2">
-                        {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=data.diaObjectId mark=data.myMark %}
-                    </span>
-                    {% include "includes/go_deeper_button.html" with collapseId="collapseObject" %}
-                </div>
+            <span class="mark-controls mark-controls-lg d-inline-flex align-items-center">
+                {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=data.diaObjectId mark=data.myMark %}
+            </span>
         </div>
     </div>
     <div class="card-body widget-body">
-        <div class="row  d-xl-flex mb-3 ms-sm-2">
-            <div class="col-6">
-                <small class="text-gray-500">
+        <div class="row">
+            <div class="col-12 col-md-5 mb-3">
+                <div class="small text-gray-500">
                     <div><b>Discovery Date:</b> {{ data.objectData.discUtc }} UTC</div>
-                    <div><b>Discovery MJD:</b> {{  data.objectData.discMjd|floatformat:2 }}</div>
-                    <div><b>Disc {{ data.objectData.discFilter }}-Flux:</b> {{  data.objectData.discMag }}</div>
-                </small>
-
-            </div>
-            <div class="col-6">
-                <small class="text-gray-500">
-                    <div><b>Latest Date:</b> {{ data.objectData.latestUtc }} UTC</div>
-                    <div><b>Latest MJD:</b> {{  data.objectData.latestMjd|floatformat:2 }}</div>
-                    <div><b>Latest {{ data.objectData.latestFilter }}-Flux:</b> {{  data.objectData.latestMag }}</div>
-                </small>
-            </div>
-        </div>
-        <div class="row  d-xl-flex  ms-sm-2">
-
-            <div class="accordion accordion-flush" id="accordionExample">
-                <div class="accordion-item">
-
-                    <div id="collapseObject" class="accordion-collapse collapse" aria-labelledby="headinOne" data-bs-parent="#accordionExample">
-                        <div class="accordion-body p-2 pe-4 ">
-
-                            <table class="table mb-3">
-
-                                <tbody>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Peak Flux</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">UTC at Peak</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakUtc }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">MJD at Peak</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.peakMjd|floatformat:2 }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Detection Count</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.nDiaSources }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Equatorial Lon,Lat</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Galactic Lon,Lat</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}</td>
-                                    </tr>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">Ecliptic Lon,Lat</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
-                                    <tr>
-                                        <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
-                                        <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
-                                    </tr>
-                                    {% if data.favouritedBy %}
-                                        <tr>
-                                            <td class="fw-bold text-gray-900">Favourited by:</td>
-                                            <td class="fw-bold text-gray-400">{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</td>
-                                        </tr>
-                                    {% endif %}
-                                    </tr>
-                                </tbody>
-                            </table>
-			    <div class="d-flex justify-content-center">
-    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Duplicate diaObjects </a> {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
-                   
-</div>
-
-                        </div>
-                    </div>
-
+                    <div><b>Discovery MJD:</b> {{ data.objectData.discMjd|floatformat:2 }}</div>
+                    <div><b>Disc {{ data.objectData.discFilter }}-Flux:</b> {{ data.objectData.discMag }}</div>
                 </div>
-
+                <div class="small text-gray-500 mt-3">
+                    <div><b>Latest Date:</b> {{ data.objectData.latestUtc }} UTC</div>
+                    <div><b>Latest MJD:</b> {{ data.objectData.latestMjd|floatformat:2 }}</div>
+                    <div><b>Latest {{ data.objectData.latestFilter }}-Flux:</b> {{ data.objectData.latestMag }}</div>
+                </div>
             </div>
-
+            <div class="col-12 col-md-7">
+                <table class="table table-sm mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Peak Flux</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.peakMag }} ({{ data.objectData.peakFilter }}-band)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">UTC at Peak</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.peakUtc }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">MJD at Peak</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.peakMjd|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Detection Count</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.nDiaSources }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Equatorial Lon,Lat</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.rasex }}, {{ data.objectData.decsex }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Galactic Lon,Lat</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.g_lon|floatformat:6 }}, {{ data.objectData.g_lat|floatformat:6 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Ecliptic Lon,Lat</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.ec_lon|floatformat:6 }}, {{ data.objectData.ec_lat|floatformat:6 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">E(B-V) Extinction</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.ebv|floatformat:6 }}</td>
+                        </tr>
+                        {% if data.favouritedBy %}
+                            <tr>
+                                <td class="fw-bold text-gray-900">Favourited by:</td>
+                                <td class="fw-bold text-gray-400">{{ data.favouritedBy }} user{{ data.favouritedBy|pluralize }}</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+                <div class="d-flex justify-content-center align-items-center">
+                    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">Duplicate diaObjects</a>
+                    {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
+                </div>
+            </div>
         </div>
     </div>
 </div>
