@@ -10,7 +10,7 @@
         </div>
         <div class="widget-heading">
             <h2 class="h6 text-gray-400 widget-title" id="headinOne">Object Info</h2>
-            <h4 class="fw-extrabold mb-0">LSST-AP-DO-{{ data.diaObjectId }}</h4>
+            <h4 class="fw-extrabold mb-0">LSST-AP-DO-<span class="text-nowrap">{{ data.diaObjectId }}</span></h4>
         </div>
         <div class="widget-actions">
             <span class="mark-controls mark-controls-lg d-inline-flex align-items-center">
@@ -18,9 +18,9 @@
             </span>
         </div>
     </div>
-    <div class="card-body widget-body">
-        <div class="row">
-            <div class="col-12 col-md-6">
+    <div class="card-body widget-body object-info-body">
+        <div class="object-info-cols">
+            <div>
                 <table class="table table-sm object-info-table mb-4">
                     <tbody>
                         <tr>
@@ -58,7 +58,7 @@
                     </tbody>
                 </table>
             </div>
-            <div class="col-12 col-md-6">
+            <div>
                 <table class="table table-sm object-info-table mb-3">
                     <tbody>
                         <tr>
@@ -102,12 +102,10 @@
                     </tbody>
                 </table>
             </div>
-            <div class="col-12">
-                <div class="d-flex justify-content-center align-items-center">
-                    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2">Duplicate diaObjects</a>
-                    {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
-                </div>
-            </div>
+        </div>
+        <div class="d-flex justify-content-center align-items-center">
+            <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2">Duplicate diaObjects</a>
+            {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
         </div>
     </div>
 </div>

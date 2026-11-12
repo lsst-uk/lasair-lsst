@@ -15,6 +15,8 @@ bandColorsDark = ['#3eb7ff','#30c39f','#ff7e00', '#2af5ff','#a7f9c1','#fdc900']
 
 # HALF-WIDTH OF THE OFFSET SCATTER PLOT AXES, IN ARCSEC
 SCATTER_RANGE_ARCSEC = 4.0
+# LEGEND POSITION OF THE STANDARD-PHOTOMETRY LIGHT CURVE, IN PLOT-AREA FRACTIONS, ABOVE THE UTC TOP-AXIS TITLE
+LIGHTCURVE_LEGEND_Y_STANDARD = 1.32
 # COLOUR FOR A BAND NOT IN THE RUBIN STYLE GUIDE (THE LIGHT CURVE DEFAULT)
 UNKNOWN_BAND_COLOR = "#268bd2"
 # AXIS, MARKER AND HOVER COLOR OF THE OFFSET SCATTER PLOT
@@ -205,39 +207,16 @@ def object_difference_lightcurve(
     # Define the tick values for the secondary y-axis
     rangeDays = int(mjdMax - mjdMin)
     # NUMPY ARRAY FROM 10 to 100 in steps of 2
-    steps = int(rangeDays/5)
-    tickvals = np.arange(int(mjdMin)-rangeDays*5, int(mjdMax)+rangeDays*5,  steps)
+    # AT LEAST ONE DAY, SO A LIGHT CURVE SHORTER THAN 5 DAYS STILL GETS DATE TICKS
+    steps = max(1, int(rangeDays/5))
+    # A PLAIN LIST, SO THE PAGE SCRIPT THAT THINS NARROW-PLOT TICKS CAN READ IT (PLOTLY ENCODES NUMPY ARRAYS AS BINARY)
+    tickvals = np.arange(int(mjdMin)-rangeDays*5, int(mjdMax)+rangeDays*5,  steps).tolist()
     
 
     # Convert tick values to the desired format
     mjd2utc = Time(tickvals, format='mjd')
     from datetime import datetime
     ticktext = [datetime.strptime(time, '%Y-%m-%d %H:%M:%S.%f').strftime('%Y-%m-%d') for time in mjd2utc.iso]
-
-    adjustTopTitle = round(len(allDataSets)/2)-4
-    if adjustTopTitle > 0:
-        adjustTopTitle = adjustTopTitle * 0.05
-    else:
-        adjustTopTitle = 0
-
-    fig.update_layout(
-        annotations=[
-            dict(
-                xref="paper",
-                yref="paper",
-                x=0.5+adjustTopTitle,  # Adjust x position (0=left, 1=right of plot area)
-                y=1.22, # Adjust y position (relative to plot area)
-                text=ttitle,
-                showarrow=False,
-                xanchor="right", 
-                yanchor="top",
-                font_size=ttitle_font_size,
-            )
-        ]
-    )
-
-    
-
 
     fig.update_layout(  
         xaxis=dict(
@@ -262,8 +241,9 @@ def object_difference_lightcurve(
             tickvals=tickvals,  # Original tick values
         ),
         xaxis2=dict(
+            # THE TOP-AXIS TITLE IS AN AXIS TITLE, NOT AN ANNOTATION, SO PLOTLY KEEPS IT CLEAR OF THE TICK LABELS
             title=dict(
-                text=""
+                text=ttitle
             ),
             title_font_size=ttitle_font_size,
             tickfont_size=ttickfont_size,
@@ -312,6 +292,8 @@ def object_difference_lightcurve(
     ticktext = [f'{flux2mag(val):.2f}' if val > 0 else '' for val in tickvals]
 
     fig.update_yaxes(
+        # GROW THE MARGIN TO FIT THE ROTATED TITLE ON NARROW PLOTS
+        automargin=True,
         range=[fluxMin, fluxMax],
         tickformat='.0f',
         tickfont_size=14,
@@ -336,6 +318,7 @@ def object_difference_lightcurve(
     )
 
     fig.update_yaxes(   # RDW:log right axis
+        automargin=True,
         range=[fluxMin, fluxMax],  # Inverted range
         secondary_y=True,   # right side
         showgrid=True,
@@ -370,7 +353,7 @@ def object_difference_lightcurve(
     else:
         title_text = " Standard Photometry"
         margin_t = 0
-        y = 1.25
+        y = LIGHTCURVE_LEGEND_Y_STANDARD
 
 
     # UPDATE PLOT LAYOUT
@@ -383,7 +366,8 @@ def object_difference_lightcurve(
         margin_r=1,
         legend=dict(
             orientation="h",
-            yanchor="top",
+            # THE STANDARD LEGEND SITS ABOVE THE TOP-AXIS TITLE; PLOTLY GROWS THE TOP MARGIN TO FIT IT
+            yanchor="top" if forced else "bottom",
             y=y,
             xanchor="left",
             x=0.0,
