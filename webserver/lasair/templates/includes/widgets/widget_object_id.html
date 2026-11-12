@@ -1,40 +1,28 @@
 <div class="card border-0 shadow h-100">
-
-
-    <div class="card-body">
-        <div class="row d-flex">
-
-            <div class="col-2 col-md-1 text-xl-center mb-3 justify-content-xl-start">
-                <div class="icon-shape icon-shape-primary rounded me-sm-0">
-
-                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-width="4"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <div class="widget-header">
+        <div class="icon-shape icon-shape-primary rounded">
+            <svg fill="currentColor" stroke="currentColor" stroke-width="4"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                         <g>
                             <path d="m61.434 50c0 6.3125-5.1211 11.434-11.434 11.434s-11.434-5.1211-11.434-11.434 5.1211-11.434 11.434-11.434 11.434 5.1211 11.434 11.434"/>
                             <path d="m90.797 48.438h-5.5078c-0.80078-18.238-15.488-32.926-33.727-33.727v-5.5078c0-0.86328-0.69922-1.5625-1.5625-1.5625s-1.5625 0.69922-1.5625 1.5625v5.5078c-18.238 0.80078-32.926 15.488-33.727 33.727h-5.5078c-0.86328 0-1.5625 0.69922-1.5625 1.5625s0.69922 1.5625 1.5625 1.5625h5.5078c0.80078 18.238 15.488 32.926 33.727 33.727v5.5078c0 0.86328 0.69922 1.5625 1.5625 1.5625s1.5625-0.69922 1.5625-1.5625v-5.5078c18.238-0.80078 32.926-15.488 33.727-33.727h5.5078c0.86328 0 1.5625-0.69922 1.5625-1.5625s-0.69922-1.5625-1.5625-1.5625zm-39.234 33.688v-5.8281c0-0.86328-0.69922-1.5625-1.5625-1.5625s-1.5625 0.69922-1.5625 1.5625v5.8281c-16.508-0.80078-29.762-14.055-30.562-30.562h5.8281c0.86328 0 1.5625-0.69922 1.5625-1.5625s-0.69922-1.5625-1.5625-1.5625h-5.8281c0.80078-16.508 14.055-29.762 30.562-30.562v5.8281c0 0.86328 0.69922 1.5625 1.5625 1.5625s1.5625-0.69922 1.5625-1.5625v-5.8281c16.508 0.80078 29.762 14.055 30.562 30.562h-5.8281c-0.86328 0-1.5625 0.69922-1.5625 1.5625s0.69922 1.5625 1.5625 1.5625h5.8281c-0.80078 16.508-14.055 29.762-30.562 30.562z"/>
                         </g>
                     </svg>
-                </div>
-            </div>
-
-            <div class="col-7 col-md-8">
-                <div class="d-block ps-3 pe-lg-2 ps-lg-5">
-                    <h4 class="h5 fw-bold mb-0">diaObjectId<br/>{{data.diaObjectId}}</h4>
-
-                    <h2 class="accordion-header " id="headinOne">
-                        <div class="h6 fw-extrabold text-gray-400  ps-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
-                    </h2>
-
-                </div>
-            </div>
-            <div class="col-3 px-xl-1">
-                <div class="d-flex align-items-center justify-content-end object-id-actions">
+        </div>
+        <div class="widget-heading">
+            <h2 class="h6 text-gray-400 widget-title" id="headinOne">Object Info</h2>
+            <h4 class="fw-extrabold mb-0"><span class="fw-normal text-gray-400">diaObjectId:</span> {{ data.diaObjectId }}</h4>
+            <div class="h6 fw-extrabold text-gray-400 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
+        </div>
+        <div class="widget-actions">
+            <div class="d-flex align-items-center justify-content-end object-id-actions">
                     <span class="mark-controls mark-controls-lg d-inline-flex align-items-center me-2">
                         {% include "includes/widgets/widget_mark_buttons.html" with diaObjectId=data.diaObjectId mark=data.myMark %}
                     </span>
                     {% include "includes/go_deeper_button.html" with collapseId="collapseObject" %}
                 </div>
-            </div>
         </div>
+    </div>
+    <div class="card-body widget-body">
         <div class="row  d-xl-flex mb-3 ms-sm-2">
             <div class="col-6">
                 <small class="text-gray-500">

@@ -2,13 +2,43 @@ import pandas as pd
 from astropy.time import Time
 import plotly.graph_objects as go
 import math, json
+import logging
 import numpy as np
+
+log = logging.getLogger(__name__)
 
 # THESE ARE THE RUBIN STYLE GUIDE COLOURS AND SYMBOLS
 bands  = ['u', 'g', 'r', 'i', 'z', 'y']
 bandColors = ['#1600ea', '#31de1f', '#b52626', '#370201', '#ba52ff', '#61a2b3']
 bandSymbols = ['circle', 'triangle-up', 'triangle-down', 'square', 'star', 'hexagon']
 bandColorsDark = ['#3eb7ff','#30c39f','#ff7e00', '#2af5ff','#a7f9c1','#fdc900']
+
+# HALF-WIDTH OF THE OFFSET SCATTER PLOT AXES, IN ARCSEC
+SCATTER_RANGE_ARCSEC = 4.0
+# COLOUR FOR A BAND NOT IN THE RUBIN STYLE GUIDE (THE LIGHT CURVE DEFAULT)
+UNKNOWN_BAND_COLOR = "#268bd2"
+# AXIS, MARKER AND HOVER COLOR OF THE OFFSET SCATTER PLOT
+PLOT_LINE_COLOR = "#1F2937"
+# ROOM FOR THE NOTES BELOW THE X-AXIS TITLE: PIXELS BELOW THE PLOT AREA, AND THE BOTTOM MARGIN
+SCATTER_NOTE_YSHIFT = -45
+SCATTER_MARGIN_BOTTOM = 85
+# MARGINS AND FIGURE HEIGHT THAT KEEP THE SQUARE PLOT FILLING A THIRD-WIDTH CARD (THE LEGEND SITS INSIDE THE PLOT)
+SCATTER_MARGIN_TOP = 10
+SCATTER_MARGIN_LEFT = 55
+SCATTER_MARGIN_RIGHT = 30
+SCATTER_HEIGHT = 330
+SCATTER_SMALL_FONT_SIZE = 11
+# TICK AND AXIS-TITLE STYLE OF THE LIGHT-CURVE AXES (TICKLEN AND TICKWIDTH ARE THE PLOTLY DEFAULTS THE LIGHT CURVE USES)
+LIGHTCURVE_AXIS_TICKS = dict(
+    ticks="inside",
+    ticklen=5,
+    tickwidth=1,
+    tickfont_size=14,
+    title_font_size=14,
+)
+# LABEL AND TRACE NAME FOR A DETECTION WITH NO BAND
+UNKNOWN_BAND_LABEL = "unknown"
+ARCSEC_PER_DEGREE = 3600.0
 
 # BOTH SIDEBARS SET TO BLACK
 magcolor  = '#002b36'
@@ -63,7 +93,7 @@ def object_difference_lightcurve(
     mjdMin, mjdMax, utcMin, utcMax, fluxMin, fluxMax, magMin, magMax = get_default_axis_ranges(lcDF)
 
     # DEFAULT DATA FRAME
-    lcDF["marker_color"] = "#268bd2"
+    lcDF["marker_color"] = UNKNOWN_BAND_COLOR
     lcDF["marker_symbol"] = "arrow-bar-down-open"
     lcDF["marker_size"]   = 10
     lcDF["marker_opacity"] = 0.6
@@ -125,7 +155,7 @@ def object_difference_lightcurve(
                     customdata=np.stack((data['utc'], data['nanojansky'], data['magpsf']), axis=-1),
                     mode='markers',
                     marker_size=data["marker_size"].values[0],
-                    marker_color="#268bd2",
+                    marker_color=UNKNOWN_BAND_COLOR,
                     marker_symbol=data["marker_symbol"].values[0],
                     marker_line_color=data["bcolor"].values[0],
                     marker_line_width=1.5,
@@ -410,6 +440,384 @@ def object_difference_lightcurve(
         })
 
     return htmlLightcurve, mergedDF
+
+def compute_source_offsets(
+        objectRa,
+        objectDec,
+        sources):
+    """*compute the tangent-plane offset of each source from the object position*
+
+    **Key Arguments:**
+
+    - ``objectRa`` -- the mean RA of the object in degrees
+    - ``objectDec`` -- the mean Dec of the object in degrees
+    - ``sources`` -- a list of diaSource dictionaries (``diaSourceId``, ``ra``, ``decl``, ``band``, ``midpointMjdTai``)
+
+    **Return:**
+
+    - ``offsets`` -- a list of dictionaries with keys ``diaSourceId``, ``mjd``, ``band`` (``unknown`` if missing or not a Rubin band), ``dRa`` (arcsec, scaled by cos(Dec)) and ``dDec`` (arcsec); sources whose ra or decl is missing, non-numeric or non-finite are left out, so ``len(sources) - len(offsets)`` is their count
+
+    **Usage:**
+
+    ```python
+    offsets = compute_source_offsets(data["objectData"]["ra"], data["objectData"]["decl"], data["diaSources"])
+    ```
+    """
+    cosDec = math.cos(math.radians(objectDec))
+    offsets = []
+    for source in sources:
+        ra = to_finite_float(source.get("ra"))
+        decl = to_finite_float(source.get("decl"))
+        if ra is None or decl is None:
+            continue
+        band = source.get("band")
+        # WRAP THE RA DIFFERENCE INTO [-180, 180) SO 359.9999 -> 0.0001 IS A SMALL STEP
+        deltaRa = (ra - objectRa + 180.0) % 360.0 - 180.0
+        offsets.append({
+            "diaSourceId": source.get("diaSourceId"),
+            "mjd": to_finite_float(source.get("midpointMjdTai")),
+            # ONLY THE RUBIN BANDS GET THEIR OWN TRACE, SO MALFORMED DATA CANNOT CREATE MANY TRACES
+            "band": str(band) if band is not None and str(band) in bands else UNKNOWN_BAND_LABEL,
+            "dRa": deltaRa * cosDec * ARCSEC_PER_DEGREE,
+            "dDec": (decl - objectDec) * ARCSEC_PER_DEGREE,
+        })
+    return offsets
+
+
+def to_finite_float(
+        value):
+    """*convert a value to a finite float*
+
+    **Key Arguments:**
+
+    - ``value`` -- the value to convert, such as a number, a numeric string or None
+
+    **Return:**
+
+    - ``number`` -- the value as a float, or None if it is missing, non-numeric, NaN or infinite
+
+    **Usage:**
+
+    ```python
+    ra = to_finite_float(source.get("ra"))
+    ```
+    """
+    try:
+        number = float(value)
+    except (TypeError, ValueError):
+        return None
+    return number if math.isfinite(number) else None
+
+
+def is_offset_in_range(
+        offset,
+        limit=SCATTER_RANGE_ARCSEC):
+    """*test whether an offset lies inside the square plot range*
+
+    **Key Arguments:**
+
+    - ``offset`` -- an offset dictionary from ``compute_source_offsets``
+    - ``limit`` -- the half-width of the plot range in arcsec
+
+    **Return:**
+
+    - ``isInRange`` -- True if both offsets are within ``limit``
+
+    **Usage:**
+
+    ```python
+    isInRange = is_offset_in_range({"dRa": 1.0, "dDec": -2.0})
+    ```
+    """
+    return abs(offset["dRa"]) <= limit and abs(offset["dDec"]) <= limit
+
+
+def split_offsets_by_range(
+        offsets,
+        limit=SCATTER_RANGE_ARCSEC):
+    """*split offsets into those inside and outside the square plot range in one pass*
+
+    **Key Arguments:**
+
+    - ``offsets`` -- a list of offset dictionaries from ``compute_source_offsets``
+    - ``limit`` -- the half-width of the plot range in arcsec
+
+    **Return:**
+
+    - ``inRange`` -- the offsets within ``limit`` on both axes
+    - ``outsideRange`` -- the offsets beyond ``limit`` on either axis
+
+    **Usage:**
+
+    ```python
+    inRange, outsideRange = split_offsets_by_range(offsets)
+    ```
+    """
+    inRange, outsideRange = [], []
+    for offset in offsets:
+        (inRange if is_offset_in_range(offset, limit) else outsideRange).append(offset)
+    return inRange, outsideRange
+
+
+def build_offset_scatter_notes(
+        outsideCount,
+        noPositionCount):
+    """*build the notes that tell the reader which detections are not plotted*
+
+    **Key Arguments:**
+
+    - ``outsideCount`` -- the number of detections beyond the plot range
+    - ``noPositionCount`` -- the number of detections with no position
+
+    **Return:**
+
+    - ``notes`` -- a list of note strings, empty when every detection is plotted
+
+    **Usage:**
+
+    ```python
+    notes = build_offset_scatter_notes(2, 0)
+    ```
+    """
+    notes = []
+    if outsideCount:
+        noun = "detection" if outsideCount == 1 else "detections"
+        notes.append("%d %s outside plot range" % (outsideCount, noun))
+    if noPositionCount:
+        noun = "detection" if noPositionCount == 1 else "detections"
+        notes.append("%d %s without a position" % (noPositionCount, noun))
+    return notes
+
+
+def build_offset_scatter_figure(
+        objectData):
+    """*build the Plotly figure of detection offsets from the object position*
+
+    **Key Arguments:**
+
+    - ``objectData`` -- the object data (uses ``objectData.ra``, ``objectData.decl`` and ``diaSources``; forced photometry is ignored)
+
+    **Return:**
+
+    - ``fig`` -- the Plotly figure, or None if the object has no detections or no usable position
+    - ``outsideCount`` -- the number of detections beyond the plot range
+
+    **Usage:**
+
+    ```python
+    fig, outsideCount = build_offset_scatter_figure(data)
+    ```
+    """
+    sources = objectData.get("diaSources")
+    position = objectData.get("objectData") or {}
+    objectRa = to_finite_float(position.get("ra"))
+    objectDec = to_finite_float(position.get("decl"))
+    if not sources or objectRa is None or objectDec is None:
+        return None, 0
+
+    offsets = compute_source_offsets(objectRa, objectDec, sources)
+    inRange, outsideRange = split_offsets_by_range(offsets)
+    notes = build_offset_scatter_notes(len(outsideRange), len(sources) - len(offsets))
+
+    fig = go.Figure()
+    for trace in make_offset_band_traces(inRange):
+        fig.add_trace(trace)
+    fig.add_trace(make_origin_trace())
+    apply_offset_scatter_layout(fig)
+    if notes:
+        # THE NOTE SITS BELOW THE X-AXIS TITLE, IN THE BOTTOM MARGIN
+        fig.add_annotation(
+            xref="paper", yref="paper", x=0.5, y=0, yshift=SCATTER_NOTE_YSHIFT,
+            text="<br>".join(notes),
+            showarrow=False, xanchor="center", yanchor="top", font_size=SCATTER_SMALL_FONT_SIZE,
+        )
+    return fig, len(outsideRange)
+
+
+def make_offset_band_traces(
+        offsets):
+    """*make one marker trace per band, colored as in the light curve*
+
+    **Key Arguments:**
+
+    - ``offsets`` -- a list of offset dictionaries from ``compute_source_offsets``
+
+    **Return:**
+
+    - ``traces`` -- a list of Plotly scatter traces, known bands first in light curve order
+
+    **Usage:**
+
+    ```python
+    traces = make_offset_band_traces(inRange)
+    ```
+    """
+    colorByBand = dict(zip(bands, bandColors))
+    presentBands = {offset["band"] for offset in offsets}
+    traces = []
+    # KNOWN BANDS FIRST, IN LIGHT CURVE ORDER, THEN ANY OTHERS
+    for band in bands + sorted(presentBands - set(bands)):
+        bandOffsets = [offset for offset in offsets if offset["band"] == band]
+        if not bandOffsets:
+            continue
+        traces.append(go.Scatter(
+            x=[offset["dRa"] for offset in bandOffsets],
+            y=[offset["dDec"] for offset in bandOffsets],
+            customdata=[
+                [str(offset["diaSourceId"]) if offset["diaSourceId"] is not None else "unknown", offset["mjd"], offset["band"]]
+                for offset in bandOffsets],
+            mode="markers",
+            marker_color=colorByBand.get(band, UNKNOWN_BAND_COLOR),
+            marker_size=9,
+            marker_opacity=0.7,
+            name=band + "-band",
+            showlegend=True,
+            hovertemplate="<b>diaSourceId: %{customdata[0]}</b><br>" +
+                "MJD: %{customdata[1]:.5f}<br>" +
+                "Band: %{customdata[2]}<br>" +
+                "ΔRA×cos(Dec): %{x:.3f} arcsec<br>" +
+                "ΔDec: %{y:.3f} arcsec" +
+                "<extra></extra>",
+        ))
+    return traces
+
+
+def make_origin_trace():
+    """*make the trace that marks the object mean position at (0, 0)*
+
+    **Return:**
+
+    - ``trace`` -- a Plotly scatter trace with one marker and no legend entry
+
+    **Usage:**
+
+    ```python
+    fig.add_trace(make_origin_trace())
+    ```
+    """
+    return go.Scatter(
+        x=[0],
+        y=[0],
+        mode="markers",
+        marker_symbol="cross-thin-open",
+        marker_color=PLOT_LINE_COLOR,
+        marker_size=14,
+        marker_line_width=2,
+        showlegend=False,
+        hoverinfo="skip",
+    )
+
+
+def apply_offset_scatter_layout(
+        fig):
+    """*apply the fixed-range, equal-aspect light theme layout to the offset scatter figure*
+
+    **Key Arguments:**
+
+    - ``fig`` -- the Plotly figure to style in place
+
+    **Usage:**
+
+    ```python
+    apply_offset_scatter_layout(fig)
+    ```
+    """
+    limit = SCATTER_RANGE_ARCSEC
+    axisStyle = dict(
+        showline=True,
+        linewidth=1.5,
+        linecolor=PLOT_LINE_COLOR,
+        gridcolor="#F0F0F0",
+        zeroline=False,
+        **LIGHTCURVE_AXIS_TICKS,
+        # KEEP THE RANGE AT +/- THE LIMIT AND SHRINK THE PLOT AREA TO STAY SQUARE
+        constrain="domain",
+    )
+    fig.update_layout(
+        plot_bgcolor="white",
+        paper_bgcolor="white",
+        height=SCATTER_HEIGHT,
+        margin_t=SCATTER_MARGIN_TOP,
+        margin_b=SCATTER_MARGIN_BOTTOM,
+        margin_l=SCATTER_MARGIN_LEFT,
+        margin_r=SCATTER_MARGIN_RIGHT,
+        showlegend=True,
+        # RA INCREASES TO THE EAST, WHICH IS ON THE LEFT OF THE SKY, SO THE X RANGE IS DISPLAYED REVERSED
+        xaxis=dict(title_text="ΔRA × cos(Dec) (arcsec)", range=[limit, -limit], **axisStyle),
+        yaxis=dict(title_text="ΔDec (arcsec)", range=[-limit, limit], scaleanchor="x", scaleratio=1, **axisStyle),
+        # THE CARD IS TOO NARROW FOR A LEGEND BESIDE OR ABOVE THE PLOT, AND DETECTIONS CLUSTER AT THE CENTRE, SO USE THE TOP-LEFT CORNER
+        legend=dict(
+            orientation="v",
+            yanchor="top",
+            y=1.0,
+            xanchor="left",
+            x=0.0,
+            bgcolor="rgba(230, 229, 229, 0.85)",
+            borderwidth=4,
+            bordercolor="#E6E5E5",
+            font_size=SCATTER_SMALL_FONT_SIZE,
+        ),
+        hoverlabel=dict(font_color="white", bgcolor=PLOT_LINE_COLOR, font_size=14),
+    )
+
+
+def object_offset_scatter(
+        objectData):
+    """*Generate the Plotly figure of detection offsets from the object position, as plain data*
+
+    The object page passes the result to the ``json_script`` template filter and draws it with
+    ``Plotly.newPlot`` once the page has loaded, so the card can sit above the light curve that
+    loads plotly.js.
+
+    **Key Arguments:**
+
+    - ``objectData`` -- a json object containing the object position and its diaSources
+
+    **Return:**
+
+    - ``figureSpec`` -- a dictionary with the Plotly ``data`` and ``layout``, or None if the object has no detections
+
+    **Usage:**
+
+    ```python
+    from lasair.apps.object.utils import object_offset_scatter
+    figureSpec = object_offset_scatter(data)
+    ```
+    """
+    fig, _ = build_offset_scatter_figure(objectData)
+    if fig is None:
+        return None
+
+    # ROUND-TRIP THROUGH PLOTLY'S ENCODER SO NUMPY VALUES BECOME PLAIN JSON TYPES
+    figureSpec = json.loads(fig.to_json())
+    return {"data": figureSpec["data"], "layout": figureSpec["layout"]}
+
+def object_offset_scatter_or_none(
+        objectData):
+    """*generate the offset scatter figure, returning None instead of raising*
+
+    The scatter is an optional card, so a failure here must never break the object page.
+
+    **Key Arguments:**
+
+    - ``objectData`` -- a json object containing the object position and its diaSources
+
+    **Return:**
+
+    - ``figureSpec`` -- the Plotly ``data`` and ``layout`` dictionary, or None if there is nothing to plot or plotting failed (the failure is logged)
+
+    **Usage:**
+
+    ```python
+    offsetScatterFigure = object_offset_scatter_or_none(data)
+    ```
+    """
+    try:
+        return object_offset_scatter(objectData)
+    except Exception:
+        log.exception("Failed to build the offset scatter plot")
+        return None
+
 
 def get_default_axis_ranges(
         lcDF):

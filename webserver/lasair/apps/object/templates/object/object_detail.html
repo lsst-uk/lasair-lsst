@@ -1,7 +1,39 @@
 {% extends "layouts/base.html" %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+    /* ONE HEADER LAYOUT FOR EVERY OBJECT-PAGE WIDGET: ICON TOP LEFT, TITLE BESIDE IT, ACTIONS ON THE RIGHT */
+    .widget-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem 1.5rem 0;
+    }
+    .widget-header .icon-shape {
+        flex: 0 0 4rem;
+    }
+    .widget-header .icon-shape svg,
+    .widget-header .icon-shape img {
+        width: 2.7rem;
+        height: 2.7rem !important;
+    }
+    .widget-heading {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .widget-title {
+        margin-bottom: 0.25rem;
+    }
+    .widget-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+    .card-body.widget-body {
+        padding: 1rem 1.5rem 1.5rem;
+    }
+</style>
+{% endblock stylesheets %}
 {% load static %}
 
 
@@ -26,21 +58,28 @@
 
         <div class="row mt-4">
 
-            <div class="col-12 col-lg-6 mb-4">
+            <div class="col-12 {% if offsetScatterFigure %}col-lg-8{% endif %} mb-4">
                 {% include "includes/widgets/widget_object_id.html" %}
             </div>
+
+            {% if offsetScatterFigure %}
+            <div class="col-12 col-md-6 col-lg-4 mb-4">
+                {% include "includes/widgets/widget_object_offset_scatter.html" %}
+            </div>
+            {% endif %}
 
             <div class="col-12 col-lg-6 mb-4">
                 {% include "includes/widgets/widget_object_tns.html" %}
             </div>
 
-            <div class="col-12 col-xl-6 mb-4">
+            <div class="col-12 col-lg-6 mb-4">
                 {% include "includes/widgets/widget_object_sherlock.html" %}
             </div>
 
             <div class="col-12 mb-4">
                 {% include "includes/widgets/widget_object_lightcurve.html" %}
             </div>
+
 
 
 
@@ -80,6 +119,22 @@
 
     <script type="text/javascript">
         {% include "includes/widgets/widget_object_aladin.script" %}
+    </script>
+
+    <script type="text/javascript">
+        // THE LIGHT-CURVE CARD LOADS plotly.js LATER IN THE PAGE THAN THE SCATTER CARD, SO DRAW THE SCATTER ONCE THE PAGE HAS LOADED
+        document.addEventListener("DOMContentLoaded", function () {
+            var dataNode = document.getElementById("detection-scatter-data");
+            if (!dataNode || typeof Plotly === "undefined") {
+                return;
+            }
+            var figure = JSON.parse(dataNode.textContent);
+            Plotly.newPlot("detection-scatter", figure.data, figure.layout, {
+                displayModeBar: false,
+                displaylogo: false,
+                responsive: true
+            });
+        });
     </script>
 
 {% endblock javascripts %}
