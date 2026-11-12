@@ -70,11 +70,12 @@ RUN pip3 install \
 RUN pip3 install \
   skytag
 
-# required for the webserver object-page tests (plotly is unpinned, as in deploy/roles/webserver)
-RUN pip3 install \
-  plotly
-
 # required for dustmaps
 RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"
 
 RUN mkdir -p /data/mysql
+
+# required for the webserver object-page tests (plotly is unpinned, as in deploy/roles/webserver).
+# kept as the last layer so adding it reuses the cached dustmaps download above.
+RUN pip3 install \
+  plotly
