@@ -10,8 +10,7 @@
         </div>
         <div class="widget-heading">
             <h2 class="h6 text-gray-400 widget-title" id="headinOne">Object Info</h2>
-            <h4 class="fw-extrabold mb-0"><span class="fw-normal text-gray-400">diaObjectId:</span> {{ data.diaObjectId }}</h4>
-            <div class="h6 fw-extrabold text-gray-400 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
+            <h4 class="fw-extrabold mb-0">LSST-AP-DO-{{ data.diaObjectId }}</h4>
         </div>
         <div class="widget-actions">
             <span class="mark-controls mark-controls-lg d-inline-flex align-items-center">
@@ -21,20 +20,46 @@
     </div>
     <div class="card-body widget-body">
         <div class="row">
-            <div class="col-12 col-md-5 mb-3">
-                <div class="small text-gray-500">
-                    <div><b>Discovery Date:</b> {{ data.objectData.discUtc }} UTC</div>
-                    <div><b>Discovery MJD:</b> {{ data.objectData.discMjd|floatformat:2 }}</div>
-                    <div><b>Disc {{ data.objectData.discFilter }}-Flux:</b> {{ data.objectData.discMag }}</div>
-                </div>
-                <div class="small text-gray-500 mt-3">
-                    <div><b>Latest Date:</b> {{ data.objectData.latestUtc }} UTC</div>
-                    <div><b>Latest MJD:</b> {{ data.objectData.latestMjd|floatformat:2 }}</div>
-                    <div><b>Latest {{ data.objectData.latestFilter }}-Flux:</b> {{ data.objectData.latestMag }}</div>
-                </div>
+            <div class="col-12 col-md-6">
+                <table class="table table-sm object-info-table mb-4">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-gray-900">diaObjectId</td>
+                            <td class="fw-bold text-gray-400">{{ data.diaObjectId }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Discovery UTC</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.discUtc }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Discovery MJD</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.discMjd|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Disc {{ data.objectData.discFilter }}-Flux</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.discMag }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table table-sm object-info-table mb-3">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Latest UTC</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.latestUtc }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Latest MJD</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.latestMjd|floatformat:2 }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-gray-900">Latest {{ data.objectData.latestFilter }}-Flux</td>
+                            <td class="fw-bold text-gray-400">{{ data.objectData.latestMag }}</td>
+                        </tr>
+                    </tbody>
+                </table>
             </div>
-            <div class="col-12 col-md-7">
-                <table class="table table-sm mb-3">
+            <div class="col-12 col-md-6">
+                <table class="table table-sm object-info-table mb-3">
                     <tbody>
                         <tr>
                             <td class="fw-bold text-gray-900">Peak Flux</td>
@@ -76,8 +101,10 @@
                         {% endif %}
                     </tbody>
                 </table>
+            </div>
+            <div class="col-12">
                 <div class="d-flex justify-content-center align-items-center">
-                    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0">Duplicate diaObjects</a>
+                    <a href="https://{{ lasair_url }}/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2">Duplicate diaObjects</a>
                     {% include "includes/info_tooltip.html" with info="Check for other detections (diaSources) at this position that are not included in this diaObject." position="auto" link="https://lasair-lsst.readthedocs.io/en/main/concepts.html#objects-and-sources" %}
                 </div>
             </div>

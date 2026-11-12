@@ -15,6 +15,8 @@ from lasair.apps.object.utils import (
     LIGHTCURVE_AXIS_TICKS,
     SCATTER_HEIGHT,
     SCATTER_LEGEND_Y,
+    SCATTER_MARGIN_BOTTOM,
+    SCATTER_MARGIN_BOTTOM_NO_NOTE,
     SCATTER_RANGE_ARCSEC,
     UNKNOWN_BAND_COLOR,
     bandColors,
@@ -393,6 +395,18 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertLess(note.yshift, 0)
         # ROOM FOR TWO LINES OF THE 11 PX NOTE TEXT
         self.assertGreaterEqual(fig.layout.margin.b, -note.yshift + 2 * NOTE_LINE_HEIGHT_PX)
+        self.assertEqual(fig.layout.margin.b, SCATTER_MARGIN_BOTTOM)
+
+    def test_bottom_margin_only_fits_the_axis_title_when_there_is_no_note(self):
+        # ARRANGE
+        objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
+
+        # ACT
+        fig, _ = build_offset_scatter_figure(objectData)
+
+        # ASSERT
+        self.assertEqual(len(fig.layout.annotations), 0)
+        self.assertEqual(fig.layout.margin.b, SCATTER_MARGIN_BOTTOM_NO_NOTE)
 
     def test_note_is_centered_under_the_plot_area(self):
         # ARRANGE

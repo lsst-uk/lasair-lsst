@@ -32,6 +32,18 @@
     .card-body.widget-body {
         padding: 1rem 1.5rem 1.5rem;
     }
+    /* TIGHTER OBJECT INFO TABLE CELLS; VALUES WRAP ONLY WHEN THE CARD IS TOO NARROW */
+    .table.object-info-table td {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        white-space: normal;
+    }
+    .table.object-info-table td:first-child {
+        white-space: nowrap;
+    }
+    .card-body.widget-body.widget-body-plot {
+        padding: 0.25rem 0.75rem 0.75rem;
+    }
 </style>
 {% endblock stylesheets %}
 {% load static %}
@@ -128,11 +140,29 @@
             if (!dataNode || typeof Plotly === "undefined") {
                 return;
             }
+            // APPROXIMATE HEIGHT OF THE ONE-ROW LEGEND ABOVE THE PLOT AREA; A WRAPPED LEGEND LEAVES THE PLOT A FEW PX SHORT OF SQUARE
+            var LEGEND_ROW_PX = 30;
+            var plotNode = document.getElementById("detection-scatter");
             var figure = JSON.parse(dataNode.textContent);
-            Plotly.newPlot("detection-scatter", figure.data, figure.layout, {
+            var margin = figure.layout.margin || {};
+
+            // SIZE THE FIGURE SO THE SQUARE PLOT AREA FILLS THE CARD WIDTH
+            function squareHeight() {
+                var width = plotNode.clientWidth;
+                if (!width) {
+                    return figure.layout.height;
+                }
+                return width - (margin.l || 0) - (margin.r || 0) + (margin.t || 0) + (margin.b || 0) + LEGEND_ROW_PX;
+            }
+
+            var layout = Object.assign({}, figure.layout, {height: squareHeight()});
+            Plotly.newPlot(plotNode, figure.data, layout, {
                 displayModeBar: false,
                 displaylogo: false,
                 responsive: true
+            });
+            window.addEventListener("resize", function () {
+                Plotly.relayout(plotNode, {height: squareHeight()});
             });
         });
     </script>

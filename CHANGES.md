@@ -4,7 +4,7 @@
 
 **FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
 
-**ENHANCEMENT**: the object page's top card is renamed Object Info and shows its discovery, latest and peak details at all times, without a Go Deeper button, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
+**ENHANCEMENT**: the object page's top card is renamed Object Info, is headed with the object's `LSST-AP-DO-<diaObjectId>` name and shows its discovery, latest and peak details in tables at all times, without a Go Deeper button, the object's RA and Dec move to the Detection Scatter card, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
 
 **FIXED**: every page was slow or stalled when the CDS servers were slow, because each page loaded Aladin Lite with a blocking script tag from the CDS website; Lasair now serves its own copy of Aladin Lite 3.8.1, loads it only on the home, object and MMA watchmap pages, loads it in the background, and shows a message in the sky map if it has not loaded after 10 seconds.
 
