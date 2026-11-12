@@ -13,7 +13,7 @@ Dummy settings file for tests
 # SLACK_URL = ''
 # SLACK_URL=''
 # WAIT_TIME = 0
-SCHEMA_VERSION = '11_1'
+SCHEMA_VERSION = '11_2'
 # PUBLIC_KAFKA_SERVER="lasair-lsst-dev-kafka_pub:29092"
 # PUBLIC_KAFKA_USERNAME='blabla'
 # PUBLIC_KAFKA_PASSWORD='junk'
