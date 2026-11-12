@@ -23,6 +23,7 @@ class SkymapTest(unittest.TestCase):
                 "obj"      :['a12', 'a13', 'a14', 'a15', 'a16'],
                 "ra"       :[8.0,   0.0, 0.0, 0.0, 0.9],
                 "de"       :[20,    22, 24, 26, 28],
+                "first_mjd":[60100, 60200, 60300, 60400, 60500],
                 "distance" :[23.510,20.350,27.440,34.780, 30.0]
                 }
 
@@ -34,6 +35,7 @@ class SkymapTest(unittest.TestCase):
             'mocfilename': dir + '/90.moc',
             'mapfilename': dir + '/map.fits',
             'mw_id': 1, 
+            'event_id': 'GW150914',
             'event_tai':60000, 
             'area90':500, 
             'params':None,
@@ -42,16 +44,13 @@ class SkymapTest(unittest.TestCase):
         #print(skymaphits)
         # should be 1 in the skymaphits from the 4 input
         # output should be {'diaObjectId': ['a15'], 'contour': [66.31], 'distance': [34.78], 
-        #    'probdens2': [85.0601], 'probdens3': [85.0601]}
         self.assertTrue(len(skymaphits['diaObjectId']) == 4)
         contour   = skymaphits['contour'][0]
         distance  = skymaphits['distance'][0]
-        probdens2  = skymaphits['probdens2'][0]
-        probdens3  = skymaphits['probdens3'][0]
+        z_score_dist  = skymaphits['paramslist'][0]
 
         self.assertTrue(abs(contour-87.5) < 1)
         self.assertTrue(abs(distance-20) < 1)
-        self.assertTrue(abs(probdens2-1.2) < 0.1)
 
 if __name__ == '__main__':
     import xmlrunner

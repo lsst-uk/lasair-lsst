@@ -19,7 +19,7 @@ s = 'python3 3_make_alter_table.py sql %s %s area_hits'
 os.system(s % (schema_ver_old, schema_ver_new))
 s = 'python3 3_make_alter_table.py sql %s %s crossmatch_tns'
 os.system(s % (schema_ver_old, schema_ver_new))
-s = 'python3 3_make_alter_table.py sql %s %s mma_area_hits'
+s = 'python3 3_make_alter_table.py sql %s %s mma_assoc'
 os.system(s % (schema_ver_old, schema_ver_new))
 s = 'python3 3_make_alter_table.py sql %s %s objects'
 os.system(s % (schema_ver_old, schema_ver_new))
