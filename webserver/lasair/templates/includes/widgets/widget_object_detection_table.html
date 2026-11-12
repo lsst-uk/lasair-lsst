@@ -1,26 +1,18 @@
 {% load customtags %}
 
 <div class="card border-0 shadow h-100">
-
-    <div class="card-header border-0 ">
-        <div class="row d-flex align-items-start">
-            <div class="col-2 col-md-1 text-xl-center mb-3 mb-xl-0  justify-content-xl-start">
-                <div class="icon-shape icon-shape-primary rounded me-sm-0">
-
-                    <svg class="w-6 h-6" style="height: 3rem;" fill="currentColor" stroke="currentColor" stroke-width="1"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <div class="widget-header">
+        <div class="icon-shape icon-shape-primary rounded">
+            <svg fill="currentColor" stroke="currentColor" stroke-width="1"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 
                         <path d="m72.801 13.801h-45.602c-3.6016 0-6.5 2.8984-6.5 6.5v59.301c0 3.6016 2.8984 6.5 6.5 6.5h45.699c3.6016 0 6.5-2.8984 6.5-6.5v-59.301c-0.097657-3.5-3-6.5-6.5977-6.5zm3.5 65.898c0 1.8984-1.6016 3.5-3.5 3.5h-45.602c-1.8984 0-3.5-1.6016-3.5-3.5v-59.398c0-1.8984 1.6016-3.5 3.5-3.5h45.699c1.8984 0 3.5 1.6016 3.5 3.5v59.398zm-42.5-48.199h33.301v-3h-33.301zm0 10h33.301v-3h-33.301zm0 10h33.301v-3h-33.301zm0 20h21.301v-3h-21.301zm0-10h33.301v-3h-33.301z"/>
                     </svg>
-                </div>
-            </div>
-
-            <div class="col-7 col-md-8 px-xl-0">
-                <div>
-                    <h2 class="h5 text-gray-400 mb-0 ps-2">LSST Alert Packet Data{% include "includes/info_tooltip.html" with info="Each row contains data measured at the location of transient on a single LSST exposure" position="auto" %}</h2>
-                </div>
-            </div>
-            <div class="col-3  px-xl-1">
-                <div class="dropdown ms-auto ps-1 float-end">
+        </div>
+        <div class="widget-heading">
+            <h2 class="h6 text-gray-400 widget-title">LSST Alert Packet Data{% include "includes/info_tooltip.html" with info="Each row contains data measured at the location of transient on a single LSST exposure" position="auto" %}</h2>
+        </div>
+        <div class="widget-actions">
+            <div class="dropdown">
                     <button class="btn btn-sm btn-dark dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         {% include "includes/icons/icon_export.html" %}
                         <span class="align-middle  d-none d-md-inline">Export</span><svg class="icon icon-xs" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
@@ -34,17 +26,11 @@
                         {% endif %}
                     </ul>
                 </div>
-            </div>
-
-
-
-
-
         </div>
     </div>
+    <div class="card-body widget-body">
 
-    <div class="card-body p-2 ">
-        <div class="table-responsive p-4 pt-0">
+        <div class="table-responsive">
             <table class="table table-flush datatable" id="exportLightcurve">
                 <thead class="thead-light">
                     <tr>
@@ -79,6 +65,5 @@
                 </tbody>
             </table>
         </div>
-
     </div>
 </div>

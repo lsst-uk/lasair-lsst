@@ -389,15 +389,10 @@ td > .text-action:not(.btn) {
     }
 }
 
-// OBJECT PAGE: LARGER ICONS, SIZED TO SIT LEVEL WITH THE "GO DEEPER" BUTTON.
+// OBJECT PAGE: LARGER ICONS IN THE OBJECT INFO CARD HEADER.
 .mark-controls-lg .mark-btn .mark-icon {
     width: 1.75rem;
     height: 1.75rem;
-}
-
-// go_deeper_button CARRIES mb-2, WHICH WOULD PUSH IT OFF THE FLEX BASELINE.
-.object-id-actions .btn {
-    margin-bottom: 0;
 }
 
 // FAVOURITE / HIDDEN OBJECT LIST PAGES REUSE THE MARK-BUTTON GLYPH IN THE HEADER.

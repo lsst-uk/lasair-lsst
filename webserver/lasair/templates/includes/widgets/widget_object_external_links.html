@@ -1,27 +1,20 @@
-<div class="card border-0 shadow  h-100">
-    <div class="card-body">
-        <div class="row d-flex">
-            <div class="col-2 col-md-1 text-xl-center mb-3 mb-xl-0  justify-content-xl-start">
-                <div class="icon-shape icon-shape-secondary rounded me-sm-0">
-
-                    <svg class="w-6 h-6" fill="currentColor" stroke="currentColor" stroke-width="2"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+<div class="card border-0 shadow h-100">
+    <div class="widget-header">
+        <div class="icon-shape icon-shape-secondary rounded">
+            <svg fill="currentColor" stroke="currentColor" stroke-width="2"  viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 
                         <g>
                             <path d="m41.367 86 16.582-16.582c3.6484-3.668 5.668-8.5156 5.668-13.684s-2.0156-10.016-5.668-13.684c-1.8516-1.8516-4.0156-3.25-6.418-4.2148l-1.1172 1.1172c-1.418 1.418-2.1836 3.3008-2.1836 5.3164 0 0.48438 0.050781 0.96484 0.13281 1.4336 1.332 0.55078 2.5664 1.332 3.582 2.3672 4.2344 4.2148 4.2344 11.117 0 15.332l-16.594 16.598c-2.0352 2.0508-4.7656 3.1836-7.668 3.1836-2.8984 0-5.6328-1.1328-7.668-3.1836-2.0508-2.0508-3.1836-4.7656-3.1836-7.6836 0-2.8984 1.1328-5.6172 3.1836-7.668l8.5508-8.5508-2.0156-9.9844-12.551 12.535c-7.5352 7.5352-7.5352 19.816 0 27.352 7.5352 7.5508 19.816 7.5508 27.367 0z"/>
                             <path d="m71.465 43.898 2 10 12.551-12.551c7.5352-7.5352 7.5352-19.816 0-27.352-7.5508-7.5508-19.816-7.5352-27.367 0l-16.582 16.582c-3.6484 3.668-5.668 8.5156-5.668 13.684s2.0156 10.035 5.668 13.684c1.8516 1.8516 4.0156 3.25 6.418 4.2148l1.1172-1.1172c1.8164-1.832 2.5156-4.3828 2.0508-6.75-1.332-0.53516-2.5664-1.332-3.582-2.3516-2.0508-2.0508-3.168-4.7852-3.168-7.6836 0-2.8984 1.1172-5.6328 3.168-7.668l16.578-16.59c2.0352-2.0508 4.7656-3.168 7.668-3.168 2.8984 0 5.6328 1.1172 7.668 3.168 2.0508 2.0508 3.1836 4.7852 3.1836 7.6836 0 2.8984-1.1328 5.6172-3.1836 7.668z"/>
                         </g>
                     </svg>
-
-
-                </div>
-            </div>
-
-            <div class="col-10 col-md-11  pe-lg-2 ps-lg-5">
-                <div class="d-block">
-                    <h2 class="h6 text-gray-400 mb-1 ps-2 ps-lg-0">External Resources{% include "includes/info_tooltip.html" with info="Links to external services providing further context information at the location of the transient" position="auto" %}</h2>
-                </div>
-
-		<a href="https://lsst.alerce.online/object/{{data.diaObjectId}}?survey=lsst" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Alerce </a>
+        </div>
+        <div class="widget-heading">
+            <h2 class="h6 text-gray-400 widget-title">External Resources{% include "includes/info_tooltip.html" with info="Links to external services providing further context information at the location of the transient" position="auto" %}</h2>
+        </div>
+    </div>
+    <div class="card-body widget-body">
+        <a href="https://lsst.alerce.online/object/{{data.diaObjectId}}?survey=lsst" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Alerce </a>
 
                 <a href="https://antares.noirlab.edu/loci?query=%7B%22currentPage%22%3A1,%22filters%22%3A%5B%7B%22type%22%3A%22query_string%22,%22field%22%3A%7B%22query%22%3A%22%2a{{data.diaObjectId}}%2a%22,%22fields%22%3A%5B%22properties.survey.lsst.dia_object_id%22,%22locus_id%22%5D%7D,%22value%22%3Anull,%22text%22%3A%22ID%20Lookup%3A%20{{data.diaObjectId}}%22%7D%5D,%22sortBy%22%3A%22properties.newest_alert_observation_time%22,%22sortDesc%22%3Atrue,%22perPage%22%3A25%7D" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> Antares </a>
 
@@ -34,8 +27,5 @@
                 <a href="http://simbad.u-strasbg.fr/simbad/sim-coo?Coord={{ data.objectData.ra }}%20{{ data.objectData.decl }}&Radius=0.08" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-xxl-0"> SIMBAD </a>
 
                 <a href="https://lasair-ztf.lsst.ac.uk/search/{{ data.objectData.ra|floatformat:6 }},{{ data.objectData.decl|floatformat:6 }}" class="btn btn-sm btn-secondary d-inline-flex align-items-center m-2 ms-0"> ZTF </a>
-
-            </div>
-        </div>
     </div>
 </div>
