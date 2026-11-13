@@ -9,6 +9,7 @@ urlpatterns = [
     path('register/', views.register, name='register'),
     path('activate/', views.activate, name='activate'),
     path('profile/',  views.profile,  name='profile'),
+    path('profile/token/regenerate/', views.regenerate_token, name='regenerate_token'),
     path('login/', auth_views.LoginView.as_view(template_name="users/login.html"), name='login'),
     path('logout/',   views.logout,   name='logout'),
     path('password_reset/', views.password_reset,  name='password_reset'),

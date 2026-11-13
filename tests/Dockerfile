@@ -70,7 +70,18 @@ RUN pip3 install \
 RUN pip3 install \
   skytag
 
+# required for webserver template render tests
+RUN pip3 install \
+  django \
+  django-crispy-forms \
+  crispy-bootstrap5 \
+  django-widget-tweaks
+
 # required for dustmaps
 RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"
 
 RUN mkdir -p /data/mysql
+
+# required for webserver view tests
+RUN pip3 install \
+  djangorestframework

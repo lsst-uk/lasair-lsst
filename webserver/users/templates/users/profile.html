@@ -4,14 +4,69 @@
 {% block title %} Profile {% endblock %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+    <style>
+        .api-token-label {
+            margin-top: 1.75rem;
+        }
+
+        /* THE ICON WIDTH IS RESERVED ON BOTH SIDES SO THE TOKEN STAYS CENTRED UNDER THE LABEL */
+        .api-token-anchor {
+            position: relative;
+            display: inline-block;
+            max-width: calc(100% - 9rem);
+        }
+
+        .api-token-display {
+            display: block;
+            line-height: 1.5;
+        }
+
+        .api-token-actions {
+            position: absolute;
+            top: 50%;
+            left: 100%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+        }
+
+        .api-token-row .btn {
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .api-token-row .btn svg {
+            display: block;
+        }
+
+        .api-token-masked {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        /* A MODAL IS FIXED TO THE VIEWPORT; OFFSET IT BY THE SIDEBAR WIDTH SO IT CENTRES OVER THE CARDS */
+        @media (min-width: 992px) {
+            .content-aligned-modal {
+                padding-left: 300px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.contracted + .content .content-aligned-modal {
+                padding-left: 95px;
+            }
+        }
+    </style>
+{% endblock stylesheets %}
 
 {% block content %}
 
 
     <div class="row mt-4 justify-content-center">
         <div class="col-12 col-xl-8 justify-content-center">
-            <div class="col-12 col-md-6 col-xxl-5 mb-4 mx-auto">
+            <div class="col-12 col-lg-10 col-xxl-8 mb-4 mx-auto">
                 <div class="card shadow border-0 text-center p-0 ">
                     <div class="profile-cover rounded-top" data-background="{{ ASSETS_ROOT }}/img/space_images/space_image_002.jpg"></div>
                     <div class="card-body pb-5">
@@ -25,8 +80,27 @@
                         <p class="text-gray mb-4">
                             {{ request.user.email }}
                         </p>
-                        <p class="fw-bold text-gray  mb-0">API Token</p>
-                        <code class="mt-0">{{ token }}</code>
+                        <div id="api-token-block">
+                        <p class="api-token-label fw-bold text-gray mb-2">API Token</p>
+                        <div class="api-token-row mt-0">
+                            <span id="api-token-hidden-note" class="visually-hidden">API token hidden</span>
+                            <span class="api-token-anchor">
+                                <code id="api-token-display" class="api-token-display api-token-masked text-body text-break mt-0" aria-hidden="true">3f9c2a7e1b5d8046c9e2f7a13b6d0e8c5a2f9b71</code>
+                                <span class="api-token-actions ms-2">
+                                    <button type="button" id="api-token-toggle" class="btn btn-link btn-sm text-body p-1 d-none" aria-label="Show API token" aria-pressed="false" aria-controls="api-token-display">
+                                        <span id="api-token-icon-show">{% include "includes/icons/icon_eye.html" %}</span>
+                                        <span id="api-token-icon-hide" class="d-none">{% include "includes/icons/icon_eye_slash.html" %}</span>
+                                    </button>
+                                    <button type="button" id="api-token-copy" class="btn btn-link btn-sm text-body p-1 d-none" aria-label="Copy API token to clipboard">
+                                        {% include "includes/icons/icon_copy.html" %}
+                                    </button>
+                                </span>
+                            </span>
+                        </div>
+                        <span id="api-token-copy-status" class="d-block small text-gray" role="status" aria-live="polite" data-copied-text="Copied" data-failed-text="Copy failed. Reveal the token and copy it by hand."></span>
+                        {{ token|json_script:"api-token" }}
+                        <button type="button" id="api-token-regenerate" class="btn btn-tertiary mt-3" data-bs-toggle="modal" data-bs-target="#regenerateTokenModal">Regenerate token</button>
+                        </div>
 
                         <p class="mt-4 mb-0">
                             <a href="{% url 'hidden_objects' %}">
@@ -108,7 +182,121 @@
 
     </div>
 
+    <!-- REGENERATE TOKEN MODAL -->
+    <div class="modal fade content-aligned-modal" id="regenerateTokenModal" tabindex="-1" aria-labelledby="regenerateTokenModalLabel" aria-describedby="regenerate-token-modal-body" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="regenerateTokenModalLabel">Regenerate your API token?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="regenerate-token-modal-body">
+                    Your current token will stop working at once. Any scripts, notebooks, or services that use it will fail until you give them the new token. You cannot undo this.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="regenerate-token-cancel" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                    <form id="regenerate-token-form" method="post" action="{% url 'regenerate_token' %}" class="mt-0 mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-tertiary">Regenerate token</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
-{% block javascripts %}{% endblock javascripts %}
+{% block javascripts %}
+    <script>
+        (function () {
+            var COPIED_RESET_MS = 2000;
+            var display = document.getElementById("api-token-display");
+            var toggle = document.getElementById("api-token-toggle");
+            var copyButton = document.getElementById("api-token-copy");
+            var status = document.getElementById("api-token-copy-status");
+            var iconShow = document.getElementById("api-token-icon-show");
+            var iconHide = document.getElementById("api-token-icon-hide");
+            var hiddenNote = document.getElementById("api-token-hidden-note");
+            var tokenElement = document.getElementById("api-token");
+            if (!display || !toggle || !copyButton || !status || !iconShow || !iconHide || !hiddenNote || !tokenElement) {
+                return;
+            }
+            // THE TOKEN LIVES ONLY IN THE JSON ELEMENT; THE DISPLAY HOLDS A BLURRED DECOY UNTIL REVEALED
+            var token = JSON.parse(tokenElement.textContent);
+            if (!token || typeof token !== "string") {
+                return;
+            }
+            var maskedText = display.textContent;
+            var resetTimer = null;
+
+            function setRevealed(isRevealed) {
+                display.textContent = isRevealed ? token : maskedText;
+                display.classList.toggle("api-token-masked", !isRevealed);
+                display.setAttribute("aria-hidden", isRevealed ? "false" : "true");
+                hiddenNote.classList.toggle("d-none", isRevealed);
+                toggle.setAttribute("aria-pressed", isRevealed ? "true" : "false");
+                iconShow.classList.toggle("d-none", isRevealed);
+                iconHide.classList.toggle("d-none", !isRevealed);
+            }
+
+            function clearStatus() {
+                window.clearTimeout(resetTimer);
+                status.textContent = "";
+            }
+
+            function showCopied() {
+                status.textContent = status.getAttribute("data-copied-text");
+                resetTimer = window.setTimeout(clearStatus, COPIED_RESET_MS);
+            }
+
+            function showCopyFailed() {
+                // A FAILURE STAYS UNTIL THE NEXT CLICK SO IT CANNOT BE MISSED
+                status.textContent = status.getAttribute("data-failed-text");
+            }
+
+            toggle.addEventListener("click", function () {
+                setRevealed(toggle.getAttribute("aria-pressed") !== "true");
+            });
+
+            copyButton.addEventListener("click", function () {
+                clearStatus();
+                if (!navigator.clipboard || !navigator.clipboard.writeText) {
+                    showCopyFailed();
+                    return;
+                }
+                navigator.clipboard.writeText(token).then(showCopied, showCopyFailed);
+            });
+
+            toggle.classList.remove("d-none");
+            copyButton.classList.remove("d-none");
+        })();
+
+        (function () {
+            var modal = document.getElementById("regenerateTokenModal");
+            var cancelButton = document.getElementById("regenerate-token-cancel");
+            var form = document.getElementById("regenerate-token-form");
+            if (!modal || !cancelButton || !form) {
+                return;
+            }
+            // FOCUS THE SAFE CHOICE SO A STRAY ENTER KEY CANNOT CONFIRM
+            modal.addEventListener("shown.bs.modal", function () {
+                cancelButton.focus();
+            });
+            // STOP A DOUBLE SUBMIT, WHICH WOULD REGENERATE THE TOKEN TWICE
+            var submitButton = form.querySelector("button[type=submit]");
+            var submitText = submitButton.textContent;
+            form.addEventListener("submit", function () {
+                submitButton.disabled = true;
+                submitButton.textContent = "Regenerating\u2026";
+            });
+            // A PAGE RESTORED BY THE BACK BUTTON KEEPS THE DISABLED BUTTON, SO RESET IT
+            window.addEventListener("pageshow", function (event) {
+                if (event.persisted) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = submitText;
+                }
+            });
+        })();
+    </script>
+{% endblock javascripts %}
