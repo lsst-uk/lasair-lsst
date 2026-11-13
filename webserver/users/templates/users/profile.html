@@ -45,6 +45,19 @@
             filter: blur(4px);
             user-select: none;
         }
+
+        /* A MODAL IS FIXED TO THE VIEWPORT; OFFSET IT BY THE SIDEBAR WIDTH SO IT CENTRES OVER THE CARDS */
+        @media (min-width: 992px) {
+            .content-aligned-modal {
+                padding-left: 300px;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .sidebar.contracted + .content .content-aligned-modal {
+                padding-left: 95px;
+            }
+        }
     </style>
 {% endblock stylesheets %}
 
@@ -67,6 +80,7 @@
                         <p class="text-gray mb-4">
                             {{ request.user.email }}
                         </p>
+                        <div id="api-token-block">
                         <p class="api-token-label fw-bold text-gray mb-2">API Token</p>
                         <div class="api-token-row mt-0">
                             <span id="api-token-hidden-note" class="visually-hidden">API token hidden</span>
@@ -85,6 +99,8 @@
                         </div>
                         <span id="api-token-copy-status" class="d-block small text-gray" role="status" aria-live="polite" data-copied-text="Copied" data-failed-text="Copy failed. Reveal the token and copy it by hand."></span>
                         {{ token|json_script:"api-token" }}
+                        <button type="button" id="api-token-regenerate" class="btn btn-tertiary mt-3" data-bs-toggle="modal" data-bs-target="#regenerateTokenModal">Regenerate token</button>
+                        </div>
 
                         <p class="mt-4 mb-0">
                             <a href="{% url 'hidden_objects' %}">
@@ -166,6 +182,28 @@
 
     </div>
 
+    <!-- REGENERATE TOKEN MODAL -->
+    <div class="modal fade content-aligned-modal" id="regenerateTokenModal" tabindex="-1" aria-labelledby="regenerateTokenModalLabel" aria-describedby="regenerate-token-modal-body" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="regenerateTokenModalLabel">Regenerate your API token?</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="regenerate-token-modal-body">
+                    Your current token will stop working at once. Any scripts, notebooks, or services that use it will fail until you give them the new token. You cannot undo this.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="regenerate-token-cancel" class="btn btn-dark" data-bs-dismiss="modal">Cancel</button>
+                    <form id="regenerate-token-form" method="post" action="{% url 'regenerate_token' %}" class="mt-0 mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-tertiary">Regenerate token</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
 {% endblock content %}
 
 <!-- Specific Page JS goes HERE  -->
@@ -232,6 +270,33 @@
 
             toggle.classList.remove("d-none");
             copyButton.classList.remove("d-none");
+        })();
+
+        (function () {
+            var modal = document.getElementById("regenerateTokenModal");
+            var cancelButton = document.getElementById("regenerate-token-cancel");
+            var form = document.getElementById("regenerate-token-form");
+            if (!modal || !cancelButton || !form) {
+                return;
+            }
+            // FOCUS THE SAFE CHOICE SO A STRAY ENTER KEY CANNOT CONFIRM
+            modal.addEventListener("shown.bs.modal", function () {
+                cancelButton.focus();
+            });
+            // STOP A DOUBLE SUBMIT, WHICH WOULD REGENERATE THE TOKEN TWICE
+            var submitButton = form.querySelector("button[type=submit]");
+            var submitText = submitButton.textContent;
+            form.addEventListener("submit", function () {
+                submitButton.disabled = true;
+                submitButton.textContent = "Regenerating\u2026";
+            });
+            // A PAGE RESTORED BY THE BACK BUTTON KEEPS THE DISABLED BUTTON, SO RESET IT
+            window.addEventListener("pageshow", function (event) {
+                if (event.persisted) {
+                    submitButton.disabled = false;
+                    submitButton.textContent = submitText;
+                }
+            });
         })();
     </script>
 {% endblock javascripts %}

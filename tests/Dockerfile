@@ -81,3 +81,7 @@ RUN pip3 install \
 RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"
 
 RUN mkdir -p /data/mysql
+
+# required for webserver view tests
+RUN pip3 install \
+  djangorestframework

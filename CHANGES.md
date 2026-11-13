@@ -2,11 +2,14 @@
 
 ## Unreleased
 
+**FEATURE**: the profile page has a "Regenerate token" button below the blurred API token; it opens a confirmation box that warns the old token stops working at once, and the token is replaced only when you confirm.
+
 **ENHANCEMENT**: the profile page shows the API token blurred, with buttons to reveal it and to copy it without revealing it.
 
 **FIXED**: every page was slow or stalled when the CDS servers were slow, because each page loaded Aladin Lite with a blocking script tag from the CDS website; Lasair now serves its own copy of Aladin Lite 3.8.1, loads it only on the home, object and MMA watchmap pages, loads it in the background, and shows a message in the sky map if it has not loaded after 10 seconds.
 
 **FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
+
 **FIXED**: the `fits` cutout view opened a new Cassandra cluster connection on every request and never shut it down; each web worker now reuses one connection, and rebuilds it after a failed connect, a lost connection, a shutdown, or a fork.
 
 **FIXED**: `test_hidden_object_results.py` and `test_email_digest.py` failed in CI, because they relied on settings (`lasair.settings`, `LASAIR_URL`) that only the gitignored `settings.py` on developer machines provides.

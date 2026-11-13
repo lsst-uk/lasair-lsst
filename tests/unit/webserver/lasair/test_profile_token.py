@@ -16,6 +16,7 @@ WEBSERVER_ROOT = Path(__file__).resolve().parents[4] / 'webserver'
 TEMPLATES_ROOT = WEBSERVER_ROOT / 'users' / 'templates'
 SITE_TEMPLATES_ROOT = WEBSERVER_ROOT / 'lasair' / 'templates'
 TOKEN = 'a1b2c3d4e5f60718293a4b5c6d7e8f9012345678'
+REGENERATE_URL = '/profile/token/regenerate/'
 MASK = '3f9c2a7e1b5d8046c9e2f7a13b6d0e8c5a2f9b71'
 STUB_BASE = (
     '{% block title %}{% endblock %}{% block stylesheets %}{% endblock %}'
@@ -28,6 +29,7 @@ def configure_django():
     from django.conf import settings
     from django.urls import path
 
+    # EACH TEST FILE MUST RUN IN ITS OWN PROCESS (AS JENKINS DOES) BECAUSE THEY CONFIGURE DJANGO DIFFERENTLY
     if settings.configured:
         return
     baseDir = tempfile.mkdtemp()
@@ -52,7 +54,10 @@ def configure_django():
             'OPTIONS': {'context_processors': []},
         }])
     django.setup()
-    urlModule.urlpatterns = [path('hidden/', lambda request: None, name='hidden_objects')]
+    urlModule.urlpatterns = [
+        path('hidden/', lambda request: None, name='hidden_objects'),
+        path('profile/token/regenerate/', lambda request: None, name='regenerate_token'),
+    ]
 
 
 class TagCollector(HTMLParser):
@@ -234,6 +239,155 @@ class TestProfileTokenCard(unittest.TestCase):
         self.assertEqual('application/json', attrs['type'])
         self.assertEqual(token, json.loads(match.group(1)))
         self.assertEqual(1, page.html.count(token))
+
+    def test_regenerate_button_opens_the_confirmation_modal(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        tag, attrs = page.tags['api-token-regenerate']
+
+        # ASSERT
+        self.assertEqual('button', tag)
+        self.assertEqual('button', attrs['type'])
+        self.assertEqual('modal', attrs['data-bs-toggle'])
+        self.assertEqual('#regenerateTokenModal', attrs['data-bs-target'])
+        self.assertEqual('Regenerate token', page.text['api-token-regenerate'].strip())
+        self.assertLessEqual(
+            {'btn', 'btn-tertiary', 'mt-3'}, set(attrs['class'].split()))
+        self.assertNotIn('btn-sm', attrs['class'].split())
+
+    def test_confirmation_modal_is_labelled_by_its_title(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        attrs = page.tags['regenerateTokenModal'][1]
+        labelId = attrs['aria-labelledby']
+
+        # ASSERT
+        self.assertIn('modal', attrs['class'].split())
+        self.assertEqual('-1', attrs['tabindex'])
+        self.assertEqual('Regenerate your API token?', page.text[labelId].strip())
+
+    def test_confirmation_modal_warns_that_the_old_token_stops_working(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        bodyText = ' '.join(page.text['regenerate-token-modal-body'].split())
+
+        # ASSERT
+        self.assertEqual(
+            'Your current token will stop working at once. Any scripts, notebooks, or '
+            'services that use it will fail until you give them the new token. '
+            'You cannot undo this.', bodyText)
+
+    def test_confirmation_modal_can_be_cancelled_without_submitting(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        tag, attrs = page.tags['regenerate-token-cancel']
+
+        # ASSERT
+        self.assertEqual('button', tag)
+        self.assertEqual('button', attrs['type'])
+        self.assertEqual('modal', attrs['data-bs-dismiss'])
+        self.assertEqual('Cancel', page.text['regenerate-token-cancel'].strip())
+
+    def test_confirmation_form_posts_to_regenerate_url_with_csrf_input(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        tag, attrs = page.tags['regenerate-token-form']
+        formHtml = re.search(
+            r'<form id="regenerate-token-form".*?</form>', page.html, flags=re.DOTALL).group(0)
+
+        # ASSERT
+        self.assertEqual('form', tag)
+        self.assertEqual('post', attrs['method'].lower())
+        self.assertEqual(REGENERATE_URL, attrs['action'])
+        self.assertRegex(formHtml, r'<input type="hidden" name="csrfmiddlewaretoken"')
+        self.assertRegex(formHtml, r'<button type="submit" class="btn btn-tertiary">Regenerate token</button>')
+
+    def test_confirmation_modal_sits_outside_the_profile_card(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        modalIndex = page.html.index('id="regenerateTokenModal"')
+        profileFormIndex = page.html.index('Update Your Profile Information')
+
+        # ASSERT
+        self.assertGreater(modalIndex, profileFormIndex)
+
+    def test_confirmation_modal_closes_on_escape_and_backdrop_click(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        attrs = RenderedPage(render_profile(token)).tags['regenerateTokenModal'][1]
+
+        # ASSERT
+        self.assertNotIn('data-bs-backdrop', attrs)
+        self.assertNotIn('data-bs-keyboard', attrs)
+
+    def test_confirmation_modal_is_described_by_its_body(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        describedBy = page.tags['regenerateTokenModal'][1]['aria-describedby']
+
+        # ASSERT
+        self.assertEqual('regenerate-token-modal-body', describedBy)
+        self.assertIn(describedBy, page.tags)
+
+    def test_confirmation_dialog_is_vertically_centred(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        dialogHtml = re.search(r'<div class="([^"]*)">\s*<div class="modal-content">', page.html)
+
+        # ASSERT
+        self.assertIn('modal-dialog-centered', dialogHtml.group(1).split())
+
+    def test_confirmation_modal_is_aligned_with_the_page_content(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        modalClasses = page.tags['regenerateTokenModal'][1]['class'].split()
+
+        # ASSERT
+        self.assertIn('content-aligned-modal', modalClasses)
+        self.assertIn('.content-aligned-modal', page.html)
+
+    def test_token_block_is_grouped_apart_from_the_hidden_objects_link(self):
+        # ARRANGE
+        token = TOKEN
+
+        # ACT
+        page = RenderedPage(render_profile(token))
+        groupHtml = re.search(
+            r'<div id="api-token-block".*?</div>\s*<p class="mt-4 mb-0">', page.html, flags=re.DOTALL).group(0)
+
+        # ASSERT
+        for elementId in ('api-token-hidden-note', 'api-token-copy-status', 'api-token', 'api-token-regenerate'):
+            self.assertIn('id="%s"' % elementId, groupHtml)
+        self.assertIn('API Token', groupHtml)
 
 
 if __name__ == '__main__':

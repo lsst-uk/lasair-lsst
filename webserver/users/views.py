@@ -1,3 +1,4 @@
+import logging
 import random
 from django.contrib.auth import logout as auth_logout
 from django.contrib.auth import authenticate, get_user_model
@@ -7,6 +8,8 @@ from django.contrib import messages
 from rest_framework.authtoken.models import Token
 from .forms import UserRegisterForm, ProfileUpdateForm, UserUpdateForm
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
+from django.views.decorators.http import require_POST
 import sys
 import hashlib
 import settings
@@ -15,6 +18,8 @@ from django.template.loader import render_to_string
 #from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 #from django.utils.encoding import force_bytes, force_str
 from django.core.mail import EmailMessage
+
+logger = logging.getLogger(__name__)
 
 def get_hash(s):
     salted_string = s + settings.HASH_SALT
@@ -145,6 +150,36 @@ def profile(request):
         'token': token.key
     }
     return render(request, "users/profile.html", context)
+
+
+@login_required
+@require_POST
+def regenerate_token(request):
+    """*replace the logged-in user's API token with a new one*
+
+    **Key Arguments:**
+
+    - ``request`` -- the POST request from the profile page confirmation form
+
+    **Return:**
+
+    - ``response`` -- a redirect to the profile page with a success message
+
+    **Usage:**
+
+        path('profile/token/regenerate/', views.regenerate_token, name='regenerate_token')
+    """
+    with transaction.atomic():
+        # LOCK THE USER ROW SO TWO CONCURRENT REQUESTS TAKE TURNS AND THE USER ENDS WITH ONE TOKEN
+        get_user_model().objects.select_for_update().get(pk=request.user.pk)
+        Token.objects.filter(user=request.user).delete()
+        Token.objects.create(user=request.user)
+    logger.info("API token regenerated for user id %s", request.user.pk)
+    messages.success(
+        request,
+        "Your API token has been regenerated. The old token no longer works. "
+        "Update any scripts that use it.")
+    return redirect('profile')
 
 
 @login_required(redirect_field_name=None)
