@@ -14,7 +14,7 @@ import os
 import sys
 from astropy.time import Time
 from lasair.utils import mjd_now, ecliptic_and_galactic, rasex, decsex, objjson
-from .utils import object_difference_lightcurve
+from .utils import object_difference_lightcurve, object_offset_scatter_or_none
 sys.path.append('../common')
 from src import annotate_util
 
@@ -82,6 +82,7 @@ def object_detail(request, diaObjectId):
 
     lightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=False)
     fplightcurveHtml, mergedDF = object_difference_lightcurve(data, forced=True)
+    offsetScatterFigure = object_offset_scatter_or_none(data)
     if mergedDF is not None:
         lcData = mergedDF.to_dict('records')
     else:
@@ -97,6 +98,7 @@ def object_detail(request, diaObjectId):
         'authenticated': request.user.is_authenticated,
         'lightcurveHtml': lightcurveHtml,
         'fplightcurveHtml': fplightcurveHtml,
+        'offsetScatterFigure': offsetScatterFigure,
         'lcData': lcData,
         'lasair_url': settings.LASAIR_URL
     })

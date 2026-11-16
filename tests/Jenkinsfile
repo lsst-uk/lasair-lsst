@@ -54,6 +54,8 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_favourites_utils.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_hidden_object_results.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_fits_view.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_object_offset_scatter.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_object_lightcurve.py'
                 }
                 dir('tests/unit/services/') {
                     sh 'python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_email_digest.py'
