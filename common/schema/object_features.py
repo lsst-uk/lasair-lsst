@@ -10,6 +10,8 @@ schema = {
 {"section":"Basic information", "doc":"ID, position, proper motion"},
 {"name": "diaObjectId",        "type": "long",   "origin": "lsst",
     "doc": "ID for this object", "extra": "NOT NULL" },
+{"name": "diaSourceId",        "type": "long",   "origin": "lsst",
+    "doc": "ID for the latest diaSource" },
 #{"name": "observation_reason", "type": "string",   "origin": "lsst",
 #    "doc": "Latest observation reason for this object" },
 #{"name": "target_name",        "type": "string",   "origin": "lsst",
