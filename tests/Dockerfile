@@ -85,3 +85,7 @@ RUN mkdir -p /data/mysql
 # required for webserver view tests
 RUN pip3 install \
   djangorestframework
+# required for the webserver object-page tests (plotly is unpinned, as in deploy/roles/webserver).
+# kept as the last layer so adding it reuses the cached dustmaps download above.
+RUN pip3 install \
+  plotly

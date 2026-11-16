@@ -1,7 +1,148 @@
 {% extends "layouts/base.html" %}
 
 <!-- Specific Page CSS goes HERE  -->
-{% block stylesheets %}{% endblock stylesheets %}
+{% block stylesheets %}
+<style>
+    /* ONE HEADER LAYOUT FOR EVERY OBJECT-PAGE WIDGET: ICON TOP LEFT, TITLE BESIDE IT, ACTIONS ON THE RIGHT */
+    .widget-header {
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        padding: 1.5rem 1.5rem 0;
+    }
+    .widget-header .icon-shape {
+        flex: 0 0 4rem;
+    }
+    .widget-header .icon-shape svg,
+    .widget-header .icon-shape img {
+        width: 2.7rem;
+        height: 2.7rem !important;
+    }
+    .widget-heading {
+        flex: 1 1 auto;
+        min-width: 0;
+        overflow-wrap: break-word;
+    }
+    .widget-title {
+        margin-bottom: 0.25rem;
+        text-wrap: balance;
+    }
+    .widget-actions {
+        flex: 0 0 auto;
+        margin-left: auto;
+    }
+    /* BODY CONTENT SITS 3 PX IN FROM THE LEFT EDGE OF THE HEADER ICON */
+    .card-body.widget-body {
+        padding: 1rem 1.5rem 1.5rem calc(1.5rem + 3px);
+    }
+    /* TIGHTER OBJECT INFO TABLE CELLS; VALUES WRAP ONLY WHEN THE CARD IS TOO NARROW */
+    .table.object-info-table td {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+        white-space: normal;
+    }
+    .table.object-info-table td:first-child {
+        white-space: nowrap;
+    }
+    /* FIXED LABEL COLUMN SO THE VALUES OF THE STACKED TABLES LINE UP */
+    .table.object-info-table {
+        table-layout: fixed;
+    }
+    .table.object-info-table td:first-child {
+        width: 40%;
+    }
+    /* A SPACER ROW IS EXACTLY ONE ROW TALL; ITS RULE IS KEPT BUT HIDDEN SO THE HEIGHT MATCHES */
+    .table.object-info-table tr.object-info-gap td {
+        border-bottom-color: transparent;
+    }
+    /* THE EXTRA SPACER ONLY MATCHES THE RIGHT TABLE'S FAVOURITED ROW WHEN THE TABLES SIT SIDE BY SIDE */
+    .table.object-info-table tr.object-info-gap-extra {
+        display: none;
+    }
+    .card-body.widget-body.widget-body-plot {
+        padding: 0.25rem 0.75rem 0.75rem;
+    }
+
+    /* TOP-OF-PAGE CARDS. BREAKPOINTS ALLOW FOR THE 300 PX SIDEBAR SHOWN FROM 992 PX */
+    .object-top-grid {
+        display: grid;
+        gap: 1.5rem;
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas: "info" "scatter" "tns" "sherlock";
+    }
+    .object-top-grid:not(.has-scatter) {
+        grid-template-areas: "info" "tns" "sherlock";
+    }
+    .object-top-grid .area-info { grid-area: info; }
+    .object-top-grid .area-scatter { grid-area: scatter; }
+    .object-top-grid .area-tns { grid-area: tns; }
+    .object-top-grid .area-sherlock { grid-area: sherlock; }
+    @media (min-width: 768px) {
+        .object-top-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            grid-template-areas: "info info" "scatter tns" "scatter sherlock";
+        }
+        .object-top-grid:not(.has-scatter) {
+            grid-template-areas: "info info" "tns sherlock";
+        }
+        /* TNS HUGS ITS CONTENT; SHERLOCK TAKES THE REST OF THE HEIGHT BESIDE THE SQUARE SCATTER CARD */
+        .object-top-grid.has-scatter {
+            grid-template-rows: auto auto 1fr;
+        }
+    }
+    @media (min-width: 1400px) {
+        .object-top-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            grid-template-areas: "info info info scatter" "tns tns sherlock sherlock";
+        }
+        .object-top-grid.has-scatter {
+            grid-template-rows: auto auto;
+        }
+        .object-top-grid:not(.has-scatter) {
+            grid-template-areas: "info info info info" "tns tns sherlock sherlock";
+        }
+    }
+    /* OBJECT INFO TABLES SIT SIDE BY SIDE ONLY WHEN THE CARD ITSELF IS WIDE ENOUGH */
+    .object-info-body {
+        container-type: inline-size;
+    }
+    .object-info-cols {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        column-gap: 1.5rem;
+    }
+    @container (min-width: 700px) {
+        .object-info-cols {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        /* SIDE BY SIDE, EVERY CELL IS ONE LINE, SO THE ROWS OF THE TWO TABLES LINE UP */
+        .table.object-info-table td {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* LABELS TAKE THEIR NATURAL WIDTH; ONLY A TOO-LONG VALUE IS SHORTENED */
+        .table.object-info-table {
+            table-layout: auto;
+        }
+        .table.object-info-table td:first-child {
+            width: 1%;
+        }
+        /* THE VALUE COLUMN TAKES THE LEFTOVER WIDTH, SO A TOO-LONG VALUE IS CUT WITH AN ELLIPSIS */
+        .table.object-info-table td:last-child {
+            max-width: 0;
+        }
+        .table.object-info-table tr.object-info-gap-extra {
+            display: table-row;
+        }
+    }
+    /* SQUARE SCATTER PLOT NEVER GROWS BEYOND THIS SIDE, SO A FULL-WIDTH CARD DOES NOT GET A GIANT PLOT */
+    #detection-scatter {
+        max-width: 520px;
+        margin: 0 auto;
+    }
+</style>
+{% endblock stylesheets %}
 {% load static %}
 
 
@@ -26,21 +167,30 @@
 
         <div class="row mt-4">
 
-            <div class="col-12 col-lg-6 mb-4">
-                {% include "includes/widgets/widget_object_id.html" %}
-            </div>
-
-            <div class="col-12 col-lg-6 mb-4">
-                {% include "includes/widgets/widget_object_tns.html" %}
-            </div>
-
-            <div class="col-12 col-xl-6 mb-4">
-                {% include "includes/widgets/widget_object_sherlock.html" %}
+            {# GRID AREAS REARRANGE THESE FOUR CARDS BY WIDTH; SEE .object-top-grid IN THE PAGE STYLES #}
+            <div class="col-12 mb-4">
+                <div class="object-top-grid{% if offsetScatterFigure %} has-scatter{% endif %}">
+                    <div class="area-info">
+                        {% include "includes/widgets/widget_object_id.html" %}
+                    </div>
+                    {% if offsetScatterFigure %}
+                    <div class="area-scatter">
+                        {% include "includes/widgets/widget_object_offset_scatter.html" %}
+                    </div>
+                    {% endif %}
+                    <div class="area-tns">
+                        {% include "includes/widgets/widget_object_tns.html" %}
+                    </div>
+                    <div class="area-sherlock">
+                        {% include "includes/widgets/widget_object_sherlock.html" %}
+                    </div>
+                </div>
             </div>
 
             <div class="col-12 mb-4">
                 {% include "includes/widgets/widget_object_lightcurve.html" %}
             </div>
+
 
 
 
@@ -80,6 +230,99 @@
 
     <script type="text/javascript">
         {% include "includes/widgets/widget_object_aladin.script" %}
+    </script>
+
+    <script type="text/javascript">
+        // THE LIGHT-CURVE CARD LOADS plotly.js LATER IN THE PAGE THAN THE SCATTER CARD, SO DRAW THE SCATTER ONCE THE PAGE HAS LOADED
+        document.addEventListener("DOMContentLoaded", function () {
+            var dataNode = document.getElementById("detection-scatter-data");
+            if (!dataNode || typeof Plotly === "undefined") {
+                return;
+            }
+            // APPROXIMATE HEIGHT OF THE ONE-ROW LEGEND ABOVE THE PLOT AREA; A WRAPPED LEGEND LEAVES THE PLOT A FEW PX SHORT OF SQUARE
+            var LEGEND_ROW_PX = 30;
+            var plotNode = document.getElementById("detection-scatter");
+            var figure = JSON.parse(dataNode.textContent);
+            var margin = figure.layout.margin || {};
+
+            // SIZE THE FIGURE SO THE SQUARE PLOT AREA FILLS THE CARD WIDTH
+            function squareHeight() {
+                var width = plotNode.clientWidth;
+                if (!width) {
+                    return figure.layout.height;
+                }
+                return width - (margin.l || 0) - (margin.r || 0) + (margin.t || 0) + (margin.b || 0) + LEGEND_ROW_PX;
+            }
+
+            var layout = Object.assign({}, figure.layout, {height: squareHeight()});
+            Plotly.newPlot(plotNode, figure.data, layout, {
+                displayModeBar: false,
+                displaylogo: false,
+                responsive: true
+            });
+            onResizeDone(function () {
+                Plotly.relayout(plotNode, {height: squareHeight()});
+            });
+        });
+
+        // THIN THE DATE TICKS OF NARROW LIGHT CURVES SO THE ANGLED LABELS DO NOT OVERLAP
+        document.addEventListener("DOMContentLoaded", function () {
+            if (typeof Plotly === "undefined") {
+                return;
+            }
+            var lightcurveNodes = document.querySelectorAll(".lightcurve-plots .plotly-graph-div");
+            var fullTicks = [];
+            lightcurveNodes.forEach(function (node) {
+                var layout = node.layout || {};
+                var bottom = layout.xaxis || {};
+                var top = layout.xaxis2 || {};
+                fullTicks.push({
+                    bottomVals: bottom.tickvals ? Array.from(bottom.tickvals) : null,
+                    topVals: top.tickvals ? Array.from(top.tickvals) : null,
+                    topText: top.ticktext ? Array.from(top.ticktext) : null
+                });
+            });
+
+            function everyNth(values, step) {
+                return values ? values.filter(function (value, index) { return index % step === 0; }) : values;
+            }
+
+            function thinTicks() {
+                lightcurveNodes.forEach(function (node, index) {
+                    var ticks = fullTicks[index];
+                    if (!ticks.bottomVals || !ticks.bottomVals.length || !node.clientWidth) {
+                        return;
+                    }
+                    var step = node.clientWidth < 450 ? 3 : (node.clientWidth < 700 ? 2 : 1);
+                    // THE PLOT IS DRAWN WITH EVERY TICK, SO A FIRST PASS AT STEP 1 HAS NOTHING TO DO
+                    var currentStep = node.dataset.tickStep || "1";
+                    if (currentStep === String(step)) {
+                        return;
+                    }
+                    // RECORD THE STEP ONLY ONCE PLOTLY HAS DRAWN IT, SO A LATER RESIZE STILL CORRECTS A STALE DRAW
+                    Plotly.relayout(node, {
+                        "xaxis.tickvals": everyNth(ticks.bottomVals, step),
+                        "xaxis2.tickvals": everyNth(ticks.topVals, step),
+                        "xaxis2.ticktext": everyNth(ticks.topText, step)
+                    }).then(function () {
+                        node.dataset.tickStep = String(step);
+                    });
+                });
+            }
+
+            thinTicks();
+            onResizeDone(thinTicks);
+        });
+
+        // RUN THE CALLBACK ONCE THE WINDOW HAS STOPPED RESIZING, NOT ON EVERY PIXEL OF A DRAG
+        function onResizeDone(callback) {
+            var RESIZE_DEBOUNCE_MS = 150;
+            var timer = null;
+            window.addEventListener("resize", function () {
+                clearTimeout(timer);
+                timer = setTimeout(callback, RESIZE_DEBOUNCE_MS);
+            });
+        }
     </script>
 
 {% endblock javascripts %}

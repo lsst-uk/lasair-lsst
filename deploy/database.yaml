@@ -312,7 +312,7 @@
         - "area_hits"
         - "watchlist_hits"
         - "annotations"
-        - "mma_area_hits"
+        - "mma_assoc"
   tags: create_sql
 
 - hosts: db,backend_db[0]

@@ -27,7 +27,7 @@
                         <tbody>
                             {% for mma_watchmap in mmaWatchmaps %}
                                 <tr><td class="align-middle">
-						<b><a href="{% url 'mma_watchmap_detail' mma_watchmap.mw_id %}">{{ mma_watchmap.otherId }}</a></b></td>
+						<b><a href="{% url 'mma_watchmap_detail' mma_watchmap.mw_id %}">{{ mma_watchmap.event_id }}</a></b></td>
                                     <td><img alt="Image placeholder" src="data:image/png;base64,{{ mma_watchmap.mocimage }}" width=150></td>
                                     <td>{{mma_watchmap.area90}}</td>
                                     <td>{{mma_watchmap.mma_type}}</td>

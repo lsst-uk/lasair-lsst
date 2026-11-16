@@ -1,0 +1,23 @@
+<div class="card border-0 shadow h-100">
+    <div class="widget-header">
+        <div class="icon-shape icon-shape-primary rounded">
+            <svg fill="currentColor" stroke="currentColor" stroke-width="2" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <path d="M10 10h6v74h74v6H10z"/>
+                <circle cx="36" cy="64" r="6"/>
+                <circle cx="54" cy="44" r="6"/>
+                <circle cx="70" cy="58" r="6"/>
+                <circle cx="48" cy="70" r="6"/>
+                <circle cx="78" cy="30" r="6"/>
+            </svg>
+        </div>
+        <div class="widget-heading">
+            <h2 class="h6 text-gray-400 widget-title">Detection Scatter{% include "includes/info_tooltip.html" with info="Position of each detection relative to the mean position of the object, in arcsec. Colors match the lightcurve bands. Forced photometry is not shown" position="auto" %}</h2>
+            <div class="h6 fw-extrabold text-gray-900 mb-0">{{ data.objectData.ra|floatformat:6 }}, {{ data.objectData.decl|floatformat:6 }}</div>
+        </div>
+    </div>
+    <div class="card-body widget-body widget-body-plot">
+        {# DRAWN BY THE OBJECT PAGE SCRIPT ONCE plotly.js HAS LOADED #}
+        <div id="detection-scatter" class="w-100"></div>
+        {{ offsetScatterFigure|json_script:"detection-scatter-data" }}
+    </div>
+</div>
