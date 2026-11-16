@@ -25,6 +25,8 @@
 
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
 
+**FIXED**: the test image build and the filter deploy role failed to install the SFD dust maps, because Harvard Dataverse now returns 403 to the python-requests user agent that `dustmaps.sfd.fetch()` uses; both now download the two maps directly, check their MD5 sums, and confirm `SFDQuery` loads them.
+
 **ENHANCEMENT**: the New and Edit Filter forms no longer offer the per-user `tags_<username>` annotators in the Object Annotators list; a filter that already uses one keeps it.
 
 **ENHANCEMENT**: the deploy playbooks pinned schema 11_0 while `SCHEMA_VERSION` was 11_1, so fresh nodes were built with the superseded `annotations` unique key.
