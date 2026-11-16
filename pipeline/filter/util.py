@@ -117,7 +117,7 @@ def dispose_kafka(fltr, query_results, query):
     will_produce = (bp < bq) or (bq == -1)
     if not will_produce:
         error_message={
-            "_lasair_error_": "your quota is exceeded",
+            "lasair_error": "your quota is exceeded",
             "byte_quota": bq,
             "bytes_produced": bp,
         }
