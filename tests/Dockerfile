@@ -78,7 +78,18 @@ RUN pip3 install \
   django-widget-tweaks
 
 # required for dustmaps
-RUN python3 -c "from dustmaps.config import config;import dustmaps.sfd;config.reset();dustmaps.sfd.fetch()"
+# HARVARD DATAVERSE RETURNS 403 TO THE PYTHON-REQUESTS USER AGENT THAT
+# DUSTMAPS.SFD.FETCH() USES, SO DOWNLOAD THE TWO SFD MAPS WITH WGET AND CHECK MD5
+RUN python3 -c "from dustmaps.config import config; config.reset()" \
+ && SFD_DIR="$(python3 -c 'from dustmaps.std_paths import data_dir; print(data_dir())')/sfd" \
+ && mkdir -p "$SFD_DIR" \
+ && wget -q -O "$SFD_DIR/SFD_dust_4096_ngp.fits" https://dataverse.harvard.edu/api/access/datafile/2902687 \
+ && wget -q -O "$SFD_DIR/SFD_dust_4096_sgp.fits" https://dataverse.harvard.edu/api/access/datafile/2902695 \
+ && printf '%s  %s\n' \
+      6f3a89528bba7d1b7bd55838da86b639 "$SFD_DIR/SFD_dust_4096_ngp.fits" \
+      60f7c43d51bccaff82961de3e9f9e789 "$SFD_DIR/SFD_dust_4096_sgp.fits" \
+    | md5sum -c - \
+ && python3 -c "from dustmaps.sfd import SFDQuery; SFDQuery()"
 
 RUN mkdir -p /data/mysql
 
