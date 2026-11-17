@@ -127,10 +127,11 @@ def reformat(old, lasair_added=True):
 #        del ds['imjd']
         del ds['since_now']
         del ds['utc']
-        iu = ds['image_urls']
-        del ds['image_urls']
-        iu['diaSourceId'] = ds['diaSourceId']
-        imageUrls.append(iu)
+        if 'image_urls' in ds:
+            iu = ds['image_urls']
+            del ds['image_urls']
+            iu['diaSourceId'] = ds['diaSourceId']
+            imageUrls.append(iu)
         diaSourcesList.append(ds)
     if lasair_added:
         lasairData['imageUrls'] = imageUrls
