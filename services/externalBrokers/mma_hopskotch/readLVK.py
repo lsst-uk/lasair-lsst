@@ -35,7 +35,6 @@ def handleDataDict(dataDict, options, logger):
 
     # used to throttle the numbers
     superEventId = dataDict['superevent_id']
-    eventType = superEventId[0] # M, T or S
 
     alertTimeStamp = dataDict['time_created'].replace(' ','T').replace('Z','').replace(':','').replace('-','')
     alertType = dataDict['alert_type'].lower()
@@ -45,12 +44,19 @@ def handleDataDict(dataDict, options, logger):
     if logger: logger.info(msg)
     else:      print(msg)
 
-    # Act on all events unless we only want superevents. Need to think about the logic!
-    if eventType != 'S' and options['--superevents']:
+    # Act on all events with the right prefix.
+    # S is the real thing, MS is mock, TS is test
+    if '--event_prefix' in options and not superEventId.startswith(options['--event_prefix']):
         msg= "Skipping over this event."
         if logger: logger.info(msg)
         else:      print(msg)
         return None
+
+    # Skip the preliminary notices
+    if alertType == 'preliminary':
+        msg= "Skipping over this preliminary event."
+        if logger: logger.info(msg)
+        else:      print(msg)
 
     # Write the event meta into the databases
     if dataDict['event'] is not None:

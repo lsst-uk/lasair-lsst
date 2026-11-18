@@ -5,7 +5,7 @@ https://emfollow.docs.ligo.org/userguide/tutorial/multiorder_skymaps.html
 This code written by Ken Smith and Roy Williams 2026
 
 Usage:
-  %s [--namespace=<alertType>] [--directory=<directory>] [--contours=<contours>] [--logfile=<logfile>] [--superevents] [--earliest]
+  %s [--namespace=<alertType>] [--directory=<directory>] [--contours=<contours>] [--logfile=<logfile>] [--event_prefix=<event_prefix>] [--earliest]
   %s (-h | --help)
 
 Options:
@@ -14,7 +14,7 @@ Options:
   --directory=<directory>           Directory to where the maps and MOCs will be written, default from settings1
   --contours=<contours>             MOC contours separated by commas,  no spaces [default: 10,50,90]
   --logfile=<logfile>               log file [default: stdout]
-  --superevents                     Only deal with superevents. 
+  --event_prefix=<event_prefix>     Requires the event_id to start with this string (S, MS, TS for LVK)
   --earliest                        Start from the earliest message in the queue. (Default is the latest.)
 """
 import sys
