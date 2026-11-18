@@ -198,6 +198,10 @@ class ObjectSerializer(serializers.Serializer):
             except Exception as e:
                 result = {'error': str(e)}
             LF.close()
+
+            if not result or 'diaSourcesList' not in result or len(result['diaSourcesList']) == 0:
+                raise NotFound()
+
         return result
 
 class SherlockObjectSerializer(serializers.Serializer):
