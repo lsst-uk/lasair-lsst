@@ -290,6 +290,48 @@ div.search-bar input {
     justify-content: flex-end !important;
 }
 
+.dataTable-bottom {
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .75rem 1.5rem;
+
+    .dataTable-dropdown label,
+    .dataTable-info {
+        white-space: nowrap;
+    }
+
+    // KEEP THE INFO BESIDE THE SELECTOR AND THE PAGER AT THE RIGHT, EVEN WHEN IT WRAPS TO ITS OWN ROW
+    .dataTable-info {
+        margin-right: auto;
+    }
+
+    .dataTable-pagination {
+        margin-left: auto;
+    }
+
+    .dataTable-pagination-list {
+        display: flex;
+        flex-wrap: wrap;
+        row-gap: .25rem;
+        margin-bottom: 0;
+    }
+
+    @include media-breakpoint-down(md) {
+        align-items: flex-start;
+
+        .dataTable-pagination {
+            margin-left: 0;
+        }
+    }
+}
+
+// VOLT ADDS A 1REM MARGIN UNDER THE INFO ON PHONES; THE GAP ABOVE ALREADY SPACES IT
+.dataTable-wrapper .dataTable-bottom .dataTable-info {
+    @include media-breakpoint-down(md) {
+        margin-bottom: 0;
+    }
+}
+
 select, input[type=number], input[type=text] {
     padding: .5rem 1rem !important;
 }
