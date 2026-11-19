@@ -57,6 +57,7 @@ def handleDataDict(dataDict, options, logger):
         msg= "Skipping over this preliminary event."
         if logger: logger.info(msg)
         else:      print(msg)
+        return None
 
     # Write the event meta into the databases
     if dataDict['event'] is not None:

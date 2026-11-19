@@ -35,6 +35,7 @@ from src import db_connect, skymaps
 
 def insert_mma_alert(database, namespace, dir, event_id, version):
     """ Deals with a given skymap
+        Returns message if not ingested, else returns empty string
     """
     # open the meta.yaml file
     datadir = '%s/%s/%s' % (dir, event_id, version)
@@ -52,6 +53,25 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     area10 = data['EXTRA']['area10']
     area50 = data['EXTRA']['area50']
     area90 = data['EXTRA']['area90']
+    if area90 > settings.MMA_MAX_AREA:
+        message = f'{Skymap 90 area {area90} is too large compared with limit {settings.MMA_MAX_AREA}'
+        return message
+
+    distmean = float(data['HEADER']['DISTMEAN'])
+    if distmean > settings.LVK_MAX_DISTANCE:
+        message = f'{DISTMEAN {distmean} is too large compared with limit {settings.LVK_MAX_DISTANCE}'
+        return message
+
+    params_dict = result['event']['classification']
+    prob_ns = params_dict.get('BNS', 0) + params_dict.get('NSBH', 0)
+    if prob_ns < settings.LVK_PROB_NS:
+        message = f'{Prob NS {prob_ns} is too small compared with limit {settings.LVK_PROB_NS}'
+        return message
+
+    far = float(data['event']['far'])
+    if far > settings.MMA_MAX_FAR:
+        message = f'{FAR {far} is too large compared with limit {settings.MMA_MAX_FAR}'
+        return message
 
     # Deal with the 3 MOCs
     moc10 = read_moc(datadir, '10')
@@ -121,11 +141,10 @@ def handle_event(database, namespace, dir, event_id, minmjd, maxmjd, verbose=Fal
             # Set done flag so we dont come back
             setDone(dir, event_id, version)
             message = ''
-#            try:
-            if 1:
+            try:
                 message = insert_mma_alert(database, namespace, dir, event_id, version)
-#            except Exception as e:
-#                print('Error inserting mma alert in database' + str(e))
+            except Exception as e:
+                print('Error inserting mma alert in database' + str(e))
 
             # message says why it was rejected
             if len(message) == 0:

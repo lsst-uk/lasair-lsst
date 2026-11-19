@@ -174,11 +174,13 @@ SCIMMA_AUTH_PASSWORD = '{{ settings.scimma_auth_password }}'
 HOPSKOTCH_GROUP_ID   = '004'
 MMA_DIRECTORY        = '/mnt/cephfs/lasair/mma'
 
-# Multimessenger events are active for this many days after the event
-MMA_ACTIVE_DAYS         = 21
-
-# specific for LVK events
-LVK_BBH_MAX_AREA        = 300
+# Controlling the MMA events and associations
+MMA_MAX_AREA        = 1000
+LVK_MAX_DSTANCE     = 1000
+LVK_PROB_NS         = 0.5
+MMA_MAX_FAR         = 100
+DAYS_BEFORE_MMA     = 7
+DAYS_AFTER_MMA      = 21
 
 # Proxy annotators 
 ##################
