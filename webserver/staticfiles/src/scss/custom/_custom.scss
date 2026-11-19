@@ -233,7 +233,13 @@ div.search-bar input {
 }
 
 .sidebar .nav-link {
-        font-size: $font-size-base*1.2 !important;
+    font-size: $font-size-base !important;
+    padding-top: .2rem !important;
+    padding-bottom: .2rem !important;
+    @include media-breakpoint-down(lg) {
+        padding-top: .6rem !important;
+        padding-bottom: .6rem !important;
+    }
 }
 
 .popover {
