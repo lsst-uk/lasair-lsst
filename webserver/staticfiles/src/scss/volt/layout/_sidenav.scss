@@ -68,6 +68,13 @@
 		color: $gray-100;
 	}
 
+	// VISIBLE KEYBOARD FOCUS RING ON THE BLACK SIDEBAR (LINKS AND THE MENU TOGGLE BUTTONS)
+	.nav-link:focus-visible {
+		outline: 2px solid $white;
+		outline-offset: -2px;
+		box-shadow: none;
+	}
+
 	// THE SKY AREA AND STATUS TOGGLES ARE <button>s (KEYBOARD REACHABLE): DROP THE BROWSER BUTTON LOOK
 	button.nav-link {
 		width: 100%;
