@@ -189,6 +189,66 @@ class FilterDescriptionTest(unittest.TestCase):
                 self.assertNotIn('name', cleaned)
 
 
+def load_real_forms():
+    """Load the filter_query forms module on real Django, stubbing only the database and other apps."""
+    from django.conf import settings as djangoSettings
+    if not djangoSettings.configured:
+        djangoSettings.configure(
+            DEBUG=False, SECRET_KEY='test', DATABASES={}, USE_TZ=True,
+            INSTALLED_APPS=[
+                'django.contrib.auth', 'django.contrib.contenttypes',
+                'lasair.apps.filter_query'])
+        import django
+        django.setup()
+    emptyModel = mock.MagicMock()
+    modules = {
+        'crispy_forms': module(),
+        'crispy_forms.helper': module(FormHelper=mock.Mock()),
+        'src.db_connect': module(readonly=mock.Mock()),
+        'src.annotate_util': module(
+            tag_topic=mock.Mock(), count_classification=mock.Mock(), MARK_FAVOURITE='f'),
+        'lasair.apps.filter_query.utils': module(check_query_zero_limit=mock.Mock(return_value=None)),
+        'lasair.apps.annotator.models': module(Annotators=emptyModel),
+        'lasair.apps.watchmap.models': module(Watchmap=emptyModel),
+        'lasair.apps.watchlist.models': module(Watchlist=emptyModel),
+        'lasair.apps.favourites.utils': module(offered_annotators=mock.Mock(return_value=[])),
+        'lasair.query_builder': module(
+            check_query=mock.Mock(return_value=None), build_query=mock.Mock(),
+            FAVOURITE_ONLY='fav', HIDDEN_INCLUDE='hid'),
+    }
+    with mock.patch.dict(sys.modules, modules):
+        sys.modules.pop('lasair.apps.filter_query.forms', None)
+        return importlib.import_module('lasair.apps.filter_query.forms')
+
+
+class RealFilterFormTest(unittest.TestCase):
+    """The example name submitted through a real Django ModelForm, which needs no database."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.forms = load_real_forms()
+
+    def test_rejects_the_example_name_without_crashing_and_without_prefilling_the_box(self):
+        # ARRANGE
+        request = types.SimpleNamespace(
+            POST={'action': 'save'},
+            user=types.SimpleNamespace(username='demo', is_authenticated=False))
+        form = self.forms.filterQueryForm(
+            data={'name': EXAMPLE_NAME, 'description': 'Fast risers.', 'run': 0, 'output': 0,
+                  'selected': 'objects.diaObjectId', 'conditions': ''},
+            request=request)
+
+        # ACT
+        isValid = form.is_valid()
+        cleaned = form.clean()
+
+        # ASSERT
+        self.assertFalse(isValid)
+        self.assertIn('choose a name', form.errors['name'][0])
+        self.assertNotIn('name', cleaned)
+        self.assertNotIn('value', form.fields['name'].widget.attrs)
+
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')
