@@ -11,6 +11,18 @@ from fundamentals.logs import emptyLogger
 from django.db import connection
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 
+DEFAULT_CONE_RADIUS = 5.
+
+# ALLOW-LIST FOR OBJECT NAMES: A diaObjectId (17-22 DIGITS), A TNS NAME WITH AN OPTIONAL
+# AT/SN/KN PREFIX (2026abc, AT2026abc, SN 2026abc) OR AN INTERNAL DISCOVERY NAME
+# (ZTF21abcdefg, ATLAS21xyz, PS1-13abc). ANYTHING ELSE IS TREATED AS A CONE SEARCH.
+OBJECT_NAME = re.compile(
+    r'\d{17,22}'
+    r'|(?:(?:AT|SN|KN)\s?)?\d{4}[a-zA-Z]+'
+    r'|[a-zA-Z][a-zA-Z0-9_.+:\-]*',
+    re.ASCII)
+TNS_PREFIX = re.compile(r'^(?:AT|SN|KN)\s?(?=\d{4}[a-zA-Z]+$)', re.I | re.ASCII)
+
 
 def search(
         request,
@@ -79,24 +91,21 @@ def do_search(
     query = query.strip()
     query = query.replace(",", " ")
 
-    objectName = re.compile(r'(^[a-zA-Z]\S*|^.*[a-zA-Z]$|^\d{17,22})', re.S)
-    objectMatch = objectName.match(query)
-
-    queries = []
     results = []
 
     schema = get_schema_dict('objects')
 
-    if objectMatch:
-        objectName = objectMatch.group()
+    if OBJECT_NAME.fullmatch(query):
+        tnsName = TNS_PREFIX.sub('', query)
+        queries = [
+            (f"select {objectColumns} from objects o where o.diaObjectId = %s", (query,)),
+            (f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = %s and w.cone_id=h.cone_id and h.diaObjectId=o.diaObjectId and t.tns_name = w.name and (w.name = %s or LOCATE(%s ,t.disc_int_name))",
+             (settings.TNS_WATCHLIST_ID, tnsName, query)),
+            (f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.diaObjectId=o.diaObjectId and o.diaObjectId = %s", (query,)),
+        ]
 
-        queries.append(f"select {objectColumns} from objects o where o.diaObjectId = '{objectName}'")
-        queries.append(f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = {settings.TNS_WATCHLIST_ID} and w.cone_id=h.cone_id and h.diaObjectId=o.diaObjectId and t.tns_name = w.name and (w.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' or LOCATE('{objectName}' ,t.disc_int_name))")
-        # queries.append(f"SELECT {objectColumns} FROM objects o, watchlist_hits h where h.wl_id = {settings.TNS_WATCHLIST_ID} AND h.diaObjectId=o.diaObjectId AND h.name = '{objectName.replace('AT','').replace('SN','').replace('KN','')}' ")
-        queries.append(f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.diaObjectId=o.diaObjectId and o.diaObjectId = '{objectName}'")
-
-        for q in queries:
-            cursor.execute(q)
+        for sql, params in queries:
+            cursor.execute(sql, params)
             results += cursor.fetchall()
     else:
         # ASSUME THIS COULD BE A CONE SEARCH
@@ -119,23 +128,21 @@ def do_search(
                 dec = converter.dec_sexegesimal_to_decimal(
                     dec=query[1]
                 )
+                radius = float(query[2]) if len(query) == 3 else DEFAULT_CONE_RADIUS
             except:
                 return [], []
         else:
             return [], []
 
-        if len(query) == 3:
-            radius = float(query[2])
-        else:
-            radius = 5.
-
         # Is there an object within RADIUS arcsec of this object? - KWS - need to fix the gkhtm code!!
         message, matches = coneSearchHTM(ra, dec, radius, 'objects', queryType=QUICK, conn=connection, django=True, prefix='htm', suffix='')
-        diaObjectIds = [o[1]['diaObjectId'] for o in matches]
-        diaObjectIds = "','".join(str(x) for x in diaObjectIds)
-        query = f"select {objectColumns} from objects o where o.diaObjectId in ('{diaObjectIds}')"
-        cursor.execute(query)
-        results += cursor.fetchall()
+        diaObjectIds = [int(o[1]['diaObjectId']) for o in matches]
+        if diaObjectIds:
+            placeholders = ",".join(["%s"] * len(diaObjectIds))
+            cursor.execute(
+                f"select {objectColumns} from objects o where o.diaObjectId in ({placeholders})",
+                tuple(diaObjectIds))
+            results += cursor.fetchall()
 
     # MAKE UNIQUE
     try:

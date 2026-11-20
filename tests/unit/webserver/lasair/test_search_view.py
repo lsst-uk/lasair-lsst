@@ -142,6 +142,192 @@ class SearchViewQueryTest(unittest.TestCase):
         self.render.assert_not_called()
 
 
+INJECTIONS = [
+    "a'OR/**/1=1#",
+    "1' OR '1'='1",
+    "x'; DROP TABLE objects;--",
+    'a" or ""="',
+]
+
+
+class DoSearchSqlTest(unittest.TestCase):
+    """Every user-derived value must reach MySQL as a bound parameter, never as SQL text."""
+
+    def setUp(self):
+        self.view, _, _ = load_view()
+        self.cursor = mock.MagicMock()
+        self.cursor.fetchall.return_value = []
+        remotePatch = mock.patch.object(self.view.db_connect, 'remote')
+        remote = remotePatch.start()
+        self.addCleanup(remotePatch.stop)
+        remote.return_value.cursor.return_value = self.cursor
+        converter = self.view.unit_conversion.return_value
+        converter.ra_sexegesimal_to_decimal.return_value = 150.1
+        converter.dec_sexegesimal_to_decimal.return_value = 2.2
+        self.view.coneSearchHTM.return_value = ('found', [])
+
+    def executed(self):
+        """Return the (sql, params) of every execute call."""
+        return [
+            (call.args[0], call.args[1] if len(call.args) > 1 else None)
+            for call in self.cursor.execute.call_args_list]
+
+    def assert_no_user_text_in_sql(self, text):
+        for sql, _ in self.executed():
+            self.assertNotIn(text, sql)
+
+    def test_binds_an_object_id_as_a_parameter(self):
+        # ARRANGE
+        objectId = '800436191404681043'
+
+        # ACT
+        self.view.do_search(objectId)
+
+        # ASSERT
+        calls = self.executed()
+        self.assertEqual(len(calls), 3)
+        self.assert_no_user_text_in_sql(objectId)
+        for sql, params in calls:
+            self.assertIn(objectId, params)
+            self.assertEqual(sql.count('%s'), len(params))
+
+    def test_binds_a_tns_name_with_its_prefix_stripped(self):
+        # ACT
+        self.view.do_search('AT2026abc')
+
+        # ASSERT
+        self.assert_no_user_text_in_sql('2026abc')
+        tnsSql, tnsParams = self.executed()[1]
+        self.assertEqual(tnsParams, (99, '2026abc', 'AT2026abc'))
+        self.assertEqual(tnsSql.count('%s'), 3)
+
+    def test_strips_a_spaced_tns_prefix_before_matching_the_name(self):
+        # ACT
+        self.view.do_search('SN 2026abc')
+
+        # ASSERT
+        self.assertEqual(self.executed()[1][1], (99, '2026abc', 'SN 2026abc'))
+
+    def test_only_strips_the_prefix_not_letters_inside_a_name(self):
+        # ACT
+        self.view.do_search('ATLAS21xyz')
+
+        # ASSERT
+        self.assertEqual(self.executed()[1][1], (99, 'ATLAS21xyz', 'ATLAS21xyz'))
+
+    def test_never_puts_injection_text_in_the_sql(self):
+        for text in INJECTIONS:
+            with self.subTest(text=text):
+                self.cursor.execute.reset_mock()
+
+                # ACT
+                results, _ = self.view.do_search(text)
+
+                # ASSERT
+                self.assertEqual(results, [])
+                self.assert_no_user_text_in_sql(text)
+
+    def test_binds_the_cone_search_ids_as_integers_with_one_placeholder_each(self):
+        # ARRANGE
+        self.view.coneSearchHTM.return_value = ('found', [
+            (0.1, {'diaObjectId': 800436191404681043}),
+            (0.2, {'diaObjectId': '808513610424051231'})])
+
+        # ACT
+        self.view.do_search('150.1 2.2')
+
+        # ASSERT
+        sql, params = self.executed()[0]
+        self.assertIn('in (%s,%s)', sql)
+        self.assertEqual(params, (800436191404681043, 808513610424051231))
+
+    def test_runs_no_query_when_the_cone_search_finds_nothing(self):
+        # ACT
+        results, _ = self.view.do_search('150.1 2.2')
+
+        # ASSERT
+        self.assertEqual(results, [])
+        self.cursor.execute.assert_not_called()
+
+
+class ObjectNameAllowListTest(unittest.TestCase):
+    """Which queries are object names and which fall through to the cone search."""
+
+    def setUp(self):
+        self.view, _, _ = load_view()
+        self.cursor = mock.MagicMock()
+        self.cursor.fetchall.return_value = []
+        remotePatch = mock.patch.object(self.view.db_connect, 'remote')
+        remote = remotePatch.start()
+        self.addCleanup(remotePatch.stop)
+        remote.return_value.cursor.return_value = self.cursor
+        self.converter = self.view.unit_conversion.return_value
+        self.converter.ra_sexegesimal_to_decimal.return_value = 150.1
+        self.converter.dec_sexegesimal_to_decimal.return_value = 2.2
+        self.view.coneSearchHTM.return_value = ('found', [])
+
+    def test_treats_real_object_names_as_names(self):
+        names = [
+            '800436191404681043', '12345678901234567', '1234567890123456789012',
+            '2026abc', 'AT2026abc', 'SN2026abc', 'KN2026abc', 'AT 2026abc',
+            'SN 2026abc', 'ZTF21abcdefg', 'ATLAS21xyz', 'Gaia21abc', 'PS1-13abc',
+            'ASASSN-21ab', 'CSS130101:123456+654321']
+        for name in names:
+            with self.subTest(name=name):
+                self.cursor.execute.reset_mock()
+                self.view.coneSearchHTM.reset_mock()
+
+                # ACT
+                self.view.do_search(name)
+
+                # ASSERT
+                self.assertEqual(self.cursor.execute.call_count, 3)
+                self.view.coneSearchHTM.assert_not_called()
+
+    def test_sends_coordinates_to_the_cone_search_with_the_default_radius(self):
+        for query in ['150.1 2.2', '150.1,2.2', '150.1|2.2']:
+            with self.subTest(query=query):
+                self.view.coneSearchHTM.reset_mock()
+
+                # ACT
+                self.view.do_search(query)
+
+                # ASSERT
+                self.assertEqual(
+                    self.view.coneSearchHTM.call_args.args[:3], (150.1, 2.2, 5.))
+
+    def test_sends_sexagesimal_coordinates_and_radius_to_the_cone_search(self):
+        # ACT
+        self.view.do_search('10:00:00 +02:00:00 7')
+
+        # ASSERT
+        self.converter.ra_sexegesimal_to_decimal.assert_called_once_with(ra='10:00:00')
+        self.converter.dec_sexegesimal_to_decimal.assert_called_once_with(dec='+02:00:00')
+        self.assertEqual(self.view.coneSearchHTM.call_args.args[:3], (150.1, 2.2, 7.))
+
+    def test_does_not_treat_other_text_as_an_object_name(self):
+        queries = ['12345', '123456789012345678901234', "a'b", 'abc def', 'a;b', '']
+        for query in queries:
+            with self.subTest(query=query):
+                self.cursor.execute.reset_mock()
+                self.converter.ra_sexegesimal_to_decimal.side_effect = ValueError
+
+                # ACT
+                results, schema = self.view.do_search(query)
+
+                # ASSERT
+                self.assertEqual((results, schema), ([], []))
+                self.cursor.execute.assert_not_called()
+
+    def test_returns_nothing_when_the_cone_radius_is_not_a_number(self):
+        # ACT
+        results, schema = self.view.do_search('10:00:00 +02:00:00 abc')
+
+        # ASSERT
+        self.assertEqual((results, schema), ([], []))
+        self.view.coneSearchHTM.assert_not_called()
+
+
 if __name__ == '__main__':
     import xmlrunner
     runner = xmlrunner.XMLTestRunner(output='test-reports')
