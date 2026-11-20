@@ -185,7 +185,7 @@ o.diaObjectId,
 h.contour, 
 o.lastDiaSourceMjdTai as "last detected",
 h.delta_t as "delta_t",
-o.latest_psfFlux, o.ra, o.decl
+o.latest_psfFlux
 FROM mma_assoc as h, objects AS o, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} AND o.diaObjectId=h.diaObjectId
 AND h.dist_host is NULL
@@ -204,12 +204,10 @@ ORDER BY h.contour LIMIT {resultCap}
              'latest flux': r2['latest_psfFlux'],
              }
 
-        r['ra'] = chop(r2['ra'])
-        r['decl'] = chop(r2['decl'])
         newtable2.append(r)
 
     count = len(table2)
-    schema2 = ['contour', 'last detected', 't_GW', 'latest flux', 'ra', 'decl']
+    schema2 = ['contour', 'last detected', 't_GW', 'latest flux']
 
     if count == resultCap:
         limit = resultCap
@@ -238,7 +236,9 @@ h.contour, h.dist_host,
 o.lastDiaSourceMjdTai as "last detected",
 h.delta_t as "delta_t",
 s.classification, s.distance, s.z, s.photoZ, s.photoZerr,
-o.latest_psfFlux, o.absMag, o.ra, o.decl 
+o.latest_psfFlux, o.absMag,
+JSON_EXTRACT(h.params, '$.dist_mean') as dist_mean,
+JSON_EXTRACT(h.params, '$.dist_stddev') as dist_stddev
 FROM mma_assoc as h, objects AS o, sherlock_classifications AS s, mma_events AS m
 WHERE m.mw_id={mw_id} AND h.mw_id={mw_id} 
 AND o.diaObjectId=h.diaObjectId AND o.diaObjectId=s.diaObjectId
@@ -252,8 +252,10 @@ ORDER BY h.dist_host DESC LIMIT {resultCap}
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
-             'dist_host': chop(r3['dist_host']),
              'contour': r3['contour'],
+             'dist_host': chop(r3['dist_host']),
+             'dist_mean': chop(r3['dist_mean']),
+             'dist_stddev': chop(r3['dist_stddev']),
              'last detected': r3['last detected'],
              'delta_t': chop(r3['delta_t']),
              'Sherlock': r3['classification'],
@@ -273,11 +275,9 @@ ORDER BY h.dist_host DESC LIMIT {resultCap}
         else:
             r['absMag'] = ''
 
-        r['ra'] = chop(r3['ra'])
-        r['decl'] = chop(r3['decl'])
         newtable3.append(r)
 
-    schema3 = ['contour', 'last detected', 't_GW', 'Sherlock', 'latest flux', 'absMag', 'z', 'zflag', 'ra', 'decl']
+    schema3 = ['contour', 'dist_host', 'dist_mean', 'dist_stddev', 'last detected', 'delta_t', 'Sherlock', 'latest flux', 'absMag', 'z', 'zflag']
 
     if count == resultCap:
         limit = resultCap
