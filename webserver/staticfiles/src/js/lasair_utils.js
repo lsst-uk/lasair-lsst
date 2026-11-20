@@ -15,8 +15,12 @@ function copy(text, target) {
  * SCHEMA BROWSER: ONE SEARCH BOX FILTERS THE ROWS OF EVERY SCHEMA TABLE ON THE PAGE.
  * A ROW MATCHES WHEN EVERY WORD TYPED IS IN ITS table.column NAME OR DESCRIPTION (data-schema-search).
  * A TABLE SECTION, THEN A WHOLE CARD, DISAPPEARS WHEN NONE OF ITS ROWS MATCH.
- * THE STATUS NOTE IS A LIVE REGION: VISUALLY HIDDEN WHILE COLUMNS MATCH, SHOWN WHEN NONE DO.
+ * THE FILTER WAITS FOR A PAUSE IN TYPING (SCHEMA_SEARCH_DEBOUNCE_MS) BEFORE IT RUNS.
+ * THE STATUS NOTE IS A LIVE REGION, SHOWN AS MUTED TEXT WHENEVER THE SEARCH BOX IS NOT EMPTY.
+ * CLICKING A JUMP LINK TO A TABLE (#<table>-schema) CLEARS THE SEARCH SO THE TARGET IS VISIBLE.
  */
+const SCHEMA_SEARCH_DEBOUNCE_MS = 250;
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchEl = document.getElementById('schema-search');
     if (searchEl === null) {
@@ -40,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             statusEl.textContent = matchCount + (matchCount === 1 ? ' column matches' : ' columns match');
         }
-        statusEl.classList.toggle('visually-hidden', !hasQuery || matchCount > 0);
+        statusEl.classList.toggle('mt-3', hasQuery);
     };
 
     const filterSchema = function() {
@@ -69,5 +73,17 @@ document.addEventListener('DOMContentLoaded', function() {
         updateStatus(words.length > 0, matchCount);
     };
 
-    searchEl.addEventListener('input', filterSchema);
+    let debounceTimer = null;
+    searchEl.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(filterSchema, SCHEMA_SEARCH_DEBOUNCE_MS);
+    });
+
+    document.querySelectorAll('a[href^="#"][href$="-schema"]').forEach(function(link) {
+        link.addEventListener('click', function() {
+            clearTimeout(debounceTimer);
+            searchEl.value = '';
+            filterSchema();
+        });
+    });
 });
