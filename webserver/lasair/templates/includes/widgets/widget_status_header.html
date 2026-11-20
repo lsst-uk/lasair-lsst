@@ -25,6 +25,12 @@
                         <div class="d-flex align-items-start">
                             <div class="h4 fw-extrabold mb-0 ms-2">Lasair Processing Status for {{prettyDate}} (MJD {{mjd}})</div>
                         </div>
+                        <div class="d-flex align-items-center mt-2 ms-2">
+                            <a class="btn btn-sm btn-gray-800 me-2" href='{% url "status" nid|add:-1 %}'>&lt; Previous Day</a>
+                            {% if daysAgo > 0 %}
+                                <a class="btn btn-sm btn-gray-800" href='{% url "status" nid|add:1 %}'>Next Day &gt;</a>
+                            {% endif %}
+                        </div>
                         <div>
                             <small class="text-gray-500">
                                 {{watchmap.description}}
