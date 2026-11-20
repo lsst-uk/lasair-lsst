@@ -42,10 +42,10 @@
                     <div class="card border-0 shadow">
                         <div class="card-body text-center">
                             {% comment %}
-                            display_sql is set only after Run Filter, so with no table it means the SQL failed. The view does not pass the error message to this page yet.
+                            display_sql is set only after Run Filter, so with no table it means the SQL failed. The view shows the error as a message at the top of the page.
                             {% endcomment %}
                             {% if display_sql %}
-                                <span class="text-gray-600">The filter could not run. Check the SQL above, then press <b>Run Filter</b>.</span>
+                                <span class="text-gray-600">Fix the error shown at the top of the page, then press <b>Run Filter</b>.</span>
                             {% else %}
                                 <span class="text-gray-600">Press <b>Run Filter</b> to see matching objects.</span>
                             {% endif %}
