@@ -1,6 +1,7 @@
 """Unit tests for reading the search query from GET (bookmarkable) or POST (old callers)."""
 import importlib
 import json
+import re
 import sys
 import types
 import unittest
@@ -267,6 +268,43 @@ class DoSearchSqlTest(unittest.TestCase):
                 # ASSERT
                 self.assertEqual(results, [])
                 self.assert_no_user_text_in_sql(text)
+
+    def test_never_puts_hostile_object_names_in_the_sql(self):
+        # ARRANGE
+        hostileNames = ['ZTF21abc OR 1', 'a UNION SELECT 1', 'ZTF21abc--', 'x OR 1 OR 2']
+
+        for text in hostileNames:
+            with self.subTest(text=text):
+                self.cursor.execute.reset_mock()
+
+                # ACT
+                self.view.do_search(text)
+
+                # ASSERT
+                calls = self.executed()
+                self.assertTrue(calls)
+                for sql, params in calls:
+                    self.assertNotIn(text, sql)
+                    self.assertIn(text, params)
+
+    def test_never_puts_hostile_text_in_the_sql_even_if_the_allow_list_accepts_it(self):
+        # ARRANGE
+        acceptEverything = re.compile(r'.*', re.S)
+
+        for text in INJECTIONS:
+            with self.subTest(text=text), \
+                    mock.patch.object(self.view, 'OBJECT_NAME', acceptEverything):
+                self.cursor.execute.reset_mock()
+
+                # ACT
+                self.view.do_search(text)
+
+                # ASSERT
+                calls = self.executed()
+                self.assertTrue(calls)
+                for sql, params in calls:
+                    self.assertNotIn(text, sql)
+                    self.assertIn(text, params)
 
     def test_binds_the_cone_search_ids_as_integers_with_one_placeholder_each(self):
         # ARRANGE
