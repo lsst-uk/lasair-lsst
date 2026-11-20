@@ -83,3 +83,29 @@ def column_tooltip(schema, key):
     if not description:
         return key
     return f'{key}: {description}'
+
+
+SITE_NAME = 'Lasair'
+TITLE_SEPARATOR = ' · '
+
+
+@register.filter(is_safe=True)
+def page_title(value):
+    """*the browser tab title: the page's own title, then the site name*
+
+    **Key Arguments:**
+
+    - ``value`` -- the rendered contents of a page's ``title`` block
+
+    **Return:**
+
+    - ``title`` -- "<page title> · Lasair", or just "Lasair" when the block is empty
+
+    **Usage:**
+
+        <title>{% filter page_title %}{% block title %}{% endblock title %}{% endfilter %}</title>
+    """
+    pageTitle = ' '.join(str(value).split())
+    if not pageTitle:
+        return SITE_NAME
+    return f'{pageTitle}{TITLE_SEPARATOR}{SITE_NAME}'

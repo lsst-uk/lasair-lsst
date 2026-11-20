@@ -21,7 +21,8 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-        <title>{% block title %}{% endblock title %} · Lasair</title>
+        {% load customtags %}
+        <title>{% filter page_title %}{% block title %}{% endblock title %}{% endfilter %}</title>
 
         {% include 'includes/metatags.html' %}
         {% include 'includes/analytics.html' %}
