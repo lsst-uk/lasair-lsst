@@ -44,7 +44,7 @@
 
         <div class="card-body p-2 pt-4">
             <div class="table-responsive p-4 pt-0">
-                <table  class="table table-flush datatable" id="{{type}}_datatable">
+                <table  class="table table-flush datatable" data-empty-text="{% if type == "my" %}You have no annotators yet. Contact us through Community if you have an idea for one.{% else %}No public annotators have been shared yet.{% endif %}" id="{{type}}_datatable">
                     <thead class="thead-light">
                         {% if type == "my" %}
                             <tr>
@@ -71,7 +71,7 @@
 
 
                                         <b><a href="{% url 'annotator_detail' annotator.topic %}">{{ annotator.topic }}</a></b></td>
-                                        <td  style="white-space: normal;">{% if annotator.description|length > 60 %}
+                                        <td  style="white-space: normal;">{% if not annotator.description %}{% elif annotator.description|length > 60 %}
                                             {{ annotator.description|safe|slice:"0:60" }} ...
 
                                             <a tabindex="0"  class="link-primary disable" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-html="true" data-bs-content="{{annotator.description|safe}}">more</a>
@@ -94,7 +94,7 @@
 
                                         <b><a href="{% url 'annotator_detail' annotator.topic %}">{{ annotator.topic }}</a></b></td>
                                         <td><img alt="Image placeholder" src="data:image/png;base64,{{ annotator.profile_image }}" class="mb-1 me-1 avatar rounded-circle"> {{ annotator.user }}</td>
-                                        <td  style="white-space: normal;">{% if annotator.description|safe|length > 60 %}
+                                        <td  style="white-space: normal;">{% if not annotator.description %}{% elif annotator.description|length > 60 %}
                                             {{ annotator.description|safe|slice:"0:60" }} ...
 
                                             <a tabindex="0"  class="link-primary disable" data-bs-container="body" data-bs-toggle="popover" data-bs-trigger="focus" data-bs-placement="top" data-bs-html="true" data-bs-content="{{annotator.description|safe}}">more</a>

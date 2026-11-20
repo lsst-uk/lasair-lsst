@@ -7,8 +7,6 @@
 
     <div class="card-body">
 
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in watchlist">{{count}}</span>
-
         <div class="row d-flex">
 
             <div class="col-12 mb-3 d-flex align-items-center">
@@ -49,11 +47,14 @@
             </div>
 
             <div class="col-12 px-4">
-                <small class="text-gray-500">
-                    {{watchlist.description}}
-                </small>
-                <small class="text-gray-500">
-		The watchlist contains {{number_cones}} sources with a default association radius of <b>{{watchlist.radius}} arcsec</b>. The watchlist is <b>{% if not watchlist.active %}not {% endif %} active</b> {% include "includes/info_tooltip.html" with info="When active, a watchlist will be dynamically matched against new transient alerts. See the watchlist settings to make changes" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}. The watchlist is matched against new sources entering Lasair going forward.  {% if user.is_authenticated and user.id == watchlist.user.id and rematchAllowed %}Click 'Rerun Watchlist' to also match the watchlist against the entire history of Lasair sources {% include "includes/info_tooltip.html" with info="Up to a maximum watchlist size of "|add:maxCrossmatchSize|add:" sources" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}.{% endif %}
+                {% if watchlist.description %}
+                    <small class="d-block text-gray-500 mb-2">{{watchlist.description}}</small>
+                {% endif %}
+                <small class="d-block text-gray-500">
+                    The watchlist contains {{number_cones}} sources with a default association radius of <b>{{watchlist.radius}} arcsec</b>, and <b>{{count}} object{{count|pluralize}} matched</b>.
+                    The watchlist is <b>{% if not watchlist.active %}not {% endif %}active</b>. {% include "includes/info_tooltip.html" with info="When active, a watchlist will be dynamically matched against new transient alerts. See the watchlist settings to make changes" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}
+                    The watchlist is matched against new sources entering Lasair going forward.
+                    {% if user.is_authenticated and user.id == watchlist.user.id and rematchAllowed %}Click 'Rerun Watchlist' to also match the watchlist against the entire history of Lasair sources. {% include "includes/info_tooltip.html" with info="Up to a maximum watchlist size of "|add:maxCrossmatchSize|add:" sources" position="auto" link=docroot|add:"/core_functions/watchlists.html" %}{% endif %}
                 </small>
             </div>
 

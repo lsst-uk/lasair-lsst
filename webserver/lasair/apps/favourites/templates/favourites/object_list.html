@@ -19,7 +19,11 @@
             {% endif %}
 
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with markable=True markList=mode %}
+                {% if mode == 'hidden' %}
+                    {% include "includes/widgets/widget_objectlist_table.html" with markable=True markList=mode heading="No hidden objects" icon="includes/icons/icon_eye_slash.html" %}
+                {% else %}
+                    {% include "includes/widgets/widget_objectlist_table.html" with markable=True markList=mode heading="No favourites yet" icon="includes/icons/icon_star.html" %}
+                {% endif %}
             </div>
         </div>
     </div>

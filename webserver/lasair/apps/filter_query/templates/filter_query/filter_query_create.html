@@ -6,7 +6,7 @@
 
 
 {% block title %}
-    {{data.diaObjectId}}
+    Filter Builder
 {% endblock title %}
 
 
@@ -36,7 +36,15 @@
                 </div>
             {% endif %}
             <div class="col-12 mb-4">
+                {% if table is not None %}
                 {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" sortTable=sortTable %}
+                {% else %}
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center">
+                            <span class="text-gray-600">Press <b>Run Filter</b> to see matching objects.</span>
+                        </div>
+                    </div>
+                {% endif %}
             </div>
 
 

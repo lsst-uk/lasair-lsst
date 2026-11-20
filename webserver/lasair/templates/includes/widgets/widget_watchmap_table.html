@@ -50,7 +50,7 @@
                 {% elif type == "community" %}
                     A watchmap is based on a region file (MOC format) which defines a specific portion of the sky. Each transient falling within that region of the sky is flagged as <em>matched</em> against that watchmap.
                 {% else %}
-                    Watchmaps submitted to the public gallery by other Lasair users. You can view matches or copy individual watchlists into your own collection.
+                    Watchmaps submitted to the public gallery by other Lasair users. You can view matches or copy individual watchmaps into your own collection.
                 {% endif %}
             </small>
         </div>
@@ -60,7 +60,7 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" {% if type == "community" %} datatable-vanilla {% endif %}  id="{{type}}_datatable">
+            <table  class="table table-flush datatable" data-empty-text="{% if type == "my" %}You have no watchmaps yet. Use Create New to make one.{% else %}No public watchmaps have been shared yet.{% endif %}" {% if type == "community" %} datatable-vanilla {% endif %}  id="{{type}}_datatable">
                 <thead class="thead-light">
                     {% if type == "my" %}
                         <tr>

@@ -23,8 +23,6 @@
 
                 <div class="card border-0 shadow h-100 p-2">
 
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Total number of recent LSST alerts">{{table|length}}</span>
-
                     <div class="card-header border-0">
 
 
@@ -53,7 +51,7 @@
                             <div class="col-12 px-4">
 
                                 <small class="text-gray-500">
-Below is a selection of recent alerts that have a Sherlock association.
+Below is a selection of recent alerts that have a Sherlock association. The table below lists <b>{{ table|length }} recent alert{{ table|length|pluralize }}</b>.
 Click on a marker for information about an object, or use the table below.
 Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,m:cDDaeb4>weather at the Observatory</a>.
                                 </small>
