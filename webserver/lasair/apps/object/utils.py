@@ -64,6 +64,25 @@ def flux2mag(flux):   # nanoJansky to Magnitude
 def mag2flux(mag):    # Magnitude to nanoJansky
     return math.pow(10.0, (31.4 - mag)/2.5)
 
+# LOG TOGGLE STYLES: DARK TEXT ON WHITE WITH A VISIBLE BORDER WHEN IDLE, BLUE WHEN THE LOG SCALE IS ON
+LOG_TOGGLE_IDLE = {"font.color": "#374151", "bgcolor": "#FFFFFF", "bordercolor": "#9CA3AF"}
+LOG_TOGGLE_ACTIVE = {"font.color": "#1E3A8A", "bgcolor": "#DBEAFE", "bordercolor": "#1E3A8A"}
+
+
+def log_toggle_style(style):
+    """*build the relayout keys that restyle the Log toggle button*
+
+    **Key Arguments:**
+
+    - ``style`` -- dict with ``font.color``, ``bgcolor`` and ``bordercolor``
+
+    **Return:**
+
+    - ``relayoutKeys`` -- the same colours keyed for ``updatemenus[0]``
+    """
+    return {f"updatemenus[0].{key}": value for key, value in style.items()}
+
+
 def object_difference_lightcurve(
     objectData,
     forced=False
@@ -385,11 +404,14 @@ def object_difference_lightcurve(
             dict(
                 type="buttons",
                 direction="right",
-                active=True,
-                font=dict(color="#D1D5DB"),
-                bgcolor="#6B7280",
+                # -1 MEANS NO BUTTON IS ACTIVE, WHICH MATCHES THE LINEAR AXES THE PLOT STARTS WITH
+                active=-1,
+                # THE ACTIVE LOOK IS SET BY THE RELAYOUT ARGS BELOW, NOT BY PLOTLY'S PALE HIGHLIGHT
+                showactive=False,
+                font=dict(color=LOG_TOGGLE_IDLE["font.color"]),
+                bgcolor=LOG_TOGGLE_IDLE["bgcolor"],
                 borderwidth=1,
-                bordercolor="#D1D5DB",
+                bordercolor=LOG_TOGGLE_IDLE["bordercolor"],
                 x=-0.03,  # Horizontal position (0 to 1)
                 y=1.02,  # Vertical position (above the plot)
                 xanchor="center",  # Anchor the button group at the center
@@ -398,8 +420,9 @@ def object_difference_lightcurve(
                     dict(
                         label="Log",
                         method="relayout",
-                        args=[{"yaxis.type": "linear", "yaxis2.type": "linear", "updatemenus[0].font.color": "#D1D5DB", "updatemenus[0].bgcolor": "#6B7280"}],
-                        args2=[{"yaxis.type": "log","yaxis2.type": "log","updatemenus[0].font.color": "#E11D48", "updatemenus[0].bgcolor": "#D1D5DB"}],
+                        # FIRST CLICK TURNS THE LOG SCALE ON, SECOND CLICK TURNS IT OFF
+                        args=[{"yaxis.type": "log", "yaxis2.type": "log", **log_toggle_style(LOG_TOGGLE_ACTIVE)}],
+                        args2=[{"yaxis.type": "linear", "yaxis2.type": "linear", **log_toggle_style(LOG_TOGGLE_IDLE)}],
                     ),
                 ],
             )
