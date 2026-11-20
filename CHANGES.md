@@ -42,3 +42,27 @@
 **REFACTOR**: removed the unused Aladin Lite files `aladin.js`, `aladin.min.js` and `aladin.min.css` from `webserver/static/vendor/` and `webserver/staticfiles/vendor/`; no page loaded them, and Aladin Lite now comes from `vendor/aladin-lite/<VERSION>/`.
 
 **FEATURE**: hiding an object from a result table fades the row, rolls it up and removes it, and a panel shown once per browser session says where hidden objects went.
+
+**ENHANCEMENT**: search now sends a GET request, so `/search/?query=<text>` links work and a search can be bookmarked or shared; the old `/search/<query>` URL still works.
+
+**ENHANCEMENT**: results and object-page tables fit their cards at desktop width without a scrollbar above the table, show readable column headings with units (for example "separation (arcsec)" and "r flux (nJy)"), keep the mark column and diaObjectId in view while other columns scroll, and no longer let sort arrows cover short headings; sorting and export still use the raw column names. The `table-responsive` wrapper stays as a fallback for older CSS.
+
+**ENHANCEMENT**: the Schema Browser has one search box in its header card that filters every table by table name, column name, or description, shows the match count, and clears when you click a table jump link.
+
+**ENHANCEMENT**: the sidebar highlights only the current page, sets `aria-current`, shows a keyboard focus ring, points the Sky Area and Status arrows down when their menus are open, and opens those menus with real buttons.
+
+**ENHANCEMENT**: every page has a tab title in the form "Page name · Lasair", including the Home, object, Filter Builder, and sign-in pages; the sign-in row now puts "Remember me" on the left and one "Forgot password?" link on the right, and the logo links home.
+
+**REFACTOR**: the old `/api`, `/contact`, and `/simple_search` pages are replaced by redirects to the REST API docs, the contact docs, and the Filter Builder; the unused `api.html`, `contact.html`, and `simple_search.html` templates are deleted.
+
+**FIXED**: the search view built SQL by joining user input into the query string; it now binds every value as a parameter, accepts object names only from an allow-list, rejects cone radii that are not finite and positive or are over 1000 arcsec, rejects coordinates that are not finite or are off the sky (and accepts a declination of exactly 90), and the unused `conesearch_impl`, `readcone`, `sexra`, and `sexde` helpers are removed.
+
+**FIXED**: the `run_filter` error message showed the internal query wrapper and put the user's SQL and the database error into HTML unescaped; it now shows the SQL the user wrote, escapes both strings, and the Filter Builder shows this error after a failed run.
+
+**FIXED**: the status page hid the Next day button in the evening, because `nid_to_days_ago` read the clock separately from `nid_now`; both now use `nid_now`, and the Previous day and Next day buttons sit in the header card.
+
+**FIXED**: filter name and description examples are placeholders, not prefilled text, and a form submitted with the example text is rejected; the Filter Builder no longer shows "ZERO MATCHES" before a run; the lightcurve Log toggle looks like a button and shows when it is on; the filter list shows an Active or Off badge on every row.
+
+**FIXED**: text and empty states from the UI/UX audit: clearer intros for the home, filters, watchmaps, and annotators pages, a watchlist header with a count in words in place of the corner badge, empty tables that name the item and the next step, a favourites empty state, no "None" for an empty annotator description, a profile form with full-width upload and its help text below, and an annotator header that tested `annotation.active`, a variable that does not exist.
+
+**TEST**: new unit tests cover search, filter descriptions, the Log toggle, docs redirects, column labels, page titles, and the `run_filter` error, and `test_date_nid.py` freezes the clock; all run in `tests/Jenkinsfile`.
