@@ -59,7 +59,7 @@
 
 **FIXED**: the `run_filter` error message showed the internal query wrapper and put the user's SQL and the database error into HTML unescaped; it now shows the SQL the user wrote, escapes both strings, and the Filter Builder shows this error after a failed run.
 
-**FIXED**: the status page hid the Next day button in the evening, because `nid_to_days_ago` read the clock separately from `nid_now`; both now use `nid_now`, and the Previous day and Next day buttons sit in the header card.
+**FIXED**: the status page hid the Next day button in the evening, because `nid_to_days_ago` read the clock separately from `nid_now`; both now use `nid_now`.
 
 **FIXED**: filter name and description examples are placeholders, not prefilled text, and a form submitted with the example text is rejected; the Filter Builder no longer shows "ZERO MATCHES" before a run; the lightcurve Log toggle looks like a button and shows when it is on; the filter list shows an Active or Off badge on every row.
 

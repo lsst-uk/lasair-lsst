@@ -1,15 +1,14 @@
 {% comment %}
 The empty-state card. Optional `heading` and `icon` (a template path) replace
-the default "ZERO MATCHES" heading and icon; a custom heading is shown in a
-readable grey rather than the pale default.
+the default "ZERO MATCHES" heading and icon.
 {% endcomment %}
 <div class="card-body p-2 pt-4">
 
     <div class="vstack gap-3 align-items-center justify-content-center">
-        <div class="icon icon-xxl rounded me-4 me-sm-0 {% if heading %}text-gray-500{% else %}text-gray-200{% endif %}">
+        <div class="icon icon-xxl rounded me-4 me-sm-0 text-gray-200">
             {% include icon|default:"includes/icons/icon_zero_matches.html" %}
         </div>
-        <h2 class="h1 fw-extrabold mb-0 {% if heading %}text-gray-700{% else %}text-gray-200{% endif %}">{{ heading|default:"ZERO MATCHES" }}</h2>
+        <h2 class="h1 fw-extrabold mb-0 text-gray-200">{{ heading|default:"ZERO MATCHES" }}</h2>
         <small class="text-gray-500">
             {{ info }}
         </small>
