@@ -57,10 +57,9 @@
                     <small class="d-block text-gray-500 mb-2">{{filterQ.description}}</small>
                 {% endif %}
                 <small class="d-block text-gray-500">
-                    {% if count is not None %}<b>{{ count }}{% if count >= 10000 %}+{% endif %} object{{ count|pluralize }} matched</b>. {% endif %}The filter is <b>{% if filterQ.run %}active{% else %}not active{% endif %}</b>{% if filterQ.output == 1 %}
-                        and <b>streamed via email</b>{% elif filterQ.output >= 2 %}
-                        and <b>streamed via Kafka{% if filterQ.output == 3 %} with lite lightcurve{% elif filterQ.output == 4 %} with full alert{% endif %}</b>{% if filterQ.topic_name %} with the topic name <code>{{filterQ.topic_name}}</code>{% endif %}{% endif %}.
-                    {% include "includes/info_tooltip.html" with info="when active, a filter will be dynamically matched against new transient alerts and/or annotations and the results streamed via email or Kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
+                    {% if count is not None %}<b>{{ count }}{% if count >= 10000 %}+{% endif %} object{{ count|pluralize }} matched</b>. {% endif %}The filter is <b>{% if filterQ.run %}active{% else %}not active{% endif %}</b>{% if filterQ.output == 1 or filterQ.output >= 2 %}{% if filterQ.run %}
+                        and {% else %}. When active, its results will be {% endif %}<b>streamed via {% if filterQ.output == 1 %}email{% else %}Kafka{% if filterQ.output == 3 %} (lite lightcurve){% elif filterQ.output == 4 %} (full alert){% endif %}{% endif %}</b>{% if filterQ.output >= 2 and filterQ.topic_name %} with the topic name <code>{{filterQ.topic_name}}</code>{% endif %}{% endif %}.
+                    {% include "includes/info_tooltip.html" with info="When active, a filter will be dynamically matched against new transient alerts and/or annotations and the results streamed via email or Kafka" position="auto" link=docroot|add:"/core_functions/alert-streams.html#kafka-streams" %}
                 </small>
             </div>
 
