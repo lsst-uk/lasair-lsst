@@ -1,5 +1,4 @@
 import datetime
-from time import gmtime
 
 SOON_HOURS = 4
 
