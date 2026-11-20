@@ -30,11 +30,40 @@
       - dustmaps
       - cassandra-driver
 
-- name: Install dustmaps
+# HARVARD DATAVERSE RETURNS 403 TO THE PYTHON-REQUESTS USER AGENT THAT
+# DUSTMAPS.SFD.FETCH() USES, SO DOWNLOAD THE TWO SFD MAPS THAT SFDQUERY NEEDS
+# RESOLVE THE PATH AS THE PIPELINE USER, WHO READS THE MAPS AT RUN TIME
+- name: Find dustmaps data directory
+  become: false
+  ansible.builtin.command:
+    cmd: "{{ venv_path }}/bin/python3 -c 'from dustmaps.std_paths import data_dir; print(data_dir())'"
+  register: dustmaps_data_dir
+  changed_when: false
+
+- name: Create SFD dust map directory
   become: true
-  ansible.builtin.script:
-    cmd: dustmap.py
-    executable: "{{ venv_path }}/bin/python3"
+  ansible.builtin.file:
+    path: "{{ dustmaps_data_dir.stdout }}/sfd"
+    state: directory
+    mode: "0755"
+
+- name: Download SFD dust maps
+  become: true
+  ansible.builtin.get_url:
+    url: "https://dataverse.harvard.edu/api/access/datafile/{{ item.file_id }}"
+    dest: "{{ dustmaps_data_dir.stdout }}/sfd/SFD_dust_4096_{{ item.pole }}.fits"
+    checksum: "md5:{{ item.md5 }}"
+    mode: "0644"
+  # DATAVERSE FILE IDS AND MD5S OF THE SFD FILES IN DOI 10.7910/DVN/EWCNL5, THE DATASET DUSTMAPS.SFD.FETCH() USES
+  loop:
+    - { pole: ngp, file_id: 2902687, md5: 6f3a89528bba7d1b7bd55838da86b639 }
+    - { pole: sgp, file_id: 2902695, md5: 60f7c43d51bccaff82961de3e9f9e789 }
+
+- name: Check SFD dust maps load
+  become: false
+  ansible.builtin.command:
+    cmd: "{{ venv_path }}/bin/python3 -c 'from dustmaps.sfd import SFDQuery; SFDQuery()'"
+  changed_when: false
 
 #- name: Create csvfiles directory
 #  file:
@@ -104,5 +133,5 @@
     - "area_hits.sql"
     - "watchlist_hits.sql"
     - "annotations.sql"
-    - "mma_area_hits.sql"
+    - "mma_assoc.sql"
 

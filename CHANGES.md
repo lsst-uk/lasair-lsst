@@ -2,9 +2,19 @@
 
 ## Unreleased
 
+**FEATURE**: the profile page has a "Regenerate token" button below the blurred API token; it opens a confirmation box that warns the old token stops working at once, and the token is replaced only when you confirm.
+
+**ENHANCEMENT**: the profile page shows the API token blurred, with buttons to reveal it and to copy it without revealing it.
+**FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
+
+**ENHANCEMENT**: the object page's top card is renamed Object Info, is headed with the object's `LSST-AP-DO-<diaObjectId>` name and shows its discovery, latest and peak details in tables at all times, without a Go Deeper button, the object's RA and Dec move to the Detection Scatter card, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
+
+**ENHANCEMENT**: the object page layout now adapts to narrow windows: the top cards rearrange by width, the Object Info tables stack when the card is narrow, the scatter plot keeps a sensible size, and the light curves show fewer date labels on narrow plots and keep the UTC Time title clear of the legend.
+
 **FIXED**: every page was slow or stalled when the CDS servers were slow, because each page loaded Aladin Lite with a blocking script tag from the CDS website; Lasair now serves its own copy of Aladin Lite 3.8.1, loads it only on the home, object and MMA watchmap pages, loads it in the background, and shows a message in the sky map if it has not loaded after 10 seconds.
 
 **FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
+
 **FIXED**: the `fits` cutout view opened a new Cassandra cluster connection on every request and never shut it down; each web worker now reuses one connection, and rebuilds it after a failed connect, a lost connection, a shutdown, or a fork.
 
 **FIXED**: `test_hidden_object_results.py` and `test_email_digest.py` failed in CI, because they relied on settings (`lasair.settings`, `LASAIR_URL`) that only the gitignored `settings.py` on developer machines provides.
@@ -16,6 +26,7 @@
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
 
 **ENHANCEMENT**: the website sidebar, the mobile navbar and the docs sidebar now show the Rubin Observatory logo beside or below the Lasair logo, so you can tell Lasair LSST from Lasair ZTF; the sidebar background is back to its original `bg-gray-800` dark grey; the sidebar logo, text and spacing are smaller so every link fits a laptop screen without scrolling, while phones keep 44 px tap rows; the rows-per-page selector, row count and page buttons under each table no longer squash together on a laptop screen, and the page buttons move to their own row at the right when there is no room (DY-209).
+**FIXED**: the test image build and the filter deploy role failed to install the SFD dust maps, because Harvard Dataverse now returns 403 to the python-requests user agent that `dustmaps.sfd.fetch()` uses; both now download the two maps directly, check their MD5 sums, and confirm `SFDQuery` loads them.
 
 **ENHANCEMENT**: the New and Edit Filter forms no longer offer the per-user `tags_<username>` annotators in the Object Annotators list; a filter that already uses one keeps it.
 

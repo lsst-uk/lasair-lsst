@@ -17,7 +17,7 @@ cmd = f"mysqldump --single-transaction --user={settings.DB_USER_READWRITE} --pas
         --port={settings.BACKUP_DATABASE_PORT} --host={settings.BACKUP_DATABASE_HOST} {settings.DB_DATABASE} \
         annotators areas auth_group auth_group_permissions auth_permission auth_user auth_user_groups \
         auth_user_user_permissions authtoken_token django_admin_log django_content_type django_migrations \
-        django_session lasair_statistics mma_areas myqueries users_profile watchlist_cones watchlists \
+        django_session lasair_statistics mma_events myqueries users_profile watchlist_cones watchlists \
         > {settings.MYSQL_BACKUP_DIR}/mysqlbackup-web.sql"
 execute_cmd(cmd, logfile)
 

@@ -1,5 +1,5 @@
 """
-Delete mma_area_hits as specified. BUt not the mma_areas themselves.
+Delete mma_assoc as specified. BUt not the mma_events themselves.
 
 Usage:
     delete_hits.py [--mw_id=mw_id]

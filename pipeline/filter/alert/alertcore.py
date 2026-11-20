@@ -47,7 +47,7 @@ class AlertFilter(Filter):
             'sherlock_classifications',
             'watchlist_hits',
             'area_hits',
-            'mma_area_hits',
+            'mma_assoc',
         ]
         try:
             for table_name in table_list:

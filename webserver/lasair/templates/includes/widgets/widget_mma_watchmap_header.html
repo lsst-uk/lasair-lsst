@@ -11,7 +11,7 @@
                 <div class="icon-shape icon-shape-tertiary rounded me-2">
                     {% include "includes/icons/icon_watchmap.html" %}
                 </div>
-		<div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.namespace }}:{{ mma_watchmap.otherId }} </div> 
+		<div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.namespace }}:{{ mma_watchmap.event_id }} </div> 
 		<div class="h5 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.event_date }}</div>
             </div>
         </div>
@@ -48,7 +48,7 @@
 <script type="text/javascript">
 var aladin;
 var circle_size = 0.1;
-var url = 'https://{{ lasair_url }}/lasair/static/mma/{{ mma_watchmap.namespace }}/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
+var url = 'https://{{ lasair_url }}/lasair/static/mma/{{ mma_watchmap.namespace }}/{{ mma_watchmap.event_id }}/{{ mma_watchmap.version }}/';
 loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
     aladin = A.aladin('#aladin-lite-div',
         {target: '{{ mma_watchmap.params.location.RA }} {{ mma_watchmap.params.location.Dec }}', fov: 20,
