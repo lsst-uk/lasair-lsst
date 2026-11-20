@@ -37,11 +37,18 @@
             {% endif %}
             <div class="col-12 mb-4">
                 {% if table is not None %}
-                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" sortTable=sortTable %}
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="No objects match this filter. Change the conditions and press <b>Run Filter</b> again." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" sortTable=sortTable %}
                 {% else %}
                     <div class="card border-0 shadow">
                         <div class="card-body text-center">
-                            <span class="text-gray-600">Press <b>Run Filter</b> to see matching objects.</span>
+                            {% comment %}
+                            display_sql is set only after Run Filter, so with no table it means the SQL failed. The view does not pass the error message to this page yet.
+                            {% endcomment %}
+                            {% if display_sql %}
+                                <span class="text-gray-600">The filter could not run. Check the SQL above, then press <b>Run Filter</b>.</span>
+                            {% else %}
+                                <span class="text-gray-600">Press <b>Run Filter</b> to see matching objects.</span>
+                            {% endif %}
                         </div>
                     </div>
                 {% endif %}
