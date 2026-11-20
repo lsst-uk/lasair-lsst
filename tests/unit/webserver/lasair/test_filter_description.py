@@ -1,4 +1,4 @@
-"""Unit tests for rejecting the example text as a filter description."""
+"""Unit tests for rejecting the example text as a filter name or description."""
 import importlib
 import sys
 import types
@@ -12,10 +12,22 @@ from django.core.exceptions import ValidationError
 sys.path.insert(0, '../../../../webserver')
 
 EXAMPLE = 'A detailed description of your filter.'
+EXAMPLE_NAME = 'Make it memorable'
+FORM_NAMES = ('filterQueryForm', 'UpdateFilterQueryForm', 'DuplicateFilterQueryForm')
 
 
 class FakeModelForm:
     """Stands in for django.forms.ModelForm so the form module imports without a database."""
+
+    def clean(self):
+        return self.cleaned_data
+
+
+class FakeWidget:
+    """Records the attrs a form widget was built with."""
+
+    def __init__(self, attrs=None, **kwargs):
+        self.attrs = dict(attrs or {})
 
 
 def module(**attributes):
@@ -28,7 +40,7 @@ def load_forms():
     """Load the filter_query forms module with framework and infrastructure edges stubbed."""
     forms = module(
         ModelForm=FakeModelForm, ValidationError=ValidationError,
-        TextInput=mock.Mock(), Textarea=mock.Mock(), CheckboxInput=mock.Mock(),
+        TextInput=FakeWidget, Textarea=FakeWidget, CheckboxInput=mock.Mock(),
         Select=mock.Mock(), SelectMultiple=mock.Mock(), ChoiceField=mock.Mock(),
         MultipleChoiceField=mock.Mock(), BooleanField=mock.Mock())
     messages = module()
@@ -69,6 +81,26 @@ def clean_description_of(formsModule, text):
     return probe.clean_description()
 
 
+def clean_name_of(formsModule, text):
+    """Run clean_name on a bare form that holds the given name."""
+    class Probe(formsModule.DescriptionPlaceholderMixin):
+        pass
+
+    probe = Probe()
+    probe.cleaned_data = {'name': text}
+    return probe.clean_name()
+
+
+def form_without_a_name(formsModule, formName, action):
+    """Build a form that failed name validation, so cleaned_data has no name."""
+    form = getattr(formsModule, formName).__new__(getattr(formsModule, formName))
+    form.request = types.SimpleNamespace(
+        POST={'action': action}, user=types.SimpleNamespace(username='demo'))
+    form.cleaned_data = {'selected': 'objects.diaObjectId', 'conditions': ''}
+    form.instance = types.SimpleNamespace(name='')
+    return form
+
+
 class FilterDescriptionTest(unittest.TestCase):
 
     @classmethod
@@ -106,6 +138,55 @@ class FilterDescriptionTest(unittest.TestCase):
             with self.subTest(form=name):
                 self.assertTrue(issubclass(
                     getattr(self.forms, name), self.forms.DescriptionPlaceholderMixin))
+
+    def test_every_form_shows_the_same_description_placeholder_the_check_rejects(self):
+        # ASSERT
+        self.assertEqual(self.forms.EXAMPLE_DESCRIPTION, EXAMPLE)
+        for name in FORM_NAMES:
+            with self.subTest(form=name):
+                widget = getattr(self.forms, name).Meta.widgets['description']
+                self.assertEqual(widget.attrs['placeholder'], EXAMPLE)
+
+    def test_no_form_prefills_the_name_box_with_the_example_text(self):
+        for name in FORM_NAMES:
+            with self.subTest(form=name):
+                widget = getattr(self.forms, name).Meta.widgets['name']
+                self.assertNotIn('value', widget.attrs)
+                self.assertEqual(widget.attrs['placeholder'], EXAMPLE_NAME)
+
+    def test_rejects_the_example_name(self):
+        # ACT / ASSERT
+        with self.assertRaises(ValidationError) as caught:
+            clean_name_of(self.forms, f'  {EXAMPLE_NAME} ')
+        self.assertIn('choose a name', caught.exception.messages[0])
+
+    def test_accepts_a_real_name(self):
+        # ACT / ASSERT
+        self.assertEqual(clean_name_of(self.forms, 'Fast risers'), 'Fast risers')
+
+    def test_accepts_a_name_that_only_contains_the_example_text(self):
+        # ARRANGE
+        text = f'{EXAMPLE_NAME} for me'
+
+        # ACT / ASSERT
+        self.assertEqual(clean_name_of(self.forms, text), text)
+
+    def test_saving_with_a_rejected_name_does_not_crash_the_form(self):
+        for formName, action in [('UpdateFilterQueryForm', 'save'),
+                                 ('DuplicateFilterQueryForm', 'copy'),
+                                 ('filterQueryForm', 'save')]:
+            with self.subTest(form=formName):
+                form = form_without_a_name(self.forms, formName, action)
+
+                with mock.patch.object(self.forms, 'check_query', return_value=None), \
+                        mock.patch.object(self.forms, 'check_query_zero_limit', return_value=None), \
+                        mock.patch.object(self.forms, 'build_query'), \
+                        mock.patch.object(self.forms, 'tag_topic'):
+                    # ACT
+                    cleaned = form.clean()
+
+                # ASSERT
+                self.assertNotIn('name', cleaned)
 
 
 if __name__ == '__main__':

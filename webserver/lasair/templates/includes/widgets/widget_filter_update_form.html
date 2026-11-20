@@ -34,7 +34,7 @@
                 <div class="form-group mb-4">
                     <label for="description">Description</label>
                     <div class="input-group">
-                        <textarea name="description" cols="40" rows="3" required="true" maxlength="4096" class="form-control" id="id_description" placeholder="A detailed description of your filter.">{{ form.description.value|default_if_none:"" }}</textarea>
+                        <textarea name="description" cols="40" rows="3" required="true" maxlength="4096" class="form-control" id="id_description" placeholder="{{ form.description.field.widget.attrs.placeholder }}">{{ form.description.value|default_if_none:"" }}</textarea>
                     </div>
                     <span class="text-error">{{ form.description.errors }}</span>
                 </div>

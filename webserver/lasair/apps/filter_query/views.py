@@ -438,7 +438,7 @@ def filter_query_create(request, mq_id=False):
             favouritesOnly = form.initial.get("favouritesOnly", False)
             includeHidden = form.initial.get("includeHidden", False)
 
-            name = form.fields['name'].widget.attrs['value']
+            name = form.fields['name'].widget.attrs.get('value')
             description = form.fields['description'].widget.attrs['value']
             public = form.initial["public"]
             run = form.initial["run"]
