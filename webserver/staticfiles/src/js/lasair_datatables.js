@@ -55,6 +55,18 @@ function exportWithRawColumnNames(dataTable, exportOptions) {
     }
 }
 
+/*
+ * EACH COLUMN'S RAW NAME: THE <th>'S data-column-name WHEN IT HAS ONE (THE SHARED RESULTS TABLE),
+ * OTHERWISE ITS HEADING TEXT. LOOKUPS BY NAME USE THIS, SO A READABLE LABEL CANNOT BREAK THEM.
+ */
+function columnNames(dataTable) {
+    const labels = dataTable.columns().dt.labels;
+    return dataTable.headings.map(function(th, idx) {
+        const rawName = th.getAttribute('data-column-name');
+        return rawName === null ? labels[idx] : rawName;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     let dataTableEls = d.querySelectorAll('.datatable');
@@ -120,7 +132,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 frameScrollingTable(dataTable);
             }
 
-            const headings = dataTable.columns().dt.labels;
+            const headings = columnNames(dataTable);
 
             if (headings.includes("objectId")) {
                 const idx = headings.indexOf("objectId");
@@ -129,7 +141,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const idx = headings.indexOf("Created");
                 dataTable.columns().sort(idx, "desc")
             }
-            // console.log(dataTable.columns().dt.labels);
 
             if (tableId !== null) {
                 document.querySelectorAll(`a[data-table=${CSS.escape(tableId)}]`).forEach(function(el) {
@@ -155,8 +166,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         // REMOVE IMAGES AND ALERT PACKET COLUMNS IF THEY EXIST, AS THESE ARE NOT NEEDED IN THE EXPORT
                         const removeCols = ["images", "alert packet"];
                         const colIdxsToRemove = [];
-                        dataTable.columns().dt.labels.forEach(function(label, idx) {
-                            if (removeCols.includes(label)) {
+                        columnNames(dataTable).forEach(function(name, idx) {
+                            if (removeCols.includes(name)) {
                                 colIdxsToRemove.push(idx);
                             }
                         });

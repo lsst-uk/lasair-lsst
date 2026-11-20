@@ -85,7 +85,7 @@
                 <thead class="thead-light">
                     <tr>
                         {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
-                            <th class="mark-col"><span class="visually-hidden">Mark</span></th>
+                            <th class="mark-col" data-sortable="false"><span class="visually-hidden">Mark</span></th>
                         {% endif %}
                         {% for key in table.0.keys %}
                             {% comment %}

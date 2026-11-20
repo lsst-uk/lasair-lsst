@@ -54,7 +54,7 @@ class ColumnLabelTest(unittest.TestCase):
         label = column_label('UTC')
 
         # ASSERT
-        self.assertEqual(label, 'Alert Time')
+        self.assertEqual(label, 'Alert time (UTC)')
 
     def test_keeps_the_dia_object_id_name(self):
         # ACT
