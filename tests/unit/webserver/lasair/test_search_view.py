@@ -366,6 +366,41 @@ class ObjectNameAllowListTest(unittest.TestCase):
         self.converter.dec_sexegesimal_to_decimal.assert_called_once_with(dec='+02:00:00')
         self.assertEqual(self.view.coneSearchHTM.call_args.args[:3], (150.1, 2.2, 7.))
 
+    def test_returns_nothing_when_the_cone_radius_is_not_usable(self):
+        for radius in ['nan', 'inf', '-inf', '1e400', '0', '-5', '-0.0']:
+            with self.subTest(radius=radius):
+                self.view.coneSearchHTM.reset_mock()
+
+                # ACT
+                results, schema = self.view.do_search(f'10 20 {radius}')
+
+                # ASSERT
+                self.assertEqual((results, schema), ([], []))
+                self.view.coneSearchHTM.assert_not_called()
+
+    def test_caps_the_cone_radius_at_the_maximum(self):
+        # ACT
+        self.view.do_search('150.1 2.2 1000000')
+
+        # ASSERT
+        self.assertEqual(
+            self.view.coneSearchHTM.call_args.args[2], self.view.MAX_CONE_RADIUS_ARCSEC)
+
+    def test_keeps_a_radius_below_the_maximum(self):
+        # ACT
+        self.view.do_search('150.1 2.2 10')
+
+        # ASSERT
+        self.assertEqual(self.view.coneSearchHTM.call_args.args[2], 10.)
+
+    def test_does_not_swallow_an_interrupt_while_reading_the_coordinates(self):
+        # ARRANGE
+        self.converter.ra_sexegesimal_to_decimal.side_effect = KeyboardInterrupt
+
+        # ACT / ASSERT
+        with self.assertRaises(KeyboardInterrupt):
+            self.view.do_search('150.1 2.2')
+
     def test_returns_nothing_when_the_cone_radius_is_not_a_number(self):
         # ACT
         results, schema = self.view.do_search('10:00:00 +02:00:00 abc')

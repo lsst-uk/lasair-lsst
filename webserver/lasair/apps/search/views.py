@@ -3,6 +3,7 @@ from lasair.apps.favourites.utils import marks_for_table, suppress_hidden
 from django.http import JsonResponse
 from django.shortcuts import render
 from .utils import conesearch_impl, readcone, sexra, sexde
+import math
 import re
 import settings
 from src import db_connect
@@ -13,6 +14,9 @@ from django.db import connection
 from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
 
 DEFAULT_CONE_RADIUS = 5.
+# SAME LIMIT AS THE CONE SEARCH IN THE API (webserver/lasairapi/serializers.py), WHICH REFUSES
+# RADII ABOVE 1000 ARCSEC; HERE A LARGER RADIUS IS CAPPED TO IT
+MAX_CONE_RADIUS_ARCSEC = 1000.
 
 # ROUTING ALLOW-LIST FOR OBJECT NAMES. EVERY VALUE IS BOUND AS A PARAMETER, SO THIS ONLY DECIDES
 # WHICH QUERIES ARE NAME SEARCHES. ANYTHING ELSE IS TREATED AS A CONE SEARCH. IT MATCHES:
@@ -74,6 +78,48 @@ def search(
         return render(request, 'search/search.html', {'results': [], 'schema': [], 'query': ''})
 
 
+def parse_cone(
+    query
+):
+    """*read the ra, dec and optional radius of a cone search from the query text*
+
+    **Key Arguments:**
+
+    - `query` -- the cleaned query text; coordinates are separated by spaces or by a pipe
+
+    **Return:**
+
+    - `(ra, dec, radius)` -- degrees, degrees and arcsec, with the radius capped at `MAX_CONE_RADIUS_ARCSEC`, or `None` if the query is not a usable cone search
+
+    **Usage:**
+
+    ```python
+    ra, dec, radius = parse_cone("150.1 2.2 10")
+    ```
+    """
+    if "|" in query:
+        tokens = [q.strip() for q in query.split("|")]
+    else:
+        tokens = query.split()
+
+    if len(tokens) not in (2, 3):
+        return None
+
+    # ASTROCALC UNIT CONVERTER OBJECT
+    converter = unit_conversion(log=emptyLogger())
+    try:
+        ra = converter.ra_sexegesimal_to_decimal(ra=tokens[0])
+        dec = converter.dec_sexegesimal_to_decimal(dec=tokens[1])
+        radius = float(tokens[2]) if len(tokens) == 3 else DEFAULT_CONE_RADIUS
+    except Exception:
+        return None
+
+    # REJECT NAN AND INFINITY (1e400 PARSES AS inf) AND ZERO OR NEGATIVE RADII, THEN CAP LARGE ONES
+    if not math.isfinite(radius) or radius <= 0:
+        return None
+    return ra, dec, min(radius, MAX_CONE_RADIUS_ARCSEC)
+
+
 def do_search(
     query
 ):
@@ -123,30 +169,10 @@ def do_search(
             results += cursor.fetchall()
     else:
         # ASSUME THIS COULD BE A CONE SEARCH
-        if "|" in query:
-            squery = query.split("|")
-            query = [q.strip() for q in squery]
-        else:
-            query = query.split()
-
-        if len(query) in (2, 3):
-            log = emptyLogger()
-            # ASTROCALC UNIT CONVERTER OBJECT
-            converter = unit_conversion(
-                log=log
-            )
-            try:
-                ra = converter.ra_sexegesimal_to_decimal(
-                    ra=query[0]
-                )
-                dec = converter.dec_sexegesimal_to_decimal(
-                    dec=query[1]
-                )
-                radius = float(query[2]) if len(query) == 3 else DEFAULT_CONE_RADIUS
-            except:
-                return [], []
-        else:
+        cone = parse_cone(query)
+        if cone is None:
             return [], []
+        ra, dec, radius = cone
 
         # Is there an object within RADIUS arcsec of this object? - KWS - need to fix the gkhtm code!!
         message, matches = coneSearchHTM(ra, dec, radius, 'objects', queryType=QUICK, conn=connection, django=True, prefix='htm', suffix='')
@@ -161,7 +187,7 @@ def do_search(
     # MAKE UNIQUE
     try:
         results = list({v['diaObjectId']: v for v in results}.values())
-    except:
+    except Exception:
         pass
 
     return results, schema
