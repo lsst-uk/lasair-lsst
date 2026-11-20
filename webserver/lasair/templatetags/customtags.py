@@ -12,6 +12,8 @@ COLUMN_LABELS = {
     'UTC': 'Alert time (UTC)',
     'psfFlux': 'Latest flux (nJy)',
     'latest_psfFlux': 'Latest flux (nJy)',
+    'latest flux': 'Latest flux (nJy)',
+    'predicted type': 'Predicted type',
     'lastDiaSourceMjdTai': 'Last detected (MJD)',
     'firstDiaSourceMjdTai': 'First detected (MJD)',
     'nDiaSources': 'Detections',

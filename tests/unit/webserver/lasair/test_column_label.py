@@ -42,6 +42,13 @@ class ColumnLabelTest(unittest.TestCase):
         # ASSERT
         self.assertEqual(label, 'Latest flux (nJy)')
 
+    def test_labels_the_favourites_and_hidden_table_aliases(self):
+        # ACT
+        labels = [column_label('latest flux'), column_label('predicted type')]
+
+        # ASSERT
+        self.assertEqual(labels, ['Latest flux (nJy)', 'Predicted type'])
+
     def test_labels_cone_id(self):
         # ACT
         label = column_label('cone_id')
