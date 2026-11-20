@@ -56,7 +56,7 @@
 
     <div class="card-body p-2 pt-4">
         <div class="table-responsive p-4 pt-0">
-            <table  class="table table-flush datatable" data-empty-text="{% if type == "my" %}You have no watchlists yet. Use Create New to make one.{% else %}No public watchlists have been shared yet.{% endif %}" {% if type == "community" %} datatable-vanilla {% endif %} id="{{type}}_datatable">
+            <table  class="table table-flush datatable" data-empty-text="{% if type == "my" %}You have no watchlists yet. Use &quot;Create New&quot; to make one.{% else %}No public watchlists have been shared yet.{% endif %}" {% if type == "community" %} datatable-vanilla {% endif %} id="{{type}}_datatable">
                 <thead class="thead-light">
                     {% if type == "my" %}
                         <tr>

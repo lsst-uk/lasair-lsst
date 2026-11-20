@@ -26,7 +26,8 @@ RESULT_CAP = 1000
 
 FAVOURITES_ZEROTEXT = (
     'You have not favourited any objects yet. '
-    'Click the star on any <a href="{}">object page</a> to add it here.')
+    'Click the star on any object page to add it here. '
+    'Find objects in the <a href="{}">recent alerts table</a>.')
 
 # THE HOME PAGE ALERTS TABLE, WHERE A USER CAN PICK AN OBJECT PAGE TO OPEN
 ALERTS_TABLE_ANCHOR = '#objectlist-table'
