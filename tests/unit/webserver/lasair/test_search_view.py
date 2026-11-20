@@ -1,13 +1,24 @@
 """Unit tests for reading the search query from GET (bookmarkable) or POST (old callers)."""
 import importlib
+import json
 import sys
 import types
 import unittest
+from datetime import datetime
+from decimal import Decimal
 from unittest import mock
 
 import context  # noqa: F401  PATCHES sys.path
 
 sys.path.insert(0, '../../../../webserver')
+
+from django.conf import settings as djangoSettings
+
+# EACH TEST FILE MUST RUN IN ITS OWN PROCESS (AS JENKINS DOES) BECAUSE THEY CONFIGURE DJANGO DIFFERENTLY
+if not djangoSettings.configured:
+    djangoSettings.configure(DEBUG=False, SECRET_KEY='test')
+
+import django.http
 
 RESULTS = [{'diaObjectId': 1234567890123456789}]
 SCHEMA = {'diaObjectId': 'the object id'}
@@ -38,6 +49,7 @@ def load_view():
         'django': module(),
         'django.contrib': module(messages=messages),
         'django.contrib.messages': messages,
+        'django.http': django.http,
         'django.shortcuts': module(render=render),
         'django.db': module(connection=mock.Mock()),
         'lasair.apps.favourites.utils': favourites_utils,
@@ -128,18 +140,36 @@ class SearchViewQueryTest(unittest.TestCase):
         # ASSERT
         self.doSearch.assert_called_once_with('153.45 18.12')
 
-    def test_json_checkbox_in_get_selects_the_json_branch(self):
+    def test_json_checkbox_returns_a_json_response_of_the_results(self):
         # ARRANGE
         request = FakeRequest('GET', get={'query': 'ZTF22aafxzfb', 'json': 'on'})
-        # THE VIEW MODULE DOES NOT IMPORT json OR HttpResponse YET (SEPARATE KNOWN BUG)
-        with mock.patch.object(self.view, 'json', create=True), \
-                mock.patch.object(self.view, 'HttpResponse', create=True) as httpResponse:
-            # ACT
-            self.view.search(request)
+        rows = [{
+            'diaObjectId': 1234567890123456789, 'ra': 150.1,
+            'last detected (days ago)': Decimal('1.25'),
+            'firstSeen': datetime(2026, 1, 2, 3, 4, 5)}]
+        self.favourites.suppress_hidden.return_value = (rows, {}, 0)
+
+        # ACT
+        response = self.view.search(request)
 
         # ASSERT
-        httpResponse.assert_called_once()
+        self.assertEqual(response['Content-Type'], 'application/json')
+        self.assertEqual(json.loads(response.content), [{
+            'diaObjectId': 1234567890123456789, 'ra': 150.1,
+            'last detected (days ago)': '1.25',
+            'firstSeen': '2026-01-02T03:04:05'}])
         self.render.assert_not_called()
+
+    def test_json_checkbox_returns_an_empty_list_when_nothing_matches(self):
+        # ARRANGE
+        request = FakeRequest('GET', get={'query': 'ZTF22aafxzfb', 'json': 'on'})
+        self.favourites.suppress_hidden.return_value = ([], {}, 0)
+
+        # ACT
+        response = self.view.search(request)
+
+        # ASSERT
+        self.assertEqual(json.loads(response.content), [])
 
 
 INJECTIONS = [
