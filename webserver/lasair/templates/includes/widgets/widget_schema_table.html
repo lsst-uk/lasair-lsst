@@ -1,18 +1,6 @@
 
 {% load humanize %}
 
-{% comment %}
-schema_index.html includes this widget once per table, so only the first include (forloop.first of
-that page's loop) draws the page-wide search box. lasair_utils.js filters the rows of every
-.schema-card as you type; a shown note replaces the tables when nothing matches.
-{% endcomment %}
-{% if forloop.first %}
-    <div class="card border-0 shadow mb-4 p-3">
-        <label for="schema-search" class="visually-hidden">Search schema columns</label>
-        <input type="search" id="schema-search" class="form-control" placeholder="Search every table by column name or description..." autocomplete="off">
-        <p id="schema-search-empty" class="text-gray-500 mt-3 mb-0 d-none" role="status">No columns match</p>
-    </div>
-{% endif %}
 
 <div class="card border-0 shadow h-100 schema-card">
 
@@ -41,7 +29,7 @@ that page's loop) draws the page-wide search box. lasair_utils.js filters the ro
                 {% endif %}
 
                 <small class="text-gray-500">
-                    Use the search box at the top of the page to find the columns required. Click on  {% include "includes/icons/icon_copy.html" %} to copy the <code>table.column</code> name to your clipboard.
+                    Click on  {% include "includes/icons/icon_copy.html" %} to copy the <code>table.column</code> name to your clipboard.
                 </small>
             </div>
         </div>
@@ -85,7 +73,7 @@ that page's loop) draws the page-wide search box. lasair_utils.js filters the ro
 
 
                                 {% for row in section.fields %}
-                                    <tr data-schema-search="{{row.name|lower}} {{row.doc|lower}}">
+                                    <tr data-schema-search="{{schema_name|lower}}.{{row.name|lower}} {{row.doc|lower}}">
                                         <td ><button data-bs-toggle="tooltip" data-bs-trigger="click" data-bs-animation="true" data-bs-placement="top" data-bs-title="copied" onclick="copy('{{schema_name}}.{{row.name}}','#copy_button_{{schema_name}}_{{row.name}}')" id="copy_button_{{schema_name}}_{{row.name}}" class="btn btn-xs copy-button me-1">  {% include "includes/icons/icon_copy.html" %} </button> <code class="fw-extrabold text-gray-400">{{schema_name}}.</code><code class="fw-extrabold text-gray-700">{{row.name}}</code></td>
                                         <td> {{row.doc}}</td>
 

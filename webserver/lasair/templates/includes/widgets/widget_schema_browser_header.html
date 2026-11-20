@@ -43,8 +43,14 @@
 
 
 
+    {% comment %}
+    One search box filters the rows of every schema table on the page (lasair_utils.js).
+    The status note is always in the DOM so screen readers hear each new match count;
+    it is visually hidden while columns match and shown when nothing matches.
+    {% endcomment %}
     <div class="card-body">
-
+        <label for="schema-search" class="form-label">Type to filter the columns</label>
+        <input type="search" id="schema-search" class="form-control" placeholder="Table name, column name or description" autocomplete="off">
+        <p id="schema-search-status" class="visually-hidden text-gray-500 mt-3 mb-0" role="status" aria-live="polite"></p>
     </div>
-</div>
 </div>

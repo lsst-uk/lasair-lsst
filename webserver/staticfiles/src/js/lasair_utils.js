@@ -13,25 +13,34 @@ function copy(text, target) {
 
 /*
  * SCHEMA BROWSER: ONE SEARCH BOX FILTERS THE ROWS OF EVERY SCHEMA TABLE ON THE PAGE.
- * A ROW MATCHES WHEN EVERY WORD TYPED IS IN ITS COLUMN NAME OR DESCRIPTION (data-schema-search).
+ * A ROW MATCHES WHEN EVERY WORD TYPED IS IN ITS table.column NAME OR DESCRIPTION (data-schema-search).
  * A TABLE SECTION, THEN A WHOLE CARD, DISAPPEARS WHEN NONE OF ITS ROWS MATCH.
+ * THE STATUS NOTE IS A LIVE REGION: VISUALLY HIDDEN WHILE COLUMNS MATCH, SHOWN WHEN NONE DO.
  */
 document.addEventListener('DOMContentLoaded', function() {
     const searchEl = document.getElementById('schema-search');
     if (searchEl === null) {
         return;
     }
-    const emptyNoteEl = document.getElementById('schema-search-empty');
+    const statusEl = document.getElementById('schema-search-status');
     const cards = Array.from(document.querySelectorAll('.schema-card'));
-
-    // THE CARD THAT HOLDS THE SEARCH BOX MUST STAY ON SCREEN, SO ONLY ITS CONTENTS ARE HIDDEN
-    const cardTarget = function(card) {
-        const column = card.closest('.col-12');
-        return (column && !column.contains(searchEl)) ? column : card;
-    };
 
     const setHidden = function(el, isHidden) {
         el.classList.toggle('d-none', isHidden);
+    };
+
+    const updateStatus = function(hasQuery, matchCount) {
+        if (statusEl === null) {
+            return;
+        }
+        if (!hasQuery) {
+            statusEl.textContent = '';
+        } else if (matchCount === 0) {
+            statusEl.textContent = 'No columns match your search.';
+        } else {
+            statusEl.textContent = matchCount + (matchCount === 1 ? ' column matches' : ' columns match');
+        }
+        statusEl.classList.toggle('visually-hidden', !hasQuery || matchCount > 0);
     };
 
     const filterSchema = function() {
@@ -53,11 +62,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 setHidden(section, sectionMatches === 0);
                 cardMatches += sectionMatches;
             });
-            setHidden(cardTarget(card), cardMatches === 0);
+            setHidden(card.closest('.col-12') || card, cardMatches === 0);
             matchCount += cardMatches;
         });
 
-        setHidden(emptyNoteEl, matchCount > 0);
+        updateStatus(words.length > 0, matchCount);
     };
 
     searchEl.addEventListener('input', filterSchema);
