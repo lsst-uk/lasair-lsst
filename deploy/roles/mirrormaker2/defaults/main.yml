@@ -1,0 +1,11 @@
+---
+# defaults file for roles/mirrormaker
+
+numstreams: 5
+group_id: "lasair-usdf-{{ lasair_name }}"
+client_id: "{{ inventory_hostname_short }}.{{ domain }}"
+target: "{{ groups['kafka'] | join(':9092,') }}:9092"
+topiclist: [ "topicname" ]
+
+ztf_source: "public.alerts.ztf.uw.edu:9092"
+

@@ -1,0 +1,51 @@
+clusters=rubin, local
+rubin.bootstrap.servers=rubin-alert-stream-bootstrap.slac.stanford.edu:9094
+local.bootstrap.servers=localhost:9092
+
+rubin.security.protocol=SASL_PLAINTEXT
+rubin.sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required username='{{ kafka_secret.upstream_username }}' password='{{ kafka_secret.upstream_password }}';
+rubin.sasl.mechanism=SCRAM-SHA-512
+
+# Replication factors should be 3 for production
+# -1 = use the Kafka broker default replication factor
+rubin.config.storage.replication.factor=-1
+local.config.storage.replication.factor=-1
+
+rubin.offset.storage.replication.factor=-1
+local.offset.storage.replication.factor=-1
+
+rubin.status.storage.replication.factor=-1
+local.status.storage.replication.factor=-1
+
+rubin->local.enabled=true
+local->rubin.enabled=false
+
+# MirrorMaker configuration. Default value for the following settings is 3
+offset-syncs.topic.replication.factor=2
+heartbeats.topic.replication.factor=2
+checkpoints.topic.replication.factor=2
+
+# Aviod trying to do things we don't have permission to do on remote
+offset-syncs.topic.location=target
+sync.topic.configs.enabled=false
+sync.topic.acls.enabled=false
+heartbeats.replication.enabled=false
+
+topics=lsst-alerts-.*
+groups=.*
+
+topics.exclude=.*[\-\.]internal, .*\.replica, __consumer_offsets
+groups.exclude=console-consumer-.*, connect-.*, __.*
+
+tasks.max=15
+replication.factor=2
+refresh.topics.enabled=true
+refresh.topics.interval.seconds=30
+
+dedicated.mode.enable.internal.rest=true
+listeners = http://{{ inventory_hostname }}:8090
+
+rubin->local.emit.heartbeats.enabled=true
+rubin->local.emit.checkpoints.enabled=true
+local->rubin.emit.heartbeats.enabled=false
+local->rubin.emit.checkpoints.enabled=false

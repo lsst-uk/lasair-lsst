@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+
+  mirror-maker:
+    image: confluentinc/cp-kafka:7.9.11
+    hostname: mirror-maker
+    #container_name: mirror-maker
+    volumes:
+      - /home/ubuntu/mm2.properties:/tmp/kafka/config/mm2.properties
+      - /home/ubuntu/log4j.properties:/tmp/kafka/config/log4j.properties
+    network_mode: host
+    environment:
+      KAFKA_HEAP_OPTS: "-Xmx2G"
+      KAFKA_ZOOKEEPER_CONNECT: localhost
+      KAFKA_AUTO_OFFSET_RESET: "latest"
+      KAFKA_LOG4J_OPTS: "-Dlog4j.configuration=file:/tmp/kafka/config/log4j.properties"
+    command: ["connect-mirror-maker", "/tmp/kafka/config/mm2.properties"]

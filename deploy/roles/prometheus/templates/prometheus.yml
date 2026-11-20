@@ -75,6 +75,7 @@ scrape_configs:
         - "{{ host }}:8082"
         - "{{ host }}:8083"
         - "{{ host }}:8084"
+        - "{{ host }}:8085"
         {% endfor %}
 
   - job_name: databases

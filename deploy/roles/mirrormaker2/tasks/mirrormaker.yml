@@ -1,0 +1,48 @@
+---
+# tasks file for roles/mirrormaker
+
+- name: "Deploy MirrorMaker2 properties"
+  become: true
+  template:
+    src:  mm2.properties.j2
+    dest: mm2.properties
+
+- name: "Deploy log4j properties"
+  become: true
+  template:
+    src:  log4j.properties.j2
+    dest: log4j.properties
+
+- name: "Deploy MirrorMaker2 compose file"
+  template:
+    src:  mm2.yml.j2
+    dest: mm2.yml
+
+- name: "Start MirrorMaker service"
+  become: true
+  docker_compose:
+    project_name: mm2
+    project_src:
+        '.'
+    files:
+      - mm2.yml
+    services:
+      - mirror-maker
+    state:
+      present
+  when: start_mirrormaker == true
+
+- name: "Stop Mirrormaker service"
+  become: true
+  docker_compose:
+    project_name: mirrormaker
+    project_src:
+        '.'
+    files:
+      - mirror-compose.yml
+    services:
+      - mirrormaker
+    state:
+      absent
+  when: start_mirrormaker == false
+

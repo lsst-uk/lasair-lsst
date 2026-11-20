@@ -168,7 +168,7 @@
     start_mirrormaker: false # don't start mirrormaker automatically by default
   roles:
     - kafka
-    - mirrormaker # we currently run mirrormaker on the same hosts as kafka 
+    - mirrormaker2 # we currently run mirrormaker on the same hosts as kafka
   tags: kafka
 
 - hosts: kafka_pub

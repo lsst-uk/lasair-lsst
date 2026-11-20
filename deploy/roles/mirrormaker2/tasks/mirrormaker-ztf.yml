@@ -1,0 +1,54 @@
+---
+# create a mirror of the ZTF kafka 
+
+- name: "Create /etc/mirror directory"
+  become: true
+  file:
+    path: /etc/mirror
+    state: directory
+
+- name: "Deploy MirrorMaker producer config"
+  become: true
+  template:
+    src:  producer.config.j2
+    dest: /etc/mirror/producer.config
+
+- name: "Deploy ZTF MirrorMaker consumer config"
+  become: true
+  template:
+    src:  consumer-ztf.config.j2
+    dest: /etc/mirror/consumer-ztf.config
+
+- name: "Deploy ZTF MirrorMaker compose file"
+  template:
+    src:  mirror-compose-ztf.yml.j2
+    dest: mirror-compose-ztf.yml
+
+- name: "Start ZTF MirrorMaker service"
+  become: true
+  docker_compose:
+    project_name: mirrormaker-ztf
+    project_src:
+        '.'
+    files:
+      - mirror-compose-ztf.yml
+    services:
+      - mirrormaker
+    state:
+      present
+  when: start_mirrormaker == true
+
+- name: "Stop Mirrormaker service"
+  become: true
+  docker_compose:
+    project_name: mirrormaker-ztf
+    project_src:
+        '.'
+    files:
+      - mirror-compose-ztf.yml
+    services:
+      - mirrormaker
+    state:
+      absent
+  when: start_mirrormaker == false
+
