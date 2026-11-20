@@ -372,6 +372,35 @@ class ObjectNameAllowListTest(unittest.TestCase):
                 self.assertEqual((results, schema), ([], []))
                 self.view.coneSearchHTM.assert_not_called()
 
+    def test_parse_cone_rejects_coordinates_that_are_not_finite_or_out_of_range(self):
+        for query in ['nan 2 5', 'inf 2', '10 -inf', '400 10', '-1 10', '10 95', '10 -90.5', '360.1 0']:
+            with self.subTest(query=query):
+                # ACT
+                cone = self.view.parse_cone(query)
+
+                # ASSERT
+                self.assertIsNone(cone)
+
+    def test_parse_cone_accepts_coordinates_on_the_edges_of_the_valid_range(self):
+        for query, expected in [('0 -90', (0., -90., 5.)), ('359.9 90', (359.9, 90., 5.)),
+                                ('360 0', (360., 0., 5.)), ('0 0', (0., 0., 5.))]:
+            with self.subTest(query=query):
+                # ACT
+                cone = self.view.parse_cone(query)
+
+                # ASSERT
+                self.assertEqual(cone, expected)
+
+    def test_parse_cone_rejects_an_unusable_value_from_the_sexagesimal_converter(self):
+        # ARRANGE
+        self.converter.dec_sexegesimal_to_decimal.return_value = float('nan')
+
+        # ACT
+        cone = self.view.parse_cone('10:00:00 +02:00:00')
+
+        # ASSERT
+        self.assertIsNone(cone)
+
     def test_caps_the_cone_radius_at_the_maximum(self):
         # ACT
         self.view.do_search('150.1 2.2 1000000')
@@ -393,7 +422,7 @@ class ObjectNameAllowListTest(unittest.TestCase):
 
         # ACT / ASSERT
         with self.assertRaises(KeyboardInterrupt):
-            self.view.do_search('150.1 2.2')
+            self.view.do_search('10:00:00 +02:00:00')
 
     def test_returns_nothing_when_the_cone_radius_is_not_a_number(self):
         # ACT
@@ -474,7 +503,7 @@ class ObjectNameRoutingTest(unittest.TestCase):
     def route_of(self, query):
         """Return the branch do_search took for this query."""
         self.view.do_search(query)
-        if self.converter.ra_sexegesimal_to_decimal.called:
+        if self.view.coneSearchHTM.called:
             return CONE
         if self.cursor.execute.called:
             return OBJECT
@@ -484,7 +513,7 @@ class ObjectNameRoutingTest(unittest.TestCase):
         for query, expected in ROUTING_CASES:
             with self.subTest(query=query):
                 self.cursor.execute.reset_mock()
-                self.converter.ra_sexegesimal_to_decimal.reset_mock()
+                self.view.coneSearchHTM.reset_mock()
 
                 # ACT
                 route = self.route_of(query)

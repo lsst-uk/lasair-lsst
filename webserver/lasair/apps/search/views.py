@@ -78,6 +78,35 @@ def search(
         return render(request, 'search/search.html', {'results': [], 'schema': [], 'query': ''})
 
 
+def read_degrees(
+    token,
+    convert_sexagesimal
+):
+    """*read a coordinate as decimal degrees, falling back to the sexagesimal converter*
+
+    A plain decimal is read directly because the astrocalc converter refuses a declination of exactly +90 or -90.
+
+    **Key Arguments:**
+
+    - `token` -- the coordinate text, decimal degrees or sexagesimal
+    - `convert_sexagesimal` -- function that converts the sexagesimal text to decimal degrees
+
+    **Return:**
+
+    - `degrees` -- the coordinate in degrees, not yet range checked
+
+    **Usage:**
+
+    ```python
+    ra = read_degrees("10:00:00", lambda token: converter.ra_sexegesimal_to_decimal(ra=token))
+    ```
+    """
+    try:
+        return float(token)
+    except ValueError:
+        return convert_sexagesimal(token)
+
+
 def parse_cone(
     query
 ):
@@ -108,10 +137,14 @@ def parse_cone(
     # ASTROCALC UNIT CONVERTER OBJECT
     converter = unit_conversion(log=emptyLogger())
     try:
-        ra = converter.ra_sexegesimal_to_decimal(ra=tokens[0])
-        dec = converter.dec_sexegesimal_to_decimal(dec=tokens[1])
+        ra = read_degrees(tokens[0], lambda token: converter.ra_sexegesimal_to_decimal(ra=token))
+        dec = read_degrees(tokens[1], lambda token: converter.dec_sexegesimal_to_decimal(dec=token))
         radius = float(tokens[2]) if len(tokens) == 3 else DEFAULT_CONE_RADIUS
     except Exception:
+        return None
+
+    # REJECT NAN, INFINITY AND ANYTHING OFF THE SKY (NAN FAILS EVERY COMPARISON)
+    if not (0. <= ra <= 360. and -90. <= dec <= 90.):
         return None
 
     # REJECT NAN AND INFINITY (1e400 PARSES AS inf) AND ZERO OR NEGATIVE RADII, THEN CAP LARGE ONES
