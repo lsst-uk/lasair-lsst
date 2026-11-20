@@ -28,7 +28,7 @@ from django.contrib import admin
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('contact', DocsRedirectView.as_view(docsPage='more_info/contact.html')),
+    path('contact', DocsRedirectView.as_view(docsPage='more_info/contact.html'), name='contact'),
     path('privacy', TemplateView.as_view(template_name='privacy.html'), name='privacy'),
 
     path('admin/', admin.site.urls),

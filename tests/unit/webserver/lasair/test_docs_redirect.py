@@ -1,11 +1,13 @@
 """Unit tests for the old /api and /contact routes that now redirect to the documentation."""
+import ast
 import sys
 import unittest
 from pathlib import Path
 
 import context  # noqa: F401  PATCHES sys.path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[4] / 'webserver'))
+WEBSERVER = Path(__file__).resolve().parents[4] / 'webserver'
+sys.path.insert(0, str(WEBSERVER))
 
 DEVELOP_DOCS = 'https://lasair-lsst.readthedocs.io/en/develop'
 MAIN_DOCS = 'https://lasair-lsst.readthedocs.io/en/main'
@@ -55,6 +57,29 @@ class DocsRedirectViewTest(unittest.TestCase):
 
         # ASSERT
         self.assertEqual(response.status_code, 302)
+
+
+def named_routes(urlconfPath):
+    """Map each route in a urls.py to the name it is registered under (None when unnamed)."""
+    tree = ast.parse(Path(urlconfPath).read_text())
+    routes = {}
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Call) and getattr(node.func, 'id', None) == 'path':
+            keywords = {keyword.arg: keyword.value for keyword in node.keywords}
+            name = keywords.get('name')
+            routes[node.args[0].value] = name.value if name else None
+    return routes
+
+
+class ContactRouteNameTest(unittest.TestCase):
+    # THE FULL URLCONF NEEDS THE DATABASE AND EVERY APP, SO THE ROUTE TABLE IS READ FROM SOURCE
+
+    def test_contact_route_keeps_its_url_name(self):
+        # ACT
+        routes = named_routes(WEBSERVER / 'lasair' / 'urls.py')
+
+        # ASSERT
+        self.assertEqual(routes['contact'], 'contact')
 
 
 if __name__ == '__main__':
