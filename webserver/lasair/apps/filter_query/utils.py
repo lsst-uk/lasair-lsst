@@ -131,8 +131,11 @@ def run_filter(
     try:
         cursor.execute(sqlquery_limit)
     except Exception as e:
+        # SHOW THE DISPLAY FORM, NOT THE INTERNAL WRAPPER (STATEMENT TIMEOUT, LIMIT, HIDDEN SUBQUERY)
+        sqlquery_display = build_query(selected, tables, conditions, owner_topic=owner_topic,
+                                       exclude_hidden=exclude_hidden, for_display=True)
         # THE VIEWS SHOW THIS WITH messages|safe, SO ESCAPE THE USER'S SQL AND THE DATABASE TEXT
-        error = 'Your query:<br/><b>' + escape(sqlquery_limit) + '</b><br/>returned the error<br/><i>' + escape(str(e)) + '</i>'
+        error = 'Your query:<br/><b>' + escape(sqlquery_display) + '</b><br/>returned the error<br/><i>' + escape(str(e)) + '</i>'
         return None, None, None, None, error
 
     table = cursor.fetchall()

@@ -13,6 +13,7 @@ from unittest import mock
 
 HOSTILE_SQL = "select '<script>alert(1)</script>' from objects"
 HOSTILE_DB_ERROR = "1064 (42000): near '<img src=x onerror=alert(2)>'"
+DISPLAY_SQL = "select '<b>display</b>' from objects /* hidden objects excluded */"
 
 UTILS_PATH = os.path.abspath(os.path.join(
     os.path.dirname(__file__), '../../../../webserver/lasair/apps/filter_query/utils.py'))
@@ -23,6 +24,10 @@ def _stub(name, **attrs):
     for key, value in attrs.items():
         setattr(module, key, value)
     return module
+
+
+def fake_build_query(*args, for_display=False, **kwargs):
+    return DISPLAY_SQL if for_display else HOSTILE_SQL
 
 
 def load_utils(cursor):
@@ -42,7 +47,7 @@ def load_utils(cursor):
         'lasair': _stub('lasair'),
         'lasair.query_builder': _stub('lasair.query_builder',
                                       check_query=lambda *a, **k: None,
-                                      build_query=lambda *a, **k: HOSTILE_SQL),
+                                      build_query=fake_build_query),
         'src': _stub('src'),
         'src.db_connect': _stub('src.db_connect', readonly=lambda: connection),
         'src.topic_name': _stub('src.topic_name', topic_name=lambda *a: 'topic'),
@@ -81,8 +86,19 @@ class RunFilterErrorEscapingTest(unittest.TestCase):
         error = self.run_failing_filter()
 
         # ASSERT
+        self.assertNotIn('<b>display</b>', error)
+        self.assertIn('&lt;b&gt;display&lt;/b&gt;', error)
+
+    def test_shows_the_display_sql_not_the_internal_wrapper(self):
+        # ACT
+        error = self.run_failing_filter()
+
+        # ASSERT
+        self.assertIn('hidden objects excluded', error)
+        self.assertNotIn('SET STATEMENT', error)
+        self.assertNotIn('LIMIT', error)
         self.assertNotIn('<script>', error)
-        self.assertIn('&lt;script&gt;', error)
+        self.assertNotIn('&lt;script&gt;', error)
 
     def test_escapes_the_database_error_text(self):
         # ACT
