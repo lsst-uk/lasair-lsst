@@ -19,7 +19,7 @@ def search(
 
     **Key Arguments:**
 
-    - `request` -- the original request
+    - `request` -- the original request (the query is read from GET, then POST)
 
     **Usage:**
 
@@ -31,13 +31,12 @@ def search(
     ]
     ```
     """
-    if request.method == 'POST':
-        query = request.POST['query']
+    # GET MAKES SEARCHES BOOKMARKABLE; POST IS KEPT FOR OLD CALLERS
+    params = request.GET if request.GET.get('query') else request.POST
+    query = params.get('query', query)
     if query:
         results, schema = do_search(query)
-        json_checked = False
-        if 'json' in request.POST and request.POST['json'] == 'on':
-            json_checked = True
+        json_checked = params.get('json') == 'on'
 
         # data = conesearch_impl(query)
         # HIDING MEANS "NEVER SHOW ME THIS AGAIN", AND SEARCH IS ONE OF THE PLACES
