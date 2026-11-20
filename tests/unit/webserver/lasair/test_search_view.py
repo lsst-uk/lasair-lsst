@@ -43,8 +43,7 @@ def load_view():
     """Load the search view with framework and infrastructure edges stubbed."""
     render = mock.Mock(side_effect=lambda request, template, context: context)
     favourites_utils = module(
-        suppress_hidden=mock.Mock(return_value=(RESULTS, {}, 0)),
-        marks_for_table=mock.Mock())
+        suppress_hidden=mock.Mock(return_value=(RESULTS, {}, 0)))
     messages = module(info=mock.Mock())
     modules = {
         'django': module(),
@@ -54,9 +53,6 @@ def load_view():
         'django.shortcuts': module(render=render),
         'django.db': module(connection=mock.Mock()),
         'lasair.apps.favourites.utils': favourites_utils,
-        'lasair.apps.search.utils': module(
-            conesearch_impl=mock.Mock(), readcone=mock.Mock(),
-            sexra=mock.Mock(), sexde=mock.Mock()),
         'lasair.apps.db_schema.utils': module(get_schema_dict=mock.Mock(return_value=SCHEMA)),
         'src.db_connect': module(remote=mock.Mock()),
         'astrocalc': module(),
@@ -64,9 +60,7 @@ def load_view():
         'fundamentals': module(),
         'fundamentals.logs': module(emptyLogger=mock.Mock()),
         'gkutils': module(),
-        'gkutils.commonutils': module(
-            coneSearchHTM=mock.Mock(), FULL=1, QUICK=2, CAT_ID_RA_DEC_COLS=[],
-            base26=mock.Mock(), Struct=object),
+        'gkutils.commonutils': module(coneSearchHTM=mock.Mock(), QUICK=2),
     }
     with mock.patch.dict(sys.modules, modules):
         sys.modules.pop('lasair.apps.search.views', None)

@@ -1,17 +1,18 @@
-from django.contrib import messages
-from lasair.apps.favourites.utils import marks_for_table, suppress_hidden
-from django.http import JsonResponse
-from django.shortcuts import render
-from .utils import conesearch_impl, readcone, sexra, sexde
 import math
 import re
+
+from django.contrib import messages
+from django.db import connection
+from django.http import JsonResponse
+from django.shortcuts import render
+
 import settings
-from src import db_connect
-from lasair.apps.db_schema.utils import get_schema_dict
 from astrocalc.coords import unit_conversion
 from fundamentals.logs import emptyLogger
-from django.db import connection
-from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, base26, Struct
+from gkutils.commonutils import coneSearchHTM, QUICK
+from lasair.apps.db_schema.utils import get_schema_dict
+from lasair.apps.favourites.utils import suppress_hidden
+from src import db_connect
 
 DEFAULT_CONE_RADIUS = 5.
 # SAME LIMIT AS THE CONE SEARCH IN THE API (webserver/lasairapi/serializers.py), WHICH REFUSES
@@ -61,7 +62,6 @@ def search(
         results, schema = do_search(query)
         json_checked = params.get('json') == 'on'
 
-        # data = conesearch_impl(query)
         # HIDING MEANS "NEVER SHOW ME THIS AGAIN", AND SEARCH IS ONE OF THE PLACES
         # THE UI AND THE API DOCUMENTATION PROMISE IT REACHES
         results, marks, omitted = suppress_hidden(request.user, results)
