@@ -68,6 +68,15 @@
 		color: $gray-100;
 	}
 
+	// THE SKY AREA AND STATUS TOGGLES ARE <button>s (KEYBOARD REACHABLE): DROP THE BROWSER BUTTON LOOK
+	button.nav-link {
+		width: 100%;
+		border: 0;
+		background: none;
+		font-family: inherit;
+		text-align: left;
+	}
+
 	.multi-level{
 		.nav-link{
 			padding-left: 53px;

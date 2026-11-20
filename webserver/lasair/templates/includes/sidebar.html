@@ -99,10 +99,22 @@
                     </a>
                 </li>
 
-                <li class="nav-item">
-                    <span
+                {% comment %}
+                /watchmaps/ and /mma_watchmaps/ both contain "watchmaps", so each is matched by its own path prefix.
+                {% endcomment %}
+                {% if request.path|slice:":11" == "/watchmaps/" or request.path|slice:":15" == "/mma_watchmaps/" %}
+                    <li class="nav-item active">
+                    <button type="button"
+                        class="nav-link d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1"
+                        aria-expanded="true" aria-controls="submenu-pages1">
+                {% else %}
+                    <li class="nav-item">
+                    <button type="button"
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1"
+                        aria-expanded="false" aria-controls="submenu-pages1">
+                {% endif %}
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -118,23 +130,23 @@
                         <span class="link-arrow">
                             <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
                         </span>
-                    </span>
+                    </button>
 
 
 
-                    <div class="multi-level {% if 'watchmaps' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages1" aria-expanded="false">
+                    <div class="multi-level collapse{% if request.path|slice:":11" == "/watchmaps/" or request.path|slice:":15" == "/mma_watchmaps/" %} show{% endif %}" role="list"
+                        id="submenu-pages1">
                         <ul class="flex-column nav">
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'watchmap_index' %}">
+                            <li class="nav-item{% if request.path|slice:":11" == "/watchmaps/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'watchmap_index' %}"{% if request.path|slice:":11" == "/watchmaps/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">Watchmaps</span>
                                     {% include "includes/info_tooltip.html" with info="Watchmaps created with a MOC" position="auto" link=docroot|add:"/core_functions/watchmaps.html" %}
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'mma_watchmap_index' %}">
+                            <li class="nav-item{% if request.path|slice:":15" == "/mma_watchmaps/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'mma_watchmap_index' %}"{% if request.path|slice:":15" == "/mma_watchmaps/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">MultiMessenger</span>
                                     {% include "includes/info_tooltip.html" with info="Sky Areas for Gravitational Wave, Fermi, and other alerts" position="auto" link=docroot|add:"/core_functions/mma.html" %}
 
@@ -159,10 +171,19 @@
                 </li>
 
 
-                <li class="nav-item">
-                    <span
+                {% if request.path|slice:":8" == "/status/" %}
+                    <li class="nav-item active">
+                    <button type="button"
+                        class="nav-link d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2"
+                        aria-expanded="true" aria-controls="submenu-pages2">
+                {% else %}
+                    <li class="nav-item">
+                    <button type="button"
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2"
+                        aria-expanded="false" aria-controls="submenu-pages2">
+                {% endif %}
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -178,16 +199,16 @@
                         <span class="link-arrow">
                             <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
                         </span>
-                    </span>
+                    </button>
 
 
 
-                    <div class="multi-level {% if 'status' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages2" aria-expanded="false">
+                    <div class="multi-level collapse{% if request.path|slice:":8" == "/status/" %} show{% endif %}" role="list"
+                        id="submenu-pages2">
                         <ul class="flex-column nav">
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'status_today' %}">
+                            <li class="nav-item{% if request.path|slice:":8" == "/status/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'status_today' %}"{% if request.path|slice:":8" == "/status/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">Today</span>
                                 </a>
                             </li>
