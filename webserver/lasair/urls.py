@@ -20,6 +20,7 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 from lasair import views
+from lasair.docs_redirect import DocsRedirectView
 from lasair.utils import fits
 
 from django.contrib import admin
@@ -27,7 +28,7 @@ from django.contrib import admin
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('contact', TemplateView.as_view(template_name='contact.html'), name='contact'),
+    path('contact', DocsRedirectView.as_view(docsPage='more_info/contact.html')),
     path('privacy', TemplateView.as_view(template_name='privacy.html'), name='privacy'),
 
     path('admin/', admin.site.urls),
