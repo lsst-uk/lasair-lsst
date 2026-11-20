@@ -54,24 +54,26 @@ def insert_mma_alert(database, namespace, dir, event_id, version):
     area50 = data['EXTRA']['area50']
     area90 = data['EXTRA']['area90']
     if area90 > settings.MMA_MAX_AREA:
-        message = f'{Skymap 90 area {area90} is too large compared with limit {settings.MMA_MAX_AREA}'
+        message = f'Skymap 90 area {area90} is too large compared with limit {settings.MMA_MAX_AREA}'
         return message
 
     distmean = float(data['HEADER']['DISTMEAN'])
     if distmean > settings.LVK_MAX_DISTANCE:
-        message = f'{DISTMEAN {distmean} is too large compared with limit {settings.LVK_MAX_DISTANCE}'
+        message = f'DISTMEAN {distmean} is too large compared with limit {settings.LVK_MAX_DISTANCE}'
         return message
 
-    params_dict = result['event']['classification']
+    params_dict = result['params']['classification']
     prob_ns = params_dict.get('BNS', 0) + params_dict.get('NSBH', 0)
     if prob_ns < settings.LVK_PROB_NS:
-        message = f'{Prob NS {prob_ns} is too small compared with limit {settings.LVK_PROB_NS}'
+        message = f'Prob NS {prob_ns} is too small compared with limit {settings.LVK_PROB_NS}'
         return message
 
-    far = float(data['event']['far'])
+    far = float(result['params']['far'])
     if far > settings.MMA_MAX_FAR:
-        message = f'{FAR {far} is too large compared with limit {settings.MMA_MAX_FAR}'
+        message = f'FAR {far} is too large compared with limit {settings.MMA_MAX_FAR}'
         return message
+
+    print(f'area {area90} distmean {distmean} prob_ns {prob_ns} far {far}')
 
     # Deal with the 3 MOCs
     moc10 = read_moc(datadir, '10')
@@ -141,10 +143,11 @@ def handle_event(database, namespace, dir, event_id, minmjd, maxmjd, verbose=Fal
             # Set done flag so we dont come back
             setDone(dir, event_id, version)
             message = ''
-            try:
+#            try:
+            if 1:
                 message = insert_mma_alert(database, namespace, dir, event_id, version)
-            except Exception as e:
-                print('Error inserting mma alert in database' + str(e))
+#            except Exception as e:
+#                print('Error inserting mma alert in database' + str(e))
 
             # message says why it was rejected
             if len(message) == 0:
@@ -230,7 +233,7 @@ if __name__ == "__main__":
     else:                maxmjd = skymaps.mjdnow()
 
     if args['--minmjd']: minmjd = float(args['--minmjd'])
-    else:                minmjd = maxmjd - settings.MMA_ACTIVE_DAYS
+    else:                minmjd = maxmjd - 30  # alerts from last month
 
     if args['--namespace']: namespace = args['--namespace']
     else:                   namespace = 'LVK'

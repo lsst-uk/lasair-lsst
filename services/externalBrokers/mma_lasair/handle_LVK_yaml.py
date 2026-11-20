@@ -38,11 +38,6 @@ def handle(data):
             percent = v
             lvkclass = k
 
-    area90 = data['EXTRA']['area90']
-    good = (lvkclass == 'BNS' or lvkclass == 'NSBH') and area90 < settings.LVK_BBH_MAX_AREA
-    if not good:
-        message = 'Classification = %s and area90 = %s' % (lvkclass, str(area90))
-
     # What kind of MMA event is this
     more_info = 'This is a gravitational wave event from LIGO-Virgo-Kagra'
 
