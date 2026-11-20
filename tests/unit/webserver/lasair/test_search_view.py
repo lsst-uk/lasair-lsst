@@ -206,7 +206,7 @@ class DoSearchSqlTest(unittest.TestCase):
         for sql, _ in self.executed():
             self.assertNotIn(text, sql)
 
-    def test_binds_an_object_id_as_a_parameter(self):
+    def test_binds_an_object_id_as_an_integer_parameter(self):
         # ARRANGE
         objectId = '800436191404681043'
 
@@ -217,9 +217,20 @@ class DoSearchSqlTest(unittest.TestCase):
         calls = self.executed()
         self.assertEqual(len(calls), 3)
         self.assert_no_user_text_in_sql(objectId)
+        self.assertEqual(calls[0][1], (800436191404681043,))
+        self.assertEqual(calls[1][1], (99, objectId, objectId))
+        self.assertEqual(calls[2][1], (800436191404681043,))
         for sql, params in calls:
-            self.assertIn(objectId, params)
             self.assertEqual(sql.count('%s'), len(params))
+
+    def test_only_looks_up_the_object_id_columns_when_the_name_is_all_digits(self):
+        # ACT
+        self.view.do_search('ZTF21abc')
+
+        # ASSERT
+        calls = self.executed()
+        self.assertEqual(len(calls), 1)
+        self.assertIn('crossmatch_tns', calls[0][0])
 
     def test_binds_a_tns_name_with_its_prefix_stripped(self):
         # ACT
@@ -227,7 +238,7 @@ class DoSearchSqlTest(unittest.TestCase):
 
         # ASSERT
         self.assert_no_user_text_in_sql('2026abc')
-        tnsSql, tnsParams = self.executed()[1]
+        tnsSql, tnsParams = self.executed()[0]
         self.assertEqual(tnsParams, (99, '2026abc', 'AT2026abc'))
         self.assertEqual(tnsSql.count('%s'), 3)
 
@@ -236,14 +247,14 @@ class DoSearchSqlTest(unittest.TestCase):
         self.view.do_search('SN 2026abc')
 
         # ASSERT
-        self.assertEqual(self.executed()[1][1], (99, '2026abc', 'SN 2026abc'))
+        self.assertEqual(self.executed()[0][1], (99, '2026abc', 'SN 2026abc'))
 
     def test_only_strips_the_prefix_not_letters_inside_a_name(self):
         # ACT
         self.view.do_search('ATLAS21xyz')
 
         # ASSERT
-        self.assertEqual(self.executed()[1][1], (99, 'ATLAS21xyz', 'ATLAS21xyz'))
+        self.assertEqual(self.executed()[0][1], (99, 'ATLAS21xyz', 'ATLAS21xyz'))
 
     def test_never_puts_injection_text_in_the_sql(self):
         for text in INJECTIONS:
@@ -296,24 +307,6 @@ class ObjectNameAllowListTest(unittest.TestCase):
         self.converter.dec_sexegesimal_to_decimal.return_value = 2.2
         self.view.coneSearchHTM.return_value = ('found', [])
 
-    def test_treats_real_object_names_as_names(self):
-        names = [
-            '800436191404681043', '12345678901234567', '1234567890123456789012',
-            '2026abc', 'AT2026abc', 'SN2026abc', 'KN2026abc', 'AT 2026abc',
-            'SN 2026abc', 'ZTF21abcdefg', 'ATLAS21xyz', 'Gaia21abc', 'PS1-13abc',
-            'ASASSN-21ab', 'CSS130101:123456+654321']
-        for name in names:
-            with self.subTest(name=name):
-                self.cursor.execute.reset_mock()
-                self.view.coneSearchHTM.reset_mock()
-
-                # ACT
-                self.view.do_search(name)
-
-                # ASSERT
-                self.assertEqual(self.cursor.execute.call_count, 3)
-                self.view.coneSearchHTM.assert_not_called()
-
     def test_sends_coordinates_to_the_cone_search_with_the_default_radius(self):
         for query in ['150.1 2.2', '150.1,2.2', '150.1|2.2']:
             with self.subTest(query=query):
@@ -335,20 +328,6 @@ class ObjectNameAllowListTest(unittest.TestCase):
         self.converter.dec_sexegesimal_to_decimal.assert_called_once_with(dec='+02:00:00')
         self.assertEqual(self.view.coneSearchHTM.call_args.args[:3], (150.1, 2.2, 7.))
 
-    def test_does_not_treat_other_text_as_an_object_name(self):
-        queries = ['12345', '123456789012345678901234', "a'b", 'abc def', 'a;b', '']
-        for query in queries:
-            with self.subTest(query=query):
-                self.cursor.execute.reset_mock()
-                self.converter.ra_sexegesimal_to_decimal.side_effect = ValueError
-
-                # ACT
-                results, schema = self.view.do_search(query)
-
-                # ASSERT
-                self.assertEqual((results, schema), ([], []))
-                self.cursor.execute.assert_not_called()
-
     def test_returns_nothing_when_the_cone_radius_is_not_a_number(self):
         # ACT
         results, schema = self.view.do_search('10:00:00 +02:00:00 abc')
@@ -356,6 +335,95 @@ class ObjectNameAllowListTest(unittest.TestCase):
         # ASSERT
         self.assertEqual((results, schema), ([], []))
         self.view.coneSearchHTM.assert_not_called()
+
+
+OBJECT = 'object'
+CONE = 'cone'
+NOTHING = 'nothing'
+
+ROUTING_CASES = [
+    # OBJECT IDS
+    ('800436191404681043', OBJECT),
+    ('12345678901234567', OBJECT),
+    ('1234567890123456789012', OBJECT),
+    # TNS NAMES, WITH AND WITHOUT A PREFIX, IN ANY CASE
+    ('2026abc', OBJECT),
+    ('AT2026abc', OBJECT),
+    ('SN2026abc', OBJECT),
+    ('KN2026abc', OBJECT),
+    ('AT 2026abc', OBJECT),
+    ('SN 2026abc', OBJECT),
+    ('at 2026abc', OBJECT),
+    ('sn 2026abc', OBJECT),
+    ('kn 2026abc', OBJECT),
+    ('at2026abc', OBJECT),
+    # INTERNAL DISCOVERY NAMES
+    ('ZTF21abcdefg', OBJECT),
+    ('ATLAS21xyz', OBJECT),
+    ('Gaia21abc', OBJECT),
+    ('PS1-13abc', OBJECT),
+    ('ASASSN-21ab', OBJECT),
+    ('CSS130101:123456+654321', OBJECT),
+    # PARTIAL OR SHORT DISCOVERY NAMES
+    ('21abc', OBJECT),
+    ('123abc', OBJECT),
+    # NAMES WITH A SINGLE INTERNAL SPACE
+    ('Gaia 21abc', OBJECT),
+    ('ZTF 21abc', OBJECT),
+    ('abc def', OBJECT),
+    # COORDINATES, PLAIN AND SEXAGESIMAL, WITH AND WITHOUT A RADIUS
+    ('150.1 2.2', CONE),
+    ('150.1,2.2', CONE),
+    ('150.1|2.2', CONE),
+    ('150.1 2.2 10', CONE),
+    ('10:00:00 +02:00:00 5', CONE),
+    ('10h00m00s +02d00m00s', CONE),
+    ('10h00m00s +02d00m00s 5', CONE),
+    # NEITHER A NAME NOR A CONE SEARCH
+    ('12345', NOTHING),
+    ('123456789012345678901234', NOTHING),
+    ("a'b", NOTHING),
+    ('a;b', NOTHING),
+    ('', NOTHING),
+]
+
+
+class ObjectNameRoutingTest(unittest.TestCase):
+    """Each query goes to the object branch, the cone branch, or nowhere."""
+
+    def setUp(self):
+        self.view, _, _ = load_view()
+        self.cursor = mock.MagicMock()
+        self.cursor.fetchall.return_value = []
+        remotePatch = mock.patch.object(self.view.db_connect, 'remote')
+        remote = remotePatch.start()
+        self.addCleanup(remotePatch.stop)
+        remote.return_value.cursor.return_value = self.cursor
+        self.converter = self.view.unit_conversion.return_value
+        self.converter.ra_sexegesimal_to_decimal.return_value = 150.1
+        self.converter.dec_sexegesimal_to_decimal.return_value = 2.2
+        self.view.coneSearchHTM.return_value = ('found', [])
+
+    def route_of(self, query):
+        """Return the branch do_search took for this query."""
+        self.view.do_search(query)
+        if self.converter.ra_sexegesimal_to_decimal.called:
+            return CONE
+        if self.cursor.execute.called:
+            return OBJECT
+        return NOTHING
+
+    def test_routes_every_query_to_the_expected_branch(self):
+        for query, expected in ROUTING_CASES:
+            with self.subTest(query=query):
+                self.cursor.execute.reset_mock()
+                self.converter.ra_sexegesimal_to_decimal.reset_mock()
+
+                # ACT
+                route = self.route_of(query)
+
+                # ASSERT
+                self.assertEqual(route, expected)
 
 
 if __name__ == '__main__':

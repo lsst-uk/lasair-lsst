@@ -14,13 +14,19 @@ from gkutils.commonutils import coneSearchHTM, FULL, QUICK, CAT_ID_RA_DEC_COLS, 
 
 DEFAULT_CONE_RADIUS = 5.
 
-# ALLOW-LIST FOR OBJECT NAMES: A diaObjectId (17-22 DIGITS), A TNS NAME WITH AN OPTIONAL
-# AT/SN/KN PREFIX (2026abc, AT2026abc, SN 2026abc) OR AN INTERNAL DISCOVERY NAME
-# (ZTF21abcdefg, ATLAS21xyz, PS1-13abc). ANYTHING ELSE IS TREATED AS A CONE SEARCH.
+# ROUTING ALLOW-LIST FOR OBJECT NAMES. EVERY VALUE IS BOUND AS A PARAMETER, SO THIS ONLY DECIDES
+# WHICH QUERIES ARE NAME SEARCHES. ANYTHING ELSE IS TREATED AS A CONE SEARCH. IT MATCHES:
+# - A diaObjectId (17-22 DIGITS)
+# - A TNS NAME WITH AN OPTIONAL AT/SN/KN PREFIX IN ANY CASE (2026abc, at 2026abc, SN2026abc)
+# - A PARTIAL DISCOVERY NAME THAT STARTS WITH DIGITS (21abc, 123abc)
+# - AN INTERNAL DISCOVERY NAME (ZTF21abcdefg, PS1-13abc), WITH SINGLE INTERNAL SPACES (Gaia 21abc)
+# NO ALTERNATIVE STARTS WITH A NUMBER PAIR WITHOUT A LETTER, SO PLAIN AND SEXAGESIMAL COORDINATES
+# NEVER MATCH.
 OBJECT_NAME = re.compile(
     r'\d{17,22}'
-    r'|(?:(?:AT|SN|KN)\s?)?\d{4}[a-zA-Z]+'
-    r'|[a-zA-Z][a-zA-Z0-9_.+:\-]*',
+    r'|(?i:(?:AT|SN|KN)\s?)?\d{4}[a-zA-Z]+'
+    r'|\d+[a-zA-Z][\w.+:\-]*'
+    r'|[a-zA-Z][\w.+:\-]*(?: [\w.+:\-]+)*',
     re.ASCII)
 TNS_PREFIX = re.compile(r'^(?:AT|SN|KN)\s?(?=\d{4}[a-zA-Z]+$)', re.I | re.ASCII)
 
@@ -98,12 +104,19 @@ def do_search(
 
     if OBJECT_NAME.fullmatch(query):
         tnsName = TNS_PREFIX.sub('', query)
-        queries = [
-            (f"select {objectColumns} from objects o where o.diaObjectId = %s", (query,)),
-            (f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = %s and w.cone_id=h.cone_id and h.diaObjectId=o.diaObjectId and t.tns_name = w.name and (w.name = %s or LOCATE(%s ,t.disc_int_name))",
-             (settings.TNS_WATCHLIST_ID, tnsName, query)),
-            (f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.diaObjectId=o.diaObjectId and o.diaObjectId = %s", (query,)),
-        ]
+        tnsQuery = (
+            f"SELECT {objectColumns} FROM objects o, crossmatch_tns t, watchlist_cones w, watchlist_hits h where w.wl_id = %s and w.cone_id=h.cone_id and h.diaObjectId=o.diaObjectId and t.tns_name = w.name and (w.name = %s or LOCATE(%s ,t.disc_int_name))",
+            (settings.TNS_WATCHLIST_ID, tnsName, query))
+        queries = [tnsQuery]
+        # ONLY AN ALL-DIGITS NAME CAN BE A diaObjectId, AND IT IS BOUND AS AN INTEGER SO
+        # MYSQL NEVER COMPARES A STRING WITH THE BIGINT COLUMN
+        if query.isascii() and query.isdigit():
+            objectId = int(query)
+            queries = [
+                (f"select {objectColumns} from objects o where o.diaObjectId = %s", (objectId,)),
+                tnsQuery,
+                (f"SELECT {objectColumns} FROM objects o, sherlock_classifications s where s.diaObjectId=o.diaObjectId and o.diaObjectId = %s", (objectId,)),
+            ]
 
         for sql, params in queries:
             cursor.execute(sql, params)
