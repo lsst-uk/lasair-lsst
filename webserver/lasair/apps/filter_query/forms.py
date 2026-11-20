@@ -13,6 +13,19 @@ from lasair.apps.favourites.utils import offered_annotators
 from .utils import check_query_zero_limit
 import re
 
+EXAMPLE_DESCRIPTION = 'A detailed description of your filter.'
+
+
+class DescriptionPlaceholderMixin:
+    """*reject the example text shown in the description box as a saved description*"""
+
+    def clean_description(self):
+        description = self.cleaned_data.get('description')
+        if description and description.strip() == EXAMPLE_DESCRIPTION:
+            raise forms.ValidationError(
+                'Please write your own description of this filter.')
+        return description
+
 
 def initialize_instance_fields(form, set_defaults=False, add_run_checkboxes=False):
 
@@ -46,7 +59,7 @@ def initialize_instance_fields(form, set_defaults=False, add_run_checkboxes=Fals
             form.initial["runOnAnnotation"] = False
 
 
-class filterQueryForm(forms.ModelForm):
+class filterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
@@ -291,7 +304,7 @@ class filterQueryForm(forms.ModelForm):
         return super(filterQueryForm, self).save(commit=commit)
 
 
-class UpdateFilterQueryForm(forms.ModelForm):
+class UpdateFilterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     class Meta:
         runTypes = (
@@ -342,7 +355,7 @@ class UpdateFilterQueryForm(forms.ModelForm):
                
 
 
-class DuplicateFilterQueryForm(forms.ModelForm):
+class DuplicateFilterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     class Meta:
         runTypes = (
