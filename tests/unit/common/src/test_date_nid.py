@@ -19,21 +19,23 @@ def fixed_now(year, month, day, hour):
 class DateNIDTest(unittest.TestCase):
 
     def test_days_ago_is_zero_for_nid_now(self):
-        # ARRANGE
-        nid = date_nid.nid_now()
+        # ARRANGE: A FIXED CLOCK, SO THE TWO READS CANNOT STRADDLE THE 4-HOUR ROLLOVER
+        with mock.patch('date_nid.datetime.datetime', fixed_now(2026, 11, 20, 12)):
+            nid = date_nid.nid_now()
 
-        # ACT
-        daysAgo = date_nid.nid_to_days_ago(nid)
+            # ACT
+            daysAgo = date_nid.nid_to_days_ago(nid)
 
         # ASSERT
         self.assertEqual(daysAgo, 0)
 
     def test_days_ago_is_one_for_the_night_before_nid_now(self):
-        # ARRANGE
-        nid = date_nid.nid_now() - 1
+        # ARRANGE: A FIXED CLOCK, SO THE TWO READS CANNOT STRADDLE THE 4-HOUR ROLLOVER
+        with mock.patch('date_nid.datetime.datetime', fixed_now(2026, 11, 20, 12)):
+            nid = date_nid.nid_now() - 1
 
-        # ACT
-        daysAgo = date_nid.nid_to_days_ago(nid)
+            # ACT
+            daysAgo = date_nid.nid_to_days_ago(nid)
 
         # ASSERT
         self.assertEqual(daysAgo, 1)
