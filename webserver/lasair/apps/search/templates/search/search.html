@@ -6,7 +6,7 @@
 
 
 {% block title %}
-    {{data.objectId}}
+    {% if query %}Search: {{ query }}{% else %}Search{% endif %}
 {% endblock title %}
 
 
