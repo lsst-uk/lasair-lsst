@@ -1,3 +1,60 @@
+const DEFAULT_EMPTY_TEXT = "No objects found";
+
+/*
+ * THE SEARCH BOX AND ROWS-PER-PAGE CONTROL ARE NO USE ON A TABLE WITH NO ROWS.
+ * A SEARCH THAT MATCHES NOTHING IS NOT THIS CASE: THE BOX MUST STAY SO THE USER CAN CLEAR IT.
+ */
+function toggleEmptyTableControls(dataTable) {
+    dataTable.wrapper.classList.toggle('lasair-table-is-empty', dataTable.data.length === 0);
+}
+
+/*
+ * SCROLL THE TABLE ITSELF (NOT THE SEARCH BOX AND PAGER AROUND IT) AND KEEP TWO CLASSES ON ITS
+ * FRAME IN STEP WITH THE SCROLL POSITION, FOR THE SHADOWS DRAWN IN _custom.scss.
+ */
+function frameScrollingTable(dataTable) {
+    const container = dataTable.container;
+    const frame = document.createElement('div');
+    frame.className = 'results-scroll-frame';
+    container.parentNode.insertBefore(frame, container);
+    frame.appendChild(container);
+
+    const updateShadows = function() {
+        const hiddenOnRight = container.scrollWidth - container.clientWidth - container.scrollLeft;
+        frame.classList.toggle('can-scroll-right', hiddenOnRight > 1);
+        frame.classList.toggle('is-scrolled', container.scrollLeft > 0);
+    };
+    container.addEventListener('scroll', updateShadows, { passive: true });
+    window.addEventListener('resize', updateShadows);
+    dataTable.on('datatable.update', updateShadows);
+    updateShadows();
+}
+
+/*
+ * THE HEADINGS SHOWN ON THE PAGE ARE READABLE LABELS ("RA (deg)"). EXPORTS KEEP THE HEADING EACH <th>
+ * DECLARES IN data-column-name (THE RAW COLUMN NAME), SO EXPORTED FILES ARE UNCHANGED.
+ * THE LABELS ARE SWAPPED BACK AS SOON AS THE EXPORT HAS BUILT ITS FILE.
+ */
+function exportWithRawColumnNames(dataTable, exportOptions) {
+    const swapped = [];
+    dataTable.headings.forEach(function(th) {
+        const rawName = th.getAttribute('data-column-name');
+        if (rawName === null) {
+            return;
+        }
+        const labelEl = th.querySelector('.dataTable-sorter') || th;
+        swapped.push({ labelEl: labelEl, label: labelEl.textContent });
+        labelEl.textContent = rawName;
+    });
+    try {
+        dataTable.export(exportOptions);
+    } finally {
+        swapped.forEach(function(item) {
+            item.labelEl.textContent = item.label;
+        });
+    }
+}
+
 document.addEventListener('DOMContentLoaded', function() {
 
     let dataTableEls = d.querySelectorAll('.datatable');
@@ -23,6 +80,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 markCol = parseInt(dataTableEl.getAttribute('data-mark-col'));
             }
 
+            const emptyText = dataTableEl.getAttribute('data-empty-text') || DEFAULT_EMPTY_TEXT;
+
             let searchable = true;
             let paging = true;
             if (dataTableEl.hasAttribute('datatable-vanilla')) {
@@ -34,7 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 labels: {
                     placeholder: "Search table...",
                     perPage: "{select} rows per page",
-                    noRows: "No objects found",
+                    noRows: emptyText,
                     info: "Showing {start} to {end} of {rows} rows",
                 },
                 searchable: searchable,
@@ -51,6 +110,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
             /* SO lasair_mark.js CAN REMOVE A ROW THROUGH THE DATATABLE, KEEPING THE PAGER AND COUNT IN STEP. */
             dataTableEl.lasairDataTable = dataTable;
+
+            toggleEmptyTableControls(dataTable);
+            dataTable.on('datatable.update', function() {
+                toggleEmptyTableControls(dataTable);
+            });
+
+            if (dataTableEl.classList.contains('results-table')) {
+                frameScrollingTable(dataTable);
+            }
 
             const headings = dataTable.columns().dt.labels;
 
@@ -107,7 +175,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             data.skipColumn = colIdxsToRemove;
                         }
 
-                        dataTable.export(data);
+                        exportWithRawColumnNames(dataTable, data);
                     });
                 });
             }

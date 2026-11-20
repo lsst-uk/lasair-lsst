@@ -72,12 +72,7 @@
 
         {% if table|length > 0 %}
 
-            
-            <div id="top-scroll" style="overflow-x: scroll; height: 20px; margin-top: 10px; margin-bottom: 10px;">
-                <div id="top-dummy" style="height: 1px;"></div>
-            </div>
-
-            <div class="table-responsive p-1 pt-0" id="objectlist-table">
+            <div class="p-1 pt-0" id="objectlist-table">
 
                 {% comment %}
                 The mark column is opt-in per call site, and vanishes entirely when the
@@ -86,22 +81,19 @@
                 cannot keep. data-mark-col carries its index explicitly, because the
                 heading is deliberately empty and a user can alias a column to anything.
                 {% endcomment %}
-	        {% if sortTable is None or sortTable != False %}
-                    <table  class="table table-flush datatable" data-perPage=50 data-sort id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}{% if markList %} data-mark-list="{{ markList }}"{% endif %}>
-                {%else%}
-                    <table  class="table table-flush datatable" data-perPage=50 id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}{% if markList %} data-mark-list="{{ markList }}"{% endif %}>
-                {% endif %}
+                <table class="table table-flush datatable table-compact results-table{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} has-mark-col{% endif %}" data-perPage=50{% if sortTable is None or sortTable != False %} data-sort{% endif %} id="filter-results"{% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %} data-mark-col="0"{% endif %}{% if markList %} data-mark-list="{{ markList }}"{% endif %}>
                 <thead class="thead-light">
                     <tr>
                         {% if markable and user.is_authenticated and "diaObjectId" in table.0.keys %}
                             <th class="mark-col"><span class="visually-hidden">Mark</span></th>
                         {% endif %}
                         {% for key in table.0.keys %}
-                            {% if key == "UTC" %}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >Alert Time</th>
-                            {%else%}
-                                <th data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|keyvalue:key}}" >{{key}}</th>
-                            {% endif %}
+                            {% comment %}
+                            data-column-name is the heading the CSV and JSON exports use, so the
+                            relabelled headings do not change the exported files. UTC keeps the
+                            "Alert Time" heading it has always exported with.
+                            {% endcomment %}
+                            <th{% if key == "diaObjectId" %} class="col-object-id"{% endif %} data-column-name="{% if key == "UTC" %}Alert Time{% else %}{{key}}{% endif %}" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-title="{{schema|column_tooltip:key}}" >{{key|column_label}}</th>
                         {% endfor %}
                     </tr></thead>
                 <tbody>
@@ -121,7 +113,7 @@
                             {% for key in object.keys %}
 
                                 {% if key == "diaObjectId" %}
-                                    <td><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
+                                    <td class="col-object-id"><a href='{% url "object_detail" object.diaObjectId %}'>{{ object.diaObjectId }}</a></td>
 				{% elif key == "url" and object.url|length > 0 %}
     				    <td><a href="{{ object.url }}">url</a></td>
 
@@ -160,29 +152,9 @@
                 </table>
             </div>
 
-            </div>
-
         {% else %}
             {% include "includes/widgets/widget_zero_matches_card.html" with info=zerotext %}
         {% endif %}
 
     </div>
 </div>
-
-{% block javascripts %}
-
-    {% if table|length > 0 %}
-        <script>
-            const topBar = document.getElementById('top-scroll');
-            const content = document.getElementById('objectlist-table');
-
-            // Match dummy width to content's scroll width
-            document.getElementById('top-dummy').style.width = content.scrollWidth + 'px';
-
-            // Sync scroll positions
-            topBar.addEventListener('scroll', () => content.scrollLeft = topBar.scrollLeft);
-            content.addEventListener('scroll', () => topBar.scrollLeft = content.scrollLeft);
-        </script>
-    {% endif %}
-
-{% endblock javascripts %}
