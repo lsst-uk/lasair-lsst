@@ -63,6 +63,8 @@ pipeline {
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_object_log_toggle.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_docs_redirect.py'
                     sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_column_label.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_page_title.py'
+                    sh 'python3 -m coverage run -a --branch --data-file=../../.coverage --omit="*/tests/*,*/dist-packages/*" test_run_filter_error.py'
                 }
                 dir('tests/unit/services/') {
                     sh 'python3 -m coverage run -a --branch --data-file=../.coverage --omit="*/tests/*,*/dist-packages/*" test_email_digest.py'
