@@ -181,7 +181,7 @@ def mma_watchmap_detail(request, mw_id):
     # GRAB P2 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, 
+o.diaObjectId, o.ra, o.decl,
 h.contour, 
 o.lastDiaSourceMjdTai as "last detected",
 h.delta_t as "delta_t",
@@ -198,6 +198,7 @@ ORDER BY h.contour LIMIT {resultCap}
     newtable2 = []
     for r2 in table2:
         r = {'diaObjectId': r2['diaObjectId'],
+             'ra': r2['ra'], 'decl': r2['decl'],
              'contour': r2['contour'],
              'last detected': r2['last detected'],
              'delta_t': chop(r2['delta_t']),
@@ -231,7 +232,7 @@ ORDER BY h.contour LIMIT {resultCap}
     # GRAB P3 WATCHMAP MATCHES
     query_hit = f"""
 SELECT
-o.diaObjectId, 
+o.diaObjectId, o.ra, o.decl,
 h.contour, h.dist_host,
 o.lastDiaSourceMjdTai as "last detected",
 h.delta_t as "delta_t",
@@ -252,6 +253,7 @@ ORDER BY h.dist_host DESC LIMIT {resultCap}
     newtable3 = []
     for r3 in table3:
         r = {'diaObjectId': r3['diaObjectId'],
+             'ra': r3['ra'], 'decl': r3['decl'],
              'contour': r3['contour'],
              'dist_host': chop(r3['dist_host']),
              'dist_mean': chop(r3['dist_mean']),

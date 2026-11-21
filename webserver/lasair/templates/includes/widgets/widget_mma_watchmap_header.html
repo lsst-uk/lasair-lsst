@@ -71,13 +71,13 @@ loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
     var cand = [];
 
     {% for object in table2 %}
-    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens': {{ object.probdens }}*circle_size, 'diaObjectId':'{{ object.diaObjectId }}' });
-        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'diaObjectId':'{{ object.diaObjectId }}' });
+        cat2.add(A.circle({{ object.ra }}, {{ object.decl }}, circle_size/2));
     {% endfor %}
 
     {% for object in table3 %}
-    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'probdens':{{ object.probdens }}*circle_size, 'diaObjectId':'{{ object.diaObjectId }}' });
-        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, {{ object.probdens }}*circle_size));
+    cand.push({'ra':{{ object.ra }}, 'dec':{{ object.decl }}, 'diaObjectId':'{{ object.diaObjectId }}' });
+        cat3.add(A.circle({{ object.ra }}, {{ object.decl }}, circle_size));
     {% endfor %}
 
     aladin.on('click', function(data) {
@@ -86,8 +86,8 @@ loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
         ifound = -1;
         $('#info').html('RA=' + data.ra + ' Dec=' + data.dec);
         for (let i = 0; i < cand.length; i++) {
-        if ((Math.abs(ra  - cand[i]['ra'] ) < cand[i]['probdens']*circle_size)
-            && (Math.abs(dec - cand[i]['dec']) < cand[i]['probdens']*circle_size)) {
+        if ((Math.abs(ra  - cand[i]['ra'] ) < circle_size)
+            && (Math.abs(dec - cand[i]['dec']) < circle_size)) {
             ifound = i;
                 break;
         }
