@@ -1,0 +1,105 @@
+
+// 2026-11-17 KWS/Claude - CDS-hosted surveys removed, non-CDS mirrors only
+var MIRROR_DSS2_COLOR = "https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor";
+var MIRROR_PANSTARRS_GRI = "https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/PanSTARRS";
+
+var surveys = [
+    {
+        "id": "P/PanSTARRS/DR1/color-i-r-g",
+        "url": MIRROR_PANSTARRS_GRI,
+        "name": "PanSTARRS DR1 color i-r-g (MAST mirror)",
+        "maxOrder": 11,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/CONSTELLATIONS6",
+        "url": "http://darts.isas.jaxa.jp/pub/judo2/HiPS/Constellations2",
+        "name": "Constellations",
+        "maxOrder": 6,
+        "frame": "equatorial",
+        "format": "png"
+    },
+    {
+        "id": "P/2MASS/color",
+        "url": "https://skies.esac.esa.int/2MASSColor",
+        "name": "2MASS colored",
+        "maxOrder": 9,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/DSS2/color",
+        "url": MIRROR_DSS2_COLOR,
+        "name": "DSS2 color (MAST mirror)",
+        "maxOrder": 9,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/Finkbeiner",
+        "url": "https://skies.esac.esa.int/FinkbeinerHa",
+        "maxOrder": 3,
+        "frame": "galactic",
+        "format": "jpeg fits",
+        "name": "Halpha"
+    },
+    {
+        "id": "P/SDSS9/color",
+        "url": "https://skies.esac.esa.int/SDSS9Color",
+        "name": "SDSS9 colored",
+        "maxOrder": 10,
+        "frame": "equatorial",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/SPITZER/color",
+        "url": "https://casda.csiro.au/hips/SpitzerI1I2I4color",
+        "name": "IRAC color",
+        "maxOrder": 9,
+        "frame": "galactic",
+        "format": "jpeg"
+    },
+    {
+        "id": "P/RASS",
+        "url": "http://cade.irap.omp.eu/documents/Ancillary/4Aladin/RASS/",
+        "name": "ROSAT ALL Sky Survey (X-ray)",
+        "maxOrder": 3,
+        "frame": "galactic",
+        "format": "jpeg"
+    }
+];
+
+let aladin;
+loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
+    // 2026-11-17 KWS/Claude - Non CDS mirror for CDS outage
+    var baseHips = ({{ data.objectData.decl }} > -30.0)
+        ? A.imageHiPS(MIRROR_PANSTARRS_GRI, {name: "PanSTARRS DR1 color i-r-g (MAST mirror)", maxOrder: 11, cooFrame: "equatorial", imgFormat: "jpeg"})
+        : A.imageHiPS(MIRROR_DSS2_COLOR, {name: "DSS2 color (MAST mirror)", maxOrder: 9, cooFrame: "equatorial", imgFormat: "jpeg"});
+    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: baseHips, fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false, hipsList: [], log: false});  // 2026-11-17 KWS/Claude - different setup for non-CDS mirror
+    surveys.forEach(s => {
+        aladin.addHiPSToFavorites(aladin.createImageSurvey(s.id, s.name, s.url, s.frame, s.maxOrder, {imgFormat: s.format.split(' ')[0]}));
+    });
+
+    {% if data.sherlock.eastSeparationArcsec %}
+    var sherlockcat = A.catalog({name: "Sherlock's predicted association", sourceSize: 18, color: "#32CD32"});
+    var sherlock = A.source(
+        {{ data.objectData.ra }} + {{ data.sherlock.eastSeparationArcsec }}/3600,
+        {{ data.objectData.decl }} + {{ data.sherlock.northSeparationArcsec }}/3600);
+    sherlockcat.addSources([sherlock]);
+    aladin.addCatalog(sherlockcat);
+{% endif %}
+
+{% if data.diaObjectId %}
+    var objectcat = A.catalog({name: "{{ data.diaObjectId }}", sourceSize: 10, color: "red", shape:"circle"});
+    var thisobject = A.source(
+        {{ data.objectData.ra }},
+        {{ data.objectData.decl }});
+    objectcat.addSources([thisobject]);
+    aladin.addCatalog(objectcat);
+{% endif %}
+
+
+// 2026-11-17 KWS/Claude - PS1 and Gaia DR2 HiPS catalogues (CDS) removed
+
+}, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
