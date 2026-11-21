@@ -1,0 +1,6 @@
+{% comment %}
+The Active/Off badge for a row of a filter list. "Active" means fq.run > 0, the same rule as the
+filter page header. When the filter also streams its results, a muted label names the output
+(fq.output: 1 = email digest, 2 to 4 = a Kafka stream).
+{% endcomment %}
+{% if fq.run > 0 %}<span class="badge bg-success text-gray-900">Active</span>{% if fq.output == 1 %} <small class="text-gray-500">Email</small>{% elif fq.output >= 2 %} <small class="text-gray-500">Kafka</small>{% endif %}{% else %}<span class="badge bg-gray-200 text-gray-700">Off</span>{% endif %}

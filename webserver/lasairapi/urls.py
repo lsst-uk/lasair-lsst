@@ -1,11 +1,11 @@
-from django.views.generic import TemplateView
 from django.urls import include, path
 from rest_framework import routers
 from rest_framework.authtoken.views import obtain_auth_token
+from lasair.docs_redirect import DocsRedirectView
 from . import views
 
 urlpatterns = [
-    path('api',  TemplateView.as_view(template_name='api.html')),
+    path('api',  DocsRedirectView.as_view(docsPage='core_functions/rest-api.html')),
     path('api/cone/',                  views.ConeView.as_view()),
     path('api/query/',                 views.QueryView.as_view()),
     path('api/object/',                views.ObjectView.as_view()),

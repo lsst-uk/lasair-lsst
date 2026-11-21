@@ -151,32 +151,21 @@
 
 
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-12 mb-3">
                                 <div class="form-group">
                                     <label for="id_image">Profile Image</label>
-                                    <input type="file" name="image" id="id_image" class="form-control">
+                                    <input type="file" name="image" id="id_image" class="form-control" accept="image/png,image/jpeg,image/gif" aria-describedby="id_image_help">
+                                    <div class="form-text" id="id_image_help">Use a square JPG, GIF or PNG. Other shapes are stretched to fit.</div>
                                 </div>
                                 <span class="text-error">{{ p_form.image.errors }}</span>
                             </div>
-
-                            <div class="col-md-6 mb-3">
-                                <svg class="icon text-gray-500 me-2" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M8 4a3 3 0 00-3 3v4a5 5 0 0010 0V7a1 1 0 112 0v4a7 7 0 11-14 0V7a5 5 0 0110 0v4a3 3 0 11-6 0V7a1 1 0 012 0v4a1 1 0 102 0V7a3 3 0 00-3-3z" clip-rule="evenodd"></path></svg>
-                                <div class="text-gray small">Upload a square JPG, GIF or PNG. If the image is not square it is going to get squished!</div>
-
-                            </div>
-
-
                         </div>
 
-
-
-
-                    </div>
-
-                    <div class="mt-3 d-flex flex-row-reverse">
-                        <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Save</button>
-                    </div>
-                </form>
+                        <div class="mt-3 d-flex flex-row-reverse">
+                            <button class="btn btn-gray-800 mt-2 animate-up-2" type="submit">Save</button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
 

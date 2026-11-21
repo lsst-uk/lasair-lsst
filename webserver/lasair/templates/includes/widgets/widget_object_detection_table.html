@@ -31,7 +31,7 @@
     <div class="card-body widget-body">
 
         <div class="table-responsive">
-            <table class="table table-flush datatable" id="exportLightcurve">
+            <table class="table table-flush table-compact datatable" id="exportLightcurve">
                 <thead class="thead-light">
                     <tr>
                         <th>MJD</th>
@@ -47,7 +47,7 @@
 
                         <tr>
                             <td>{{ cand.mjd|floatformat:6 }}</td>
-                            <td>{{ cand.utc }}</td>
+                            <td class="cell-wrap">{{ cand.utc }}</td>
 			    <td>{{ cand.band }}</td>
 			    <td>{{ cand.psfFlux|floatformat:0 }} &plusmn; {{ cand.psfFluxErr|floatformat:0 }}</td>
 			    <td>{{ cand.reliability|floatformat:2 }}</td>

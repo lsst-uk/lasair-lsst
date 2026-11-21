@@ -438,7 +438,7 @@ def filter_query_create(request, mq_id=False):
             favouritesOnly = form.initial.get("favouritesOnly", False)
             includeHidden = form.initial.get("includeHidden", False)
 
-            name = form.fields['name'].widget.attrs['value']
+            name = form.fields['name'].widget.attrs.get('value')
             description = form.fields['description'].widget.attrs['value']
             public = form.initial["public"]
             run = form.initial["run"]
@@ -480,6 +480,10 @@ def filter_query_create(request, mq_id=False):
                 mq_id=None,
                 query_name=False,
                 owner_topic=tag_topic(request.user.username))
+
+            # SHOW THE ERROR THE SAME WAY THE SAVED-FILTER PAGE DOES
+            if error:
+                messages.error(request, error)
 
             # DISPLAY ONLY: NEVER SAVED OR EXECUTED. run_filter ABOVE ALREADY RAN
             # THE REAL QUERY WITH THE REAL MARK PREDICATES.

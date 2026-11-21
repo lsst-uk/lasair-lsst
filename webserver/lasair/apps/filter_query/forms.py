@@ -13,6 +13,27 @@ from lasair.apps.favourites.utils import offered_annotators
 from .utils import check_query_zero_limit
 import re
 
+EXAMPLE_NAME = 'Make it memorable'
+EXAMPLE_DESCRIPTION = 'A detailed description of your filter.'
+
+
+class DescriptionPlaceholderMixin:
+    """*reject the example text shown in the name and description boxes as a saved value*"""
+
+    def clean_name(self):
+        name = self.cleaned_data.get('name')
+        if name and name.strip() == EXAMPLE_NAME:
+            raise forms.ValidationError(
+                'Please choose a name for this filter.')
+        return name
+
+    def clean_description(self):
+        description = self.cleaned_data.get('description')
+        if description and description.strip() == EXAMPLE_DESCRIPTION:
+            raise forms.ValidationError(
+                'Please write your own description of this filter.')
+        return description
+
 
 def initialize_instance_fields(form, set_defaults=False, add_run_checkboxes=False):
 
@@ -46,7 +67,7 @@ def initialize_instance_fields(form, set_defaults=False, add_run_checkboxes=Fals
             form.initial["runOnAnnotation"] = False
 
 
-class filterQueryForm(forms.ModelForm):
+class filterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     msl = db_connect.readonly()
     cursor = msl.cursor(buffered=True, dictionary=True)
@@ -180,8 +201,8 @@ class filterQueryForm(forms.ModelForm):
         )
         model = filter_query
         widgets = {
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
+            'name': forms.TextInput(attrs={'size': 80, 'placeholder': EXAMPLE_NAME, 'required': 'true'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': EXAMPLE_DESCRIPTION, 'required': 'true'}),
             'public': forms.CheckboxInput(),
             'selected': forms.Textarea(),
             'conditions': forms.Textarea(),
@@ -199,7 +220,7 @@ class filterQueryForm(forms.ModelForm):
             action = self.request.POST.get('action')
         name = self.cleaned_data.get('name')
 
-        if action == "save":
+        if action == "save" and name:
             if filter_query.objects.filter(Q(user=self.request.user) & Q(name__iexact=name.strip().lower())).exists() and self.instance.name != name:
                 msg = 'You already have a filter by that name, please choose another.'
                 self.add_error('name', msg)
@@ -291,7 +312,7 @@ class filterQueryForm(forms.ModelForm):
         return super(filterQueryForm, self).save(commit=commit)
 
 
-class UpdateFilterQueryForm(forms.ModelForm):
+class UpdateFilterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     class Meta:
         runTypes = (
@@ -309,8 +330,8 @@ class UpdateFilterQueryForm(forms.ModelForm):
         )
         model = filter_query
         widgets = {
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your watchlist. Remember to add a citation to the original data source.', 'required': 'true'}),
+            'name': forms.TextInput(attrs={'size': 80, 'placeholder': EXAMPLE_NAME, 'required': 'true'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': EXAMPLE_DESCRIPTION, 'required': 'true'}),
             'public': forms.CheckboxInput(),
             'run': forms.Select(choices=runTypes),
             'output': forms.Select(choices=notificationTypes)
@@ -323,7 +344,7 @@ class UpdateFilterQueryForm(forms.ModelForm):
             action = self.request.POST.get('action')
         name = self.cleaned_data.get('name')
 
-        if action == "save":
+        if action == "save" and name:
             if filter_query.objects.filter(Q(user=self.request.user) & Q(name__iexact=name.strip().lower())).exists() and self.instance.name != name:
                 msg = 'You already have a filter by that name, please choose another.'
                 self.add_error('name', msg)
@@ -342,7 +363,7 @@ class UpdateFilterQueryForm(forms.ModelForm):
                
 
 
-class DuplicateFilterQueryForm(forms.ModelForm):
+class DuplicateFilterQueryForm(DescriptionPlaceholderMixin, forms.ModelForm):
 
     class Meta:
         runTypes = (
@@ -360,8 +381,8 @@ class DuplicateFilterQueryForm(forms.ModelForm):
         )
         model = filter_query
         widgets = {
-            'name': forms.TextInput(attrs={'size': 80, 'placeholder': 'Make it memorable', 'required': 'true', 'value': "Make it memorable"}),
-            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': 'A detailed description of your filter.', 'required': 'true'}),
+            'name': forms.TextInput(attrs={'size': 80, 'placeholder': EXAMPLE_NAME, 'required': 'true'}),
+            'description': forms.Textarea(attrs={'rows': 3, 'placeholder': EXAMPLE_DESCRIPTION, 'required': 'true'}),
             'public': forms.CheckboxInput(),
             'run': forms.Select(choices=runTypes),
             'output': forms.Select(choices=notificationTypes)
@@ -374,7 +395,7 @@ class DuplicateFilterQueryForm(forms.ModelForm):
             action = self.request.POST.get('action')
         name = self.cleaned_data.get('name')
 
-        if action == "copy":
+        if action == "copy" and name:
             if filter_query.objects.filter(Q(user=self.request.user) & Q(name__iexact=name.strip().lower())).exists():
                 msg = 'You already have a filter by that name, please choose another.'
                 self.add_error('name', msg)

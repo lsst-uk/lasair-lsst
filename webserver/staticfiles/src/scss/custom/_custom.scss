@@ -480,3 +480,94 @@ body.object-hidden {
     25%      { transform: translateX(-3px); }
     75%      { transform: translateX(3px); }
 }
+
+
+// COMPACT TABLES: 6PX SIDE PADDING AND HEADINGS THAT MAY WRAP, SO WIDE TABLES FIT THEIR CARD.
+// THE EXTRA CLASSES BEAT THE .card .table PADDING RULE IN _tables.scss
+.card .table.table-compact {
+    td,
+    th {
+        padding-left: .375rem;
+        padding-right: .375rem;
+    }
+
+    // HEADINGS MAY WRAP ONTO TWO LINES; CELL VALUES STAY ON ONE UNLESS THEY ASK FOR .cell-wrap
+    thead th {
+        white-space: normal;
+    }
+
+    td.cell-wrap {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    // LONG FREE TEXT (E.G. AN ANNOTATION EXPLANATION) GETS A CEILING SO IT CANNOT PUSH LINKS OFF SCREEN
+    td.cell-wrap-text {
+        min-width: 10rem;
+        max-width: 24rem;
+    }
+}
+
+// SHARED RESULTS TABLE (widget_objectlist_table.html)
+$results-mark-col-width: 5rem;
+
+.card .results-table.table {
+    // THE MARK COLUMN AND diaObjectId STAY ON SCREEN WHILE THE OTHER COLUMNS SCROLL UNDER THEM
+    .mark-col,
+    .col-object-id {
+        position: sticky;
+        z-index: 1;
+        left: 0;
+        background-color: $white;
+    }
+
+    thead .mark-col,
+    thead .col-object-id {
+        background-color: $gray-100;
+    }
+
+    // inline widths from simple-datatables WOULD OTHERWISE MOVE THE diaObjectId OFFSET BELOW
+    .mark-col {
+        width: $results-mark-col-width !important;
+        min-width: $results-mark-col-width !important;
+        max-width: $results-mark-col-width !important;
+    }
+
+    &.has-mark-col .col-object-id {
+        left: $results-mark-col-width;
+    }
+}
+
+// lasair_datatables.js WRAPS THE SCROLLING TABLE CONTAINER IN THIS FRAME, SO THE SCROLLBAR SITS
+// DIRECTLY BELOW THE TABLE (NOT BELOW THE PAGER) AND THE SHADOWS STAY PUT WHILE THE TABLE SCROLLS.
+.results-scroll-frame {
+    position: relative;
+
+    > .dataTable-container {
+        overflow-x: auto;
+    }
+
+    // SOFT SHADOW ON THE RIGHT EDGE: THERE ARE MORE COLUMNS TO SCROLL TO
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1.5rem;
+        z-index: 2;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity .15s ease;
+        background: linear-gradient(to left, rgba(0, 0, 0, .14), rgba(0, 0, 0, 0));
+    }
+
+    &.can-scroll-right::after {
+        opacity: 1;
+    }
+
+    // SHADOW ON THE FIXED COLUMNS' RIGHT EDGE ONCE OTHER COLUMNS SLIDE UNDER THEM
+    &.is-scrolled .results-table .col-object-id {
+        box-shadow: 6px 0 6px -4px rgba(0, 0, 0, .25);
+    }
+}

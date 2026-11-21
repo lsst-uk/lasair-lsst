@@ -3,8 +3,6 @@
 <div class="card border-0 shadow h-100">
     <div class="card-body">
 
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in watchmap">{{count}}</span>
-
         <div class="row d-flex   justify-content-start">
 
             <div class="col-12 mb-3 d-flex align-items-center   justify-content-start">
@@ -26,7 +24,7 @@
                     </span>
 
                 {% endif %}</div>
-                <div class="h5 fw-extrabold mb-0 ms-2 d-sm-none">'{{ watchmap.name }}'{{ annotator.topic }}' Annotator{% if annotator.public %}
+                <div class="h5 fw-extrabold mb-0 ms-2 d-sm-none">'{{ annotator.topic }}' Annotator{% if annotator.public %}
                     <span class="icon icon-md mx-2 text-gray-400 " data-bs-toggle="tooltip" data-bs-title="public list">
                         {% include "includes/icons/icon_padlock_open.html" %}
                     </span>
@@ -45,11 +43,11 @@
 
 
             <div class="col-12 px-4">
-                <small class="text-gray-500">
-                    {{annotator.description|safe}}
-                </small>
-                <small class="text-gray-500">
-                    The annotator is <b>{% if annotation.active == 0 %}not {% endif %} active</b> {% include "includes/info_tooltip.html" with info="When active, an annotator can add data to the Lasair database" position="auto" link=docroot|add:"/core_functions/annotators.html" %}.
+                {% if annotator.description %}
+                    <small class="d-block text-gray-500 mb-2">{{annotator.description|safe}}</small>
+                {% endif %}
+                <small class="d-block text-gray-500">
+                    <b>{{count}} object{{count|pluralize}} annotated</b>. The annotator is <b>{% if annotator.active == 0 %}not {% endif %}active</b>. {% include "includes/info_tooltip.html" with info="When active, an annotator can add data to the Lasair database" position="auto" link=docroot|add:"/core_functions/annotators.html" %}
                 </small>
             </div>
 
