@@ -52,7 +52,8 @@ def mma_watchmap_index(request):
     ]
     ```           
     """
-    mmaWatchmaps = MmaWatchmap.objects.filter(event_tai_gte=mjdnow() - settings.DAYS_AFTER_MMA)
+    # just get the recent ones
+    mmaWatchmaps = MmaWatchmap.objects.filter(event_tai__gte=mjd_now() - settings.DAYS_AFTER_MMA)
 #    mmaWatchmaps = MmaWatchmap.objects.all()
 
     # how many hits for each
