@@ -31,6 +31,8 @@ from .utils import make_image_of_MOC
 from lasair.utils import bytes2string, string2bytes
 sys.path.append('../common')
 
+def mjd_now():
+    return time.time() / 86400 + 40587.0
 
 @csrf_exempt
 def mma_watchmap_index(request):
@@ -50,7 +52,8 @@ def mma_watchmap_index(request):
     ]
     ```           
     """
-    mmaWatchmaps = MmaWatchmap.objects.all()
+    mmaWatchmaps = MmaWatchmap.objects.filter(event_tai_gte=mjdnow() - settings.DAYS_AFTER_MMA)
+#    mmaWatchmaps = MmaWatchmap.objects.all()
 
     # how many hits for each
     msl = db_connect.remote()
