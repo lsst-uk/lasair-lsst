@@ -4,7 +4,6 @@
 
 <div class="card border-0 shadow h-100">
     <div class="card-body">
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in MMA watchmap">{{count}}</span>
 
         <div class="row d-flex   justify-content-start">
             <div class="col-12 mb-3 d-flex align-items-center   justify-content-start">
@@ -13,6 +12,9 @@
                 </div>
 		<div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.namespace }}:{{ mma_watchmap.event_id }} </div> 
 		<div class="h5 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.event_date }}</div>
+            </div>
+            <div class="col-12 px-4 mb-3">
+                <small class="d-block text-gray-500"><b>{{count}} object{{count|pluralize}} matched</b>.</small>
             </div>
         </div>
 

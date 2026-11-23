@@ -1,5 +1,4 @@
 import datetime
-from time import gmtime
 
 SOON_HOURS = 4
 
@@ -41,10 +40,9 @@ def nid_to_date(nid):
 
 
 def nid_to_days_ago(nid):
-    """ Converts ZTF night id (nid) to number of days ago
+    """ Converts ZTF night id (nid) to number of days ago, relative to nid_now()
     """
-    g = gmtime()
-    return date_to_nid("%4s%2s%2s" % (g.tm_year, g.tm_mon, g.tm_mday)) - nid
+    return nid_now() - nid
 
 
 def nid_to_pretty_date(nid):

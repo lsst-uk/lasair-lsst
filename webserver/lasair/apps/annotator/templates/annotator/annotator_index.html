@@ -1,5 +1,8 @@
 {% extends "layouts/base.html" %}
 {% load static %}
+{% block title %}
+    Annotators
+{% endblock title %}
 {% block content %}
 
     <div class="container">
@@ -23,8 +26,8 @@
 
                             <div class="col-12 px-4">
                                 <small class="text-gray-500">
-                                    Annotators are codes that run on the Lasair transient stream, compute some value added feature(s) for the transients and inject these values back into the stream for other users to use in their filters.
-                                    Some annotators are written by the Lasair Team but others are submitted by a Lasair users. Please get in contact via <a href="https://community.lsst.org/c/support/support-lasair/55">Community</a> if you have an idea for an annotator.
+                                    Annotators are programs that add extra values to transients in the Lasair stream, for use in your filters.
+                                    The Lasair team writes some, and other users write others. Contact us through <a href="https://community.lsst.org/c/support/support-lasair/55">Community</a> if you have an idea for one.
                                 </small>
                             </div>
 

@@ -1,6 +1,38 @@
+import re
+
 from django import template
 
 register = template.Library()
+
+# READABLE HEADINGS, WITH UNITS, FOR KNOWN SCHEMA COLUMNS. ANY OTHER KEY (E.G. A USER ALIAS) KEEPS ITS OWN NAME.
+COLUMN_LABELS = {
+    'ra': 'RA (deg)',
+    'decl': 'Dec (deg)',
+    'cone_id': 'Cone ID',
+    'UTC': 'Alert time (UTC)',
+    'psfFlux': 'Latest flux (nJy)',
+    'latest_psfFlux': 'Latest flux (nJy)',
+    'latest flux': 'Latest flux (nJy)',
+    'predicted type': 'Predicted type',
+    'lastDiaSourceMjdTai': 'Last detected (MJD)',
+    'firstDiaSourceMjdTai': 'First detected (MJD)',
+    'nDiaSources': 'Detections',
+    'absMag': 'Peak absolute mag',
+    'sherlock': 'Sherlock class',
+    'days ago': 'Days ago',
+    'days since': 'Days since',
+    'classification': 'Classification',
+    'classdict': 'Classification data',
+}
+
+# BAND COLUMNS FOLLOW ONE PATTERN, E.G. r_psfFlux -> "r flux (nJy)"
+BAND_COLUMN_LABELS = {
+    'psfFlux': '{band} flux (nJy)',
+    'psfFluxMean': '{band} mean flux (nJy)',
+    'psfFluxMeanErr': '{band} mean flux error (nJy)',
+    'latestMJD': '{band} latest (MJD)',
+}
+BAND_COLUMN_PATTERN = re.compile(r'^([ugrizy])_(%s)$' % '|'.join(BAND_COLUMN_LABELS))
 
 
 @register.filter
@@ -27,3 +59,55 @@ def replace(value, arg):
 @register.filter
 def is_float(value):
     return isinstance(value, float)
+
+
+@register.filter
+def column_label(key):
+    """
+    Readable heading, with units, for a results-table column
+    Use `{{ key|column_label }}`
+    """
+    if key in COLUMN_LABELS:
+        return COLUMN_LABELS[key]
+    bandMatch = BAND_COLUMN_PATTERN.match(str(key))
+    if bandMatch:
+        return BAND_COLUMN_LABELS[bandMatch.group(2)].format(band=bandMatch.group(1))
+    return key
+
+
+@register.filter
+def column_tooltip(schema, key):
+    """
+    Header tooltip: the column name, then its schema description if there is one
+    Use `{{ schema|column_tooltip:key }}`
+    """
+    description = keyvalue(schema, key)
+    if not description:
+        return key
+    return f'{key}: {description}'
+
+
+SITE_NAME = 'Lasair'
+TITLE_SEPARATOR = ' · '
+
+
+@register.filter(is_safe=True)
+def page_title(value):
+    """*the browser tab title: the page's own title, then the site name*
+
+    **Key Arguments:**
+
+    - ``value`` -- the rendered contents of a page's ``title`` block
+
+    **Return:**
+
+    - ``title`` -- "<page title> · Lasair", or just "Lasair" when the block is empty
+
+    **Usage:**
+
+        <title>{% filter page_title %}{% block title %}{% endblock title %}{% endfilter %}</title>
+    """
+    pageTitle = ' '.join(str(value).split())
+    if not pageTitle:
+        return SITE_NAME
+    return f'{pageTitle}{TITLE_SEPARATOR}{SITE_NAME}'

@@ -466,6 +466,8 @@
     height: 100%;
     position: relative;
     width: 100%;
+    // ROOM FOR THE SORT ARROWS SO THEY NEVER SIT ON TOP OF THE HEADING TEXT
+    padding-right: 1rem;
     &::before {
         content: "";
         height: 0;
@@ -516,3 +518,12 @@
 
 
 
+
+
+// A TABLE WITH NO ROWS HAS NOTHING TO SEARCH OR PAGE. lasair_datatables.js SETS THE CLASS.
+.dataTable-wrapper.lasair-table-is-empty {
+    .dataTable-search,
+    .dataTable-dropdown {
+        display: none;
+    }
+}

@@ -320,7 +320,7 @@ def distance(ra1, de1, ra2, de2):
     **Usage:**
 
     ```python
-    from lasair.apps.search import distance
+    from lasair.utils import distance
     separation = distance(ra1, de1, ra2, de2)
     ```           
     """

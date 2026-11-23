@@ -2,7 +2,7 @@
 {% load humanize %}
 
 
-<div class="card border-0 shadow h-100">
+<div class="card border-0 shadow h-100 schema-card">
 
 
 
@@ -29,7 +29,7 @@
                 {% endif %}
 
                 <small class="text-gray-500">
-                    Use the search bar below to find the columns required. Click on  {% include "includes/icons/icon_copy.html" %} to copy the <code>table.column</code> name to your clipboard.
+                    Click on  {% include "includes/icons/icon_copy.html" %} to copy the <code>table.column</code> name to your clipboard.
                 </small>
             </div>
         </div>
@@ -47,6 +47,8 @@
                 {% if tablename is None or schema_name == tablename %}
 
                     {% for section in schema_content %}
+
+                        <div class="schema-section">
 
                         {% if schema_content|length > 1 %}
 
@@ -71,7 +73,7 @@
 
 
                                 {% for row in section.fields %}
-                                    <tr>
+                                    <tr data-schema-search="{{schema_name|lower}}.{{row.name|lower}} {{row.doc|lower}}">
                                         <td ><button data-bs-toggle="tooltip" data-bs-trigger="click" data-bs-animation="true" data-bs-placement="top" data-bs-title="copied" onclick="copy('{{schema_name}}.{{row.name}}','#copy_button_{{schema_name}}_{{row.name}}')" id="copy_button_{{schema_name}}_{{row.name}}" class="btn btn-xs copy-button me-1">  {% include "includes/icons/icon_copy.html" %} </button> <code class="fw-extrabold text-gray-400">{{schema_name}}.</code><code class="fw-extrabold text-gray-700">{{row.name}}</code></td>
                                         <td> {{row.doc}}</td>
 
@@ -80,6 +82,8 @@
 
                             </tbody>
                         </table>
+
+                        </div>
                     {% endfor %}
                 {% endif %}
             {% endfor %}
