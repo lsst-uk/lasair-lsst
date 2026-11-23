@@ -25,6 +25,7 @@
 
 **FIXED**: `3_make_alter_table.py` diffed only the fields of a schema, so an index change between two versions was never emitted as an `ALTER TABLE` and never reached an existing database.
 
+**ENHANCEMENT**: the website sidebar, the mobile navbar and the docs sidebar now show the Rubin Observatory logo beside or below the Lasair logo, so you can tell Lasair LSST from Lasair ZTF; the sidebar background is back to its original `bg-gray-800` dark grey; the sidebar logo, text and spacing are smaller so every link fits a laptop screen without scrolling, while phones keep 44 px tap rows; the rows-per-page selector, row count and page buttons under each table no longer squash together on a laptop screen, and the page buttons move to their own row at the right when there is no room (DY-209).
 **FIXED**: the test image build and the filter deploy role failed to install the SFD dust maps, because Harvard Dataverse now returns 403 to the python-requests user agent that `dustmaps.sfd.fetch()` uses; both now download the two maps directly, check their MD5 sums, and confirm `SFDQuery` loads them.
 
 **ENHANCEMENT**: the New and Edit Filter forms no longer offer the per-user `tags_<username>` annotators in the Object Annotators list; a filter that already uses one keeps it.
