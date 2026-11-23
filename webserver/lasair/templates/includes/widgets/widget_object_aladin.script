@@ -1,42 +1,14 @@
 
+// 2026-11-17 KWS/Claude - CDS-hosted surveys removed, non-CDS mirrors only
+var MIRROR_DSS2_COLOR = "https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor";
+var MIRROR_PANSTARRS_GRI = "https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/PanSTARRS";
+
 var surveys = [
     {
-        "id": "P/DESI-Legacy-Surveys/DR10/color",
-        "url": "https://alasky.cds.unistra.fr/DESI-legacy-surveys/DR10/CDS_P_DESI-Legacy-Surveys_DR10_color/",
-        "name": "DESI Legacy",
+        "id": "P/PanSTARRS/DR1/color-i-r-g",
+        "url": MIRROR_PANSTARRS_GRI,
+        "name": "PanSTARRS DR1 color i-r-g (MAST mirror)",
         "maxOrder": 11,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/DECaPS/DR2/color",
-        "url": "https://alasky.cds.unistra.fr/DECaPS/DR2/CDS_P_DECaPS_DR2_color/",
-        "name": "DECaPS_DR2",
-        "maxOrder": 11,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/PanSTARRS/DR1/color-z-zg-g",
-        "url": "http://alasky.u-strasbg.fr/Pan-STARRS/DR1/color-z-zg-g/",
-        "name": "PanSTARRS",
-        "maxOrder": 11,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/DECaLS/DR5/color/",
-        "url": "http://alasky.u-strasbg.fr/DECaLS/DR5/color/",
-        "name": "DECaLS DR5",
-        "maxOrder": 11,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/HSC/DR2/CDS_P_HSC_DR2_wide_color-i-r-g",
-        "url": "http://alasky.u-strasbg.fr/HSC/DR2/CDS_P_HSC_DR2_wide_color-i-r-g",
-        "name": "HSC DR2 wide color",
-        "maxOrder": 12,
         "frame": "equatorial",
         "format": "jpeg"
     },
@@ -50,7 +22,7 @@ var surveys = [
     },
     {
         "id": "P/2MASS/color",
-        "url": "http://alasky.u-strasbg.fr/2MASS/Color",
+        "url": "https://skies.esac.esa.int/2MASSColor",
         "name": "2MASS colored",
         "maxOrder": 9,
         "frame": "equatorial",
@@ -58,55 +30,23 @@ var surveys = [
     },
     {
         "id": "P/DSS2/color",
-        "url": "http://alasky.u-strasbg.fr/DSS/DSSColor",
-        "name": "DSS colored",
+        "url": MIRROR_DSS2_COLOR,
+        "name": "DSS2 color (MAST mirror)",
         "maxOrder": 9,
         "frame": "equatorial",
         "format": "jpeg"
     },
     {
-        "id": "P/Fermi/color",
-        "url": "http://alasky.u-strasbg.fr/Fermi/Color",
-        "name": "Fermi color",
-        "maxOrder": 3,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
         "id": "P/Finkbeiner",
-        "url": "http://alasky.u-strasbg.fr/FinkbeinerHalpha",
+        "url": "https://skies.esac.esa.int/FinkbeinerHa",
         "maxOrder": 3,
         "frame": "galactic",
         "format": "jpeg fits",
         "name": "Halpha"
     },
     {
-        "id": "P/GALEXGR6/AIS/color",
-        "url": "http://alasky.u-strasbg.fr/GALEX/GR6-02-Color",
-        "name": "GALEX Allsky Imaging Survey colored",
-        "maxOrder": 8,
-        "frame": "equatorial",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/IRIS/color",
-        "url": "http://alasky.u-strasbg.fr/IRISColor",
-        "name": "IRIS colored",
-        "maxOrder": 3,
-        "frame": "galactic",
-        "format": "jpeg"
-    },
-    {
-        "id": "P/Mellinger/color",
-        "url": "http://alasky.u-strasbg.fr/MellingerRGB",
-        "name": "Mellinger coloured",
-        "maxOrder": 4,
-        "frame": "galactic",
-        "format": "jpeg"
-    },
-    {
         "id": "P/SDSS9/color",
-        "url": "http://alasky.u-strasbg.fr/SDSS/DR9/color",
+        "url": "https://skies.esac.esa.int/SDSS9Color",
         "name": "SDSS9 colored",
         "maxOrder": 10,
         "frame": "equatorial",
@@ -114,19 +54,11 @@ var surveys = [
     },
     {
         "id": "P/SPITZER/color",
-        "url": "http://alasky.u-strasbg.fr/SpitzerI1I2I4color",
+        "url": "https://casda.csiro.au/hips/SpitzerI1I2I4color",
         "name": "IRAC color",
         "maxOrder": 9,
         "frame": "galactic",
         "format": "jpeg"
-    },
-    {
-        "id": "P/VTSS/Ha",
-        "url": "http://alasky.u-strasbg.fr/VTSS/Ha",
-        "maxOrder": 3,
-        "frame": "galactic",
-        "format": "png jpeg fits",
-        "name": "VTSS-Ha"
     },
     {
         "id": "P/RASS",
@@ -135,20 +67,19 @@ var surveys = [
         "maxOrder": 3,
         "frame": "galactic",
         "format": "jpeg"
-    },
-    {
-        "id": "P/allWISE/color",
-        "url": "http://alasky.u-strasbg.fr/AllWISE/RGB-W4-W2-W1/",
-        "name": "AllWISE color",
-        "maxOrder": 8,
-        "frame": "equatorial",
-        "format": "jpeg"
     }
 ];
 
 let aladin;
 loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
-    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: "P/DESI-Legacy-Surveys/DR10/color", fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false});
+    // 2026-11-17 KWS/Claude - Non CDS mirror for CDS outage
+    var baseHips = ({{ data.objectData.decl }} > -30.0)
+        ? A.imageHiPS(MIRROR_PANSTARRS_GRI, {name: "PanSTARRS DR1 color i-r-g (MAST mirror)", maxOrder: 11, cooFrame: "equatorial", imgFormat: "jpeg"})
+        : A.imageHiPS(MIRROR_DSS2_COLOR, {name: "DSS2 color (MAST mirror)", maxOrder: 9, cooFrame: "equatorial", imgFormat: "jpeg"});
+    aladin = A.aladin('#aladin-lite-div', {showControl: false, survey: baseHips, fov:0.025, target: "{{ data.objectData.ra }}, {{ data.objectData.decl }}", cooFrame: "J2000", showFullscreenControl: false, showFrame: false, showGotoControl: false, hipsList: [], log: false});  // 2026-11-17 KWS/Claude - different setup for non-CDS mirror
+    surveys.forEach(s => {
+        aladin.addHiPSToFavorites(aladin.createImageSurvey(s.id, s.name, s.url, s.frame, s.maxOrder, {imgFormat: s.format.split(' ')[0]}));
+    });
 
     {% if data.sherlock.eastSeparationArcsec %}
     var sherlockcat = A.catalog({name: "Sherlock's predicted association", sourceSize: 18, color: "#32CD32"});
@@ -169,13 +100,6 @@ loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
 {% endif %}
 
 
-var hipsCats = {
-    'ps1': A.catalogHiPS('https://axel.u-strasbg.fr/HiPSCatService/II/349/ps1', {name: 'PanSTARRS DR1 sources', shape: 'circle', sourceSize: 8, color: '#6baed6', onClick: 'showTable', name: '          PanSTARRS DR1'}),
-    'gdr2': A.catalogHiPS('https://axel.u-strasbg.fr/HiPSCatService/I/345/gaia2', {name: 'Gaia DR2 sources', shape: 'circle', sourceSize: 8, color: '#d66bae', onClick: 'showTable', name: 'Gaia DR2'})
-};
-hipsCats['ps1'].hide();
-hipsCats['gdr2'].hide();
-aladin.addCatalog(hipsCats['ps1']);
-aladin.addCatalog(hipsCats['gdr2']);
+// 2026-11-17 KWS/Claude - PS1 and Gaia DR2 HiPS catalogues (CDS) removed
 
 }, () => {});  // ON FAILURE loadAladin HAS ALREADY SHOWN THE FALLBACK MESSAGE
