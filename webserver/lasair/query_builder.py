@@ -75,7 +75,7 @@ def check_select_forbidden(select_expression):
             return ('Cannot use %s in the SELECT clause' % s)
 
     # Want to split on whitespace, parentheses, curlys
-    se = re.split('\\s|\(|\)|\{|\}', select_expression.lower())
+    se = re.split(r'\s|\(|\)|\{|\}', select_expression.lower())
 
     # Check no forbidden words
     for s in select_forbidden_word_list:
@@ -110,7 +110,7 @@ def check_where_forbidden(where_condition):
         where_condition = regex.sub("", where_condition)
 
     # Want to split on whitespace, parentheses, curlys
-    wc = re.split('\\s|\(|\)|\{|\}', where_condition.lower())
+    wc = re.split(r'\s|\(|\)|\{|\}', where_condition.lower())
     for w in where_forbidden_word_list:
         if w in wc or w.upper() in wc:
             return('Cannot use the word %s in the WHERE clause' % w.upper())
@@ -342,6 +342,7 @@ def build_query(select_expression, from_expression, where_condition,
     favourite_only = False  # restrict to the owner's favourited objects
     include_hidden = False  # show the owner's hidden objects rather than excluding them
     crossmatch_tns = False  # using crossmatch tns, but not combined with watchlist
+    mma_assoc_events = False  # using mma_assoc and mma_events
     annotation_topics = []  # topics of chosen annotations
     watchlist_id = None     # wl_id of the chosen watchlist, if any
     area_ids = None     # wl_id of the chosen watchlist, if any
@@ -383,6 +384,8 @@ def build_query(select_expression, from_expression, where_condition,
     # We know if the watchlist is there or n ot, can see if the put in crossamtch_tns
     for _table in tables:
         table = _table.strip().lower()
+        if table == 'mma_assoc' or table == 'mma_events':
+            mma_assoc_events = True
         if table == 'crossmatch_tns':
             if watchlist_id:
                 raise QueryBuilderError('Error in FROM list, cannot have both watchlist and crossmatch_tns')
@@ -401,6 +404,9 @@ def build_query(select_expression, from_expression, where_condition,
             for i, a in enumerate(area_ids):
                 from_table_list.append(f'area_hits as ar{i}')
 
+    if mma_assoc_events:
+        from_table_list.append('mma_assoc')
+        from_table_list.append('mma_events')
     if crossmatch_tns:
         from_table_list.append('watchlist_hits')
         from_table_list.append('crossmatch_tns')
@@ -428,6 +434,9 @@ def build_query(select_expression, from_expression, where_condition,
 
         where_clauses.append('watchlist_hits.wl_id=%d' % settings.TNS_WATCHLIST_ID)
         where_clauses.append('watchlist_hits.name=crossmatch_tns.tns_name')
+    if mma_assoc_events:
+        where_clauses.append('objects.diaObjectId=mma_assoc.diaObjectId')
+        where_clauses.append('mma_assoc.mw_id=mma_events.mw_id')
 
     if len(annotation_topics) > 0:
         for at in annotation_topics:

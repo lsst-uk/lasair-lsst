@@ -133,5 +133,6 @@
     - "area_hits.sql"
     - "watchlist_hits.sql"
     - "annotations.sql"
+    - "mma_events.sql"
     - "mma_assoc.sql"
 
