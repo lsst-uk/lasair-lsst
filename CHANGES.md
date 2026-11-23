@@ -11,6 +11,8 @@
 
 **ENHANCEMENT**: the object page layout now adapts to narrow windows: the top cards rearrange by width, the Object Info tables stack when the card is narrow, the scatter plot keeps a sensible size, and the light curves show fewer date labels on narrow plots and keep the UTC Time title clear of the legend.
 
+**FIXED**: `gulp build` failed with `Undefined mixin`, because `_custom.scss` uses Bootstrap's `media-breakpoint-down` mixin but `volt.scss` imported it before the mixin was loaded; `volt.scss` now loads Bootstrap's breakpoint mixins first.
+
 **FIXED**: every page was slow or stalled when the CDS servers were slow, because each page loaded Aladin Lite with a blocking script tag from the CDS website; Lasair now serves its own copy of Aladin Lite 3.8.1, loads it only on the home, object and MMA watchmap pages, loads it in the background, and shows a message in the sky map if it has not loaded after 10 seconds.
 
 **FIXED**: unfavouriting or unhiding several objects in quick succession on the Favourites or Hidden page removed only the first row, because each removal rebuilt the table from clones and the pending timers still pointed at the old rows; leaving rows are now tracked by object id, and a mark set on one row now survives another row's removal.
