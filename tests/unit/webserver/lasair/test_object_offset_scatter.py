@@ -14,7 +14,6 @@ from lasair.apps.object.utils import (
     ARCSEC_PER_DEGREE,
     LIGHTCURVE_AXIS_TICKS,
     SCATTER_HEIGHT,
-    SCATTER_LEGEND_Y,
     SCATTER_MARGIN_BOTTOM,
     SCATTER_MARGIN_BOTTOM_NO_NOTE,
     SCATTER_RANGE_ARCSEC,
@@ -161,7 +160,7 @@ class TestSplitOffsetsByRange(unittest.TestCase):
 
 class TestMakeOffsetBandTraces(unittest.TestCase):
 
-    def test_makes_one_legend_trace_per_present_band(self):
+    def test_makes_one_trace_per_present_band(self):
         # ARRANGE
         offsets = [
             {'diaSourceId': 1, 'mjd': 1.0, 'band': 'r', 'dRa': 0.0, 'dDec': 0.0},
@@ -202,7 +201,7 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         # ASSERT
         self.assertEqual(len(plotted_points(fig)), 1)
 
-    def test_band_traces_use_light_curve_colours_and_legend(self):
+    def test_band_traces_use_light_curve_colours(self):
         # ARRANGE
         sources = [make_source(10.0, 20.0, band=band, diaSourceId=i) for i, band in enumerate(bands)]
         objectData = make_object_data(10.0, 20.0, sources)
@@ -215,7 +214,6 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertEqual([trace.name for trace in bandTraces], [band + '-band' for band in bands])
         self.assertEqual([trace.marker.color for trace in bandTraces], bandColors)
         self.assertEqual([trace.marker.symbol for trace in bandTraces], bandSymbols)
-        self.assertTrue(fig.layout.showlegend)
 
     def test_axes_are_fixed_and_equal_aspect(self):
         # ARRANGE
@@ -440,19 +438,16 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         note = fig.layout.annotations[0]
         self.assertEqual((note.xref, note.x, note.xanchor), ('paper', 0.5, 'center'))
 
-    def test_legend_sits_above_the_plot_so_it_cannot_cover_points(self):
+    def test_plot_has_no_legend(self):
         # ARRANGE
-        objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
+        sources = [make_source(10.0, 20.0, band=band, diaSourceId=i) for i, band in enumerate(bands)]
+        objectData = make_object_data(10.0, 20.0, sources)
 
         # ACT
         fig, _ = build_offset_scatter_figure(objectData)
 
         # ASSERT
-        legend = fig.layout.legend
-        self.assertEqual((legend.orientation, legend.x, legend.xanchor), ('h', 0.5, 'center'))
-        self.assertEqual(legend.yanchor, 'bottom')
-        self.assertEqual(legend.y, SCATTER_LEGEND_Y)
-        self.assertGreater(SCATTER_LEGEND_Y, 1.0)
+        self.assertFalse(fig.layout.showlegend)
 
     def test_plots_empty_axes_with_note_when_no_detection_has_a_position(self):
         # ARRANGE

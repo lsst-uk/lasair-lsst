@@ -239,8 +239,6 @@
             if (!dataNode || typeof Plotly === "undefined") {
                 return;
             }
-            // APPROXIMATE HEIGHT OF THE ONE-ROW LEGEND ABOVE THE PLOT AREA; A WRAPPED LEGEND LEAVES THE PLOT A FEW PX SHORT OF SQUARE
-            var LEGEND_ROW_PX = 30;
             var plotNode = document.getElementById("detection-scatter");
             var figure = JSON.parse(dataNode.textContent);
             var margin = figure.layout.margin || {};
@@ -251,7 +249,7 @@
                 if (!width) {
                     return figure.layout.height;
                 }
-                return width - (margin.l || 0) - (margin.r || 0) + (margin.t || 0) + (margin.b || 0) + LEGEND_ROW_PX;
+                return width - (margin.l || 0) - (margin.r || 0) + (margin.t || 0) + (margin.b || 0);
             }
 
             var layout = Object.assign({}, figure.layout, {height: squareHeight()});
