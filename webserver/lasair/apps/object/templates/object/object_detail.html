@@ -37,9 +37,12 @@
     }
     /* TIGHTER OBJECT INFO TABLE CELLS; VALUES WRAP ONLY WHEN THE CARD IS TOO NARROW */
     .table.object-info-table td {
-        padding-left: 0.5rem;
-        padding-right: 0.5rem;
+        padding: 2px 0.5rem;
         white-space: normal;
+    }
+    /* LESS SPACE BELOW THE TABLES KEEPS THE TOP ROW OF CARDS COMPACT */
+    .card-body.widget-body.object-info-body {
+        padding-bottom: 0.75rem;
     }
     .table.object-info-table td:first-child {
         white-space: nowrap;
@@ -90,16 +93,22 @@
             grid-template-rows: auto auto 1fr;
         }
     }
-    @media (min-width: 1400px) {
+    /* TEN COLUMNS: OBJECT INFO TAKES 70% AND THE SCATTER CARD 30%; TNS AND SHERLOCK SPLIT THE ROW BELOW IN HALF.
+       BELOW 1460 PX, 70% IS NARROWER THAN THE 700 PX THE SIDE-BY-SIDE OBJECT INFO TABLES NEED */
+    @media (min-width: 1460px) {
         .object-top-grid {
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            grid-template-areas: "info info info scatter" "tns tns sherlock sherlock";
+            grid-template-columns: repeat(10, minmax(0, 1fr));
+            grid-template-areas:
+                "info info info info info info info scatter scatter scatter"
+                "tns tns tns tns tns sherlock sherlock sherlock sherlock sherlock";
         }
         .object-top-grid.has-scatter {
             grid-template-rows: auto auto;
         }
         .object-top-grid:not(.has-scatter) {
-            grid-template-areas: "info info info info" "tns tns sherlock sherlock";
+            grid-template-areas:
+                "info info info info info info info info info info"
+                "tns tns tns tns tns sherlock sherlock sherlock sherlock sherlock";
         }
     }
     /* OBJECT INFO TABLES SIT SIDE BY SIDE ONLY WHEN THE CARD ITSELF IS WIDE ENOUGH */
@@ -136,9 +145,9 @@
             display: table-row;
         }
     }
-    /* SQUARE SCATTER PLOT NEVER GROWS BEYOND THIS SIDE, SO A FULL-WIDTH CARD DOES NOT GET A GIANT PLOT */
+    /* SQUARE SCATTER PLOT NEVER GROWS BEYOND THIS SIDE, SO A FULL-WIDTH CARD DOES NOT GET A GIANT PLOT; 90% OF THE CARD KEEPS IT NO TALLER THAN THE OBJECT INFO CARD */
     #detection-scatter {
-        max-width: 520px;
+        max-width: min(520px, 90%);
         margin: 0 auto;
     }
 </style>
