@@ -4,15 +4,17 @@
 
 <div class="card border-0 shadow h-100">
     <div class="card-body">
-        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="number of objects detected in MMA watchmap">{{count}}</span>
 
         <div class="row d-flex   justify-content-start">
             <div class="col-12 mb-3 d-flex align-items-center   justify-content-start">
                 <div class="icon-shape icon-shape-tertiary rounded me-2">
                     {% include "includes/icons/icon_watchmap.html" %}
                 </div>
-		<div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.namespace }}:{{ mma_watchmap.otherId }} </div> 
+		<div class="h2 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.namespace }}:{{ mma_watchmap.event_id }} </div> 
 		<div class="h5 fw-extrabold mb-0 ms-2 d-none d-sm-inline">{{ mma_watchmap.event_date }}</div>
+            </div>
+            <div class="col-12 px-4 mb-3">
+                <small class="d-block text-gray-500"><b>{{count}} object{{count|pluralize}} matched</b>.</small>
             </div>
         </div>
 
@@ -48,11 +50,12 @@
 <script type="text/javascript">
 var aladin;
 var circle_size = 0.1;
-var url = 'https://{{ lasair_url }}/lasair/static/mma/{{ mma_watchmap.namespace }}/{{ mma_watchmap.otherId }}/{{ mma_watchmap.version }}/';
+var url = 'https://{{ lasair_url }}/lasair/static/mma/{{ mma_watchmap.namespace }}/{{ mma_watchmap.event_id }}/{{ mma_watchmap.version }}/';
 loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
     aladin = A.aladin('#aladin-lite-div',
         {target: '{{ mma_watchmap.params.location.RA }} {{ mma_watchmap.params.location.Dec }}', fov: 20,
-        projection: 'AIT', survey: 'P/Mellinger/color'});
+        projection: 'AIT', hipsList: [], log: false,  // 2026-11-17 KWS/Claude - use of non CDS mirror.
+        survey: A.imageHiPS('https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor', {name: 'DSS2 color (MAST mirror)', maxOrder: 9, cooFrame: 'equatorial', imgFormat: 'jpeg'})});
     aladin.setFrame('J2000d');
 
     var moc90 = A.MOCFromURL(url+'90.moc', {name: '90% contour', color: '#ce4257', lineWidth: 1});

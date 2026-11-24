@@ -74,6 +74,23 @@
     - webserver
   tags: web
 
+- hosts: api
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+    - exports.yaml
+  vars:
+    db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
+    db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
+    sherlock_svc_host: "{{ groups['sherlock'][0] }}"
+    cassandra_head: "{{ groups['cassandranodes'] }}"
+    powerapi_token: "placeholder"
+    web_domain: "api.{{ web_name }}"
+  roles:
+    - lasair_cephfs
+    - webserver
+  tags: api
+
 - hosts: all
   gather_facts: true
   vars_files:
@@ -99,7 +116,7 @@
   tags:
     - always
 
-- hosts: localhost
+- hosts: localhost:svc:ingest:sherlock:filter:web:api
   gather_facts: false
   vars_files:
     - settings.yaml
@@ -108,11 +125,16 @@
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
   tasks:
+    - name: Ensure the repo is up to date
+      git:
+        repo: "{{ git_url }}"
+        dest: "{{ ansible_env.HOME }}/{{ git_name }}"
+        version: "{{ lasair_version }}"
     - name: Create settings file
       template:
         src: common/settings.py.j2
-        dest: "{{ ansible_env.HOME }}/{{ git_name}}/common/settings.py"
-      tags: settings
+        dest: "{{ ansible_env.HOME }}/{{ git_name }}/common/settings.py"
+  tags: settings
 
 - hosts: svc
   gather_facts: false
@@ -204,7 +226,7 @@
     - settings.yaml
     - exports.yaml
   vars:
-    schema: "11_1"
+    schema: "11_2"
     db_host: "{{ (groups['db'] + groups['cluster_control'] + [''])[0] }}"
     db_port: "{% if groups['db'] %}3306{% else %}9001{% endif %}"
     mysql_root_password: "{{ settings.local_db_root_password }}"
@@ -223,6 +245,19 @@
     enable_letsencrypt: true
     # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
     use_hsts: false 
+  roles:
+    - proxy
+  tags: proxy
+
+- hosts: api
+  gather_facts: false
+  vars_files:
+    - settings.yaml
+  vars:
+    enable_letsencrypt: true
+    # HTTP Sctrict Transport Security - should be true for prod, probably not for dev
+    use_hsts: false 
+    server_name: "api.{{ web_name }}.{{ domain }}"
   roles:
     - proxy
   tags: proxy

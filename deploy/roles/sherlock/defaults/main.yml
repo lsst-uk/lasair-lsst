@@ -13,7 +13,7 @@ db_port: "3306"
 master_db_name: "{{ settings.master_db_username }}"
 master_db_host: "{{ db_host }}"
 master_db_port: "{{ db_port }}"
-master_db_username: "{{ settings.master_db_username }}"
-master_db_password: "{{ settings.master_db_password }}"
+master_db_username: "{{ settings.master_db_readonly_username }}"
+master_db_password: "{{ settings.master_db_readonly_password }}"
 
 venv_path: /opt/lasair_venv

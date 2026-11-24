@@ -14,6 +14,7 @@ from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils.html import format_html
 from django.views.decorators.http import require_POST
 
 from lasair.apps.db_schema.utils import get_schema_dict
@@ -25,7 +26,11 @@ RESULT_CAP = 1000
 
 FAVOURITES_ZEROTEXT = (
     'You have not favourited any objects yet. '
-    'Click the star on any object page to add it here.')
+    'Click the star on any object page to add it here. '
+    'Find objects in the <a href="{}">recent alerts table</a>.')
+
+# THE HOME PAGE ALERTS TABLE, WHERE A USER CAN PICK AN OBJECT PAGE TO OPEN
+ALERTS_TABLE_ANCHOR = '#objectlist-table'
 
 HIDDEN_ZEROTEXT = (
     'You have not hidden any objects. Hiding an object removes it from your own '
@@ -190,7 +195,7 @@ def favourites_list(request):
         header='Favourite Objects',
         header_icon='includes/icons/icon_star.html',
         desc='The objects you have favourited, most recently favourited first.',
-        zerotext=FAVOURITES_ZEROTEXT,
+        zerotext=format_html(FAVOURITES_ZEROTEXT, reverse('index') + ALERTS_TABLE_ANCHOR),
         export_name='favourites',
         mode='favourites')
 

@@ -176,21 +176,26 @@ See `tests/system/README.md` for details.
 
 ## Starting and Stopping
 
-To cleanly start and stop Lasair you can use the `start.sh` and `stop.sh` scripts.
+To cleanly start and stop Lasair you can use the `control.sh` script.
 
 To start everything that is deployed:
 ```
-$ ./start.sh
+$ ./control.sh start all
 ```
 
 Similarly, to stop everything:
 ```
-$ ./stop.sh
+$ ./control.sh stop all
+```
+
+To check on the status of Lasair services:
+```
+$ ./control.sh status
 ```
 
 You can also stop and start individual components. E.g. to stop the ingest:
 ```
-$ ./stop.sh ingest
+$ ./control.sh stop ingest
 ```
 
 There is also a `pipeline` tag to start/stop all of the pipeline components
@@ -198,7 +203,7 @@ There is also a `pipeline` tag to start/stop all of the pipeline components
 
 It is possible to get a full list of available tags:
 ```
-$ ansible-playbook control.yaml --list-tags
+$ ./control.sh help
 ```
 
 ## Modify a deployment

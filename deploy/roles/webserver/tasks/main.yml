@@ -22,7 +22,7 @@
   pip: 
     executable: pip3 
     name: 
-      - numpy
+      - numpy<2.4
       - mysql-connector-python
       - mysqlclient
       - requests
@@ -49,7 +49,7 @@
     name: 
       - pyephem
       - MOCpy
-      - astropy
+      - astropy==7.1 # workaround as 8 is not compatible with ubuntu 24.04 system packages
       - gkhtm
       - gkutils
       - gkdbutils
@@ -57,6 +57,8 @@
       - pandas
       - plotly
       - hmpty
+      - pillow
+      - matplotlib
     extra_args: "--break-system-packages"
 
 - name: Disable Apache
@@ -176,7 +178,7 @@
     - makemigrations watchmap
     - makemigrations mma_watchmap
     - makemigrations users
-    - migrate
+    - migrate --fake-initial
     - collectstatic --noinput
 
 - name: Create symlink for services log
@@ -199,7 +201,7 @@
 
 - name: Create symlink for GW MOCS
   file:
-    src: /mnt/cephfs/lasair/mma/
+    src: /mnt/cephfs/lasair/mma
     dest: "{{ ansible_env.HOME }}/{{ git_name }}/webserver/static/mma"
     state: link
 

@@ -22,17 +22,8 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <!-- Primary Meta Tags -->
 
-        {% if title %}
-            <title>
-                Lasair - {% block title %}{% endblock %}
-            </title>
-
-        {% else %}
-            <title>
-                Lasair
-            </title>
-
-        {% endif %}
+        {% load customtags %}
+        <title>{% filter page_title %}{% block title %}{% endblock title %}{% endfilter %}</title>
 
         {% include 'includes/metatags.html' %}
         {% include 'includes/analytics.html' %}

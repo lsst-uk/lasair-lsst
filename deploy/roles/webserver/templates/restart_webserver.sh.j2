@@ -16,10 +16,11 @@ mod_wsgi-express setup-server \
 --group {{ lookup('pipe', 'id -gn') }} \
 --working-directory {{ ansible_env.HOME }}/{{ git_name }}/webserver \
 --python-path       {{ ansible_env.HOME }}/{{ git_name }}/webserver \
+--limit-request-body 70000000 \
 --url-alias /lasair/static static \
 --application-type module lasair.wsgi \
 --server-root $APACHEPATH \
 --port $PORT \
---mount-point /
+--processes 4 --threads 4 --mount-point /
 
 $APACHEPATH/apachectl start

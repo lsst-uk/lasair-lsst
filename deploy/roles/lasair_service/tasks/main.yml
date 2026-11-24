@@ -55,3 +55,4 @@
 
 - import_tasks: cron.yml
 - import_tasks: settings.yml
+- import_tasks: mma.yml

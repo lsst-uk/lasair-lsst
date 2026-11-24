@@ -19,6 +19,8 @@
 
 // update variables here
 @import "custom/variables";
+// THE CUSTOM CSS USES media-breakpoint-* MIXINS, SO LOAD THEM BEFORE IT
+@import "../../node_modules/bootstrap/scss/mixins/breakpoints";
 // custom css here
 @import "custom/custom";
 

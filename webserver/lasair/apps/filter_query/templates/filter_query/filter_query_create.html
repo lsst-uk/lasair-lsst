@@ -6,7 +6,7 @@
 
 
 {% block title %}
-    {{data.diaObjectId}}
+    Filter Builder
 {% endblock title %}
 
 
@@ -36,7 +36,22 @@
                 </div>
             {% endif %}
             <div class="col-12 mb-4">
-                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="Zero objects have been matched against this filter so far. Check back later to see if any new objects have been matched, or amend the filtering criteria to catch more objects." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" sortTable=sortTable %}
+                {% if table is not None %}
+                {% include "includes/widgets/widget_objectlist_table.html" with zerotext="No objects match this filter. Change the conditions and press <b>Run Filter</b> again." table=table header="Filter Results"  desc="Here are the filtered objects, limited to "|add:limit|add:" objects" sortTable=sortTable %}
+                {% else %}
+                    <div class="card border-0 shadow">
+                        <div class="card-body text-center">
+                            {% comment %}
+                            display_sql is set only after Run Filter, so with no table it means the SQL failed. The view shows the error as a message at the top of the page.
+                            {% endcomment %}
+                            {% if display_sql %}
+                                <span class="text-gray-600">Fix the error shown at the top of the page, then press <b>Run Filter</b>.</span>
+                            {% else %}
+                                <span class="text-gray-600">Press <b>Run Filter</b> to see matching objects.</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
             </div>
 
 

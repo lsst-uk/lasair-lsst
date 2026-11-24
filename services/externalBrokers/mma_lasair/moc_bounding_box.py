@@ -93,10 +93,10 @@ if __name__ == "__main__":
 
     for file in sorted(os.listdir(settings.MMA_DIRECTORY + '/LVK/')):
         if file.startswith('S') or file.startswith('M'):
-            otherId = file
-            for version in os.listdir(settings.MMA_DIRECTORY+'/LVK/'+otherId):
+            event_id = file
+            for version in os.listdir(settings.MMA_DIRECTORY+'/LVK/'+event_id):
                 if version.startswith('20'):
-                    mocfilename = '%s/%s' % (otherId, version)
+                    mocfilename = '%s/%s' % (event_id, version)
                     if checking:
                         checkit(mocfilename, points)
                     else:

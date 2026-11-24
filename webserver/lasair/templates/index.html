@@ -23,8 +23,6 @@
 
                 <div class="card border-0 shadow h-100 p-2">
 
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-tertiary" data-bs-toggle="tooltip" data-bs-placement="auto" data-bs-title="Total number of recent LSST alerts">{{table|length}}</span>
-
                     <div class="card-header border-0">
 
 
@@ -53,8 +51,8 @@
                             <div class="col-12 px-4">
 
                                 <small class="text-gray-500">
-Below is a selection of recent alerts that have a Sherlock association.
-Click on a marker for information about an object, or use the table below.
+The table below lists the <b>{{ table|length }} most recently detected object{{ table|length|pluralize }}</b> with more than three detections that Sherlock classifies as SN, NT, CV or AGN.
+Click a marker on the map, or an object ID in the table, for details.
 Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,m:cDDaeb4>weather at the Observatory</a>.
                                 </small>
 
@@ -125,7 +123,7 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
                         </div>
 
                         <div class="d-flex justify-content-center">
-                            <small class="text-gray-500" style="font-size:0.7em;">Mellinger color optical survey - Copyright 2000-2017 Axel Mellinger. All rights reserved.</small>
+                            <small class="text-gray-500" style="font-size:0.7em;">DSS2 color optical survey - served by the STScI MAST mirror.</small>{# 2026-11-17 KWS/Claude Use DSS2, not Mellinger when CDS is down. #}
                         </div>
                     </div>
                 </div>
@@ -168,11 +166,13 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
 
 
 
-            var imageSurvey = 'P/Mellinger/color'
+            // 2026-11-17 KWS/Claude Use DSS2 mirror when CDS is down.
+            var imageSurvey = 'https://stpubdata.s3.us-east-1.amazonaws.com/mast/skybackgrounds/DSSColor'
 
             var aladin;
             loadAladin(ALADIN_SRC, '#aladin-lite-div').then(() => {
                 aladin = A.aladin('#aladin-lite-div', {
+                    survey: A.imageHiPS(imageSurvey, {name: 'DSS2 color (MAST mirror)', maxOrder: 9, cooFrame: 'equatorial', imgFormat: 'jpeg'}),  // 2026-11-17 KWS/Claude - Use DSS2 when CDS is down.
                     fov:360,
                     cooFrame: 'ICRSd',
                     projection: 'AIT',
@@ -184,10 +184,10 @@ Click for <a href=https://www.windy.com/-Clouds-clouds?clouds,-36.902,-71.842,8,
                     showProjectionControl: false,
                     showLayersControl: false,
                     showFrame: false,
-                    showGotoControl: false
+                    showGotoControl: false,
+                    hipsList: [],  // 2026-11-17 KWS/Claude Empty HiPS list for situation when CDS is down.
+                    log: false  // 2026-11-17 KWS/Claude Don't log to CDS
                 });
-
-                aladin.setBaseImageLayer(aladin.newImageSurvey(imageSurvey ));
 
                 for (iclass = 0; iclass < nclass; iclass++) {
                     for (iage = 0; iage < nage; iage++) {

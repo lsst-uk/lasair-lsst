@@ -1,6 +1,7 @@
 <nav class="navbar navbar-dark navbar-theme-primary px-4 col-12 d-lg-none">
     <a class="navbar-brand me-lg-5" href="/">
-        <img class="navbar-brand-dark" src="{{ ASSETS_ROOT }}/img/brand/icon.svg" alt="Volt logo" /> <img class="navbar-brand-light" src="{{ ASSETS_ROOT }}/img/brand/dark.svg" alt="Volt logo" />
+        <img class="navbar-brand-dark" src="{{ ASSETS_ROOT }}/img/brand/icon.svg" alt="Lasair" /> <img class="navbar-brand-light" src="{{ ASSETS_ROOT }}/img/brand/dark.svg" alt="Lasair" />
+        <img class="navbar-brand-dark ms-3" style="height: 26px;" src="{{ ASSETS_ROOT }}/img/brand/rubin_logo_light.svg" alt="Rubin Observatory" />
     </a>
     <div class="d-flex align-items-center">
         <button class="navbar-toggler d-lg-none collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle navigation">
@@ -9,7 +10,7 @@
     </div>
 </nav>
 
-<nav id="sidebarMenu" class="sidebar d-lg-block text-white collapse" data-simplebar style="background-color: #000000;">
+<nav id="sidebarMenu" class="sidebar d-lg-block bg-gray-800 text-white collapse" data-simplebar>
     <div class="sidebar-inner px-2 pt-3">
         <div class="user-card d-flex d-md-none align-items-center justify-content-between justify-content-md-center pb-4">
             <div class="d-flex align-items-center">
@@ -52,18 +53,19 @@
 
             <li class="nav-item">
                 <a href="/" class="nav-link align-items-center">
-                    <img src="{{ ASSETS_ROOT }}/img/brand/logo_light.svg" alt="brand logo">
+                    <img class="d-block mx-auto" style="width: 90%;" src="{{ ASSETS_ROOT }}/img/brand/logo_light.svg" alt="Lasair">
+                    <img class="d-block mx-auto mt-2" style="width: 36%;" src="{{ ASSETS_ROOT }}/img/brand/rubin_logo_light.svg" alt="Rubin Observatory">
                 </a>
             </li>
 
-            <li class="nav-item pt-3">
+            <li class="nav-item pt-2">
 
 
 
 
                 {% if user.is_authenticated %}
                     <li class="nav-item {% if 'favourites' in request.path %} active {% endif %}">
-                        <a class="nav-link" href="{% url 'favourites' %}">
+                        <a class="nav-link" href="{% url 'favourites' %}"{% if 'favourites' in request.path %} aria-current="page"{% endif %}>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-sm mb-1 me-1" fill="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.7-5.2 2.7 1-5.8-4.3-4.1 5.9-.9z"/>
@@ -76,7 +78,7 @@
                 {% endif %}
 
                 <li class="nav-item {% if 'filters' in request.path %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'filter_query_index' %}">
+                    <a class="nav-link" href="{% url 'filter_query_index' %}"{% if 'filters' in request.path %} aria-current="page"{% endif %}>
                         <span class="sidebar-icon">
                             <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                                 <path d="m56.25 75c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-12.5c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25zm18.75-31.25c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-50c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25zm18.75-31.25c3.4531 0 6.25 2.7969 6.25 6.25s-2.7969 6.25-6.25 6.25h-87.5c-3.4531 0-6.25-2.7969-6.25-6.25s2.7969-6.25 6.25-6.25z"/>
@@ -90,7 +92,7 @@
 
 
                 <li class="nav-item {% if 'watchlists' in request.path %} active {% endif %}">
-                    <a class="nav-link" href="{% url 'watchlist_index' %}">
+                    <a class="nav-link" href="{% url 'watchlist_index' %}"{% if 'watchlists' in request.path %} aria-current="page"{% endif %}>
                         <span class="sidebar-icon">
                             <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M9 2a1 1 0 000 2h2a1 1 0 100-2H9z"></path><path fill-rule="evenodd" d="M4 5a2 2 0 012-2 3 3 0 003 3h2a3 3 0 003-3 2 2 0 012 2v11a2 2 0 01-2 2H6a2 2 0 01-2-2V5zm3 4a1 1 0 000 2h.01a1 1 0 100-2H7zm3 0a1 1 0 000 2h3a1 1 0 100-2h-3zm-3 4a1 1 0 100 2h.01a1 1 0 100-2H7zm3 0a1 1 0 100 2h3a1 1 0 100-2h-3z" clip-rule="evenodd"></path></svg>
                         </span>
@@ -99,10 +101,21 @@
                     </a>
                 </li>
 
+                {% comment %}
+                /watchmaps/ and /mma_watchmaps/ both contain "watchmaps", so each is matched by its own path prefix.
+                {% endcomment %}
                 <li class="nav-item">
-                    <span
+                {% if request.path|slice:":11" == "/watchmaps/" or request.path|slice:":15" == "/mma_watchmaps/" %}
+                    <button type="button"
+                        class="nav-link d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1"
+                        aria-expanded="true" aria-controls="submenu-pages1">
+                {% else %}
+                    <button type="button"
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages1"
+                        aria-expanded="false" aria-controls="submenu-pages1">
+                {% endif %}
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -118,23 +131,23 @@
                         <span class="link-arrow">
                             <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
                         </span>
-                    </span>
+                    </button>
 
 
 
-                    <div class="multi-level {% if 'watchmaps' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages1" aria-expanded="false">
+                    <div class="multi-level collapse{% if request.path|slice:":11" == "/watchmaps/" or request.path|slice:":15" == "/mma_watchmaps/" %} show{% endif %}"
+                        id="submenu-pages1">
                         <ul class="flex-column nav">
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'watchmap_index' %}">
+                            <li class="nav-item{% if request.path|slice:":11" == "/watchmaps/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'watchmap_index' %}"{% if request.path|slice:":11" == "/watchmaps/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">Watchmaps</span>
                                     {% include "includes/info_tooltip.html" with info="Watchmaps created with a MOC" position="auto" link=docroot|add:"/core_functions/watchmaps.html" %}
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'mma_watchmap_index' %}">
+                            <li class="nav-item{% if request.path|slice:":15" == "/mma_watchmaps/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'mma_watchmap_index' %}"{% if request.path|slice:":15" == "/mma_watchmaps/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">MultiMessenger</span>
                                     {% include "includes/info_tooltip.html" with info="Sky Areas for Gravitational Wave, Fermi, and other alerts" position="auto" link=docroot|add:"/core_functions/mma.html" %}
 
@@ -147,7 +160,7 @@
 
                 <li class="nav-item {% if 'annotator' in request.path %} active {% endif %}">
 
-                    <a class="nav-link" href="{% url 'annotator_index' %}">
+                    <a class="nav-link" href="{% url 'annotator_index' %}"{% if 'annotator' in request.path %} aria-current="page"{% endif %}>
                         <span class="sidebar-icon">
                             <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                                 <path d="m90.668 47.168l-34.836-34.836c-4.832-4.832-11.5-7.332-18.332-7l-19.168 1c-6.5 0.33594-11.664 5.5-12 12l-1 19.168c-0.33203 6.832 2.168 13.5 7 18.332l34.832 34.832c2.668 2.668 6.168 4.168 10 4.168 3.832 0 7.332-1.5 10-4.168l23.5-23.5c2.668-2.668 4.168-6.168 4.168-10 0-3.832-1.5-7.332-4.1641-9.9961zm-56.836-13.336c-2.668 2.668-6.832 2.668-9.5 0s-2.668-6.832 0-9.5c1.332-1.332 3-2 4.668-2s3.332 0.66797 4.668 2c2.832 2.668 2.832 7 0.16406 9.5z"/>
@@ -160,9 +173,17 @@
 
 
                 <li class="nav-item">
-                    <span
+                {% if request.path|slice:":8" == "/status/" %}
+                    <button type="button"
+                        class="nav-link d-flex justify-content-between align-items-center"
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2"
+                        aria-expanded="true" aria-controls="submenu-pages2">
+                {% else %}
+                    <button type="button"
                         class="nav-link collapsed d-flex justify-content-between align-items-center"
-                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2">
+                        data-bs-toggle="collapse" data-bs-target="#submenu-pages2"
+                        aria-expanded="false" aria-controls="submenu-pages2">
+                {% endif %}
                         <span>
                             <span class="sidebar-icon">
                                 <svg class="icon icon-xs me-2" fill="currentColor" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -178,16 +199,16 @@
                         <span class="link-arrow">
                             <svg class="icon icon-sm" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
                         </span>
-                    </span>
+                    </button>
 
 
 
-                    <div class="multi-level {% if 'status' not in request.path %} collapse {% endif %}" role="list"
-                        id="submenu-pages2" aria-expanded="false">
+                    <div class="multi-level collapse{% if request.path|slice:":8" == "/status/" %} show{% endif %}"
+                        id="submenu-pages2">
                         <ul class="flex-column nav">
 
-                            <li class="nav-item">
-                                <a class="nav-link" href="{% url 'status_today' %}">
+                            <li class="nav-item{% if request.path == "/status/" %} active{% endif %}">
+                                <a class="nav-link" href="{% url 'status_today' %}"{% if request.path == "/status/" %} aria-current="page"{% endif %}>
                                     <span class="sidebar-text">Today</span>
                                 </a>
                             </li>
@@ -208,7 +229,7 @@
 
 
 
-                <li role="separator" class="dropdown-divider mt-4 mb-5 border-gray-700"><hr></li>
+                <li role="separator" class="dropdown-divider mt-2 mb-3 border-gray-700"><hr></li>
 
 
                 <li class="nav-item {% if 'about' in request.path %} active {% endif %}">
@@ -261,7 +282,7 @@
 
                 <li class="nav-item {% if 'comres' in request.path %} active {% endif %}">
 
-                    <a class="nav-link" href="{% url 'community_resource_index' %}">
+                    <a class="nav-link" href="{% url 'community_resource_index' %}"{% if 'comres' in request.path %} aria-current="page"{% endif %}>
                         <span class="sidebar-icon">
                             <svg class="icon icon-xs mb-1 me-1" fill="currentColor" stroke="none" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
 
@@ -294,7 +315,7 @@
 
             <li class="nav-item {% if 'schema' in request.path %} active {% endif %}">
 
-                <a class="nav-link" href="{% url 'schema_index' %}">
+                <a class="nav-link" href="{% url 'schema_index' %}"{% if 'schema' in request.path %} aria-current="page"{% endif %}>
                     <span class="sidebar-icon">
                         <svg class="icon icon-xs mb-1 me-1" fill="currentColor" viewBox="0 0 90 90" xmlns="http://www.w3.org/2000/svg">
 
