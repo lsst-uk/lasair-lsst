@@ -7,6 +7,8 @@
 **ENHANCEMENT**: the profile page shows the API token blurred, with buttons to reveal it and to copy it without revealing it.
 **FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
 
+**ENHANCEMENT**: the Detection Scatter card labels its RA and Dec as the object's mean RA and Dec, and its plot now spans ±2 arcsec instead of ±4 arcsec.
+
 **ENHANCEMENT**: the object page's top card is renamed Object Info, is headed with the object's `LSST-AP-DO-<diaObjectId>` name and shows its discovery, latest and peak details in tables at all times, without a Go Deeper button, the object's RA and Dec move to the Detection Scatter card, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
 
 **ENHANCEMENT**: the object page layout now adapts to narrow windows: the top cards rearrange by width, the Object Info tables stack when the card is narrow, the scatter plot keeps a sensible size, and the light curves show fewer date labels on narrow plots and keep the UTC Time title clear of the legend.

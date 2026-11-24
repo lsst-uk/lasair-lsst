@@ -232,6 +232,27 @@ class TestBuildOffsetScatterFigure(unittest.TestCase):
         self.assertEqual(fig.layout.yaxis.scaleanchor, 'x')
         self.assertEqual(fig.layout.yaxis.scaleratio, 1)
 
+    def test_axes_span_two_arcsec_either_side_of_the_mean_position(self):
+        # ARRANGE
+        objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
+
+        # ACT
+        fig, _ = build_offset_scatter_figure(objectData)
+
+        # ASSERT
+        self.assertEqual(tuple(fig.layout.xaxis.range), (2.0, -2.0))
+        self.assertEqual(tuple(fig.layout.yaxis.range), (-2.0, 2.0))
+
+    def test_detection_three_arcsec_away_is_outside_plot_range(self):
+        # ARRANGE
+        objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0 + 3 * ARCSEC)])
+
+        # ACT
+        _, outsideCount = build_offset_scatter_figure(objectData)
+
+        # ASSERT
+        self.assertEqual(outsideCount, 1)
+
     def test_axis_titles_give_units_in_round_brackets(self):
         # ARRANGE
         objectData = make_object_data(10.0, 20.0, [make_source(10.0, 20.0)])
