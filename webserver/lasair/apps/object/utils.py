@@ -14,7 +14,7 @@ bandSymbols = ['circle', 'triangle-up', 'triangle-down', 'square', 'star', 'hexa
 bandColorsDark = ['#3eb7ff','#30c39f','#ff7e00', '#2af5ff','#a7f9c1','#fdc900']
 
 # HALF-WIDTH OF THE OFFSET SCATTER PLOT AXES, IN ARCSEC
-SCATTER_RANGE_ARCSEC = 4.0
+SCATTER_RANGE_ARCSEC = 2.0
 # LEGEND POSITION OF THE STANDARD-PHOTOMETRY LIGHT CURVE, IN PLOT-AREA FRACTIONS, ABOVE THE UTC TOP-AXIS TITLE
 LIGHTCURVE_LEGEND_Y_STANDARD = 1.32
 # COLOUR FOR A BAND NOT IN THE RUBIN STYLE GUIDE (THE LIGHT CURVE DEFAULT)
@@ -26,14 +26,12 @@ SCATTER_NOTE_YSHIFT = -50
 SCATTER_MARGIN_BOTTOM = 82
 # BOTTOM MARGIN THAT ONLY FITS THE X-AXIS TITLE, USED WHEN THERE IS NO NOTE
 SCATTER_MARGIN_BOTTOM_NO_NOTE = 45
-# MARGINS THAT KEEP THE SQUARE PLOT FILLING THE CARD; PLOTLY GROWS THE TOP MARGIN TO FIT THE LEGEND
-SCATTER_MARGIN_TOP = 5
+# MARGINS THAT KEEP THE SQUARE PLOT FILLING THE CARD; THE TOP MARGIN FITS HALF OF THE TOP Y TICK LABEL
+SCATTER_MARGIN_TOP = 10
 SCATTER_MARGIN_LEFT = 45
 SCATTER_MARGIN_RIGHT = 5
 # FALLBACK FIGURE HEIGHT; THE OBJECT PAGE RESIZES THE FIGURE TO THE CARD WIDTH
 SCATTER_HEIGHT = 360
-# LEGEND POSITION IN PLOT-AREA FRACTIONS: JUST ABOVE THE TOP AXIS, WHICH MAKES PLOTLY GROW THE TOP MARGIN TO FIT IT
-SCATTER_LEGEND_Y = 1.02
 # MARKER FOR A DETECTION WHOSE BAND IS NOT A RUBIN BAND
 UNKNOWN_BAND_SYMBOL = 'circle'
 SCATTER_SMALL_FONT_SIZE = 11
@@ -758,22 +756,11 @@ def apply_offset_scatter_layout(
         margin_b=SCATTER_MARGIN_BOTTOM_NO_NOTE,
         margin_l=SCATTER_MARGIN_LEFT,
         margin_r=SCATTER_MARGIN_RIGHT,
-        showlegend=True,
+        # NO LEGEND: THE BAND OF EACH POINT IS IN ITS HOVER LABEL
+        showlegend=False,
         # RA INCREASES TO THE EAST, WHICH IS ON THE LEFT OF THE SKY, SO THE X RANGE IS DISPLAYED REVERSED
         xaxis=dict(title_text="ΔRA × cos(Dec) (arcsec)", range=[limit, -limit], **axisStyle),
         yaxis=dict(title_text="ΔDec (arcsec)", range=[-limit, limit], scaleanchor="x", scaleratio=1, **axisStyle),
-        # ABOVE THE PLOT, OUTSIDE THE AXES, SO IT NEVER COVERS A DETECTION
-        legend=dict(
-            orientation="h",
-            yanchor="bottom",
-            y=SCATTER_LEGEND_Y,
-            xanchor="center",
-            x=0.5,
-            bgcolor="#E6E5E5",
-            borderwidth=4,
-            bordercolor="#E6E5E5",
-            font_size=SCATTER_SMALL_FONT_SIZE,
-        ),
         hoverlabel=dict(font_color="white", bgcolor=PLOT_LINE_COLOR, font_size=14),
     )
 

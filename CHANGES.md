@@ -5,9 +5,11 @@
 **FEATURE**: the profile page has a "Regenerate token" button below the blurred API token; it opens a confirmation box that warns the old token stops working at once, and the token is replaced only when you confirm.
 
 **ENHANCEMENT**: the profile page shows the API token blurred, with buttons to reveal it and to copy it without revealing it.
-**FEATURE**: the object page shows a Detection Scatter card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
+**FEATURE**: the object page shows an Object diaSources card, beside the Object Info card, with a scatter plot of each detection's offset from the object position, drawn with the light curve's band colors and symbols.
 
-**ENHANCEMENT**: the object page's top card is renamed Object Info, is headed with the object's `LSST-AP-DO-<diaObjectId>` name and shows its discovery, latest and peak details in tables at all times, without a Go Deeper button, the object's RA and Dec move to the Detection Scatter card, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
+**ENHANCEMENT**: the Detection Scatter card is renamed Object diaSources, shows the object position as `RA: <ra> Dec: <dec>` in the Object Info table style and text size, has no plot legend, and its plot now spans ±2 arcsec instead of ±4 arcsec; from 1460 px wide the Object Info and Object diaSources cards take 70% and 30% of the width, and both cards are 10% shorter because the Object Info table rows are tighter and the plot fills 90% of its card.
+
+**ENHANCEMENT**: the object page's top card is renamed Object Info, is headed with the object's `LSST-AP-DO-<diaObjectId>` name and shows its discovery, latest and peak details in tables at all times, without a Go Deeper button, the object's RA and Dec move to the Object diaSources card, the TNS and Sherlock cards now sit side by side at half width each, and the object-page cards now share one header layout, so every icon has the same size and top-left position, every title has the same size, and every card has the same padding.
 
 **ENHANCEMENT**: the object page layout now adapts to narrow windows: the top cards rearrange by width, the Object Info tables stack when the card is narrow, the scatter plot keeps a sensible size, and the light curves show fewer date labels on narrow plots and keep the UTC Time title clear of the legend.
 
