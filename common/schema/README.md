@@ -30,7 +30,8 @@ These data files are transformed by three programs:
 
 There is also a `3_make_all_alter_table` which runs `3_make_alter_table` for all the tables.
 
-### Updating the schema
+### Updating the schema code
+This is done on the lasair-lsst-dev cluster
 
 - `cd lasair-lsst/common/schema`
 - Copy the old to the new schema:
@@ -41,7 +42,15 @@ cp -R 7_3 7_4
 ```
 python3 1_fetch_avsc.py 7_4
 ```
-- Build the combined `objects.py` for MySQL:
+- For a minor schema change, only the `diaSources` schema is changed, so you can skip this step. This updates `objects.py`, either because Rubin has changed the `disObject` schema,
+or because Lasair has added attributes/features to the `objects` table.
+
+  - Modify the `object_features.py` with the new attributes. The Galera schema has
+of two parts: featured copied from the LSST 'diaObjects` schema, and added
+value features made by Lasair. If the former, the new attribute has `"origin": "lsst"`
+and if the latter it has `"origin": "lasair"`. In the latter case, there are checks made to ensure the code generates the attribute.
+
+  - Build the combined `objects.py` for MySQL:
 ```
     python3 2_join_object_schema.py 7_4
 ```
@@ -49,87 +58,30 @@ python3 1_fetch_avsc.py 7_4
 ```
 python3 3_make_all_alter_table.py 7_3 7_4
 ```
+There will be ALTER TABLE commands for both Cassandra and MySQL. 
+Keep a note of these, you will need them when deploying to production.
 
-## Updating and checking the nodes
-(1) Run the command 
+Finally, change the `SCHEMA_VERSION` in several places:
 ```
-cd common/schema
-python3 3_make_create_table.py sql 9_0 objects
-```
-Check that `show create table objects` returns the same as this on main and both filter MySQL databases.
-Check other tables in the same way.
-
-(2) 
-Run the commands 
-```
-python3 3_make_create_table.py cql 9_0 diaObjects
-python3 3_make_create_table.py cql 9_0 diaSources
-```
-Check that the Cassandra tables match the schema with `show create table "diaObjects"` in `cqlsh`.
-Check other tables in the same way.
-
-(3) The value of SCHEMA_VERSION should be up to date in `/common/settings.py` for both ingest nodes, 
-both filters, and web. In fact, it would be great to simply replace all the local copies of 
-`settings.py` from the template in the bootstrap node. 
-
-## Update June 2026
-How to do a minor schema update, where nothing is added to the objects table of MySQL
-```
-ssh lasair-lsst-dev
-
-cd lasair-lsst/deploy
-./stop.sh ingest
-
-cd ../common/schema
-git switch schema_11_1
-mkdir 11_1
-cp 11_0/*.py 11_1
-python3 1_fetch_avsc.py  11_1
-python3 2_join_object_schema.py 11_1
-python3 3_make_all_alter_table.py 11_0 11_1
-    MySQL databases
-    Cassandra
-    ALTER TABLE diaSources ADD "exposureTime"  float;
-    ALTER TABLE diaSources ADD "trailAlgorithm"  int;
-    ALTER TABLE diaSources ADD "trail_flag"  boolean;
-    ALTER TABLE diaSources ADD "reliabilityVersion"  ascii;
-git add 11_1
-
-The schema version is written in other places in the code. Modify the following
-files:
-
+deploy/common/settings.py.j2
 deploy/deploy.yaml
 deploy/database.yaml
 tests/system/system_test_settings.yaml
 tests/unit/pipeline/filter/annotation/settings.py
-
-Then do git add
-
-git commit -m 'updated to 11_1'
-git push
-
---> edit ../settings.py
-SCHEMA_VERSION = "11_1"
-and copy this to the nodes
----------------
-ssh lasair-lsst-dev-cassandranodes-0
-cqlsh
-cqlsh> use lasair
-cqlsh> ALTER TABLE diaSources ADD "exposureTime"  float;
-etc etc as above
-exit
-----------------
-ssh lasair-lsst-dev-ingest-0
-cd lasair-lsst/pipeline/ingest/
-git fetch
-git switch schema_11_1
-python3 ingest.py --maxalert=100 --group_id=blabla12
-
-    INFO:ingest:2026-06-27T06:52:49Z 100 alerts 1348 diaSource 223 forcedSource 5 noObject
-
---> same on ingest-1
-exit
-------------------
---> back to bootstrap
-./start.sh ingest
 ```
+
+Now push the code changes to git.
+
+With the new code in place, we update the databases:
+
+- Update the Cassandra nodes: `ssh lasair-lsst-dev-cassandranodes-0` then `cqlsh`
+then `use lasair` then do the CQL ALTER TABLE commands.
+
+- Update the filter nodes. For each one, start `mysql` then run the SQL ALTER TABLE commands.
+
+- Update Galera, run the SQL ALTER TABLE commands
+
+Now see if it all works. See the companion guide [Update Lasair System](https://lsst-uk.atlassian.net/wiki/spaces/LUSC/pages/5345312769/Update+Lasair+System)
+
+
+
