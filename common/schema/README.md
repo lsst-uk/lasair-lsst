@@ -42,12 +42,15 @@ cp -R 7_3 7_4
 ```
 python3 1_fetch_avsc.py 7_4
 ```
-- For a minor schema change, only the `diaSources` schema is changed, so you can skip this step. Modify the `object_features.py` with the new attributes. The Galera schema has
+- For a minor schema change, only the `diaSources` schema is changed, so you can skip this step. This updates `objects.py`, either because Rubin has changed the `disObject` schema,
+or because Lasair has added attributes/features to the `objects` table.
+
+  - Modify the `object_features.py` with the new attributes. The Galera schema has
 of two parts: featured copied from the LSST 'diaObjects` schema, and added
 value features made by Lasair. If the former, the new attribute has `"origin": "lsst"`
 and if the latter it has `"origin": "lasair"`. In the latter case, there are checks made to ensure the code generates the attribute.
 
-- Build the combined `objects.py` for MySQL:
+  - Build the combined `objects.py` for MySQL:
 ```
     python3 2_join_object_schema.py 7_4
 ```
@@ -78,7 +81,7 @@ then `use lasair` then do the CQL ALTER TABLE commands.
 
 - Update Galera, run the SQL ALTER TABLE commands
 
-Now see if it all works. See the compamnion guide [Update Lasair System](https://lsst-uk.atlassian.net/wiki/spaces/LUSC/pages/5345312769/Update+Lasair+System)
+Now see if it all works. See the companion guide [Update Lasair System](https://lsst-uk.atlassian.net/wiki/spaces/LUSC/pages/5345312769/Update+Lasair+System)
 
 
 
