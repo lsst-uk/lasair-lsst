@@ -54,7 +54,7 @@ and if the latter it has `"origin": "lasair"`. In the latter case, there are che
 - Generate required `ALTER TABLE` commands:
 ```
 python3 3_make_all_alter_table.py 7_3 7_4
-
+```
 There will be ALTER TABLE commands for both Cassandra and MySQL. 
 Keep a note of these, you will need them when deploying to production.
 
