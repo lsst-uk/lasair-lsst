@@ -1,5 +1,5 @@
 schema = {
-  'indexes':['PRIMARY KEY ("diaObjectId", "midpointMjdTai", "diaSourceId")'],
+  'indexes':['PRIMARY KEY ("diaObjectId")'],
   "name": "diaObjects",
   "fields": [
     {
