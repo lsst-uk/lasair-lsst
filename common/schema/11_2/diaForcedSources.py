@@ -1,16 +1,19 @@
 schema = {
-  'indexes':['PRIMARY KEY ("diaObjectId","midpointMjdTai")'],
+
+  "indexes": [
+    "PRIMARY KEY (\"diaObjectId\",\"midpointMjdTai\")"
+  ],
   "name": "diaForcedSources",
   "fields": [
     {
       "name": "diaForcedSourceId",
       "type": "long",
-      "doc": "Unique id."
+      "doc": "Unique identifier of this DiaForcedSource."
     },
     {
       "name": "diaObjectId",
       "type": "long",
-      "doc": "Id of the DiaObject that this DiaForcedSource was associated with."
+      "doc": "Id of the DiaObject that set the position for this forced measurement."
     },
     {
       "name": "ra",
@@ -35,7 +38,7 @@ schema = {
     {
       "name": "psfFlux",
       "type": "float",
-      "doc": "Point Source model flux [nJy]."
+      "doc": "Forced PSF flux on the difference image at the DiaObject position. Positive if the source is brighter in the visit image than in the template."
     },
     {
       "name": "psfFluxErr",
@@ -50,7 +53,7 @@ schema = {
     {
       "name": "scienceFlux",
       "type": "float",
-      "doc": "Forced photometry flux for a point source model measured on the visit image centered at the DiaObject position [nJy]."
+      "doc": "Forced PSF flux on the visit image at the DiaObject position. Unlike psfFlux, it includes the flux of any static source and background."
     },
     {
       "name": "scienceFluxErr",
@@ -70,7 +73,7 @@ schema = {
     {
       "name": "timeWithdrawnMjdTai",
       "type": "double",
-      "doc": "Time when this record was marked invalid, expressed as Modified Julian Date, International Atomic Time."
+      "doc": "Time when this record was marked invalid, expressed as Modified Julian Date, International Atomic Time. NULL unless the record has been withdrawn."
     }
   ]
 }

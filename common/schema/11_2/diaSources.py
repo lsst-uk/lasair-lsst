@@ -1,5 +1,8 @@
 schema = {
-  'indexes':['PRIMARY KEY ("diaObjectId", "midpointMjdTai", "diaSourceId")'],
+
+  "indexes": [
+    "PRIMARY KEY (\"diaObjectId\", \"midpointMjdTai\", \"diaSourceId\")"
+  ],
   "name": "diaSources",
   "fields": [
     {
@@ -20,12 +23,12 @@ schema = {
     {
       "name": "diaObjectId",
       "type": "long",
-      "doc": "Id of the diaObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
+      "doc": "Id of the diaObject this source was associated with. NULL if the source is associated with an ssObject instead; each diaSource is associated with either a diaObject or an ssObject."
     },
     {
       "name": "ssObjectId",
       "type": "long",
-      "doc": "Id of the ssObject this source was associated with, if any. If not, it is set to NULL (each diaSource will be associated with either a diaObject or ssObject)."
+      "doc": "Id of the ssObject this source was associated with. NULL if the source is associated with a diaObject instead; each diaSource is associated with either a diaObject or an ssObject."
     },
     {
       "name": "parentDiaSourceId",
@@ -45,7 +48,7 @@ schema = {
     {
       "name": "ra",
       "type": "double",
-      "doc": "Right ascension coordinate of the center of this diaSource [deg]."
+      "doc": "Right ascension of the diaSource centroid. For sources with both positive and negative peaks this is the midpoint of the two lobes of the dipole fit."
     },
     {
       "name": "raErr",
@@ -70,7 +73,7 @@ schema = {
     {
       "name": "x",
       "type": "float",
-      "doc": "x position computed by a centroiding algorithm [pixel]."
+      "doc": "x position of the centroid on the difference image. For sources with both positive and negative peaks this is the midpoint of the two lobes of the dipole fit."
     },
     {
       "name": "xErr",
@@ -80,7 +83,7 @@ schema = {
     {
       "name": "y",
       "type": "float",
-      "doc": "y position computed by a centroiding algorithm [pixel]."
+      "doc": "y position of the centroid on the difference image. For sources with both positive and negative peaks this is the midpoint of the two lobes of the dipole fit."
     },
     {
       "name": "yErr",
@@ -90,7 +93,7 @@ schema = {
     {
       "name": "centroid_flag",
       "type": "boolean",
-      "doc": "General centroid algorithm failure flag; set if anything went wrong when fitting the centroid. Another centroid flag field should also be set to provide more information."
+      "doc": "Centroid measurement failed. For sources with both positive and negative peaks this is the dipole fit failure flag; otherwise it is the centroid failure flag."
     },
     {
       "name": "apFlux",
@@ -125,7 +128,7 @@ schema = {
     {
       "name": "psfFlux",
       "type": "float",
-      "doc": "Flux for Point Source model. Note this actually measures the flux difference between the template and the visit image [nJy]."
+      "doc": "Flux of a point-source (PSF) model fit to the difference image at the diaSource centroid."
     },
     {
       "name": "psfFluxErr",
@@ -150,7 +153,7 @@ schema = {
     {
       "name": "psfFlux_flag",
       "type": "boolean",
-      "doc": "Failure to derive linear least-squares fit of psf model. Another psfFlux flag field should also be set to provide more information."
+      "doc": "PSF flux measurement on the difference image failed. Another psfFlux flag field should also be set to provide more information."
     },
     {
       "name": "psfFlux_flag_edge",
@@ -165,37 +168,37 @@ schema = {
     {
       "name": "trailFlux",
       "type": "float",
-      "doc": "Flux for a trailed source model. Note this actually measures the flux difference between the template and the visit image [nJy]."
+      "doc": "Flux of a trailed source model on the difference image. If the model flux can't be computed, this is the aperture flux."
     },
     {
       "name": "trailFluxErr",
       "type": "float",
-      "doc": "Uncertainty of trailFlux [nJy]."
+      "doc": "Uncertainty of trailFlux, propagated from the centroid, trail length and angle uncertainties only. NULL when trailFlux is the aperture flux."
     },
     {
       "name": "trailRa",
       "type": "double",
-      "doc": "Right ascension coordinate of centroid for trailed source model [deg]."
+      "doc": "Right ascension coordinate of the trailed source model centroid."
     },
     {
       "name": "trailRaErr",
       "type": "float",
-      "doc": "Angular error of trailRa (dRA*cos(Dec)) [deg]."
+      "doc": "Uncertainty of trailRa (dRA*cos(Dec))."
     },
     {
       "name": "trailDec",
       "type": "double",
-      "doc": "Declination coordinate of centroid for trailed source model [deg]."
+      "doc": "Declination coordinate of the trailed source model centroid."
     },
     {
       "name": "trailDecErr",
       "type": "float",
-      "doc": "Angular error of trailDec [deg]."
+      "doc": "Uncertainty of trailDec."
     },
     {
       "name": "trailLength",
       "type": "float",
-      "doc": "Maximum likelihood fit of trail length [arcsec]."
+      "doc": "Trail length derived from the adaptive second moments of the source."
     },
     {
       "name": "trailLengthErr",
@@ -205,7 +208,7 @@ schema = {
     {
       "name": "trailAngle",
       "type": "float",
-      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the trail direction (bearing) [deg]."
+      "doc": "Position angle (east of north) of the trail axis, from the adaptive second moments of the source. Defined modulo 180 degrees."
     },
     {
       "name": "trailAngleErr",
@@ -225,22 +228,22 @@ schema = {
     {
       "name": "trailAlgorithm",
       "type": "int",
-      "doc": "Integer key indicating which algorithm was used to measure trailed source. 1=SDSSShape, 2=HSMShape."
+      "doc": "Shape algorithm used for the trail measurement. 1=SdssShape, 2=HSM, 0=no measurement."
     },
     {
       "name": "trail_flag_edge",
       "type": "boolean",
-      "doc": "This flag is set if a trailed source extends onto or past edge pixels."
+      "doc": "Set if either end of the trail lies off the image or on an EDGE pixel."
     },
     {
       "name": "trail_flag",
       "type": "boolean",
-      "doc": "The trailed source fitting algorithm failed."
+      "doc": "General failure flag of the trailed source measurement."
     },
     {
       "name": "dipoleMeanFlux",
       "type": "float",
-      "doc": "Maximum likelihood value for the mean absolute flux of the two lobes for a dipole model [nJy]."
+      "doc": "Mean of the absolute fluxes of the two lobes of the dipole model. Both lobes share one fitted flux, so this is the flux of a single point source modeled at the positive-lobe position in the visit image and at the negative-lobe position in the template, fit jointly to the difference, visit and template images."
     },
     {
       "name": "dipoleMeanFluxErr",
@@ -250,7 +253,7 @@ schema = {
     {
       "name": "dipoleFluxDiff",
       "type": "float",
-      "doc": "Maximum likelihood value for the difference of absolute fluxes of the two lobes for a dipole model [nJy]."
+      "doc": "Difference of the absolute fluxes of the positive and negative lobes of the dipole model. 0 for every fitted dipole, because the fit uses one flux for both lobes."
     },
     {
       "name": "dipoleFluxDiffErr",
@@ -260,12 +263,12 @@ schema = {
     {
       "name": "dipoleLength",
       "type": "float",
-      "doc": "Maximum likelihood value for the lobe separation in dipole model [arcsec]."
+      "doc": "Separation of the two lobes of the dipole fit."
     },
     {
       "name": "dipoleAngle",
       "type": "float",
-      "doc": "Maximum likelihood fit of the angle between the meridian through the centroid and the dipole direction (bearing, from negative to positive lobe) [deg]."
+      "doc": "Position angle (east of north) of the direction from the negative to the positive lobe of the dipole fit."
     },
     {
       "name": "dipoleChi2",
@@ -275,12 +278,12 @@ schema = {
     {
       "name": "dipoleNdata",
       "type": "int",
-      "doc": "The number of data points (pixels) used to fit the model."
+      "doc": "Number of pixels in the dipole fit, summed over the footprint bounding box in the difference, visit and template images. 0 for sources without a dipole fit."
     },
     {
       "name": "scienceFlux",
       "type": "float",
-      "doc": "Forced photometry flux for a point source model measured on the visit image centered at DiaSource position [nJy]."
+      "doc": "Forced PSF flux on the visit image at the diaSource centroid. Unlike psfFlux, it is not aperture corrected."
     },
     {
       "name": "scienceFluxErr",
@@ -290,7 +293,7 @@ schema = {
     {
       "name": "forced_PsfFlux_flag",
       "type": "boolean",
-      "doc": "Forced PSF photometry on science image failed. Another forced_PsfFlux flag field should also be set to provide more information."
+      "doc": "Forced PSF photometry on the visit image failed. Another forced_PsfFlux flag field should also be set to provide more information."
     },
     {
       "name": "forced_PsfFlux_flag_edge",
@@ -300,12 +303,12 @@ schema = {
     {
       "name": "forced_PsfFlux_flag_noGoodPixels",
       "type": "boolean",
-      "doc": "Forced PSF flux not enough non-rejected pixels in data to attempt the fit."
+      "doc": "The forced PSF flux fit region on the visit image has no usable pixels."
     },
     {
       "name": "templateFlux",
       "type": "float",
-      "doc": "Forced photometry flux for a point source model measured on the template image centered at the DiaObject position [nJy]."
+      "doc": "Forced PSF flux on the PSF-matched template at the diaSource centroid."
     },
     {
       "name": "templateFluxErr",
@@ -315,42 +318,42 @@ schema = {
     {
       "name": "ixx",
       "type": "float",
-      "doc": "Adaptive second moment of the source intensity [arcsec**2]."
+      "doc": "HSM adaptive second moment Ixx of the source on the difference image."
     },
     {
       "name": "iyy",
       "type": "float",
-      "doc": "Adaptive second moment of the source intensity [arcsec**2]."
+      "doc": "HSM adaptive second moment Iyy of the source on the difference image."
     },
     {
       "name": "ixy",
       "type": "float",
-      "doc": "Adaptive second moment of the source intensity [arcsec**2]."
+      "doc": "HSM adaptive second moment Ixy of the source on the difference image."
     },
     {
       "name": "ixxPSF",
       "type": "float",
-      "doc": "Adaptive second moment of the PSF measured at the location of the source [arcsec**2]."
+      "doc": "HSM adaptive second moment Ixx of the PSF at the source position."
     },
     {
       "name": "iyyPSF",
       "type": "float",
-      "doc": "Adaptive second moment of the PSF measured at the location of the source [arcsec**2]."
+      "doc": "HSM adaptive second moment Iyy of the PSF at the source position."
     },
     {
       "name": "ixyPSF",
       "type": "float",
-      "doc": "Adaptive second moment of the PSF measured at the location of the source [arcsec**2]."
+      "doc": "HSM adaptive second moment Ixy of the PSF at the source position."
     },
     {
       "name": "shape_flag",
       "type": "boolean",
-      "doc": "General source shape algorithm failure flag; set if anything went wrong when measuring the shape. Another shape flag field should also be set to provide more information."
+      "doc": "HSM adaptive-moments shape measurement on the difference image failed. Another shape flag field should also be set to provide more information."
     },
     {
       "name": "shape_flag_no_pixels",
       "type": "boolean",
-      "doc": "No pixels were useable for computing shape measurement."
+      "doc": "The footprint bounding box contains no useable pixels."
     },
     {
       "name": "shape_flag_not_contained",
@@ -400,7 +403,7 @@ schema = {
     {
       "name": "timeWithdrawnMjdTai",
       "type": "double",
-      "doc": "Time when this record was marked invalid, expressed as Modified Julian Date, International Atomic Time."
+      "doc": "Time when this record was marked invalid, expressed as Modified Julian Date, International Atomic Time. NULL unless the record has been withdrawn."
     },
     {
       "name": "bboxSize",
@@ -435,7 +438,7 @@ schema = {
     {
       "name": "pixelFlags_nodata",
       "type": "boolean",
-      "doc": "NO_DATA pixel in the source footprint."
+      "doc": "NO_DATA pixel in the source footprint, from the visit image or the PSF-matched template (missing template coverage)."
     },
     {
       "name": "pixelFlags_nodataCenter",
@@ -460,12 +463,12 @@ schema = {
     {
       "name": "pixelFlags_saturated",
       "type": "boolean",
-      "doc": "Saturated pixel in the DiaSource footprint."
+      "doc": "Saturated pixel of the visit image in the DiaSource footprint."
     },
     {
       "name": "pixelFlags_saturatedCenter",
       "type": "boolean",
-      "doc": "Saturated pixel in the 3x3 region around the centroid."
+      "doc": "Saturated pixel of the visit image in the 3x3 region around the centroid."
     },
     {
       "name": "pixelFlags_spike",
@@ -495,27 +498,27 @@ schema = {
     {
       "name": "pixelFlags_injected",
       "type": "boolean",
-      "doc": "A pixel in the diaSource footprint contains at least one pixel modified by injecting fake sources."
+      "doc": "The diaSource footprint includes visit image pixels modified by fake source injection."
     },
     {
       "name": "pixelFlags_injectedCenter",
       "type": "boolean",
-      "doc": "A pixel in the 3x3 region around the centroid contains at least one pixel modified by injecting fake sources."
+      "doc": "The 3x3 region around the centroid includes visit image pixels modified by fake source injection."
     },
     {
       "name": "pixelFlags_injected_template",
       "type": "boolean",
-      "doc": "A pixel in the diaSource footprint contains at least one pixel modified by injecting fake sources into the template."
+      "doc": "The diaSource footprint includes pixels modified by fake source injection into the template."
     },
     {
       "name": "pixelFlags_injected_templateCenter",
       "type": "boolean",
-      "doc": "A pixel in the 3x3 region around the centroid contains at least one pixel modified by injecting fake sources into the template."
+      "doc": "The 3x3 region around the centroid includes pixels modified by fake source injection into the template."
     },
     {
       "name": "glint_trail",
       "type": "boolean",
-      "doc": "This flag is set if the source is likely part of a glint trail from an artifical satellite."
+      "doc": "Set if the source is likely part of a glint trail, usually from a satellite or debris."
     },
     {
       "name": "templateMjdMean",
