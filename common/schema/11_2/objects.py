@@ -22,7 +22,7 @@ schema = {
       "name": "ra",
       "type": "double",
       "origin": "lsst",
-      "doc": "Mean RA of this object"
+      "doc": "Right ascension of the inverse-variance weighted mean position of the DiaSources associated with this object, from all bands."
     },
     {
       "name": "decl",
@@ -38,13 +38,13 @@ schema = {
       "name": "lastDiaSourceMjdTai",
       "type": "double",
       "origin": "lsst",
-      "doc": "Latest MJD of a diaSource"
+      "doc": "midpointMjdTai of the most recent DiaSource associated with this object, expressed as Modified Julian Date, International Atomic Time."
     },
     {
       "name": "firstDiaSourceMjdTai",
       "type": "double",
       "origin": "lsst",
-      "doc": "Earliest MJD of a diaSource"
+      "doc": "midpointMjdTai of the earliest DiaSource associated with this object, expressed as Modified Julian Date, International Atomic Time."
     },
     {
       "section": "Latest Flux",
@@ -72,13 +72,13 @@ schema = {
       "name": "u_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for u filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the u-band DiaSources."
     },
     {
       "name": "u_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of u_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of u_psfFluxMean."
     },
     {
       "name": "g_psfFlux",
@@ -96,13 +96,13 @@ schema = {
       "name": "g_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for g filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the g-band DiaSources."
     },
     {
       "name": "g_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of g_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of g_psfFluxMean."
     },
     {
       "name": "r_psfFlux",
@@ -120,13 +120,13 @@ schema = {
       "name": "r_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for r filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the r-band DiaSources."
     },
     {
       "name": "r_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of r_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of r_psfFluxMean."
     },
     {
       "name": "i_psfFlux",
@@ -144,13 +144,13 @@ schema = {
       "name": "i_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for i filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the i-band DiaSources."
     },
     {
       "name": "i_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of i_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of i_psfFluxMean."
     },
     {
       "name": "z_psfFlux",
@@ -168,13 +168,13 @@ schema = {
       "name": "z_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for z filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the z-band DiaSources."
     },
     {
       "name": "z_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of z_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of z_psfFluxMean."
     },
     {
       "name": "y_psfFlux",
@@ -192,13 +192,13 @@ schema = {
       "name": "y_psfFluxMean",
       "type": "float",
       "origin": "lsst",
-      "doc": "Weighted mean point-source model flux for y filter. (nJy)"
+      "doc": "Inverse-variance weighted mean of psfFlux of the y-band DiaSources."
     },
     {
       "name": "y_psfFluxMeanErr",
       "type": "float",
       "origin": "lsst",
-      "doc": "Standard error of y_psfFluxMean. (nJy)"
+      "doc": "Uncertainty of y_psfFluxMean."
     },
     {
       "section": "Counting and Reliability",
@@ -220,7 +220,7 @@ schema = {
       "name": "nDiaSources",
       "type": "int",
       "origin": "lsst",
-      "doc": "Number of diaSources associated with this diaObject"
+      "doc": "Number of DiaSources, in all bands, associated with this DiaObject in the APDB history window (360 days by default) up to and including this one."
     },
     {
       "name": "nPosDiaSources",
