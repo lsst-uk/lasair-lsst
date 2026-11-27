@@ -28,7 +28,7 @@ schema = {
       "name": "decl",
       "type": "double",
       "origin": "lsst",
-      "doc": "Mean Dec of this object"
+      "doc": "Declination of the inverse-variance weighted mean position of the DiaSources associated with this object, from all bands."
     },
     {
       "section": "Lightcurve interval",

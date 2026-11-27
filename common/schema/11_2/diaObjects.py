@@ -25,7 +25,7 @@ schema = {
     {
       "name": "decl",
       "type": "double",
-      "doc": "Declination coordinate of the position of the object [deg]."
+      "doc": "Declination of the inverse-variance weighted mean position of the DiaSources associated with this object, from all bands."
     },
     {
       "name": "decErr",
