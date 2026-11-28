@@ -7,7 +7,7 @@ import ephem
 import json
 import base64
 
-sys.path.append('../common')
+sys.path.insert(0, '../common')
 from src import cutoutStore
 from src import db_connect
 import settings as lasair_settings
